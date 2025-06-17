@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Deneme</title>
+</head>
+<body>
+    <h1>WebSocket Test</h1>
+    <input type="text" id="messageInput" placeholder="Mesaj yaz">
+    <button onclick="sendMessage()">Gönder</button>
+    <div id="log"></div>
+
+    <script>
+        const socket = new WebSocket("ws://localhost:8080");
+
+        socket.onopen = () => {
+            log("Bağlantı kuruldu.");
+        };
+
+        socket.onmessage = (event) => {
+            log("Sunucudan mesaj: " + event.data);
+        };
+
+        function sendMessage() {
+            const input = document.getElementById("messageInput");
+            socket.send(input.value);
+            log("Gönderildi: " + input.value);
+            input.value = "";
+        }
+
+        function log(text) {
+            const logDiv = document.getElementById("log");
+            const p = document.createElement("p");
+            p.textContent = text;
+            logDiv.appendChild(p);
+        }
+    </script>
+</body>
+</html>
