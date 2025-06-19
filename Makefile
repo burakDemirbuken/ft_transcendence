@@ -3,8 +3,8 @@ DOCKER_COMPOSE_FILE = docker-compose.yml
 
 all: run
 
-run:
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) up --build -d
+run: stop
+	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) up --build
 
 stop:
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) down

@@ -1,27 +1,16 @@
-const socket = new WebSocket("ws://localhost:5500/ws");
+const socket = new WebSocket("ws://localhost:3000/ws");
 
-
-socket.onopen = () =>
-{
-	alert("WebSocket bağlantısı kuruldu!");
-	sendBtn.disabled = false;  // Butonu aktif hale getir
-};
-
-socket.onmessage = function(event)
-{
+socket.onmessage = (event) => {
 	const li = document.createElement("li");
 	li.textContent = "Gelen: " + event.data;
 	document.getElementById("messages").appendChild(li);
-	console.log("Gelen mesaj:", event.data);
 };
 
-function sendMessage()
-{
+function sendMessage() {
 	const msg = document.getElementById("msgInput").value;
-
-	socket.send(msg);
-	const li = document.createElement("li");
-	li.textContent = "Gönderilen: " + msg;
-	document.getElementById("messages").appendChild(li);
-	document.getElementById("msgInput").value = ""; // Giriş alanını temizle
+	if (socket.readyState === WebSocket.OPEN) {
+		socket.send(msg);
+	} else {
+		alert("Bağlantı henüz hazır değil.");
+	}
 }

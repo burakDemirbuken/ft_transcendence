@@ -14,4 +14,4 @@ COPY . .
 RUN npm install
 
 # Sunucuyu başlat
-CMD [ "node", "server.js" ]
+CMD [ "npm", "run", "dev" ]

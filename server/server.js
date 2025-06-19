@@ -1,39 +1,42 @@
 // ...existing code...
 const fastify = require('fastify')({
 	logger: true});
+const websocket = require('@fastify/websocket');
 
-fastify.get('/hello-woerld', async (request, reply) =>
-{
-	// İstekten veri alma
-	const { isim } = request.query || {};
+fastify.register(websocket);
 
-	// Yanıtı özelleştirme
-	reply.code(200).send({ mesaj: `Merhaba, ${isim || 'dünya'}!`,
-		baner: 'https://example.com/banner.png' });
+const clients = new Set();
 
-});
+fastify.get('/ws', { websocket: true }, (connection, req) => {
+	console.log('✅ Yeni client bağlandı');
+	clients.add(connection.socket);
 
-fastify.get('/naber', async (request, reply) =>
-{
-	// İstekten veri alma
-	const { isim } = request.query || {};
+	connection.socket.on('message', message => {
+		console.log('📨 Gelen mesaj:', message.toString());
 
-	// Yanıtı özelleştirme
-	reply.code(200).send({ mesaj: `Nasılsın, ${isim || 'dünya'}?` });
+		// Tüm bağlı client'lara yay
+		for (const client of clients) {
+			if (client !== connection.socket) {
+				client.send(message.toString());
+			}
+		}
+	});
+
+	connection.socket.on('close', () => {
+		console.log('❌ Client ayrıldı');
+		clients.delete(connection.socket);
+	});
 });
 
 const start = async () =>
 {
-	try
-	{
-		await fastify.listen({ port: 3000});
-		fastify.log.info(`Server listening at http://localhost:3000`);
-	}
-	catch (err)
-	{
-		fastify.log.error(err);
-		process.exit(1);
-	}
+	fastify.listen({ port: 3000 }, err => {
+		if (err) {
+			console.error(err);
+			process.exit(1);
+		}
+		console.log('🚀 WebSocket sunucusu http://localhost:3000/ws üzerinde çalışıyor');
+	});
 };
 
 start();
