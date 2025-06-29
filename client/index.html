@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>WebSocket Test</title>
+  <title>PinPong Test</title>
+  <script src="https://unpkg.com/babylonjs@latest/babylon.js"></script>
+  <script src="https://unpkg.com/babylonjs-loaders@latest/babylonjs.loaders.js"></script>
 </head>
 <body>
-  <h2>Mesaj Gönder</h2>
-  <input id="msgInput" type="text" />
-  <button id="sendBtn" onclick="sendMessage()" disabled>Gönder</button>
+  <canvas id="renderCanvas" style="
+    width: 100%;
+    height: 100vh;
+    touch-action: none;">
+    </canvas>
+    <script src="client.js"></script>
 
-  <h3>Gelen Mesajlar:</h3>
-  <ul id="messages"></ul>
 
-  <script src="client.js"></script>
 </body>
 </html>
