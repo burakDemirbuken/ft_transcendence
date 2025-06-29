@@ -1,42 +1,63 @@
-// ...existing code...
-const fastify = require('fastify')({
-	logger: true});
-const websocket = require('@fastify/websocket');
+import Fastify from 'fastify'
+import websocket from '@fastify/websocket'
 
-fastify.register(websocket);
+const fastify = Fastify({ logger: true });
+
+// WebSocket plugin'ini kaydet
+await fastify.register(websocket);
 
 const clients = new Set();
 
-fastify.get('/ws', { websocket: true }, (connection, req) => {
-	console.log('✅ Yeni client bağlandı');
-	clients.add(connection.socket);
+// WebSocket route'u
+fastify.register(
+	async function (fastify)
+	{
+		fastify.get('/ws', { websocket: true },
+			(connection, req) =>
+			{
+				console.log('🟢 Yeni WebSocket bağlantısı kuruldu');  // ← Bu log'u görmeli
 
-	connection.socket.on('message', message => {
-		console.log('📨 Gelen mesaj:', message.toString());
+				clients.add(connection.socket);
 
-		// Tüm bağlı client'lara yay
-		for (const client of clients) {
-			if (client !== connection.socket) {
-				client.send(message.toString());
-			}
-		}
+				connection.socket.on('message',
+					message =>
+					{
+						console.log('📨 Gelen mesaj:', message.toString());
+
+						// Tüm bağlı client'lara yay
+						for (const client of clients)
+							client.send(message.toString());
+					});
+
+				connection.socket.on('close',
+					() =>
+					{
+						clients.delete(connection.socket);
+						console.log('Client disconnected');
+					})
+			});
 	});
 
-	connection.socket.on('close', () => {
-		console.log('❌ Client ayrıldı');
-		clients.delete(connection.socket);
+// Normal HTTP route'ları da ekleyebilirsiniz
+fastify.get('/',
+	async (request, reply) =>
+	{
+		return { message: 'WebSocket server çalışıyor' };
 	});
-});
 
-const start = async () =>
+async function start()
 {
-	fastify.listen({ port: 3000 }, err => {
-		if (err) {
-			console.error(err);
-			process.exit(1);
-		}
-		console.log('🚀 WebSocket sunucusu http://localhost:3000/ws üzerinde çalışıyor');
-	});
-};
+	try
+	{
+		await fastify.listen({ port: 3000, host: '0.0.0.0' });
+		console.log('Server listening on port 3000');
+		console.log('WebSocket: ws://localhost:3000/ws');
+	}
+	catch (err)
+	{
+		fastify.log.error(err);
+		process.exit(1);
+	}
+}
 
 start();
