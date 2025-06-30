@@ -39,10 +39,10 @@ fastify.register(
 	});
 
 // Normal HTTP route'ları da ekleyebilirsiniz
-fastify.get('/',
+fastify.get('/burak',
 	async (request, reply) =>
 	{
-		return { message: 'WebSocket server çalışıyor' };
+		return "naber";
 	});
 
 async function start()
