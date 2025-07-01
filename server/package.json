@@ -1,10 +1,10 @@
 {
   "name": "deneme",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "betul.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node betul.js",
+    "dev": "nodemon betul.js"
   },
   "keywords": [],
   "author": "",

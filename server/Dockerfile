@@ -11,7 +11,7 @@ WORKDIR /app
 COPY . .
 
 # Bağımlılıkları yükle
-RUN npm install
+RUN npm install && npm install @fastify/static
 
 # Sunucuyu başlat
 CMD [ "npm", "run", "dev" ]
