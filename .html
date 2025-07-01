@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Babylon.js Basit Örnek</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #renderCanvas {
+            width: 100%;
+            height: 100vh;
+            touch-action: none;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <div id="info">
+        <h3>Babylon.js Basit Örnek</h3>
+        <p>• Fare ile sahneyi döndürebilirsiniz</p>
+        <p>• Scroll ile yakınlaştırabilirsiniz</p>
+        <p>• Küp otomatik olarak dönüyor</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/5.57.1/babylon.min.js"></script>
+
+    <script>
+        // Canvas elementini al
+        const canvas = document.getElementById("renderCanvas");
+
+        // Babylon.js motorunu başlat
+        const engine = new BABYLON.Engine(canvas, true);
+
+        // Sahne oluştur
+        const createScene = function() {
+            // Yeni sahne
+            const scene = new BABYLON.Scene(engine);
+
+            // Arka plan rengini ayarla
+            scene.clearColor = new BABYLON.Color3(0.2, 0.2, 0.3);
+
+            // Kamera oluştur (Universal kamera deneyelim)
+            const camera = new BABYLON.UniversalCamera(
+                "camera",
+                new BABYLON.Vector3(0, 5, -10),
+                scene
+            );
+
+            // Kamerayı merkeze baktır
+            camera.lookAt(BABYLON.Vector3.Zero());
+
+            // Kamera kontrollerini aktifleştir
+            camera.attachControls(canvas, true);
+
+            // Işık oluştur
+            const light = new BABYLON.HemisphericLight(
+                "light",
+                new BABYLON.Vector3(0, 1, 0),
+                scene
+            );
+            light.intensity = 0.7;
+
+            // Küp oluştur
+            const box = BABYLON.MeshBuilder.CreateBox("box", {size: 2}, scene);
+
+            // Küp için malzeme oluştur
+            const boxMaterial = new BABYLON.StandardMaterial("boxMaterial", scene);
+            boxMaterial.diffuseColor = new BABYLON.Color3(1, 0.5, 0); // Turuncu renk
+            boxMaterial.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+            box.material = boxMaterial;
+
+            // Zemin oluştur
+            const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 10, height: 10}, scene);
+            const groundMaterial = new BABYLON.StandardMaterial("groundMaterial", scene);
+            groundMaterial.diffuseColor = new BABYLON.Color3(0.3, 0.5, 0.3); // Yeşil renk
+            ground.material = groundMaterial;
+
+            // Küpü yükselt
+            box.position.y = 1;
+
+            // Animasyon - küpü döndür
+            scene.registerBeforeRender(function() {
+                box.rotation.x += 0.01;
+                box.rotation.y += 0.02;
+            });
+
+            return scene;
+        };
+
+        // Sahneyi oluştur
+        const scene = createScene();
+
+        // Render döngüsü
+        engine.runRenderLoop(function() {
+            scene.render();
+        });
+
+        // Pencere boyutu değiştiğinde canvas'ı yeniden boyutlandır
+        window.addEventListener("resize", function() {
+            engine.resize();
+        });
+    </script>
+</body>
+</html>
