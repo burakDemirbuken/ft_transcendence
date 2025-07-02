@@ -39,9 +39,11 @@ fastify.register(
 	});
 
 // Normal HTTP route'ları da ekleyebilirsiniz
-fastify.get('/burak',
+fastify2.get('/burak',
 	async (request, reply) =>
 	{
+		// get ile gelen data
+		console.log('GET isteği alındı:', request.query);
 		return "naber";
 	});
 
@@ -51,7 +53,7 @@ async function start()
 	{
 		await fastify.listen({ port: 3000, host: '0.0.0.0' });
 		console.log('Server listening on port 3000');
-		console.log('WebSocket: ws://localhost:3000/ws');
+		console.log('WebSocket: ws://127.0.0.1:3000/ws');
 	}
 	catch (err)
 	{
