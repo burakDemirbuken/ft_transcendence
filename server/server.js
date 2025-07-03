@@ -1,63 +1,38 @@
-import Fastify from 'fastify'
-import websocket from '@fastify/websocket'
+// server.js
+const fastify = require('fastify')({ logger: true });
+const path = require('path');
+const fs = require('fs');
 
-const fastify = Fastify({ logger: true });
+// Create server instance
+const server = fastify;
 
-// WebSocket plugin'ini kaydet
-await fastify.register(websocket);
+// Serve static files from the 'dist' directory (common SPA output folder)
+server.register(require('@fastify/static'), {
+  root: path.join(__dirname, '../dist'),
+  prefix: '/',
+  wildcard: false, // Disable wildcard to handle 404 properly for SPA
+});
 
-const clients = new Set();
+// SPA fallback route - serve index.html for all other routes
+server.setNotFoundHandler((req, reply) => {
+  const indexFile = path.join(__dirname, '../dist', 'index.html');
 
-// WebSocket route'u
-fastify.register(
-	async function (fastify)
-	{
-		fastify.get('/ws', { websocket: true },
-			(connection, req) =>
-			{
-				console.log('🟢 Yeni WebSocket bağlantısı kuruldu');  // ← Bu log'u görmeli
+  if (fs.existsSync(indexFile)) {
+    reply.type('text/html').send(fs.readFileSync(indexFile));
+  } else {
+    reply.code(404).send({ error: 'Not Found' });
+  }
+});
 
-				clients.add(connection.socket);
-
-				connection.socket.on('message',
-					message =>
-					{
-						console.log('📨 Gelen mesaj:', message.toString());
-
-						// Tüm bağlı client'lara yay
-						for (const client of clients)
-							client.send(message.toString());
-					});
-
-				connection.socket.on('close',
-					() =>
-					{
-						clients.delete(connection.socket);
-						console.log('Client disconnected');
-					})
-			});
-	});
-
-// Normal HTTP route'ları da ekleyebilirsiniz
-fastify.get('/',
-	async (request, reply) =>
-	{
-		return { message: 'WebSocket server çalışıyor' };
-	});
-
-async function start()
-{
-	try
-	{
-		await fastify.listen({ port: 3000, host: '0.0.0.0' });
-		console.log('Server listening on port 3000');
-		console.log('WebSocket: ws://localhost:3000/ws');
-	}
-	catch (err)
-	{
-		fastify.log.error(err);
-		process.exit(1);
-	}
-}
+// Start the server
+const start = async () => {
+  try {
+    await server.listen({ port: 3000, host: '0.0.0.0' });
+    server.log.info(`Server listening on ${server.server.address().port}`);
+  } catch (err) {
+    server.log.error(err);
+    process.exit(1);
+  }
+};
 
 start();
