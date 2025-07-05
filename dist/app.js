@@ -2,6 +2,7 @@ const pageState = {
 	current: 'login', // default
 };
 
+// Dynamically update page (without reloads)
 function loadPage(page) {
 	const content = document.getElementById('content');
 	pageState.current = page;
@@ -21,20 +22,20 @@ function loadPage(page) {
 }
 
 function navigate(page) {
-	// Push state without changing visible URL
-	history.pushState({ page }, '', location.pathname); // URL hiç değişmez
+	history.pushState({ page }, '', `/${page}`);
 	loadPage(page);
 }
 
-  // Handle browser back/forward
+// Handle browser back/forward
 window.addEventListener('popstate', (event) => {
 	const page = event.state?.page || 'login';
 	loadPage(page);
 });
 
-// İlk yükleme
+// Initial load and page reloads
 window.addEventListener('load', () => {
-	const initialPage = history.state?.page || 'login';
+	const urlPage = window.location.pathname.slice(1);
+	const initialPage = urlPage || history.state?.page || 'login';
 	loadPage(initialPage);
-	history.replaceState({ page: initialPage }, '', location.pathname); // ilk state sabit
+	history.replaceState({ page: initialPage }, '', `/${initialPage}`);
 });
