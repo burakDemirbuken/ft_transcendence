@@ -21,3 +21,6 @@ class Socket
 		}
 	}
 }
+
+// Export the Socket class
+export default Socket;
