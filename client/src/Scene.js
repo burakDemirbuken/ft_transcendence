@@ -1,11 +1,26 @@
 import arcadeMachine from "./ArcadeMachine.js";
 import EventEmitter from "./EventEmitter.js";
 
+const Keys = {
+	LEFT: "ArrowLeft",
+	RIGHT: "ArrowRight",
+	UP: "ArrowUp",
+	DOWN: "ArrowDown",
+	SPACE: "Space",
+	ENTER: "Enter",
+	ESCAPE: "Escape",
+	W: "KeyW",
+	A: "KeyA",
+	D: "KeyD",
+	S: "KeyS",
+}
+
 class Scene extends EventEmitter
 {
 	constructor(engine)
 	{
 		super();
+		this.dynamicTextures = new Map();
 		this.scene = new BABYLON.Scene(engine);
 		this.pressedKeys = new Set();
 
@@ -31,34 +46,33 @@ class Scene extends EventEmitter
 		this.#keyObservable();
 
 		this.arcadeMachine = new arcadeMachine(this.scene);
-	}
+		}
 
 	#keyObservable()
 	{
 		this.scene.onKeyboardObservable.add(
 			(kbInfo) =>
 			{
-
 				const keyCode = kbInfo.event.code;
 				const key = kbInfo.event.key;
-
 				switch (kbInfo.type)
 				{
 					case BABYLON.KeyboardEventTypes.KEYDOWN:
 						if (!this.pressedKeys.has(keyCode))
-						{
 							this.pressedKeys.add(keyCode);
-							this.emit("keydown", { keyCode, key, event: kbInfo.event });
-						}
 						break;
 
 					case BABYLON.KeyboardEventTypes.KEYUP:
 						this.pressedKeys.delete(keyCode);
-						this.emit("keyup", { keyCode, key, event: kbInfo.event });
 						break;
 				}
-				console.log(`Key ${kbInfo.type}: ${key} (${keyCode})`);
+				this.emit("pressedKeys", this.pressedKeys);
 			});
+	}
+
+	getDynamicTexture(name)
+	{
+		return this.dynamicTextures.get(name);
 	}
 
 }

@@ -2,6 +2,7 @@ class ArcadeMachine
 {
 	constructor(scene)
 	{
+		this.DynamicTexture = null;
 		// Arrow function kullanarak 'this' context'ini koru
 		BABYLON.SceneLoader.ImportMesh("", "../models/arcade/", "arcade.obj", scene, // ✅ this.scene
 			(meshes) => // ✅ arrow function
@@ -22,22 +23,20 @@ class ArcadeMachine
 
 	#setupArcadeScreen(screenMesh, scene)
 	{
-		console.log("🖥️ Arcade ekranı ayarlanıyor...");
-
 		const textureSize = 512; // Daha küçük boyut dene
-		const dynamicTexture = new BABYLON.DynamicTexture("screenTexture",
+		this.dynamicTexture = new BABYLON.DynamicTexture("screenTexture",
 			{width: textureSize, height: textureSize}, scene, false);
 
-		dynamicTexture.hasAlpha = false;
-		dynamicTexture.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
-		dynamicTexture.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
+		this.dynamicTexture.hasAlpha = false;
+		this.dynamicTexture.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
+		this.dynamicTexture.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
 
-		dynamicTexture.updateSamplingMode(BABYLON.Texture.NEAREST_SAMPLINGMODE);
+		this.dynamicTexture.updateSamplingMode(BABYLON.Texture.NEAREST_SAMPLINGMODE);
 
 		const screenMaterial = new BABYLON.StandardMaterial("screenMaterial", scene);
 
-		screenMaterial.diffuseTexture = dynamicTexture;
-		screenMaterial.emissiveTexture = dynamicTexture;
+		screenMaterial.diffuseTexture = this.dynamicTexture;
+		screenMaterial.emissiveTexture = this.dynamicTexture;
 		screenMaterial.emissiveColor = new BABYLON.Color3(0.8, 0.8, 0.8);
 		screenMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
 		screenMaterial.ambientColor = new BABYLON.Color3(0.2, 0.2, 0.2);
@@ -51,22 +50,24 @@ class ArcadeMachine
 		this.#fixUVMapping(screenMesh);
 
 		// Canvas context'i al
-		const ctx = dynamicTexture.getContext();
-
-		// Başlangıç ekranı çiz
-		this.#drawImprovedStartScreen(ctx, dynamicTexture);
+		const ctx = this.dynamicTexture.getContext();
 
 		// Global referansları sakla
 		window.arcadeScreen = {
-			texture: dynamicTexture,
+			texture: this.dynamicTexture,
 			context: ctx,
 			mesh: screenMesh,
 			material: screenMaterial
 		};
 
 		// Debug bilgileri
-		this.#createEnhancedDebugInfo(dynamicTexture, screenMesh);
+		this.#createEnhancedDebugInfo(this.dynamicTexture, screenMesh);
 
+	}
+
+	getDynamicTexture()
+	{
+		return this.dynamicTexture;
 	}
 
 
@@ -87,74 +88,6 @@ class ArcadeMachine
 			}
 			mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);
 		}
-	}
-
-	// Geliştirilmiş başlangıç ekranı
-	#drawImprovedStartScreen(ctx, texture)
-	{
-		const size = texture.getSize();
-		const width = size.width;
-		const height = size.height;
-
-		console.log(`🎨 Geliştirilmiş ekran çiziliyor: ${width}x${height}`);
-
-		// Canvas'ı temizle
-		ctx.clearRect(0, 0, width, height);
-
-		// Arka plan gradyanı
-		const gradient = ctx.createLinearGradient(0, 0, 0, height);
-		gradient.addColorStop(0, '#0f3460');
-		gradient.addColorStop(1, '#16213e');
-		ctx.fillStyle = gradient;
-		ctx.fillRect(0, 0, width, height);
-
-		// Çerçeve
-		ctx.strokeStyle = '#00ff88';
-		ctx.lineWidth = 4;
-		ctx.strokeRect(20, 20, width-40, height-40);
-
-		// Ana başlık
-		ctx.fillStyle = '#00ff88';
-		ctx.font = `bold ${Math.floor(height/10)}px 'Courier New', monospace`;
-		ctx.textAlign = 'center';
-		ctx.textBaseline = 'middle';
-		ctx.fillText('PONG', width/2, height/3);
-
-		// Alt başlık
-		ctx.fillStyle = '#ffffff';
-		ctx.font = `${Math.floor(height/16)}px 'Courier New', monospace`;
-		ctx.fillText('ARCADE', width/2, height/3 + height/12);
-
-		// Talimat
-		ctx.fillStyle = '#ffff00';
-		ctx.font = `${Math.floor(height/20)}px Arial`;
-		ctx.fillText('Press SPACE to Start', width/2, height*2.2/3);
-
-		// Animasyonlu noktalar
-		const time = Date.now() * 0.001;
-		for (let i = 0; i < 3; i++) {
-			const alpha = Math.sin(time * 2 + i * 0.5) * 0.5 + 0.5;
-			ctx.globalAlpha = alpha;
-			ctx.fillStyle = '#00ffff';
-			ctx.beginPath();
-			ctx.arc(width/2 + (i-1) * 20, height*3/4, 5, 0, Math.PI * 2);
-			ctx.fill();
-		}
-		ctx.globalAlpha = 1;
-
-		// Test köşeleri - debug için
-		ctx.fillStyle = '#ff0000';
-		ctx.fillRect(0, 0, 20, 20); // Sol üst
-		ctx.fillStyle = '#00ff00';
-		ctx.fillRect(width-20, 0, 20, 20); // Sağ üst
-		ctx.fillStyle = '#0000ff';
-		ctx.fillRect(0, height-20, 20, 20); // Sol alt
-		ctx.fillStyle = '#ffff00';
-		ctx.fillRect(width-20, height-20, 20, 20); // Sağ alt
-
-		// Texture'ı güncelle
-		texture.update();
-		console.log('🎨 Geliştirilmiş texture çizildi');
 	}
 
 	// Geliştirilmiş debug sistemi
@@ -224,7 +157,6 @@ class ArcadeMachine
 		testButton.textContent = 'Test Pattern';
 		testButton.style.cssText = 'margin: 2px; padding: 5px; background: #333; color: white; border: 1px solid #666;';
 		testButton.onclick = () => {
-			this.#drawTestPattern(dynamicTexture.getContext(), dynamicTexture);
 			updatePreview();
 		};
 
@@ -234,7 +166,6 @@ class ArcadeMachine
 		refreshButton.onclick =
 		() =>
 		{
-			this.#drawImprovedStartScreen(dynamicTexture.getContext(), dynamicTexture);
 			updatePreview();
 		};
 
@@ -246,36 +177,8 @@ class ArcadeMachine
 
 		// Global güncelleme fonksiyonu
 		window.updateDebugCanvas = updatePreview;
-
-		console.log('🔍 Geliştirilmiş debug sistemi aktif!');
 	}
 
-	// Test pattern çizme fonksiyonu
-	#drawTestPattern(ctx, texture) {
-		const size = texture.getSize();
-		const width = size.width;
-		const height = size.height;
-
-		// Şachmat pattern
-		ctx.clearRect(0, 0, width, height);
-
-		const squareSize = 32;
-		for (let x = 0; x < width; x += squareSize) {
-			for (let y = 0; y < height; y += squareSize) {
-				const isEven = ((x / squareSize) + (y / squareSize)) % 2 === 0;
-				ctx.fillStyle = isEven ? '#ffffff' : '#000000';
-				ctx.fillRect(x, y, squareSize, squareSize);
-			}
-		}
-
-		// Merkeze kırmızı daire
-		ctx.fillStyle = '#ff0000';
-		ctx.beginPath();
-		ctx.arc(width/2, height/2, 50, 0, Math.PI * 2);
-		ctx.fill();
-
-		texture.update();
-	}
 }
 
 // Export the ArcadeMachine class
