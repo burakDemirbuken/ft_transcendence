@@ -4,17 +4,27 @@
 	<meta charset="UTF-8">
 	<title>SPA Static URL</title>
 	<style>
-		nav a { margin-right: 10px; cursor: pointer; }
+		nav a { cursor: pointer; }
 	</style>
+	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="sidebar.css">
 </head>
 <body>
-	<nav>
-		<a onclick="navigate('login')">Login</a>
-		<a onclick="navigate('dashboard')">Dashboard</a>
-		<a onclick="navigate('reports')">Reports</a>
+	<nav class="sidebar">
+		<button class="menu-toggle">☰</button>
+		<h2>Sidebar Menu</h2>
+		<ul>
+			<li><a onclick="navigate('home')">Home</a></li>
+			<li><a onclick="navigate('play')">Play</a></li>
+			<li><a onclick="navigate('tourneys')">Tourneys</a></li>
+			<li><a onclick="navigate('chat')">Chat</a></li>
+			<li><a onclick="navigate('profile')">Profile</a></li>
+			<li><a onclick="navigate('social')">Social</a></li>
+			<li><a onclick="navigate('settings')">Settings</a></li>
+			<li><a onclick="navigate('aboutUs')">About Us</a></li>
+			<li><a onclick="navigate('login')">Logout</a></li>
+		</ul>
 	</nav>
-
-	<hr>
 
 	<div id="content"></div>
 

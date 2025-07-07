@@ -1,0 +1,9 @@
+/* Hide ONLY the sidebar nav when 'hidden' class is applied */
+.hidden {
+    display: none;
+}
+
+/* Keep all other content visible
+#content {
+    display: block !important;
+} */
