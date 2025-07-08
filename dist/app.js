@@ -2,6 +2,18 @@ const pageState = {
 	current: 'login', // default
 };
 
+const routes = {
+	login: { template: 'login', title: 'Login' },
+	home: { template: 'home', title: 'Home' },
+	play: { template: 'play', title: 'Play' },
+	tourneys: { template: 'tourneys', title: 'Tourneys' },
+	chat: { template: 'chat', title: 'Chat' },
+	profile: { template: 'profile', title: 'Profile' },
+	social: { template: 'social', title: 'Social' },
+	settings: { template: 'settings', title: 'Settings' },
+	aboutUs: { template: 'aboutUs', title: 'About Us' },
+}
+
 async function loadTemplate(templateName) {
 	const response = await fetch(`templates/${templateName}.html`);
 	return await response.text();
@@ -19,42 +31,21 @@ async function loadPage(page) {
 		sidebar.classList.remove('hidden'); // Show on other pages
 	}
 
-	if (page === 'login') {
-		content.innerHTML = await loadTemplate('login');
-		document.title = "Login";
-	} else if (page === 'home') {
-		content.innerHTML = await loadTemplate('home');
-		document.title = "Home";
-	} else if (page === 'play') {
-		content.innerHTML = await loadTemplate('play');
-		document.title = "Play";
-	} else if (page === 'tourneys') {
-		content.innerHTML = await loadTemplate('tourneys');
-		document.title = "Tourneys";
-	} else if (page === 'chat') {
-		content.innerHTML = await loadTemplate('chat');
-		document.title = "Chat";
-	} else if (page === 'profile') {
-		content.innerHTML = await loadTemplate('profile');
-		document.title = "Profile";
-	} else if (page === 'social') {
-		content.innerHTML = await loadTemplate('social');
-		document.title = "Social";
-	} else if (page === 'settings') {
-		content.innerHTML = await loadTemplate('settings');
-		document.title = "Settings";
-	} else if (page === 'aboutUs') {
-		content.innerHTML = await loadTemplate('aboutUs');
-		document.title = "About Us";
+	const route = routes[page];
+	if (route) {
+		content.innerHTML = await loadTemplate(route.template);
+		document.title = route.title;
 	} else {
 		content.innerHTML = '<h2>404</h2><p>Page not found.</p>';
 	}
-
-	document.querySelector(".menu-toggle").addEventListener("click", () => {
-		document.querySelector(".sidebar").classList.toggle("collapsed");
-		document.documentElement.style.setProperty('--sidebar-width', '80px');
-	});
 }
+
+document.querySelector(".menu-toggle").addEventListener("click", () => {
+	const sidebar = document.querySelector(".sidebar")
+	sidebar.classList.toggle("collapsed");
+	const newWidth = sidebar.classList.contains("collapsed") ? "80px" : "250px"
+	document.documentElement.style.setProperty('--sidebar-width', newWidth);
+});
 
 function navigate(page) {
 	history.pushState({ page }, '', `/${page}`);

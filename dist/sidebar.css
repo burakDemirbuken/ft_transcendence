@@ -11,10 +11,6 @@
 	transition: width 0.3s ease; /* Smooth resize */
 }
 
-.sidebar.collapsed {
-	--sidebar-width: 80px; /* Collapsed width */
-}
-
 #content {
 	background: #527fab;
 	padding-left: var(--sidebar-width); /* Auto-adjusts! */
