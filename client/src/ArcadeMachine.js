@@ -111,7 +111,8 @@ class ArcadeMachine
 			font-family: monospace;
 			font-size: 12px;
 			z-index: 1000;
-			max-width: 300px;
+			width: auto;
+			height: auto;
 		`;
 
 		// Başlık
@@ -132,9 +133,13 @@ class ArcadeMachine
 		debugDiv.appendChild(meshInfo);
 
 		// Texture preview
+		let çarpan = 1;
+		let width = dynamicTexture.getContext().canvas.width * çarpan;
+		let height = dynamicTexture.getContext().canvas.height * çarpan;
+
 		const canvas = document.createElement('canvas');
-		canvas.width = 150;
-		canvas.height = 150;
+		canvas.width = width;
+		canvas.height = height;
 		canvas.style.border = '1px solid #00ff88';
 		canvas.style.display = 'block';
 
@@ -142,8 +147,8 @@ class ArcadeMachine
 
 		function updatePreview() {
 			const sourceCanvas = dynamicTexture.getContext().canvas;
-			ctx.clearRect(0, 0, 150, 150);
-			ctx.drawImage(sourceCanvas, 0, 0, 150, 150);
+			ctx.clearRect(0, 0, width, height);
+			ctx.drawImage(sourceCanvas, 0, 0, width, height);
 		}
 
 		updatePreview();
@@ -153,24 +158,6 @@ class ArcadeMachine
 		const buttonContainer = document.createElement('div');
 		buttonContainer.style.marginTop = '10px';
 
-		const testButton = document.createElement('button');
-		testButton.textContent = 'Test Pattern';
-		testButton.style.cssText = 'margin: 2px; padding: 5px; background: #333; color: white; border: 1px solid #666;';
-		testButton.onclick = () => {
-			updatePreview();
-		};
-
-		const refreshButton = document.createElement('button');
-		refreshButton.textContent = 'Refresh';
-		refreshButton.style.cssText = 'margin: 2px; padding: 5px; background: #333; color: white; border: 1px solid #666;';
-		refreshButton.onclick =
-		() =>
-		{
-			updatePreview();
-		};
-
-		buttonContainer.appendChild(testButton);
-		buttonContainer.appendChild(refreshButton);
 		debugDiv.appendChild(buttonContainer);
 
 		document.body.appendChild(debugDiv);

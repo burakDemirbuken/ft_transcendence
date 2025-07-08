@@ -6,6 +6,16 @@ const engine = new Engine(document.getElementById("renderCanvas"));
 const scene = new Scene(engine);
 let socket = new Socket("ws://localhost:3000/ws");
 
+const buttons = [
+	{"startGame": false},
+	{"settings": false},
+ 	{"exit": false}
+];
+
+
+let buttonWidth = 200;
+let buttonHeight = 50;
+
 engine.runRenderLoop(
 	() =>
 	{
@@ -38,7 +48,7 @@ function startAnimationWhenReady() {
 
 startAnimationWhenReady();
 
-function drawBtutton(x, y, width, height, text, dynamicTexture, isSelected)
+function drawBtutton(dynamicTexture, x, y, width, height, text, isSelected)
 {
 	const ctx = dynamicTexture.getContext();
 
@@ -60,8 +70,23 @@ function drawBtutton(x, y, width, height, text, dynamicTexture, isSelected)
 	ctx.strokeRect(x, y, width, height);
 	ctx.textBaseline = "middle";
 	ctx.fillStyle = (isSelected ? "black" : "white");
-	ctx.fillText(text, x + 10 + (ctx.measureText(text).width / 2), y + height / 2);
+	ctx.fillText(text, x + (width / 2) - (ctx.measureText(text).width / 2), y + height / 2);
 
+}
+
+function drawButtons(dynamicTexture, Buttons, buttonWidth, buttonHeight)
+{
+	const ctx = dynamicTexture.getContext();
+	let margin = buttonHeight + 10;
+
+	let y = (ctx.canvas.height / 2) - ((Buttons.length * margin) / 2);
+
+	Buttons.forEach((buttonObj) => {
+		const x = (ctx.canvas.width / 2) - (buttonWidth / 2);
+		const [text, isSelected] = Object.entries(buttonObj)[0];
+		drawBtutton(dynamicTexture, x, y, buttonWidth, buttonHeight, text, isSelected);
+		y += margin;
+	});
 }
 
 function drawMenu(dynamicTexture)
@@ -73,12 +98,7 @@ function drawMenu(dynamicTexture)
 
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-	drawBtutton(50, 50, 200, 50, "Start Game", dynamicTexture, true);
-	drawBtutton(50, 120, 200, 50, "Settings", dynamicTexture, false);
-	drawBtutton(50, 190, 200, 50, "Exit", dynamicTexture, false);
-
+	drawButtons(dynamicTexture, buttons, buttonWidth, buttonHeight);
 
 	dynamicTexture.update();
 }
-
-
