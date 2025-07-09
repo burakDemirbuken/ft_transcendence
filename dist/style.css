@@ -1,9 +1,39 @@
-/* Hide ONLY the sidebar nav when 'hidden' class is applied */
-.hidden {
-    display: none;
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
 }
 
-/* Keep all other content visible
+body {
+	display: grid;
+	grid-template-columns: auto 1fr;
+}
+
+.sidebar {
+	box-sizing: border-box;
+	height: 100vh;
+	width: 250px;
+	/* position: fixed; */
+	background: #2c3e50;
+	/* width: var(--sidebar-width); Use the variable */
+	/* transition: width 0.3s ease; Smooth resize */
+}
+
+.sidebar ul {
+	list-style: none;
+}
+
+/* :root {
+	--sidebar-width: 250px; /* Default width
+}
+
+.hidden {
+	display: none;
+}
+
+
 #content {
-    display: block !important;
+	background: #527fab;
+	padding-left: var(--sidebar-width); /* Auto-adjusts!
+	transition: padding-left 0.3s ease; /* Smooth with sidebar
 } */

@@ -41,9 +41,9 @@ async function loadPage(page) {
 }
 
 document.querySelector(".menu-toggle").addEventListener("click", () => {
-	const sidebar = document.querySelector(".sidebar")
+	const sidebar = document.querySelector(".sidebar");
 	sidebar.classList.toggle("collapsed");
-	const newWidth = sidebar.classList.contains("collapsed") ? "80px" : "250px"
+	const newWidth = sidebar.classList.contains("collapsed") ? "80px" : "250px";
 	document.documentElement.style.setProperty('--sidebar-width', newWidth);
 });
 
