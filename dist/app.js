@@ -40,20 +40,20 @@ async function loadPage(page) {
 	}
 }
 
-// const toggle = document.getElementById('toggle');
-// const sidebar = document.getElementsByClassName('sidebar');
+function toggleSidebar() {
+	const menuToggle = document.querySelector("#menu-toggle")
+	const sidebar = document.querySelector(".sidebar")
 
-// function toggleSidebar() {
-// 	sidebar.classList.toggle('close');
-// 	toggle.classList.toggle('rotate');
-// }
+	sidebar.classList.toggle('collapse')
+	menuToggle.classList.toggle('rotate')
+}
 
-document.querySelector(".menu-toggle").addEventListener("click", () => {
-	const sidebar = document.querySelector(".sidebar");
-	sidebar.classList.toggle("collapsed");
-	const newWidth = sidebar.classList.contains("collapsed") ? "80px" : "250px";
-	document.documentElement.style.setProperty('--sidebar-width', newWidth);
-});
+// document.querySelector(".menu-toggle").addEventListener("click", () => {
+// 	const sidebar = document.querySelector(".sidebar");
+// 	sidebar.classList.toggle("collapsed");
+// 	const newWidth = sidebar.classList.contains("collapsed") ? "80px" : "250px";
+// 	document.documentElement.style.setProperty('--sidebar-width', newWidth);
+// });
 
 function navigate(page) {
 	history.pushState({ page }, '', `/${page}`);
