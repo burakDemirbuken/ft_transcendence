@@ -1,14 +1,13 @@
 class ArcadeMachine
 {
-	constructor(scene)
+	constructor(scene, position)
 	{
 		this.DynamicTexture = null;
-		// Arrow function kullanarak 'this' context'ini koru
-		BABYLON.SceneLoader.ImportMesh("", "../models/arcade/", "arcade.obj", scene, // ✅ this.scene
-			(meshes) => // ✅ arrow function
+		BABYLON.SceneLoader.ImportMesh("", "../models/arcade/", "arcade.obj", scene,
+			(meshes) =>
 			{
 				let screenMesh = meshes.find(m => m.name.toLowerCase().includes("screen"));
-				this.#setupArcadeScreen(screenMesh, this.scene); // ✅ this.scene
+				this.#setupArcadeScreen(screenMesh, this.scene);
 			},
 			function (progress)
 			{
@@ -23,7 +22,7 @@ class ArcadeMachine
 
 	#setupArcadeScreen(screenMesh, scene)
 	{
-		const textureSize = 512; // Daha küçük boyut dene
+		const textureSize = 512;
 		this.dynamicTexture = new BABYLON.DynamicTexture("screenTexture",
 			{width: textureSize, height: textureSize}, scene, false);
 
@@ -49,10 +48,8 @@ class ArcadeMachine
 
 		this.#fixUVMapping(screenMesh);
 
-		// Canvas context'i al
 		const ctx = this.dynamicTexture.getContext();
 
-		// Global referansları sakla
 		window.arcadeScreen = {
 			texture: this.dynamicTexture,
 			context: ctx,
@@ -60,18 +57,20 @@ class ArcadeMachine
 			material: screenMaterial
 		};
 
-		// Debug bilgileri
 		this.#createEnhancedDebugInfo(this.dynamicTexture, screenMesh);
 
 	}
 
-	getDynamicTexture()
+	getScreen()
 	{
 		return this.dynamicTexture;
 	}
 
+	getTextureSize()
+	{
+		return this.dynamicTexture.getSize();
+	}
 
-	// Geliştirilmiş UV mapping düzeltmesi
 	#fixUVMapping(mesh)
 	{
 
@@ -90,14 +89,11 @@ class ArcadeMachine
 		}
 	}
 
-	// Geliştirilmiş debug sistemi
 	#createEnhancedDebugInfo(dynamicTexture, screenMesh)
 	{
-		// Eski debug div'i kaldır
 		const oldDebug = document.getElementById('debug-texture');
 		if (oldDebug) oldDebug.remove();
 
-		// Yeni debug container
 		const debugDiv = document.createElement('div');
 		debugDiv.id = 'debug-texture';
 		debugDiv.style.cssText = `
@@ -115,13 +111,11 @@ class ArcadeMachine
 			height: auto;
 		`;
 
-		// Başlık
 		const title = document.createElement('div');
 		title.textContent = 'Arcade Screen Debug';
 		title.style.cssText = 'font-weight: bold; margin-bottom: 10px; color: #00ff88;';
 		debugDiv.appendChild(title);
 
-		// Mesh bilgileri
 		const meshInfo = document.createElement('div');
 		meshInfo.innerHTML = `
 			<strong>Mesh:</strong> ${screenMesh.name}<br>
@@ -132,7 +126,6 @@ class ArcadeMachine
 		meshInfo.style.marginBottom = '10px';
 		debugDiv.appendChild(meshInfo);
 
-		// Texture preview
 		let çarpan = 1;
 		let width = dynamicTexture.getContext().canvas.width * çarpan;
 		let height = dynamicTexture.getContext().canvas.height * çarpan;
@@ -154,7 +147,6 @@ class ArcadeMachine
 		updatePreview();
 		debugDiv.appendChild(canvas);
 
-		// Test butonları
 		const buttonContainer = document.createElement('div');
 		buttonContainer.style.marginTop = '10px';
 
@@ -162,11 +154,9 @@ class ArcadeMachine
 
 		document.body.appendChild(debugDiv);
 
-		// Global güncelleme fonksiyonu
 		window.updateDebugCanvas = updatePreview;
 	}
 
 }
 
-// Export the ArcadeMachine class
 export default ArcadeMachine;

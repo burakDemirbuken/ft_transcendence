@@ -45,8 +45,10 @@ class Scene extends EventEmitter
 
 		this.#keyObservable();
 
-		this.arcadeMachine = new arcadeMachine(this.scene);
-		}
+
+		this.arcadeMachines.add("Player1", new arcadeMachine(this.scene));
+
+	}
 
 	#keyObservable()
 	{
@@ -70,7 +72,7 @@ class Scene extends EventEmitter
 			});
 	}
 
-	getDynamicTexture(name)
+	getDynamicTextures(name)
 	{
 		return this.dynamicTextures.get(name);
 	}
