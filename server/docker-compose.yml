@@ -1,0 +1,19 @@
+services:
+  node:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - my-volume:/home/bkorkut/trancedere
+    command: nodemon server/server.js
+
+volumes:
+  my-volume:
+    name: "my-volume"
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${HOME}/Desktop/trancedere"

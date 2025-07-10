@@ -5,6 +5,10 @@
 }
 
 body {
+	min-height: 100vh;
+	max-height: 100dvh;
+	background-color: #0c1218;
+	color: #ffffff; /* Text Color! */
 	display: grid;
 	grid-template-columns: auto 1fr;
 }
@@ -13,27 +17,65 @@ body {
 	box-sizing: border-box;
 	height: 100vh;
 	width: 250px;
-	/* position: fixed; */
+	padding: 5px 1em;
 	background: #2c3e50;
-	/* width: var(--sidebar-width); Use the variable */
-	/* transition: width 0.3s ease; Smooth resize */
+	border-right: 1px solid #ffffff;
+
+	position: sticky;
+	top: 0;
+	align-self: start;
 }
 
 .sidebar ul {
-	list-style: none;
+	list-style: none; /* prevents bullet points */
 }
 
-/* :root {
-	--sidebar-width: 250px; /* Default width
+.sidebar ul li:first-child{
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 16px;
+	.logo{
+		font-weight: 600;
+	}
 }
 
-.hidden {
-	display: none;
+.sidebar ul li.active a{
+	color: #87c3ff;
+	svg{
+		fill: #87c3ff;
+	}
 }
 
+.sidebar a, .sidebar .logo{
+	border-radius: .5em;
+	/* border: 1px solid #ffffff; */
+	padding: .85em;
+	display: flex;
+	text-decoration: none; /* dunno what this does */
+	align-items: center;
+	gap: 1em;
+}
 
-#content {
-	background: #527fab;
-	padding-left: var(--sidebar-width); /* Auto-adjusts!
-	transition: padding-left 0.3s ease; /* Smooth with sidebar
-} */
+.sidebar svg{
+	flex-shrink: 0;
+	fill: #ffffff;
+}
+
+.sidebar a:hover{
+	background-color: #445d75;
+}
+
+#toggle {
+	margin-left: auto;
+	padding: 1em;
+	border: none;
+	border-radius: .5em;
+	background: none;
+	cursor: pointer;
+}
+
+#toggle:hover{
+	background-color: #445d75;
+}
+
+/* Feyza'dan özlü sözler: jhbuvıytvıycutdxguybdyrvsxhtf */

@@ -40,6 +40,14 @@ async function loadPage(page) {
 	}
 }
 
+// const toggle = document.getElementById('toggle');
+// const sidebar = document.getElementsByClassName('sidebar');
+
+// function toggleSidebar() {
+// 	sidebar.classList.toggle('close');
+// 	toggle.classList.toggle('rotate');
+// }
+
 document.querySelector(".menu-toggle").addEventListener("click", () => {
 	const sidebar = document.querySelector(".sidebar");
 	sidebar.classList.toggle("collapsed");
