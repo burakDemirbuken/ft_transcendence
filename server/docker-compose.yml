@@ -6,8 +6,8 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - my-volume:/home/bkorkut/trancedere
-    command: nodemon server/server.js
+      - my-volume:/home/bkorkut/trancedere/src
+    command: nodemon server.js
 
 volumes:
   my-volume:
@@ -16,4 +16,4 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: "${HOME}/Desktop/trancedere"
+      device: "${HOME}/Desktop/trancedere/src"

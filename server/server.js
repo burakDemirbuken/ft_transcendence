@@ -6,16 +6,16 @@ const fs = require('fs');
 // Create server instance
 const server = fastify;
 
-// Serve static files from the 'dist' directory (common SPA output folder)
+// Serve static files from the 'src' directory (common SPA output folder)
 server.register(require('@fastify/static'), {
-  root: path.join(__dirname, '../dist'),
+  root: path.join(__dirname, './src'),
   prefix: '/',
   wildcard: false, // Disable wildcard to handle 404 properly for SPA
 });
 
 // SPA fallback route - serve index.html for all other routes
 server.setNotFoundHandler((req, reply) => {
-  const indexFile = path.join(__dirname, '../dist', 'index.html');
+  const indexFile = path.join(__dirname, './src', 'index.html');
 
   if (fs.existsSync(indexFile)) {
     reply.type('text/html').send(fs.readFileSync(indexFile));

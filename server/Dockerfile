@@ -1,15 +1,14 @@
-# En güncel Node.js sürümünü kullan
 FROM node:latest
 
-# Sistemi güncelle ve temel araçları kur
 RUN apt update && apt install -y
 
-# Çalışma dizinine geç
 WORKDIR /home/bkorkut/trancedere
 
-COPY ../ .
+COPY . .
 
-ENTRYPOINT ["/home/bkorkut/trancedere/server/entrypoint.sh"]
+RUN npm install fastify @fastify/static
+RUN npm install -g nodemon
+RUN npm install tailwindcss @tailwindcss/postcss postcss
+# RUN npx tailwindcss init
 
-# Sunucuyu başlat
-CMD [ "nodemon", "server/server.js" ]
+CMD [ "nodemon", "server.js" ]
