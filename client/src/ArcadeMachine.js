@@ -1,75 +1,61 @@
 class ArcadeMachine
 {
-	constructor(scene, position)
+	constructor(id, scene, position = { x: 0, y: 0, z: 0 })
 	{
-		this.DynamicTexture = null;
-		BABYLON.SceneLoader.ImportMesh("", "../models/arcade/", "arcade.obj", scene,
-			(meshes) =>
-			{
-				let screenMesh = meshes.find(m => m.name.toLowerCase().includes("screen"));
-				this.#setupArcadeScreen(screenMesh, this.scene);
-			},
-			function (progress)
-			{
-				console.log("📥 Model loading: ", Math.round(progress.loaded / progress.total * 100) + "%");
-			},
-			function (error)
-			{
-				console.error("❌ Model loading error:", error);
-			}
-		);
-	}
+        this.id = id;
+        this.scene = scene;
+        this.position = position;
+        this.meshs = null;
+        this.gameScreen = null;
+        this.screenMaterial = null;
+        this.isActive = false;
+    }
 
-	#setupArcadeScreen(screenMesh, scene)
+    async load()
 	{
-		const textureSize = 512;
-		this.dynamicTexture = new BABYLON.DynamicTexture("screenTexture",
-			{width: textureSize, height: textureSize}, scene, false);
 
-		this.dynamicTexture.hasAlpha = false;
-		this.dynamicTexture.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
-		this.dynamicTexture.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
+        const result = await BABYLON.SceneLoader.ImportMeshAsync("", "./models/", "ArcadeMachine.obj", this.scene);
+		this.meshs = result.meshes;
+		let body = this.meshs.find(m => m.name === "body");
 
-		this.dynamicTexture.updateSamplingMode(BABYLON.Texture.NEAREST_SAMPLINGMODE);
+        this.body.position = new BABYLON.Vector3(this.position.x, this.position.y, this.position.z);
+		this.body.scaling = new BABYLON.Vector3(1, 1, 1);
 
-		const screenMaterial = new BABYLON.StandardMaterial("screenMaterial", scene);
+        this.createGameScreen();
 
-		screenMaterial.diffuseTexture = this.dynamicTexture;
-		screenMaterial.emissiveTexture = this.dynamicTexture;
-		screenMaterial.emissiveColor = new BABYLON.Color3(0.8, 0.8, 0.8);
-		screenMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-		screenMaterial.ambientColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+        return this;
+    }
 
-		screenMaterial.backFaceCulling = false;
 
-		screenMesh.material = screenMaterial;
-		screenMesh.isVisible = true;
-		screenMesh.visibility = 1;
-
-		this.#fixUVMapping(screenMesh);
-
-		const ctx = this.dynamicTexture.getContext();
-
-		window.arcadeScreen = {
-			texture: this.dynamicTexture,
-			context: ctx,
-			mesh: screenMesh,
-			material: screenMaterial
-		};
-
-		this.#createEnhancedDebugInfo(this.dynamicTexture, screenMesh);
-
-	}
-
-	getScreen()
+	createGameScreen()
 	{
-		return this.dynamicTexture;
-	}
+        const screenWidth = 512;
+        const screenHeight = 512;
 
-	getTextureSize()
-	{
-		return this.dynamicTexture.getSize();
-	}
+        this.gameScreen = new BABYLON.DynamicTexture(`gameScreen_${this.id}`, {
+            width: screenWidth,
+            height: screenHeight
+        }, this.scene);
+
+		this.gameScreen.hasAlpha = false;
+		this.gameScreen.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
+		this.gameScreen.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
+
+		this.gameScreen.updateSamplingMode(BABYLON.Texture.NEAREST_SAMPLINGMODE);
+
+        // Ekran materyali
+        this.screenMaterial = new BABYLON.StandardMaterial(`screenMaterial_${this.id}`, this.scene);
+        this.screenMaterial.diffuseTexture = this.gameScreen;
+        this.screenMaterial.emissiveTexture = this.gameScreen;
+
+        const screenMesh = this.meshs.find(m => m.name === `screen`);
+        if (screenMesh)
+		{
+            screenMesh.material = this.screenMaterial;
+			this.#fixUVMapping(screenMesh);
+			this.#createEnhancedDebugInfo(this.gameScreen, screenMesh);
+		}
+    }
 
 	#fixUVMapping(mesh)
 	{
@@ -138,7 +124,8 @@ class ArcadeMachine
 
 		const ctx = canvas.getContext('2d');
 
-		function updatePreview() {
+		function updatePreview()
+		{
 			const sourceCanvas = dynamicTexture.getContext().canvas;
 			ctx.clearRect(0, 0, width, height);
 			ctx.drawImage(sourceCanvas, 0, 0, width, height);
@@ -157,6 +144,41 @@ class ArcadeMachine
 		window.updateDebugCanvas = updatePreview;
 	}
 
+    getScreenContext()
+	{
+        return this.gameScreen.getContext();
+    }
+
+    updateScreen()
+	{
+        this.gameScreen.update();
+    }
+
+    setActive(active)
+	{
+        this.isActive = active;
+        // Aktif olmayan makineleri solgun göster
+        if (this.screenMaterial)
+		{
+            this.screenMaterial.alpha = active ? 1.0 : 0.5;
+        }
+    }
+
+    dispose()
+	{
+        if (this.gameScreen)
+		{
+            this.gameScreen.dispose();
+        }
+        if (this.screenMaterial)
+		{
+            this.screenMaterial.dispose();
+        }
+        if (this.mesh)
+		{
+            this.mesh.dispose();
+        }
+    }
 }
 
 export default ArcadeMachine;
