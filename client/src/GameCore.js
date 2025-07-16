@@ -1,13 +1,17 @@
+// BABYLON.js is loaded via CDN in index.html
+import ArcadeMachine from './ArcadeMachine.js';
+
 class GameCore
 {
-	constructor(parameters)
+	constructor(parameters = {})
 	{
+		this.parameters = parameters;
 		this.engine = null;
 		this.scene = null;
 		this.camera = null;
 		this.arcadeMachines = new Map();
 		this.isInitialized = false;
-		this.viewMode = 'single'; // 'single', 'multiple', 'tournament'
+		this.viewMode = 'single';
 	}
 
 	async initialize(canvas)
@@ -15,23 +19,14 @@ class GameCore
 		this.engine = new BABYLON.Engine(canvas, true);
 		this.scene = new BABYLON.Scene(this.engine);
 
-		const camera = new BABYLON.UniversalCamera("camera",
+		this.camera = new BABYLON.UniversalCamera("camera",
 			new BABYLON.Vector3(0, 4.5, 2.5), this.scene);
 
-		camera.setTarget(new BABYLON.Vector3(0, 3.75, 0));
-
-		const canvas = engine.getRenderingCanvas();
-		camera.attachControl(canvas, true);
-		camera.angularSensibility = 5000;
-		camera.speed = 0;
-		camera.lowerRadiusLimit = camera.radius;
-		camera.upperRadiusLimit = camera.radius;
-
-		const light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), this.scene);
-		light1.intensity = 0.7;
-
-		const light2 = new BABYLON.DirectionalLight("light2", new BABYLON.Vector3(-1, -1, -1), this.scene);
-		light2.intensity = 0.5;
+		this.camera.attachControl(canvas, true);
+		this.camera.angularSensibility = 5000;
+		this.camera.speed = 0;
+		this.camera.lowerRadiusLimit = this.camera.radius;
+		this.camera.upperRadiusLimit = this.camera.radius;
 
 		this.isInitialized = true;
 
@@ -47,7 +42,6 @@ class GameCore
 				this.engine.resize();
 			});
 	}
-
 
 /* // ...existing code...
 positionCameraInFrontOfMachine(machineId, distance = 5, height = 2) {
@@ -158,55 +152,46 @@ attachCameraToMachineFront(machineId, distance = 5, height = 2) {
 		switch (mode)
 		{
 			case 'single':
-				await this.setupSingleMachine();
-				break;
 			case 'multiple':
-				await this.setupMultipleMachines(machineCount);
+				await this.setupSingleMachine();
 				break;
 			case 'tournament':
 				await this.setupTournamentMachines(machineCount);
 				break;
 		}
 
-		this.adjustCameraForMode();
+		this.setCameraPositionForMode(this.arcadeMachines.get('main'));
 	}
 
-}
+	setCameraPositionForMode(mainMachine)
+	{
+		if (!this.camera || !mainMachine)
+			return;
 
-class GameCore
-{
+		if (!mainMachine.meshs || !Array.isArray(mainMachine.meshs))
+		{
+			console.warn("mainMachine.meshs is not available or not an array");
+			return;
+		}
 
-
+		const screen = mainMachine.meshs.find(m => m.name === "screen");
+		if (screen)
+		{
+			this.camera.setTarget(new BABYLON.Vector3(screen.position.x, screen.position.y + 3.75, screen.position.z));
+			this.camera.position = new BABYLON.Vector3(mainMachine.position.x, mainMachine.position.y + 4.5, mainMachine.position.z + 2.5);
+		}
+	}
 
 	async setupSingleMachine()
 	{
-		const machine = new ArcadeMachine('main', this.scene, { x: 0, y: 0, z: 0 });
+		const machine = new ArcadeMachine('main', this.scene, { x: 1, y: 1, z: 1 });
 		await machine.load();
 		machine.setActive(true);
 		this.arcadeMachines.set('main', machine);
 	}
 
-	async setupMultipleMachines(count)
-	{
-		const spacing = 8; // Makineler arası mesafe
-		const startX = -(count - 1) * spacing / 2;
-
-		for (let i = 0; i < count; i++)
-		{
-			const machine = new ArcadeMachine(`machine_${i}`, this.scene, {
-				x: startX + i * spacing,
-				y: 0,
-				z: 0
-			});
-			await machine.load();
-			machine.setActive(i === 0); // İlk makine aktif
-			this.arcadeMachines.set(`machine_${i}`, machine);
-		}
-	}
-
 	async setupTournamentMachines(count)
 	{
-		// Turnuva için dairesel yerleşim
 		const radius = 15;
 		const angleStep = (Math.PI * 2) / count;
 
@@ -219,37 +204,16 @@ class GameCore
 			const machine = new ArcadeMachine(`tournament_${i}`, this.scene, { x, y: 0, z });
 			await machine.load();
 
-			// Merkeze doğru bak
 			machine.mesh.rotation.y = angle + Math.PI;
 
-			machine.setActive(false); // Başlangıçta hepsi pasif
+			machine.setActive(false);
 			this.arcadeMachines.set(`tournament_${i}`, machine);
 		}
 	}
 
-	adjustCameraForMode()
+	getMachines()
 	{
-		switch (this.viewMode)
-		{
-			case 'single':
-				this.camera.position = new BABYLON.Vector3(0, 5, -10);
-				this.camera.setTarget(BABYLON.Vector3.Zero());
-				break;
-			case 'multiple':
-				const machineCount = this.arcadeMachines.size;
-				this.camera.position = new BABYLON.Vector3(0, 8, -15 - machineCount * 2);
-				this.camera.setTarget(BABYLON.Vector3.Zero());
-				break;
-			case 'tournament':
-				this.camera.position = new BABYLON.Vector3(0, 25, -5);
-				this.camera.setTarget(BABYLON.Vector3.Zero());
-				break;
-		}
-	}
-
-	getMachine(id)
-	{
-		return this.arcadeMachines.get(id);
+		return this.arcadeMachines;
 	}
 
 	setActiveMachine(id)
@@ -273,5 +237,6 @@ class GameCore
 		this.clearMachines();
 		this.engine.dispose();
 	}
-
 }
+
+export default GameCore;

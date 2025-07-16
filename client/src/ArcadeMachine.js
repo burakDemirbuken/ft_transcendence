@@ -1,41 +1,114 @@
+// TODOO: implement arcade machine settings
+// Example arcade machine settings object
+/*
+const exampleArcadeSettings =
+{
+	position:
+	{
+		x: 0,
+		y: 0,
+		z: 0
+	},
+	screenSize:
+	{
+		width: 512,
+		height: 512
+	},
+	type: 'classic', // 'classic', 'modern', '1971 pong'
+	classic:
+	{
+		path: '../models/arcade/classic/',
+		model: 'arcade.obj',
+		colors:
+		{
+			body: '#FF0000',
+			sides: '#00FF00',
+			joystick: '#0000FF',
+			buttons: '#FFFF00'
+		}
+	},
+	modern:
+	{
+		path: '../models/arcade/modern/',
+		model: 'arcade.obj',
+		colors:
+		{
+			body: '#FF0000',
+			sides: '#00FF00',
+			joystick: '#0000FF',
+			buttons: '#FFFF00'
+		}
+	},
+	1971pong:
+	{
+		path: '../models/arcade/1971pong/',
+		model: 'arcade.obj'
+		}
+};
+*/
+
 class ArcadeMachine
 {
-	constructor(id, scene, position = { x: 0, y: 0, z: 0 })
+	constructor(id, scene, position = { x: 0, y: 0, z: 0 }, screenSize = { width: 512, height: 512 })
 	{
         this.id = id;
         this.scene = scene;
         this.position = position;
         this.meshs = null;
+        this.body = null;
         this.gameScreen = null;
         this.screenMaterial = null;
         this.isActive = false;
+        this.screenSize = screenSize;
     }
 
     async load()
 	{
+        try
+		{
+            const result = await BABYLON.SceneLoader.ImportMeshAsync("", "../models/arcade/", "arcade.obj", this.scene);
+            this.meshs = result.meshes;
 
-        const result = await BABYLON.SceneLoader.ImportMeshAsync("", "./models/", "ArcadeMachine.obj", this.scene);
-		this.meshs = result.meshes;
-		let body = this.meshs.find(m => m.name === "body");
+            this.body = this.meshs[0];
 
-        this.body.position = new BABYLON.Vector3(this.position.x, this.position.y, this.position.z);
-		this.body.scaling = new BABYLON.Vector3(1, 1, 1);
+            if (this.body)
+			{
+                const parentMesh = new BABYLON.TransformNode(`arcadeMachine_${this.id}`, this.scene);
+
+                this.meshs.forEach(
+					mesh =>
+					{
+                    	mesh.parent = parentMesh;
+					});
+
+                parentMesh.position = new BABYLON.Vector3(this.position.x, this.position.y, this.position.z);
+                parentMesh.scaling = new BABYLON.Vector3(1, 1, 1);
+
+                this.body = parentMesh;
+            }
+
+
+        }
+		catch (error)
+		{
+            console.error("Error loading arcade machine:", error);
+            return;
+        }
+
+		const light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(this.position.x, this.position.y + 1, this.position.z), this.scene);
+		light1.intensity = 0.7;
+
+		const light2 = new BABYLON.DirectionalLight("light2", new BABYLON.Vector3(this.position.x -1, this.position.y -1, this.position.z -1), this.scene);
+		light2.intensity = 0.5;
 
         this.createGameScreen();
 
         return this;
     }
 
-
 	createGameScreen()
 	{
-        const screenWidth = 512;
-        const screenHeight = 512;
-
-        this.gameScreen = new BABYLON.DynamicTexture(`gameScreen_${this.id}`, {
-            width: screenWidth,
-            height: screenHeight
-        }, this.scene);
+        this.gameScreen = new BABYLON.DynamicTexture(`gameScreen_${this.id}`, this.screenSize, this.scene);
 
 		this.gameScreen.hasAlpha = false;
 		this.gameScreen.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
@@ -43,18 +116,21 @@ class ArcadeMachine
 
 		this.gameScreen.updateSamplingMode(BABYLON.Texture.NEAREST_SAMPLINGMODE);
 
-        // Ekran materyali
         this.screenMaterial = new BABYLON.StandardMaterial(`screenMaterial_${this.id}`, this.scene);
         this.screenMaterial.diffuseTexture = this.gameScreen;
         this.screenMaterial.emissiveTexture = this.gameScreen;
 
-        const screenMesh = this.meshs.find(m => m.name === `screen`);
+        let screenMesh = this.meshs.find(m => m.name.toLowerCase().includes("screen"));
         if (screenMesh)
 		{
             screenMesh.material = this.screenMaterial;
-			this.#fixUVMapping(screenMesh);
-			this.#createEnhancedDebugInfo(this.gameScreen, screenMesh);
-		}
+            this.#fixUVMapping(screenMesh);
+            this.#createEnhancedDebugInfo(this.gameScreen, screenMesh);
+        }
+		else
+		{
+            console.warn(`Screen mesh not found. Available meshes: ${this.meshs.map(m => m.name).join(', ')}`);
+        }
     }
 
 	#fixUVMapping(mesh)
@@ -113,8 +189,8 @@ class ArcadeMachine
 		debugDiv.appendChild(meshInfo);
 
 		let çarpan = 1;
-		let width = dynamicTexture.getContext().canvas.width * çarpan;
-		let height = dynamicTexture.getContext().canvas.height * çarpan;
+		let width = this.screenSize.width * çarpan;
+		let height = this.screenSize.height * çarpan;
 
 		const canvas = document.createElement('canvas');
 		canvas.width = width;
@@ -157,7 +233,6 @@ class ArcadeMachine
     setActive(active)
 	{
         this.isActive = active;
-        // Aktif olmayan makineleri solgun göster
         if (this.screenMaterial)
 		{
             this.screenMaterial.alpha = active ? 1.0 : 0.5;
@@ -174,10 +249,12 @@ class ArcadeMachine
 		{
             this.screenMaterial.dispose();
         }
-        if (this.mesh)
+        if (this.meshs)
 		{
-            this.mesh.dispose();
-        }
+			this.meshs.forEach(mesh => {
+				if (mesh) mesh.dispose();
+			});
+		}
     }
 }
 

@@ -1,4 +1,4 @@
-import Scene from './Scene.js';
+/* import Scene from './Scene.js';
 import Socket from './Socket.js';
 import Engine from './Engine.js';
 import MenuScreen from './Screen/MenuScreen.js';
@@ -58,3 +58,12 @@ function startAnimationWhenReady()
 
 startAnimationWhenReady();
 
+ */
+
+
+import GameCore from "./GameCore.js";
+
+const gameCore = new GameCore();
+
+gameCore.initialize(document.getElementById("renderCanvas"));
+gameCore.setViewMode('single');

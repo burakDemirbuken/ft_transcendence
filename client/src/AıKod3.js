@@ -304,15 +304,61 @@ class NetworkManager {
 // GAME STATE MANAGER
 // ==============================================
 
+
+/*
+const examplGameState:
+{
+	currentState: 'waiting', // 'waiting', 'playing', 'finished'
+	gameMode: 'single', // 'single', 'tournament', 'Ai', 'multiplayer'
+	gameId: 'game_12345',
+	gameData:
+	{
+		player1:
+		{
+			id: 'player1',
+			name: 'Player 1',
+			score: 0,
+			position:
+			{
+				x: 0,
+				y: 0
+			}
+		},
+		player2:
+		{
+			id: 'player2',
+			name: 'Player 2',
+			score: 0,
+			position:
+			{
+				x: 0,
+				y: 0
+			}
+		},
+		ball:
+		{
+			position:
+			{
+				x: 0,
+				y: 0
+			},
+			direction:
+			{
+				x: 1,
+				y: 1
+			},
+			speed: 5
+		},
+		score: { player1: 0, player2: 0 },
+		turn: 'player1',
+	}
+}
+*/
 class GameStateManager
 {
 	constructor()
 	{
-		this.currentState = 'menu';
 		this.gameData = null;
-		this.players = [];
-		this.ball = null;
-		this.score = { player1: 0, player2: 0 };
 		this.gameMode = null;
 		this.callbacks = new Map();
 	}
@@ -327,25 +373,12 @@ class GameStateManager
 	updateGameData(data)
 	{
 		this.gameData = data;
-
-		// Oyun verilerini güncelle
-		if (data.players) this.players = data.players;
-		if (data.ball) this.ball = data.ball;
-		if (data.score) this.score = data.score;
-		if (data.gameMode) this.gameMode = data.gameMode;
-
 		this.triggerCallback('gameDataUpdated', data);
 	}
 
 	getGameData()
 	{
-		return {
-			players: this.players,
-			ball: this.ball,
-			score: this.score,
-			gameMode: this.gameMode,
-			currentState: this.currentState
-		};
+		return this.gameData;
 	}
 
 	on(event, callback)
@@ -366,12 +399,31 @@ class GameStateManager
 // RENDERER CLASS
 // ==============================================
 
+/*
+const exampleGameSettings =
+{
+
+	paddleWidth: 10,
+	paddleHeight: 32,
+	ballSize: 16,
+	colors:
+	{
+		background: '#000000',
+		paddle: '#FFFFFF',
+		ball: '#FFFFFF',
+		text: '#FFFFFF',
+		accent: '#00FF00'
+	}
+};
+
+*/
+
 class GameRenderer
 {
 	constructor(gameCore)
 	{
 		this.gameCore = gameCore;
-		this.screenWidth = 1024;
+		this.screenWidth = 512;
 		this.screenHeight = 512;
 		this.colors = {
 			background: '#000000',
@@ -387,10 +439,10 @@ class GameRenderer
 		// Renderer artık birden fazla makine destekliyor
 	}
 
-	renderGame(gameData, machineId = 'main')
+	renderGame(gameData, machine)
 	{
-		const machine = this.gameCore.getMachine(machineId);
-		if (!machine) return;
+		if (!machine)
+			return;
 
 		const ctx = machine.getScreenContext();
 		this.clearScreen(ctx);
@@ -427,40 +479,51 @@ class GameRenderer
 			});
 	}
 
-	renderTournament(tournamentData) {
+	renderTournament(tournamentData)
+	{
 		// Turnuva verisi
-		if (tournamentData.matches) {
-			tournamentData.matches.forEach((match, index) => {
-				const machineId = `tournament_${index}`;
+		if (tournamentData.matches)
+		{
+			tournamentData.matches.forEach(
+				(match, index) =>
+				{
+					const machineId = `tournament_${index}`;
 
-				if (match.isActive) {
-					this.gameCore.setActiveMachine(machineId);
-					this.renderGame(match.gameData, machineId);
-				} else {
-					this.renderWaitingScreen(`Maç ${index + 1}`, machineId);
-				}
-			});
+					if (match.isActive)
+					{
+						this.gameCore.setActiveMachine(machineId);
+						this.renderGame(match.gameData, machineId);
+					}
+					else
+					{
+						this.renderWaitingScreen(`Maç ${index + 1}`, machineId);
+					}
+				});
 		}
 	}
 
-	clearScreen(ctx) {
+	clearScreen(ctx)
+	{
 		ctx.fillStyle = this.colors.background;
 		ctx.fillRect(0, 0, this.screenWidth, this.screenHeight);
 	}
 
-	renderPaddle(ctx, player) {
+	renderPaddle(ctx, player)
+	{
 		ctx.fillStyle = this.colors.paddle;
 		ctx.fillRect(player.x, player.y, player.width, player.height);
 	}
 
-	renderBall(ctx, ball) {
+	renderBall(ctx, ball)
+	{
 		ctx.fillStyle = this.colors.ball;
 		ctx.beginPath();
 		ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
 		ctx.fill();
 	}
 
-	renderScore(ctx, score) {
+	renderScore(ctx, score)
+	{
 		ctx.fillStyle = this.colors.text;
 		ctx.font = '48px Arial';
 		ctx.textAlign = 'center';
@@ -472,7 +535,8 @@ class GameRenderer
 		ctx.fillText(score.player2, (this.screenWidth * 3) / 4, 60);
 	}
 
-	renderCenterLine(ctx) {
+	renderCenterLine(ctx)
+	{
 		ctx.strokeStyle = this.colors.text;
 		ctx.setLineDash([10, 10]);
 		ctx.beginPath();
@@ -496,11 +560,14 @@ class GameRenderer
 		ctx.fillText('PONG', this.screenWidth / 2, 100);
 
 		// Frontend'den gelen menü verileri
-		if (menuData && menuData.length > 0) {
+		if (menuData && menuData.length > 0)
+		{
 			ctx.font = '32px Arial';
-			menuData.forEach((item, index) => {
-				ctx.fillText(item, this.screenWidth / 2, 200 + index * 60);
-			});
+			menuData.forEach(
+				(item, index) =>
+				{
+					ctx.fillText(item, this.screenWidth / 2, 200 + index * 60);
+				});
 		}
 
 		machine.updateScreen();
