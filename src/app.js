@@ -22,13 +22,13 @@ async function loadTemplate(templateName) {
 // Dynamically update page (without reloads)
 async function loadPage(page) {
 	const content = document.getElementById('content');
-	const sidebar = document.querySelector('nav.sidebar'); // Get the sidebar
+	const body = document.querySelector('body');
 	pageState.current = page;
 
 	if (page === 'login') {
-		sidebar.classList.add('hidden'); // Hide on login
+		body.classList.add('login-page');
 	} else {
-		sidebar.classList.remove('hidden'); // Show on other pages
+		body.classList.remove('login-page');
 	}
 
 	const route = routes[page];
@@ -42,18 +42,11 @@ async function loadPage(page) {
 
 function toggleSidebar() {
 	const menuToggle = document.querySelector("#menu-toggle")
-	const sidebar = document.querySelector(".sidebar")
+	const sidebar = document.querySelector("#sidebar")
 
-	sidebar.classList.toggle('collapse')
+	sidebar.classList.toggle('collapsed')
 	menuToggle.classList.toggle('rotate')
 }
-
-// document.querySelector(".menu-toggle").addEventListener("click", () => {
-// 	const sidebar = document.querySelector(".sidebar");
-// 	sidebar.classList.toggle("collapsed");
-// 	const newWidth = sidebar.classList.contains("collapsed") ? "80px" : "250px";
-// 	document.documentElement.style.setProperty('--sidebar-width', newWidth);
-// });
 
 function navigate(page) {
 	history.pushState({ page }, '', `/${page}`);

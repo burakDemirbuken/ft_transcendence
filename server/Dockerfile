@@ -6,7 +6,6 @@ WORKDIR /home/bkorkut/trancedere
 
 COPY . .
 
-RUN npm install
 RUN npm install fastify @fastify/static
 RUN npm install -g nodemon
 
