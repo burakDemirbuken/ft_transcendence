@@ -1,7 +1,11 @@
+
 services:
   node:
+    container_name: node_service
     build:
-      context: ./server
-      dockerfile: Dockerfile
+      context: ./backend/server
     ports:
       - "3000:3000"
+    volumes:
+      - ./backend/server/data:/app/data
+    restart: unless-stopped
