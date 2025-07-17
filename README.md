@@ -22,6 +22,7 @@ Method: POST
 ```
 {
   "username": "yunus",
+  "email":"example@gmail.com
   "password": "123456"
 }
 ```
@@ -39,6 +40,7 @@ Method: POST
 ```
 {
   "username": "yunus",
+  "email":"example@gmail.com"
   "password": "123456"
 }
 ```
@@ -57,6 +59,8 @@ Yanıt:
 {
   "id": 1,
   "username": "yunus"
+  "email":"example@gmail.com"
+  "password":"123456"
 }
 ```
 ## 🧪 Test Etmek İçin Örnek curl Komutları
@@ -64,16 +68,16 @@ Kayıt:
 ```
 curl -X POST http://localhost:3000/api/users/register \
 -H "Content-Type: application/json" \
--d '{"username":"yunus","password":"123456"}'
+-d '{"username":"yunus","email":"example@gmail.com","password":"123456"}'
 ```
 Giriş:
 ```
 curl -X POST http://localhost:3000/api/users/login \
 -H "Content-Type: application/json" \
--d '{"username":"yunus","password":"123456"}'
+-d '{"username":"yunus","email":"example@gmail.com","password":"123456"}'
 ```
 Bilgileri Getir:
 ```
-curl -X GET http://localhost:3000/api/users/me \
+curl -X GET http://localhost:3000/api/users/ \
 -H "Authorization: Bearer <TOKEN>"
 ```

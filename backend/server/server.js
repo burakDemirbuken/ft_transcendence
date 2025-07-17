@@ -17,7 +17,3 @@ app.use("/api/users", userRoutes);
 app.listen(port, () => {
   console.log(`🚀 API çalışıyor → http://localhost:${port}`);
 });
-
-
-curl http://localhost:3000/api/users/profile \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ5dW51cyIsImlhdCI6MTc1Mjc0OTYxMSwiZXhwIjoxNzUyNzUzMjExfQ.om0L12eH17GB8ssLxNN0lyU_LofUxmc73m0cbi7l0i8"
