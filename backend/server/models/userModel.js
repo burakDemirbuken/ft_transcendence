@@ -10,6 +10,7 @@ const createUserTable = () => {
   )`);
 };
 
+
 const createUser = (username, email, hashedPassword, callback) => {
   const sql = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
   db.run(sql, [username, email, hashedPassword], function (err) {
