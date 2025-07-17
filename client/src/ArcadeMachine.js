@@ -49,25 +49,27 @@ const exampleArcadeSettings =
 
 class ArcadeMachine
 {
-	constructor(id, scene, position = { x: 0, y: 0, z: 0 }, screenSize = { width: 512, height: 512 })
+	constructor(id, scene)
 	{
         this.id = id;
         this.scene = scene;
-        this.position = position;
+        this.position = null;
         this.meshs = null;
         this.body = null;
         this.gameScreen = null;
         this.screenMaterial = null;
         this.isActive = false;
-        this.screenSize = screenSize;
+        this.screenSize = null;
     }
 
-    async load()
+    async load(arcadeSettings)
 	{
         try
 		{
             const result = await BABYLON.SceneLoader.ImportMeshAsync("", "../models/arcade/", "arcade.obj", this.scene);
             this.meshs = result.meshes;
+			this.position = arcadeSettings.position || { x: 0, y: 0, z: 0 };
+			this.screenSize = arcadeSettings.screenSize || { width: 512, height: 512 };
 
             this.body = this.meshs[0];
 
@@ -234,27 +236,21 @@ class ArcadeMachine
 	{
         this.isActive = active;
         if (this.screenMaterial)
-		{
             this.screenMaterial.alpha = active ? 1.0 : 0.5;
-        }
     }
 
     dispose()
 	{
         if (this.gameScreen)
-		{
             this.gameScreen.dispose();
-        }
         if (this.screenMaterial)
-		{
             this.screenMaterial.dispose();
-        }
         if (this.meshs)
-		{
-			this.meshs.forEach(mesh => {
-				if (mesh) mesh.dispose();
-			});
-		}
+			this.meshs.forEach(
+				mesh =>
+				{
+					if (mesh) mesh.dispose();
+				});
     }
 }
 

@@ -90,3 +90,5 @@ class GameStateManager
 			this.callbacks.get(event).forEach(callback => callback(data));
 	}
 }
+
+export default GameStateManager;

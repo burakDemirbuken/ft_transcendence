@@ -12,9 +12,10 @@ class GameCore
 		this.arcadeMachines = new Map();
 		this.isInitialized = false;
 		this.viewMode = 'single';
+		this.gameConfig = null;
 	}
 
-	async initialize(canvas)
+	async initialize(canvas, gameConfig)
 	{
 		this.engine = new BABYLON.Engine(canvas, true);
 		this.scene = new BABYLON.Scene(this.engine);
@@ -27,6 +28,7 @@ class GameCore
 		this.camera.speed = 0;
 		this.camera.lowerRadiusLimit = this.camera.radius;
 		this.camera.upperRadiusLimit = this.camera.radius;
+		this.gameConfig = gameConfig;
 
 		this.isInitialized = true;
 
@@ -214,6 +216,11 @@ attachCameraToMachineFront(machineId, distance = 5, height = 2) {
 	getMachines()
 	{
 		return this.arcadeMachines;
+	}
+
+	getMachine(id)
+	{
+		return this.arcadeMachines.get(id);
 	}
 
 	setActiveMachine(id)

@@ -425,7 +425,8 @@ class GameRenderer
 		this.gameCore = gameCore;
 		this.screenWidth = 512;
 		this.screenHeight = 512;
-		this.colors = {
+		this.colors =
+		{
 			background: '#000000',
 			paddle: '#FFFFFF',
 			ball: '#FFFFFF',
