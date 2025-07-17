@@ -18,13 +18,92 @@ body.login-page {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	min-height: 100vh;
 }
 
 body.login-page #sidebar {
 	display: none;
 }
 
-body.login-page
+.login-wrapper {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 400px;
+	height: 500px;
+
+	background: transparent;
+	border: 5px solid #333;
+	border-radius: 20px;
+	transition: .5s;
+
+	h2 {
+		font-size: 2em;
+		text-align: center;
+		color: #fff;
+		transition: .5s;
+	}
+
+	.form-group {
+		position: relative;
+		width: 320px;
+		margin: 30px 0px;
+	}
+
+	input {
+		width: 100%;
+		height: 50px;
+		background: transparent;
+		border: 2px solid #333;
+		outline: none;
+		border-radius: 8px;
+
+		font-size: 1em;
+		color: #fff;
+		padding: 0 10px 0 15px;
+		transition: .5s;
+	}
+
+	input::placeholder {
+		color: #333;
+	}
+
+	button {
+		position: relative;
+		width: 100%;
+		height: 45px;
+		background: #333;
+		border: none;
+		outline: none;
+		border-radius: 8px;
+		cursor: pointer;
+		font-size: 1em;
+		color: #fff;
+		font-weight: 500;
+		transition: .5s;
+	}
+}
+
+.login-wrapper:hover {
+	border: 5px solid oklch(70.4% 0.191 22.216);
+	box-shadow: 0 0 20px oklch(70.4% 0.191 22.216), inset 0 0 20px oklch(70.4% 0.191 22.216);
+
+	h2 {
+		color: oklch(70.4% 0.191 22.216);
+	}
+
+	input {
+		border: 2px solid oklch(70.4% 0.191 22.216);
+		box-shadow: 0 0 10px oklch(70.4% 0.191 22.216), inset 0 0 10px oklch(70.4% 0.191 22.216);
+	}
+
+	button {
+		background: oklch(70.4% 0.191 22.216);
+		color: #000;
+		box-shadow: 0 0 20px oklch(70.4% 0.191 22.216);
+	}
+}
 
 #sidebar {
 	box-sizing: border-box;
