@@ -1,4 +1,81 @@
 
+/*
+const exampleGameConfig =
+{
+	type: "config",
+
+	payload:
+	{
+		gameMode: "local", // "local", "online", "tournament", "ai"
+
+		arcade:
+		{
+			position:
+			{
+				x: 0,
+				y: 0,
+				z: 0
+			},
+			screenSize:
+			{
+				width: 512,
+				height: 512
+			},
+			type: "classic", // "classic", "modern", "1971 pong"
+			classic:
+			{
+				path: "../models/arcade/classic/",
+				model: "arcade.obj",
+				colors:
+				{
+					body: "#FF0000",
+					sides: "#00FF00",
+					joystick: "#0000FF",
+					buttons: "#FFFF00"
+				}
+			},
+			modern:
+			{
+				path: "../models/arcade/modern/",
+				model: "arcade.obj",
+				colors:
+				{
+					body: "#FF0000",
+					sides: "#00FF00",
+					joystick: "#0000FF",
+					buttons: "#FFFF00"
+				}
+			},
+			1971pong:
+			{
+				path: "../models/arcade/1971pong/",
+				model: "arcade.obj"
+			}
+		},
+		gameRender:
+		{
+			screenSize:
+			{
+				width: 512,
+				height: 512
+			},
+			colors:
+			{
+				background: "#000000",
+				paddle: "#FFFFFF",
+				ball: "#FFFFFF",
+				text: "#FFFFFF",
+				accent: "#00FF00"
+			},
+			paddleSize:
+			{
+				width: 10,
+			}
+		},
+	}
+};
+*/
+
 class Client
 {
 	constructor(canvasId)
@@ -8,13 +85,14 @@ class Client
 		this.networkManager = new NetworkManager();
 		this.gameStateManager = new GameStateManager();
 		this.renderer = new GameRenderer(this.gameCore);
-
+		/*
 		// Game modes
 		this.gameModes = {
 			sameDevice: new SameDeviceMode(this.networkManager, this.gameStateManager),
 			multiDevice: new MultiDeviceMode(this.networkManager, this.gameStateManager),
 			tournament: new TournamentMode(this.networkManager, this.gameStateManager)
 		};
+		*/
 
 		this.currentGameMode = null;
 		this.isRunning = false;
@@ -22,15 +100,19 @@ class Client
 
 	async initialize(gameConfig)
 	{
-		await this.gameCore.initialize(this.canvas);
-		this.renderer.initialize();
+		if (!this.canvas || !gameConfig || !gameConfig.arcade)
+			throw new Error('Canvas or game configuration is missing');
+		await this.gameCore.initialize(this.canvas, gameConfig.arcade);
+
+		if (!gameConfig.gameRender)
+			throw new Error('Game render configuration is missing');
+		this.renderer.initialize(gameConfig.gameRender);
 		this.setupEventListeners();
 		this.gameStateManager.setState('ready');
 	}
 
 	setupEventListeners()
 	{
-		// Network events
 
 	}
 
