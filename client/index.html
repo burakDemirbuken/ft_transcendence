@@ -7,11 +7,13 @@
   <script src="https://unpkg.com/babylonjs-loaders@latest/babylonjs.loaders.js"></script>
 </head>
 <body>
+  <button id="startButton" style="position: absolute; top: 10px; left: 10px; z-index: 1000;"
+      onclick="startGame()">Start Game</button>
   <canvas id="renderCanvas" style="
     width: 100%;
     height: 100vh;
     touch-action: none;">
     </canvas>
-    <script type="module" src="src/client.js"></script>
+    <script type="module" src="src/main.js"></script>
 </body>
 </html>

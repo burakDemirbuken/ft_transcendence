@@ -16,13 +16,8 @@ const exampleGameConfig =
 				y: 0,
 				z: 0
 			},
-			screenSize:
-			{
-				width: 512,
-				height: 512
-			},
-			type: "classic", // "classic", "modern", "1971 pong"
-			classic:
+			type: "classic", // "classic", "modern", "pong1971"
+			machine:
 			{
 				path: "../models/arcade/classic/",
 				model: "arcade.obj",
@@ -33,32 +28,10 @@ const exampleGameConfig =
 					joystick: "#0000FF",
 					buttons: "#FFFF00"
 				}
-			},
-			modern:
-			{
-				path: "../models/arcade/modern/",
-				model: "arcade.obj",
-				colors:
-				{
-					body: "#FF0000",
-					sides: "#00FF00",
-					joystick: "#0000FF",
-					buttons: "#FFFF00"
-				}
-			},
-			1971pong:
-			{
-				path: "../models/arcade/1971pong/",
-				model: "arcade.obj"
 			}
 		},
 		gameRender:
 		{
-			screenSize:
-			{
-				width: 512,
-				height: 512
-			},
 			colors:
 			{
 				background: "#000000",
@@ -75,6 +48,15 @@ const exampleGameConfig =
 	}
 };
 */
+// TODOO: Veri tabanına gameconfig ekle. Özelleştirme ayarları için.
+// TODOO: gameConfig özelleştirme ve oyun içi ayarlar şıu an birleşik onları ayır.
+
+// TODOO: serverdan gelen bilgiyi GameStatede tut ve renderda kullan. Ayrıca hem serverda hemde clientte topun gidişini hesapla. Fakat öncelik Serverda.
+
+import GameCore from './GameCore.js';
+import NetworkManager from './NetworkManager.js';
+import GameStateManager from './GameStateManager.js';
+import GameRenderer from './GameRenderer.js';
 
 class Client
 {
@@ -103,17 +85,35 @@ class Client
 		if (!this.canvas || !gameConfig || !gameConfig.arcade)
 			throw new Error('Canvas or game configuration is missing');
 		await this.gameCore.initialize(this.canvas, gameConfig.arcade);
-
+		await this.gameCore.setViewMode(gameConfig.gameMode);
 		if (!gameConfig.gameRender)
 			throw new Error('Game render configuration is missing');
 		this.renderer.initialize(gameConfig.gameRender);
 		this.setupEventListeners();
 		this.gameStateManager.setState('ready');
+		this.networkManager.connect();
+
 	}
 
 	setupEventListeners()
 	{
-
+		this.networkManager.on("config",
+			(data) =>
+			{
+				console.log('Received game configuration:', data);
+				this.initialize(data.payload);
+			});
+		this.networkManager.on("stateChange",
+			(data) =>
+			{
+				this.handleStateChange(data.payload);
+			});
+		this.networkManager.on("connected",
+			() =>
+			{
+				console.log('Sunucuya bağlandı');
+				this.gameStateManager.setState('ready');
+			});
 	}
 
 	handleStateChange(data)
@@ -189,8 +189,7 @@ class Client
 	{
 		if (!this.isRunning)
 			return;
-
-		// Ana oyun döngüsü - çizim sunucudan gelen verilere göre yapılacak
+		this.renderer.renderGame(this.gameStateManager.getGameData(), mainMachine);
 		requestAnimationFrame(() => this.gameLoop());
 	}
 

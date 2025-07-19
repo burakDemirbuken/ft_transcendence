@@ -3,47 +3,27 @@
 /*
 const exampleArcadeSettings =
 {
-	position:
+	arcade:
 	{
-		x: 0,
-		y: 0,
-		z: 0
-	},
-	screenSize:
-	{
-		width: 512,
-		height: 512
-	},
-	type: 'classic', // 'classic', 'modern', '1971 pong'
-	classic:
-	{
-		path: '../models/arcade/classic/',
-		model: 'arcade.obj',
-		colors:
+		position:
 		{
-			body: '#FF0000',
-			sides: '#00FF00',
-			joystick: '#0000FF',
-			buttons: '#FFFF00'
-		}
-	},
-	modern:
-	{
-		path: '../models/arcade/modern/',
-		model: 'arcade.obj',
-		colors:
+			x: 0,
+			y: 0,
+			z: 0
+		},
+		machine:
 		{
-			body: '#FF0000',
-			sides: '#00FF00',
-			joystick: '#0000FF',
-			buttons: '#FFFF00'
+			path: "../models/arcade/classic/",
+			model: "arcade.obj",
+			colors:
+			{
+				body: "#FF0000",
+				sides: "#00FF00",
+				joystick: "#0000FF",
+				buttons: "#FFFF00"
+			}
 		}
 	},
-	1971pong:
-	{
-		path: '../models/arcade/1971pong/',
-		model: 'arcade.obj'
-		}
 };
 */
 
@@ -59,19 +39,18 @@ class ArcadeMachine
         this.gameScreen = null;
         this.screenMaterial = null;
         this.isActive = false;
-        this.screenSize = null;
+        this.screenSize = { width: 512, height: 512 };
     }
 
     async load(arcadeSettings)
 	{
         try
 		{
-            const result = await BABYLON.SceneLoader.ImportMeshAsync("", "../models/arcade/", "arcade.obj", this.scene);
-            this.meshs = result.meshes;
+			const result = await BABYLON.SceneLoader.ImportMeshAsync("", "../models/arcade/", "arcade.obj", this.scene);
+			this.meshs = result.meshes;
 			this.position = arcadeSettings.position || { x: 0, y: 0, z: 0 };
-			this.screenSize = arcadeSettings.screenSize || { width: 512, height: 512 };
 
-            this.body = this.meshs[0];
+			this.body = this.meshs[0];
 
             if (this.body)
 			{
@@ -88,8 +67,6 @@ class ArcadeMachine
 
                 this.body = parentMesh;
             }
-
-
         }
 		catch (error)
 		{
@@ -127,7 +104,7 @@ class ArcadeMachine
 		{
             screenMesh.material = this.screenMaterial;
             this.#fixUVMapping(screenMesh);
-            this.#createEnhancedDebugInfo(this.gameScreen, screenMesh);
+            this.#createEnhancedDebugInfo(screenMesh);
         }
 		else
 		{
@@ -137,7 +114,6 @@ class ArcadeMachine
 
 	#fixUVMapping(mesh)
 	{
-
 		const uvs = mesh.getVerticesData(BABYLON.VertexBuffer.UVKind);
 
 		if (uvs)
@@ -153,7 +129,7 @@ class ArcadeMachine
 		}
 	}
 
-	#createEnhancedDebugInfo(dynamicTexture, screenMesh)
+	#createEnhancedDebugInfo(screenMesh)
 	{
 		const oldDebug = document.getElementById('debug-texture');
 		if (oldDebug) oldDebug.remove();
@@ -185,7 +161,7 @@ class ArcadeMachine
 			<strong>Mesh:</strong> ${screenMesh.name}<br>
 			<strong>Vertices:</strong> ${screenMesh.getTotalVertices()}<br>
 			<strong>Material:</strong> ${screenMesh.material ? screenMesh.material.name : 'None'}<br>
-			<strong>Texture Size:</strong> ${dynamicTexture.getSize().width}x${dynamicTexture.getSize().height}
+			<strong>Texture Size:</strong> ${this.gameScreen.getSize().width}x${this.gameScreen.getSize().height}
 		`;
 		meshInfo.style.marginBottom = '10px';
 		debugDiv.appendChild(meshInfo);
@@ -202,14 +178,12 @@ class ArcadeMachine
 
 		const ctx = canvas.getContext('2d');
 
-		function updatePreview()
-		{
-			const sourceCanvas = dynamicTexture.getContext().canvas;
-			ctx.clearRect(0, 0, width, height);
-			ctx.drawImage(sourceCanvas, 0, 0, width, height);
-		}
+		// Canvas'ı instance değişkeni olarak sakla
+		this.debugCanvas = canvas;
+		this.debugCtx = ctx;
 
-		updatePreview();
+		// İlk preview'ı oluştur
+		this.updatePreview();
 		debugDiv.appendChild(canvas);
 
 		const buttonContainer = document.createElement('div');
@@ -219,7 +193,19 @@ class ArcadeMachine
 
 		document.body.appendChild(debugDiv);
 
-		window.updateDebugCanvas = updatePreview;
+		// Global fonksiyonu da tanımla
+		window.updateDebugCanvas = () => this.updatePreview();
+	}
+
+	updatePreview()
+	{
+		if (!this.debugCanvas || !this.debugCtx || !this.gameScreen) {
+			return;
+		}
+
+		const sourceCanvas = this.gameScreen.getContext().canvas;
+		this.debugCtx.clearRect(0, 0, this.debugCanvas.width, this.debugCanvas.height);
+		this.debugCtx.drawImage(sourceCanvas, 0, 0, this.debugCanvas.width, this.debugCanvas.height);
 	}
 
     getScreenContext()

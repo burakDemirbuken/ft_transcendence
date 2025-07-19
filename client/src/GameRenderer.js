@@ -2,11 +2,6 @@
 const exampleGameState =
 {
 	currentState: 'waiting', // 'waiting', 'playing', 'finished'
-	screenSize:
-	{
-		width: 512,
-		height: 512
-	},
 	gameData:
 	{
 		players:
@@ -19,11 +14,6 @@ const exampleGameState =
 					x: 0,
 					y: 0
 				}
-				size:
-				{
-					width: 10,
-					height: 100
-				}
 			},
 			{
 				id: 'player2',
@@ -32,11 +22,6 @@ const exampleGameState =
 				{
 					x: 0,
 					y: 0
-				}
-				size:
-				{
-					width: 10,
-					height: 100
 				}
 			}
 		],
@@ -56,11 +41,6 @@ const exampleGameState =
 
 const exampleGameRenderConfig =
 {
-	screenSize:
-	{
-		width: 512,
-		height: 512
-	},
 	colors:
 	{
 		background: '#000000',
@@ -86,7 +66,7 @@ class GameRenderer
 	constructor(gameCore)
 	{
 		this.gameCore = gameCore;
-		this.screenSize = null;
+		this.screenSize = { width: 512, height: 512 };
 		this.paddleSize = null;
 		this.ballSize = null;
 		this.colors = null;
@@ -94,10 +74,9 @@ class GameRenderer
 
 	initialize(gameConfig)
 	{
-		if (!gameConfig || !gameConfig.screenSize || !gameConfig.colors)
+		if (!gameConfig || !gameConfig.colors)
 			throw new Error('Game configuration is incomplete');
 
-		this.screenSize = gameConfig.screenSize;
 		this.colors = gameConfig.colors;
 
 		if (gameConfig.paddleSize)
@@ -128,26 +107,26 @@ class GameRenderer
 				});
 		}
 		if (gameData.ball)
-			this.renderBall(ctx, gameData.ball);
+			this.renderBall(ctx, gameData.ball.position);
 		if (gameData.score)
 			this.renderScore(ctx, gameData.score);
 
 		this.renderCenterLine(ctx);
 
 		machine.updateScreen();
+		if (machine && typeof machine.updatePreview === 'function')
+			machine.updatePreview();
 	}
 
 	renderSingleGame(gameData)
 	{
-		const machineId = `machine_1`;
+		const machineId = `main`;
 		this.renderGame(gameData, machineId);
 	}
-
 
 	// TODOO: turnuva için render ayarlanacak.
 	renderTournament(tournamentData)
 	{
-		// Turnuva verisi
 		if (tournamentData.matches)
 		{
 			tournamentData.matches.forEach(
@@ -174,17 +153,17 @@ class GameRenderer
 		ctx.fillRect(0, 0, this.screenSize.width, this.screenSize.height);
 	}
 
-	renderPaddle(ctx, player)
+	renderPaddle(ctx, position)
 	{
 		ctx.fillStyle = this.colors.paddle;
-		ctx.fillRect(player.x, player.y, this.paddleSize.width, this.paddleSize.height);
+		ctx.fillRect(position.x, position.y, this.paddleSize.width, this.paddleSize.height);
 	}
 
-	renderBall(ctx, ball)
+	renderBall(ctx, position)
 	{
 		ctx.fillStyle = this.colors.ball;
 		ctx.beginPath();
-		ctx.arc(ball.x, ball.y, this.ballSize.radius, 0, Math.PI * 2);
+		ctx.arc(position.x, position.y, this.ballSize, 0, Math.PI * 2);
 		ctx.fill();
 	}
 
@@ -194,10 +173,8 @@ class GameRenderer
 		ctx.font = '48px Arial';
 		ctx.textAlign = 'center';
 
-		// Sol oyuncu skoru
 		ctx.fillText(score.player1, this.screenSize.width / 4, 60);
 
-		// Sağ oyuncu skoru
 		ctx.fillText(score.player2, (this.screenSize.width * 3) / 4, 60);
 	}
 

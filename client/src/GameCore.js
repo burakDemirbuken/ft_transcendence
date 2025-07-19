@@ -1,4 +1,3 @@
-// BABYLON.js is loaded via CDN in index.html
 import ArcadeMachine from './ArcadeMachine.js';
 
 class GameCore
@@ -150,7 +149,6 @@ attachCameraToMachineFront(machineId, distance = 5, height = 2) {
 		this.viewMode = mode;
 
 		this.clearMachines();
-
 		switch (mode)
 		{
 			case 'single':
@@ -160,6 +158,8 @@ attachCameraToMachineFront(machineId, distance = 5, height = 2) {
 			case 'tournament':
 				await this.setupTournamentMachines(machineCount);
 				break;
+			default:
+				throw new Error(`Unknown view mode: ${mode}`);
 		}
 
 		this.setCameraPositionForMode(this.arcadeMachines.get('main'));
@@ -187,7 +187,7 @@ attachCameraToMachineFront(machineId, distance = 5, height = 2) {
 	async setupSingleMachine()
 	{
 		const machine = new ArcadeMachine('main', this.scene, { x: 1, y: 1, z: 1 });
-		await machine.load();
+		await machine.load(this.gameConfig.machine);
 		machine.setActive(true);
 		this.arcadeMachines.set('main', machine);
 	}
@@ -243,6 +243,9 @@ attachCameraToMachineFront(machineId, distance = 5, height = 2) {
 	{
 		this.clearMachines();
 		this.engine.dispose();
+		this.camera.dispose();
+		this.scene.dispose();
+		this.isInitialized = false;
 	}
 }
 

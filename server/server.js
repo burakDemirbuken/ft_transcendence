@@ -38,15 +38,6 @@ fastify.register(
 			});
 	});
 
-// Normal HTTP route'ları da ekleyebilirsiniz
-fastify2.get('/burak',
-	async (request, reply) =>
-	{
-		// get ile gelen data
-		console.log('GET isteği alındı:', request.query);
-		return "naber";
-	});
-
 async function start()
 {
 	try
@@ -62,4 +53,64 @@ async function start()
 	}
 }
 
+const exampleGameState =
+{
+	currentState: 'waiting', // 'waiting', 'playing', 'finished'
+	gameData:
+	{
+		players:
+		[
+			{
+				id: 'player1',
+				name: 'Player 1',
+				position:
+				{
+					x: 0,
+					y: 0
+				}
+			},
+			{
+				id: 'player2',
+				name: 'Player 2',
+				position:
+				{
+					x: 0,
+					y: 0
+				}
+			}
+		],
+		ball:
+		{
+			position:
+			{
+				x: 0,
+				y: 0
+			},
+			radius: 10,
+			speed: 5
+		},
+		score: { player1: 0, player2: 0 },
+	}
+}
+
+const tickRate = 30; // 30 FPS
+const tickInterval = 1000 / tickRate; // ~33ms
+
+setInterval(() =>
+{
+	for (const client of clients)
+	{
+		client.send(JSON.stringify({
+			type: 'gameState',
+			payload: exampleGameState
+		}));
+	}
+}, tickInterval);
+
+setInterval(() =>
+{
+}, 5000);
+
 start();
+
+//

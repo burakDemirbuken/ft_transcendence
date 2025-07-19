@@ -5,14 +5,14 @@ class NetworkManager
 	{
 		this.socket = null;
 		this.isConnected = false;
-		this.serverUrl = 'ws://localhost:3000';
+		this.serverUrl = 'ws://localhost:3000/ws';
 		this.callbacks = new Map();
 	}
 
-	connect(url = this.serverUrl)
+	connect()
 	{
-		this.socket = new WebSocket(url);
-
+		this.socket = new WebSocket(this.serverUrl);
+		console.log('Connecting to server:', this.serverUrl);
 		this.socket.onopen =
 			() =>
 			{
@@ -23,6 +23,7 @@ class NetworkManager
 		this.socket.onmessage =
 			(event) =>
 			{
+				console.log('Message received from server:', event.data);
 				const data = JSON.parse(event.data);
 				this.handleMessage(data);
 			};

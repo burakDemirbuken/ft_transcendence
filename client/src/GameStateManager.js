@@ -49,7 +49,7 @@ const examplGameState:
 */
 
 // TODOO: veriler düzenlenecek, oyun durumu ve oyun verileri ayrı olacak
-class GameStateManager
+export class GameStateManager
 {
 	constructor()
 	{
