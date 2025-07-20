@@ -23,7 +23,6 @@ class NetworkManager
 		this.socket.onmessage =
 			(event) =>
 			{
-				console.log('Message received from server:', event.data);
 				const data = JSON.parse(event.data);
 				this.handleMessage(data);
 			};

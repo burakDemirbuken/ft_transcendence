@@ -48,14 +48,64 @@ const examplGameState:
 }
 */
 
-// TODOO: veriler düzenlenecek, oyun durumu ve oyun verileri ayrı olacak
+/*
+
+const exampleGameConfig = {
+	type: "config",
+
+	payload:
+	{
+		gameMode: "multiple", // "local", "online", "tournament", "ai"
+
+		arcade:
+		{
+			position:
+			{
+				x: 0,
+				y: 0,
+				z: 0
+			},
+			type: "classic", // "classic", "modern", "pong1971"
+			machine:
+			{
+				path: "../models/arcade/classic/",
+				model: "arcade.obj",
+				colors:
+				{
+					body: "#FF0000",
+					sides: "#00FF00",
+					joystick: "#0000FF",
+					buttons: "#FFFF00"
+				}
+			}
+		},
+		gameRender:
+		{
+			colors:
+			{
+				background: "#000000",
+				paddle: "#FFFFFF",
+				ball: "#FFFFFF",
+				text: "#FFFFFF",
+				accent: "#00FF00"
+			},
+			paddleSize:
+			{
+				width: 10,
+			}
+		},
+	}
+};
+
+
+*/
+
+
 export class GameStateManager
 {
 	constructor()
 	{
-		this.gameData = null;
-		this.gameMode = null;
-		this.currentState = 'waiting'; // 'waiting', 'playing', 'finished', 'countDown', 'paused'
+		this.gameState = null;
 		this.callbacks = new Map();
 	}
 

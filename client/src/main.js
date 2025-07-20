@@ -43,8 +43,14 @@ const exampleGameConfig = {
 			},
 			paddleSize:
 			{
-				width: 10,
+				width: 8,
+				height: 45,
+			},
+			ball:
+			{
+				radius: 6
 			}
+
 		},
 	}
 };
@@ -53,7 +59,7 @@ function startGame()
 {
 	client.initialize(exampleGameConfig.payload);
 	client.startGame();
-	document.getElementById("startButton").style.display = "none"; // Hide the button after starting the game
+	document.getElementById("startButton").style.display = "false"; // Hide the button after starting the game
 }
 
 // ES6 modüllerinde global fonksiyon yapmak için window objesine ekliyoruz

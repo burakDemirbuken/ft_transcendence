@@ -48,10 +48,6 @@ const exampleGameConfig =
 	}
 };
 */
-// TODOO: Veri tabanına gameconfig ekle. Özelleştirme ayarları için.
-// TODOO: gameConfig özelleştirme ve oyun içi ayarlar şıu an birleşik onları ayır.
-
-// TODOO: serverdan gelen bilgiyi GameStatede tut ve renderda kullan. Ayrıca hem serverda hemde clientte topun gidişini hesapla. Fakat öncelik Serverda.
 
 import GameCore from './GameCore.js';
 import NetworkManager from './NetworkManager.js';
@@ -65,8 +61,8 @@ class Client
 		this.canvas = document.getElementById(canvasId);
 		this.gameCore = new GameCore();
 		this.networkManager = new NetworkManager();
-		this.gameStateManager = new GameStateManager();
 		this.renderer = new GameRenderer(this.gameCore);
+		this.gameState = null;
 		/*
 		// Game modes
 		this.gameModes = {
@@ -90,29 +86,21 @@ class Client
 			throw new Error('Game render configuration is missing');
 		this.renderer.initialize(gameConfig.gameRender);
 		this.setupEventListeners();
-		this.gameStateManager.setState('ready');
 		this.networkManager.connect();
 
 	}
 
 	setupEventListeners()
 	{
-		this.networkManager.on("config",
-			(data) =>
-			{
-				console.log('Received game configuration:', data);
-				this.initialize(data.payload);
-			});
 		this.networkManager.on("stateChange",
 			(data) =>
 			{
-				this.handleStateChange(data.payload);
+				this.render(data.gameData, this.gameCore.getMachine("main"));
 			});
 		this.networkManager.on("connected",
 			() =>
 			{
 				console.log('Sunucuya bağlandı');
-				this.gameStateManager.setState('ready');
 			});
 	}
 
@@ -158,24 +146,6 @@ class Client
 			if (mode === 'multiDevice' && options.playerId)
 				this.currentGameMode.setPlayerId(options.playerId);
 
-			this.gameStateManager.setState('waiting');
-		}
-	}
-
-	// API endpoint'i için public method
-	async setGameModeFromAPI(endpoint)
-	{
-		try
-		{
-			const response = await fetch(endpoint);
-			const data = await response.json();
-
-			if (data.gameMode)
-				this.setGameMode(data.gameMode, data.options);
-		}
-		catch (error)
-		{
-			console.error('Oyun modu alınamadı:', error);
 		}
 	}
 
@@ -185,11 +155,21 @@ class Client
 		this.gameLoop();
 	}
 
+	render(data, machine)
+	{
+		if (!this.isRunning)
+			return;
+		this.renderer.renderGame(data, machine);
+		if (machine && typeof machine.updatePreview === 'function')
+			machine.updatePreview();
+	}
+
+
 	gameLoop()
 	{
 		if (!this.isRunning)
 			return;
-		this.renderer.renderGame(this.gameStateManager.getGameData(), mainMachine);
+		this.render(this.gameState, this.gameCore.getMachine("main"));
 		requestAnimationFrame(() => this.gameLoop());
 	}
 

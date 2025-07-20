@@ -1,5 +1,3 @@
-// TODOO: implement arcade machine settings
-// Example arcade machine settings object
 /*
 const exampleArcadeSettings =
 {

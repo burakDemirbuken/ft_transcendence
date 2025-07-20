@@ -13,7 +13,8 @@ const exampleGameState =
 				{
 					x: 0,
 					y: 0
-				}
+				},
+				direction: "up", // "up", "down", "stop"
 			},
 			{
 				id: 'player2',
@@ -22,7 +23,8 @@ const exampleGameState =
 				{
 					x: 0,
 					y: 0
-				}
+				},
+				direction: "up", // "up", "down", "stop"
 			}
 		],
 		ball:
@@ -31,6 +33,11 @@ const exampleGameState =
 			{
 				x: 0,
 				y: 0
+			},
+			direction:
+			{
+				x: 1,
+				y: 1
 			},
 			radius: 10,
 			speed: 5
@@ -98,14 +105,12 @@ class GameRenderer
 		const ctx = machine.getScreenContext();
 		this.clearScreen(ctx);
 
-		if (gameData.players)
-		{
-			gameData.players.forEach(
-				(player) =>
-				{
-					this.renderPaddle(ctx, player.position);
-				});
-		}
+
+		gameData.players.forEach(
+			(player) =>
+			{
+				this.renderPaddle(ctx, player.position);
+			});
 		if (gameData.ball)
 			this.renderBall(ctx, gameData.ball.position);
 		if (gameData.score)
@@ -114,8 +119,6 @@ class GameRenderer
 		this.renderCenterLine(ctx);
 
 		machine.updateScreen();
-		if (machine && typeof machine.updatePreview === 'function')
-			machine.updatePreview();
 	}
 
 	renderSingleGame(gameData)
