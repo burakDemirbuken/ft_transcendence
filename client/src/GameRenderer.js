@@ -67,13 +67,15 @@ const exampleGameRenderConfig =
 	}
 };
 */
+import { SCREEN_SIZE } from './constants.js';
 
 class GameRenderer
 {
 	constructor(gameCore)
 	{
 		this.gameCore = gameCore;
-		this.screenSize = { width: 512, height: 512 };
+		this.screenSize = SCREEN_SIZE;
+		console.log(`GameRenderer initialized with screen size: ${this.screenSize.width}x${this.screenSize.height}`);
 		this.paddleSize = null;
 		this.ballSize = null;
 		this.colors = null;
@@ -99,18 +101,23 @@ class GameRenderer
 
 	renderGame(gameData, machine)
 	{
-		if (!machine)
+		if (!machine || !gameData)
+		{
+			this.renderWaitingScreen('Waiting for game data...', machine);
 			return;
+		}
 
 		const ctx = machine.getScreenContext();
 		this.clearScreen(ctx);
 
-
-		gameData.players.forEach(
-			(player) =>
-			{
-				this.renderPaddle(ctx, player.position);
-			});
+		if (gameData.players)
+		{
+			gameData.players.forEach(
+				(player) =>
+				{
+					this.renderPaddle(ctx, player.position);
+				});
+		}
 		if (gameData.ball)
 			this.renderBall(ctx, gameData.ball.position);
 		if (gameData.score)

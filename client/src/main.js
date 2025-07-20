@@ -55,7 +55,7 @@ const exampleGameConfig = {
 	}
 };
 
-function startGame()
+function gameStart()
 {
 	client.initialize(exampleGameConfig.payload);
 	client.startGame();
@@ -63,4 +63,4 @@ function startGame()
 }
 
 // ES6 modüllerinde global fonksiyon yapmak için window objesine ekliyoruz
-window.startGame = startGame;
+window.gameStart = gameStart;

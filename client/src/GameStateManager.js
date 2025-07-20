@@ -106,6 +106,8 @@ export class GameStateManager
 	constructor()
 	{
 		this.gameState = null;
+		this.gameMode = null;
+		this.currentState = 'waiting'; // 'waiting', 'playing', 'finished'
 		this.callbacks = new Map();
 	}
 
@@ -114,17 +116,6 @@ export class GameStateManager
 		const oldState = this.currentState;
 		this.currentState = newState;
 		this.triggerCallback('stateChanged', { oldState, newState });
-	}
-
-	updateGameData(data)
-	{
-		this.gameData = data;
-		this.triggerCallback('gameDataUpdated', data);
-	}
-
-	getGameData()
-	{
-		return this.gameData;
 	}
 
 	on(event, callback)

@@ -63,6 +63,9 @@ class Client
 		this.networkManager = new NetworkManager();
 		this.renderer = new GameRenderer(this.gameCore);
 		this.gameState = null;
+
+
+		// ? this.gameStateManager = new GameStateManager();
 		/*
 		// Game modes
 		this.gameModes = {
@@ -71,8 +74,6 @@ class Client
 			tournament: new TournamentMode(this.networkManager, this.gameStateManager)
 		};
 		*/
-
-		this.currentGameMode = null;
 		this.isRunning = false;
 	}
 
@@ -96,6 +97,7 @@ class Client
 			(data) =>
 			{
 				this.render(data.gameData, this.gameCore.getMachine("main"));
+				this.gameState = data.gameData;
 			});
 		this.networkManager.on("connected",
 			() =>
@@ -130,25 +132,6 @@ class Client
 		this.networkManager.connect(url);
 	}
 
-	// Endpoint'ten gelen oyun modu bilgisi
-	setGameMode(mode, options = {})
-	{
-		if (this.currentGameMode)
-			this.currentGameMode.deactivate();
-
-		this.currentGameMode = this.gameModes[mode];
-
-		if (this.currentGameMode)
-		{
-			this.currentGameMode.activate();
-
-			// Çoklu cihaz modunda oyuncu ID'si gerekebilir
-			if (mode === 'multiDevice' && options.playerId)
-				this.currentGameMode.setPlayerId(options.playerId);
-
-		}
-	}
-
 	startGame()
 	{
 		this.isRunning = true;
@@ -163,7 +146,6 @@ class Client
 		if (machine && typeof machine.updatePreview === 'function')
 			machine.updatePreview();
 	}
-
 
 	gameLoop()
 	{

@@ -25,6 +25,8 @@ const exampleArcadeSettings =
 };
 */
 
+import { SCREEN_SIZE } from "./constants.js";
+
 class ArcadeMachine
 {
 	constructor(id, scene)
@@ -37,7 +39,8 @@ class ArcadeMachine
         this.gameScreen = null;
         this.screenMaterial = null;
         this.isActive = false;
-        this.screenSize = { width: 512, height: 512 };
+        this.screenSize = SCREEN_SIZE;
+		console.log(`ArcadeMachine initialized with screen size: ${this.screenSize.width}x${this.screenSize.height}`);
     }
 
     async load(arcadeSettings)
