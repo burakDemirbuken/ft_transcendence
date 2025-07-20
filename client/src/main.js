@@ -59,7 +59,7 @@ function startGame()
 {
 	client.initialize(exampleGameConfig.payload);
 	client.startGame();
-	document.getElementById("startButton").style.display = "false"; // Hide the button after starting the game
+	document.getElementById("startButton").style.display = "none"; // Hide the button after starting the game
 }
 
 // ES6 modüllerinde global fonksiyon yapmak için window objesine ekliyoruz
