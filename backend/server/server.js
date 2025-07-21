@@ -7,6 +7,10 @@ const port = 3000;
 
 app.use(express.json()); // Body parse middleware
 
+// BETUL: Serve static files from specified directories
+app.use(express.static(path.join(__dirname, 'frontend'))); // For CSS/JS
+app.use(express.static(path.join(__dirname, 'frontend/dist'))); // For compiled TS
+
 // 🔍 Tüm gelen istekleri logla
 app.use((req, res, next) => {
   console.log(`📥 Gelen istek: ${req.method} ${req.url}`);

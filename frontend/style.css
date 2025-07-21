@@ -3,3 +3,14 @@
 	padding: 0;
 	box-sizing: border-box;
 }
+
+body {
+	min-height: 100vh;
+	max-height: 100dvh;
+	background-color: #000;
+	color: red;
+
+	#content {
+		color: blue;
+	}
+}

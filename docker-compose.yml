@@ -7,16 +7,5 @@ services:
       - "3000:3000"
     volumes:
       - ./backend/server/data:/app/data
-      - frontend-volume:/app/frontend
+      - ./frontend:/app/frontend
     restart: unless-stopped
-
-# BETUL: Need bind mount to see frontend changes immediately!
-# BETUL: Frontend değişikliklerini anında görmek için bind mount gerekli!
-volumes:
-  frontend-volume:
-    name: "frontend-volume"
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: "./frontend"
