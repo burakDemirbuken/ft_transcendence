@@ -7,6 +7,7 @@ WORKDIR /home/bkorkut/trancedere
 COPY . .
 
 RUN npm install fastify @fastify/static
+RUN npm install typescript @types/node --save-dev
 RUN npm install -g nodemon
 
 CMD [ "nodemon", "server.js" ]
