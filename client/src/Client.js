@@ -53,6 +53,7 @@ import GameCore from './GameCore.js';
 import NetworkManager from './NetworkManager.js';
 import GameStateManager from './GameStateManager.js';
 import GameRenderer from './GameRenderer.js';
+import InputManager from './InputManager.js';
 
 class Client
 {
@@ -62,6 +63,7 @@ class Client
 		this.gameCore = new GameCore();
 		this.networkManager = new NetworkManager();
 		this.renderer = new GameRenderer(this.gameCore);
+		this.inputManager = new InputManager();
 		this.gameState = null;
 
 
@@ -86,9 +88,8 @@ class Client
 		if (!gameConfig.gameRender)
 			throw new Error('Game render configuration is missing');
 		this.renderer.initialize(gameConfig.gameRender);
-		this.setupEventListeners();
 		this.networkManager.connect();
-
+		this.setupEventListeners();
 	}
 
 	setupEventListeners()
@@ -98,12 +99,34 @@ class Client
 			{
 				this.render(data.gameData, this.gameCore.getMachine("main"));
 				this.gameState = data.gameData;
-			});
+			}
+		);
 		this.networkManager.on("connected",
 			() =>
 			{
 				console.log('Sunucuya bağlandı');
-			});
+			}
+		);
+		this.inputManager.onKey("w",
+			() =>
+			{
+				this.networkManager.send({ type: "input", payload: {direction: 'up', action: "down"} });
+			},
+			() =>
+			{
+				this.networkManager.send({ type: "input", payload: {direction: 'up', action: "up"} });
+			}
+		);
+		this.inputManager.onKey("s",
+			() =>
+			{
+				this.networkManager.send({ type: "input", payload: {direction: 'down', action: "down"} });
+			},
+			() =>
+			{
+				this.networkManager.send({ type: "input", payload: {direction: 'down', action: "up"} });
+			}
+		);
 	}
 
 	handleStateChange(data)

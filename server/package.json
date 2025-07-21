@@ -2,7 +2,8 @@
   "name": "deneme",
   "version": "1.0.0",
   "main": "server.js",
-  "scripts": {
+  "scripts":
+  {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
@@ -10,11 +11,13 @@
   "author": "",
   "license": "ISC",
   "description": "",
-  "dependencies": {
+  "dependencies":
+  {
     "fastify": "^5.4.0",
     "@fastify/websocket": "^7.0.0"
   },
-  "devDependencies": {
+  "devDependencies":
+  {
     "nodemon": "^3.1.0"
   }
 }
