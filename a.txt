@@ -1,0 +1,6 @@
+
+curl -X GET http://localhost:3000/api/users/profile \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwidXNlcm5hbWUiOiJ0ZXN0dXNlciIsImlhdCI6MTc1Mjg0NDUyNH0.xAaie7rnPSZ_JUywtZXmR6sex08VySw8MzeKLDcMoZ8"
+
+
+  localhost:3001

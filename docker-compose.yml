@@ -1,4 +1,3 @@
-
 services:
   node:
     container_name: node_service
@@ -7,5 +6,6 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./backend/server/data:/app/data
+      - ./backend/server:/app        # Kodları canlı bağla
+      - /app/node_modules            # node_modules containerda kalsın
     restart: unless-stopped

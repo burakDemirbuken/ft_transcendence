@@ -1,10 +1,9 @@
-const express = require('express');
-const router = express.Router();
-const userController = require('../controllers/userController');
-const auth = require('../middleware/authMiddleware');
+import { register, loginUser, getProfile,verify2FA } from '../controllers/userController.js';
+import { verifyJWT } from '../middleware/authMiddleware.js';
 
-router.post('/register', userController.register);
-router.post('/login', userController.login);
-router.get('/', auth, userController.getUsers); // GET /api/users
-
-module.exports = router;
+export default async function (fastify) {
+  fastify.post('/register', register);
+  fastify.get('/profile', { preHandler: verifyJWT }, getProfile);
+  fastify.post('/login', loginUser);
+  fastify.post('/verify-2fa', verify2FA);
+}

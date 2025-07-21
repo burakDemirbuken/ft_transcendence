@@ -1,34 +1,39 @@
-const db = require('../config/db');
+import db from '../config/db.js';
 
-const createUserTable = () => {
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL UNIQUE,
-    email TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`);
-};
-
-
-const createUser = (username, email, hashedPassword, callback) => {
-  const sql = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
-  db.run(sql, [username, email, hashedPassword], function (err) {
-    callback(err, this?.lastID);
+export const createUser = (user) =>
+  new Promise((resolve, reject) => {
+    const { username, email, password } = user;
+    const sql = 'INSERT INTO users (username, email, password) VALUES (?, ?, ?)';
+    db.run(sql, [username, email, password], function (err) {
+      if (err) reject(err);
+      else resolve(this.lastID);
+    });
   });
-};
 
-const getAllUsers = (callback) => {
-  db.all('SELECT id, username, email, created_at FROM users', [], callback);
-};
+export const findUserByUsername = (username) =>
+  new Promise((resolve, reject) => {
+    const sql = 'SELECT * FROM users WHERE username = ?';
+    db.get(sql, [username], (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
 
-const getUserByUsername = (username, callback) => {
-  db.get('SELECT * FROM users WHERE username = ?', [username], callback);
-};
+export const findUserById = (id) =>
+  new Promise((resolve, reject) => {
+    const sql = 'SELECT * FROM users WHERE id = ?';
+    db.get(sql, [id], (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+  });
 
-module.exports = {
-  createUserTable,
-  createUser,
-  getAllUsers,
-  getUserByUsername
-};
+export const findUserByEmail = (email) =>
+  new Promise((resolve, reject) => {
+    const sql = 'SELECT * FROM users WHERE email = ?';
+    db.get(sql, [email], (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
+});
+

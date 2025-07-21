@@ -1,19 +1,28 @@
-const express = require('express');
-const userRoutes = require('./routes/userRoutes');
+import Fastify from 'fastify';
+import userRoutes from './routes/userRoutes.js';
+import fastifyJwt from '@fastify/jwt';
 
-const app = express();
-const port = 3000;
+const fastify = Fastify({ logger: true });
 
-app.use(express.json()); // Body parse middleware
-
-// 🔍 Tüm gelen istekleri logla
-app.use((req, res, next) => {
-  console.log(`📥 Gelen istek: ${req.method} ${req.url}`);
-  next();
+fastify.register(fastifyJwt, {
+  secret: process.env.JWT_SECRET || 'supersecretkey',
 });
 
-app.use("/api/users", userRoutes);
+fastify.decorate('authenticate', async function (request, reply) {
+  try {
+    await request.jwtVerify();
+  } catch (err) {
+    reply.send(err);
+  }
+});
 
-app.listen(port, () => {
-  console.log(`🚀 API çalışıyor → http://localhost:${port}`);
+fastify.register(userRoutes, { prefix: '/api/users' });
+
+fastify.listen({ port: 3000, host: '0.0.0.0' }, (err, address) => {
+  if (err) {
+    console.log("error");
+    fastify.log.error(err);
+    process.exit(1);
+  }
+  console.log(`🚀 API çalışıyor: ${address}`);
 });
