@@ -67,7 +67,7 @@ const exampleGameRenderConfig =
 	}
 };
 */
-import { SCREEN_SIZE } from './constants.js';
+import { SCREEN_SIZE } from '../utils/constants.js';
 
 class GameRenderer
 {

@@ -25,7 +25,7 @@ const exampleArcadeSettings =
 };
 */
 
-import { SCREEN_SIZE } from "./constants.js";
+import { SCREEN_SIZE } from "../utils/constants.js";
 
 class ArcadeMachine
 {
@@ -47,7 +47,7 @@ class ArcadeMachine
 	{
         try
 		{
-			const result = await BABYLON.SceneLoader.ImportMeshAsync("", "../models/arcade/", "arcade.obj", this.scene);
+			const result = await BABYLON.SceneLoader.ImportMeshAsync("", "./src/assets/models/arcade/", "arcade.obj", this.scene);
 			this.meshs = result.meshes;
 			this.position = arcadeSettings.position || { x: 0, y: 0, z: 0 };
 

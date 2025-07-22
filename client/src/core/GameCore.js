@@ -1,4 +1,4 @@
-import ArcadeMachine from './ArcadeMachine.js';
+import ArcadeMachine from '../arcade/ArcadeMachine.js';
 
 class GameCore
 {

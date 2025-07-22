@@ -49,11 +49,11 @@ const exampleGameConfig =
 };
 */
 
-import GameCore from './GameCore.js';
-import NetworkManager from './NetworkManager.js';
+import GameCore from './core/GameCore.js';
+import NetworkManager from './network/NetworkManager.js';
 import GameStateManager from './GameStateManager.js';
-import GameRenderer from './GameRenderer.js';
-import InputManager from './InputManager.js';
+import GameRenderer from './rendering/GameRenderer.js';
+import InputManager from './input/InputManager.js';
 
 class Client
 {
@@ -110,21 +110,21 @@ class Client
 		this.inputManager.onKey("w",
 			() =>
 			{
-				this.networkManager.send({ type: "input", payload: {direction: 'up', action: "down"} });
+				this.networkManager.send({ type: "move", payload: {direction: 'up', action: "down"} });
 			},
 			() =>
 			{
-				this.networkManager.send({ type: "input", payload: {direction: 'up', action: "up"} });
+				this.networkManager.send({ type: "move", payload: {direction: 'up', action: "up"} });
 			}
 		);
 		this.inputManager.onKey("s",
 			() =>
 			{
-				this.networkManager.send({ type: "input", payload: {direction: 'down', action: "down"} });
+				this.networkManager.send({ type: "move", payload: {direction: 'down', action: "down"} });
 			},
 			() =>
 			{
-				this.networkManager.send({ type: "input", payload: {direction: 'down', action: "up"} });
+				this.networkManager.send({ type: "move", payload: {direction: 'down', action: "up"} });
 			}
 		);
 	}
