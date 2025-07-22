@@ -1,17 +1,27 @@
 import nodemailer from 'nodemailer';
 
 export const sendEmail = async (to, subject, text) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: "forty2transcendence@gmail.com", // ← boş değil mi kontrol et
-      pass: "gfyk pfqi gvpm ahtx", // ← uygulama şifresi olmalı
-    },
-  });
-  await transporter.sendMail({
-    from: "forty2transcendence@gmail.com",
-    to: to,
-    subject: subject,
-    text: text,
-  });
+  try {
+    const transporter = nodemailer.createTransport({
+      service: process.env.EMAIL_SERVICE || 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER || "forty2transcendence@gmail.com",
+        pass: process.env.EMAIL_PASS || "gfyk pfqi gvpm ahtx"
+      }
+    });
+
+    const mailOptions = {
+      from: `"Transcendence" <${process.env.EMAIL_USER || "forty2transcendence@gmail.com"}>`,
+      to: to,
+      subject: subject,
+      text: text
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`📩 Mail gönderildi: ${info.response}`);
+    return info;
+  } catch (error) {
+    console.error('❌ Mail gönderilemedi:', error.message);
+    throw new Error('Mail gönderilemedi');
+  }
 };
