@@ -16,3 +16,6 @@ TODOO:
 - [ ] Testing - Unit ve integration testleri
 - [ ] Docker - Containerization
 - [ ] Deployment - Production hazırlığı
+- [ ] mactchmaking-service - Oyuncu eşleştirme servisi
+- [ ] game-service - Oyun yönetim servisi
+- [ ] redis araştır.
