@@ -1,0 +1,27 @@
+{
+  "ball": {
+    "x": 600,
+    "y": 250,
+    "speed_x": 5,
+    "speed_y": -3
+  },
+  "paddle": {
+    "ai_y": 200,
+    "ai_speed_y": 0,
+    "opponent_y": 300,
+    "length": 80
+  },
+  "game_area": {
+    "width": 800,
+    "height": 600
+  },
+  "score": {
+    "ai_score": 2,
+    "human_score": 3,
+    "ai_scored": false,
+    "human_scored": true
+  },
+  "ai_config": {
+    "difficulty": "hard"
+  }
+}
