@@ -1,0 +1,7 @@
+[ ] websocket üzerinden soketin için açılan fd'ye veriler yazılacak
+[ ] bu veriler içinden veri oku
+[ ] ardından üzerine yazarak dönüş yap
+[ ] action için zaman tutma işlemini yap
+[ ] JSON'ı string'e çevirip veriyi yolluyor
+[ ] 
+[ ] 
