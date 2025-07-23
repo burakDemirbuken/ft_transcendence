@@ -1,7 +1,7 @@
 import pygame
 import sys
 import random
-from level_increase_Added.ai_player import PingPongAI
+from ai_player import PingPongAI
 
 # Pygame'i başlat
 pygame.init()
