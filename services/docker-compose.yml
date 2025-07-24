@@ -1,0 +1,79 @@
+secrets:
+  nginx_conf:
+    file: ../secrets/nginx.txt
+
+volumes:
+  nginx_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /sgoinfre/ulyildiz/transcendencev1/nginx_data
+      o: bind
+
+networks:
+  transcendency:
+    driver: bridge
+
+
+services:
+  authentication:
+    container_name: authentication
+    build: ./authentication
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 3001
+
+
+  gateway:
+    container_name: gateway
+    build: ./gateway
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 3000
+
+  #gameserver:
+  #  container_name: gameserver
+  #  build: ./gameserver
+  #  restart: on-failure
+  #  networks:
+  #    - transcendency
+  #  expose:
+  #    - 3000
+  
+  # sqlite:
+  #   container_name: sqlite
+  #   build: ./sqlite
+  #   restart: on-failure
+  #   networks:
+  #     - transcendency
+
+  # user:
+  #   container_name: user
+  #   build: ./user
+  #   restart: on-failure
+  #   networks:
+  #     - transcendency
+
+  # livechat:
+  #   container_name: livechat
+  #   build: ./livechat
+  #   restart: on-failure
+  #   networks:
+  #     - transcendency
+
+  nginx:
+    container_name: nginx
+    build: ./nginx
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 9000
+    ports:
+      - "8080:8080"
+    secrets:
+      - nginx_conf
