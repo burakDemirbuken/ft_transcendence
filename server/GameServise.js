@@ -1,7 +1,0 @@
-class GammeServis
-{
-	constructor(players)
-	{
-
-	}
-}

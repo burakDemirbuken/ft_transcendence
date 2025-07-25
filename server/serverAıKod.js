@@ -395,24 +395,35 @@ class WebSocketManager {
         this.clients = new Map(); // ws -> playerId
     }
 
-    start() {
+    start()
+    {
         this.wss = new WebSocket.Server({ port: CONFIG.WS_PORT });
 
-        this.wss.on('connection', (ws) => {
-            console.log('New WebSocket connection');
+        this.wss.on('connection',
+            (ws) =>
+            {
+                console.log('New WebSocket connection');
 
-            ws.on('message', (data) => {
-                this.handleMessage(ws, data);
-            });
+                ws.on('message',
+                    (data) => {
+                        this.handleMessage(ws, data);
+                    }
+                );
 
-            ws.on('close', () => {
-                this.handleDisconnection(ws);
-            });
+                ws.on('close',
+                    () => {
+                        this.handleDisconnection(ws);
+                    }
+                );
 
-            ws.on('error', (error) => {
-                console.error('WebSocket error:', error);
-            });
-        });
+                ws.on('error',
+                    (error) =>
+                    {
+                        console.error('WebSocket error:', error);
+                    }
+                );
+            }
+        );
 
         console.log(`WebSocket server started on port ${CONFIG.WS_PORT}`);
     }
@@ -552,11 +563,6 @@ class APIServer {
             return { gameId, gameState };
         });
 
-        // Serve static files (if needed)
-        fastify.register(require('@fastify/static'), {
-            root: require('path').join(__dirname, '../client'),
-            prefix: '/static/'
-        });
     }
 
     async start() {
