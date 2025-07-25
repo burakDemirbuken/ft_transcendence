@@ -8,7 +8,7 @@ class PingPongAI:
         self.hits = 0
         self.misses = 0
 
-        # Zorluk seviyesi
+        # Zorluk sevixyesi
         self.difficulty = difficulty
         self.custom_settings = custom_settings
         self.setup_difficulty()
