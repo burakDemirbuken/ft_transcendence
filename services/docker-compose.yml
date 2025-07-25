@@ -7,8 +7,21 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /sgoinfre/ulyildiz/transcendencev1/nginx_data
+      device: /home/ysarac/Masaüstü/microservice/nginx_data
       o: bind
+  gateway_src:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/ysarac/Masaüstü/microservice/services/gateway/srcs
+      o: bind
+  database:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/ysarac/Masaüstü/microservice/services/databases/data
+      o: bind
+
 
 networks:
   transcendency:
@@ -34,6 +47,11 @@ services:
       - transcendency
     expose:
       - 3000
+    volumes:
+      - gateway_src:/app/srcs
+    environment:
+      - JWT_SECRET=my-super-secret
+      - CORS_ORIGIN=http://localhost:3000
 
   #gameserver:
   #  container_name: gameserver
@@ -44,12 +62,16 @@ services:
   #  expose:
   #    - 3000
   
-  # sqlite:
-  #   container_name: sqlite
-  #   build: ./sqlite
-  #   restart: on-failure
-  #   networks:
-  #     - transcendency
+  databases:
+    container_name: databases
+    build: ./databases
+    restart: on-failure
+    volumes:
+      - database:/app/data
+    networks:
+      - transcendency
+    expose:
+      - 3306
 
   # user:
   #   container_name: user
@@ -77,3 +99,5 @@ services:
       - "8080:8080"
     secrets:
       - nginx_conf
+    depends_on:
+      - gateway
