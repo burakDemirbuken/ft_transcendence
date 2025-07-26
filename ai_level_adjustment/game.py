@@ -2,8 +2,6 @@ import pygame
 import sys
 import random
 import time
-import threading
-import json
 from ai_player import PingPongAI
 
 # Pygame'i başlat
@@ -121,7 +119,7 @@ prev_right_score = 0
 clock = pygame.time.Clock()
 
 def send_data_to_ai(game_data):
-    """Verileri yapay zekaya gönder"""
+    """Verileri yapay zekaya gönder - Thread kullanmadan"""
     try:
         # Konsola yazdır (test için)
         print(f"[{time.strftime('%H:%M:%S')}] AI Verisi: Skor H:{game_data['scores']['human']} AI:{game_data['scores']['ai']}, "
@@ -129,17 +127,8 @@ def send_data_to_ai(game_data):
               f"AI Durum: {game_data['ai_stats']['difficulty']}, "
               f"Kazanma Oranı: {game_data['ai_stats']['win_rate']:.1f}%")
 
-        # Burada kendi AI API'nize gönderim yapabilirsiniz
-        # import requests
-        # response = requests.post('http://your-ai-api-endpoint.com/game-data',
-        #                         json=game_data, timeout=0.5)
-
-        # Dosyaya kaydetmek isterseniz:
-        # with open('game_data.json', 'a', encoding='utf-8') as f:
-        #     f.write(json.dumps(game_data) + '\n')
-
     except Exception as e:
-        print(f"Veri gönderme hatası: {e}")
+        print(e)
 
 def collect_game_data():
     """Oyun verilerini topla"""
@@ -463,7 +452,7 @@ def draw_game():
     screen.blit(right_text, (WIDTH * 3 // 4, 20))
 
     # Sabit hızlar bilgisi
-    speed_info = tiny_font.render(f"SABİT HIZLAR: Top={BALL_SPEED} | Çubuk={PADDLE_SPEED} | AI Veri Gönderimi: Aktif", True, GRAY)
+    speed_info = tiny_font.render(f"SABİT HIZLAR: Top={BALL_SPEED} | Çubuk={PADDLE_SPEED} | AI Veri: Her 1s", True, GRAY)
     screen.blit(speed_info, (10, 10))
 
     # Oyuncu etiketleri
@@ -589,7 +578,7 @@ def start_game():
     right_paddle.y = HEIGHT // 2 - PADDLE_HEIGHT // 2
 
     reset_ball()
-    print(f"[{time.strftime('%H:%M:%S')}] Oyun başlatıldı - AI veri gönderimi aktif")
+    print(f"[{time.strftime('%H:%M:%S')}] Oyun başlatıldı - AI veri gönderimi aktif (Thread'siz)")
 
 # Ana oyun döngüsü
 running = True
@@ -653,16 +642,12 @@ while running:
     elif game_state == PLAYING and ai_player:
         current_time = time.time()
 
-        # 1 saniyede bir AI'ya veri gönder
+        # 1 saniyede bir AI'ya veri gönder (Thread kullanmadan)
         if current_time - last_ai_update_time >= AI_UPDATE_INTERVAL:
             game_data = collect_game_data()
             if game_data:
-                # Thread kullanarak oyunu dondurmadan gönder
-                threading.Thread(
-                    target=send_data_to_ai,
-                    args=(game_data,),
-                    daemon=True
-                ).start()
+                # Direkt çağır (thread yok)
+                send_data_to_ai(game_data)
             last_ai_update_time = current_time
 
         keys = pygame.key.get_pressed()
@@ -709,7 +694,7 @@ while running:
         # Sol paddle (human)
         if ball_rect.colliderect(left_paddle) and ball_speed[0] < 0:
             ball_speed[0] = -ball_speed[0]
-                        # Top hızı her zaman sabit kalır
+            # Top hızı her zaman sabit kalır
             ball_speed[0] = BALL_SPEED  # Sabit hız
 
             # Y hızını paddle'ın hangi kısmına çarptığına göre ayarla

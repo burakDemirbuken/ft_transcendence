@@ -1,0 +1,7 @@
+- [x] websocket üzerinden soketin için açılan fd'ye veriler yazılacak
+- [x] bu veriler içinden veri oku
+- [x] ardından üzerine yazarak dönüş yap
+- [ ] action için zaman tutma işlemini yap -- İPTAL
+- [x] saniyede 1 kez gönderme işine bak
+- [x] JSON'ı string'e çevirip veriyi yolluyor
+- [x] çoklu client işleme
