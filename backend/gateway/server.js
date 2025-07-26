@@ -3,15 +3,10 @@ import cookie from '@fastify/cookie'
 import jwt from '@fastify/jwt'
 import cors from '@fastify/cors'
 import dotenv from 'dotenv'
-import proxy from '@fastify/http-proxy'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import authProxy from './routes/authProxy.js'
 
 // ENV yükle
 dotenv.config()
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 const fastify = Fastify({ logger: true })
 
@@ -23,24 +18,27 @@ await fastify.register(cors, {
 
 // Cookie ve JWT ayarları
 await fastify.register(cookie)
+
 await fastify.register(jwt, {
-  secret: process.env.JWT_SECRET,
+  secret: process.env.JWT_SECRET || 'default_secret',
   cookie: {
     cookieName: 'accessToken',
     signed: false,
-  },
-})
-
-// JWT Doğrulama middleware’i
-await fastify.register(import('./plugins/jwtVerify.js'))
-
-// Proxy yönlendirmeleri
-await fastify.register(import('./routes/index.js'))
-
-// Server'ı başlat
-fastify.listen({ port: 8080, host: '0.0.0.0' }, (err) => {
-  if (err) {
-    fastify.log.error(err)
-    process.exit(1)
   }
-})
+})    
+
+// Auth proxy'yi register et - /auth/* isteklerini authentication servisine yönlendir
+await fastify.register(authProxy);
+
+fastify.listen({ 
+  port: process.env.PORT || 3000, 
+  host: process.env.HOST || '0.0.0.0' 
+}, (err, address) => {
+  if (err) {
+    console.log("error");
+    fastify.log.error(err);
+    process.exit(1);
+  }
+  console.log(`🚀 Gateway çalışıyor: ${address}`);
+  console.log(`📡 Authentication istekleri için: ${address}/auth/*`);
+});

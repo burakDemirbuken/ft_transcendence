@@ -1,7 +1,3 @@
-secrets:
-  nginx_conf:
-    file: ../secrets/nginx.txt
-
 volumes:
   nginx_data:
     driver: local
@@ -13,15 +9,20 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/ysarac/Masaüstü/microservice/services/gateway/srcs
+      device: /home/ysarac/Masaüstü/microservice/backend/gateway
       o: bind
   database:
     driver: local
     driver_opts:
       type: none
-      device: /home/ysarac/Masaüstü/microservice/services/databases/data
+      device: /home/ysarac/Masaüstü/microservice/backend/databases/data
       o: bind
-
+  authentication_src:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/ysarac/Masaüstü/microservice/backend/authentication
+      o: bind
 
 networks:
   transcendency:
@@ -37,6 +38,9 @@ services:
       - transcendency
     expose:
       - 3001
+    volumes:
+      - authentication_src:/app
+      - /app/node_modules
 
 
   gateway:
@@ -48,11 +52,8 @@ services:
     expose:
       - 3000
     volumes:
-      - gateway_src:/app/srcs
-    environment:
-      - JWT_SECRET=my-super-secret
-      - CORS_ORIGIN=http://localhost:3000
-
+      - gateway_src:/app
+      - /app/node_modules
   #gameserver:
   #  container_name: gameserver
   #  build: ./gameserver
@@ -61,17 +62,6 @@ services:
   #    - transcendency
   #  expose:
   #    - 3000
-  
-  databases:
-    container_name: databases
-    build: ./databases
-    restart: on-failure
-    volumes:
-      - database:/app/data
-    networks:
-      - transcendency
-    expose:
-      - 3306
 
   # user:
   #   container_name: user
@@ -89,7 +79,7 @@ services:
 
   nginx:
     container_name: nginx
-    build: ./nginx
+    build: ../nginx
     restart: on-failure
     networks:
       - transcendency
@@ -97,7 +87,5 @@ services:
       - 9000
     ports:
       - "8080:8080"
-    secrets:
-      - nginx_conf
     depends_on:
       - gateway

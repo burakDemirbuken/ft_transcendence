@@ -1,5 +1,5 @@
 # Variables
-SRCS_FILE = ./services
+SRCS_FILE = ./backend
 COMPOSE_FILE = $(SRCS_FILE)/docker-compose.yml
 COMPOSE_CMD = docker-compose -f $(COMPOSE_FILE)
 
@@ -72,40 +72,15 @@ up:
 	@echo "$(GREEN)Starting all services...$(NC)"
 	@$(COMPOSE_CMD) up -d --build
 
-# Build and start specific service
-up-%:
-	@echo "$(GREEN)Starting service: $*$(NC)"
-	@$(COMPOSE_CMD) up -d --build $*
-
 # Stop containers
 down:
 	@echo "$(YELLOW)Stopping all services...$(NC)"
 	@$(COMPOSE_CMD) down
 
-# Stop specific service
-down-%:
-	@echo "$(YELLOW)Stopping service: $*$(NC)"
-	@$(COMPOSE_CMD) stop $*
-
 # Stop and remove containers
 stop:
 	@echo "$(YELLOW)Stopping and removing containers...$(NC)"
 	@$(COMPOSE_CMD) down --remove-orphans
-
-# Restart specific service
-restart-%:
-	@echo "$(BLUE)Restarting service: $*$(NC)"
-	@$(COMPOSE_CMD) restart $*
-
-# Build specific service
-build-%:
-	@echo "$(BLUE)Building service: $*$(NC)"
-	@$(COMPOSE_CMD) build $*
-
-# Rebuild specific service (no cache)
-rebuild-%:
-	@echo "$(BLUE)Rebuilding service: $* (no cache)$(NC)"
-	@$(COMPOSE_CMD) build --no-cache $*
 
 # Show container status
 status:
@@ -116,15 +91,31 @@ status:
 logs:
 	@$(COMPOSE_CMD) logs -f
 
-# Show logs for specific service
-logs-%:
-	@echo "$(GREEN)Showing logs for service: $*$(NC)"
-	@$(COMPOSE_CMD) logs -f $*
+log-nginx:
+	@echo "$(GREEN)Showing logs for nginx service$(NC)"
+	@$(COMPOSE_CMD) logs -f nginx
 
-# Execute shell in specific service
-shell-%:
-	@echo "$(GREEN)Entering shell for service: $*$(NC)"
-	@docker exec -it $* /bin/bash || docker exec -it $* /bin/sh
+log-authentication:
+	@echo "$(GREEN)Showing logs for authentication service$(NC)"
+	@$(COMPOSE_CMD) logs -f authentication
+
+log-gateway:
+	@echo "$(GREEN)Showing logs for gateway service$(NC)"
+	@$(COMPOSE_CMD) logs -f gateway
+
+shell-nginx:
+	@echo "$(GREEN)Entering shell for nginx service$(NC)"
+	@$(COMPOSE_CMD) exec -it nginx /bin/sh
+
+shell-authentication:
+	@echo "$(GREEN)Entering shell for authentication service$(NC)"
+	@$(COMPOSE_CMD) exec -it authentication /bin/sh
+
+shell-gateway:
+	@echo "$(GREEN)Entering shell for gateway service$(NC)"
+	@$(COMPOSE_CMD) exec -it gateway /bin/sh
+
+
 
 # Clean non-persistent data
 clean: stop
@@ -141,16 +132,6 @@ fclean: clean-volumes
 
 # Restart everything
 re: fclean all
-
-# Service-specific shortcuts
-authentication: up-authentication
-gateway: up-gateway
-databases: up-databases
-nginx: up-nginx
-gameserver: up-gameserver
-user: up-user
-livechat: up-livechat
-frontend: up-frontend
 
 # Development helpers - Quick access to individual services
 dev-authentication:

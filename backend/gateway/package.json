@@ -1,0 +1,17 @@
+{
+  "name": "gateway",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^9.0.0",
+    "@fastify/cors": "^9.0.0",
+    "@fastify/jwt": "^8.0.0",
+    "@fastify/http-proxy": "^9.0.0",
+    "dotenv": "^16.0.0",
+    "fastify": "^4.29.1",
+    "nodemon": "^3.1.10"
+  }
+}
