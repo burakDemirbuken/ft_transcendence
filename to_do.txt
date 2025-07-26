@@ -2,6 +2,6 @@
 [x] bu veriler içinden veri oku
 [x] ardından üzerine yazarak dönüş yap
 [ ] action için zaman tutma işlemini yap
+[ ] saniyede 1 kez gönderme işine bak
 [x] JSON'ı string'e çevirip veriyi yolluyor
-[ ] çoklu client işleme
-[ ]
+[x] çoklu client işleme
