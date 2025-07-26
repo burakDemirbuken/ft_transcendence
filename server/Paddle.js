@@ -8,14 +8,14 @@ const PADDLE_SPACE = 10; // Space from the edge of the canvas
 
 class Paddle extends Object
 {
-	constructor(playerId)
+	constructor(position)
 	{
-		if (playerId === 1)
+		if (position === "left")
 			var x = 0 + PADDLE_SPACE;
-		else if (playerId === 2)
+		else if (position === "right")
 			var x = 800 - PADDLE_WIDTH - PADDLE_SPACE; // Assuming canvas width is 800
 		else
-			throw new Error('Invalid player ID for Paddle');
+			throw new Error('Invalid position for Paddle');
 		super(x, CANVAS_HEIGHT / 2 - PADDLE_HEIGHT / 2, PADDLE_WIDTH, PADDLE_HEIGHT);
 		this.down = false;
 		this.up = false;
@@ -27,16 +27,6 @@ class Paddle extends Object
 			this.y += PADDLE_SPEED * deltaTime;
 		if (this.up && this.y - this.height >= 0)
 			this.y -= PADDLE_SPEED * deltaTime;
-	}
-
-	down(action)
-	{
-		this.down = action;
-	}
-
-	up(action)
-	{
-		this.up = action;
 	}
 
 	getState()

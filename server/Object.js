@@ -1,4 +1,4 @@
-class Obje
+class Object
 {
 	constructor(x, y, width, height)
 	{
@@ -25,6 +25,6 @@ class Obje
 	{
 		return { width: this.width, height: this.height };
 	}
-
-
 }
+
+export default Object;

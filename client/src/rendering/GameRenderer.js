@@ -46,11 +46,67 @@ const exampleGameState =
 	}
 }
 
+{
+	"type":"stateChange",
+	"payload":
+	{
+		"currentState":"running",
+		"gameData":
+		{
+			"status":"running",
+			"players":
+			[
+				{
+					"id":"OASCBT",
+					"name":"Tester422",
+					"score":0,
+					"position":
+					{
+						"x":10,
+						"y":250
+					}
+				},
+				{
+					"id":"ONX57I",
+					"name":"User989",
+					"score":0,
+					"position":
+					{
+						"x":780,
+						"y":250
+					}
+				}
+			],
+			"ball":
+			{
+				"position":
+				{
+					"x":-151581,
+					"y":529
+				},
+				"direction":
+				{
+					"x":-1,
+					"y":1
+				},
+				"radius":7,
+				"speed":3
+			},
+			"score":
+			{
+				"team1":0,
+				"team2":0
+			}
+		}
+	}
+}
+
 const exampleGameRenderConfig =
 {
 	colors:
 	{
 		background: '#000000',
+
 		paddle: '#FFFFFF',
 		ball: '#FFFFFF',
 		text: '#FFFFFF',

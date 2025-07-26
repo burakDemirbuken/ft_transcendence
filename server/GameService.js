@@ -1,37 +1,89 @@
-import GameEngine from './GameEngine.js';
+import GameManager from './GameManager.js';
+import WebSocketManager from './network/WebSocketManager.js';
+import Player from './Player.js';
+import Fastify from 'fastify';
+
+/*
+exampleWebSocketMessage=
+{
+	matchId: '12345',
+	id: 'user1',
+	name: 'Player 1',
+
+*/
 
 class GameService
 {
 	constructor()
 	{
-		this.gameEngine = new GameEngine();
-		this.webSocketManager = new WebSocketManager(this.gameEngine);
-		this.apiServer = new APIServer(this.gameEngine);
+		this.fastify = Fastify({ logger: false });
+		this.gameManager = new GameManager();
+		this.webSocketManager = new WebSocketManager(this.fastify);
+		this.Players = new Map(); // playerId -> Player instance
 	}
 
 	async start()
 	{
 		console.log('Starting Game Server...');
 
-		this.gameEngine.start();
 
-		this.webSocketManager.start();
+		this.webSocketManager.start(
+			(query) =>
+			{
+				const player = new Player(query.id, query.name);
+				this.Players.set(query.id, player);
+				console.log('New player connected:', player);
+				this.gameManager.addPlayerToGame('default-game', player);
+			},
+			(clientId, message) =>
+			{
+				this.handleWebSocketMessage(message, clientId);
+			},
+			(clientId) =>
+			{
+				console.log('WebSocket client disconnected:', clientId);
+				this.Players.delete(clientId);
+			}
+		);
+		this.gameManager.start(
+			(gameData, players) =>
+			{
+				players.forEach((player) =>
+				{
+					this.webSocketManager.sendToClient(player.id, {type: 'stateChange', payload: gameData});
+				});
+			}
+		);
+	}
 
-		await this.apiServer.start();
+	handleWebSocketMessage(message, clientId)
+	{
+		const player = this.Players.get(clientId);
+		if (!player)
+		{
+			console.warn('Player not found for clientId:', clientId);
+			return;
+		}
 
-		console.log('Game Server fully started!');
-		console.log(`HTTP API: http://localhost:${CONFIG.PORT}`);
-		console.log(`WebSocket: ws://localhost:${CONFIG.WS_PORT}`);
+		switch (message.type) {
+			case "move":
+				player.move(message.payload);
+				break;
+
+			default:
+				break;
+		}
 	}
 
 	async stop()
 	{
 		console.log('Stopping Game Server...');
 
-		this.gameEngine.stop();
+		this.gameManager.stop();
 		this.webSocketManager.stop();
-		await this.apiServer.stop();
 
 		console.log('Game Server stopped!');
 	}
 }
+
+export default GameService;

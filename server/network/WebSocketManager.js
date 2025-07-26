@@ -1,18 +1,6 @@
 import Fastify from 'fastify'
 import websocket from '@fastify/websocket'
 
-/*
-exampleMatchInfo=
-{
-	matchId: '12345',
-	user:
-	{
-		id: 'user1',
-		name: 'Player 1',
-	},
-
-*/
-
 class WebSocketManager
 {
 	constructor(fastify ,config = {port: 3000})
@@ -37,17 +25,32 @@ class WebSocketManager
 
 						const client = connection.socket;
 
-						const user = req.query.user;
-						this.clients.set(user.id, client);
+						const { id, name } = req.query;
+						if (!id)
+						{
+						    console.warn('⚠️ User bilgisi eksik, connection kapatılıyor');
+						    connection.socket.close(1008, 'User info required');
+						    return;
+						}
+						
+						if (this.clients.has(id)) {
+						    console.log('⚠️ User zaten bağlı, eski connection kapatılıyor');
+						    this.clients.get(id).close();
+						}
+
+						this.clients.set(id, client);
 						onClientConnect(req.query);
 
-						client.on('message', onMessage);
+						client.on('message', (message) => {
+							console.log(`📨 Client ${id} mesaj gönderdi:`, message.toString());
+							onMessage(id, message);
+						});
 
 						client.on('close',
 							() =>
 							{
-								this.clients.delete(user.id);
-								onClose(user.id);
+								this.clients.delete(id);
+								onClose(id);
 								console.log('🟡 Client disconnected');
 							}
 						);
@@ -56,9 +59,15 @@ class WebSocketManager
 							(error) =>
 							{
 								console.error('❌ WebSocket error:', error);
-								this.clients.delete(user.id);
+								this.clients.delete(id);
 							}
 						);
+
+						console.log('🟢 Yeni bağlantı:', {
+						    userId: id,
+						    userName: name,
+						    totalClients: this.clients.size + 1
+						});
 					}
 				);
 			}.bind(this)
@@ -141,3 +150,5 @@ class WebSocketManager
 	}
 
 }
+
+export default WebSocketManager;

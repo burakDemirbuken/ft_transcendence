@@ -11,13 +11,14 @@ class Ball extends Object
 	constructor()
 	{
 		super(CANVAS_HEIGHT / 2, CANVAS_WIDTH / 2, BALL_RADIUS * 2, BALL_RADIUS * 2);
+		this.radius = BALL_RADIUS; // Radius property'si ekle
 		this.speed = BALL_START_SPEED;
 		this.directionX = Math.random() < 0.5 ? -1 : 1;
 		this.directionY = Math.random() < 0.5 ? -1 : 1;
 		this.oldPosition = { x: this.x, y: this.y };
 	}
 
-	update(deltaTime, players)
+	update(deltaTime)
 	{
 		this.oldPosition = { x: this.x, y: this.y };
 		this.x += this.directionX * this.speed * deltaTime;
@@ -30,6 +31,24 @@ class Ball extends Object
 	{
 		if (this.y - this.radius < 0 || this.y + this.radius > CANVAS_HEIGHT)
 			this.directionY *= -1;
+	}
+
+	getState()
+	{
+		return {
+			position:
+			{
+				x: this.x,
+				y: this.y
+			},
+			direction:
+			{
+				x: this.directionX,
+				y: this.directionY
+			},
+			radius: this.radius,
+			speed: this.speed
+		};
 	}
 
 }
