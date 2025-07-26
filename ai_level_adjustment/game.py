@@ -1,6 +1,9 @@
 import pygame
 import sys
 import random
+import time
+import threading
+import json
 from ai_player import PingPongAI
 
 # Pygame'i başlat
@@ -50,6 +53,10 @@ PADDLE_SPEED = 8        # Çubuk hızı sabit
 BALL_RADIUS = 10        # Top boyutu sabit
 PADDLE_WIDTH = 10       # Çubuk genişliği sabit
 PADDLE_HEIGHT = 100     # Çubuk yüksekliği sabit
+
+# AI Veri Gönderimi için değişkenler
+last_ai_update_time = 0
+AI_UPDATE_INTERVAL = 1.0  # 1 saniye
 
 # Custom ayarlar (sadece AI yetenekleri)
 custom_settings = {
@@ -112,6 +119,77 @@ right_score = 0
 prev_left_score = 0
 prev_right_score = 0
 clock = pygame.time.Clock()
+
+def send_data_to_ai(game_data):
+    """Verileri yapay zekaya gönder"""
+    try:
+        # Konsola yazdır (test için)
+        print(f"[{time.strftime('%H:%M:%S')}] AI Verisi: Skor H:{game_data['scores']['human']} AI:{game_data['scores']['ai']}, "
+              f"Top: ({game_data['ball_position']['x']:.0f},{game_data['ball_position']['y']:.0f}), "
+              f"AI Durum: {game_data['ai_stats']['difficulty']}, "
+              f"Kazanma Oranı: {game_data['ai_stats']['win_rate']:.1f}%")
+
+        # Burada kendi AI API'nize gönderim yapabilirsiniz
+        # import requests
+        # response = requests.post('http://your-ai-api-endpoint.com/game-data',
+        #                         json=game_data, timeout=0.5)
+
+        # Dosyaya kaydetmek isterseniz:
+        # with open('game_data.json', 'a', encoding='utf-8') as f:
+        #     f.write(json.dumps(game_data) + '\n')
+
+    except Exception as e:
+        print(f"Veri gönderme hatası: {e}")
+
+def collect_game_data():
+    """Oyun verilerini topla"""
+    if not ai_player:
+        return None
+
+    stats = ai_player.get_stats()
+
+    game_data = {
+        'timestamp': time.time(),
+        'formatted_time': time.strftime('%Y-%m-%d %H:%M:%S'),
+        'ball_position': {'x': ball_pos[0], 'y': ball_pos[1]},
+        'ball_speed': {'x': ball_speed[0], 'y': ball_speed[1]},
+        'paddles': {
+            'human': {'y': left_paddle.y, 'center_y': left_paddle.centery},
+            'ai': {'y': right_paddle.y, 'center_y': right_paddle.centery}
+        },
+        'scores': {'human': left_score, 'ai': right_score},
+        'ai_stats': {
+            'difficulty': stats['difficulty'],
+            'games_played': stats['games'],
+            'wins': stats['wins'],
+            'win_rate': stats['win_rate'],
+            'target_win_rate': stats['target_win_rate'],
+            'hit_rate': stats['hit_rate'],
+            'hits': stats['hits'],
+            'misses': stats['misses'],
+            'consecutive_wins': stats['consecutive_wins'],
+            'is_frozen': stats['is_frozen'],
+            'target_locked': stats['target_locked'],
+            'should_lose_next': stats['should_lose_next'],
+            'freeze_distance': stats['freeze_distance'],
+            'rage_mode': stats.get('rage_mode', False),
+            'tired_mode': stats.get('tired_mode', False),
+            'super_focus': stats.get('super_focus', False),
+            'rage_counter': stats.get('rage_counter', 0),
+            'prediction_lines': stats.get('prediction_lines', False)
+        },
+        'game_constants': {
+            'ball_speed': BALL_SPEED,
+            'paddle_speed': PADDLE_SPEED,
+            'ball_radius': BALL_RADIUS,
+            'paddle_width': PADDLE_WIDTH,
+            'paddle_height': PADDLE_HEIGHT,
+            'screen_width': WIDTH,
+            'screen_height': HEIGHT
+        }
+    }
+
+    return game_data
 
 def draw_menu():
     """Ana menüyü çiz"""
@@ -385,7 +463,7 @@ def draw_game():
     screen.blit(right_text, (WIDTH * 3 // 4, 20))
 
     # Sabit hızlar bilgisi
-    speed_info = tiny_font.render(f"SABİT HIZLAR: Top={BALL_SPEED} | Çubuk={PADDLE_SPEED}", True, GRAY)
+    speed_info = tiny_font.render(f"SABİT HIZLAR: Top={BALL_SPEED} | Çubuk={PADDLE_SPEED} | AI Veri Gönderimi: Aktif", True, GRAY)
     screen.blit(speed_info, (10, 10))
 
     # Oyuncu etiketleri
@@ -491,9 +569,10 @@ def reset_ball():
 def start_game():
     """Oyunu başlat"""
     global game_state, ai_player, left_score, right_score, prev_left_score, prev_right_score
-    global left_paddle, right_paddle
+    global left_paddle, right_paddle, last_ai_update_time
 
     game_state = PLAYING
+    last_ai_update_time = time.time()  # AI veri gönderim zamanlayıcısını sıfırla
 
     # Custom mod seçiliyse özel ayarları kullan
     if selected_difficulty == 4:  # Custom
@@ -510,6 +589,7 @@ def start_game():
     right_paddle.y = HEIGHT // 2 - PADDLE_HEIGHT // 2
 
     reset_ball()
+    print(f"[{time.strftime('%H:%M:%S')}] Oyun başlatıldı - AI veri gönderimi aktif")
 
 # Ana oyun döngüsü
 running = True
@@ -571,6 +651,20 @@ while running:
         draw_custom_settings()
 
     elif game_state == PLAYING and ai_player:
+        current_time = time.time()
+
+        # 1 saniyede bir AI'ya veri gönder
+        if current_time - last_ai_update_time >= AI_UPDATE_INTERVAL:
+            game_data = collect_game_data()
+            if game_data:
+                # Thread kullanarak oyunu dondurmadan gönder
+                threading.Thread(
+                    target=send_data_to_ai,
+                    args=(game_data,),
+                    daemon=True
+                ).start()
+            last_ai_update_time = current_time
+
         keys = pygame.key.get_pressed()
 
         # Human player kontrolü - SABİT HIZ
@@ -654,4 +748,3 @@ while running:
 
 pygame.quit()
 sys.exit()
-
