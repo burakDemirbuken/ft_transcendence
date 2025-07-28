@@ -8,4 +8,6 @@ services:
     volumes:
       - ./backend/server/data:/app/data
       - ./frontend:/app/frontend
+      # - ./backend/server:/app        # Bunu yaparsam frontend'i app/frontend'e bağlayamam.
+      - /app/node_modules            # node_modules containerda kalsın
     restart: unless-stopped

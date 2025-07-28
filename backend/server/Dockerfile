@@ -3,6 +3,7 @@ FROM node:22-alpine
 WORKDIR /app
 
 COPY package.json ./
+
 RUN npm install
 
 COPY . .
@@ -15,9 +16,8 @@ ENTRYPOINT [ "./entrypoint.sh" ]
 
 # CMD ["npm", "start"]
 
-# BETUL: Front end üzerinde çalışırken, değişiklik halinde dosyaların güncellenmesi
-# için node otomatik olarak yeniden başlamalı (nodemon) ve .ts dosyalarının değişiklik halinde
-# tekrar derlenip .js dosyasına çevirilmesi için tsc -w (--watch) flagi ile çalışmalı.
+# CMD ["npm", "run", "devBack"]
 
-# Eski düzen için yorum satırları kaldırılıp ENTRYPOINT içerisindeki bazı satırlar yoruma alınmalı.
-
+# CMD komutları kullanıldığında entrypoint'te sadece şu ikisi açık kalmalı:
+# npm run build
+# exec "$@"

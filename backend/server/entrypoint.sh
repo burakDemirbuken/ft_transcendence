@@ -4,15 +4,12 @@
 npm run watch &
 
 # Run nodemon in foreground (so Docker tracks the process)
-npm run dev
+npm run devFront
 
 # This ensures SIGTERM gets propagated to both processes
 trap "kill 0" EXIT
 
-# For production only leave these open:
-
-# # Compile typescript once
-# # Needs to be here because the ts files are in the frontend bind mount.
+# For backend development or production, just leave these open:
 # npm run build
 
 # exec "$@"

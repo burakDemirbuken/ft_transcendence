@@ -1,31 +1,69 @@
-const express = require('express');
-const userRoutes = require('./routes/userRoutes');
-const path = require('path'); // BETUL: For path creation / Path oluşturmak için
+import 'dotenv/config';
+import Fastify from 'fastify';
+import userRoutes from './routes/userRoutes.js';
+import fastifyJwt from '@fastify/jwt';
+import fastifyCookie from '@fastify/cookie';
+import { setFastifyInstance, isAccessTokenBlacklisted } from './controllers/userController.js';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const app = express();
-const port = 3000;
+const fastify = Fastify({ logger: true });
 
-app.use(express.json()); // Body parse middleware
+fastify.decorate('authenticate', async function (request, reply) {
+  try {
+    // Access token'ı cookie'den veya header'dan al
+    let token = null;
 
-// BETUL: Serve static files from specified directories
-app.use(express.static(path.join(__dirname, 'frontend'))); // For CSS/JS
-app.use(express.static(path.join(__dirname, 'frontend/dist'))); // For compiled TS
+    // Önce cookie'den kontrol et
+    if (request.cookies.accessToken) {
+      token = request.cookies.accessToken;
+    }
+    // Cookie yoksa header'dan al
+    else if (request.headers.authorization && request.headers.authorization.startsWith('Bearer ')) {
+      token = request.headers.authorization.substring(7);
+    }
 
-// 🔍 Tüm gelen istekleri logla
-app.use((req, res, next) => {
-  console.log(`📥 Gelen istek: ${req.method} ${req.url}`);
-  next();
+    if (!token) {
+      return reply.code(401).send({ error: 'Access token bulunamadı' });
+    }
+
+    // JWT doğrula
+    const decoded = fastify.jwt.verify(token);
+    request.user = decoded;
+
+    // Access token'ın memory blacklist'te olup olmadığını kontrol et
+    if (isAccessTokenBlacklisted(token)) {
+      return reply.code(401).send({ error: 'Access token geçersiz (logout edilmiş)' });
+    }
+  } catch (err) {
+    reply.code(401).send({ error: 'Token geçersiz', detail: err.message });
+  }
 });
 
-// API routes
-app.use("/api/users", userRoutes);
+fastify.register(userRoutes, { prefix: '/api/users' });
 
-// BETUL: Serve index.html for all other routes (for SPA)
-// BETUL: Diğer tüm rout'lar için index.html servis et (SPA için)
-app.get('*', (req, reply) => {
-  reply.sendFile(path.join(__dirname, './frontend', 'index.html'));
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Serve static files
+fastify.register(fastifyStatic, {
+  root: path.join(__dirname, 'frontend'),
+  prefix: '/',
 });
 
-app.listen(port, () => {
-  console.log(`🚀 API çalışıyor → http://localhost:${port}`);
+// Serve index.html for all other routes (SPA fallback)
+fastify.setNotFoundHandler((request, reply) => {
+  reply.sendFile('index.html', path.join(__dirname, 'frontend'));
+});
+
+fastify.listen({
+  port: process.env.PORT || 3000,
+  host: process.env.HOST || '0.0.0.0'
+}, (err, address) => {
+  if (err) {
+    console.log("error");
+    fastify.log.error(err);
+    process.exit(1);
+  }
+  console.log(`🚀 API çalışıyor: ${address}`);
 });
