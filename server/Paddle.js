@@ -1,10 +1,11 @@
 import Object from './Object.js';
 
-const PADDLE_SPEED = 2;
+const PADDLE_SPEED = 1;
 const PADDLE_HEIGHT = 100;
 const PADDLE_WIDTH = 10;
 const CANVAS_HEIGHT = 600;
-const PADDLE_SPACE = 10; // Space from the edge of the canvas
+
+const PADDLE_SPACE = 15; // Space from the edge of the canvas
 
 class Paddle extends Object
 {
@@ -25,7 +26,7 @@ class Paddle extends Object
 	{
 		if (this.down && this.y + this.height <= CANVAS_HEIGHT)
 			this.y += PADDLE_SPEED * deltaTime;
-		if (this.up && this.y - this.height >= 0)
+		if (this.up && this.y >= 0)
 			this.y -= PADDLE_SPEED * deltaTime;
 	}
 

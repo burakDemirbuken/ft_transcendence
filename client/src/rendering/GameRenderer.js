@@ -1,3 +1,4 @@
+
 /*
 const exampleGameState =
 {
@@ -123,15 +124,15 @@ const exampleGameRenderConfig =
 	}
 };
 */
-import { SCREEN_SIZE } from '../utils/constants.js';
+
+import * as constants from '../utils/constants.js';
 
 class GameRenderer
 {
 	constructor(gameCore)
 	{
 		this.gameCore = gameCore;
-		this.screenSize = SCREEN_SIZE;
-		console.log(`GameRenderer initialized with screen size: ${this.screenSize.width}x${this.screenSize.height}`);
+		this.screenSize = constants.SCREEN_SIZE;
 		this.paddleSize = null;
 		this.ballSize = null;
 		this.colors = null;
@@ -239,9 +240,9 @@ class GameRenderer
 		ctx.font = '48px Arial';
 		ctx.textAlign = 'center';
 
-		ctx.fillText(score.player1, this.screenSize.width / 4, 60);
+		ctx.fillText(score.team1, this.screenSize.width / 4, 60);
 
-		ctx.fillText(score.player2, (this.screenSize.width * 3) / 4, 60);
+		ctx.fillText(score.team2, (this.screenSize.width * 3) / 4, 60);
 	}
 
 	renderCenterLine(ctx)

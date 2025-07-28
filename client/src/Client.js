@@ -110,21 +110,22 @@ class Client
 		this.inputManager.onKey("w",
 			() =>
 			{
-				this.networkManager.send({ type: "move", payload: {direction: 'up', action: true} });
+				console.log('W pressed');
+				this.networkManager.send("move", {direction: 'up', action: true});
 			},
 			() =>
 			{
-				this.networkManager.send({ type: "move", payload: {direction: 'up', action: false} });
+				this.networkManager.send("move", {direction: 'up', action: false});
 			}
 		);
 		this.inputManager.onKey("s",
 			() =>
 			{
-				this.networkManager.send({ type: "move", payload: {direction: 'down', action: true} });
+				this.networkManager.send("move", {direction: 'down', action: true});
 			},
 			() =>
 			{
-				this.networkManager.send({ type: "move", payload: {direction: 'down', action: false} });
+				this.networkManager.send("move", {direction: 'down', action: false});
 			}
 		);
 	}

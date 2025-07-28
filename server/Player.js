@@ -16,6 +16,7 @@ class Player
 
 	move(payload)
 	{
+		console.log(`Player ${this.id} move action:`, payload);
 		if (!payload || !payload.direction || typeof payload.action !== 'boolean')
 		{
 			console.warn('Invalid move payload:', payload);

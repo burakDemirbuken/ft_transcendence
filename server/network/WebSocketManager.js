@@ -32,8 +32,9 @@ class WebSocketManager
 						    connection.socket.close(1008, 'User info required');
 						    return;
 						}
-						
-						if (this.clients.has(id)) {
+
+						if (this.clients.has(id))
+						{
 						    console.log('⚠️ User zaten bağlı, eski connection kapatılıyor');
 						    this.clients.get(id).close();
 						}
@@ -41,10 +42,20 @@ class WebSocketManager
 						this.clients.set(id, client);
 						onClientConnect(req.query);
 
-						client.on('message', (message) => {
-							console.log(`📨 Client ${id} mesaj gönderdi:`, message.toString());
-							onMessage(id, message);
-						});
+						client.on('message',
+							(message) =>
+							{
+								try
+								{
+									const parsedMessage = JSON.parse(message.toString());
+									onMessage(id, parsedMessage);
+								}
+								catch (error)
+								{
+									console.error('❌ Invalid JSON message:', error);
+								}
+							}
+						);
 
 						client.on('close',
 							() =>

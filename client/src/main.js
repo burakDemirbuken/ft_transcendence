@@ -1,4 +1,5 @@
 import Client from './Client.js';
+import * as constants from './utils/constants.js';
 
 let client = new Client("renderCanvas");
 
@@ -43,12 +44,12 @@ const exampleGameConfig = {
 			},
 			paddleSize:
 			{
-				width: 8,
-				height: 45,
+				width: constants.PADDLE_WIDTH,
+				height: constants.PADDLE_HEIGHT,
 			},
 			ball:
 			{
-				radius: 6
+				radius: constants.BALL_RADIUS
 			}
 
 		},

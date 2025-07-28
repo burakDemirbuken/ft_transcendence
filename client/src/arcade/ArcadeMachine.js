@@ -167,7 +167,7 @@ class ArcadeMachine
 		meshInfo.style.marginBottom = '10px';
 		debugDiv.appendChild(meshInfo);
 
-		let çarpan = 1;
+		let çarpan = 0.25;
 		let width = this.screenSize.width * çarpan;
 		let height = this.screenSize.height * çarpan;
 

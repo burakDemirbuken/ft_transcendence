@@ -11,7 +11,7 @@ class NetworkManager
 		if (!this.getUserFromURL()) {
 			const randomId = this.generateRandomId();
 			const randomName = this.generateRandomName();
-			this.serverUrl = `ws://localhost:3000/ws?id=${randomId}&name=${randomName}`;
+			this.serverUrl = `ws://10.12.8.2:3000/ws?id=${randomId}&name=${randomName}`;
 			console.log(`🎮 Generated test user: ID=${randomId}, Name=${randomName}`);
 		}
 	}
@@ -47,7 +47,6 @@ class NetworkManager
 		this.socket.onmessage =
 			(event) =>
 			{
-				console.log('Message received:', event.data);
 				const data = JSON.parse(event.data);
 				this.handleMessage(data);
 			};

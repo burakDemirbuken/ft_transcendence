@@ -117,24 +117,21 @@ class Game
 			}
 		}
 
-		// Paddle'ları güncelle
 		for (const paddle of this.playerPaddles.values())
-		{
 			paddle.update(deltaTime);
-		}
 
-		// Ball'ı güncelle (paddle'larla collision için)
 		const paddleArray = Array.from(this.playerPaddles.values());
-		this.ball.update(deltaTime, paddleArray);
+		const goalResult = this.ball.update(deltaTime, paddleArray);
+
+		if (goalResult)
+			this.handleGoal(goalResult);
 	}
 
 	processPlayerInput(player, paddle)
 	{
-		// Player'ın Map'indeki input'ları kontrol et
 		const upPressed = player.inputs.get('up') || false;
 		const downPressed = player.inputs.get('down') || false;
 
-		// Paddle'a input'ları aktar
 		paddle.up = upPressed;
 		paddle.down = downPressed;
 	}
@@ -170,6 +167,26 @@ class Game
 		const playerArray = Array.from(this.players.keys());
 		const playerIndex = playerArray.indexOf(playerId);
 		return playerIndex === 0 ? this.score.team1 : this.score.team2;
+	}
+
+	handleGoal(goalResult)
+	{
+		if (goalResult === 'goal-left')
+		{
+			this.score.team1++;
+			console.log(`🎯 Left player scores! Score: ${this.score.team1}-${this.score.team2}`);
+		}
+		else if (goalResult === 'goal-right')
+		{
+			this.score.team2++;
+			console.log(`🎯 Right player scores! Score: ${this.score.team1}-${this.score.team2}`);
+		}
+
+		if (this.score.team1 >= 11 || this.score.team2 >= 11)
+		{
+			this.stop();
+			console.log('🏆 Game Over!');
+		}
 	}
 }
 

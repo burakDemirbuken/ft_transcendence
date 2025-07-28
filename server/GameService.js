@@ -42,6 +42,7 @@ class GameService
 			(clientId) =>
 			{
 				console.log('WebSocket client disconnected:', clientId);
+				this.gameManager.removeGame('default-game');
 				this.Players.delete(clientId);
 			}
 		);
@@ -58,14 +59,15 @@ class GameService
 
 	handleWebSocketMessage(message, clientId)
 	{
+
 		const player = this.Players.get(clientId);
 		if (!player)
 		{
 			console.warn('Player not found for clientId:', clientId);
 			return;
 		}
-
-		switch (message.type) {
+		switch (message.type)
+		{
 			case "move":
 				player.move(message.payload);
 				break;
