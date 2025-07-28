@@ -1,13 +1,16 @@
 <div class="login-wrapper">
-	<form>
+	<form id="loginForm">
 		<h2>Login</h2>
 		<div class="form-group">
-			<input type="email" placeholder="Email">
+			<input type="text" name="username" placeholder="Username">
 		</div>
 		<div class="form-group">
-			<input type="password" placeholder="Password">
+			<input type="email" name="email" placeholder="Email">
 		</div>
-		<button type="submit" onclick="navigate('home')">Login</button>
+		<div class="form-group">
+			<input type="password" name="password" placeholder="Password">
+		</div>
+		<button type="submit">Login</button>
 	</form>
 </div>
 
