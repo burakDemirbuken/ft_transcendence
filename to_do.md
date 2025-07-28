@@ -38,16 +38,16 @@ Kullanılabilecek Veriler:
 4. “İstatistikleri açık ve görsel olarak çekici bir şekilde sunmak için çizelgeler ve grafikler gibi veri görselleştirme tekniklerini uygulayın.”
 
 Kullanılabilecek Grafik Türleri & Veriler:
-- [ ]📈 Çizgi Grafik (Line Chart):
-	- [ ]Zamanla skor gelişimi
-	- [ ]Günlük / haftalık performans (kazanılan maçlar)
-- [ ]📊 Sütun Grafik (Bar Chart):
-	- [ ]Oyuncu bazlı kazanılan/kaybedilen maç sayısı
-	- [ ]En çok karşılaşılan rakipler
-- [ ]🥧 Pasta Grafik (Pie Chart):
-	- [ ]Kazanma/kaybetme oranları
-- [ ]📌 Radar / Spider Grafiği:
-	- [ ]Beceri puanı: isabet
+- [ ] 📈 Çizgi Grafik (Line Chart):
+	- [ ] Zamanla skor gelişimi
+	- [ ] Günlük / haftalık performans (kazanılan maçlar)
+- [ ] 📊 Sütun Grafik (Bar Chart):
+	- [ ] Oyuncu bazlı kazanılan/kaybedilen maç sayısı
+	- [ ] En çok karşılaşılan rakipler
+- [ ] 🥧 Pasta Grafik (Pie Chart):
+	- [ ] Kazanma/kaybetme oranları
+- [ ] 📌 Radar / Spider Grafiği:
+	- [ ] Beceri puanı: isabet
 
 5. “Kullanıcıların kendi oyun geçmişlerine ve performans ölçümlerine rahatça erişmelerine ve bunları keşfetmelerine olanak tanıyın.”
 
