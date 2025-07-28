@@ -13,7 +13,9 @@ const pageState = {
 };
 const routes = {
     login: { template: 'login', title: 'Login' },
+    "2fa": { template: '2fa', title: '2fa' },
     register: { template: 'register', title: 'Register' },
+    profile: { template: 'profile', title: 'Profile' },
     home: { template: 'home', title: 'Home' },
 };
 function loadTemplate(templateName) {
@@ -49,9 +51,15 @@ function register(event) {
         // 'Authorization': 'Bearer token123' // HEADER
         // cache: 'no-store',
         // mode: 'cors' // CORS handling
-        const obj = yield req(request);
+        const response = yield fetch(request);
+        const obj = yield response.json();
         const test = document.createElement("p");
-        test.textContent = `Reply: ${obj.error}`;
+        if (response.ok)
+            test.textContent = `Reply: ${obj.message}`;
+        else if (obj.error)
+            test.textContent = `Reply: ${obj.error}`;
+        else
+            test.textContent = `Reply not found`;
         content.appendChild(test);
     });
 }
@@ -71,15 +79,30 @@ function login(event) {
             }),
             body: JSON.stringify(user),
         });
-        const obj = yield req(request);
-        const test = document.createElement("p");
-        test.textContent = `Reply: ${obj.token}`;
-        content.appendChild(test);
+        const response = yield fetch(request);
+        const obj = yield response.json();
+        if (response.ok)
+            navigate("2fa");
+        else {
+            const test = document.createElement("p");
+            test.textContent = `Reply: ${obj.error}`;
+            content.appendChild(test);
+        }
+    });
+}
+function login2(event) {
+    return __awaiter(this, void 0, void 0, function* () {
+        event.preventDefault();
+        // const form = new FormData(event.target);
+        // const code = {
+        // 	"code": form.get("code"),
+        // };
+        navigate("profile");
     });
 }
 function loadPage(page) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
+        var _a, _b, _c;
         const body = document.querySelector('body');
         pageState.current = page;
         const route = routes[page];
@@ -92,6 +115,7 @@ function loadPage(page) {
         }
         (_a = content.querySelector('#loginForm')) === null || _a === void 0 ? void 0 : _a.addEventListener("submit", login);
         (_b = content.querySelector('#registerForm')) === null || _b === void 0 ? void 0 : _b.addEventListener("submit", register);
+        (_c = content.querySelector('#twofaForm')) === null || _c === void 0 ? void 0 : _c.addEventListener("submit", login2);
     });
 }
 function navigate(page) {

@@ -4,7 +4,9 @@ const pageState = {
 
 const routes = {
 	login: { template: 'login', title: 'Login' },
+	"2fa": { template: '2fa', title: '2fa' },
 	register: { template: 'register', title: 'Register' },
+	profile: { template: 'profile', title: 'Profile' },
 	home: { template: 'home', title: 'Home' },
 }
 
@@ -43,10 +45,16 @@ async function register(event) {
 	// cache: 'no-store',
 	// mode: 'cors' // CORS handling
 
-	const obj = await req(request);
+	const response = await fetch(request);
+	const obj = await response.json();
 
 	const test = document.createElement("p");
-	test.textContent = `Reply: ${obj.error}`;
+	if (response.ok)
+		test.textContent = `Reply: ${obj.message}`;
+	else if (obj.error)
+		test.textContent = `Reply: ${obj.error}`;
+	else
+		test.textContent = `Reply not found`;
 	content.appendChild(test);
 }
 
@@ -69,11 +77,28 @@ async function login(event) {
 		body: JSON.stringify(user),
 	});
 
-	const obj = await req(request);
+	const response = await fetch(request);
+	const obj = await response.json();
 
-	const test = document.createElement("p");
-	test.textContent = `Reply: ${obj.token}`;
-	content.appendChild(test);
+	if (response.ok)
+		navigate("2fa");
+	else {
+		const test = document.createElement("p");
+		test.textContent = `Reply: ${obj.error}`;
+		content.appendChild(test);
+	}
+}
+
+async function login2(event) {
+	event.preventDefault();
+
+	// const form = new FormData(event.target);
+
+	// const code = {
+	// 	"code": form.get("code"),
+	// };
+
+	navigate("profile");
 }
 
 async function loadPage(page) {
@@ -90,6 +115,7 @@ async function loadPage(page) {
 
 	content.querySelector('#loginForm')?.addEventListener("submit", login);
 	content.querySelector('#registerForm')?.addEventListener("submit", register);
+	content.querySelector('#twofaForm')?.addEventListener("submit", login2);
 }
 
 function navigate(page) {
