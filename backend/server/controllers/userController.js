@@ -120,10 +120,10 @@ export const verify2FA = async (request, reply) => {
     });
 
     pending2FA.delete(email);
-    
+
     // Cookie süreleri
     const cookieExpiry = rememberMe ? 2 * 60 * 1000 : 90 * 1000; // ms cinsinden
-    
+
     // Access token'ı da cookie olarak set et (opsiyonel)
     reply.setCookie('accessToken', accessToken, {
       httpOnly: true,
@@ -132,7 +132,7 @@ export const verify2FA = async (request, reply) => {
       maxAge: 30 * 1000, // 30 saniye
       path: '/'
     });
-    
+
     // Refresh token'ı HttpOnly cookie olarak set et
     reply.setCookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -141,9 +141,9 @@ export const verify2FA = async (request, reply) => {
       maxAge: cookieExpiry,
       path: '/'
     });
-    
+
     // Debug için cookie set edildi mi kontrol et
-    reply.send({ 
+    reply.send({
       message: "Giriş başarılı - Token'lar cookie olarak set edildi",
       debug: {
         accessTokenCookie: true,
@@ -153,7 +153,7 @@ export const verify2FA = async (request, reply) => {
       }
     });
     await sendEmail(email, 'Giriş Başarılı', `Sisteme giriş yaptınız: IP: ${ip}, Tarayıcı: ${userAgent}`);
-    
+
   } catch (err) {
     reply.code(500).send({ error: 'Sunucu hatası', detail: err.message });
   }
@@ -175,7 +175,7 @@ export const refreshAccessToken = async (request, reply) => {
 
   // Refresh token'ı cookie'den al
   const refreshToken = request.cookies.refreshToken;
-  
+
   if (!refreshToken) {
     return reply.code(400).send({ error: 'Refresh token cookie bulunamadı' });
   }
@@ -191,7 +191,7 @@ export const refreshAccessToken = async (request, reply) => {
 
     // JWT'yi manuel doğrula
     const decoded = fastifyInstance.jwt.verify(refreshToken);
-    
+
     // Veritabanından refresh token'ın geçerli olup olmadığını kontrol et
     const valid = await isRefreshSessionValid({
       token: refreshToken,
@@ -207,7 +207,7 @@ export const refreshAccessToken = async (request, reply) => {
 
     // Yeni access token oluştur ve cookie olarak set et
     const newAccessToken = await reply.jwtSign({ id: decoded.id }, { expiresIn: '30s' });
-    
+
     reply.setCookie('accessToken', newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -216,7 +216,7 @@ export const refreshAccessToken = async (request, reply) => {
       path: '/'
     });
 
-    reply.send({ 
+    reply.send({
       message: "Token yenilendi",
       debug: {
         newAccessTokenSet: true,
@@ -232,7 +232,7 @@ export const refreshAccessToken = async (request, reply) => {
 
 export const logoutUser = async (request, reply) => {
   const userId = request.user.id;
-  
+
   try {
     // Access token'ı cookie'den veya header'dan al
     let accessToken = null;
@@ -255,12 +255,12 @@ export const logoutUser = async (request, reply) => {
 
     // Kullanıcının tüm session'larını da sil
     await deleteRefreshSession({ userId });
-    
+
     // Her iki cookie'yi de temizle
     reply.clearCookie('accessToken');
     reply.clearCookie('refreshToken');
-    
-    reply.send({ 
+
+    reply.send({
       message: 'Çıkış başarılı',
       info: 'Tüm cookie\'ler temizlendi'
     });

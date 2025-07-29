@@ -32,7 +32,10 @@ body {
 
 #title {
 	background-color: rgb(57, 34, 109);
-	color: magenta;
+	color: rgb(252, 245, 255);
+	font-family: "RocketClouds";
+	font-size: small;
+	text-shadow: 0 0 15px magenta, 0 0 15px magenta;
 	width: 450px;
 	height: 200px;
 
@@ -46,22 +49,29 @@ body {
 	content: "";
 	position: absolute;
 	background-color: magenta;
-	width: 104%;
+	left: -4px;
+	width: 4px;
 	height: 100%;
 
-	filter: blur(15px);
-	opacity: 3;
-	z-index: -1;
-}
+	border-radius: 3px;
+	box-shadow:
+		0 0px 25px magenta, 0 0 20px magenta,
+		0 0 20px magenta, inset 0 0 20px magenta,
+		0 5px 50px magenta, 0 -5px 50px magenta;}
 
 #title::before {
 	content: "";
 	position: absolute;
 	background-color: magenta;
-	width: 102%;
+	right: -4px;
+	width: 4px;
 	height: 100%;
-	z-index: -1;
-}
+
+	border-radius: 3px;
+	box-shadow:
+		0 0px 25px magenta, 0 0 20px magenta,
+		0 0 20px magenta, inset 0 0 20px magenta,
+		0 5px 50px magenta, 0 -5px 50px magenta;}
 
 #sides {
 	background: rgb(57, 34, 109);
@@ -77,8 +87,8 @@ body {
 	position: relative;
 	align-items: center;
 	justify-content: center;
-	/* padding-top: 30px;
-	padding-bottom: 20px; */
+	padding-top: 30px;
+	padding-bottom: 20px;
 }
 
 #sides::after {
@@ -91,10 +101,9 @@ body {
 	border-bottom: 50px solid magenta;
 	border-left: 10px solid transparent;
 	border-right: 10px solid transparent;
-	width: 104%;
+	width: 102%;
 	height: 100%;
-	filter: blur(15px);
-	opacity: 3;
+	filter: drop-shadow(0 0 15px magenta);
 	z-index: -1;
 }
 
@@ -108,15 +117,23 @@ body {
 	border-bottom: 50px solid magenta;
 	border-left: 10px solid transparent;
 	border-right: 10px solid transparent;
+	mask-image:
+	linear-gradient(
+		to right,
+		black 0%,
+		transparent 5%,
+		transparent 95%,
+		black 100%
+	);
 	width: 102%;
 	height: 100%;
-	z-index: -1;
+	pointer-events: none;
 }
 
 #screen {
 	background-color: rgb(57, 34, 109);
-	--verti: palevioletred;
-	--hori: aquamarine;
+	--hori: rgb(57, 34, 109);
+	--verti: rgb(46, 27, 87);
 	border-top: 8px solid var(--hori);
 	border-bottom: 8px solid var(--hori);
 	border-left: 8px solid var(--verti);
@@ -141,13 +158,15 @@ body {
 	content: "";
 	position: absolute;
 	background-color: magenta;
-	left: -6px;
-	width: 104%;
+	right: -4px;
+	width: 4px;
 	height: 100%;
 
-	filter: blur(15px);
-	opacity: 3;
-	z-index: -1;
+	border-radius: 3px;
+	box-shadow:
+		0 0px 30px magenta, 0 0 30px magenta,
+		0 0 20px magenta, inset 0 0 20px magenta,
+		0 5px 50px magenta, 0 -5px 50px magenta;
 }
 
 #console::before {
@@ -155,10 +174,14 @@ body {
 	position: absolute;
 	background-color: magenta;
 	left: -4px;
-	right: 4px;
-	width: 102%;
+	width: 4px;
 	height: 100%;
-	z-index: -1;
+
+	border-radius: 3px;
+	box-shadow:
+		0 0px 25px magenta, 0 0 20px magenta,
+		0 0 20px magenta, inset 0 0 20px magenta,
+		0 5px 50px magenta, 0 -5px 50px magenta;
 }
 
 #bottom {
@@ -172,23 +195,6 @@ body {
 	position: relative;
 }
 
-#bottom::after {
-	content: "";
-	position: absolute;
-	background-color: magenta;
-	background-clip: padding-box;
-	border-top: 8px solid magenta;
-	border-left: 8px solid transparent;
-	border-right: 8px solid transparent;
-	width: 104%;
-	height: 100%;
-	top: -8px;
-	left: -15px;
-	filter: blur(15px);
-	opacity: 3;
-	z-index: -1;
-}
-
 #bottom::before {
 	content: "";
 	position: absolute;
@@ -199,7 +205,22 @@ body {
 	border-right: 8px solid transparent;
 	top: -8px;
 	left: -12px;
+	mask-image:
+	linear-gradient(
+		to right,
+		black 0%,
+		transparent 5%,
+		transparent 95%,
+		black 100%
+	);
 	width: 102%;
 	height: 100%;
-	z-index: -1;
+	pointer-events: none;
+}
+
+@font-face {
+	font-family: "RocketClouds";
+	src: url('fonts/rocket-clouds-demo.regular.ttf'), format("tff");
+	font-weight: normal;
+	font-size: normal;
 }
