@@ -2,28 +2,17 @@ class Object
 {
 	constructor(x, y, width, height)
 	{
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
+		this.position = {x: x, y: y };
+		this.oldPosition = { x: x, y: y };
+		this.size = { width: width, height: height };
 	}
 
 	isCollidingWith(other)
 	{
-		return this.x < other.x + other.width &&
-		       this.x + this.width > other.x &&
-		       this.y < other.y + other.height &&
-		       this.y + this.height > other.y;
-	}
-
-	getPosition()
-	{
-		return { x: this.x, y: this.y };
-	}
-
-	getSize()
-	{
-		return { width: this.width, height: this.height };
+		return this.position.x < other.position.x + other.size.width &&
+		       this.position.x + this.size.width > other.position.x &&
+		       this.position.y < other.position.y + other.size.height &&
+		       this.position.y + this.size.height > other.position.y;
 	}
 }
 

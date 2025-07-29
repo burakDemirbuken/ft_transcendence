@@ -11,7 +11,7 @@ class NetworkManager
 		if (!this.getUserFromURL()) {
 			const randomId = this.generateRandomId();
 			const randomName = this.generateRandomName();
-			this.serverUrl = `ws://10.12.8.2:3000/ws?id=${randomId}&name=${randomName}`;
+			this.serverUrl = `ws://10.12.5.4:3000/ws?id=${randomId}&matchId=${randomName}`;
 			console.log(`🎮 Generated test user: ID=${randomId}, Name=${randomName}`);
 		}
 	}

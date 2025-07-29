@@ -146,7 +146,7 @@ class Game
 				id: player.id,
 				name: player.name,
 				score: this.getPlayerScore(player.id),
-				position: this.playerPaddles.get(player.id).getPosition()
+				position: this.playerPaddles.get(player.id).position
 			});
 		}
 		return {
