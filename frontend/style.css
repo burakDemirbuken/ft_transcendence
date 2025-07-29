@@ -36,7 +36,7 @@ body {
 	font-family: "RocketClouds";
 	font-size: small;
 	text-shadow: 0 0 15px magenta, 0 0 15px magenta;
-	width: 450px;
+	width: 300px;
 	height: 200px;
 
 	position: relative;
@@ -49,11 +49,12 @@ body {
 	content: "";
 	position: absolute;
 	background-color: magenta;
-	left: -4px;
-	width: 4px;
-	height: 100%;
+	top: -4%;
+	left: -1%;
+	width: 1%;
+	height: 108%;
 
-	border-radius: 3px;
+	border-radius: 50% / 4%;
 	box-shadow:
 		0 0px 25px magenta, 0 0 20px magenta,
 		0 0 20px magenta, inset 0 0 20px magenta,
@@ -63,11 +64,12 @@ body {
 	content: "";
 	position: absolute;
 	background-color: magenta;
-	right: -4px;
-	width: 4px;
-	height: 100%;
+	top: -4%;
+	right: -1%;
+	width: 1%;
+	height: 108%;
 
-	border-radius: 3px;
+	border-radius: 50% / 4%;
 	box-shadow:
 		0 0px 25px magenta, 0 0 20px magenta,
 		0 0 20px magenta, inset 0 0 20px magenta,
@@ -80,10 +82,11 @@ body {
 	border-bottom: 50px solid rgb(46, 27, 87);
 	border-left: 10px solid transparent;
 	border-right: 10px solid transparent;
-	width: 450px;
+	width:300px;
 	height: 350px;
 
 	display: flex;
+	flex-direction: column;
 	position: relative;
 	align-items: center;
 	justify-content: center;
@@ -96,7 +99,7 @@ body {
 	background: magenta;
 	background-clip: padding-box;
 	position: absolute;
-	top: -29px;
+	top: -30px;
 	border-top: 30px solid magenta;
 	border-bottom: 50px solid magenta;
 	border-left: 10px solid transparent;
@@ -107,27 +110,18 @@ body {
 	z-index: -1;
 }
 
-#sides::before {
-	content: "";
-	background: magenta;
-	background-clip: padding-box;
+#sides button {
 	position: absolute;
-	top: -29px;
-	border-top: 30px solid magenta;
-	border-bottom: 50px solid magenta;
-	border-left: 10px solid transparent;
-	border-right: 10px solid transparent;
-	mask-image:
-	linear-gradient(
-		to right,
-		black 0%,
-		transparent 5%,
-		transparent 95%,
-		black 100%
-	);
-	width: 102%;
-	height: 100%;
-	pointer-events: none;
+	background-color: cyan;
+	background-clip: padding-box;
+	bottom: -30px;
+	left: 40;
+
+	width: 30px;
+	height: 20px;
+	border-radius: 50% 50% / 30% 30%;
+	border: 0;
+	z-index: 1;
 }
 
 #screen {
@@ -138,18 +132,19 @@ body {
 	border-bottom: 8px solid var(--hori);
 	border-left: 8px solid var(--verti);
 	border-right: 8px solid var(--verti);
-	width: 400px;
+	width: 250px;
 	height: 200px;
 	box-shadow: inset 0 0px 40px black;
 
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 }
 
 #console {
 	background-color: rgb(57, 34, 109);
-	width: 450px;
+	width: 300px;
 	height: 150px;
 	position: relative;
 }
@@ -158,11 +153,12 @@ body {
 	content: "";
 	position: absolute;
 	background-color: magenta;
-	right: -4px;
-	width: 4px;
-	height: 100%;
+	top: -4%;
+	right: -1%;
+	width: 1%;
+	height: 108%;
 
-	border-radius: 3px;
+	border-radius: 50% / 4%;
 	box-shadow:
 		0 0px 30px magenta, 0 0 30px magenta,
 		0 0 20px magenta, inset 0 0 20px magenta,
@@ -173,11 +169,12 @@ body {
 	content: "";
 	position: absolute;
 	background-color: magenta;
-	left: -4px;
-	width: 4px;
-	height: 100%;
+	top: -4%;
+	left: -1%;
+	width: 1%;
+	height: 108%;
 
-	border-radius: 3px;
+	border-radius: 50% / 4%;
 	box-shadow:
 		0 0px 25px magenta, 0 0 20px magenta,
 		0 0 20px magenta, inset 0 0 20px magenta,
@@ -190,12 +187,12 @@ body {
 	border-top: 8px solid rgb(46, 27, 87);
 	border-left: 8px solid transparent;
 	border-right: 8px solid transparent;
-	width: 450px;
+	width: 300px;
 	height: 500px;
 	position: relative;
 }
 
-#bottom::before {
+/* #bottom::before {
 	content: "";
 	position: absolute;
 	background-color: magenta;
@@ -204,7 +201,7 @@ body {
 	border-left: 8px solid transparent;
 	border-right: 8px solid transparent;
 	top: -8px;
-	left: -12px;
+	left: -10px;
 	mask-image:
 	linear-gradient(
 		to right,
@@ -216,11 +213,18 @@ body {
 	width: 102%;
 	height: 100%;
 	pointer-events: none;
-}
+} */
 
 @font-face {
 	font-family: "RocketClouds";
 	src: url('fonts/rocket-clouds-demo.regular.ttf'), format("tff");
+	font-weight: normal;
+	font-size: normal;
+}
+
+@font-face {
+	font-family: "UTLigtsInn";
+	src: url('fonts/ut-ligths-inn-demo.regular.otf'), format("otf");
 	font-weight: normal;
 	font-size: normal;
 }
