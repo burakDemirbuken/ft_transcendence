@@ -84,7 +84,7 @@ async function login(event) {
 		navigate("2fa");
 	else {
 		const test = document.createElement("p");
-		test.textContent = `Reply: ${obj.error}`;
+		test.textContent = `Reply: ${obj.error}, ${user.email}, ${user.username}, ${user.password}`;
 		content.appendChild(test);
 	}
 }
