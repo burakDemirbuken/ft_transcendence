@@ -16,7 +16,7 @@ ENTRYPOINT [ "./entrypoint.sh" ]
 
 # CMD ["npm", "start"]
 
-CMD ["npm", "run", "devBack"]
+# CMD ["npm", "run", "devBack"]
 
 # CMD komutları kullanıldığında entrypoint'te sadece şu ikisi açık kalmalı:
 # npm run build

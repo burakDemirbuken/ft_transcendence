@@ -95,68 +95,58 @@ async function login2(event) {
 	navigate("profile");
 }
 
-const form = document.querySelector('#loginForm');
 let currentStep = 'welcome';
-let currentAuthMode = null;
+
+function goToNextField(field)
+{
+	let step = document.querySelector(`.field[data-step="${currentStep}"]`);
+	step.classList.remove("active");
+	currentStep = field;
+	step = document.querySelector(`[data-step="${currentStep}"]`);
+	step.classList.add('active');
+}
+
+// const form = document.querySelector('#loginForm');
 
 // Enter button handler
-document.getElementById('enter')?.addEventListener('click', async () => {
-
+async function enter() {
 	switch (currentStep) {
 		case 'welcome':
-			goToNextField('email');
+			goToNextField("email");
 			break;
 
 		case 'email':
-			const email = form.elements.email.value;
-			const emailExists = await checkEmailExists(email);
-
-			if (emailExists) {
-				currentAuthMode = 'login';
-				goToNextField('password');
-			} else {
-				currentAuthMode = 'register';
-				goToNextField('username');
-			}
+			goToNextField("username")
 			break;
 
 		case 'username':
-			const username = form.elements.username.value;
-			const usernameExists = await checkUsernameExists(username);
-
-			if (usernameExists) {
-				showError("Username taken");
-			} else {
-				goToNextField('password');
-			}
+			goToNextField('password');
 			break;
 
 		case 'password':
-			if (currentAuthMode === "login") {
-				const loginSuccess = await attemptLogin(formData);
-				// form?.dispatchEvent(new Event('submit'));
-				if (!loginSuccess)
-					showError("Wrong password");
-				form.elements.password.value = "";
-			}
-			else
-				await attemptRegister(formData);
+			navigate("2fa");
 			break;
 	}
-});
+};
 
-// document.getElementById('retry')?.addEventListener('click', () => {
-// 	if (currentStep === 'email') {
+async function retry() {
+	switch (currentStep) {
+		case 'welcome':
+			break;
 
-// 	} else if (currentStep === 'password') {
+		case 'email':
+			goToNextField("welcome")
+			break;
 
-// 	}
-// });
+		case 'username':
+			goToNextField('email');
+			break;
 
-form?.addEventListener('submit', (e) => {
-	e.preventDefault();
-	// my submission logic
-});
+		case 'password':
+			goToNextField('username');
+			break;
+	}
+};
 
 async function loadPage(page) {
 	const body = document.querySelector('body');
@@ -170,6 +160,9 @@ async function loadPage(page) {
 		content.innerHTML = '<h2>404</h2><p>Page not found.</p>';
 	}
 
+	currentStep = "welcome";
+	document.querySelector("#enter")?.addEventListener("click", enter);
+	document.querySelector("#retry")?.addEventListener('click', retry);
 	// content.querySelector('#loginForm')?.addEventListener("submit", login);
 	content.querySelector('#registerForm')?.addEventListener("submit", register);
 	content.querySelector('#twofaForm')?.addEventListener("submit", login2);

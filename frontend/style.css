@@ -5,6 +5,7 @@
 }
 
 body {
+	--neon-pink: magenta;
 	min-height: 100vh;
 	max-height: 100dvh;
 	background-color: #000;
@@ -12,7 +13,7 @@ body {
 }
 
 #content {
-	color: magenta;
+	color: var(--neon-pink);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -36,7 +37,7 @@ body {
 	color: rgb(252, 245, 255);
 	font-family: "RocketClouds";
 	font-size: small;
-	text-shadow: 0 0 15px magenta, 0 0 15px magenta;
+	text-shadow: 0 0 15px var(--neon-pink), 0 0 15px var(--neon-pink);
 	width: 300px;
 	height: 200px;
 
@@ -49,7 +50,7 @@ body {
 #title::after {
 	content: "";
 	position: absolute;
-	background-color: magenta;
+	background-color: var(--neon-pink);
 	top: -4%;
 	left: -1%;
 	width: 1%;
@@ -57,14 +58,14 @@ body {
 
 	border-radius: 50% / 4%;
 	box-shadow:
-		0 0px 25px magenta, 0 0 20px magenta,
-		0 0 20px magenta, inset 0 0 20px magenta,
-		0 5px 50px magenta, 0 -5px 50px magenta;}
+		0 0px 25px var(--neon-pink), 0 0 20px var(--neon-pink),
+		0 0 20px var(--neon-pink), inset 0 0 20px var(--neon-pink),
+		0 5px 50px var(--neon-pink), 0 -5px 50px var(--neon-pink);}
 
 #title::before {
 	content: "";
 	position: absolute;
-	background-color: magenta;
+	background-color: var(--neon-pink);
 	top: -4%;
 	right: -1%;
 	width: 1%;
@@ -72,9 +73,9 @@ body {
 
 	border-radius: 50% / 4%;
 	box-shadow:
-		0 0px 25px magenta, 0 0 20px magenta,
-		0 0 20px magenta, inset 0 0 20px magenta,
-		0 5px 50px magenta, 0 -5px 50px magenta;}
+		0 0px 25px var(--neon-pink), 0 0 20px var(--neon-pink),
+		0 0 20px var(--neon-pink), inset 0 0 20px var(--neon-pink),
+		0 5px 50px var(--neon-pink), 0 -5px 50px var(--neon-pink);}
 
 #sides {
 	background: #39226d;
@@ -97,24 +98,24 @@ body {
 
 #sides::after {
 	content: "";
-	background: magenta;
+	background: var(--neon-pink);
 	background-clip: padding-box;
 	position: absolute;
 	top: -30px;
-	border-top: 30px solid magenta;
-	border-bottom: 50px solid magenta;
+	border-top: 30px solid var(--neon-pink);
+	border-bottom: 50px solid var(--neon-pink);
 	border-left: 10px solid transparent;
 	border-right: 10px solid transparent;
 	width: 102%;
 	height: 100%;
-	filter: drop-shadow(0 0 15px magenta);
+	filter: drop-shadow(0 0 15px var(--neon-pink));
 	z-index: -1;
 }
 
 #sides #enter {
 	position: absolute;
 	cursor: grab;
-	background-color: turquoise;
+	background-color: springgreen;
 	background-clip: padding-box;
 	bottom: -20px;
 	right: 30px;
@@ -136,7 +137,7 @@ body {
 
 	box-shadow: inset 0 0 1px 0 black;
 	border-radius: 50%;
-	border: 1px solid turquoise;
+	border: 1px solid limegreen;
 	width: 100%;
 	height: 60%;
 }
@@ -288,7 +289,7 @@ body {
 #sides #down {
 	position: absolute;
 	cursor: grab;
-	background-color: green;
+	background-color: chocolate;
 	background-clip: padding-box;
 	bottom: -35px;
 	left: 50px;
@@ -309,7 +310,7 @@ body {
 
 	box-shadow: inset 0 0 1px 0 black;
 	border-radius: 50%;
-	border: 1px solid green;
+	border: 1px solid chocolate;
 	width: 100%;
 	height: 60%;
 }
@@ -345,7 +346,7 @@ body {
 #sides #left {
 	position: absolute;
 	cursor: grab;
-	background-color: purple;
+	background-color: cyan;
 	background-clip: padding-box;
 	bottom: -25px;
 	left: 25px;
@@ -366,7 +367,7 @@ body {
 
 	box-shadow: inset 0 0 1px 0 black;
 	border-radius: 50%;
-	border: 1px solid purple;
+	border: 1px solid cyan;
 	width: 100%;
 	height: 60%;
 }
@@ -402,7 +403,7 @@ body {
 #sides #right {
 	position: absolute;
 	cursor: grab;
-	background-color: magenta;
+	background-color: var(--neon-pink);
 	background-clip: padding-box;
 	bottom: -25px;
 	left: 75px;
@@ -423,7 +424,7 @@ body {
 
 	box-shadow: inset 0 0 1px 0 black;
 	border-radius: 50%;
-	border: 1px solid magenta;
+	border: 1px solid var(--neon-pink);
 	width: 100%;
 	height: 60%;
 }
@@ -459,8 +460,8 @@ body {
 #dynamicScreen {
 	background-image:
 	/* --- Grid --- */
-	linear-gradient(to right, rgba(19,19,255,0.1) 0%, transparent 5%),
-	linear-gradient(to bottom, rgba(19,19,255,0.1) 0%, transparent 5%),
+	linear-gradient(to right, rgba(0, 255, 255, 0.1) 0%, transparent 5%),
+	linear-gradient(to bottom, rgba(0, 255, 255, 0.1) 0%, transparent 5%),
 	/* --- Stars --- */
 	radial-gradient(circle at 10% 20%, red 0.5px, transparent 1px),
 	radial-gradient(circle at 50% 30%, yellow 0.5px, transparent 1px),
@@ -473,7 +474,7 @@ body {
 		100px 100px,
 		100px 100px,
 		100px 100px;
-	background-color: #0f1535; /* Dark space-like background */
+	background-color: #0f1535;
 	--hori: mediumpurple;
 	--verti: rgb(46, 27, 87);
 	border-top: 8px solid var(--hori);
@@ -493,11 +494,48 @@ body {
 
 .field {
 	position: absolute;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 	width: 100%;
+
+	font-family: "PixeloidSansBold";
 	opacity: 0;
-	transition: opacity 0.3 ease;
+	transition: opacity 0.3s ease-in-out;
 	pointer-events: none;
+	color: coral;
+	text-shadow:
+		1px 1px 0 #c00,
+		2px 2px 0 #900,
+		3px 3px 0 #600;
 }
+
+.field h2 {
+	padding: .2em;
+}
+
+.field p {
+	opacity: 0;
+	animation: flicker 1.5s infinite alternate;
+}
+@keyframes flicker { to { opacity: 1; } }
+
+.field input {
+	background-color: transparent;
+	border: 0;
+	caret-color: coral;
+}
+
+.field input::placeholder {
+	font-family: "PixeloidSansBold";
+	color: coral;
+}
+
+/* .field label {
+	align-self: flex-start;
+	width: 100%;
+} */
 
 .field.active {
 	opacity: 1;
@@ -514,7 +552,7 @@ body {
 #console::after {
 	content: "";
 	position: absolute;
-	background-color: magenta;
+	background-color: var(--neon-pink);
 	top: -4%;
 	right: -1%;
 	width: 1%;
@@ -522,15 +560,15 @@ body {
 
 	border-radius: 50% / 4%;
 	box-shadow:
-		0 0px 30px magenta, 0 0 30px magenta,
-		0 0 20px magenta, inset 0 0 20px magenta,
-		0 5px 50px magenta, 0 -5px 50px magenta;
+		0 0px 30px var(--neon-pink), 0 0 30px var(--neon-pink),
+		0 0 20px var(--neon-pink), inset 0 0 20px var(--neon-pink),
+		0 5px 50px var(--neon-pink), 0 -5px 50px var(--neon-pink);
 }
 
 #console::before {
 	content: "";
 	position: absolute;
-	background-color: magenta;
+	background-color: var(--neon-pink);
 	top: -4%;
 	left: -1%;
 	width: 1%;
@@ -538,9 +576,9 @@ body {
 
 	border-radius: 50% / 4%;
 	box-shadow:
-		0 0px 25px magenta, 0 0 20px magenta,
-		0 0 20px magenta, inset 0 0 20px magenta,
-		0 5px 50px magenta, 0 -5px 50px magenta;
+		0 0px 25px var(--neon-pink), 0 0 20px var(--neon-pink),
+		0 0 20px var(--neon-pink), inset 0 0 20px var(--neon-pink),
+		0 5px 50px var(--neon-pink), 0 -5px 50px var(--neon-pink);
 }
 
 #bottom {
@@ -557,9 +595,9 @@ body {
 #bottom::before {
 	content: "";
 	position: absolute;
-	background-color: magenta;
+	background-color: var(--neon-pink);
 	background-clip: padding-box;
-	border-top: 8px solid magenta;
+	border-top: 8px solid var(--neon-pink);
 	border-left: 8px solid transparent;
 	border-right: 8px solid transparent;
 	top: -8px;
@@ -585,8 +623,22 @@ body {
 }
 
 @font-face {
-	font-family: "UTLigtsInn";
-	src: url('fonts/ut-ligths-inn-demo.regular.otf'), format("otf");
+	font-family: "PixeloidMono";
+	src: url('fonts/pixeloid.mono.ttf'), format("tff");
+	font-weight: normal;
+	font-size: normal;
+}
+
+@font-face {
+	font-family: "PixeloidSans";
+	src: url('fonts/pixeloid.sans.ttf'), format("tff");
+	font-weight: normal;
+	font-size: normal;
+}
+
+@font-face {
+	font-family: "PixeloidSansBold";
+	src: url('fonts/pixeloid.sans-bold.ttf'), format("tff");
 	font-weight: normal;
 	font-size: normal;
 }

@@ -25,13 +25,6 @@ function loadTemplate(templateName) {
     });
 }
 const content = document.querySelector('#content');
-function req(request) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield fetch(request);
-        const obj = yield response.json();
-        return obj;
-    });
-}
 function register(event) {
     return __awaiter(this, void 0, void 0, function* () {
         event.preventDefault(); // Prevent auto refresh
@@ -100,9 +93,56 @@ function login2(event) {
         navigate("profile");
     });
 }
+let currentStep = 'welcome';
+function goToNextField(field) {
+    let step = document.querySelector(`.field[data-step="${currentStep}"]`);
+    step.classList.remove("active");
+    currentStep = field;
+    step = document.querySelector(`[data-step="${currentStep}"]`);
+    step.classList.add('active');
+}
+// const form = document.querySelector('#loginForm');
+// Enter button handler
+function enter() {
+    return __awaiter(this, void 0, void 0, function* () {
+        switch (currentStep) {
+            case 'welcome':
+                goToNextField("email");
+                break;
+            case 'email':
+                goToNextField("username");
+                break;
+            case 'username':
+                goToNextField('password');
+                break;
+            case 'password':
+                navigate("2fa");
+                break;
+        }
+    });
+}
+;
+function retry() {
+    return __awaiter(this, void 0, void 0, function* () {
+        switch (currentStep) {
+            case 'welcome':
+                break;
+            case 'email':
+                goToNextField("welcome");
+                break;
+            case 'username':
+                goToNextField('email');
+                break;
+            case 'password':
+                goToNextField('username');
+                break;
+        }
+    });
+}
+;
 function loadPage(page) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         const body = document.querySelector('body');
         pageState.current = page;
         const route = routes[page];
@@ -113,9 +153,12 @@ function loadPage(page) {
         else {
             content.innerHTML = '<h2>404</h2><p>Page not found.</p>';
         }
-        (_a = content.querySelector('#loginForm')) === null || _a === void 0 ? void 0 : _a.addEventListener("submit", login);
-        (_b = content.querySelector('#registerForm')) === null || _b === void 0 ? void 0 : _b.addEventListener("submit", register);
-        (_c = content.querySelector('#twofaForm')) === null || _c === void 0 ? void 0 : _c.addEventListener("submit", login2);
+        currentStep = "welcome";
+        (_a = document.querySelector("#enter")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", enter);
+        (_b = document.querySelector("#retry")) === null || _b === void 0 ? void 0 : _b.addEventListener('click', retry);
+        // content.querySelector('#loginForm')?.addEventListener("submit", login);
+        (_c = content.querySelector('#registerForm')) === null || _c === void 0 ? void 0 : _c.addEventListener("submit", register);
+        (_d = content.querySelector('#twofaForm')) === null || _d === void 0 ? void 0 : _d.addEventListener("submit", login2);
     });
 }
 function navigate(page) {
