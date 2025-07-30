@@ -4,13 +4,16 @@ import {
   createUser,
   findUserById,
   findUserByEmail,
+  findUserByUsername,
+  deleteUser,
   isRefreshSessionValid,
   deleteRefreshSession
 } from '../models/userModel.js';
 import {
   storeToken,
   isTokenActive,
-  deactivateToken
+  deactivateToken,
+  deleteAllUserTokens
 } from '../models/tokenModel.js';
 
 // Fastify instance'ını global olarak tutmak için
@@ -29,10 +32,10 @@ const blacklistedAccessTokens = new Set();
 // Access token'ı blacklist'e ekle
 const addAccessTokenToBlacklist = (token) => {
   blacklistedAccessTokens.add(token);
-  // 35 saniye sonra otomatik temizle (token süresi 30s + 5s buffer)
+  // 1.6 saat sonra otomatik temizle (token süresi 1.5h + 6 dakika buffer)
   setTimeout(() => {
     blacklistedAccessTokens.delete(token);
-  }, 35000);
+  }, 1.6 * 60 * 60 * 1000); // 1.6 saat
 };
 
 // Access token blacklist kontrolü
@@ -47,9 +50,16 @@ export const register = async (request, reply) => {
   }
 
   try {
-    const existing = await findUserByEmail(email);
-    if (existing) {
-      return reply.code(409).send({ error: 'Kullanıcı zaten kayıtlı' });
+    // Email kontrolü
+    const existingEmail = await findUserByEmail(email);
+    if (existingEmail) {
+      return reply.code(409).send({ error: 'Bu e-posta adresi zaten kayıtlı' });
+    }
+
+    // Username kontrolü
+    const existingUsername = await findUserByUsername(username);
+    if (existingUsername) {
+      return reply.code(409).send({ error: 'Bu kullanıcı adı zaten alınmış' });
     }
 
     const hashed = await bcrypt.hash(password, 10);
@@ -61,23 +71,26 @@ export const register = async (request, reply) => {
 };
 
 export const loginUser = async (request, reply) => {
-  const { email, password } = request.body;
+  const { username, password } = request.body;
   const ip = request.ip;
   const userAgent = request.headers['user-agent'] || 'unknown';
 
   try {
-    const user = await findUserByEmail(email);
-    if (!user) return reply.code(401).send({ error: 'Geçersiz e-posta veya şifre' });
+    const user = await findUserByUsername(username);
+    if (!user) return reply.code(401).send({ error: 'Geçersiz kullanıcı adı veya şifre' });
 
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return reply.code(401).send({ error: 'Geçersiz e-posta veya şifre' });
+    if (!valid) return reply.code(401).send({ error: 'Geçersiz kullanıcı adı veya şifre' });
 
     // 2FA'yı her zaman zorunlu yapıyoruz
     const code = generate2FACode();
-    pending2FA.set(email, { code, ip, userAgent, createdAt: Date.now() });
+    pending2FA.set(user.email, { code, ip, userAgent, createdAt: Date.now(), action: 'login' });
 
-    await sendEmail(email, 'Giriş Kodu', `Kodunuz: ${code}`);
-    reply.send({ message: '2FA kodu gönderildi. Lütfen e-posta kutunuzu kontrol edin.' });
+    await sendEmail(user.email, 'Giriş Kodu', `Kodunuz: ${code}`);
+    reply.send({ 
+      message: '2FA kodu gönderildi. Lütfen e-posta kutunuzu kontrol edin.',
+      email: user.email // Frontend'e hangi email'e kod gönderildiğini bildirmek için
+    });
 
   } catch (err) {
     reply.code(500).send({ error: 'Sunucu hatası', detail: err.message });
@@ -103,12 +116,35 @@ export const verify2FA = async (request, reply) => {
 
   try {
     const user = await findUserByEmail(email);
-    const accessToken = await reply.jwtSign({ id: user.id }, { expiresIn: '30s' });
-    const refreshExpiresIn = rememberMe ? '2m' : '90s';
+
+    // Action'a göre farklı işlemler yap
+    if (record.action === 'delete') {
+      // Hesap silme işlemi
+      await deleteAllUserTokens(user.id);
+      await deleteUser(user.id);
+      pending2FA.delete(email);
+
+      // Cookie'leri temizle
+      reply.clearCookie('accessToken');
+      reply.clearCookie('refreshToken');
+
+      await sendEmail(email, '✅ Hesap Silindi', 
+        `Hesabınız başarıyla silindi. IP: ${ip}, Tarayıcı: ${userAgent}`
+      );
+
+      return reply.send({
+        message: 'Hesabınız başarıyla silindi',
+        info: 'Tüm verileriniz kalıcı olarak silindi'
+      });
+    }
+
+    // Normal login işlemi (action === 'login' veya undefined)
+    const accessToken = await reply.jwtSign({ id: user.id }, { expiresIn: '1.5h' });
+    const refreshExpiresIn = rememberMe ? '30d' : '6h';
     const refreshToken = await reply.jwtSign({ id: user.id }, { expiresIn: refreshExpiresIn });
 
     // Sadece storeToken kullan (storeRefreshSession duplicate yaratır)
-    const refreshExpiry = Math.floor(Date.now() / 1000) + (rememberMe ? 120 : 90);
+    const refreshExpiry = Math.floor(Date.now() / 1000) + (rememberMe ? 30 * 24 * 60 * 60 : 6 * 60 * 60); // 30 gün veya 6 saat
 
     await storeToken({
       userId: user.id,
@@ -122,14 +158,14 @@ export const verify2FA = async (request, reply) => {
     pending2FA.delete(email);
 
     // Cookie süreleri
-    const cookieExpiry = rememberMe ? 2 * 60 * 1000 : 90 * 1000; // ms cinsinden
+    const cookieExpiry = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 6 * 60 * 60 * 1000; // 30 gün veya 6 saat (ms cinsinden)
 
     // Access token'ı da cookie olarak set et (opsiyonel)
     reply.setCookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 30 * 1000, // 30 saniye
+      maxAge: 1.5 * 60 * 60 * 1000, // 1.5 saat
       path: '/'
     });
 
@@ -148,7 +184,7 @@ export const verify2FA = async (request, reply) => {
       debug: {
         accessTokenCookie: true,
         refreshTokenCookie: true,
-        accessExpiry: 30,
+        accessExpiry: 1.5 * 60 * 60, // 1.5 saat (saniye cinsinden)
         refreshExpiry: cookieExpiry / 1000
       }
     });
@@ -206,13 +242,13 @@ export const refreshAccessToken = async (request, reply) => {
     }
 
     // Yeni access token oluştur ve cookie olarak set et
-    const newAccessToken = await reply.jwtSign({ id: decoded.id }, { expiresIn: '30s' });
+    const newAccessToken = await reply.jwtSign({ id: decoded.id }, { expiresIn: '1.5h' });
 
     reply.setCookie('accessToken', newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 30 * 1000, // 30 saniye
+      maxAge: 1.5 * 60 * 60 * 1000, // 1.5 saat
       path: '/'
     });
 
@@ -220,7 +256,7 @@ export const refreshAccessToken = async (request, reply) => {
       message: "Token yenilendi",
       debug: {
         newAccessTokenSet: true,
-        expires: 30
+        expires: 1.5 * 60 * 60 // 1.5 saat (saniye cinsinden)
       }
     });
 
@@ -264,6 +300,77 @@ export const logoutUser = async (request, reply) => {
       message: 'Çıkış başarılı',
       info: 'Tüm cookie\'ler temizlendi'
     });
+  } catch (err) {
+    reply.code(500).send({ error: 'Sunucu hatası', detail: err.message });
+  }
+};
+
+export const checkUsername = async (request, reply) => {
+  const { username } = request.query;
+  if (!username) {
+    return reply.code(400).send({ error: 'Kullanıcı adı gerekli' });
+  }
+
+  try {
+    const user = await findUserByUsername(username);
+    if (user) {
+      return reply.send({ exists: true, message: 'Bu kullanıcı adı zaten alınmış' });
+    }
+    reply.send({ exists: false, message: 'Kullanıcı adı kullanılabilir' });
+  } catch (err) {
+    reply.code(500).send({ error: 'Sunucu hatası', detail: err.message });
+  }
+};
+
+export const checkEmail = async (request, reply) => {
+  const { email } = request.query;
+  if (!email) {
+    return reply.code(400).send({ error: 'E-posta adresi gerekli' });
+  }
+
+  try {
+    const user = await findUserByEmail(email);
+    if (user) {
+      return reply.send({ exists: true, message: 'Bu e-posta adresi zaten kayıtlı' });
+    }
+    reply.send({ exists: false, message: 'E-posta adresi kullanılabilir' });
+  } catch (err) {
+    reply.code(500).send({ error: 'Sunucu hatası', detail: err.message });
+  }
+};
+
+export const deleteAccount = async (request, reply) => {
+  const userId = request.user.id;
+  const ip = request.ip;
+  const userAgent = request.headers['user-agent'] || 'unknown';
+
+  try {
+    const user = await findUserById(userId);
+    if (!user) {
+      return reply.code(404).send({ error: 'Kullanıcı bulunamadı' });
+    }
+
+    // 2FA kodu oluştur ve gönder
+    const code = generate2FACode();
+    pending2FA.set(user.email, { 
+      code, 
+      ip, 
+      userAgent, 
+      createdAt: Date.now(), 
+      action: 'delete',
+      userId: userId 
+    });
+
+    await sendEmail(user.email, '⚠️ Hesap Silme Doğrulaması', 
+      `Hesabınızı kalıcı olarak silmek için doğrulama kodunuz: ${code}\n\nBu işlem geri alınamaz!`
+    );
+
+    reply.send({
+      message: '2FA kodu gönderildi. Hesabınızı silmek için e-posta kutunuzu kontrol edin.',
+      email: user.email,
+      warning: 'Bu işlem geri alınamaz!'
+    });
+
   } catch (err) {
     reply.code(500).send({ error: 'Sunucu hatası', detail: err.message });
   }
