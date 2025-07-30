@@ -15,7 +15,7 @@ async function verifyToken(req, rep) {
 export default async function authRoutes(fastify, opts) {
   // Public routes
   fastify.post('/register', AuthController.register);
-  fastify.post('/login', AuthController.login);
+  fastify.get('/login', AuthController.login);
   fastify.post('/logout', AuthController.logout);
   
   // Protected routes

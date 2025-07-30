@@ -78,6 +78,7 @@ class AuthController {
   }
 
   async login(req, rep) {
+    console.log("Login request received:", req.body);
     try {
       const { email, password } = req.body;
 

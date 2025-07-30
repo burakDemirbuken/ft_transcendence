@@ -1,0 +1,22 @@
+				try {
+					const response = await fetch(finalUrl, {
+						method: request.method,
+						headers: {
+							...request.headers,
+							'host': undefined,
+						},
+						body: ['GET', 'HEAD'].includes(request.method) ? undefined : JSON.stringify(request.body),
+					});
+
+					// Forward response headers
+					Object.entries(response.headers).forEach(([key, value]) => {
+						reply.header(key, value);
+					});
+
+					// Forward response body
+					const responseBody = await response.text();
+					return reply.code(response.status).send(responseBody);
+				} catch (error) {
+					gateway.log.error(`Proxy error: ${error.message}`);
+					return reply.code(500).send({ error: 'Proxy error' });
+				}

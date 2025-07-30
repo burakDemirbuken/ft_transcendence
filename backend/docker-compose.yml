@@ -1,33 +1,26 @@
 volumes:
-  nginx_data:
-    driver: local
-    driver_opts:
-      type: none
-      device: /home/ysarac/Masaüstü/microservice/nginx_data
-      o: bind
   gateway_src:
     driver: local
     driver_opts:
       type: none
-      device: /home/ysarac/Masaüstü/microservice/backend/gateway
+      device: ./gateway
       o: bind
   database:
     driver: local
     driver_opts:
       type: none
-      device: /home/ysarac/Masaüstü/microservice/backend/databases/data
+      device: ./databases/data
       o: bind
   authentication_src:
     driver: local
     driver_opts:
       type: none
-      device: /home/ysarac/Masaüstü/microservice/backend/authentication
+      device: ./authentication
       o: bind
 
 networks:
   transcendency:
     driver: bridge
-
 
 services:
   authentication:
@@ -40,8 +33,6 @@ services:
       - 3001
     volumes:
       - authentication_src:/app
-      - /app/node_modules
-
 
   gateway:
     container_name: gateway
@@ -53,7 +44,7 @@ services:
       - 3000
     volumes:
       - gateway_src:/app
-      - /app/node_modules
+
   #gameserver:
   #  container_name: gameserver
   #  build: ./gameserver

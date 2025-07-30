@@ -7,7 +7,6 @@ import authRoutes from './routes/authRoutes.js'
 const fastify = Fastify({ 
   logger: {
     level: 'info',
-    prettyPrint: true
   }
 })
 

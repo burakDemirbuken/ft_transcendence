@@ -95,7 +95,7 @@ log-nginx:
 	@echo "$(GREEN)Showing logs for nginx service$(NC)"
 	@$(COMPOSE_CMD) logs -f nginx
 
-log-authentication:
+log-auth:
 	@echo "$(GREEN)Showing logs for authentication service$(NC)"
 	@$(COMPOSE_CMD) logs -f authentication
 
@@ -107,7 +107,7 @@ shell-nginx:
 	@echo "$(GREEN)Entering shell for nginx service$(NC)"
 	@$(COMPOSE_CMD) exec -it nginx /bin/sh
 
-shell-authentication:
+shell-auth:
 	@echo "$(GREEN)Entering shell for authentication service$(NC)"
 	@$(COMPOSE_CMD) exec -it authentication /bin/sh
 
