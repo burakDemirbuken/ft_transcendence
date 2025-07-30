@@ -1,5 +1,5 @@
-import Ball from './Ball.js';
-import Paddle from './Paddle.js';
+import Ball from '../Ball.js';
+import Paddle from '../Paddle.js';
 
 //! TODOO:  Paddle ve Player ayır.
 /*

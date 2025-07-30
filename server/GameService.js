@@ -1,4 +1,3 @@
-import GameManager from './GameManager.js';
 import WebSocketManager from './network/WebSocketManager.js';
 import Player from './Player.js';
 import Fastify from 'fastify';

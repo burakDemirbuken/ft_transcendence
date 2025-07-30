@@ -9,20 +9,20 @@ class NetworkManager
 
 		// URL'den user bilgisi varsa onu kullan, yoksa rastgele oluştur
 		if (!this.getUserFromURL()) {
-			const randomId = this.generateRandomId();
-			const randomName = this.generateRandomName();
+			const randomId = this.TEST_generateRandomId();
+			const randomName = this.TEST_generateRandomName();
 			this.serverUrl = `ws://10.12.5.4:3000/ws?id=${randomId}&matchId=${randomName}`;
 			console.log(`🎮 Generated test user: ID=${randomId}, Name=${randomName}`);
 		}
 	}
 
-	generateRandomId()
+	TEST_generateRandomId()
 	{
 		// 6 haneli rastgele alfanumerik ID
 		return Math.random().toString(36).substr(2, 6).toUpperCase();
 	}
 
-	generateRandomName()
+	TEST_generateRandomName()
 	{
 		const names = [
 			'Player', 'Gamer', 'User', 'Tester', 'Demo',

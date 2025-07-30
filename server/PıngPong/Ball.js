@@ -1,34 +1,25 @@
-import Player from './Paddle.js';
-import Object from './Object.js';
+import Player from '../Paddle.js';
+import Object from '../Object.js';
 
-const CANVAS_WIDTH = 800;
-const CANVAS_HEIGHT = 600;
-const BALL_RADIUS = 7;
-const BALL_START_SPEED = 500;
+const BALL_SPEED_INCREASE = 200;
 
 class Ball extends Object
 {
-	constructor()
+	constructor(x, y, radius, ballSpeed, canvasSize)
 	{
-		super(CANVAS_HEIGHT / 2, CANVAS_WIDTH / 2, BALL_RADIUS * 2, BALL_RADIUS * 2);
-		this.radius = BALL_RADIUS;
-		this.speed = BALL_START_SPEED;
+		super(x, y, radius * 2, radius * 2);
+		this.radius = radius;
+		this.speed = ballSpeed;
+		this.defaultSpeed = ballSpeed;
 		this.directionX = Math.random() < 0.5 ? -1 : 1;
 		this.directionY = Math.random();
 		this.lastGoal = null;
+		this.canvasSize = canvasSize;
 	}
 
 	update(deltaTime, paddles)
 	{
-		console.log('---------------- Ball Update --------------');
-		console.log(`Ball position: ${this.position.x}, ${this.position.y}`);
-		console.log(`Ball oldPosition: ${this.oldPosition.x}, ${this.oldPosition.y}`);
-		console.log(`Ball speed: ${this.speed}`);
-		console.log(`Ball direction: ${this.directionX}, ${this.directionY}`);
-		console.log(`-------------------------------------------`);
-
 		const deltaTimeInSeconds = deltaTime / 1000;
-
 
 		this.oldPosition = { x: this.position.x, y: this.position.y };
 		this.position.x += this.directionX * this.speed * deltaTimeInSeconds;
@@ -47,9 +38,9 @@ class Ball extends Object
 			this.position.y = this.radius;
 			this.directionY *= -1;
 		}
-		else if (this.position.y + this.radius >= CANVAS_HEIGHT)
+		else if (this.position.y + this.radius >= this.canvasSize.height)
 		{
-			this.position.y = CANVAS_HEIGHT - this.radius;
+			this.position.y = this.canvasSize.height - this.radius;
 			this.directionY *= -1;
 		}
 
@@ -60,7 +51,7 @@ class Ball extends Object
 			this.reset();
 			return 'goal-right';
 		}
-		else if (this.position.x + this.radius >= CANVAS_WIDTH)
+		else if (this.position.x + this.radius >= this.canvasSize.width)
 		{
 			console.log('🥅 Goal! Left player scores');
 			this.lastGoal = 'left';
@@ -73,9 +64,9 @@ class Ball extends Object
 
 	reset()
 	{
-		this.position.x = CANVAS_WIDTH / 2;
-		this.position.y = CANVAS_HEIGHT / 2;
-		this.speed = BALL_START_SPEED;
+		this.position.x = this.canvasSize.width / 2;
+		this.position.y = this.canvasSize.height / 2;
+		this.speed = defaultSpeed;
 
 		if (this.lastGoal === 'right')
 			this.directionX = -1;
@@ -84,7 +75,7 @@ class Ball extends Object
 
 		this.directionY = Math.random();
 
-		this.oldPosition = this.position;
+		this.oldPosition = { x: this.position.x, y: this.position.y };
 	}
 
 	checkCollisionWithPaddles(paddles)
@@ -102,20 +93,7 @@ class Ball extends Object
 
 	isCollidingWithPaddle(paddle)
 	{
-		// Circle-Rectangle collision detection
-		const ballCenterX = this.position.x;
-		const ballCenterY = this.position.y;
-
-		// En yakın noktayı bul
-		const closestX = Math.max(paddle.position.x, Math.min(ballCenterX, paddle.position.x + paddle.size.width));
-		const closestY = Math.max(paddle.position.y, Math.min(ballCenterY, paddle.position.y + paddle.size.height));
-
-		// Mesafe hesapla
-		const distanceX = ballCenterX - closestX;
-		const distanceY = ballCenterY - closestY;
-		const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
-
-		return distanceSquared <= (this.radius * this.radius);
+		return this.checkTrajectoryCollision(paddle) && this.isCollidingWith(paddle);
 	}
 
 	getCollisionSide(paddle)
@@ -126,7 +104,6 @@ class Ball extends Object
 		const prevBallX = this.oldPosition.x;
 		const prevBallY = this.oldPosition.y;
 
-		// Hangi yönden geldiğini hesapla
 		if (prevBallX < paddle.position.x && ballCenterX >= paddle.position.x)
 			return 'left';
 		else if (prevBallX > paddle.position.x + paddle.size.width && ballCenterX <= paddle.position.x + paddle.size.width)
@@ -136,7 +113,6 @@ class Ball extends Object
 		else if (prevBallY > paddle.position.y + paddle.size.height && ballCenterY <= paddle.position.y + paddle.size.height)
 			return 'bottom';
 
-		// Varsayılan olarak en yakın kenarı hesapla
 		const distToLeft = Math.abs(ballCenterX - paddle.position.x);
 		const distToRight = Math.abs(ballCenterX - (paddle.position.x + paddle.size.width));
 		const distToTop = Math.abs(ballCenterY - paddle.position.y);
@@ -175,7 +151,6 @@ class Ball extends Object
 	{
 		console.log(`🏓 Ball hit paddle on ${collisionSide} side`);
 
-		// Topu paddle'dan tamamen ayır
 		this.separateFromPaddle(paddle, collisionSide);
 
 		switch(collisionSide)
@@ -195,11 +170,10 @@ class Ball extends Object
 
 	separateFromPaddle(paddle, collisionSide)
 	{
-		// Topu paddle'dan tamamen ayırmak için doğru pozisyona yerleştir
 		switch(collisionSide)
 		{
 			case 'left':
-				this.position.x = paddle.position.x - this.radius - 1; // 1 piksel extra boşluk
+				this.position.x = paddle.position.x - this.radius - 1;
 				break;
 			case 'right':
 				this.position.x = paddle.position.x + paddle.size.width + this.radius + 1;
@@ -224,8 +198,8 @@ class Ball extends Object
 		this.directionX /= length;
 		this.directionY /= length;
 
-		this.speed =  BALL_START_SPEED;
-		this.speed += Math.abs(length) * 200;
+		this.speed =  defaultSpeed;
+		this.speed += Math.abs(length) * BALL_SPEED_INCREASE;
 	}
 
 	getState()

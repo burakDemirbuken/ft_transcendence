@@ -1,6 +1,6 @@
 import Game from './Game.js';
 
-const TICK_RATE = 1000 / 60; // 60 FPS - daha smooth hareket için
+const TICK_RATE = 1000 / 30; // 30 FPS
 
 class GameManager
 {

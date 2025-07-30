@@ -1,4 +1,4 @@
-import Ball from './Ball.js';
+import Ball from './PıngPong/Ball.js';
 import Paddle from './Paddle.js';
 
 class Game

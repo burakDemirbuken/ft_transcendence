@@ -1,4 +1,3 @@
-import Fastify from 'fastify'
 import websocket from '@fastify/websocket'
 
 class WebSocketManager
