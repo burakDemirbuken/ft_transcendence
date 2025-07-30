@@ -5,19 +5,26 @@
 		</div>
 		<form id="loginForm">
 			<div id="sides">
-				<div id="screen">
-					<h2>Login</h2>
-					<div class="form-group">
-						<input type="text" name="username" placeholder="Username">
+				<div id="dynamicScreen">
+					<div class="field active" data-step="welcome">
+						<h2>Welcome!</h2>
 					</div>
-					<div class="form-group">
-						<input type="email" name="email" placeholder="Email">
+					<div class="field" data-step="email">
+						<input type="email" name="email" placeholder="Email" required>
 					</div>
-					<div class="form-group">
-						<input type="password" name="password" placeholder="Password">
+					<div class="field" data-step="username">
+						<input type="text" name="username" placeholder="Username" requiered>
+					</div>
+					<div class="field" data-step="password">
+						<input type="password" name="password" placeholder="Password" required>
 					</div>
 				</div>
-				<button type="submit"></button>
+				<button type="button" id="enter"></button>
+				<button type="button" id="retry"></button>
+				<button type="button" id="up"></button>
+				<button type="button" id="left"></button>
+				<button type="button" id="right"></button>
+				<button type="button" id="down"></button>
 			</div>
 		</form>
 		<div id="console"></div>

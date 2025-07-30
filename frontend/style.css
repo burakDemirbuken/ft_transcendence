@@ -12,7 +12,7 @@ body {
 }
 
 #content {
-	color: blue;
+	color: magenta;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -31,6 +31,7 @@ body {
 }
 
 #title {
+	cursor: default;
 	background-color: rgb(57, 34, 109);
 	color: rgb(252, 245, 255);
 	font-family: "RocketClouds";
@@ -76,22 +77,22 @@ body {
 		0 5px 50px magenta, 0 -5px 50px magenta;}
 
 #sides {
-	background: rgb(57, 34, 109);
+	background: #39226d;
 	background-clip: padding-box;
 	border-top: 30px solid rgb(46, 27, 87);
 	border-bottom: 50px solid rgb(46, 27, 87);
 	border-left: 10px solid transparent;
 	border-right: 10px solid transparent;
 	width:300px;
-	height: 350px;
+	height: 345px;
 
 	display: flex;
 	flex-direction: column;
 	position: relative;
 	align-items: center;
 	justify-content: center;
-	padding-top: 30px;
-	padding-bottom: 20px;
+	padding-top: 20px;
+	padding-bottom: 10px;
 }
 
 #sides::after {
@@ -110,12 +111,130 @@ body {
 	z-index: -1;
 }
 
-#sides button {
+#sides #enter {
 	position: absolute;
-	background-color: cyan;
+	cursor: grab;
+	background-color: turquoise;
 	background-clip: padding-box;
-	bottom: -30px;
-	left: 40;
+	bottom: -20px;
+	right: 30px;
+
+	width: 40px;
+	height: 20px;
+	border-radius: 50% 50% / 30% 30%;
+	border: 0;
+	z-index: 1;
+	overflow: hidden;
+}
+
+#enter::before {
+	box-sizing: border-box;
+	content: "";
+	position: absolute;
+	top: -1%;
+	left: 0;
+
+	box-shadow: inset 0 0 1px 0 black;
+	border-radius: 50%;
+	border: 1px solid turquoise;
+	width: 100%;
+	height: 60%;
+}
+
+
+#enter::after {
+	content: '';
+	box-sizing: border-box;
+	position: absolute;
+	width: 100%;
+	height: 60%;
+	top: -1%;
+	left: 0;
+	border-radius: 50%;
+	background:
+	linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 60%
+	), linear-gradient(
+		135deg,
+		rgba(255, 255, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 40%
+	), linear-gradient(
+		260deg,
+		rgba(255, 0, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 80%
+	);
+	backdrop-filter: blur(5px);
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+#sides #retry {
+	position: absolute;
+	cursor: grab;
+	background-color: red;
+	background-clip: padding-box;
+	bottom: -35px;
+	right: 60px;
+
+	width: 35px;
+	height: 20px;
+	border-radius: 50% 50% / 30% 30%;
+	border: 0;
+	z-index: 1;
+}
+
+
+#retry::before {
+	box-sizing: border-box;
+	content: "";
+	position: absolute;
+	top: -1%;
+	left: 0;
+
+	box-shadow: inset 0 0 1px 0 black;
+	border-radius: 50%;
+	border: 1px solid red;
+	width: 100%;
+	height: 60%;
+}
+
+#retry::after {
+	content: '';
+	box-sizing: border-box;
+	position: absolute;
+	width: 100%;
+	height: 60%;
+	top: -1%;
+	left: 0;
+	border-radius: 50%;
+	background:
+	linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 60%
+	), linear-gradient(
+		120deg,
+		rgba(255, 255, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 40%
+	), linear-gradient(
+		260deg,
+		rgba(255, 0, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 80%
+	);
+	backdrop-filter: blur(5px);
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+#sides #up {
+	position: absolute;
+	cursor: grab;
+	background-color: yellow;
+	background-clip: padding-box;
+	bottom: -15px;
+	left: 50px;
 
 	width: 30px;
 	height: 20px;
@@ -124,9 +243,238 @@ body {
 	z-index: 1;
 }
 
-#screen {
-	background-color: rgb(57, 34, 109);
-	--hori: rgb(57, 34, 109);
+#up::before {
+	box-sizing: border-box;
+	content: "";
+	position: absolute;
+	top: -1%;
+	left: 0;
+
+	box-shadow: inset 0 0 1px 0 black;
+	border-radius: 50%;
+	border: 1px solid yellow;
+	width: 100%;
+	height: 60%;
+}
+
+#up::after {
+	content: '';
+	box-sizing: border-box;
+	position: absolute;
+	width: 100%;
+	height: 60%;
+	top: -1%;
+	left: 0;
+	border-radius: 50%;
+	background:
+	linear-gradient(
+	180deg,
+		rgba(255, 255, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 60%
+	), linear-gradient(
+		225deg,
+		rgba(255, 255, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 60%
+	), linear-gradient(
+		90deg,
+		rgba(255, 0, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 40%
+	);
+	backdrop-filter: blur(5px);
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+#sides #down {
+	position: absolute;
+	cursor: grab;
+	background-color: green;
+	background-clip: padding-box;
+	bottom: -35px;
+	left: 50px;
+
+	width: 30px;
+	height: 20px;
+	border-radius: 50% 50% / 30% 30%;
+	border: 0;
+	z-index: 1;
+}
+
+#down::before {
+	box-sizing: border-box;
+	content: "";
+	position: absolute;
+	top: -1%;
+	left: 0;
+
+	box-shadow: inset 0 0 1px 0 black;
+	border-radius: 50%;
+	border: 1px solid green;
+	width: 100%;
+	height: 60%;
+}
+
+#down::after {
+	content: '';
+	box-sizing: border-box;
+	position: absolute;
+	width: 100%;
+	height: 60%;
+	top: -1%;
+	left: 0;
+	border-radius: 50%;
+	background:
+	linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 40%
+	), linear-gradient(
+		190deg,
+		rgba(255, 255, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 40%
+	), linear-gradient(
+		20deg,
+		rgba(255, 0, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 80%
+	);
+	backdrop-filter: blur(5px);
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+#sides #left {
+	position: absolute;
+	cursor: grab;
+	background-color: purple;
+	background-clip: padding-box;
+	bottom: -25px;
+	left: 25px;
+
+	width: 30px;
+	height: 20px;
+	border-radius: 50% 50% / 30% 30%;
+	border: 0;
+	z-index: 1;
+}
+
+#left::before {
+	box-sizing: border-box;
+	content: "";
+	position: absolute;
+	top: -1%;
+	left: 0;
+
+	box-shadow: inset 0 0 1px 0 black;
+	border-radius: 50%;
+	border: 1px solid purple;
+	width: 100%;
+	height: 60%;
+}
+
+#left::after {
+	content: '';
+	box-sizing: border-box;
+	position: absolute;
+	width: 100%;
+	height: 60%;
+	top: -1%;
+	left: 0;
+	border-radius: 50%;
+	background:
+	linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 30%
+	), linear-gradient(
+		190deg,
+		rgba(255, 255, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 40%
+	), linear-gradient(
+		20deg,
+		rgba(255, 80, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 80%
+	);
+	backdrop-filter: blur(5px);
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+#sides #right {
+	position: absolute;
+	cursor: grab;
+	background-color: magenta;
+	background-clip: padding-box;
+	bottom: -25px;
+	left: 75px;
+
+	width: 30px;
+	height: 20px;
+	border-radius: 50% 50% / 30% 30%;
+	border: 0;
+	z-index: 1;
+}
+
+#right::before {
+	box-sizing: border-box;
+	content: "";
+	position: absolute;
+	top: -1%;
+	left: 0;
+
+	box-shadow: inset 0 0 1px 0 black;
+	border-radius: 50%;
+	border: 1px solid magenta;
+	width: 100%;
+	height: 60%;
+}
+
+#right::after {
+	content: '';
+	box-sizing: border-box;
+	position: absolute;
+	width: 100%;
+	height: 60%;
+	top: -1%;
+	left: 0;
+	border-radius: 50%;
+	background:
+	linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 40%
+	), linear-gradient(
+		190deg,
+		rgba(255, 255, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 40%
+	), linear-gradient(
+		20deg,
+		rgba(255, 80, 255, 0.8) 0%,
+		rgba(255, 255, 255, 0) 80%
+	);
+	backdrop-filter: blur(5px);
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+#dynamicScreen {
+	background-image:
+	/* --- Grid --- */
+	linear-gradient(to right, rgba(19,19,255,0.1) 0%, transparent 5%),
+	linear-gradient(to bottom, rgba(19,19,255,0.1) 0%, transparent 5%),
+	/* --- Stars --- */
+	radial-gradient(circle at 10% 20%, red 0.5px, transparent 1px),
+	radial-gradient(circle at 50% 30%, yellow 0.5px, transparent 1px),
+	radial-gradient(circle at 30% 60%, rgb(188, 80, 255) 0.5px, transparent 1px),
+	radial-gradient(circle at 70% 80%, white 0.5px, transparent 1px);
+	background-size:
+		20px 20px,
+		20px 20px,
+		100px 100px,
+		100px 100px,
+		100px 100px,
+		100px 100px;
+	background-color: #0f1535; /* Dark space-like background */
+	--hori: mediumpurple;
 	--verti: rgb(46, 27, 87);
 	border-top: 8px solid var(--hori);
 	border-bottom: 8px solid var(--hori);
@@ -136,10 +484,24 @@ body {
 	height: 200px;
 	box-shadow: inset 0 0px 40px black;
 
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+}
+
+.field {
+	position: absolute;
+	width: 100%;
+	opacity: 0;
+	transition: opacity 0.3 ease;
+	pointer-events: none;
+}
+
+.field.active {
+	opacity: 1;
+	pointer-events: all;
 }
 
 #console {
@@ -192,7 +554,7 @@ body {
 	position: relative;
 }
 
-/* #bottom::before {
+#bottom::before {
 	content: "";
 	position: absolute;
 	background-color: magenta;
@@ -213,7 +575,7 @@ body {
 	width: 102%;
 	height: 100%;
 	pointer-events: none;
-} */
+}
 
 @font-face {
 	font-family: "RocketClouds";

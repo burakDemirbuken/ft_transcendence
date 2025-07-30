@@ -17,12 +17,6 @@ async function loadTemplate(templateName) {
 
 const content = document.querySelector('#content');
 
-async function req(request) {
-	const response = await fetch(request);
-	const obj = await response.json();
-	return obj;
-}
-
 async function register(event) {
 	event.preventDefault(); // Prevent auto refresh
 
@@ -101,6 +95,69 @@ async function login2(event) {
 	navigate("profile");
 }
 
+const form = document.querySelector('#loginForm');
+let currentStep = 'welcome';
+let currentAuthMode = null;
+
+// Enter button handler
+document.getElementById('enter')?.addEventListener('click', async () => {
+
+	switch (currentStep) {
+		case 'welcome':
+			goToNextField('email');
+			break;
+
+		case 'email':
+			const email = form.elements.email.value;
+			const emailExists = await checkEmailExists(email);
+
+			if (emailExists) {
+				currentAuthMode = 'login';
+				goToNextField('password');
+			} else {
+				currentAuthMode = 'register';
+				goToNextField('username');
+			}
+			break;
+
+		case 'username':
+			const username = form.elements.username.value;
+			const usernameExists = await checkUsernameExists(username);
+
+			if (usernameExists) {
+				showError("Username taken");
+			} else {
+				goToNextField('password');
+			}
+			break;
+
+		case 'password':
+			if (currentAuthMode === "login") {
+				const loginSuccess = await attemptLogin(formData);
+				// form?.dispatchEvent(new Event('submit'));
+				if (!loginSuccess)
+					showError("Wrong password");
+				form.elements.password.value = "";
+			}
+			else
+				await attemptRegister(formData);
+			break;
+	}
+});
+
+// document.getElementById('retry')?.addEventListener('click', () => {
+// 	if (currentStep === 'email') {
+
+// 	} else if (currentStep === 'password') {
+
+// 	}
+// });
+
+form?.addEventListener('submit', (e) => {
+	e.preventDefault();
+	// my submission logic
+});
+
 async function loadPage(page) {
 	const body = document.querySelector('body');
 	pageState.current = page;
@@ -113,7 +170,7 @@ async function loadPage(page) {
 		content.innerHTML = '<h2>404</h2><p>Page not found.</p>';
 	}
 
-	content.querySelector('#loginForm')?.addEventListener("submit", login);
+	// content.querySelector('#loginForm')?.addEventListener("submit", login);
 	content.querySelector('#registerForm')?.addEventListener("submit", register);
 	content.querySelector('#twofaForm')?.addEventListener("submit", login2);
 }
