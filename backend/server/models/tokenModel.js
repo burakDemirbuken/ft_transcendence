@@ -52,3 +52,14 @@ export const deactivateAllUserTokens = (userId) => {
     });
   });
 };
+
+// Kullanıcının tüm token'larını sil (hesap silme için)
+export const deleteAllUserTokens = (userId) => {
+  return new Promise((resolve, reject) => {
+    const sql = `DELETE FROM tokens WHERE user_id = ?`;
+    db.run(sql, [userId], function (err) {
+      if (err) reject(err);
+      else resolve(this.changes);
+    });
+  });
+};
