@@ -1,13 +1,13 @@
 const pageState = {
-	current: 'login', // default
+	current: "login", // default
 };
 
 const routes = {
-	login: { template: 'login', title: 'Login' },
-	"2fa": { template: '2fa', title: '2fa' },
-	register: { template: 'register', title: 'Register' },
-	profile: { template: 'profile', title: 'Profile' },
-	home: { template: 'home', title: 'Home' },
+	login: { template: "login", title: "Login" },
+	"2fa": { template: "2fa", title: "2fa" },
+	register: { template: "register", title: "Register" },
+	profile: { template: "profile", title: "Profile" },
+	home: { template: "home", title: "Home" },
 }
 
 async function loadTemplate(templateName) {
@@ -15,7 +15,7 @@ async function loadTemplate(templateName) {
 	return await response.text();
 }
 
-const content = document.querySelector('#content');
+const content = document.querySelector("#content");
 
 async function register(event) {
 	event.preventDefault(); // Prevent auto refresh
@@ -29,15 +29,15 @@ async function register(event) {
 	};
 
 	const request = new Request("http://localhost:3000/api/users/register", {
-		method: 'POST',
+		method: "POST",
 		headers: new Headers({
-			'Content-Type': 'application/json',
+			"Content-Type": "application/json",
 		}),
 		body: JSON.stringify(user),
 	});
-	// 'Authorization': 'Bearer token123' // HEADER
-	// cache: 'no-store',
-	// mode: 'cors' // CORS handling
+	// "Authorization": "Bearer token123" // HEADER
+	// cache: "no-store",
+	// mode: "cors" // CORS handling
 
 	const response = await fetch(request);
 	const obj = await response.json();
@@ -52,37 +52,6 @@ async function register(event) {
 	content.appendChild(test);
 }
 
-async function login(event) {
-	event.preventDefault(); // Prevent auto refresh
-
-	const form = new FormData(event.target);
-
-	const user = {
-		"username": form.get("username"),
-		"email": form.get("email"),
-		"password": form.get("password")
-	};
-
-	const request = new Request("http://localhost:3000/api/users/login", {
-		method: 'POST',
-		headers: new Headers({
-			'Content-Type': 'application/json',
-		}),
-		body: JSON.stringify(user),
-	});
-
-	const response = await fetch(request);
-	const obj = await response.json();
-
-	if (response.ok)
-		navigate("2fa");
-	else {
-		const test = document.createElement("p");
-		test.textContent = `Reply: ${obj.error}, ${user.email}, ${user.username}, ${user.password}`;
-		content.appendChild(test);
-	}
-}
-
 async function login2(event) {
 	event.preventDefault();
 
@@ -95,7 +64,8 @@ async function login2(event) {
 	navigate("profile");
 }
 
-let currentStep = 'welcome';
+let currentStep = "welcome";
+let userRegistered;
 
 function goToNextField(field)
 {
@@ -103,53 +73,118 @@ function goToNextField(field)
 	step.classList.remove("active");
 	currentStep = field;
 	step = document.querySelector(`[data-step="${currentStep}"]`);
-	step.classList.add('active');
+	step.classList.add("active");
 }
-
-// const form = document.querySelector('#loginForm');
 
 // Enter button handler
 async function enter() {
+	const form = document.querySelector("#loginForm");
+	const formData = new FormData(form);
+	let obj;
+
 	switch (currentStep) {
-		case 'welcome':
-			goToNextField("email");
+		case "welcome":
+			goToNextField("username");
 			break;
 
-		case 'email':
-			goToNextField("username")
+		case "username":
+			const address = `http://localhost:3000/api/users/checkUsername?username=${formData.get("username")}`;
+			const response = await fetch(address);
+			const json = await response.json();
+			if(json.exists) {
+				userRegistered = true;
+				goToNextField("password");
+			} else {
+				userRegistered = false;
+				goToNextField("email");
+			}
 			break;
 
-		case 'username':
-			goToNextField('password');
+		case "email":
+			// check email validity
+			goToNextField("password")
 			break;
 
-		case 'password':
-			navigate("2fa");
+		case "password":
+			if (userRegistered) {
+				obj = {
+					"username": formData.get("username"),
+					"password": formData.get("password")
+				};
+				const request = new Request("http://localhost:3000/api/users/login", {
+					method: "POST",
+					headers: new Headers({
+						"Content-Type": "application/json",
+					}),
+					body: JSON.stringify(obj),
+				});
+				const response = await fetch(request);
+				const json = await response.json();
+				if (response.ok) {
+					document.querySelector("#error").textContent = json.message;
+					goToNextField("2fa")
+				}
+				else
+					document.querySelector("#error").textContent = json.error;
+			} else {
+				obj = {
+					"username": formData.get("username"),
+					"email": formData.get("email"),
+					"password": formData.get("password")
+				};
+				const request = new Request("http://localhost:3000/api/users/register", {
+					method: "POST",
+					headers: new Headers({
+						"Content-Type": "application/json",
+					}),
+					body: JSON.stringify(obj),
+				});
+				const response = await fetch(request);
+				const json = await response.json();
+				if (response.ok) {
+					document.querySelector("#error").textContent = json.message;
+					goToNextField("welcome")
+				}
+				else
+					document.querySelector("#error").textContent = json.error;
+			}
+			break;
+
+		case "2fa":
+			// send code and get cookies
+			navigate("profile");
 			break;
 	}
 };
 
 async function retry() {
 	switch (currentStep) {
-		case 'welcome':
+		case "welcome":
 			break;
 
-		case 'email':
-			goToNextField("welcome")
+		case "username":
+			goToNextField("welcome");
 			break;
 
-		case 'username':
-			goToNextField('email');
+		case "email":
+			goToNextField("username")
 			break;
 
-		case 'password':
-			goToNextField('username');
+		case "password":
+			if (userRegistered)
+				goToNextField("username");
+			else
+				goToNextField("email");
+			break;
+
+		case "2fa":
+			goToNextField("password");
 			break;
 	}
 };
 
 async function loadPage(page) {
-	const body = document.querySelector('body');
+	const body = document.querySelector("body");
 	pageState.current = page;
 
 	const route = routes[page];
@@ -157,33 +192,33 @@ async function loadPage(page) {
 		content.innerHTML = await loadTemplate(route.template);
 		document.title = route.title;
 	} else {
-		content.innerHTML = '<h2>404</h2><p>Page not found.</p>';
+		content.innerHTML = "<h2>404</h2><p>Page not found.</p>";
 	}
 
 	currentStep = "welcome";
 	document.querySelector("#enter")?.addEventListener("click", enter);
-	document.querySelector("#retry")?.addEventListener('click', retry);
-	// content.querySelector('#loginForm')?.addEventListener("submit", login);
-	content.querySelector('#registerForm')?.addEventListener("submit", register);
-	content.querySelector('#twofaForm')?.addEventListener("submit", login2);
+	document.querySelector("#retry")?.addEventListener("click", retry);
+	// content.querySelector("#loginForm")?.addEventListener("submit", login);
+	content.querySelector("#registerForm")?.addEventListener("submit", register);
+	content.querySelector("#twofaForm")?.addEventListener("submit", login2);
 }
 
 function navigate(page) {
-	history.pushState({ page }, '', `/${page}`);
+	history.pushState({ page }, "", `/${page}`);
 	loadPage(page);
 	console.log("navigate called");
 }
 
 // Handle browser back/forward
-window.addEventListener('popstate', (event) => {
-	const page = event.state.page || 'login';
+window.addEventListener("popstate", (event) => {
+	const page = event.state.page || "login";
 	loadPage(page);
 });
 
 // Initial load and page reloads
-window.addEventListener('load', () => {
+window.addEventListener("load", () => {
 	const urlPage = window.location.pathname.slice(1);
-	const initialPage = urlPage || history.state.page || 'login';
+	const initialPage = urlPage || history.state.page || "login";
 	loadPage(initialPage);
-	history.replaceState({ page: initialPage }, '', `/${initialPage}`);
+	history.replaceState({ page: initialPage }, "", `/${initialPage}`);
 });

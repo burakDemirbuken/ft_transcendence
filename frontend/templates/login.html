@@ -6,6 +6,7 @@
 		<form id="loginForm">
 			<div id="sides">
 				<div id="dynamicScreen">
+					<p id="error"></p>
 					<div class="field active" data-step="welcome">
 						<h2>Welcome!</h2>
 						<p>Press Start Button...</p>
@@ -21,6 +22,10 @@
 					<div class="field" data-step="password">
 						<label for="email">Enter password</label>
 						<input type="password" name="password" placeholder=">" required>
+					</div>
+					<div class="field" data-step="2fa">
+						<label for="email">Enter code</label>
+						<input type="number" name="code" placeholder=">" required>
 					</div>
 				</div>
 				<button type="button" id="enter"></button>
