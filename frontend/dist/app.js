@@ -179,9 +179,47 @@ function back() {
     });
 }
 ;
+function loadTranslations(lang) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch(`locales/${lang}.json`);
+        return yield response.json();
+    });
+}
+function applyTranslations(lang) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const translations = yield loadTranslations(lang);
+        document.querySelector("[data-i18n='lang']").textContent = translations.login.lang;
+        document.querySelector("[data-i18n='welcome.title']").textContent = translations.login.welcome.title;
+        document.querySelector("[data-i18n='welcome.prompt']").textContent = translations.login.welcome.prompt;
+        document.querySelector("[data-i18n='username']").textContent = translations.login.username;
+        document.querySelector("[data-i18n='password']").textContent = translations.login.password;
+        document.querySelector("[data-i18n='email']").textContent = translations.login.email;
+        document.querySelector("[data-i18n='code']").textContent = translations.login.code;
+    });
+}
+let currentLang = "en";
+function up() {
+    return __awaiter(this, void 0, void 0, function* () {
+        switch (currentLang) {
+            case "en":
+                currentLang = "tr";
+                break;
+            case "tr":
+                currentLang = "de";
+                break;
+            case "de":
+                currentLang = "jp";
+                break;
+            case "jp":
+                currentLang = "en";
+                break;
+        }
+        applyTranslations(currentLang);
+    });
+}
 function loadPage(page) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
+        var _a, _b, _c;
         const body = document.querySelector("body");
         pageState.current = page;
         const route = routes[page];
@@ -195,6 +233,7 @@ function loadPage(page) {
         currentStep = "welcome";
         (_a = document.querySelector("#enter")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", enter);
         (_b = document.querySelector("#back")) === null || _b === void 0 ? void 0 : _b.addEventListener("click", back);
+        (_c = document.querySelector("#up")) === null || _c === void 0 ? void 0 : _c.addEventListener("click", up);
         // content.querySelector("#loginForm")?.addEventListener("submit", login);
     });
 }

@@ -8,6 +8,6 @@
 		"username": "Enter Username",
 		"email": "Enter Email",
 		"password": "Enter Password",
-		"2fa": "Enter Code"
+		"code": "Enter Code"
 	}
 }

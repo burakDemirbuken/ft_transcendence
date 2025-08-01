@@ -182,6 +182,44 @@ async function back() {
 	}
 };
 
+async function loadTranslations(lang) {
+	const response = await fetch(`locales/${lang}.json`);
+	return await response.json();
+}
+
+async function applyTranslations(lang) {
+	const translations = await loadTranslations(lang);
+	document.querySelector("[data-i18n='lang']").textContent = translations.login.lang;
+	document.querySelector("[data-i18n='welcome.title']").textContent = translations.login.welcome.title;
+	document.querySelector("[data-i18n='welcome.prompt']").textContent = translations.login.welcome.prompt;
+	document.querySelector("[data-i18n='username']").textContent = translations.login.username;
+	document.querySelector("[data-i18n='password']").textContent = translations.login.password;
+	document.querySelector("[data-i18n='email']").textContent = translations.login.email;
+	document.querySelector("[data-i18n='code']").textContent = translations.login.code;
+}
+
+let currentLang = "en";
+async function up() {
+	switch (currentLang) {
+		case "en":
+			currentLang = "tr";
+			break;
+
+		case "tr":
+			currentLang = "de";
+			break;
+
+		case "de":
+			currentLang = "jp";
+			break;
+
+		case "jp":
+			currentLang = "en";
+			break;
+	}
+	applyTranslations(currentLang);
+}
+
 async function loadPage(page) {
 	const body = document.querySelector("body");
 	pageState.current = page;
@@ -197,6 +235,7 @@ async function loadPage(page) {
 	currentStep = "welcome";
 	document.querySelector("#enter")?.addEventListener("click", enter);
 	document.querySelector("#back")?.addEventListener("click", back);
+	document.querySelector("#up")?.addEventListener("click", up);
 	// content.querySelector("#loginForm")?.addEventListener("submit", login);
 }
 
