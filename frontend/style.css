@@ -171,7 +171,7 @@ body {
 	opacity: 0.5;
 }
 
-#sides #retry {
+#sides #back {
 	position: absolute;
 	cursor: grab;
 	background-color: red;
@@ -187,7 +187,7 @@ body {
 }
 
 
-#retry::before {
+#back::before {
 	box-sizing: border-box;
 	content: "";
 	position: absolute;
@@ -201,7 +201,7 @@ body {
 	height: 60%;
 }
 
-#retry::after {
+#back::after {
 	content: '';
 	box-sizing: border-box;
 	position: absolute;
@@ -529,7 +529,38 @@ body {
 	pointer-events: all;
 }
 
-.field 
+.field label {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+}
+
+.field .input-wrapper {
+	display: flex;
+	align-items: center;
+}
+
+.field .caret {
+	margin-right: 8px;
+}
+
+.field input {
+	flex-grow: 1;
+	background: transparent;
+	outline: none;
+	border: none;
+	/* caret: coral underscore; Hide default cursor */
+	color: inherit;
+	font-family: inherit;
+	width: 100%;
+}
+
+@keyframes carblink {
+    0%, 50% { background-color: transparent; }
+    51%, 100% { background-color: #000; }
+}
 
 @keyframes flicker { to { opacity: 1; } }
 .blink {

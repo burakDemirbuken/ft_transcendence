@@ -56,16 +56,6 @@ function register(event) {
         content.appendChild(test);
     });
 }
-function login2(event) {
-    return __awaiter(this, void 0, void 0, function* () {
-        event.preventDefault();
-        // const form = new FormData(event.target);
-        // const code = {
-        // 	"code": form.get("code"),
-        // };
-        navigate("profile");
-    });
-}
 let currentStep = "welcome";
 let userRegistered;
 function goToNextField(field) {
@@ -148,13 +138,14 @@ function enter() {
                     });
                     const response = yield fetch(request);
                     const json = yield response.json();
-                    if (response.ok) {
-                        document.querySelector("#error").textContent = json.message;
-                        goToNextField("welcome");
-                    }
-                    else
-                        document.querySelector("#error").textContent = json.error;
+                    // if (response.ok) {
+                    // 	document.querySelector("#error").textContent = json.message;
+                    // goToNextField("welcome");
+                    // }
+                    // else
+                    // 	document.querySelector("#error").textContent = json.error;
                 }
+                goToNextField("2fa");
                 break;
             case "2fa":
                 // send code and get cookies
@@ -164,7 +155,7 @@ function enter() {
     });
 }
 ;
-function retry() {
+function back() {
     return __awaiter(this, void 0, void 0, function* () {
         switch (currentStep) {
             case "welcome":
@@ -190,7 +181,7 @@ function retry() {
 ;
 function loadPage(page) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d;
+        var _a, _b;
         const body = document.querySelector("body");
         pageState.current = page;
         const route = routes[page];
@@ -203,10 +194,8 @@ function loadPage(page) {
         }
         currentStep = "welcome";
         (_a = document.querySelector("#enter")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", enter);
-        (_b = document.querySelector("#retry")) === null || _b === void 0 ? void 0 : _b.addEventListener("click", retry);
+        (_b = document.querySelector("#back")) === null || _b === void 0 ? void 0 : _b.addEventListener("click", back);
         // content.querySelector("#loginForm")?.addEventListener("submit", login);
-        (_c = content.querySelector("#registerForm")) === null || _c === void 0 ? void 0 : _c.addEventListener("submit", register);
-        (_d = content.querySelector("#twofaForm")) === null || _d === void 0 ? void 0 : _d.addEventListener("submit", login2);
     });
 }
 function navigate(page) {

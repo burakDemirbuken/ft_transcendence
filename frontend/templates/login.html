@@ -13,30 +13,44 @@
 						<p class="blink">Press Start Button...</p>
 					</div>
 					<div class="field" data-step="username">
-						<label for="email">
-							<span class="prompt">Enter Email</span>
-							<span class="caret" aria-hidden="true"></span>
-							<input type="text" name="username" requiered>
+						<label>
+							<span class="prompt">Enter Username</span>
+							<div class="input-wrapper">
+								<span class="caret" aria-hidden="true">></span>
+								<input type="text" name="username" required class="blinking-cursor">
+							</div>
 						</label>
 					</div>
 					<div class="field" data-step="email">
-						<p>Enter email</p>
-						<label for="email">></label>
-						<input type="email" name="email" required>
+						<label>
+							<span class="prompt">Enter email</span>
+							<div class="input-wrapper">
+								<span class="caret" aria-hidden="true">></span>
+								<input type="email" name="email" required>
+							</div>
+						</label>
 					</div>
 					<div class="field" data-step="password">
-						<p>Enter password</p>
-						<label for="email">></label>
-						<input type="password" name="password" required>
+						<label>
+							<span class="prompt">Enter Password</span>
+							<div class="input-wrapper">
+								<span class="caret" aria-hidden="true">></span>
+								<input type="password" name="password" required>
+							</div>
+						</label>
 					</div>
 					<div class="field" data-step="2fa">
-						<p>Enter code</p>
-						<label for="email">></label>
-						<input type="number" name="code" required>
+						<label>
+							<span class="prompt">Enter Code</span>
+							<div class="input-wrapper">
+								<span class="caret" aria-hidden="true">></span>
+								<input type="text" pattern="[0-9]*" inputmode="numeric" name="code" required>
+							</div>
+						</label>
 					</div>
 				</div>
 				<button type="button" id="enter"></button>
-				<button type="button" id="retry"></button>
+				<button type="button" id="back"></button>
 				<button type="button" id="up"></button>
 				<button type="button" id="left"></button>
 				<button type="button" id="right"></button>

@@ -52,18 +52,6 @@ async function register(event) {
 	content.appendChild(test);
 }
 
-async function login2(event) {
-	event.preventDefault();
-
-	// const form = new FormData(event.target);
-
-	// const code = {
-	// 	"code": form.get("code"),
-	// };
-
-	navigate("profile");
-}
-
 let currentStep = "welcome";
 let userRegistered;
 
@@ -151,13 +139,14 @@ async function enter() {
 				});
 				const response = await fetch(request);
 				const json = await response.json();
-				if (response.ok) {
-					document.querySelector("#error").textContent = json.message;
-					goToNextField("welcome")
-				}
-				else
-					document.querySelector("#error").textContent = json.error;
+				// if (response.ok) {
+				// 	document.querySelector("#error").textContent = json.message;
+					// goToNextField("welcome");
+				// }
+				// else
+				// 	document.querySelector("#error").textContent = json.error;
 			}
+			goToNextField("2fa");
 			break;
 
 		case "2fa":
@@ -167,7 +156,7 @@ async function enter() {
 	}
 };
 
-async function retry() {
+async function back() {
 	switch (currentStep) {
 		case "welcome":
 			break;
@@ -207,10 +196,8 @@ async function loadPage(page) {
 
 	currentStep = "welcome";
 	document.querySelector("#enter")?.addEventListener("click", enter);
-	document.querySelector("#retry")?.addEventListener("click", retry);
+	document.querySelector("#back")?.addEventListener("click", back);
 	// content.querySelector("#loginForm")?.addEventListener("submit", login);
-	content.querySelector("#registerForm")?.addEventListener("submit", register);
-	content.querySelector("#twofaForm")?.addEventListener("submit", login2);
 }
 
 function navigate(page) {
