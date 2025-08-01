@@ -30,14 +30,12 @@ class Player
 		return {
 			id: this.id,
 			name: this.name,
-			score: this.score,
 			isReady: this.isReady,
 			status: this.status,
 			lastActivity: this.lastActivity
 		};
 	}
 
-	// Create from serialized data
 	static fromState(state)
 	{
 		const player = new Player(state.id, state.name);

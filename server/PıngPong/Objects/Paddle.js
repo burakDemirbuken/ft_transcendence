@@ -1,8 +1,7 @@
-import Object from './Object.js';
 
 const PADDLE_SPEED = 700;
 
-class Paddle extends Object
+class Paddle
 {
 	constructor(x , y, width, height, canvasSize)
 	{

@@ -19,3 +19,4 @@ TODOO:
 - [ ] mactchmaking-service - Oyuncu eşleştirme servisi
 - [ ] game-service - Oyun yönetim servisi
 - [ ] redis araştır.
+- [ ] kogami code entegre et. "nice try"

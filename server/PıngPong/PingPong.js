@@ -107,7 +107,6 @@ class Game
 		if (!this.isRunning || this.players.length !== 2)
 			return;
 
-		// Her player'ın input'larını paddle'lara aktar
 		for (const player of this.players)
 		{
 			const paddle = this.playerPaddles.get(player.id);
@@ -125,15 +124,6 @@ class Game
 
 		if (goalResult)
 			this.handleGoal(goalResult);
-	}
-
-	processPlayerInput(player, paddle)
-	{
-		const upPressed = player.inputs.get('up') || false;
-		const downPressed = player.inputs.get('down') || false;
-
-		paddle.up = upPressed;
-		paddle.down = downPressed;
 	}
 
 	getState()
