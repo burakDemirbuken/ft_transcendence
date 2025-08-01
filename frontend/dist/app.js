@@ -78,6 +78,7 @@ function goToNextField(field) {
 // Enter button handler
 function enter() {
     return __awaiter(this, void 0, void 0, function* () {
+        var _a;
         const form = document.querySelector("#loginForm");
         const formData = new FormData(form);
         let obj;
@@ -103,6 +104,14 @@ function enter() {
                 goToNextField("password");
                 break;
             case "password":
+                (_a = document.querySelector(`.field[data-step=password]`)) === null || _a === void 0 ? void 0 : _a.classList.add("shake");
+                // form.classList.add('shake');
+                // Remove shake class after animation completes
+                setTimeout(() => {
+                    var _a;
+                    // form.classList.remove('shake');
+                    (_a = document.querySelector(`.field[data-step=password]`)) === null || _a === void 0 ? void 0 : _a.classList.remove("shake");
+                }, 500);
                 if (userRegistered) {
                     obj = {
                         "username": formData.get("username"),

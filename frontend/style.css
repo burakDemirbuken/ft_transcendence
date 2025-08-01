@@ -492,6 +492,15 @@ body {
 	align-items: center;
 }
 
+#lang {
+	position: absolute;
+	font-size: 50%;
+	font-family: "PixeloidSansBold";
+	color: white;
+	top: 1.5em;
+	left: 3em;
+}
+
 .field {
 	position: absolute;
 	display: flex;
@@ -515,12 +524,6 @@ body {
 	padding: .2em;
 }
 
-.field p {
-	opacity: 0;
-	animation: flicker 1.5s infinite alternate;
-}
-@keyframes flicker { to { opacity: 1; } }
-
 .field input {
 	background-color: transparent;
 	border: 0;
@@ -532,14 +535,32 @@ body {
 	color: coral;
 }
 
-/* .field label {
+.field label {
+	color: coral;
+	text-shadow: none;
 	align-self: flex-start;
 	width: 100%;
-} */
+}
 
 .field.active {
 	opacity: 1;
 	pointer-events: all;
+}
+
+@keyframes flicker { to { opacity: 1; } }
+.blink {
+	opacity: 0;
+	animation: flicker 1.5s infinite alternate;
+}
+
+@keyframes shake {
+	0%, 100% { transform: translateX(0); }
+	10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+	20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+
+.shake {
+	animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
 
 #console {

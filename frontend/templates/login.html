@@ -6,26 +6,31 @@
 		<form id="loginForm">
 			<div id="sides">
 				<div id="dynamicScreen">
+					<p id="lang">ENG</p>
 					<p id="error"></p>
 					<div class="field active" data-step="welcome">
 						<h2>Welcome!</h2>
-						<p>Press Start Button...</p>
-					</div>
-					<div class="field" data-step="email">
-						<label for="email">Enter email</label>
-						<input type="email" name="email" placeholder=">" required>
+						<p class="blink">Press Start Button...</p>
 					</div>
 					<div class="field" data-step="username">
-						<label for="email">Enter username</label>
-						<input type="text" name="username" placeholder=">" requiered>
+						<p>Enter Username</p>
+						<label for="email">></label>
+						<input type="text" name="username" requiered>
+					</div>
+					<div class="field" data-step="email">
+						<p>Enter email</p>
+						<label for="email">></label>
+						<input type="email" name="email" required>
 					</div>
 					<div class="field" data-step="password">
-						<label for="email">Enter password</label>
-						<input type="password" name="password" placeholder=">" required>
+						<p>Enter password</p>
+						<label for="email">></label>
+						<input type="password" name="password" required>
 					</div>
 					<div class="field" data-step="2fa">
-						<label for="email">Enter code</label>
-						<input type="number" name="code" placeholder=">" required>
+						<p>Enter code</p>
+						<label for="email">></label>
+						<input type="number" name="code" required>
 					</div>
 				</div>
 				<button type="button" id="enter"></button>

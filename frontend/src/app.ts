@@ -106,6 +106,16 @@ async function enter() {
 			break;
 
 		case "password":
+				document.querySelector(`.field[data-step=password]`)?.classList.add("shake");
+
+			    // form.classList.add('shake');
+
+   			 	// Remove shake class after animation completes
+		    	setTimeout(() => {
+					// form.classList.remove('shake');
+					document.querySelector(`.field[data-step=password]`)?.classList.remove("shake");
+		    	}, 500);
+
 			if (userRegistered) {
 				obj = {
 					"username": formData.get("username"),
