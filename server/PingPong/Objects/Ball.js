@@ -1,5 +1,4 @@
-import Player from '../Paddle.js'
-import EventEmitter from '../utils/EventEmitter.js';
+import EventEmitter from '../../utils/EventEmitter.js';
 import Vector2D from '../utils/Vector2D.js';
 
 class Ball extends EventEmitter
@@ -14,8 +13,9 @@ class Ball extends EventEmitter
 		this.directionY = Math.random();
 		this.lastGoal = null;
 
-		this.position = new Vector2D(x, y);
-		this.oldPosition = new Vector2D(x, y);
+		this.pos = new Vector2D(x, y);
+		this.oldPos = new Vector2D(x, y);
+		this.defaultPos = new Vector2D(x, y);
 		this.height = radius * 2;
 		this.width = radius * 2;
 
@@ -26,22 +26,22 @@ class Ball extends EventEmitter
 	{
 		const deltaTimeInSeconds = deltaTime / 1000;
 
-		this.oldPosition = { x: this.position.x, y: this.position.y };
-		this.position.x += this.directionX * this.speed * deltaTimeInSeconds;
-		this.position.y += this.directionY * this.speed * deltaTimeInSeconds;
+		this.oldPos = { x: this.pos.x, y: this.pos.y };
+		this.pos.x += this.directionX * this.speed * deltaTimeInSeconds;
+		this.pos.y += this.directionY * this.speed * deltaTimeInSeconds;
 
 		this.checkBorders();
 	}
 
 	checkBorders()
 	{
-		if (this.position.y - this.radius < 0)
+		if (this.pos.y - this.radius < 0)
 			this.emit('borderHit', 'top');
-		else if (this.position.y + this.radius > this.canvasSize.height)
+		else if (this.pos.y + this.radius > this.canvasSize.height)
 			this.emit('borderHit', 'bottom');
-		else if (this.position.x - this.radius < 0)
+		else if (this.pos.x - this.radius < 0)
 			this.emit('borderHit', 'left');
-		else if (this.position.x + this.radius > this.canvasSize.width)
+		else if (this.pos.x + this.radius > this.canvasSize.width)
 			this.emit('borderHit', 'right');
 	}
 
@@ -54,26 +54,22 @@ class Ball extends EventEmitter
 
 	reset()
 	{
-		this.position.x = this.canvasSize.width / 2;
-		this.position.y = this.canvasSize.height / 2;
+		this.pos.x = this.defaultPos.x;
+		this.pos.y = this.defaultPos.y;
 		this.speed = this.defaultSpeed;
-/*
-		if (this.lastGoal === 'right')
-			this.directionX = -1;
-		else
-			this.directionX = 1;
-
-		this.directionY = (Math.random() - 0.5) * 0.8;
- */
 		this.directionX = 0;
 		this.directionY = 0;
-		this.oldPosition = { x: this.position.x, y: this.position.y };
+		this.oldPos = { x: this.pos.x, y: this.pos.y };
 	}
 
 	getState()
 	{
 		return {
-			position: this.position,
+			position:
+			{
+				x: this.pos.x,
+				y: this.pos.y
+			},
 			direction:
 			{
 				x: this.directionX,

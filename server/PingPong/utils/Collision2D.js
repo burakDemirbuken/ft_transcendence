@@ -1,5 +1,4 @@
-import Vector2D from '../../utils/Vector2D.js';
-import Object from '../PıngPong/utils/Object.js';
+import Vector2D from './Vector2D.js';
 
 class Collision2D
 {
@@ -15,12 +14,32 @@ class Collision2D
 	 */
 	static rectangleToRectangle(rect1, rect2, returnDetails = false)
 	{
+
+		const rect1Pos = new Vector2D(
+			rect1.x || rect1.pos.x || rect1.position.x || 0,
+			rect1.y || rect1.pos.y || rect1.position.y || 0
+		);
+
+		const rect1Size = {
+			width: rect1.width || rect1.size.width || rect1.size.x || 0,
+			height: rect1.height || rect1.size.height || rect1.size.y || 0
+		};
+
+		const rect2Pos = new Vector2D(
+			rect2.x || rect2.pos.x || rect2.position.x || 0,
+			rect2.y || rect2.pos.y || rect2.position.y || 0
+		);
+		const rect2Size = {
+			width: rect2.width || rect2.size.width || rect2.size.x || 0,
+			height: rect2.height || rect2.size.height || rect2.size.y || 0
+		};
+
 		const isColliding =
 		(
-			rect1.x < rect2.x + rect2.width &&
-			rect1.x + rect1.width > rect2.x &&
-			rect1.y < rect2.y + rect2.height &&
-			rect1.y + rect1.height > rect2.y
+			rect1Pos.x < rect2Pos.x + rect2Size.width &&
+			rect1Pos.x + rect1Size.width > rect2Pos.x &&
+			rect1Pos.y < rect2Pos.y + rect2Size.height &&
+			rect1Pos.y + rect1Size.height > rect2Pos.y
 		);
 
 		if (!returnDetails)
@@ -29,15 +48,15 @@ class Collision2D
 		if (!isColliding)
 			return { colliding: false };
 
-		const overlapX = Math.min(rect1.x + rect1.width - rect2.x, rect2.x + rect2.width - rect1.x);
-		const overlapY = Math.min(rect1.y + rect1.height - rect2.y, rect2.y + rect2.height - rect1.y);
+		const overlapX = Math.min(rect1Pos.x + rect1Size.width - rect2Pos.x, rect2Pos.x + rect2Size.width - rect1Pos.x);
+		const overlapY = Math.min(rect1Pos.y + rect1Size.height - rect2Pos.y, rect2Pos.y + rect2Size.height - rect1Pos.y);
 
 		let side, normalX = 0, normalY = 0, penetration;
 
 		if (overlapX < overlapY)
 		{
 			penetration = overlapX;
-			if (rect1.x < rect2.x)
+			if (rect1Pos.x < rect2Pos.x)
 			{
 				side = 'right';
 				normalX = -1;
@@ -51,7 +70,7 @@ class Collision2D
 		else
 		{
 			penetration = overlapY;
-			if (rect1.y < rect2.y)
+			if (rect1Pos.y < rect2Pos.y)
 			{
 				side = 'bottom';
 				normalY = -1;
@@ -90,18 +109,31 @@ class Collision2D
 			return currentCollision;
 		}
 
-		const startX = rect1.oldX !== undefined ? rect1.oldX : rect1.x;
-		const startY = rect1.oldY !== undefined ? rect1.oldY : rect1.y;
-		const endX = rect1.x;
-		const endY = rect1.y;
+		const rect1Pos = new Vector2D(
+			rect1.x || rect1.pos.x || rect1.position.x || 0,
+			rect1.y || rect1.pos.y || rect1.position.y || 0
+		);
+		const rect1Size = {
+			width: rect1.width || rect1.size.width || rect1.size.x || 0,
+			height: rect1.height || rect1.size.height || rect1.size.y || 0
+		};
+		const rect1OldPos = new Vector2D(
+			rect1.oldX || rect1.oldPos.x || rect1.oldPosition.x || rect1Pos.x,
+			rect1.oldY || rect1.oldPos.y || rect1.oldPosition.y || rect1Pos.y
+		);
+
+		const startX = rect1OldPos.x !== undefined ? rect1OldPos.x : rect1Pos.x;
+		const startY = rect1OldPos.y !== undefined ? rect1OldPos.y : rect1Pos.y;
+		const endX = rect1Pos.x;
+		const endY = rect1Pos.y;
 
 		if (startX === endX && startY === endY)
 			return returnDetails ? { colliding: false } : false;
 
 		const sweepStartX = Math.min(startX, endX);
 		const sweepStartY = Math.min(startY, endY);
-		const sweepEndX = Math.max(startX + rect1.width, endX + rect1.width);
-		const sweepEndY = Math.max(startY + rect1.height, endY + rect1.height);
+		const sweepEndX = Math.max(startX + rect1Size.width, endX + rect1Size.width);
+		const sweepEndY = Math.max(startY + rect1Size.height, endY + rect1Size.height);
 
 		const sweptArea = {
 			x: sweepStartX,
@@ -116,9 +148,9 @@ class Collision2D
 
 		const corners = [
 			{ x1: startX, y1: startY, x2: endX, y2: endY },
-			{ x1: startX + rect1.width, y1: startY, x2: endX + rect1.width, y2: endY },
-			{ x1: startX, y1: startY + rect1.height, x2: endX, y2: endY + rect1.height },
-			{ x1: startX + rect1.width, y1: startY + rect1.height, x2: endX + rect1.width, y2: endY + rect1.height }
+			{ x1: startX + rect1Size.width, y1: startY, x2: endX + rect1Size.width, y2: endY },
+			{ x1: startX, y1: startY + rect1Size.height, x2: endX, y2: endY + rect1Size.height },
+			{ x1: startX + rect1Size.width, y1: startY + rect1Size.height, x2: endX + rect1Size.width, y2: endY + rect1Size.height }
 		];
 
 		let earliestCollision = null;
@@ -145,8 +177,8 @@ class Collision2D
 			const collisionRect1 = {
 				x: collisionX,
 				y: collisionY,
-				width: rect1.width,
-				height: rect1.height
+				width: rect1Size.width,
+				height: rect1Size.height
 			};
 
 			const detailedCollision = this.rectangleToRectangle(collisionRect1, rect2, true);

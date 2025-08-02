@@ -25,11 +25,18 @@ class WebSocketManager
 						const client = connection.socket;
 
 						const { id, name } = req.query;
+						console.log('🔍 Query parameters:', { id, name, fullQuery: req.query });
+
 						if (!id)
 						{
-						    console.warn('⚠️ User bilgisi eksik, connection kapatılıyor');
-						    connection.socket.close(1008, 'User info required');
+						    console.warn('⚠️ User ID eksik, connection kapatılıyor');
+						    connection.socket.close(1008, 'User ID required');
 						    return;
+						}
+
+						if (!name)
+						{
+						    console.warn('⚠️ User name eksik ama devam ediliyor');
 						}
 
 						if (this.clients.has(id))

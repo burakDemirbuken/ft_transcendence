@@ -1,3 +1,4 @@
+import Vector2D from '../utils/Vector2D.js';
 
 const PADDLE_SPEED = 700;
 
@@ -5,10 +6,16 @@ class Paddle
 {
 	constructor(x , y, width, height, canvasSize)
 	{
-		super(x, y, width, height);
+
 		this.down = false;
 		this.up = false;
 		this.canvasSize = canvasSize;
+
+		this.position = new Vector2D(x, y);
+		this.oldPos = new Vector2D(x, y);
+		this.defaultPos = new Vector2D(x, y);
+		this.height = height;
+		this.width = width;
 	}
 
 	update(deltaTime)

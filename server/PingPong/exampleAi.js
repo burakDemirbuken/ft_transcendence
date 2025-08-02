@@ -361,7 +361,7 @@ class Tournament {
 
     start() {
         this.status = 'active';
-        this.startRoundGames();
+        thi();
         this.emit('tournamentStarted', { tournamentId: this.tournamentId });
     }
 
