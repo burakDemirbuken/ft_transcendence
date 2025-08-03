@@ -4,11 +4,12 @@ RUN apk upgrade --no-cache && \
 	apk update --no-cache
 
 WORKDIR /app
+
 COPY package*.json ./
+COPY . .
 
 RUN npm install && \
 	npm cache clean --force
 
-COPY . .
 
 CMD ["npm", "run", "dev"]

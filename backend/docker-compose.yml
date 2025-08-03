@@ -5,12 +5,6 @@ volumes:
       type: none
       device: ./gateway
       o: bind
-  database:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./databases/data
-      o: bind
   authentication_src:
     driver: local
     driver_opts:
@@ -33,6 +27,7 @@ services:
       - 3001
     volumes:
       - authentication_src:/app
+      - /app/node_modules
 
   gateway:
     container_name: gateway
@@ -44,6 +39,7 @@ services:
       - 3000
     volumes:
       - gateway_src:/app
+      - /app/node_modules
 
   #gameserver:
   #  container_name: gameserver
