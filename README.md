@@ -60,8 +60,8 @@
 	- `length`     : paddle uzunluğu
 
 - Oyun alanı bilgileri;
-	- `width`  : oyun alanının genişliği (bu veri sabir değer ise baştan koda işlenebilir)
-	- `height` : oyun alanının yüksekliği (bu veri sabir değer ise baştan koda işlenebilir)
+	- `width`  : oyun alanının genişliği (bu veri sabit değer ise baştan koda işlenebilir)
+	- `height` : oyun alanının yüksekliği (bu veri sabit değer ise baştan koda işlenebilir)
 
 - Skor bilgileri;
 	- `ai_score`     : AI'ın skoru
