@@ -11,7 +11,7 @@ class Paddle
 		this.up = false;
 		this.canvasSize = canvasSize;
 
-		this.position = new Vector2D(x, y);
+		this.pos = new Vector2D(x, y);
 		this.oldPos = new Vector2D(x, y);
 		this.defaultPos = new Vector2D(x, y);
 		this.height = height;
@@ -22,17 +22,23 @@ class Paddle
 	{
 		const deltaTimeInSeconds = deltaTime / 1000;
 
-		if (this.down && this.position.y + this.size.height <= this.canvasSize.height)
-			this.position.y += PADDLE_SPEED * deltaTimeInSeconds;
-		if (this.up && this.position.y >= 0)
-			this.position.y -= PADDLE_SPEED * deltaTimeInSeconds;
+		if (this.down && this.pos.y + this.height <= this.canvasSize.height)
+			this.pos.y += PADDLE_SPEED * deltaTimeInSeconds;
+		if (this.up && this.pos.y >= 0)
+			this.pos.y -= PADDLE_SPEED * deltaTimeInSeconds;
 	}
 
 	getState()
 	{
 		return {
-			position: this.position,
-			size: this.size,
+			position: {
+				x: this.pos.x,
+				y: this.pos.y
+			},
+			size: {
+				width: this.width,
+				height: this.height
+			},
 		};
 	}
 

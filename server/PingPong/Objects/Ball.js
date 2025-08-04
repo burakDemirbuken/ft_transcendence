@@ -45,7 +45,12 @@ class Ball extends EventEmitter
 			this.emit('borderHit', 'right');
 	}
 
-	launchBall(direction, speed = this.defaultSpeed)
+	revertPosition()
+	{
+		this.pos = { x: this.oldPos.x, y: this.oldPos.y };
+	}
+
+	launchBall(direction, speed = this.speed)
 	{
 		this.speed = speed;
 		this.directionX = direction.x;
@@ -60,6 +65,19 @@ class Ball extends EventEmitter
 		this.directionX = 0;
 		this.directionY = 0;
 		this.oldPos = { x: this.pos.x, y: this.pos.y };
+	}
+
+	setPosition(x, y)
+	{
+		this.pos.x = x;
+		this.pos.y = y;
+	}
+
+	setSafePosition(x, y)
+	{
+		this.pos.x = x;
+		this.pos.y = y;
+		this.oldPos = { x: x, y: y };
 	}
 
 	getState()

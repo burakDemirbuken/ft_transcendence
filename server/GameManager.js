@@ -9,7 +9,7 @@ const DEFAULT_GAME_PROPERTIES = {
 	paddleHeight: 100,
 	ballRadius: 10,
 	ballSpeed: 300,
-	ballSpeedIncrease: 200,
+	ballSpeedIncrease: 100,
 	maxPlayers: 2,
 	maxScore: 11
 }
@@ -33,6 +33,7 @@ class GameManager
 		if (!this.games.has(gameId))
 		{
 			const game = new PingPong({...DEFAULT_GAME_PROPERTIES});
+
 			this.games.set(gameId, game);
 			console.log(`🆕 Game ${gameId} created`);
 		}
@@ -41,7 +42,7 @@ class GameManager
 		console.log(`👤 Player ${player.id} added to game ${gameId}`);
 		if (game.isFull())
 		{
-			console.log(`🚀 Starting game ${gameId} with players`);
+			console.log(`🚀 Starting game ${gameId} with players ${Array.from(game.players.values()).map(p => p.id).join(", ")}`);
 			game.start();
 		}
 	}
@@ -78,12 +79,10 @@ class GameManager
 		this.lastUpdateTime = currentTime;
 		for (const [gameId, game] of this.games.entries())
 		{
-			if (game.isRunning)
+			if (game.isRunning())
 			{
 				game.update(deltaTime);
-				console.log(`⏱️ Game ${gameId} updated`);
-				console.log(`Game state:`, game.getState());
-				callback(game.getState(), game.players);
+				callback(game.getGameState(), game.players);
 			}
 		}
 	}

@@ -14,25 +14,32 @@ class Collision2D
 	 */
 	static rectangleToRectangle(rect1, rect2, returnDetails = false)
 	{
-
-		const rect1Pos = new Vector2D(
-			rect1.x || rect1.pos.x || rect1.position.x || 0,
-			rect1.y || rect1.pos.y || rect1.position.y || 0
-		);
-
-		const rect1Size = {
-			width: rect1.width || rect1.size.width || rect1.size.x || 0,
-			height: rect1.height || rect1.size.height || rect1.size.y || 0
+		// Null check and safe property access
+		const getX = (obj) => {
+			if (!obj) return 0;
+			return obj.x || (obj.pos && obj.pos.x) || (obj.position && obj.position.x) || 0;
 		};
 
-		const rect2Pos = new Vector2D(
-			rect2.x || rect2.pos.x || rect2.position.x || 0,
-			rect2.y || rect2.pos.y || rect2.position.y || 0
-		);
-		const rect2Size = {
-			width: rect2.width || rect2.size.width || rect2.size.x || 0,
-			height: rect2.height || rect2.size.height || rect2.size.y || 0
+		const getY = (obj) => {
+			if (!obj) return 0;
+			return obj.y || (obj.pos && obj.pos.y) || (obj.position && obj.position.y) || 0;
 		};
+
+		const getWidth = (obj) => {
+			if (!obj) return 0;
+			return obj.width || (obj.size && obj.size.width) || (obj.size && obj.size.x) || 0;
+		};
+
+		const getHeight = (obj) => {
+			if (!obj) return 0;
+			return obj.height || (obj.size && obj.size.height) || (obj.size && obj.size.y) || 0;
+		};
+
+		const rect1Pos = new Vector2D(getX(rect1), getY(rect1));
+		const rect1Size = { width: getWidth(rect1), height: getHeight(rect1) };
+
+		const rect2Pos = new Vector2D(getX(rect2), getY(rect2));
+		const rect2Size = { width: getWidth(rect2), height: getHeight(rect2) };
 
 		const isColliding =
 		(
@@ -104,26 +111,53 @@ class Collision2D
 	 */
 	static trajectoryRectangleToRectangle(rect1, rect2, returnDetails = false)
 	{
-		const currentCollision = this.rectangleToRectangle(rect1, rect2, returnDetails);
+		if (!rect1 || !rect2) {
+			console.warn('⚠️ Null objects passed to trajectoryRectangleToRectangle');
+			return returnDetails ? { colliding: false } : false;
+		}
+
+
+		const currentCollision = Collision2D.rectangleToRectangle(rect1, rect2, returnDetails);
 		if (currentCollision === true || (currentCollision && currentCollision.colliding)) {
 			return currentCollision;
 		}
 
-		const rect1Pos = new Vector2D(
-			rect1.x || rect1.pos.x || rect1.position.x || 0,
-			rect1.y || rect1.pos.y || rect1.position.y || 0
-		);
-		const rect1Size = {
-			width: rect1.width || rect1.size.width || rect1.size.x || 0,
-			height: rect1.height || rect1.size.height || rect1.size.y || 0
+		const getX = (obj) => {
+			if (!obj) return 0;
+			return obj.x || (obj.pos && obj.pos.x) || (obj.position && obj.position.x) || 0;
 		};
-		const rect1OldPos = new Vector2D(
-			rect1.oldX || rect1.oldPos.x || rect1.oldPosition.x || rect1Pos.x,
-			rect1.oldY || rect1.oldPos.y || rect1.oldPosition.y || rect1Pos.y
-		);
 
-		const startX = rect1OldPos.x !== undefined ? rect1OldPos.x : rect1Pos.x;
-		const startY = rect1OldPos.y !== undefined ? rect1OldPos.y : rect1Pos.y;
+		const getY = (obj) => {
+			if (!obj) return 0;
+			return obj.y || (obj.pos && obj.pos.y) || (obj.position && obj.position.y) || 0;
+		};
+
+		const getWidth = (obj) => {
+			if (!obj) return 0;
+			return obj.width || (obj.size && obj.size.width) || (obj.size && obj.size.x) || 0;
+		};
+
+		const getHeight = (obj) => {
+			if (!obj) return 0;
+			return obj.height || (obj.size && obj.size.height) || (obj.size && obj.size.y) || 0;
+		};
+
+		const getOldX = (obj) => {
+			if (!obj) return getX(obj);
+			return obj.oldX || (obj.oldPos && obj.oldPos.x) || (obj.oldPosition && obj.oldPosition.x) || getX(obj);
+		};
+
+		const getOldY = (obj) => {
+			if (!obj) return getY(obj);
+			return obj.oldY || (obj.oldPos && obj.oldPos.y) || (obj.oldPosition && obj.oldPosition.y) || getY(obj);
+		};
+
+		const rect1Pos = new Vector2D(getX(rect1), getY(rect1));
+		const rect1Size = { width: getWidth(rect1), height: getHeight(rect1) };
+		const rect1OldPos = new Vector2D(getOldX(rect1), getOldY(rect1));
+
+		const startX = rect1OldPos.x;
+		const startY = rect1OldPos.y;
 		const endX = rect1Pos.x;
 		const endY = rect1Pos.y;
 
@@ -141,8 +175,7 @@ class Collision2D
 			width: sweepEndX - sweepStartX,
 			height: sweepEndY - sweepStartY
 		};
-
-		const sweepCollision = this.rectangleToRectangle(sweptArea, rect2, false);
+		const sweepCollision = Collision2D.rectangleToRectangle(sweptArea, rect2, false);
 		if (!sweepCollision)
 			return returnDetails ? { colliding: false } : false;
 
@@ -158,13 +191,14 @@ class Collision2D
 
 		for (const corner of corners)
 		{
-			const lineCollision = this.lineToRectangle(corner, rect2, true);
+			const lineCollision = Collision2D.lineToRectangle(corner, rect2, true);
 			if (lineCollision && lineCollision.colliding && lineCollision.time < earliestTime)
-				{
+			{
 				earliestTime = lineCollision.time;
 				earliestCollision = lineCollision;
 			}
 		}
+
 
 		if (earliestCollision)
 		{
@@ -181,7 +215,7 @@ class Collision2D
 				height: rect1Size.height
 			};
 
-			const detailedCollision = this.rectangleToRectangle(collisionRect1, rect2, true);
+			const detailedCollision = Collision2D.rectangleToRectangle(collisionRect1, rect2, true);
 
 			return {
 				colliding: true,
@@ -278,38 +312,32 @@ class Collision2D
 
 
 	/**
-	 * Basic overlap resolution
-	 * @param {Object} obj1 - {x, y, radius}
-	 * @param {Object} obj2 - {x, y, radius}
-	 * @returns {Object} - New positions
+	 * @description Separates two objects based on collision details.
+	 * @param {Object} obj1 - {x, y, width, height} - (stationary object)
+	 * @param {Object} obj2 - {x, y, width, height} - (moving object)
+	 * @param {Object} collisionDetails - {colliding, overlap, normal, penetration}
+	 * @returns {Object} - New positions {obj1: {x, y}, obj2: {x, y}}
 	 */
-	static separateObjects(obj1, obj2)
+	static separateObjects(obj1, obj2, collisionDetails)
 	{
-		const dx = obj2.x - obj1.x;
-		const dy = obj2.y - obj1.y;
-		const distance = Math.sqrt(dx * dx + dy * dy);
-		const minDistance = obj1.radius + obj2.radius;
+		if (!obj1 || !obj2 || !collisionDetails || !collisionDetails.colliding)
+		{
+			console.warn('⚠️ Invalid parameters for separateObjects');
+			return { obj1: { x: 0, y: 0 }, obj2: { x: 0, y: 0 } };
+		}
 
-		if (distance >= minDistance)
-			return { obj1, obj2 };
+		const getX = (obj) => obj.x || (obj.pos && obj.pos.x) || (obj.position && obj.position.x) || 0;
+		const getY = (obj) => obj.y || (obj.pos && obj.pos.y) || (obj.position && obj.position.y) || 0;
 
-		const overlap = minDistance - distance;
-		const separationDistance = overlap / 2;
+		const originalX = getX(obj1);
+		const originalY = getY(obj1);
 
-		const nx = distance > 0 ? dx / distance : 1;
-		const ny = distance > 0 ? dy / distance : 0;
+		let newX = originalX + collisionDetails.normal.x * collisionDetails.penetration;
+		let newY = originalY + collisionDetails.normal.y * collisionDetails.penetration;
 
 		return {
-			obj1: {
-				...obj1,
-				x: obj1.x - nx * separationDistance,
-				y: obj1.y - ny * separationDistance
-			},
-			obj2: {
-				...obj2,
-				x: obj2.x + nx * separationDistance,
-				y: obj2.y + ny * separationDistance
-			}
+			obj1: { x: originalX, y: originalY }, // obj1 remains stationary
+			obj2: { x: newX, y: newY }            // obj2 moved to resolve collision
 		};
 	}
 }
