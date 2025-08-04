@@ -273,9 +273,14 @@ async def handle_legacy_init(websocket, client_id: str, data: dict):
         response = {"error": str(e)}
         await websocket.send(json.dumps(response))
 
+print("==> main.py başlatıldı")
+
+import sys
+print("==> Argümanlar:", sys.argv)
+
 # Ana kullanım
 if __name__ == "__main__":
-    import sys
+    print("==> __main__ bloğuna girildi")
 
     if len(sys.argv) > 1 and sys.argv[1] == "--websocket":
         # WebSocket modu
@@ -287,7 +292,7 @@ if __name__ == "__main__":
             print("WebSocket sunucusu çalışıyor. Bağlantı bekleniyor...")
 
             # Sunucuyu başlat
-            server = await websockets.serve(handle_client, "localhost", 3000)
+            server = await websockets.serve(handle_client, "0.0.0.0", 3000)
 
             # Sunucuyu sonsuza kadar çalıştır
             await server.wait_closed()

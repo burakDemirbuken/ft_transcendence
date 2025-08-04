@@ -5,8 +5,17 @@ import json
 async def test_websocket():
     uri = "ws://localhost:3000"
 
+    # Önce oyun başlatma verisi
+    init_game_data = {
+        "type": "init_game",
+        "ai_config": {
+            "difficulty": "hard"
+        }
+    }
+
     # Test verisi - oyun durumunu simüle eder
     test_game_data = {
+        "type": "game_data",
         "ball": {
             "x": 600,
             "y": 250,
@@ -28,9 +37,6 @@ async def test_websocket():
             "human_score": 3,
             "ai_scored": False,
             "human_scored": True
-        },
-        "ai_config": {
-            "difficulty": "hard"
         }
     }
 
@@ -38,18 +44,35 @@ async def test_websocket():
         async with websockets.connect(uri) as websocket:
             print("WebSocket sunucusuna bağlandı!")
 
-            # Test verilerini gönder
-            message = json.dumps(test_game_data)
-            await websocket.send(message)
-            print(f"Veri gönderildi: {message}")
+            # 1. Önce oyunu başlat
+            init_message = json.dumps(init_game_data)
+            await websocket.send(init_message)
+            print(f"Oyun başlatma verisi gönderildi: {init_message}")
 
-            # Cevabı bekle
-            response = await websocket.recv()
-            print(f"AI cevabı alındı: {response}")
+            # Oyun başlatma cevabını bekle
+            init_response = await websocket.recv()
+            print(f"Oyun başlatma cevabı: {init_response}")
+
+            init_result = json.loads(init_response)
+            if not init_result.get('success', False):
+                print("Oyun başlatılamadı!")
+                return
+
+            # 2. Şimdi oyun verilerini gönder
+            game_message = json.dumps(test_game_data)
+            await websocket.send(game_message)
+            print(f"Oyun verisi gönderildi: {game_message}")
+
+            # AI kararını bekle
+            game_response = await websocket.recv()
+            print(f"AI cevabı alındı: {game_response}")
 
             # JSON'u parse et
-            ai_decision = json.loads(response)
-            print(f"AI kararı: {ai_decision['direction']}")
+            ai_decision = json.loads(game_response)
+            if 'direction' in ai_decision:
+                print(f"AI kararı: {ai_decision['direction']}")
+            else:
+                print(f"Hata: {ai_decision.get('error', 'Bilinmeyen hata')}")
 
     except Exception as e:
         print(f"Hata: {e}")
