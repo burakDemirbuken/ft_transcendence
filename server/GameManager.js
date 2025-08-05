@@ -13,7 +13,7 @@ const DEFAULT_GAME_PROPERTIES = {
 	ballSpeed: 600,
 	ballSpeedIncrease: 100,
 
-	maxPlayers: 2,
+	maxPlayers: 4,
 
 	maxScore: 11
 }
@@ -62,6 +62,36 @@ class GameManager
 		}
 	}
 
+	resetGame(gameId)
+	{
+		if (this.games.has(gameId))
+		{
+			const game = this.games.get(gameId);
+			game.resetGame();
+			console.log(`🔄 Game ${gameId} reset`);
+		}
+	}
+
+	getPlayerGame(player)
+	{
+		for (const [gameId, game] of this.games.entries())
+		{
+			if (game.hasPlayer(player))
+				return game;
+		}
+		return null;
+	}
+
+	getPlayerGameId(player)
+	{
+		for (const [gameId, game] of this.games.entries())
+		{
+			if (game.hasPlayer(player))
+				return gameId;
+		}
+		return null;
+	}
+
 	start(callback)
 	{
 		this.updateInterval = setInterval(() => this.update(callback), TICK_RATE);
@@ -82,15 +112,9 @@ class GameManager
 		{
 			const game = this.games.get(gameId);
 			if (game.status === 'playing')
-			{
-				game.status = 'paused';
-				console.log(`⏸️ Game ${gameId} paused`);
-			}
+				game.pause();
 			else if (game.status === 'paused')
-			{
-				game.status = 'playing';
-				console.log(`▶️ Game ${gameId} resumed`);
-			}
+				game.resume();
 		}
 	}
 

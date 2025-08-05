@@ -97,13 +97,18 @@ class GameService
 			console.warn('Player not found for clientId:', clientId);
 			return;
 		}
+		console.log(`Handling message of type: ${message.type}`);
 		switch (message.type)
 		{
 			case "move":
 				player.move(message.payload);
 				break;
 			case "pause":
-				this.gameManager.pause('default-game');
+				this.gameManager.pause(this.gameManager.getPlayerGameId(player));
+				break;
+			case "resetBurak":
+				this.gameManager.resetGame(this.gameManager.getPlayerGameId(player));
+				break;
 			default:
 				break;
 		}

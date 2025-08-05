@@ -134,6 +134,13 @@ class Client
 				this.networkManager.send("pause");
 			}
 		);
+
+		this.inputManager.onKey("I",
+			() =>
+			{
+				this.networkManager.send("resetBurak");
+			}
+		);
 	}
 
 	handleStateChange(data)

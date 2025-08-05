@@ -50,6 +50,11 @@ class PingPong extends EventEmitter
 		console.log(`🆕 Game created with settings: ${JSON.stringify(this.settings)}`);
 	}
 
+	hasPlayer(player)
+	{
+		return this.players.some(p => p.id === player.id);
+	}
+
 	addPlayer(player)
 	{
 		console.log(`👤 Player ${player.id} added to game`);
@@ -258,12 +263,6 @@ node-1  |    Final position: (25.8, 235.0)
 
 	separateBallFromPaddle(ball, paddle, side)
 	{
-		console.log(`🔧 COLLISION DEBUG:`);
-		console.log(`   Ball: pos(${ball.pos.x.toFixed(1)}, ${ball.pos.y.toFixed(1)}) size(${ball.width}x${ball.height})`);
-		console.log(`   Paddle: pos(${paddle.pos.x.toFixed(1)}, ${paddle.pos.y.toFixed(1)}) size(${paddle.width}x${paddle.height})`);
-		console.log(`   Ball direction: (${ball.directionX.toFixed(2)}, ${ball.directionY.toFixed(2)})`);
-		console.log(`   Detected side: "${side}"`);
-
 		let newX = ball.pos.x;
 		let newY = ball.pos.y;
 
@@ -275,17 +274,9 @@ node-1  |    Final position: (25.8, 235.0)
 				newX = paddle.pos.x - ball.width - 1;
 		}
 		else if (side === 'top')
-		{
 			newY = paddle.pos.y - ball.height - 1;
-			console.log(`   TOP collision: ${paddle.pos.y} - ${ball.height} - 1 = ${newY}`);
-		}
 		else if (side === 'bottom')
-		{
 			newY = paddle.pos.y + paddle.height + 1;
-			console.log(`   BOTTOM collision: ${paddle.pos.y} + ${paddle.height} + 1 = ${newY}`);
-		}
-
-		console.log(`   Final position: (${newX.toFixed(1)}, ${newY.toFixed(1)})`);
 		ball.setSafePosition(newX, newY);
 	}
 
@@ -311,16 +302,36 @@ node-1  |    Final position: (25.8, 235.0)
 	pause()
 	{
 		this.status = 'paused';
+		console.log(`⏸️ Game paused`);
 	}
 
 	resume()
 	{
 		this.status = 'playing';
+		console.log(`▶️ Game resumed`);
 	}
 
 	stop()
 	{
-		this.status = 'finished';
+		this.status = 'stopped';
+		console.log(`⏸️ Game stopped`);
+	}
+
+	resetGame()
+	{
+		console.log('🔄 Resetting game state...');
+		this.score = {
+			left: 0,
+			right: 0
+		};
+		this.status = 'not initialized';
+		this.ball = null;
+		for (const paddle of this.paddles.values())
+			paddle.reset();
+		this.gameTime = 0;
+		this.lastUpdateTime = 0;
+		this.deltaTime = 0;
+		this.start();
 	}
 
 	isRunning()

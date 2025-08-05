@@ -47,6 +47,14 @@ class Paddle
 		};
 	}
 
+	reset()
+	{
+		this.pos = { x: this.defaultPos.x, y: this.defaultPos.y };
+		this.oldPos = { x: this.defaultPos.x, y: this.defaultPos.y };
+		this.down = false;
+		this.up = false;
+	}
+
 }
 
 export default Paddle;
