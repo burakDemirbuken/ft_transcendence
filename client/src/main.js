@@ -51,7 +51,6 @@ const exampleGameConfig = {
 			{
 				radius: constants.BALL_RADIUS
 			}
-
 		},
 	}
 };

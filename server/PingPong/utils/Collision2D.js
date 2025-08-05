@@ -77,7 +77,7 @@ class Collision2D
 		else
 		{
 			penetration = overlapY;
-			if (rect1Pos.y < rect2Pos.y)
+			if (rect1Pos.y > rect2Pos.y)
 			{
 				side = 'bottom';
 				normalY = -1;
@@ -103,7 +103,7 @@ class Collision2D
 	// ============================
 
 	/**
-	 * @description trajectory rectangle to rectangle collision detection
+	 * @description trajectory rectangle to rectangle collision detection (Swept AABB)
 	 * @param {Object} rect1 - trajectory rectangle {x, y, width, height, oldX, oldY}
 	 * @param {Object} rect2 - static rectangle {x, y, width, height}
 	 * @param {boolean} returnDetails - collision details
@@ -114,12 +114,6 @@ class Collision2D
 		if (!rect1 || !rect2) {
 			console.warn('⚠️ Null objects passed to trajectoryRectangleToRectangle');
 			return returnDetails ? { colliding: false } : false;
-		}
-
-
-		const currentCollision = Collision2D.rectangleToRectangle(rect1, rect2, returnDetails);
-		if (currentCollision === true || (currentCollision && currentCollision.colliding)) {
-			return currentCollision;
 		}
 
 		const getX = (obj) => {
@@ -144,93 +138,158 @@ class Collision2D
 
 		const getOldX = (obj) => {
 			if (!obj) return getX(obj);
-			return obj.oldX || (obj.oldPos && obj.oldPos.x) || (obj.oldPosition && obj.oldPosition.x) || getX(obj);
+			return obj.oldX !== undefined ? obj.oldX :
+				   (obj.oldPos && obj.oldPos.x) ||
+				   (obj.oldPosition && obj.oldPosition.x) ||
+				   getX(obj);
 		};
 
 		const getOldY = (obj) => {
 			if (!obj) return getY(obj);
-			return obj.oldY || (obj.oldPos && obj.oldPos.y) || (obj.oldPosition && obj.oldPosition.y) || getY(obj);
+			return obj.oldY !== undefined ? obj.oldY :
+				   (obj.oldPos && obj.oldPos.y) ||
+				   (obj.oldPosition && obj.oldPosition.y) ||
+				   getY(obj);
 		};
 
-		const rect1Pos = new Vector2D(getX(rect1), getY(rect1));
-		const rect1Size = { width: getWidth(rect1), height: getHeight(rect1) };
-		const rect1OldPos = new Vector2D(getOldX(rect1), getOldY(rect1));
+		const rect1X = getX(rect1);
+		const rect1Y = getY(rect1);
+		const rect1W = getWidth(rect1);
+		const rect1H = getHeight(rect1);
 
-		const startX = rect1OldPos.x;
-		const startY = rect1OldPos.y;
-		const endX = rect1Pos.x;
-		const endY = rect1Pos.y;
+		const rect2X = getX(rect2);
+		const rect2Y = getY(rect2);
+		const rect2W = getWidth(rect2);
+		const rect2H = getHeight(rect2);
 
-		if (startX === endX && startY === endY)
-			return returnDetails ? { colliding: false } : false;
+		const oldX = getOldX(rect1);
+		const oldY = getOldY(rect1);
 
-		const sweepStartX = Math.min(startX, endX);
-		const sweepStartY = Math.min(startY, endY);
-		const sweepEndX = Math.max(startX + rect1Size.width, endX + rect1Size.width);
-		const sweepEndY = Math.max(startY + rect1Size.height, endY + rect1Size.height);
-
-		const sweptArea = {
-			x: sweepStartX,
-			y: sweepStartY,
-			width: sweepEndX - sweepStartX,
-			height: sweepEndY - sweepStartY
-		};
-		const sweepCollision = Collision2D.rectangleToRectangle(sweptArea, rect2, false);
-		if (!sweepCollision)
-			return returnDetails ? { colliding: false } : false;
-
-		const corners = [
-			{ x1: startX, y1: startY, x2: endX, y2: endY },
-			{ x1: startX + rect1Size.width, y1: startY, x2: endX + rect1Size.width, y2: endY },
-			{ x1: startX, y1: startY + rect1Size.height, x2: endX, y2: endY + rect1Size.height },
-			{ x1: startX + rect1Size.width, y1: startY + rect1Size.height, x2: endX + rect1Size.width, y2: endY + rect1Size.height }
-		];
-
-		let earliestCollision = null;
-		let earliestTime = 1.0;
-
-		for (const corner of corners)
-		{
-			const lineCollision = Collision2D.lineToRectangle(corner, rect2, true);
-			if (lineCollision && lineCollision.colliding && lineCollision.time < earliestTime)
-			{
-				earliestTime = lineCollision.time;
-				earliestCollision = lineCollision;
-			}
+		const currentCollision = Collision2D.rectangleToRectangle(rect1, rect2, returnDetails);
+		if (currentCollision === true || (currentCollision && currentCollision.colliding)) {
+			return currentCollision;
 		}
 
+		if (oldX === rect1X && oldY === rect1Y) {
+			return returnDetails ? { colliding: false } : false;
+		}
 
-		if (earliestCollision)
+		const velX = rect1X - oldX;
+		const velY = rect1Y - oldY;
+
+		const expandedRect = {
+			x: rect2X - rect1W,
+			y: rect2Y - rect1H,
+			width: rect2W + rect1W,
+			height: rect2H + rect1H
+		};
+
+		const lineStart = { x: oldX, y: oldY };
+		const lineEnd = { x: rect1X, y: rect1Y };
+
+		const intersection = Collision2D.lineToRectangleIntersection(lineStart, lineEnd, expandedRect);
+
+		if (!intersection.intersects)
+			return returnDetails ? { colliding: false } : false;
+
+		if (!returnDetails)
+			return true;
+
+		const t = intersection.t;
+		const collisionX = oldX + velX * t;
+		const collisionY = oldY + velY * t;
+
+		const expandedCenterX = expandedRect.x + expandedRect.width / 2;
+		const expandedCenterY = expandedRect.y + expandedRect.height / 2;
+		const dx = collisionX - expandedCenterX;
+		const dy = collisionY - expandedCenterY;
+
+		let side, normal;
+		const ratioX = Math.abs(dx) / (expandedRect.width / 2);
+		const ratioY = Math.abs(dy) / (expandedRect.height / 2);
+
+		if (ratioX > ratioY)
 		{
-			if (!returnDetails)
-				return true;
+			side = dx > 0 ? 'right' : 'left';
+			normal = { x: dx > 0 ? 1 : -1, y: 0 };
+		}
+		else
+		{
+			side = dy > 0 ? 'bottom' : 'top';
+			normal = { x: 0, y: dy > 0 ? 1 : -1 };
+		}
 
-			const collisionX = startX + (endX - startX) * earliestTime;
-			const collisionY = startY + (endY - startY) * earliestTime;
+		return {
+			colliding: true,
+			time: t,
+			collisionPoint: { x: collisionX, y: collisionY },
+			side: side,
+			normal: normal,
+			penetration: 0, // At exact collision time, no penetration
+			trajectoryStart: { x: oldX, y: oldY },
+			trajectoryEnd: { x: rect1X, y: rect1Y }
+		};
+	}
 
-			const collisionRect1 = {
-				x: collisionX,
-				y: collisionY,
-				width: rect1Size.width,
-				height: rect1Size.height
-			};
+	/**
+	 * Line-Rectangle intersection with time parameter (parametric approach)
+	 * @param {Object} lineStart - {x, y}
+	 * @param {Object} lineEnd - {x, y}
+	 * @param {Object} rect - {x, y, width, height}
+	 * @returns {Object} - {intersects: boolean, t: number, point: {x, y}}
+	 */
+	static lineToRectangleIntersection(lineStart, lineEnd, rect)
+	{
+		const x1 = lineStart.x;
+		const y1 = lineStart.y;
+		const x2 = lineEnd.x;
+		const y2 = lineEnd.y;
 
-			const detailedCollision = Collision2D.rectangleToRectangle(collisionRect1, rect2, true);
+		const rectLeft = rect.x;
+		const rectRight = rect.x + rect.width;
+		const rectTop = rect.y;
+		const rectBottom = rect.y + rect.height;
 
+		const dx = x2 - x1;
+		const dy = y2 - y1;
+
+		let tmin = 0;
+		let tmax = 1;
+
+		if (Math.abs(dx) > 1e-10)
+		{
+			const t1 = (rectLeft - x1) / dx;
+			const t2 = (rectRight - x1) / dx;
+			tmin = Math.max(tmin, Math.min(t1, t2));
+			tmax = Math.min(tmax, Math.max(t1, t2));
+		}
+		else if (x1 < rectLeft || x1 > rectRight)
+			return { intersects: false };
+
+		if (Math.abs(dy) > 1e-10)
+		{
+			const t1 = (rectTop - y1) / dy;
+			const t2 = (rectBottom - y1) / dy;
+			tmin = Math.max(tmin, Math.min(t1, t2));
+			tmax = Math.min(tmax, Math.max(t1, t2));
+		}
+		else if (y1 < rectTop || y1 > rectBottom)
+			return { intersects: false };
+
+		if (tmin <= tmax && tmin >= 0 && tmin <= 1)
+		{
 			return {
-				colliding: true,
-				time: earliestTime,
-				collisionPoint: {
-					x: collisionX,
-					y: collisionY
-				},
-				trajectoryStart: { x: startX, y: startY },
-				trajectoryEnd: { x: endX, y: endY },
-				...detailedCollision
+				intersects: true,
+				t: tmin,
+				point:
+				{
+					x: x1 + dx * tmin,
+					y: y1 + dy * tmin
+				}
 			};
 		}
 
-		return returnDetails ? { colliding: false } : false;
+		return { intersects: false };
 	}
 
 	/**

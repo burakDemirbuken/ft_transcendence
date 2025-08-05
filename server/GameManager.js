@@ -1,16 +1,20 @@
 import PingPong from './PingPong/PingPong.js';
 
-const TICK_RATE = 1000 / 30; // 30 FPS
+const TICK_RATE = 1000 / 60; // 30 FPS
 
 const DEFAULT_GAME_PROPERTIES = {
 	width: 800,
 	height: 600,
+
 	paddleWidth: 10,
 	paddleHeight: 100,
-	ballRadius: 10,
-	ballSpeed: 300,
+
+	ballRadius: 7,
+	ballSpeed: 600,
 	ballSpeedIncrease: 100,
+
 	maxPlayers: 2,
+
 	maxScore: 11
 }
 
@@ -69,6 +73,24 @@ class GameManager
 		{
 			clearInterval(this.updateInterval);
 			this.updateInterval = null;
+		}
+	}
+
+	pause(gameId)
+	{
+		if (this.games.has(gameId))
+		{
+			const game = this.games.get(gameId);
+			if (game.status === 'playing')
+			{
+				game.status = 'paused';
+				console.log(`⏸️ Game ${gameId} paused`);
+			}
+			else if (game.status === 'paused')
+			{
+				game.status = 'playing';
+				console.log(`▶️ Game ${gameId} resumed`);
+			}
 		}
 	}
 

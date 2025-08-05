@@ -128,6 +128,12 @@ class Client
 				this.networkManager.send("move", {direction: 'down', action: false});
 			}
 		);
+		this.inputManager.onKey("Escape",
+			() =>
+			{
+				this.networkManager.send("pause");
+			}
+		);
 	}
 
 	handleStateChange(data)

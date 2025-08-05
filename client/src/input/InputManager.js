@@ -36,7 +36,7 @@ class InputManager
 			(e) =>
 			{
 				this.pressedKeys.delete(e.key);
-
+				console.log(`Key released: ${e.key}`);
 				const callback = this.keyUpCallbacks.get(e.key);
 				if (callback)
 					callback(e);

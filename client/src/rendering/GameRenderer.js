@@ -176,7 +176,7 @@ class GameRenderer
 				});
 		}
 		if (gameData.ball)
-			this.renderBall(ctx, gameData.ball.position);
+			this.renderBall(ctx, gameData.ball);
 		if (gameData.score)
 			this.renderScore(ctx, gameData.score);
 
@@ -226,11 +226,11 @@ class GameRenderer
 		ctx.fillRect(position.x, position.y, this.paddleSize.width, this.paddleSize.height);
 	}
 
-	renderBall(ctx, position)
+	renderBall(ctx, ball)
 	{
 		ctx.fillStyle = this.colors.ball;
 		ctx.beginPath();
-		ctx.arc(position.x, position.y, this.ballSize, 0, Math.PI * 2);
+		ctx.arc(ball.position.x + ball.radius, ball.position.y + ball.radius, ball.radius, 0, Math.PI * 2);
 		ctx.fill();
 	}
 
@@ -240,9 +240,9 @@ class GameRenderer
 		ctx.font = '48px Arial';
 		ctx.textAlign = 'center';
 
-		ctx.fillText(score.left, this.screenSize.width / 4, 60);
+		ctx.fillText(score.right, this.screenSize.width / 4, 60);
 
-		ctx.fillText(score.right, (this.screenSize.width * 3) / 4, 60);
+		ctx.fillText(score.left, (this.screenSize.width * 3) / 4, 60);
 	}
 
 	renderCenterLine(ctx)

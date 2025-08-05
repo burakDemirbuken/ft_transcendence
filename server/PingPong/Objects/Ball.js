@@ -6,7 +6,6 @@ class Ball extends EventEmitter
 	constructor(x, y, radius, ballSpeed, canvasSize)
 	{
 		super();
-		this.radius = radius;
 		this.speed = ballSpeed;
 		this.defaultSpeed = ballSpeed;
 		this.directionX = Math.random() < 0.5 ? -1 : 1;
@@ -15,7 +14,7 @@ class Ball extends EventEmitter
 
 		this.pos = new Vector2D(x, y);
 		this.oldPos = new Vector2D(x, y);
-		this.defaultPos = new Vector2D(x, y);
+		this.defaultPos = new Vector2D(x - radius, y - radius);
 		this.height = radius * 2;
 		this.width = radius * 2;
 
@@ -35,13 +34,13 @@ class Ball extends EventEmitter
 
 	checkBorders()
 	{
-		if (this.pos.y - this.radius < 0)
+		if (this.pos.y < 0)
 			this.emit('borderHit', 'top');
-		else if (this.pos.y + this.radius > this.canvasSize.height)
+		else if (this.pos.y + this.width > this.canvasSize.height)
 			this.emit('borderHit', 'bottom');
-		else if (this.pos.x - this.radius < 0)
+		else if (this.pos.x < 0)
 			this.emit('borderHit', 'left');
-		else if (this.pos.x + this.radius > this.canvasSize.width)
+		else if (this.pos.x + this.height > this.canvasSize.width)
 			this.emit('borderHit', 'right');
 	}
 
@@ -93,7 +92,7 @@ class Ball extends EventEmitter
 				x: this.directionX,
 				y: this.directionY
 			},
-			radius: this.radius,
+			radius: this.width / 2,
 			speed: this.speed
 		};
 	}

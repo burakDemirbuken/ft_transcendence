@@ -24,36 +24,46 @@ class GameService
 
 	async start()
 	{
-		try {
+		try
+		{
 			console.log('Starting Game Server...');
 
 			this.webSocketManager.start(
 				(query) =>
 				{
-					try {
+					try
+					{
 						console.log('🟢 New client connecting:', query);
 						const player = new Player(query.id, query.name);
 						this.Players.set(query.id, player);
 						this.gameManager.addPlayerToGame('default-game', player);
-					} catch (error) {
+					}
+					catch (error)
+					{
 						console.error('❌ Error in client connect:', error);
 					}
 				},
 				(clientId, message) =>
 				{
-					try {
+					try
+					{
 						this.handleWebSocketMessage(message, clientId);
-					} catch (error) {
+					}
+					catch (error)
+					{
 						console.error('❌ Error handling message:', error);
 					}
 				},
 				(clientId) =>
 				{
-					try {
+					try
+					{
 						console.log('WebSocket client disconnected:', clientId);
 						this.gameManager.removeGame('default-game');
 						this.Players.delete(clientId);
-					} catch (error) {
+					}
+					catch (error)
+					{
 						console.error('❌ Error in client disconnect:', error);
 					}
 				}
@@ -70,7 +80,9 @@ class GameService
 			);
 
 			console.log('✅ Game Server started successfully!');
-		} catch (error) {
+		}
+		catch (error)
+		{
 			console.error('❌ Error starting Game Server:', error);
 			throw error;
 		}
@@ -90,7 +102,8 @@ class GameService
 			case "move":
 				player.move(message.payload);
 				break;
-
+			case "pause":
+				this.gameManager.pause('default-game');
 			default:
 				break;
 		}

@@ -22,10 +22,15 @@ class Paddle
 	{
 		const deltaTimeInSeconds = deltaTime / 1000;
 
-		if (this.down && this.pos.y + this.height <= this.canvasSize.height)
+		if (this.down)
 			this.pos.y += PADDLE_SPEED * deltaTimeInSeconds;
 		if (this.up && this.pos.y >= 0)
 			this.pos.y -= PADDLE_SPEED * deltaTimeInSeconds;
+
+		if (this.pos.y + this.height > this.canvasSize.height)
+			this.pos.y = this.canvasSize.height - this.height;
+		if (this.pos.y < 0)
+			this.pos.y = 0;
 	}
 
 	getState()

@@ -11,7 +11,7 @@ const DEFAULT_GAME_PROPERTIES = {
 	paddleHeight: 100,
 	paddleSpeed: 300,
 
-	ballRadius: 3,
+	ball         : 3,
 	ballSpeed: 300,
 	ballSpeedIncrease: 200,
 
@@ -98,7 +98,7 @@ class PingPong extends EventEmitter
 			this.settings.ballSpeed,
 			{width: this.settings.canvasWidth, height: this.settings.canvasHeight}
 		);
-		this.ball.launchBall({x: 1, y: Math.random() - 0.5});
+		this.ball.launchBall({x: Math.random() < 0.5 ? -1 : 1, y: Math.random() - 0.5});
 		this.eventListeners();
 		this.status = 'waiting';
 	}
@@ -108,24 +108,31 @@ class PingPong extends EventEmitter
 		this.ball.on('borderHit',
 			(border) =>
 			{
-				if (border === 'left')
+				if (this.checkCollisions() != null)
+					return;
+				if (border === 'left' || border === 'right')
 				{
-					this.score.right++;
-					this.emit('goal', 'right');
+					if (border === 'right')
+						this.score.right++;
+					else
+						this.score.left++;
+					this.emit('goal', border);
 					this.ball.reset();
-					this.ball.launchBall({x: -1, y: Math.random() - 0.5});
+					const interval = setInterval(() =>
+					{
+						this.ball.launchBall({x: border == "left" ? -1 : 1, y: Math.random() - 0.5});
+						clearInterval(interval);
+					}, 500);
 				}
-				else if (border === 'right')
-				{
-					this.score.left++;
-					this.emit('goal', 'left');
-					this.ball.reset();
-					this.ball.launchBall({x: 1, y: Math.random() - 0.5});
-				}
-				else if (border === 'top' || border === 'bottom')
+				else if (border === 'top')
 				{
 					this.ball.revertPosition();
-					this.ball.launchBall({x: this.ball.directionX, y: -this.ball.directionY});
+					this.ball.launchBall({x: this.ball.directionX, y: Math.abs(this.ball.directionY)});
+				}
+				else if (border === 'bottom')
+				{
+					this.ball.revertPosition();
+					this.ball.launchBall({x: this.ball.directionX, y: -Math.abs(this.ball.directionY)});
 				}
 			}
 		);
@@ -167,6 +174,7 @@ class PingPong extends EventEmitter
 		if (this.ball)
 			this.ball.update(deltaTime);
 
+
 		this.checkCollisions();
 		this.isFinished();
 	}
@@ -202,13 +210,13 @@ class PingPong extends EventEmitter
 				const collisionDetails = Collision2D.trajectoryRectangleToRectangle(this.ball, paddle, true);
 				if (collisionDetails && collisionDetails.colliding)
 				{
-					console.log(`Collision detected between ball and paddle for player ${player.id}`, collisionDetails);
-					this.separateBallFromPaddle(this.ball, collisionDetails);
 					const side = collisionDetails.side;
+					this.separateBallFromPaddle(this.ball, paddle, side);
 					if (side === "top" || side === "bottom")
 						this.ball.launchBall({x: this.ball.directionX, y: -this.ball.directionY});
 					else if (side === "left" || side === "right")
 						this.adjustBallAngle(paddle);
+					return collisionDetails.colliding;
 				}
 			}
 			else
@@ -216,8 +224,8 @@ class PingPong extends EventEmitter
 				console.warn(`⚠️ Paddle not found for player ${player.id}`);
 			}
 		}
+		return null;
 	}
-
 
 	adjustBallAngle(paddle)
 	{
@@ -227,6 +235,59 @@ class PingPong extends EventEmitter
 										this.ball.defaultSpeed + this.settings.ballSpeedIncrease * Math.abs(normalizedRelativeIntersectionY));
 	}
 
+/*
+node-1  | 🔧 COLLISION DEBUG:
+node-1  |    Ball: pos(770.4, 365.8) size(14x14)
+node-1  |    Paddle: pos(770.0, 272.4) size(10x100)
+node-1  |    Ball direction: (1.00, 0.19)
+node-1  |    Detected side: "top"
+node-1  |    TOP collision: 272.40000000000003 - 14 - 1 = 257.40000000000003
+node-1  |    Final position: (770.4, 257.4)
+
+
+node-1  | 🔧 COLLISION DEBUG:
+node-1  |    Ball: pos(25.8, 348.4) size(14x14)
+node-1  |    Paddle: pos(20.0, 250.0) size(10x100)
+node-1  |    Ball direction: (-1.00, 0.15)
+node-1  |    Detected side: "top"
+node-1  |    TOP collision: 250 - 14 - 1 = 235
+node-1  |    Final position: (25.8, 235.0)
+
+*/
+
+
+	separateBallFromPaddle(ball, paddle, side)
+	{
+		console.log(`🔧 COLLISION DEBUG:`);
+		console.log(`   Ball: pos(${ball.pos.x.toFixed(1)}, ${ball.pos.y.toFixed(1)}) size(${ball.width}x${ball.height})`);
+		console.log(`   Paddle: pos(${paddle.pos.x.toFixed(1)}, ${paddle.pos.y.toFixed(1)}) size(${paddle.width}x${paddle.height})`);
+		console.log(`   Ball direction: (${ball.directionX.toFixed(2)}, ${ball.directionY.toFixed(2)})`);
+		console.log(`   Detected side: "${side}"`);
+
+		let newX = ball.pos.x;
+		let newY = ball.pos.y;
+
+		if (side === 'left' || side === 'right')
+		{
+			if (ball.directionX < 0)
+				newX = paddle.pos.x + paddle.width + 1;
+			else
+				newX = paddle.pos.x - ball.width - 1;
+		}
+		else if (side === 'top')
+		{
+			newY = paddle.pos.y - ball.height - 1;
+			console.log(`   TOP collision: ${paddle.pos.y} - ${ball.height} - 1 = ${newY}`);
+		}
+		else if (side === 'bottom')
+		{
+			newY = paddle.pos.y + paddle.height + 1;
+			console.log(`   BOTTOM collision: ${paddle.pos.y} + ${paddle.height} + 1 = ${newY}`);
+		}
+
+		console.log(`   Final position: (${newX.toFixed(1)}, ${newY.toFixed(1)})`);
+		ball.setSafePosition(newX, newY);
+	}
 
 	start()
 	{
@@ -238,7 +299,13 @@ class PingPong extends EventEmitter
 			this.initializeGame();
 		}
 
-		this.status = 'playing';
+		this.status = 'countdown';
+		const interval = setInterval(() =>
+		{
+			this.status = 'playing';
+			clearInterval(interval);
+		}, 1000);
+
 	}
 
 	pause()
@@ -258,7 +325,7 @@ class PingPong extends EventEmitter
 
 	isRunning()
 	{
-		return this.status === 'playing';
+		return this.status === 'playing' || this.status === 'countdown';
 	}
 
 	getGameState()
@@ -289,43 +356,11 @@ class PingPong extends EventEmitter
 		};
 	}
 
-	processPlayerInput(player, paddle)
-	{
-		const upPressed = player.inputs.get('up') || false;
-		const downPressed = player.inputs.get('down') || false;
-
-		paddle.up = upPressed;
-		paddle.down = downPressed;
-	}
-
 	isFull()
 	{
 		return this.players.length === this.settings.maxPlayers;
 	}
 
-	/**
-	 * Top'u paddle'dan güvenli bir şekilde ayırır
-	 * @param {Ball} ball
-	 * @param {Object} collisionDetails
-	 */
-	separateBallFromPaddle(ball, collisionDetails)
-	{
-		console.log("Separating ball from paddle with collision details:", collisionDetails);
-		if (!collisionDetails || !collisionDetails.overlap)
-		{
-			console.warn('⚠️ No collision details or overlap found');
-			return;
-		}
-
-		let newX = ball.pos.x;
-		let newY = ball.pos.y;
-
-		if (collisionDetails.normal.x !== 0)
-			newX += collisionDetails.penetration * collisionDetails.normal.x;
-		if (collisionDetails.normal.y !== 0)
-			newY += collisionDetails.penetration * collisionDetails.normal.y;
-		ball.setSafePosition(newX, newY);
-	}
 }
 
 export default PingPong;
