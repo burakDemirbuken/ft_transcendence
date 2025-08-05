@@ -8,8 +8,10 @@ WORKDIR /app
 COPY package*.json ./
 COPY . .
 
+RUN apk add --no-cache sqlite
+
 RUN npm install && \
 	npm cache clean --force
 
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "test:db:watch"]

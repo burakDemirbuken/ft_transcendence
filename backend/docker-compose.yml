@@ -17,17 +17,17 @@ networks:
     driver: bridge
 
 services:
-  authentication:
-    container_name: authentication
-    build: ./authentication
-    restart: on-failure
-    networks:
-      - transcendency
-    expose:
-      - 3001
-    volumes:
-      - authentication_src:/app
-      - /app/node_modules
+  #authentication:
+  #  container_name: authentication
+  #  build: ./authentication
+  #  restart: on-failure
+  #  networks:
+  #    - transcendency
+  #  expose:
+  #    - 3001
+  #  volumes:
+  #    - authentication_src:/app
+  #    - /app/node_modules
 
   gateway:
     container_name: gateway
