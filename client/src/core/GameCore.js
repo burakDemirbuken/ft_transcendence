@@ -158,6 +158,9 @@ attachCameraToMachineFront(machineId, distance = 5, height = 2) {
 			case 'tournament':
 				await this.setupTournamentMachines(machineCount);
 				break;
+			case 'local':
+				await this.setupSingleMachine();
+				break;
 			default:
 				throw new Error(`Unknown view mode: ${mode}`);
 		}

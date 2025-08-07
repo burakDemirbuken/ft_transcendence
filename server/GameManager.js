@@ -8,12 +8,13 @@ const DEFAULT_GAME_PROPERTIES = {
 
 	paddleWidth: 10,
 	paddleHeight: 100,
+	paddleSpeed: 700,
 
 	ballRadius: 7,
-	ballSpeed: 600,
+	ballSpeed: 800,
 	ballSpeedIncrease: 100,
 
-	maxPlayers: 4,
+	maxPlayers: 2,
 
 	maxScore: 11
 }
@@ -23,6 +24,7 @@ class GameManager
 	constructor()
 	{
 		this.games = new Map();
+		this.gameMode
 		this.updateInterval = null;
 		this.lastUpdateTime = Date.now();
 	}

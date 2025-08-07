@@ -27,8 +27,12 @@
   </style>
 </head>
 <body>
-  <button id="startButton" style="position: absolute; top: 10px; left: 10px; z-index: 1000;"
+  <button id="startButton"
       onclick="gameStart()">Start Game</button>
+  <button id="localgame"
+      onclick="localGameStart()">Local Game</button>
+  <button id="customgame"
+      onclick="customGameStart()">Custom Game</button>
   <canvas id="renderCanvas"></canvas>
   <script type="module" src="src/main.js"></script>
 </body>

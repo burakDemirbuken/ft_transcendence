@@ -1,4 +1,3 @@
-
 /*
 const exampleGameConfig =
 {
@@ -55,6 +54,14 @@ import GameStateManager from './GameStateManager.js';
 import GameRenderer from './rendering/GameRenderer.js';
 import InputManager from './input/InputManager.js';
 
+
+const exampleGameConnectQuery = {
+	id: "test-id",
+	name: "Test Player",
+	matchId: "test-match-id",
+	gameMode: "local", // "local", "online", "tournament", "ai"
+};
+
 class Client
 {
 	constructor(canvasId)
@@ -68,15 +75,24 @@ class Client
 
 
 		// ? this.gameStateManager = new GameStateManager();
-		/*
-		// Game modes
-		this.gameModes = {
-			sameDevice: new SameDeviceMode(this.networkManager, this.gameStateManager),
-			multiDevice: new MultiDeviceMode(this.networkManager, this.gameStateManager),
-			tournament: new TournamentMode(this.networkManager, this.gameStateManager)
-		};
-		*/
 		this.isRunning = false;
+	}
+
+	TEST_generateRandomId()
+	{
+		// 6 haneli rastgele alfanumerik ID
+		return Math.random().toString(36).substr(2, 6).toUpperCase();
+	}
+
+	TEST_generateRandomName()
+	{
+		const names = [
+			'Player', 'Gamer', 'User', 'Tester', 'Demo',
+			'Alpha', 'Beta', 'Gamma', 'Delta', 'Echo'
+		];
+		const randomName = names[Math.floor(Math.random() * names.length)];
+		const randomNumber = Math.floor(Math.random() * 999) + 1;
+		return `${randomName}${randomNumber}`;
 	}
 
 	async initialize(gameConfig)
@@ -88,8 +104,29 @@ class Client
 		if (!gameConfig.gameRender)
 			throw new Error('Game render configuration is missing');
 		this.renderer.initialize(gameConfig.gameRender);
-		this.networkManager.connect();
+
+		exampleGameConnectQuery.id = this.TEST_generateRandomId();
+		exampleGameConnectQuery.name = this.TEST_generateRandomName();
+		exampleGameConnectQuery.matchId = this.generateUniqueMatchId();
+
+		const hostname = window.location.hostname || 'localhost';
+		console.log(`🌐 Using hostname: ${hostname}`);
+
+		const url = `ws://${hostname}:3000/ws?id=${exampleGameConnectQuery.id}&name=${exampleGameConnectQuery.name}&matchId=${exampleGameConnectQuery.matchId}`;
+		this.networkManager.connect(url);
 		this.setupEventListeners();
+	}
+
+	createCustomRoom()
+	{
+		
+	}
+
+	generateUniqueMatchId()
+	{
+		const timestamp = Date.now().toString(36);
+		const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+		return `match-${timestamp}-${randomPart}`;
 	}
 
 	setupEventListeners()
@@ -102,45 +139,25 @@ class Client
 			}
 		);
 		this.networkManager.on("connected",
-			() =>
-			{
-				console.log('Sunucuya bağlandı');
-			}
+			() => console.log('Sunucuya bağlandı')
 		);
 		this.inputManager.onKey("w",
-			() =>
-			{
-				console.log('W pressed');
-				this.networkManager.send("move", {direction: 'up', action: true});
-			},
-			() =>
-			{
-				this.networkManager.send("move", {direction: 'up', action: false});
-			}
+			() => this.networkManager.send("move", {direction: 'up', action: true}),
+			() => this.networkManager.send("move", {direction: 'up', action: false})
 		);
 		this.inputManager.onKey("s",
-			() =>
-			{
-				this.networkManager.send("move", {direction: 'down', action: true});
-			},
-			() =>
-			{
-				this.networkManager.send("move", {direction: 'down', action: false});
-			}
+			() => this.networkManager.send("move", {direction: 'down', action: true}),
+			() => this.networkManager.send("move", {direction: 'down', action: false})
 		);
 		this.inputManager.onKey("Escape",
-			() =>
-			{
-				this.networkManager.send("pause");
-			}
+			() => this.networkManager.send("pause")
 		);
 
-		this.inputManager.onKey("I",
-			() =>
-			{
-				this.networkManager.send("resetBurak");
-			}
-		);
+		this.inputManager.onKey("I", () => this.networkManager.send("resetBurak"));
+
+		this.networkManager.on("ArrowUp", () => this.inputManager.send("move", {direction: 'up', action: true}));
+
+		this.inputManager.onKey("ArrowDown", () => this.inputManager.send("move", {direction: 'down', action: true}));
 	}
 
 	handleStateChange(data)
@@ -201,5 +218,4 @@ class Client
 		this.gameCore.dispose();
 	}
 }
-
 export default Client;

@@ -36,6 +36,7 @@ class GameService
 						console.log('🟢 New client connecting:', query);
 						const player = new Player(query.id, query.name);
 						this.Players.set(query.id, player);
+						console.log("query: ", query);
 						this.gameManager.addPlayerToGame('default-game', player);
 					}
 					catch (error)

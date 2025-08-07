@@ -35,6 +35,7 @@ class InputManager
 		document.addEventListener('keyup',
 			(e) =>
 			{
+				console.log(`Key released: ${e.key}`);
 				this.pressedKeys.delete(e.key);
 				const callback = this.keyUpCallbacks.get(e.key);
 				if (callback)

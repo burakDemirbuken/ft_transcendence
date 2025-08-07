@@ -58,9 +58,24 @@ const exampleGameConfig = {
 function gameStart()
 {
 	client.initialize(exampleGameConfig.payload);
+	document.getElementById("startButton").style.display = "none";
+	document.getElementById("localgame").style.display = "none";
+	document.getElementById("customgame").style.display = "none";
 	client.startGame();
-	document.getElementById("startButton").style.display = "none"; // Hide the button after starting the game
 }
 
-// ES6 modüllerinde global fonksiyon yapmak için window objesine ekliyoruz
+function localGameStart()
+{
+	exampleGameConfig.payload.gameMode = "local";
+	gameStart();
+}
+
+function customGameStart()
+{
+	exampleGameConfig.payload.gameMode = "custom";
+	gameStart();
+}
+
 window.gameStart = gameStart;
+window.localGameStart = localGameStart;
+window.customGameStart = customGameStart;

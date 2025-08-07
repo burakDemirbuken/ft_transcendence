@@ -6,9 +6,11 @@ echo "=============================="
 # IP adresini al
 SERVER_IP=$(hostname -I | awk '{print $1}')
 
+PORT=3030
+
 echo "📍 Server IP: $SERVER_IP"
-echo "🌐 Client will be available at: http://$SERVER_IP:8080"
-echo "🧪 Test page: http://$SERVER_IP:8080/test.html"
+echo "🌐 Client will be available at: http://$SERVER_IP:$PORT"
+echo "🧪 Test page: http://$SERVER_IP:$PORT/test.html"
 echo ""
 
 # Client klasörüne git
@@ -19,9 +21,9 @@ echo "📁 Files:"
 ls -la
 
 echo ""
-echo "🚀 Starting HTTP server on port 8080..."
+echo "🚀 Starting HTTP server on port $PORT..."
 echo "⏹️  Press Ctrl+C to stop"
 echo ""
 
 # HTTP sunucuyu başlat
-python3 -m http.server 3030
+python3 -m http.server $PORT
