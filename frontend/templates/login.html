@@ -9,6 +9,7 @@
 		<div class="field active" data-step="welcome">
 			<h2 data-i18n="welcome.title">Welcome!</h2>
 			<p data-i18n="welcome.prompt" class="blink">Press Start Button...</p>
+			<button class="enter" type="button">></button>
 		</div>
 		<div class="field" data-step="username">
 			<label>
@@ -18,6 +19,10 @@
 					<input type="text" name="username" required class="blinking-cursor">
 				</div>
 			</label>
+			<div class="buttons">
+				<button class="back" type="button" ><</button>
+				<button class="enter" type="button">></button>
+			</div>
 		</div>
 		<div class="field" data-step="email">
 			<label>
@@ -27,6 +32,10 @@
 					<input type="email" name="email" required>
 				</div>
 			</label>
+			<div class="buttons">
+				<button class="back" type="button" ><</button>
+				<button class="enter" type="button">></button>
+			</div>
 		</div>
 		<div class="field" data-step="password">
 			<label>
@@ -36,6 +45,10 @@
 					<input type="password" name="password" required>
 				</div>
 			</label>
+			<div class="buttons">
+				<button class="back" type="button" ><</button>
+				<button class="enter" type="button">></button>
+			</div>
 		</div>
 		<div class="field" data-step="2fa">
 			<label>
@@ -45,6 +58,10 @@
 					<input type="text" pattern="[0-9]*" inputmode="numeric" name="code" required>
 				</div>
 			</label>
+			<div class="buttons">
+				<button class="back" type="button" ><</button>
+				<button class="enter" type="button">></button>
+			</div>
 		</div>
 		<p id="rme" data-i18n="rme">Remember Me</p>
 	</form>

@@ -132,6 +132,25 @@ body {
 #rme.active {
 	color: white;
 }
+.buttons {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 60px;
+	width: 100%;
+}
+
+button {
+	position: relative;
+	background: #111;
+	color: #0ff;
+	border-radius: .5rem;
+	border: 1px solid #0ff;
+	font-family: inherit;
+	font-size: 2rem;
+	width: 10%;
+}
 
 .field {
 	position: absolute;
@@ -144,6 +163,7 @@ body {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	gap: 30px;
 
 	color: #0ff;
 	text-shadow:

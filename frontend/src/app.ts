@@ -262,15 +262,20 @@ const choice = {
 
 let currentLang = "eng";
 function move(e) {
-	if (e.key === "ArrowUp") {
-		currentLang = choice[currentLang].next;
-		applyTranslations(currentLang);
-	} else if (e.key === "ArrowDown") {
-		document.querySelector("#rme")?.classList.toggle("active");
-	} else if (e.key === "ArrowLeft") {
-		back();
-	} else if (e.key === "Enter") {
-		enter();
+	if (e.type === "click") {
+		if (e.target.classList.contains("enter"))
+			enter();
+		else if (e.target.classList.contains("back"))
+			back();
+	} else {
+		if (e.key === "ArrowUp") {
+			currentLang = choice[currentLang].next;
+			applyTranslations(currentLang);
+		} else if (e.key === "ArrowDown") {
+			document.querySelector("#rme")?.classList.toggle("active");
+		} else if (e.key === "Enter") {
+			enter();
+		}
 	}
 }
 
@@ -288,6 +293,7 @@ async function loadPage(page) {
 
 	currentStep = "welcome";
 	document.addEventListener("keydown", move);
+	document.addEventListener("click", move);
 }
 
 function navigate(page) {
