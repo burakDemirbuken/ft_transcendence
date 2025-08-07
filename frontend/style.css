@@ -132,6 +132,7 @@ body {
 #rme.active {
 	color: white;
 }
+
 .buttons {
 	position: relative;
 	display: flex;
@@ -152,9 +153,15 @@ button {
 	width: 10%;
 }
 
+#error {
+	position: absolute;
+	top: 25%;
+	font-size: min(2rem, 1rem + 1vw);
+}
+
 .field {
 	position: absolute;
-	font-size: clamp(1.8rem, 7vw + 1rem, 5rem);
+	font-size: clamp(1.8rem, 5vw + 1rem, 5rem);
 	opacity: 0;
 	transition: opacity 0.3s ease-in-out;
 	pointer-events: none;
@@ -177,14 +184,33 @@ button {
 	pointer-events: all;
 }
 
+label {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
+.input-wrapper {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
 .field input {
-	/* background: transparent; */
+	background: transparent;
 	outline: none;
 	border: none;
-	color: inherit;
+	color: #fff;
 	font-family: inherit;
-	/* font-size: inherit; */
-	/* width: 100%; */
+	font-size: min(3rem, 1rem + 2vw);
+	width: 3ch;
+	min-width: 1ch;
+	max-width: 20ch;
 }
 
 @keyframes flicker { to { opacity: 1; } }

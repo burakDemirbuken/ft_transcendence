@@ -174,6 +174,8 @@ function verify() {
 // Enter button handler
 function enter() {
     return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        (_a = document.querySelector("#error")) === null || _a === void 0 ? void 0 : _a.textContent = "";
         switch (currentStep) {
             case "welcome":
                 goToNextField("username");
@@ -201,6 +203,8 @@ function enter() {
 ;
 function back() {
     return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        (_a = document.querySelector("#error")) === null || _a === void 0 ? void 0 : _a.textContent = "";
         switch (currentStep) {
             case "welcome":
                 break;
@@ -285,6 +289,9 @@ function loadPage(page) {
         currentStep = "welcome";
         document.addEventListener("keydown", move);
         document.addEventListener("click", move);
+        document.addEventListener("input", (e) => {
+            e.target.style.width = (Math.max(e.target.value.length, 1) + 2) + "ch";
+        });
     });
 }
 function navigate(page) {

@@ -16,7 +16,7 @@
 				<span data-i18n="username" class="prompt">Enter Username</span>
 				<div class="input-wrapper">
 					<span class="caret" aria-hidden="true">></span>
-					<input type="text" name="username" required class="blinking-cursor">
+					<input type="text" name="username" maxlength="20" required>
 				</div>
 			</label>
 			<div class="buttons">
@@ -29,7 +29,7 @@
 				<span data-i18n="email" class="prompt">Enter email</span>
 				<div class="input-wrapper">
 					<span class="caret" aria-hidden="true">></span>
-					<input type="email" name="email" required>
+					<input type="email" name="email" maxlength="254" required>
 				</div>
 			</label>
 			<div class="buttons">
@@ -42,7 +42,7 @@
 				<span data-i18n="password" class="prompt">Enter Password</span>
 				<div class="input-wrapper">
 					<span class="caret" aria-hidden="true">></span>
-					<input type="password" name="password" required>
+					<input type="password" name="password" maxlength="128" required>
 				</div>
 			</label>
 			<div class="buttons">
@@ -55,7 +55,7 @@
 				<span data-i18n="code" class="prompt">Enter Code</span>
 				<div class="input-wrapper">
 					<span class="caret" aria-hidden="true">></span>
-					<input type="text" pattern="[0-9]*" inputmode="numeric" name="code" required>
+					<input type="text" pattern="[0-9]*" inputmode="numeric" name="code" maxlength="20" required>
 				</div>
 			</label>
 			<div class="buttons">

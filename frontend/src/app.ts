@@ -183,6 +183,7 @@ async function verify()
 
 // Enter button handler
 async function enter() {
+	document.querySelector("#error")?.textContent = "";
 	switch (currentStep) {
 		case "welcome":
 			goToNextField("username");
@@ -211,6 +212,7 @@ async function enter() {
 };
 
 async function back() {
+	document.querySelector("#error")?.textContent = "";
 	switch (currentStep) {
 		case "welcome":
 			break;
@@ -294,6 +296,9 @@ async function loadPage(page) {
 	currentStep = "welcome";
 	document.addEventListener("keydown", move);
 	document.addEventListener("click", move);
+	document.addEventListener("input", (e) => {
+		e.target.style.width = (Math.max(e.target.value.length, 1) + 2) + "ch";
+	})
 }
 
 function navigate(page) {
