@@ -24,38 +24,6 @@ function loadTemplate(templateName) {
         return yield response.text();
     });
 }
-const content = document.querySelector("#content");
-function register(event) {
-    return __awaiter(this, void 0, void 0, function* () {
-        event.preventDefault(); // Prevent auto refresh
-        const form = new FormData(event.target);
-        const user = {
-            "username": form.get("username"),
-            "email": form.get("email"),
-            "password": form.get("password")
-        };
-        const request = new Request("http://localhost:3000/api/users/register", {
-            method: "POST",
-            headers: new Headers({
-                "Content-Type": "application/json",
-            }),
-            body: JSON.stringify(user),
-        });
-        // "Authorization": "Bearer token123" // HEADER
-        // cache: "no-store",
-        // mode: "cors" // CORS handling
-        const response = yield fetch(request);
-        const obj = yield response.json();
-        const test = document.createElement("p");
-        if (response.ok)
-            test.textContent = `Reply: ${obj.message}`;
-        else if (obj.error)
-            test.textContent = `Reply: ${obj.error}`;
-        else
-            test.textContent = `Reply not found`;
-        content.appendChild(test);
-    });
-}
 let currentStep = "welcome";
 let userRegistered;
 function goToNextField(field) {
@@ -65,91 +33,167 @@ function goToNextField(field) {
     step = document.querySelector(`[data-step="${currentStep}"]`);
     step.classList.add("active");
 }
+function showError(message) {
+    const form = document.querySelector("#loginForm");
+    const error = document.querySelector("#error");
+    error.textContent = message;
+    form.classList.add('shake');
+    setTimeout(() => {
+        form.classList.remove('shake');
+    }, 500);
+}
+function username() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const form = document.querySelector("#loginForm");
+        const formData = new FormData(form);
+        const username = formData.get("username");
+        if (!username) {
+            showError("uname cant be empty");
+            return;
+        }
+        const graphemeLength = [...username].length;
+        if (graphemeLength < 1 || graphemeLength > 20) {
+            showError("uname has to be 1-20 characters long");
+            return;
+        }
+        if (!/^[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
+            showError("uname has to be valid characters");
+            return;
+        }
+        const address = `http://localhost:3000/api/users/checkUsername?username=${username}`;
+        const response = yield fetch(address);
+        const json = yield response.json();
+        if (json.exists) {
+            userRegistered = true;
+            goToNextField("password");
+        }
+        else {
+            userRegistered = false;
+            goToNextField("email");
+        }
+    });
+}
+function email() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const form = document.querySelector("#loginForm");
+        const formData = new FormData(form);
+        const email = formData.get("email");
+        if (!email) {
+            showError("email can't be empty");
+            return;
+        }
+        if (email.length < 5 || email.length > 254) {
+            showError("invalid email");
+            return;
+        }
+        if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/u.test(email)) {
+            showError("invalid email");
+            return;
+        }
+        goToNextField("password");
+    });
+}
+function login() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const form = document.querySelector("#loginForm");
+        const formData = new FormData(form);
+        const password = formData.get("password");
+        if (!password) {
+            showError("password can't be empty");
+            return;
+        }
+        if (password.length < 4 || password.length > 128) {
+            showError("invalid password");
+            return;
+        }
+        const user = {
+            "username": formData.get("username"),
+            "password": formData.get("password")
+        };
+        const request = new Request("http://localhost:3000/api/users/login", {
+            method: "POST",
+            headers: new Headers({ "Content-Type": "application/json" }),
+            body: JSON.stringify(user),
+        });
+        const response = yield fetch(request);
+        const json = yield response.json();
+        if (response.ok) {
+            document.querySelector("#error").textContent = json.message;
+            goToNextField("2fa");
+        }
+        else
+            showError(json.error);
+    });
+}
+function register() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const form = document.querySelector("#loginForm");
+        const formData = new FormData(form);
+        const password = formData.get("password");
+        if (!password) {
+            showError("password can't be empty");
+            return;
+        }
+        if (password.length < 8 || password.length > 128) {
+            showError("invalid password");
+            return;
+        }
+        const obj = {
+            "username": formData.get("username"),
+            "email": formData.get("email"),
+            "password": formData.get("password")
+        };
+        const request = new Request("http://localhost:3000/api/users/register", {
+            method: "POST",
+            headers: new Headers({ "Content-Type": "application/json" }),
+            body: JSON.stringify(obj),
+        });
+        const response = yield fetch(request);
+        const json = yield response.json();
+        if (response.ok) {
+            document.querySelector("#error").textContent = json.message;
+            goToNextField("2fa");
+        }
+        else
+            showError(json.error);
+    });
+}
+function verify() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const form = document.querySelector("#loginForm");
+        const formData = new FormData(form);
+        const code = formData.get("code");
+        if (!code) {
+            showError("code can't be empty");
+            return;
+        }
+        // send code to db for login
+        navigate("profile");
+    });
+}
 // Enter button handler
 function enter() {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a;
-        const form = document.querySelector("#loginForm");
-        const formData = new FormData(form);
-        let obj;
         switch (currentStep) {
             case "welcome":
                 goToNextField("username");
                 break;
             case "username":
-                const address = `http://localhost:3000/api/users/checkUsername?username=${formData.get("username")}`;
-                const response = yield fetch(address);
-                const json = yield response.json();
-                if (json.exists) {
-                    userRegistered = true;
-                    goToNextField("password");
-                }
-                else {
-                    userRegistered = false;
-                    goToNextField("email");
-                }
+                username();
                 break;
             case "email":
-                // check email validity
-                goToNextField("password");
+                email();
                 break;
             case "password":
-                (_a = document.querySelector(`.field[data-step=password]`)) === null || _a === void 0 ? void 0 : _a.classList.add("shake");
-                // form.classList.add('shake');
-                // Remove shake class after animation completes
-                setTimeout(() => {
-                    var _a;
-                    // form.classList.remove('shake');
-                    (_a = document.querySelector(`.field[data-step=password]`)) === null || _a === void 0 ? void 0 : _a.classList.remove("shake");
-                }, 500);
                 if (userRegistered) {
-                    obj = {
-                        "username": formData.get("username"),
-                        "password": formData.get("password")
-                    };
-                    const request = new Request("http://localhost:3000/api/users/login", {
-                        method: "POST",
-                        headers: new Headers({
-                            "Content-Type": "application/json",
-                        }),
-                        body: JSON.stringify(obj),
-                    });
-                    const response = yield fetch(request);
-                    const json = yield response.json();
-                    if (response.ok) {
-                        document.querySelector("#error").textContent = json.message;
-                        goToNextField("2fa");
-                    }
-                    else
-                        document.querySelector("#error").textContent = json.error;
+                    login();
                 }
                 else {
-                    obj = {
-                        "username": formData.get("username"),
-                        "email": formData.get("email"),
-                        "password": formData.get("password")
-                    };
-                    const request = new Request("http://localhost:3000/api/users/register", {
-                        method: "POST",
-                        headers: new Headers({
-                            "Content-Type": "application/json",
-                        }),
-                        body: JSON.stringify(obj),
-                    });
-                    const response = yield fetch(request);
-                    const json = yield response.json();
-                    // if (response.ok) {
-                    // 	document.querySelector("#error").textContent = json.message;
-                    // goToNextField("welcome");
-                    // }
-                    // else
-                    // 	document.querySelector("#error").textContent = json.error;
+                    register();
                 }
-                goToNextField("2fa");
                 break;
             case "2fa":
-                // send code and get cookies
-                navigate("profile");
+                verify();
                 break;
         }
     });
@@ -195,32 +239,35 @@ function applyTranslations(lang) {
         document.querySelector("[data-i18n='password']").textContent = translations.login.password;
         document.querySelector("[data-i18n='email']").textContent = translations.login.email;
         document.querySelector("[data-i18n='code']").textContent = translations.login.code;
+        document.querySelector("[data-i18n='rme']").textContent = translations.login.rme;
     });
 }
-let currentLang = "en";
-function up() {
-    return __awaiter(this, void 0, void 0, function* () {
-        switch (currentLang) {
-            case "en":
-                currentLang = "tr";
-                break;
-            case "tr":
-                currentLang = "de";
-                break;
-            case "de":
-                currentLang = "jp";
-                break;
-            case "jp":
-                currentLang = "en";
-                break;
-        }
+const choice = {
+    eng: { next: "tur" },
+    tur: { next: "deu" },
+    deu: { next: "jpn" },
+    jpn: { next: "eng" }
+};
+let currentLang = "eng";
+function move(e) {
+    var _a;
+    if (e.key === "ArrowUp") {
+        currentLang = choice[currentLang].next;
         applyTranslations(currentLang);
-    });
+    }
+    else if (e.key === "ArrowDown") {
+        (_a = document.querySelector("#rme")) === null || _a === void 0 ? void 0 : _a.classList.toggle("active");
+    }
+    else if (e.key === "ArrowLeft") {
+        back();
+    }
+    else if (e.key === "Enter") {
+        enter();
+    }
 }
 function loadPage(page) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c;
-        const body = document.querySelector("body");
+        const content = document.querySelector("#content");
         pageState.current = page;
         const route = routes[page];
         if (route) {
@@ -231,10 +278,7 @@ function loadPage(page) {
             content.innerHTML = "<h2>404</h2><p>Page not found.</p>";
         }
         currentStep = "welcome";
-        (_a = document.querySelector("#enter")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", enter);
-        (_b = document.querySelector("#back")) === null || _b === void 0 ? void 0 : _b.addEventListener("click", back);
-        (_c = document.querySelector("#up")) === null || _c === void 0 ? void 0 : _c.addEventListener("click", up);
-        // content.querySelector("#loginForm")?.addEventListener("submit", login);
+        document.addEventListener("keydown", move);
     });
 }
 function navigate(page) {

@@ -1,6 +1,6 @@
 {
 	"login": {
-		"lang": "JPN",
+		"lang": "ENG",
 		"welcome": {
 			"title": "Welcome!",
 			"prompt": "Press Start Button..."
@@ -8,6 +8,7 @@
 		"username": "Enter Username",
 		"email": "Enter Email",
 		"password": "Enter Password",
-		"code": "Enter Code"
+		"code": "Enter Code",
+		"rme": "Remember Me"
 	}
 }

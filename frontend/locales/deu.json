@@ -8,6 +8,7 @@
 		"username": "Nick Eingeben",
 		"email": "Email Eingeben",
 		"password": "Passwort Eingeben",
-		"code": "Schlüssel Eingeben"
+		"code": "Schlüssel Eingeben",
+		"rme": "Login Merken"
 	}
 }

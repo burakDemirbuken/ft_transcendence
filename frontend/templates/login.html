@@ -1,68 +1,58 @@
-<div class="login-wrapper">
-	<div id="machine">
-		<div id="title">
-			<h1>Transcendence</h1>
+<div class="login-container">
+	<div id="ball"></div>
+	<div class="paddle paddle-left"></div>
+	<div class="paddle paddle-right"></div>
+	<div id="net"></div>
+	<form id="loginForm">
+		<p id="lang" data-i18n="lang">ENG</p>
+		<p id="error"></p>
+		<div class="field active" data-step="welcome">
+			<h2 data-i18n="welcome.title">Welcome!</h2>
+			<p data-i18n="welcome.prompt" class="blink">Press Start Button...</p>
 		</div>
-		<form id="loginForm">
-			<div id="sides">
-				<div id="dynamicScreen">
-					<p id="lang" lang="eng" data-i18n="lang">ENG</p>
-					<p id="error"></p>
-					<div class="field active" data-step="welcome">
-						<h2 data-i18n="welcome.title">Welcome!</h2>
-						<p data-i18n="welcome.prompt" class="blink">Press Start Button...</p>
-					</div>
-					<div class="field" data-step="username">
-						<label>
-							<span data-i18n="username" class="prompt">Enter Username</span>
-							<div class="input-wrapper">
-								<span class="caret" aria-hidden="true">></span>
-								<input type="text" name="username" required class="blinking-cursor">
-							</div>
-						</label>
-					</div>
-					<div class="field" data-step="email">
-						<label>
-							<span data-i18n="email" class="prompt">Enter email</span>
-							<div class="input-wrapper">
-								<span class="caret" aria-hidden="true">></span>
-								<input type="email" name="email" required>
-							</div>
-						</label>
-					</div>
-					<div class="field" data-step="password">
-						<label>
-							<span data-i18n="password" class="prompt">Enter Password</span>
-							<div class="input-wrapper">
-								<span class="caret" aria-hidden="true">></span>
-								<input type="password" name="password" required>
-							</div>
-						</label>
-					</div>
-					<div class="field" data-step="2fa">
-						<label>
-							<span data-i18n="code" class="prompt">Enter Code</span>
-							<div class="input-wrapper">
-								<span class="caret" aria-hidden="true">></span>
-								<input type="text" pattern="[0-9]*" inputmode="numeric" name="code" required>
-							</div>
-						</label>
-					</div>
+		<div class="field" data-step="username">
+			<label>
+				<span data-i18n="username" class="prompt">Enter Username</span>
+				<div class="input-wrapper">
+					<span class="caret" aria-hidden="true">></span>
+					<input type="text" name="username" required class="blinking-cursor">
 				</div>
-				<button type="button" id="enter"></button>
-				<button type="button" id="back"></button>
-				<button type="button" id="up"></button>
-				<button type="button" id="left"></button>
-				<button type="button" id="right"></button>
-				<button type="button" id="down"></button>
-			</div>
-		</form>
-		<div id="console"></div>
-		<div id="bottom"></div>
+			</label>
+		</div>
+		<div class="field" data-step="email">
+			<label>
+				<span data-i18n="email" class="prompt">Enter email</span>
+				<div class="input-wrapper">
+					<span class="caret" aria-hidden="true">></span>
+					<input type="email" name="email" required>
+				</div>
+			</label>
+		</div>
+		<div class="field" data-step="password">
+			<label>
+				<span data-i18n="password" class="prompt">Enter Password</span>
+				<div class="input-wrapper">
+					<span class="caret" aria-hidden="true">></span>
+					<input type="password" name="password" required>
+				</div>
+			</label>
+		</div>
+		<div class="field" data-step="2fa">
+			<label>
+				<span data-i18n="code" class="prompt">Enter Code</span>
+				<div class="input-wrapper">
+					<span class="caret" aria-hidden="true">></span>
+					<input type="text" pattern="[0-9]*" inputmode="numeric" name="code" required>
+				</div>
+			</label>
+		</div>
+		<p id="rme" data-i18n="rme">Remember Me</p>
+	</form>
+	<div class="particles">
+		<div class="particle"></div>
+		<div class="particle"></div>
+		<div class="particle"></div>
+		<div class="particle"></div>
+		<div class="particle"></div>
 	</div>
 </div>
-
-<!-- <div class="form-group">
-	<label for="email">Email:</label>
-	<input type="email" id="email" name="email" required>
-</div> -->

@@ -15,43 +15,6 @@ async function loadTemplate(templateName) {
 	return await response.text();
 }
 
-const content = document.querySelector("#content");
-
-async function register(event) {
-	event.preventDefault(); // Prevent auto refresh
-
-	const form = new FormData(event.target);
-
-	const user = {
-		"username": form.get("username"),
-		"email": form.get("email"),
-		"password": form.get("password")
-	};
-
-	const request = new Request("http://localhost:3000/api/users/register", {
-		method: "POST",
-		headers: new Headers({
-			"Content-Type": "application/json",
-		}),
-		body: JSON.stringify(user),
-	});
-	// "Authorization": "Bearer token123" // HEADER
-	// cache: "no-store",
-	// mode: "cors" // CORS handling
-
-	const response = await fetch(request);
-	const obj = await response.json();
-
-	const test = document.createElement("p");
-	if (response.ok)
-		test.textContent = `Reply: ${obj.message}`;
-	else if (obj.error)
-		test.textContent = `Reply: ${obj.error}`;
-	else
-		test.textContent = `Reply not found`;
-	content.appendChild(test);
-}
-
 let currentStep = "welcome";
 let userRegistered;
 
@@ -64,94 +27,185 @@ function goToNextField(field)
 	step.classList.add("active");
 }
 
-// Enter button handler
-async function enter() {
+function showError(message:string)
+{
+	const form = document.querySelector("#loginForm");
+	const error = document.querySelector("#error");
+	error.textContent = message;
+	form.classList.add('shake')
+	setTimeout(() => {
+		form.classList.remove('shake');
+	}, 500);
+}
+
+async function username() {
 	const form = document.querySelector("#loginForm");
 	const formData = new FormData(form);
-	let obj;
+	const username:string = formData.get("username");
 
+	if (!username) {
+		showError("uname cant be empty");
+		return ;
+	}
+
+	const graphemeLength = [...username].length;
+	if (graphemeLength < 1 || graphemeLength > 20) {
+		showError("uname has to be 1-20 characters long");
+		return ;
+	}
+
+	if (!/^[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
+		showError("uname has to be valid characters")
+		return ;
+	}
+
+	const address = `http://localhost:3000/api/users/checkUsername?username=${username}`;
+	const response = await fetch(address);
+	const json = await response.json();
+	if(json.exists) {
+		userRegistered = true;
+		goToNextField("password");
+	} else {
+		userRegistered = false;
+		goToNextField("email");
+	}
+}
+
+async function email()
+{
+	const form = document.querySelector("#loginForm");
+	const formData = new FormData(form);
+	const email:string = formData.get("email");
+
+	if (!email) {
+		showError("email can't be empty");
+		return ;
+	}
+
+	if (email.length < 5 || email.length > 254) {
+		showError("invalid email");
+		return ;
+	}
+
+	if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/u.test(email)) {
+		showError("invalid email")
+		return ;
+	}
+
+	goToNextField("password");
+}
+
+async function login() {
+	const form = document.querySelector("#loginForm");
+	const formData = new FormData(form);
+	const password:string = formData.get("password");
+
+	if (!password) {
+		showError("password can't be empty");
+		return ;
+	}
+
+	if (password.length < 4 || password.length > 128) {
+		showError("invalid password");
+		return ;
+	}
+
+	const user:Object = {
+		"username": formData.get("username"),
+		"password": formData.get("password")
+	};
+
+	const request = new Request("http://localhost:3000/api/users/login", {
+		method: "POST",
+		headers: new Headers({ "Content-Type": "application/json" }),
+		body: JSON.stringify(user),
+	});
+
+	const response = await fetch(request);
+	const json = await response.json();
+	if (response.ok) {
+		document.querySelector("#error").textContent = json.message;
+		goToNextField("2fa")
+	}
+	else
+		showError(json.error);
+}
+
+async function register() {
+	const form = document.querySelector("#loginForm");
+	const formData = new FormData(form);
+	const password:string = formData.get("password");
+
+	if (!password) {
+		showError("password can't be empty");
+		return ;
+	}
+
+	if (password.length < 8 || password.length > 128) {
+		showError("invalid password");
+		return ;
+	}
+
+	const obj:Object = {
+		"username": formData.get("username"),
+		"email": formData.get("email"),
+		"password": formData.get("password")
+	};
+
+	const request = new Request("http://localhost:3000/api/users/register", {
+		method: "POST",
+		headers: new Headers({ "Content-Type": "application/json" }),
+		body: JSON.stringify(obj),
+	});
+	const response = await fetch(request);
+	const json = await response.json();
+	if (response.ok) {
+		document.querySelector("#error").textContent = json.message;
+		goToNextField("2fa");
+	}
+	else
+		showError(json.error);
+}
+
+async function verify()
+{
+	const form = document.querySelector("#loginForm");
+	const formData = new FormData(form);
+	const code:string = formData.get("code");
+
+	if (!code) {
+		showError("code can't be empty");
+		return ;
+	}
+	// send code to db for login
+	navigate("profile");
+}
+
+// Enter button handler
+async function enter() {
 	switch (currentStep) {
 		case "welcome":
 			goToNextField("username");
 			break;
 
 		case "username":
-			const address = `http://localhost:3000/api/users/checkUsername?username=${formData.get("username")}`;
-			const response = await fetch(address);
-			const json = await response.json();
-			if(json.exists) {
-				userRegistered = true;
-				goToNextField("password");
-			} else {
-				userRegistered = false;
-				goToNextField("email");
-			}
+			username();
 			break;
 
 		case "email":
-			// check email validity
-			goToNextField("password")
+			email();
 			break;
 
 		case "password":
-				document.querySelector(`.field[data-step=password]`)?.classList.add("shake");
-
-			    // form.classList.add('shake');
-
-   			 	// Remove shake class after animation completes
-		    	setTimeout(() => {
-					// form.classList.remove('shake');
-					document.querySelector(`.field[data-step=password]`)?.classList.remove("shake");
-		    	}, 500);
-
 			if (userRegistered) {
-				obj = {
-					"username": formData.get("username"),
-					"password": formData.get("password")
-				};
-				const request = new Request("http://localhost:3000/api/users/login", {
-					method: "POST",
-					headers: new Headers({
-						"Content-Type": "application/json",
-					}),
-					body: JSON.stringify(obj),
-				});
-				const response = await fetch(request);
-				const json = await response.json();
-				if (response.ok) {
-					document.querySelector("#error").textContent = json.message;
-					goToNextField("2fa")
-				}
-				else
-					document.querySelector("#error").textContent = json.error;
+				login();
 			} else {
-				obj = {
-					"username": formData.get("username"),
-					"email": formData.get("email"),
-					"password": formData.get("password")
-				};
-				const request = new Request("http://localhost:3000/api/users/register", {
-					method: "POST",
-					headers: new Headers({
-						"Content-Type": "application/json",
-					}),
-					body: JSON.stringify(obj),
-				});
-				const response = await fetch(request);
-				const json = await response.json();
-				// if (response.ok) {
-				// 	document.querySelector("#error").textContent = json.message;
-					// goToNextField("welcome");
-				// }
-				// else
-				// 	document.querySelector("#error").textContent = json.error;
+				register();
 			}
-			goToNextField("2fa");
 			break;
 
 		case "2fa":
-			// send code and get cookies
-			navigate("profile");
+			verify();
 			break;
 	}
 };
@@ -196,34 +250,34 @@ async function applyTranslations(lang) {
 	document.querySelector("[data-i18n='password']").textContent = translations.login.password;
 	document.querySelector("[data-i18n='email']").textContent = translations.login.email;
 	document.querySelector("[data-i18n='code']").textContent = translations.login.code;
+	document.querySelector("[data-i18n='rme']").textContent = translations.login.rme;
 }
 
-let currentLang = "en";
-async function up() {
-	switch (currentLang) {
-		case "en":
-			currentLang = "tr";
-			break;
+const choice = {
+	eng: { next: "tur" },
+	tur: { next: "deu" },
+	deu: { next: "jpn" },
+	jpn: { next: "eng" }
+}
 
-		case "tr":
-			currentLang = "de";
-			break;
-
-		case "de":
-			currentLang = "jp";
-			break;
-
-		case "jp":
-			currentLang = "en";
-			break;
+let currentLang = "eng";
+function move(e) {
+	if (e.key === "ArrowUp") {
+		currentLang = choice[currentLang].next;
+		applyTranslations(currentLang);
+	} else if (e.key === "ArrowDown") {
+		document.querySelector("#rme")?.classList.toggle("active");
+	} else if (e.key === "ArrowLeft") {
+		back();
+	} else if (e.key === "Enter") {
+		enter();
 	}
-	applyTranslations(currentLang);
 }
 
 async function loadPage(page) {
-	const body = document.querySelector("body");
-	pageState.current = page;
+	const content = document.querySelector("#content");
 
+	pageState.current = page;
 	const route = routes[page];
 	if (route) {
 		content.innerHTML = await loadTemplate(route.template);
@@ -233,10 +287,7 @@ async function loadPage(page) {
 	}
 
 	currentStep = "welcome";
-	document.querySelector("#enter")?.addEventListener("click", enter);
-	document.querySelector("#back")?.addEventListener("click", back);
-	document.querySelector("#up")?.addEventListener("click", up);
-	// content.querySelector("#loginForm")?.addEventListener("submit", login);
+	document.addEventListener("keydown", move);
 }
 
 function navigate(page) {
