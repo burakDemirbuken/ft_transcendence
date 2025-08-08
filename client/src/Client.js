@@ -54,14 +54,6 @@ import GameStateManager from './GameStateManager.js';
 import GameRenderer from './rendering/GameRenderer.js';
 import InputManager from './input/InputManager.js';
 
-
-const exampleGameConnectQuery = {
-	id: "test-id",
-	name: "Test Player",
-	matchId: "test-match-id",
-	gameMode: "local", // "local", "online", "tournament", "ai"
-};
-
 class Client
 {
 	constructor(canvasId)
@@ -80,7 +72,6 @@ class Client
 
 	TEST_generateRandomId()
 	{
-		// 6 haneli rastgele alfanumerik ID
 		return Math.random().toString(36).substr(2, 6).toUpperCase();
 	}
 
@@ -99,27 +90,33 @@ class Client
 	{
 		if (!this.canvas || !gameConfig || !gameConfig.arcade)
 			throw new Error('Canvas or game configuration is missing');
+
+		// Store gameConfig as instance variable for later use
+		this.gameConfig = gameConfig;
+
 		await this.gameCore.initialize(this.canvas, gameConfig.arcade);
 		await this.gameCore.setViewMode(gameConfig.gameMode);
 		if (!gameConfig.gameRender)
 			throw new Error('Game render configuration is missing');
 		this.renderer.initialize(gameConfig.gameRender);
 
-		exampleGameConnectQuery.id = this.TEST_generateRandomId();
-		exampleGameConnectQuery.name = this.TEST_generateRandomName();
-		exampleGameConnectQuery.matchId = this.generateUniqueMatchId();
-
 		const hostname = window.location.hostname || 'localhost';
 		console.log(`🌐 Using hostname: ${hostname}`);
 
-		const url = `ws://${hostname}:3000/ws?id=${exampleGameConnectQuery.id}&name=${exampleGameConnectQuery.name}&matchId=${exampleGameConnectQuery.matchId}`;
+		const params = new URLSearchParams({
+			id: this.TEST_generateRandomId(),
+			name: this.TEST_generateRandomName(),
+			matchId: this.generateUniqueMatchId(),
+			gameMode: gameConfig.gameMode
+		});
+		const url = `ws://${hostname}:3000/ws?${params.toString()}`;
 		this.networkManager.connect(url);
 		this.setupEventListeners();
 	}
 
 	createCustomRoom()
 	{
-		
+
 	}
 
 	generateUniqueMatchId()
@@ -149,15 +146,21 @@ class Client
 			() => this.networkManager.send("move", {direction: 'down', action: true}),
 			() => this.networkManager.send("move", {direction: 'down', action: false})
 		);
+		this.inputManager.onKey("ArrowUp",
+			() => this.networkManager.send(this.gameConfig.gameMode === "local" ? "player2Move" : "move", {direction: 'up', action: true}),
+			() => this.networkManager.send(this.gameConfig.gameMode === "local" ? "player2Move" : "move", {direction: 'up', action: false})
+		);
+
+		this.inputManager.onKey("ArrowDown",
+			() => this.networkManager.send(this.gameConfig.gameMode === "local" ? "player2Move" : "move", {direction: 'down', action: true}),
+			() => this.networkManager.send(this.gameConfig.gameMode === "local" ? "player2Move" : "move", {direction: 'down', action: false})
+		);
+
+
+		this.inputManager.onKey("r", () => this.networkManager.send("reset"));
 		this.inputManager.onKey("Escape",
 			() => this.networkManager.send("pause")
 		);
-
-		this.inputManager.onKey("I", () => this.networkManager.send("resetBurak"));
-
-		this.networkManager.on("ArrowUp", () => this.inputManager.send("move", {direction: 'up', action: true}));
-
-		this.inputManager.onKey("ArrowDown", () => this.inputManager.send("move", {direction: 'down', action: true}));
 	}
 
 	handleStateChange(data)

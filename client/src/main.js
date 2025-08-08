@@ -57,10 +57,18 @@ const exampleGameConfig = {
 
 function gameStart()
 {
-	client.initialize(exampleGameConfig.payload);
 	document.getElementById("startButton").style.display = "none";
 	document.getElementById("localgame").style.display = "none";
 	document.getElementById("customgame").style.display = "none";
+	try
+	{
+		client.initialize(exampleGameConfig.payload);
+	}
+	catch (error)
+	{
+		console.error('❌ Error initializing client:', error);
+		return;
+	}
 	client.startGame();
 }
 

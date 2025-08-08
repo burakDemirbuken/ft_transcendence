@@ -31,42 +31,38 @@ class GameService
 			this.webSocketManager.start(
 				(query) =>
 				{
-					try
+					console.log('🟢 New client connecting:', query);
+					if (!query.id || !query.name || !query.matchId || !query.gameMode)
 					{
-						console.log('🟢 New client connecting:', query);
+						console.error('❌ Missing id or name in query:', query);
+						return;
+					}
+					if (query.gameMode === 'local')
+					{
 						const player = new Player(query.id, query.name);
 						this.Players.set(query.id, player);
-						console.log("query: ", query);
 						this.gameManager.addPlayerToGame('default-game', player);
+						const localPlayer = this.createLocalIdAndName();
+						const player2 = new Player(localPlayer.id, localPlayer.name);
+						this.Players.set(localPlayer.id, player2);
+						this.gameManager.addPlayerToGame('default-game', player2);
 					}
-					catch (error)
+					else
 					{
-						console.error('❌ Error in client connect:', error);
+						const player = new Player(query.id, query.name);
+						this.Players.set(query.id, player);
+						this.gameManager.addPlayerToGame('default-game', player);
 					}
 				},
 				(clientId, message) =>
 				{
-					try
-					{
-						this.handleWebSocketMessage(message, clientId);
-					}
-					catch (error)
-					{
-						console.error('❌ Error handling message:', error);
-					}
+					this.handleWebSocketMessage(message, clientId);
 				},
 				(clientId) =>
 				{
-					try
-					{
-						console.log('WebSocket client disconnected:', clientId);
-						this.gameManager.removeGame('default-game');
-						this.Players.delete(clientId);
-					}
-					catch (error)
-					{
-						console.error('❌ Error in client disconnect:', error);
-					}
+					console.log('WebSocket client disconnected:', clientId);
+					this.gameManager.removeGame('default-game');
+					this.Players.delete(clientId);
 				}
 			);
 
@@ -89,6 +85,14 @@ class GameService
 		}
 	}
 
+	createLocalIdAndName()
+	{
+		return {
+			id: `local-${Math.random().toString(36).substring(2, 15)}`,
+			name: `LocalPlayer-${Math.random().toString(36).substring(2, 15)}`
+		};
+	}
+
 	handleWebSocketMessage(message, clientId)
 	{
 
@@ -107,7 +111,7 @@ class GameService
 			case "pause":
 				this.gameManager.pause(this.gameManager.getPlayerGameId(player));
 				break;
-			case "resetBurak":
+			case "reset":
 				this.gameManager.resetGame(this.gameManager.getPlayerGameId(player));
 				break;
 			default:

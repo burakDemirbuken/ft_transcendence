@@ -14,7 +14,7 @@ const DEFAULT_GAME_PROPERTIES = {
 	ballSpeed: 800,
 	ballSpeedIncrease: 100,
 
-	maxPlayers: 2,
+	maxPlayers: 4,
 
 	maxScore: 11
 }
