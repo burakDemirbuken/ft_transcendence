@@ -17,6 +17,7 @@ const routes = {
     register: { template: "register", title: "Register" },
     profile: { template: "profile", title: "Profile" },
     home: { template: "home", title: "Home" },
+    settings: { template: "settings", title: "Settings" }
 };
 function loadTemplate(templateName) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -26,6 +27,8 @@ function loadTemplate(templateName) {
 }
 let currentStep = "welcome";
 let userRegistered;
+let rememberMe = false;
+let userEmail;
 function goToNextField(field) {
     let step = document.querySelector(`.field[data-step="${currentStep}"]`);
     step.classList.remove("active");
@@ -119,6 +122,7 @@ function login() {
         const json = yield response.json();
         if (response.ok) {
             document.querySelector("#error").textContent = json.message;
+            userEmail = json.email;
             goToNextField("2fa");
         }
         else
@@ -167,11 +171,28 @@ function verify() {
             showError("code can't be empty");
             return;
         }
-        // send code to db for login
-        navigate("profile");
+        if (userEmail) {
+            const obj = {
+                "email": userEmail,
+                "code": code,
+                "rememberMe": rememberMe
+            };
+            const request = new Request("http://localhost:3000/api/users/verify-2fa", {
+                method: "POST",
+                headers: new Headers({ "Content-Type": "application/json" }),
+                body: JSON.stringify(obj),
+            });
+            const response = yield fetch(request);
+            const json = yield response.json();
+            if (response.ok)
+                navigate("profile");
+            else
+                showError("Login Fail");
+        }
+        else
+            goToNextField("password");
     });
 }
-// Enter button handler
 function enter() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
@@ -268,6 +289,7 @@ function move(e) {
         }
         else if (e.key === "ArrowDown") {
             (_a = document.querySelector("#rme")) === null || _a === void 0 ? void 0 : _a.classList.toggle("active");
+            rememberMe = !rememberMe;
         }
         else if (e.key === "Enter") {
             enter();

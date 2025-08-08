@@ -8,6 +8,7 @@ const routes = {
 	register: { template: "register", title: "Register" },
 	profile: { template: "profile", title: "Profile" },
 	home: { template: "home", title: "Home" },
+	settings: { template: "settings", title: "Settings" }
 }
 
 async function loadTemplate(templateName) {
@@ -15,8 +16,10 @@ async function loadTemplate(templateName) {
 	return await response.text();
 }
 
-let currentStep = "welcome";
-let userRegistered;
+let currentStep:string = "welcome";
+let userRegistered:boolean;
+let rememberMe:boolean = false;
+let userEmail:string;
 
 function goToNextField(field)
 {
@@ -125,6 +128,7 @@ async function login() {
 	const json = await response.json();
 	if (response.ok) {
 		document.querySelector("#error").textContent = json.message;
+		userEmail = json.email;
 		goToNextField("2fa")
 	}
 	else
@@ -177,11 +181,31 @@ async function verify()
 		showError("code can't be empty");
 		return ;
 	}
-	// send code to db for login
-	navigate("profile");
+
+	if (userEmail)
+	{
+		const obj:Object = {
+			"email": userEmail,
+			"code":  code,
+			"rememberMe": rememberMe
+		};
+
+		const request = new Request("http://localhost:3000/api/users/verify-2fa", {
+		method: "POST",
+		headers: new Headers({ "Content-Type": "application/json" }),
+		body: JSON.stringify(obj),
+		});
+		const response = await fetch(request);
+		const json = await response.json();
+		if (response.ok)
+			navigate("profile");
+		else
+			showError("Login Fail");
+	}
+	else
+		goToNextField("password");
 }
 
-// Enter button handler
 async function enter() {
 	document.querySelector("#error")?.textContent = "";
 	switch (currentStep) {
@@ -275,6 +299,7 @@ function move(e) {
 			applyTranslations(currentLang);
 		} else if (e.key === "ArrowDown") {
 			document.querySelector("#rme")?.classList.toggle("active");
+			rememberMe = !rememberMe;
 		} else if (e.key === "Enter") {
 			enter();
 		}
