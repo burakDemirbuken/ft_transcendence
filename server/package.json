@@ -1,6 +1,7 @@
 {
   "name": "deneme",
   "version": "1.0.0",
+  "type": "module",
   "main": "main.js",
   "scripts":
   {

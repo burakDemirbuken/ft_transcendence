@@ -17,7 +17,6 @@ class NetworkManager
 				this.isConnected = true;
 				this.triggerCallback('connected');
 			};
-
 		this.socket.onmessage =
 			(event) =>
 			{

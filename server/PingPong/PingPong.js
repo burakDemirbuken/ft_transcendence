@@ -28,6 +28,7 @@ class PingPong extends EventEmitter
 	{
 		super();
 		this.status = 'not initialized'; // 'waiting', 'playing', 'paused', 'finished', 'not initialized'
+		this.gameMode = property.gameMode || 'online'; // 'local', 'online', 'tournament', 'ai'
 
 		this.deltaTime = 0;
 		this.lastUpdateTime = 0;
@@ -50,38 +51,27 @@ class PingPong extends EventEmitter
 		console.log(`🆕 Game created with settings: ${JSON.stringify(this.settings)}`);
 	}
 
-	hasPlayer(player)
-	{
-		return this.players.some(p => p.id === player.id);
-	}
-
 	addPlayer(player)
 	{
 		console.log(`👤 Player ${player.id} added to game`);
 		if (this.players.length < this.settings.maxPlayers)
 		{
 			this.players.push(player);
-			this.paddles.set(player.id, this.createPaddle());
-
-			// İlk player eklendiğinde oyunu initialize et
-			if (this.players.length === 1 && this.status === 'not initialized')
-			{
-				this.initializeGame();
-				console.log(`🎮 Game initialized with first player`);
-			}
+			this.paddles.set(player.id, this.createPaddle(this.players.length));
 		}
 	}
 
-	createPaddle()
+	createPaddle(number)
 	{
+		console.log(`Creating paddle for player ${number}`);
 		let paddlePos = { x: 0, y: this.settings.canvasHeight / 2 - this.settings.paddleHeight / 2 };
-		if (this.players.length === 1)
+		if (number === 1)
 			paddlePos.x = this.settings.canvasWidth - this.settings.paddleWidth - PADDLE_SPACE;
-		else if (this.players.length === 2)
+		else if (number === 2)
 			paddlePos.x = PADDLE_SPACE;
-		else if (this.players.length === 3)
+		else if (number === 3)
 			paddlePos.x = 200;
-		else if (this.players.length === 4)
+		else if (number === 4)
 			paddlePos.x = this.settings.canvasWidth - this.settings.paddleWidth - 200;
 
 		console.log(`Creating paddle at position: ${JSON.stringify(paddlePos)}`);
@@ -143,59 +133,58 @@ class PingPong extends EventEmitter
 		);
 	}
 
-	processPlayerInput(player, paddle)
+	paddleControls()
 	{
-		const upPressed = player.inputs.get('up') || false;
-		const downPressed = player.inputs.get('down') || false;
-
-		paddle.up = upPressed;
-		paddle.down = downPressed;
+		for (const player of this.players)
+		{
+			const paddle = this.paddles.get(player.id);
+			if (paddle)
+			{
+				paddle.up = player.inputsGet('w') || player.inputsGet('ArrowUp');
+				paddle.down = player.inputsGet('s') || player.inputsGet('ArrowDown');
+			}
+		}
 	}
 
 	update(deltaTime)
 	{
 		if (this.status === 'paused')
-		{
-			this.deltaTime = 0;
 			return;
-		}
 
 		if (this.status !== 'playing')
 			return new Error('Game is not currently playing: ' + this.status);
 
 		this.deltaTime = deltaTime;
 		this.gameTime += deltaTime;
+		this.lastUpdateTime = Date.now();
 
-		for (const player of this.players)
-		{
-			const paddle = this.paddles.get(player.id);
-			if (paddle)
-			{
-				this.processPlayerInput(player, paddle);
-				paddle.update(deltaTime);
-			}
-		}
+		this.paddleControls();
 
-		if (this.ball)
-			this.ball.update(deltaTime);
+		this.paddles.forEach((paddle) => paddle.update(deltaTime));
 
-
+		this.ball.update(deltaTime);
 		this.checkCollisions();
+
 		this.isFinished();
+		this.emit('gameStateUpdate', this.getGameState());
+
 	}
 
-	isFinished()
+	finishedControls()
 	{
+		if (this.status === 'finished')
+			return;
 		if (this.score.left >= this.settings.maxScore || this.score.right >= this.settings.maxScore)
 		{
 			this.status = 'finished';
 			this.emit('gameFinished', this.getGameState());
 			console.log(`🏁 Game finished! Final Score - Left: ${this.score.left}, Right: ${this.score.right}`);
 		}
-		else
-		{
-			this.emit('gameStateUpdate', this.getGameState());
-		}
+	}
+
+
+	isFinished()
+	{
 		return this.status === 'finished';
 	}
 
@@ -207,10 +196,9 @@ class PingPong extends EventEmitter
 			return;
 		}
 
-		for (const player of this.players)
-		{
-			const paddle = this.paddles.get(player.id);
-			if (paddle)
+
+		this.paddles.forEach(
+			(paddle) =>
 			{
 				const collisionDetails = Collision2D.trajectoryRectangleToRectangle(this.ball, paddle, true);
 				if (collisionDetails && collisionDetails.colliding)
@@ -224,11 +212,7 @@ class PingPong extends EventEmitter
 					return collisionDetails.colliding;
 				}
 			}
-			else
-			{
-				console.warn(`⚠️ Paddle not found for player ${player.id}`);
-			}
-		}
+		);
 		return null;
 	}
 
@@ -239,27 +223,6 @@ class PingPong extends EventEmitter
 		this.ball.launchBall({x: -this.ball.directionX, y: -normalizedRelativeIntersectionY},
 										this.ball.defaultSpeed + this.settings.ballSpeedIncrease * Math.abs(normalizedRelativeIntersectionY));
 	}
-
-/*
-node-1  | 🔧 COLLISION DEBUG:
-node-1  |    Ball: pos(770.4, 365.8) size(14x14)
-node-1  |    Paddle: pos(770.0, 272.4) size(10x100)
-node-1  |    Ball direction: (1.00, 0.19)
-node-1  |    Detected side: "top"
-node-1  |    TOP collision: 272.40000000000003 - 14 - 1 = 257.40000000000003
-node-1  |    Final position: (770.4, 257.4)
-
-
-node-1  | 🔧 COLLISION DEBUG:
-node-1  |    Ball: pos(25.8, 348.4) size(14x14)
-node-1  |    Paddle: pos(20.0, 250.0) size(10x100)
-node-1  |    Ball direction: (-1.00, 0.15)
-node-1  |    Detected side: "top"
-node-1  |    TOP collision: 250 - 14 - 1 = 235
-node-1  |    Final position: (25.8, 235.0)
-
-*/
-
 
 	separateBallFromPaddle(ball, paddle, side)
 	{
@@ -366,6 +329,12 @@ node-1  |    Final position: (25.8, 235.0)
 			}
 		};
 	}
+
+	hasPlayer(playerId)
+	{
+		return this.players.some(p => p.id === playerId);
+	}
+
 
 	isFull()
 	{

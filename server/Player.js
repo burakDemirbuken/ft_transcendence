@@ -11,18 +11,18 @@ class Player
 		this.isReady = false;
 		this.lastActivity = Date.now();
 		this.status = 'online'; // 'online', 'offline', 'playing'
-		this.inputs = new Map();
+		this.inputs = new Map(); // type -> boolean(true: pressed, false: not pressed)
 	}
 
-	move(payload)
+	inputsSet(key, value)
 	{
-		console.log(`Player ${this.id} move action:`, payload);
-		if (!payload || !payload.direction || typeof payload.action !== 'boolean')
-		{
-			console.warn('Invalid move payload:', payload);
-			return;
-		}
-		this.inputs.set(payload.direction, payload.action);
+		this.inputs.set(key, value);
+		this.lastActivity = Date.now();
+	}
+
+	inputsGet(key)
+	{
+		return this.inputs.get(key);
 	}
 
 	getState()
@@ -34,16 +34,6 @@ class Player
 			status: this.status,
 			lastActivity: this.lastActivity
 		};
-	}
-
-	static fromState(state)
-	{
-		const player = new Player(state.id, state.name);
-		player.score = state.score || 0;
-		player.isReady = state.isReady || false;
-		player.status = state.status || 'online';
-		player.lastActivity = state.lastActivity || Date.now();
-		return player;
 	}
 }
 

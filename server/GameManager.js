@@ -1,4 +1,5 @@
 import PingPong from './PingPong/PingPong.js';
+import LocalPingPong from './PingPong/LocalPingPong.js';
 
 const TICK_RATE = 1000 / 60; // 30 FPS
 
@@ -14,9 +15,9 @@ const DEFAULT_GAME_PROPERTIES = {
 	ballSpeed: 800,
 	ballSpeedIncrease: 100,
 
-	maxPlayers: 4,
+	maxPlayers: 2,
 
-	maxScore: 11
+	maxScore: 100
 }
 
 class GameManager
@@ -34,21 +35,32 @@ class GameManager
 
 	}
 
-	addPlayerToGame(gameId, player)
+	createGame(gameMode, gameId, properties = {})
+	{
+		if (this.games.has(gameId))
+			throw new Error(`Game with ID ${gameId} already exists`);
+		let game;
+		const gameProperties = {...DEFAULT_GAME_PROPERTIES, gameMode, ...properties};
+		if (gameMode === 'local')
+			game = new LocalPingPong(gameProperties);
+		else
+			game = new PingPong(gameProperties);
+		this.games.set(gameId, game);
+		game.initializeGame();
+		console.log(`🆕 Game ${gameId} created with mode: ${gameMode}`);
+		return game;
+	}
+
+	addPlayerToGame(gameMode, gameId, player)
 	{
 		if (!this.games.has(gameId))
-		{
-			const game = new PingPong({...DEFAULT_GAME_PROPERTIES});
-
-			this.games.set(gameId, game);
-			console.log(`🆕 Game ${gameId} created`);
-		}
+			throw new Error(`Game with ID ${gameId} does not exist`);
 		const game = this.games.get(gameId);
 		game.addPlayer(player);
 		console.log(`👤 Player ${player.id} added to game ${gameId}`);
 		if (game.isFull())
 		{
-			console.log(`🚀 Starting game ${gameId} with players ${Array.from(game.players.values()).map(p => p.id).join(", ")}`);
+			console.log(`🚀 Starting game ${gameId} with players ${game.players.map(p => p.id).join(", ")}`);
 			game.start();
 		}
 	}
@@ -78,17 +90,17 @@ class GameManager
 	{
 		for (const [gameId, game] of this.games.entries())
 		{
-			if (game.hasPlayer(player))
+			if (game.hasPlayer(player.id))
 				return game;
 		}
 		return null;
 	}
 
-	getPlayerGameId(player)
+	getPlayerGameId(playerId)
 	{
 		for (const [gameId, game] of this.games.entries())
 		{
-			if (game.hasPlayer(player))
+			if (game.hasPlayer(playerId))
 				return gameId;
 		}
 		return null;
@@ -119,7 +131,6 @@ class GameManager
 				game.resume();
 		}
 	}
-
 	update(callback)
 	{
 		const currentTime = Date.now();
@@ -127,12 +138,22 @@ class GameManager
 		this.lastUpdateTime = currentTime;
 		for (const [gameId, game] of this.games.entries())
 		{
+			if (game.players.length === 0)
+			{
+				this.removeGame(gameId);
+				continue;
+			}
 			if (game.isRunning())
 			{
 				game.update(deltaTime);
 				callback(game.getGameState(), game.players);
 			}
 		}
+	}
+
+	hasGame(gameId)
+	{
+		return this.games.has(gameId);
 	}
 }
 

@@ -34,24 +34,24 @@ class GameService
 					console.log('🟢 New client connecting:', query);
 					if (!query.id || !query.name || !query.matchId || !query.gameMode)
 					{
-						console.error('❌ Missing id or name in query:', query);
+						console.error('❌ Missing required parameters in query:', query);
 						return;
 					}
-					if (query.gameMode === 'local')
+
+					try
 					{
+						//? gameId serverda oluşup gitse daha sağlıklı olmaz mı?
+						if (!this.gameManager.hasGame(query.matchId))
+							this.gameManager.createGame(query.gameMode, query.matchId);
+
 						const player = new Player(query.id, query.name);
 						this.Players.set(query.id, player);
-						this.gameManager.addPlayerToGame('default-game', player);
-						const localPlayer = this.createLocalIdAndName();
-						const player2 = new Player(localPlayer.id, localPlayer.name);
-						this.Players.set(localPlayer.id, player2);
-						this.gameManager.addPlayerToGame('default-game', player2);
+
+						this.gameManager.addPlayerToGame(query.gameMode, query.matchId, player);
 					}
-					else
+					catch (error)
 					{
-						const player = new Player(query.id, query.name);
-						this.Players.set(query.id, player);
-						this.gameManager.addPlayerToGame('default-game', player);
+						console.error('❌ Error during client connection setup:', error);
 					}
 				},
 				(clientId, message) =>
@@ -61,7 +61,7 @@ class GameService
 				(clientId) =>
 				{
 					console.log('WebSocket client disconnected:', clientId);
-					this.gameManager.removeGame('default-game');
+					this.gameManager.removeGame(this.gameManager.getPlayerGameId(clientId));
 					this.Players.delete(clientId);
 				}
 			);
@@ -95,28 +95,13 @@ class GameService
 
 	handleWebSocketMessage(message, clientId)
 	{
-
 		const player = this.Players.get(clientId);
 		if (!player)
 		{
 			console.warn('Player not found for clientId:', clientId);
 			return;
 		}
-		console.log(`Handling message of type: ${message.type}`);
-		switch (message.type)
-		{
-			case "move":
-				player.move(message.payload);
-				break;
-			case "pause":
-				this.gameManager.pause(this.gameManager.getPlayerGameId(player));
-				break;
-			case "reset":
-				this.gameManager.resetGame(this.gameManager.getPlayerGameId(player));
-				break;
-			default:
-				break;
-		}
+		player.inputsSet(message.type, message.payload.action);
 	}
 
 	async stop()

@@ -103,10 +103,16 @@ class Client
 		const hostname = window.location.hostname || 'localhost';
 		console.log(`🌐 Using hostname: ${hostname}`);
 
+		if (!gameConfig.matchId)
+		{
+			gameConfig.matchId = this.generateUniqueMatchId();
+			console.log(`Generated match ID: ${gameConfig.matchId}`);
+		}
+
 		const params = new URLSearchParams({
 			id: this.TEST_generateRandomId(),
 			name: this.TEST_generateRandomName(),
-			matchId: this.generateUniqueMatchId(),
+			matchId: gameConfig.matchId,
 			gameMode: gameConfig.gameMode
 		});
 		const url = `ws://${hostname}:3000/ws?${params.toString()}`;
@@ -136,30 +142,38 @@ class Client
 			}
 		);
 		this.networkManager.on("connected",
-			() => console.log('Sunucuya bağlandı')
+			() => console.log('✅ Connected to server')
 		);
+		this.networkManager.on("error",
+			(error) => console.error('connection error:', error)
+		);
+
 		this.inputManager.onKey("w",
-			() => this.networkManager.send("move", {direction: 'up', action: true}),
-			() => this.networkManager.send("move", {direction: 'up', action: false})
+			() => this.networkManager.send("w", {action: true}),
+			() => this.networkManager.send("w", {action: false})
 		);
 		this.inputManager.onKey("s",
-			() => this.networkManager.send("move", {direction: 'down', action: true}),
-			() => this.networkManager.send("move", {direction: 'down', action: false})
+			() => this.networkManager.send("s", {action: true}),
+			() => this.networkManager.send("s", {action: false})
 		);
+		// Arrow keys for same player (alternative controls)
 		this.inputManager.onKey("ArrowUp",
-			() => this.networkManager.send(this.gameConfig.gameMode === "local" ? "player2Move" : "move", {direction: 'up', action: true}),
-			() => this.networkManager.send(this.gameConfig.gameMode === "local" ? "player2Move" : "move", {direction: 'up', action: false})
+			() => this.networkManager.send("ArrowUp", {action: true}),
+			() => this.networkManager.send("ArrowUp", {action: false})
 		);
 
 		this.inputManager.onKey("ArrowDown",
-			() => this.networkManager.send(this.gameConfig.gameMode === "local" ? "player2Move" : "move", {direction: 'down', action: true}),
-			() => this.networkManager.send(this.gameConfig.gameMode === "local" ? "player2Move" : "move", {direction: 'down', action: false})
+			() => this.networkManager.send("ArrowDown", {action: true}),
+			() => this.networkManager.send("ArrowDown", {action: false})
 		);
 
-
-		this.inputManager.onKey("r", () => this.networkManager.send("reset"));
+		this.inputManager.onKey("r",
+			() => this.networkManager.send("r", {action: true}),
+			() => this.networkManager.send("r", {action: false})
+		);
 		this.inputManager.onKey("Escape",
-			() => this.networkManager.send("pause")
+			() => this.networkManager.send("Escape", {action: true}),
+			() => this.networkManager.send("Escape", {action: false})
 		);
 	}
 

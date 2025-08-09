@@ -60,6 +60,8 @@ function gameStart()
 	document.getElementById("startButton").style.display = "none";
 	document.getElementById("localgame").style.display = "none";
 	document.getElementById("customgame").style.display = "none";
+	document.getElementById("joinGame").style.display = "none";
+	document.getElementById("customGameId").style.display = "none";
 	try
 	{
 		client.initialize(exampleGameConfig.payload);
@@ -84,6 +86,20 @@ function customGameStart()
 	gameStart();
 }
 
+function joinGame()
+{
+	const customGameId = document.getElementById("customGameId").value;
+	if (!customGameId)
+	{
+		alert("Please enter a valid Game ID.");
+		return;
+	}
+	exampleGameConfig.payload.gameMode = "multiple";
+	exampleGameConfig.payload.matchId = customGameId;
+	gameStart();
+}
+
 window.gameStart = gameStart;
 window.localGameStart = localGameStart;
 window.customGameStart = customGameStart;
+window.joinGame = joinGame;
