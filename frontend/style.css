@@ -322,26 +322,22 @@ label {
 	font-family: "RocketClouds";
 	src: url('fonts/rocket-clouds-demo.regular.ttf'), format("tff");
 	font-weight: normal;
-	font-size: normal;
 }
 
 @font-face {
 	font-family: "PixeloidMono";
 	src: url('fonts/pixeloid.mono.ttf'), format("tff");
 	font-weight: normal;
-	font-size: normal;
 }
 
 @font-face {
 	font-family: "PixeloidSans";
 	src: url('fonts/pixeloid.sans.ttf'), format("tff");
 	font-weight: normal;
-	font-size: normal;
 }
 
 @font-face {
 	font-family: "PixeloidSansBold";
 	src: url('fonts/pixeloid.sans-bold.ttf'), format("tff");
 	font-weight: normal;
-	font-size: normal;
 }

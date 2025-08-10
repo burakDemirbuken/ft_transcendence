@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES6",
-    "module": "CommonJS", // Changed for better Node.js compatibility
+    "module": "ESNext",
     "outDir": "/app/frontend/dist/",
     "rootDir": "/app/frontend/src/",
     "strict": true,
