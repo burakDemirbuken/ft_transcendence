@@ -2,6 +2,32 @@ import Login from "../dist/Login.js";
 import Settings from "../dist/Settings.js";
 import Profile from "../dist/Profile.js";
 
+// let currentLang = "eng";
+
+// const lang = {
+// 	eng: { next: "tur" },
+// 	tur: { next: "deu" },
+// 	deu: { next: "jpn" },
+// 	jpn: { next: "eng" }
+// }
+
+// async function loadTranslations(lang) {
+// 	const response = await fetch(`locales/${lang}.json`);
+// 	return await response.json();
+// }
+
+// async function applyTranslations(lang) {
+// 	const translations = await loadTranslations(lang);
+// 	document.querySelector("[data-i18n='lang']").textContent = translations.login.lang;
+// 	document.querySelector("[data-i18n='welcome.title']").textContent = translations.login.welcome.title;
+// 	document.querySelector("[data-i18n='welcome.prompt']").textContent = translations.login.welcome.prompt;
+// 	document.querySelector("[data-i18n='username']").textContent = translations.login.username;
+// 	document.querySelector("[data-i18n='password']").textContent = translations.login.password;
+// 	document.querySelector("[data-i18n='email']").textContent = translations.login.email;
+// 	document.querySelector("[data-i18n='code']").textContent = translations.login.code;
+// 	document.querySelector("[data-i18n='rme']").textContent = translations.login.rme;
+// }
+
 const pageState = {
 	current: "login", // default
 };
@@ -22,17 +48,11 @@ const router = async function(page:string) {
 	if (route) {
 		const view = new route.view();
 		content.innerHTML = await view.getHtml();
+		view.setEventHandlers();
 	} else {
 		document.title = "Page Not Found";
 		content.innerHTML = "<h2>404</h2><p>Page not found.</p>";
 	}
-
-	// currentStep = "welcome";
-	// document.addEventListener("keydown", move);
-	// document.addEventListener("click", move);
-	// document.addEventListener("input", (e) => {
-	// 	e.target.style.width = (Math.max(e.target.value.length, 1) + 2) + "ch";
-	// })
 }
 
 function navigateTo(page:string) {
@@ -42,7 +62,6 @@ function navigateTo(page:string) {
 
 document.addEventListener("DOMContentLoaded", () => {
 	document.body.addEventListener("click", e => {
-		console.log("HEEEEEEEY!");
 		if (e.target.matches("[data-link]")) {
 			e.preventDefault();
 			navigateTo(e.target.getAttribute("href").replace(/^\//, ''));

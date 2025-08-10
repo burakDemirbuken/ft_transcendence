@@ -7,7 +7,9 @@ export default class {
 		document.title = title;
 	}
 
-	async getHtml() {
-		return "";
-	}
+	async getHtml() { return ""; }
+
+	async setEventHandlers() {}
+
+	async unsetEventHandlers() {}
 }

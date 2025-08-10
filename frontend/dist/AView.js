@@ -14,9 +14,13 @@ export default class {
         document.title = title;
     }
     getHtml() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return "";
-        });
+        return __awaiter(this, void 0, void 0, function* () { return ""; });
+    }
+    setEventHandlers() {
+        return __awaiter(this, void 0, void 0, function* () { });
+    }
+    unsetEventHandlers() {
+        return __awaiter(this, void 0, void 0, function* () { });
     }
 }
 //# sourceMappingURL=AView.js.map
