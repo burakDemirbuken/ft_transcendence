@@ -1,6 +1,6 @@
 import AView from "./AView.js";
 import { navigateTo } from './index.js';
-
+import I18n from './translations.js';
 
 let currentStep:string = "welcome";
 let userRegistered:boolean;
@@ -250,22 +250,8 @@ async function back() {
 	}
 }
 
-let currentLang = "eng";
-
-const lang = {
-	eng: { next: "tur" },
-	tur: { next: "deu" },
-	deu: { next: "jpn" },
-	jpn: { next: "eng" }
-}
-
-async function loadTranslations(lang) {
-	const response = await fetch(`locales/${lang}.json`);
-	return await response.json();
-}
-
-async function applyTranslations(lang) {
-	const translations = await loadTranslations(lang);
+async function applyTranslations() {
+	const translations = await I18n.nextLanguage();
 	document.querySelector("[data-i18n='lang']").textContent = translations.login.lang;
 	document.querySelector("[data-i18n='welcome.title']").textContent = translations.login.welcome.title;
 	document.querySelector("[data-i18n='welcome.prompt']").textContent = translations.login.welcome.prompt;
@@ -282,9 +268,7 @@ function move(e) {
 	else if (e.target.classList.contains("back"))
 		back();
 	else if (e.target.matches("#lang")) {
-		const newLang = lang[currentLang];
-		applyTranslations(newLang.next);
-		currentLang = newLang.next;
+		applyTranslations();
 	}
 	else if (e.target.matches("#rme")) {
 		rememberMe = !rememberMe;

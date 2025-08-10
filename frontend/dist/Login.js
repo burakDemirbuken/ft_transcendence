@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import AView from "./AView.js";
 import { navigateTo } from './index.js';
+import I18n from './translations.js';
 let currentStep = "welcome";
 let userRegistered;
 let rememberMe = false;
@@ -232,22 +233,9 @@ function back() {
         }
     });
 }
-let currentLang = "eng";
-const lang = {
-    eng: { next: "tur" },
-    tur: { next: "deu" },
-    deu: { next: "jpn" },
-    jpn: { next: "eng" }
-};
-function loadTranslations(lang) {
+function applyTranslations() {
     return __awaiter(this, void 0, void 0, function* () {
-        const response = yield fetch(`locales/${lang}.json`);
-        return yield response.json();
-    });
-}
-function applyTranslations(lang) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const translations = yield loadTranslations(lang);
+        const translations = yield I18n.nextLanguage();
         document.querySelector("[data-i18n='lang']").textContent = translations.login.lang;
         document.querySelector("[data-i18n='welcome.title']").textContent = translations.login.welcome.title;
         document.querySelector("[data-i18n='welcome.prompt']").textContent = translations.login.welcome.prompt;
@@ -264,9 +252,7 @@ function move(e) {
     else if (e.target.classList.contains("back"))
         back();
     else if (e.target.matches("#lang")) {
-        const newLang = lang[currentLang];
-        applyTranslations(newLang.next);
-        currentLang = newLang.next;
+        applyTranslations();
     }
     else if (e.target.matches("#rme")) {
         rememberMe = !rememberMe;
