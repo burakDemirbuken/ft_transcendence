@@ -41,13 +41,20 @@ const routes = {
     // home: { template: "home", view: Home },
     settings: { template: "settings", view: Settings }
 };
+let view = null;
 const router = function (page) {
     return __awaiter(this, void 0, void 0, function* () {
         const content = document.querySelector("#content");
+        if (view) {
+            view.unsetEventHandlers();
+            view.unsetStylesheet();
+            view = null;
+        }
         pageState.current = page;
         const route = routes[page];
         if (route) {
-            const view = new route.view();
+            view = new route.view();
+            view.setStylesheet();
             content.innerHTML = yield view.getHtml();
             view.setEventHandlers();
         }

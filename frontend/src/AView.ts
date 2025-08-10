@@ -10,6 +10,8 @@ export default class {
 	async getHtml() { return ""; }
 
 	async setEventHandlers() {}
-
 	async unsetEventHandlers() {}
+
+	async setStylesheet() {}
+	async unsetStylesheet() {}
 }

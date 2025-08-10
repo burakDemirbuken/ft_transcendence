@@ -251,6 +251,9 @@ function move(e) {
         }
     }
 }
+function growInput(e) {
+    e.target.style.width = (Math.max(e.target.value.length, 1) + 2) + "ch";
+}
 export default class extends AView {
     constructor() {
         super();
@@ -267,13 +270,28 @@ export default class extends AView {
             currentStep = "welcome";
             document.addEventListener("keydown", move);
             document.addEventListener("click", move);
-            document.addEventListener("input", (e) => {
-                e.target.style.width = (Math.max(e.target.value.length, 1) + 2) + "ch";
-            });
+            document.addEventListener("input", growInput);
         });
     }
     unsetEventHandlers() {
         return __awaiter(this, void 0, void 0, function* () {
+            document.removeEventListener("keydown", move);
+            document.removeEventListener("click", move);
+            document.removeEventListener("input", growInput);
+        });
+    }
+    setStylesheet() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = "styles/login.css";
+            document.head.appendChild(link);
+        });
+    }
+    unsetStylesheet() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const link = document.querySelector("link[href='styles/login.css']");
+            document.head.removeChild(link);
         });
     }
 }

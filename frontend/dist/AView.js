@@ -22,5 +22,11 @@ export default class {
     unsetEventHandlers() {
         return __awaiter(this, void 0, void 0, function* () { });
     }
+    setStylesheet() {
+        return __awaiter(this, void 0, void 0, function* () { });
+    }
+    unsetStylesheet() {
+        return __awaiter(this, void 0, void 0, function* () { });
+    }
 }
 //# sourceMappingURL=AView.js.map

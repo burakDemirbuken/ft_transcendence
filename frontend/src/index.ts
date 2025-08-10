@@ -39,14 +39,22 @@ const routes = {
 	settings: { template: "settings", view: Settings }
 }
 
+let view = null;
+
 const router = async function(page:string) {
 	const content = document.querySelector("#content");
 
+	if (view) {
+		view.unsetEventHandlers();
+		view.unsetStylesheet();
+		view = null;
+	}
 	pageState.current = page;
 
 	const route = routes[page];
 	if (route) {
-		const view = new route.view();
+		view = new route.view();
+		view.setStylesheet();
 		content.innerHTML = await view.getHtml();
 		view.setEventHandlers();
 	} else {

@@ -265,6 +265,10 @@ function move(e) {
 	}
 }
 
+function growInput(e) {
+	e.target.style.width = (Math.max(e.target.value.length, 1) + 2) + "ch";
+}
+
 export default class extends AView {
 	constructor() {
 		super();
@@ -280,12 +284,24 @@ export default class extends AView {
 		currentStep = "welcome";
 		document.addEventListener("keydown", move);
 		document.addEventListener("click", move);
-		document.addEventListener("input", (e) => {
-			e.target.style.width = (Math.max(e.target.value.length, 1) + 2) + "ch";
-		})
+		document.addEventListener("input", growInput);
 	}
 
 	async unsetEventHandlers() {
+		document.removeEventListener("keydown", move);
+		document.removeEventListener("click", move);
+		document.removeEventListener("input", growInput);
+	}
 
+	async setStylesheet() {
+		const link = document.createElement("link");
+		link.rel = "stylesheet";
+		link.href = "styles/login.css"
+		document.head.appendChild(link);
+	}
+
+	async unsetStylesheet() {
+		const link = document.querySelector("link[href='styles/login.css']");
+		document.head.removeChild(link);
 	}
 }
