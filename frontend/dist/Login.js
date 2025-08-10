@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import AView from "./AView.js";
+import { navigateTo } from './index.js';
 let currentStep = "welcome";
 let userRegistered;
 let rememberMe = false;
@@ -15,9 +16,11 @@ let userEmail;
 function goToNextField(field) {
     let step = document.querySelector(`.field[data-step="${currentStep}"]`);
     step.classList.remove("active");
+    step === null || step === void 0 ? void 0 : step.setAttribute("inert", "");
     currentStep = field;
     step = document.querySelector(`[data-step="${currentStep}"]`);
     step.classList.add("active");
+    step === null || step === void 0 ? void 0 : step.removeAttribute("inert");
 }
 function showError(message) {
     const form = document.querySelector("#loginForm");
@@ -168,7 +171,7 @@ function verify() {
             const response = yield fetch(request);
             const json = yield response.json();
             if (response.ok)
-                navigate("profile");
+                navigateTo("profile");
             else
                 showError("Login Fail");
         }
@@ -229,26 +232,45 @@ function back() {
         }
     });
 }
+let currentLang = "eng";
+const lang = {
+    eng: { next: "tur" },
+    tur: { next: "deu" },
+    deu: { next: "jpn" },
+    jpn: { next: "eng" }
+};
+function loadTranslations(lang) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch(`locales/${lang}.json`);
+        return yield response.json();
+    });
+}
+function applyTranslations(lang) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const translations = yield loadTranslations(lang);
+        document.querySelector("[data-i18n='lang']").textContent = translations.login.lang;
+        document.querySelector("[data-i18n='welcome.title']").textContent = translations.login.welcome.title;
+        document.querySelector("[data-i18n='welcome.prompt']").textContent = translations.login.welcome.prompt;
+        document.querySelector("[data-i18n='username']").textContent = translations.login.username;
+        document.querySelector("[data-i18n='password']").textContent = translations.login.password;
+        document.querySelector("[data-i18n='email']").textContent = translations.login.email;
+        document.querySelector("[data-i18n='code']").textContent = translations.login.code;
+        document.querySelector("[data-i18n='rme']").textContent = translations.login.rme;
+    });
+}
 function move(e) {
-    var _a;
-    if (e.type === "click") {
-        if (e.target.classList.contains("enter"))
-            enter();
-        else if (e.target.classList.contains("back"))
-            back();
+    if (e.target.classList.contains("enter"))
+        enter();
+    else if (e.target.classList.contains("back"))
+        back();
+    else if (e.target.matches("#lang")) {
+        const newLang = lang[currentLang];
+        applyTranslations(newLang.next);
+        currentLang = newLang.next;
     }
-    else {
-        if (e.key === "ArrowUp") {
-            currentLang = choice[currentLang].next;
-            applyTranslations(currentLang);
-        }
-        else if (e.key === "ArrowDown") {
-            (_a = document.querySelector("#rme")) === null || _a === void 0 ? void 0 : _a.classList.toggle("active");
-            rememberMe = !rememberMe;
-        }
-        else if (e.key === "Enter") {
-            enter();
-        }
+    else if (e.target.matches("#rme")) {
+        rememberMe = !rememberMe;
+        e.target.classList.toggle("active");
     }
 }
 function growInput(e) {
@@ -268,14 +290,12 @@ export default class extends AView {
     setEventHandlers() {
         return __awaiter(this, void 0, void 0, function* () {
             currentStep = "welcome";
-            document.addEventListener("keydown", move);
             document.addEventListener("click", move);
             document.addEventListener("input", growInput);
         });
     }
     unsetEventHandlers() {
         return __awaiter(this, void 0, void 0, function* () {
-            document.removeEventListener("keydown", move);
             document.removeEventListener("click", move);
             document.removeEventListener("input", growInput);
         });

@@ -1,4 +1,6 @@
 import AView from "./AView.js";
+import { navigateTo } from './index.js';
+
 
 let currentStep:string = "welcome";
 let userRegistered:boolean;
@@ -9,9 +11,11 @@ function goToNextField(field)
 {
 	let step = document.querySelector(`.field[data-step="${currentStep}"]`);
 	step.classList.remove("active");
+	step?.setAttribute("inert", "");
 	currentStep = field;
 	step = document.querySelector(`[data-step="${currentStep}"]`);
 	step.classList.add("active");
+	step?.removeAttribute("inert");
 }
 
 function showError(message:string)
@@ -182,7 +186,7 @@ async function verify()
 		const response = await fetch(request);
 		const json = await response.json();
 		if (response.ok)
-			navigate("profile");
+			navigateTo("profile");
 		else
 			showError("Login Fail");
 	}
@@ -246,22 +250,45 @@ async function back() {
 	}
 }
 
+let currentLang = "eng";
+
+const lang = {
+	eng: { next: "tur" },
+	tur: { next: "deu" },
+	deu: { next: "jpn" },
+	jpn: { next: "eng" }
+}
+
+async function loadTranslations(lang) {
+	const response = await fetch(`locales/${lang}.json`);
+	return await response.json();
+}
+
+async function applyTranslations(lang) {
+	const translations = await loadTranslations(lang);
+	document.querySelector("[data-i18n='lang']").textContent = translations.login.lang;
+	document.querySelector("[data-i18n='welcome.title']").textContent = translations.login.welcome.title;
+	document.querySelector("[data-i18n='welcome.prompt']").textContent = translations.login.welcome.prompt;
+	document.querySelector("[data-i18n='username']").textContent = translations.login.username;
+	document.querySelector("[data-i18n='password']").textContent = translations.login.password;
+	document.querySelector("[data-i18n='email']").textContent = translations.login.email;
+	document.querySelector("[data-i18n='code']").textContent = translations.login.code;
+	document.querySelector("[data-i18n='rme']").textContent = translations.login.rme;
+}
+
 function move(e) {
-	if (e.type === "click") {
-		if (e.target.classList.contains("enter"))
-			enter();
-		else if (e.target.classList.contains("back"))
-			back();
-	} else {
-		if (e.key === "ArrowUp") {
-			currentLang = choice[currentLang].next;
-			applyTranslations(currentLang);
-		} else if (e.key === "ArrowDown") {
-			document.querySelector("#rme")?.classList.toggle("active");
-			rememberMe = !rememberMe;
-		} else if (e.key === "Enter") {
-			enter();
-		}
+	if (e.target.classList.contains("enter"))
+		enter();
+	else if (e.target.classList.contains("back"))
+		back();
+	else if (e.target.matches("#lang")) {
+		const newLang = lang[currentLang];
+		applyTranslations(newLang.next);
+		currentLang = newLang.next;
+	}
+	else if (e.target.matches("#rme")) {
+		rememberMe = !rememberMe;
+		e.target.classList.toggle("active");
 	}
 }
 
@@ -282,13 +309,11 @@ export default class extends AView {
 
 	async setEventHandlers() {
 		currentStep = "welcome";
-		document.addEventListener("keydown", move);
 		document.addEventListener("click", move);
 		document.addEventListener("input", growInput);
 	}
 
 	async unsetEventHandlers() {
-		document.removeEventListener("keydown", move);
 		document.removeEventListener("click", move);
 		document.removeEventListener("input", growInput);
 	}

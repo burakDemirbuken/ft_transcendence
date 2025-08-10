@@ -10,28 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import Login from "../dist/Login.js";
 import Settings from "../dist/Settings.js";
 import Profile from "../dist/Profile.js";
-// let currentLang = "eng";
-// const lang = {
-// 	eng: { next: "tur" },
-// 	tur: { next: "deu" },
-// 	deu: { next: "jpn" },
-// 	jpn: { next: "eng" }
-// }
-// async function loadTranslations(lang) {
-// 	const response = await fetch(`locales/${lang}.json`);
-// 	return await response.json();
-// }
-// async function applyTranslations(lang) {
-// 	const translations = await loadTranslations(lang);
-// 	document.querySelector("[data-i18n='lang']").textContent = translations.login.lang;
-// 	document.querySelector("[data-i18n='welcome.title']").textContent = translations.login.welcome.title;
-// 	document.querySelector("[data-i18n='welcome.prompt']").textContent = translations.login.welcome.prompt;
-// 	document.querySelector("[data-i18n='username']").textContent = translations.login.username;
-// 	document.querySelector("[data-i18n='password']").textContent = translations.login.password;
-// 	document.querySelector("[data-i18n='email']").textContent = translations.login.email;
-// 	document.querySelector("[data-i18n='code']").textContent = translations.login.code;
-// 	document.querySelector("[data-i18n='rme']").textContent = translations.login.rme;
-// }
 const pageState = {
     current: "login", // default
 };
@@ -46,6 +24,7 @@ const router = function (page) {
     return __awaiter(this, void 0, void 0, function* () {
         const content = document.querySelector("#content");
         if (view) {
+            content === null || content === void 0 ? void 0 : content.innerHTML = "";
             view.unsetEventHandlers();
             view.unsetStylesheet();
             view = null;
@@ -64,7 +43,7 @@ const router = function (page) {
         }
     });
 };
-function navigateTo(page) {
+export function navigateTo(page) {
     history.pushState({ page }, "", `/${page}`);
     router(page);
 }
