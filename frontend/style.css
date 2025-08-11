@@ -8,11 +8,69 @@ body {
 	min-height: 100vh;
 	max-height: 100dvh;
 	height: 100dvh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
 #content {
 	width: 100%;
 	height: 100%;
+}
+
+#navbar {
+	width: auto;
+	height: 100%;
+	padding: 5px;
+	background: #111;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+
+#navbar #logo {
+	font-family: "RocketClouds";
+	font-size: 1.5rem;
+	font-weight: bolder;
+	color: rgb(237, 48, 85);
+	padding: .5em .5em;
+	display: flex;
+	justify-content: center;
+}
+
+#navbar a {
+	padding: .85em;
+	font-family: "PixeloidSans";
+	text-decoration: none;
+	color: #ccc;
+	transition: font-size 0.2s ease;
+}
+
+#navbar svg {
+	width: 1em;
+	height: 1em;
+	fill: #fff;
+}
+
+#navbar a:before {
+	content: ">";
+	text-shadow: 0 0 5px #f0f;
+	color: #f0f;
+	top: 0;
+	left: 0;
+	margin-left: 5px;
+	margin-right: 10px;
+	opacity: 0;
+}
+
+#navbar a:hover:before, #nav {
+	opacity: 1;
+}
+
+#navbar a:hover {
+	font-size: 1.2rem;
+	color: #eee;
+	/* text-shadow: 0 0 5px #fff; */
 }
 
 @font-face {
@@ -37,4 +95,11 @@ body {
 	font-family: "PixeloidSansBold";
 	src: url('fonts/pixeloid.sans-bold.ttf'), format("tff");
 	font-weight: normal;
+}
+
+@font-face {
+	font-family: "NitroBreak";
+	src: url('fonts/Nitro\ Break.otf'), format("otf");
+	font-weight: normal;
+	font-size: xx-small;
 }
