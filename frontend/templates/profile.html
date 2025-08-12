@@ -1,8 +1,768 @@
-<div class="profile-wrapper">
-	<h2>This is your profile</h2>
-	<p id="id">insert user id</p>
-	<p id="name">insert user name</p>
-	<p id="email">insert user email</p>
-	<p id="pass">insert user pass</p>
-	<button>Logout</button>
-</div>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Ping Pong - Profil</title>
+    <link rel="stylesheet" href="../profile.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="profile-container">
+        <!-- Header -->
+        <header class="profile-header">
+            <div class="header-content">
+                <div class="user-avatar">
+                    <div class="avatar-ring" ></div>
+                    <div class="avatar-image">🏓</div>
+                </div>
+                <div class="user-info">
+                    <h1 class="username">PingPongMaster</h1>
+                    <p class="user-title">Neon Champion</p>
+                    <div class="user-level">
+                        <span class="level-text">Level 42</span>
+                        <div class="level-bar">
+                            <div class="level-progress" data-progress="75"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-item">
+                            <div class="tooltip-container">
+                            <i class="fa-solid fa-fire gradient-icon"></i>
+                            <div class="tooltip-popup">Current Streak</div>
+                        </div>
+                        <span class="stat-value" id="current-streak">18</span>
+                    </div>
+                    <div class="stat-item">
+                        <div class="tooltip-container">
+                            <i class="fa-solid fa-gamepad gradient-icon"></i>
+                            <div class="tooltip-popup">Total Games</div>
+                        </div>
+                            <span class="stat-value" id="total-games">234</span>
+                    </div>
+                    <div class="stat-item">
+                            <div class="tooltip-container">
+                                <i class="fa-solid fa-medal gradient-icon"></i>
+                            <div class="tooltip-popup">Win Rate</div>
+                        </div>
+                            <span class="stat-value" id="win-rate">73%</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <div class="profile-nav">
+            <button class="tab-btn active" data-tab="overview"><i class="fa-solid fa-grip-vertical"></i> Dashboard <span class="btn-glow"></span></button>
+            <button class="tab-btn" data-tab="statistics"><i class="fa-solid fa-chart-simple"></i> Detaylı İstatistikler <span class="btn-glow"></span></button>
+            <button class="tab-btn" data-tab="tournaments"><i class="fa-solid fa-trophy"></i> Turnuva Geçmişi <span class="btn-glow"></span></button>
+            <button class="tab-btn" data-tab="match_history"><i class="fa-solid fa-clock-rotate-left"></i> Maç Geçmişi <span class="btn-glow"></span></button>
+            <button class="tab-btn" data-tab="performance"><i class="fa-solid fa-chart-line"></i> Performans <span class="btn-glow"></span></button>
+            <button class="tab-btn" data-tab="achievements"><i class="fa-solid fa-star"></i> Achievements <span class="btn-glow"></span></button>
+            <button class="tab-btn" data-tab="friends"><i class="fa-solid fa-user-group"></i> Arkadaşlar <span class="btn-glow"></span></button>
+        </div>
+        <!-- Content Tabs -->
+        <main class="profile-content">
+            <!-- Overview Tab -->
+            <section id="overview" class="tab-content active">
+                <div class="stats-grid">
+                    <!-- Performance Cards -->
+                    <div class="stat-card performance-card">
+                        <h3><i class="fa-solid fa-bullseye"></i> Performans Özeti</h3>
+                        <div class="performance-stats">
+                            <div class="perf-item">
+                                <span class="perf-label">Kazanılan Maçlar</span>
+                                <span class="perf-value win">171</span>
+                            </div>
+                            <div class="perf-item">
+                                <span class="perf-label">Kaybedilen Maçlar</span>
+                                <span class="perf-value loss">63</span>
+                            </div>
+                            <div class="perf-item">
+                                <span class="perf-label">Ortalama Maç Süresi</span>
+                                <span class="perf-value">4:32</span>
+                            </div>
+                            <div class="perf-item">
+                                <span class="perf-label">Toplam Oyun Süresi</span>
+                                <span class="perf-value">18h 45m</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Streak Card -->
+                    <div class="stat-card streak-card">
+                        <h3><i class="fa-solid fa-fire"></i> Streak Bilgileri</h3>
+                        <div class="streak-display">
+                            <div class="streak-current">
+                                <span class="streak-number">18</span>
+                                <span class="streak-text">Mevcut Seri</span>
+                            </div>
+                            <div class="streak-best">
+                                <span class="streak-label">En İyi Seri:</span>
+                                <span class="streak-value">24</span>
+                            </div>
+                            <div class="streak-visual">
+                                <div class="streak-flames">
+                                    <div class="flame"></div>
+                                    <div class="flame"></div>
+                                    <div class="flame"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Matches -->
+                    <div class="stat-card recent-matches">
+                        <h3><i class="fa-solid fa-clock"></i> Son Maçlar</h3>
+                        <div class="matches-list">
+                            <div class="match-item win">
+                                <div class="match-result">W</div>
+                                <div class="match-info">
+                                    <span class="opponent">NeonKiller</span>
+                                    <span class="score">11-7</span>
+                                </div>
+                                <div class="match-time">2 saat önce</div>
+                            </div>
+                            <div class="match-item win">
+                                <div class="match-result">W</div>
+                                <div class="match-info">
+                                    <span class="opponent">PongPro</span>
+                                    <span class="score">11-9</span>
+                                </div>
+                                <div class="match-time">5 saat önce</div>
+                            </div>
+                            <div class="match-item win">
+                                <div class="match-result">W</div>
+                                <div class="match-info">
+                                    <span class="opponent">CyberPaddle</span>
+                                    <span class="score">11-4</span>
+                                </div>
+                                <div class="match-time">1 gün önce</div>
+                            </div>
+                            <div class="match-item loss">
+                                <div class="match-result">L</div>
+                                <div class="match-info">
+                                    <span class="opponent">TableMaster</span>
+                                    <span class="score">8-11</span>
+                                </div>
+                                <div class="match-time">2 gün önce</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Chart -->
+                    <div class="stat-card chart-card">
+                        <h3><i class="fa-solid fa-cubes"></i> Haftalık Performans</h3>
+                        <canvas id="performanceChart" data-labels='["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]' data-values='[4, 6, 3, 9, 7, 5, 8]'></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics Tab -->
+            <section id="statistics" class="tab-content">
+                <div class="stats-grid">
+                    <!-- Win/Loss Pie Chart -->
+                    <div class="stat-card">
+                        <h3><i class="fa-solid fa-chart-pie"></i> Kazanma/Kaybetme Oranı</h3>
+                        <canvas id="winLossChart" width="300" height="300" data-wins="171" data-losses="63" data-labels='["Kazanılan", "Kaybedilen"]'></canvas>
+                    </div>
+
+                    <!-- Performance Radar -->
+                    <div class="stat-card">
+                        <div id="skill-data" data-hiz="85" data-dogruluk="92" data-savunma="78" data-saldiri="88" data-strateji="75" data-dayaniklilik="90"></div>
+                        <h3><i class="fa-solid fa-gem"></i> Beceri Analizi</h3>
+                        <canvas id="skillRadar" width="300" height="300"></canvas>
+                    </div>
+
+                    <!-- Monthly Progress -->
+                    <div class="stat-card">
+                        <h3><i class="fa-solid fa-chart-simple"></i> Aylık İlerleme</h3>
+                        <canvas id="monthlyChart" width="400" height="200"></canvas>
+                    </div>
+
+                    <!-- Detailed Stats -->
+                    <div class="stat-card detailed-stats">
+                        <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Detaylı İstatistikler</h3>
+                        <div class="stats-table">
+                            <div class="stat-row">
+                                <span class="stat-name">Toplam Puan</span>
+                                <span class="stat-value">15,420</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-name">Ortalama Skor Farkı</span>
+                                <span class="stat-value">+3.2</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-name">En Hızlı Galibiyet</span>
+                                <span class="stat-value">2:15</span>
+                            </div>
+                            <div class="stat-row">
+                                <span class="stat-name">En Uzun Maç</span>
+                                <span class="stat-value">12:34</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tournaments Tab -->
+            <section id="tournaments" class="tab-content">
+                <div class="tournaments-header">
+                    <h3><i class="fa-solid fa-trophy"></i> Turnuva Geçmişi</h3>
+                    <div class="tournaments-filters">
+                        <select id="tournament-year-filter">
+                            <option value="all">Tüm Yıllar</option>
+                            <option value="2025" selected>2025</option>
+                            <option value="2024">2024</option>
+                        </select>
+                        <select id="tournament-type-filter">
+                            <option value="all">Tüm Turnuvalar</option>
+                            <option value="league">Lig Turnuvaları</option>
+                            <option value="knockout">Eleme Turnuvaları</option>
+                            <option value="special">Özel Etkinlikler</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="tournaments-grid">
+                    <!-- Turnuva Kartları -->
+                    <div class="tournament-card" data-year="2025" data-type="league">
+                        <div class="tournament-header">
+                            <div class="tournament-badge elite">
+                                <i class="fa-solid fa-crown"></i>
+                            </div>
+                            <div class="tournament-info">
+                                <h4 class="tournament-name">Neon Masters League 2025</h4>
+                                <span class="tournament-date">15 Temmuz - 30 Temmuz 2025</span>
+                            </div>
+                            <div class="tournament-result gold">
+                                <i class="fa-solid fa-medal"></i>
+                                <span>1.</span>
+                            </div>
+                        </div>
+                        <div class="tournament-stats">
+                            <div class="tournament-stat">
+                                <span class="stat-label">Maçlar</span>
+                                <span class="stat-value">12/12</span>
+                            </div>
+                            <div class="tournament-stat">
+                                <span class="stat-label">G/M</span>
+                                <span class="stat-value">11/1</span>
+                            </div>
+                            <div class="tournament-stat">
+                                <span class="stat-label">Puan</span>
+                                <span class="stat-value">1250</span>
+                            </div>
+                        </div>
+                        <div class="tournament-details">
+                            <div class="tournament-highlight">
+                                <span>En İyi Performans:</span> NeonKiller'a karşı 11-2
+                            </div>
+                            <button class="view-details-btn">
+                                <i class="fa-solid fa-chevron-down"></i> Detayları Göster
+                            </button>
+                            <div class="tournament-matches-detail">
+                                <div class="tournament-match win">
+                                    <span class="match-round">Final</span>
+                                    <span class="match-opponent">CyberPaddle</span>
+                                    <span class="match-score">11-7</span>
+                                </div>
+                                <div class="tournament-match win">
+                                    <span class="match-round">Yarı Final</span>
+                                    <span class="match-opponent">TableMaster</span>
+                                    <span class="match-score">11-9</span>
+                                </div>
+                                <div class="tournament-match win">
+                                    <span class="match-round">Çeyrek Final</span>
+                                    <span class="match-opponent">NeonKiller</span>
+                                    <span class="match-score">11-2</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tournament-card" data-year="2025" data-type="knockout">
+                        <div class="tournament-header">
+                            <div class="tournament-badge premium">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <div class="tournament-info">
+                                <h4 class="tournament-name">Neon Cup 2025</h4>
+                                <span class="tournament-date">5 Haziran - 10 Haziran 2025</span>
+                            </div>
+                            <div class="tournament-result silver">
+                                <i class="fa-solid fa-medal"></i>
+                                <span>2.</span>
+                            </div>
+                        </div>
+                        <div class="tournament-stats">
+                            <div class="tournament-stat">
+                                <span class="stat-label">Maçlar</span>
+                                <span class="stat-value">8/8</span>
+                            </div>
+                            <div class="tournament-stat">
+                                <span class="stat-label">G/M</span>
+                                <span class="stat-value">7/1</span>
+                            </div>
+                            <div class="tournament-stat">
+                                <span class="stat-label">Puan</span>
+                                <span class="stat-value">850</span>
+                            </div>
+                        </div>
+                        <div class="tournament-details">
+                            <div class="tournament-highlight">
+                                <span>En İyi Performans:</span> PongPro'ya karşı 11-4
+                            </div>
+                            <button class="view-details-btn">
+                                <i class="fa-solid fa-chevron-down"></i> Detayları Göster
+                            </button>
+                            <div class="tournament-matches-detail">
+                                <div class="tournament-match loss">
+                                    <span class="match-round">Final</span>
+                                    <span class="match-opponent">TableMaster</span>
+                                    <span class="match-score">8-11</span>
+                                </div>
+                                <div class="tournament-match win">
+                                    <span class="match-round">Yarı Final</span>
+                                    <span class="match-opponent">PongPro</span>
+                                    <span class="match-score">11-4</span>
+                                </div>
+                                <div class="tournament-match win">
+                                    <span class="match-round">Çeyrek Final</span>
+                                    <span class="match-opponent">NeonSmasher</span>
+                                    <span class="match-score">11-6</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tournament-card" data-year="2025" data-type="special">
+                        <div class="tournament-header">
+                            <div class="tournament-badge special">
+                                <i class="fa-solid fa-bolt"></i>
+                            </div>
+                            <div class="tournament-info">
+                                <h4 class="tournament-name">Neon Blitz Turnuvası</h4>
+                                <span class="tournament-date">15 Mayıs 2025</span>
+                            </div>
+                            <div class="tournament-result bronze">
+                                <i class="fa-solid fa-medal"></i>
+                                <span>3.</span>
+                            </div>
+                        </div>
+                        <div class="tournament-stats">
+                            <div class="tournament-stat">
+                                <span class="stat-label">Maçlar</span>
+                                <span class="stat-value">5/5</span>
+                            </div>
+                            <div class="tournament-stat">
+                                <span class="stat-label">G/M</span>
+                                <span class="stat-value">3/2</span>
+                            </div>
+                            <div class="tournament-stat">
+                                <span class="stat-label">Puan</span>
+                                <span class="stat-value">350</span>
+                            </div>
+                        </div>
+                        <div class="tournament-details">
+                            <div class="tournament-highlight">
+                                <span>En İyi Performans:</span> GlowPaddle'a karşı 11-3
+                            </div>
+                            <button class="view-details-btn">
+                                <i class="fa-solid fa-chevron-down"></i> Detayları Göster
+                            </button>
+                            <div class="tournament-matches-detail">
+                                <div class="tournament-match loss">
+                                    <span class="match-round">Yarı Final</span>
+                                    <span class="match-opponent">CyberPaddle</span>
+                                    <span class="match-score">9-11</span>
+                                </div>
+                                <div class="tournament-match win">
+                                    <span class="match-round">Çeyrek Final</span>
+                                    <span class="match-opponent">GlowPaddle</span>
+                                    <span class="match-score">11-3</span>
+                                </div>
+                                <div class="tournament-match win">
+                                    <span class="match-round">İlk Tur</span>
+                                    <span class="match-opponent">NeonRookie</span>
+                                    <span class="match-score">11-5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tournament-card" data-year="2024" data-type="league">
+                        <div class="tournament-header">
+                            <div class="tournament-badge elite">
+                                <i class="fa-solid fa-crown"></i>
+                            </div>
+                            <div class="tournament-info">
+                                <h4 class="tournament-name">Neon Masters League 2024</h4>
+                                <span class="tournament-date">10 Temmuz - 25 Temmuz 2024</span>
+                            </div>
+                            <div class="tournament-result top8">
+                                <i class="fa-solid fa-award"></i>
+                                <span>5.</span>
+                            </div>
+                        </div>
+                        <div class="tournament-stats">
+                            <div class="tournament-stat">
+                                <span class="stat-label">Maçlar</span>
+                                <span class="stat-value">8/12</span>
+                            </div>
+                            <div class="tournament-stat">
+                                <span class="stat-label">G/M</span>
+                                <span class="stat-value">5/3</span>
+                            </div>
+                            <div class="tournament-stat">
+                                <span class="stat-label">Puan</span>
+                                <span class="stat-value">450</span>
+                            </div>
+                        </div>
+                        <div class="tournament-details">
+                            <div class="tournament-highlight">
+                                <span>En İyi Performans:</span> PaddlePro'ya karşı 11-6
+                            </div>
+                            <button class="view-details-btn">
+                                <i class="fa-solid fa-chevron-down"></i> Detayları Göster
+                            </button>
+                            <div class="tournament-matches-detail">
+                                <div class="tournament-match loss">
+                                    <span class="match-round">Çeyrek Final</span>
+                                    <span class="match-opponent">TableMaster</span>
+                                    <span class="match-score">7-11</span>
+                                </div>
+                                <div class="tournament-match win">
+                                    <span class="match-round">Son 16</span>
+                                    <span class="match-opponent">PaddlePro</span>
+                                    <span class="match-score">11-6</span>
+                                </div>
+                                <div class="tournament-match win">
+                                    <span class="match-round">Grup Aşaması</span>
+                                    <span class="match-opponent">NeonBeginner</span>
+                                    <span class="match-score">11-2</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Matches Tab -->
+            <!-- <section id="match_history" class="tab-content">
+                <div class="matches-header">
+                    <h3> Maç Geçmişi</h3>
+                    <div class="matches-filters">
+                        <select id="time-filter">
+                            <option value="all">Tüm Zamanlar</option>
+                            <option value="week">Son 7 Gün</option>
+                            <option value="month">Son 30 Gün</option>
+                        </select>
+                        <select id="result-filter">
+                            <option value="all">Tüm Sonuçlar</option>
+                            <option value="win">Sadece Galibiyetler</option>
+                            <option value="loss">Sadece Mağlubiyetler</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="matches-table">
+                    <div class="match-row header">
+                        <span>Tarih</span>
+                        <span>Rakip</span>
+                        <span>Skor</span>
+                        <span>Süre</span>
+                        <span>Sonuç</span>
+                    </div>
+                    <div class="match-row" data-result="win">
+                        <span>28.06.2025 19:30</span>
+                        <span>NeonKiller</span>
+                        <span>11-7</span>
+                        <span>4:23</span>
+                        <span class="result win">Galibiyet</span>
+                    </div>
+                    <div class="match-row" data-result="win">
+                        <span>28.07.2025 16:15</span>
+                        <span>PongPro</span>
+                        <span>11-9</span>
+                        <span>6:45</span>
+                        <span class="result win">Galibiyet</span>
+                    </div>
+                    <div class="match-row" data-result="win">
+                        <span>27.06.2025 20:00</span>
+                        <span>CyberPaddle</span>
+                        <span>11-4</span>
+                        <span>3:12</span>
+                        <span class="result win">Galibiyet</span>
+                    </div>
+                    <div class="match-row" data-result="loss">
+                        <span>26.07.2025 18:30</span>
+                        <span>TableMaster</span>
+                        <span>8-11</span>
+                        <span>7:28</span>
+                        <span class="result loss">Mağlubiyet</span>
+                    </div>
+                </div>
+            </section> -->
+
+            <!-- Matches Tab (Birleştirilmiş Maç Geçmişi ve Analizi) -->
+            <section id="match_history" class="tab-content">
+                <div class="matches-header">
+                    <h3><i class="fa-solid fa-clock-rotate-left"></i> Maç Geçmişi ve Analizi</h3>
+                    <div class="matches-filters">
+                        <select id="time-filter">
+                            <option value="all">Tüm Zamanlar</option>
+                            <option value="week">Son 7 Gün</option>
+                            <option value="month">Son 30 Gün</option>
+                        </select>
+                        <select id="result-filter">
+                            <option value="all">Tüm Sonuçlar</option>
+                            <option value="win">Sadece Galibiyetler</option>
+                            <option value="loss">Sadece Mağlubiyetler</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="matches-table">
+                    <div class="match-row header">
+                        <span>Tarih</span>
+                        <span>Rakip</span>
+                        <span>Skor</span>
+                        <span>Süre</span>
+                        <span>Sonuç</span>
+                        <span>Analiz</span>
+                    </div>
+                    <div class="match-row" data-result="win" data-match-id="1">
+                        <span>28.06.2025 19:30</span>
+                        <span>NeonKiller</span>
+                        <span>11-7</span>
+                        <span>4:23</span>
+                        <span class="result win">Galibiyet</span>
+                        <span class="match-analysis-btn" data-match-id="1">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </span>
+                    </div>
+                    <div class="match-row" data-result="win" data-match-id="2">
+                        <span>28.07.2025 16:15</span>
+                        <span>PongPro</span>
+                        <span>11-9</span>
+                        <span>6:45</span>
+                        <span class="result win">Galibiyet</span>
+                        <span class="match-analysis-btn" data-match-id="2">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </span>
+                    </div>
+                    <div class="match-row" data-result="win" data-match-id="3">
+                        <span>27.06.2025 20:00</span>
+                        <span>CyberPaddle</span>
+                        <span>11-4</span>
+                        <span>3:12</span>
+                        <span class="result win">Galibiyet</span>
+                        <span class="match-analysis-btn" data-match-id="3">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </span>
+                    </div>
+                    <div class="match-row" data-result="loss" data-match-id="4">
+                        <span>26.07.2025 18:30</span>
+                        <span>TableMaster</span>
+                        <span>8-11</span>
+                        <span>7:28</span>
+                        <span class="result loss">Mağlubiyet</span>
+                        <span class="match-analysis-btn" data-match-id="4">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Maç Analizi Popup -->
+            <div id="match-analysis-popup" class="popup">
+                <div class="popup-content">
+                    <button class="popup-close"><i class="fa-solid fa-times"></i></button>
+                    <h2 id="popup-match-title">Maç Analizi</h2>
+
+                    <div class="popup-section">
+                        <h3>Maç Bilgileri</h3>
+                        <p><strong>Rakip:</strong> <span id="popup-opponent-name"></span></p>
+                        <p><strong>Skor:</strong> <span id="popup-your-score"></span> - <span id="popup-opponent-score"></span></p>
+                        <p><strong>Tarih:</strong> <span id="popup-match-date"></span></p>
+                        <p><strong>Süre:</strong> <span id="popup-match-duration"></span></p>
+                        <p><strong>Yer:</strong> <span id="popup-match-location"></span></p>
+                    </div>
+
+                    <div class="popup-section">
+                        <h3>İstatistikler</h3>
+                        <div id="stats" class="stats-grid"></div>
+                    </div>
+
+                    <div class="popup-section">
+                        <h3>Puan Dağılımı</h3>
+                        <div id="points-bars" class="bar-chart"></div>
+                    </div>
+
+                    <div class="popup-section">
+                        <h3>Vuruş Analizi</h3>
+                        <table id="shot-table">
+                            <thead>
+                                <tr>
+                                    <th>Vuruş</th>
+                                    <th>Siz (%)</th>
+                                    <th>Rakip (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="popup-section">
+                        <h3>Oyun Haritası</h3>
+                        <div class="hit-points"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements Tab -->
+            <section id="achievements" class="tab-content">
+                <div class="achievements-grid" class="stats-grid">
+                    <div class="achievement-card unlocked">
+                        <div class="achievement-icon">🏆</div>
+                        <h4>İlk Galibiyet</h4>
+                        <p>İlk maçını kazandın!</p>
+                        <div class="achievement-date">15.03.2025</div>
+                    </div>
+                    <div class="achievement-card unlocked">
+                        <div class="achievement-icon">🔥</div>
+                        <h4>Streak Master</h4>
+                        <p>10 maç üst üste kazandın!</p>
+                        <div class="achievement-date">22.07.2025</div>
+                    </div>
+                    <div class="achievement-card unlocked">
+                        <div class="achievement-icon">⚡</div>
+                        <h4>Hızlı Galibiyet</h4>
+                        <p>3 dakikadan kısa sürede kazandın!</p>
+                        <div class="achievement-date">25.07.2025</div>
+                    </div>
+                    <div class="achievement-card locked">
+                        <div class="achievement-icon">👑</div>
+                        <h4>Neon Kralı</h4>
+                        <p>100 maç kazanman gerekiyor</p>
+                        <div class="achievement-progress">171/100 ✓</div>
+                    </div>
+                    <div class="achievement-card locked">
+                        <div class="achievement-icon">🎯</div>
+                        <h4>Mükemmel Seri</h4>
+                        <p>25 maç üst üste kazanman gerekiyor</p>
+                        <div class="achievement-progress">15/25</div>
+                    </div>
+                    <div class="achievement-card locked">
+                        <div class="achievement-icon">💎</div>
+                        <h4>Efsane Oyuncu</h4>
+                        <p>500 maç oynaman gerekiyor</p>
+                        <div class="achievement-progress">234/500</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="../dist/profile.js" type="module"></script>
+    <script>
+        const matchData = {
+            1: {
+                opponent: "NeonKiller",
+                yourScore: 11,
+                opponentScore: 7,
+                date: "28.06.2025",
+                duration: "4:23",
+                location: "Kort 1",
+                stats: { aces: 5, winners: 10, errors: 3 },
+                pointsData: { labels:["1.set", "2.set"], you:[10, 8], opponent:[8, 6] },
+                shotData: { labels:["Forehand", "Backhand", "Volley"], you:[60, 30, 10], opponent:[40, 50, 10] },
+                hitPoints: [
+                    { x: 20, y: 30, win: true },
+                    { x: 70, y: 60, win: false }
+                ]
+            },
+            2: {
+                opponent: "PongPro",
+                yourScore: 11,
+                opponentScore: 9,
+                date: "05.08.2025",
+                duration: "6:45",
+                location: "Kort 2",
+                stats: { aces: 2, winners: 8, errors: 7 },
+                pointsData: { labels:["1.set", "2.set"], you:[6, 7], opponent:[8, 9] },
+                shotData: { labels:["Forehand", "Backhand", "Volley"], you:[50, 40, 10], opponent:[45, 45, 10] },
+                hitPoints: [
+                    { x: 10, y: 20, win: true },
+                    { x: 80, y: 40, win: false }
+                ]
+            }
+        };
+
+        document.querySelectorAll('.match-analysis-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.closest('.match-row').getAttribute('data-match-id');
+                openMatchAnalysis(id);
+            });
+        });
+
+        document.querySelector('.popup-close').addEventListener('click', closePopup);
+
+        function openMatchAnalysis(id) {
+            const match = matchData[id];
+            if (!match) return;
+
+            document.getElementById('popup-match-title').textContent = `Maç Analizi: Siz vs ${match.opponent}`;
+            document.getElementById('popup-opponent-name').textContent = match.opponent;
+            document.getElementById('popup-your-score').textContent = match.yourScore;
+            document.getElementById('popup-opponent-score').textContent = match.opponentScore;
+            document.getElementById('popup-match-date').textContent = match.date;
+            document.getElementById('popup-match-duration').textContent = match.duration;
+            document.getElementById('popup-match-location').textContent = match.location;
+
+            const statsEl = document.getElementById('stats');
+            statsEl.innerHTML = `
+                <div class="stat-item"><strong>Aces:</strong> ${match.stats.aces}</div>
+                <div class="stat-item"><strong>Winners:</strong> ${match.stats.winners}</div>
+                <div class="stat-item"><strong>Errors:</strong> ${match.stats.errors}</div>
+            `;
+
+            const pointsBars = document.getElementById('points-bars');
+            pointsBars.innerHTML = '';
+            match.pointsData.labels.forEach((label, i) => {
+                const bar = document.createElement('div');
+                const span = document.createElement('span');
+                span.style.width = match.pointsData.you[i] * 10 + 'px';
+                span.textContent = `${label}: ${match.pointsData.you[i]} pts`;
+                bar.appendChild(span);
+                pointsBars.appendChild(bar);
+            });
+
+            const tbody = document.querySelector('#shot-table tbody');
+            tbody.innerHTML = '';
+            match.shotData.labels.forEach((label, i) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${label}</td><td>${match.shotData.you[i]}%</td><td>${match.shotData.opponent[i]}%</td>`;
+                tbody.appendChild(tr);
+            });
+
+            const hitPointsField = document.querySelector('.hit-points');
+            hitPointsField.innerHTML = '';
+            match.hitPoints.forEach(point => {
+                const dot = document.createElement('div');
+                dot.style.left = `${point.x}%`;
+                dot.style.top = `${point.y}%`;
+                dot.className = point.win ? 'win' : 'lose';
+                hitPointsField.appendChild(dot);
+            });
+
+            document.getElementById('match-analysis-popup').classList.add('active');
+        }
+
+        function closePopup() {
+            document.getElementById('match-analysis-popup').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
+
