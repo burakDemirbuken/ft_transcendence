@@ -10,6 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import Login from "../dist/Login.js";
 import Settings from "../dist/Settings.js";
 import Profile from "../dist/Profile.js";
+import Play from "../dist/Play.js";
+import Friends from "../dist/Friends.js";
 const pageState = {
     current: "login", // default
 };
@@ -17,7 +19,9 @@ const routes = {
     login: { template: "login", view: Login },
     profile: { template: "profile", view: Profile },
     // home: { template: "home", view: Home },
-    settings: { template: "settings", view: Settings }
+    settings: { template: "settings", view: Settings },
+    play: { template: "play", view: Play },
+    friends: { template: "friends", view: Friends }
 };
 let view = null;
 const router = function (page) {
@@ -49,9 +53,15 @@ export function navigateTo(page) {
 }
 document.addEventListener("DOMContentLoaded", () => {
     document.body.addEventListener("click", e => {
+        var _a;
         if (e.target.matches("[data-link]")) {
+            console.log("hey?");
             e.preventDefault();
             navigateTo(e.target.getAttribute("href").replace(/^\//, ''));
+        }
+        else if (e.target.matches("[id='toggle']")) {
+            console.log("hey");
+            (_a = document.querySelector("#navbar")) === null || _a === void 0 ? void 0 : _a.classList.toggle("active");
         }
     });
 });

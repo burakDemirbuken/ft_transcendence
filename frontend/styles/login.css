@@ -88,7 +88,7 @@
 	position: relative;
 	width: 100%;
 	height: 100%;
-	color: #0df;
+	color: #f50;
 
 	display: flex;
 	align-items: center;
@@ -232,7 +232,7 @@ label {
 	background: transparent;
 	outline: none;
 	border: none;
-	color: #f50;
+	color: #0df;
 	/* text-shadow:
 		3px 3px #0cc,
 		9px 9px #606; */

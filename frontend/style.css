@@ -19,58 +19,120 @@ body {
 }
 
 #navbar {
-	width: auto;
+	width: 300px;
 	height: 100%;
 	padding: 5px;
 	background: #111;
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
+
+	transition: all .3s ease;
+	overflow: hidden;
+	position: sticky;
+	top: 0;
+	left: 0;
+}
+
+#navbar.active {
+	width: 60px;
+}
+
+#navbar.active #logo {
+	opacity: 0;
+}
+
+#navbar.active svg {
+	width: 1.4em;
+	height: 1.4em;
+}
+
+#navbar.active a, #navbar.active #toggle {
+	gap: 1.2em;
+	/* padding-left: 0; */
+	margin-left: 0;
+	margin-right: 0;
+}
+
+#navbar.active #toggle:hover, #navbar.active #toggle:focus, #navbar.active a:hover, #navbar.active a:focus {
+	padding-left: .65em;
 }
 
 #navbar #logo {
 	font-family: "RocketClouds";
 	font-size: 1.5rem;
 	font-weight: bolder;
-	color: rgb(237, 48, 85);
-	padding: .5em .5em;
+	background: linear-gradient(to right, #f0f, #0ff);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill5-color: transparent;
+	color: transparent;
+	padding: 1em;
+	padding-bottom: .5em;
 	display: flex;
 	justify-content: center;
+	position: relative;
+	transition: inherit;
+}
+
+#navbar #toggle {
+	margin: .40em;
+	padding: .45em;
+	padding-left: .85em;
+
+	border: none;
+	outline: none;
+	background: transparent;
+	text-decoration: none;
+	font-family: "PixeloidSans";
+	font-size: 1em;
+	color: #ccc;
+	transition: font-size 0.2s ease, padding .2s ease;
+
+	display: flex;
+	align-items: center;
+	gap: .8em;
+}
+
+#navbar #toggle:hover, #navbar #toggle:focus {
+	font-size: 1.1em;
+	color: #eee;
+	padding-left: 1em;
+	background: #606;
 }
 
 #navbar a {
-	padding: .85em;
-	font-family: "PixeloidSans";
+	margin: .40em;
+	padding: .45em;
+	padding-left: .85em;
+
+	outline: none;
 	text-decoration: none;
+	font-family: "PixeloidSans";
+	font-size: 1em;
 	color: #ccc;
-	transition: font-size 0.2s ease;
+	transition: font-size 0.2s ease,  padding .2s ease;
+
+	display: flex;
+	align-items: center;
+	gap: .8em;
+	transition: inherit;
 }
 
 #navbar svg {
-	width: 1em;
-	height: 1em;
+	width: 1.2em;
+	height: 1.2em;
 	fill: #fff;
+	flex-shrink: 0;
+	transition: inherit;
+	pointer-events: none;
 }
 
-#navbar a:before {
-	content: ">";
-	text-shadow: 0 0 5px #f0f;
-	color: #f0f;
-	top: 0;
-	left: 0;
-	margin-left: 5px;
-	margin-right: 10px;
-	opacity: 0;
-}
-
-#navbar a:hover:before, #nav {
-	opacity: 1;
-}
-
-#navbar a:hover {
-	font-size: 1.2rem;
+#navbar a:hover, #navbar a:focus {
+	font-size: 1.1em;
 	color: #eee;
-	/* text-shadow: 0 0 5px #fff; */
+	padding-left: 1em;
+	background: #606;
 }
 
 @font-face {
