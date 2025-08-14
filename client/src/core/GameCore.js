@@ -44,6 +44,11 @@ class GameCore
 			});
 	}
 
+	joystickMove(number, direction)
+	{
+		this.arcadeMachines.get('main').joystickMove(number, direction);
+	}
+
 /* // ...existing code...
 positionCameraInFrontOfMachine(machineId, distance = 5, height = 2) {
     const machine = this.getMachine(machineId);

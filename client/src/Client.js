@@ -149,12 +149,28 @@ class Client
 		);
 
 		this.inputManager.onKey("w",
-			() => this.networkManager.send("w", {action: true}),
-			() => this.networkManager.send("w", {action: false})
+			() =>
+			{
+				if (this.gameCore) this.gameCore.joystickMove(1, 'up');
+				this.networkManager.send("w", {action: true});
+			},
+			() =>
+			{
+				if (this.gameCore) this.gameCore.joystickMove(1, 'reset');
+				this.networkManager.send("w", {action: false});
+			}
 		);
 		this.inputManager.onKey("s",
-			() => this.networkManager.send("s", {action: true}),
-			() => this.networkManager.send("s", {action: false})
+			() =>
+			{
+				if (this.gameCore) this.gameCore.joystickMove(1, 'down');
+				this.networkManager.send("s", {action: true});
+			},
+			() =>
+			{
+				if (this.gameCore) this.gameCore.joystickMove(1, 'reset');
+				this.networkManager.send("s", {action: false});
+			}
 		);
 		// Arrow keys for same player (alternative controls)
 		this.inputManager.onKey("ArrowUp",

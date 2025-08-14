@@ -2,25 +2,7 @@ import EventEmitter from '../utils/EventEmitter.js';
 import Ball from './Objects/Ball.js';
 import Paddle from './Objects/Paddle.js';
 import Collision2D from "./utils/Collision2D.js";
-
-const DEFAULT_GAME_PROPERTIES = {
-	canvasWidth: 800,
-	canvasHeight: 600,
-
-	paddleWidth: 10,
-	paddleHeight: 100,
-	paddleSpeed: 300,
-
-	ball         : 3,
-	ballSpeed: 300,
-	ballSpeedIncrease: 200,
-
-	maxScore: 11,
-
-	maxPlayers: 2,
-};
-
-const PADDLE_SPACE = 20;
+import { DEFAULT_GAME_PROPERTIES, PADDLE_SPACE } from '../utils/constants.js';
 
 class PingPong extends EventEmitter
 {
@@ -63,7 +45,6 @@ class PingPong extends EventEmitter
 
 	createPaddle(number)
 	{
-		console.log(`Creating paddle for player ${number}`);
 		let paddlePos = { x: 0, y: this.settings.canvasHeight / 2 - this.settings.paddleHeight / 2 };
 		if (number === 1)
 			paddlePos.x = this.settings.canvasWidth - this.settings.paddleWidth - PADDLE_SPACE;
@@ -80,7 +61,8 @@ class PingPong extends EventEmitter
 			paddlePos.y,
 			this.settings.paddleWidth,
 			this.settings.paddleHeight,
-			{width: this.settings.canvasWidth, height: this.settings.canvasHeight},
+			this.settings.paddleSpeed,
+			{width: this.settings.canvasWidth, height: this.settings.canvasHeight}
 		);
 	}
 
@@ -165,14 +147,14 @@ class PingPong extends EventEmitter
 		this.ball.update(deltaTime);
 		this.checkCollisions();
 
-		this.isFinished();
+		this.finishedControls();
 		this.emit('gameStateUpdate', this.getGameState());
 
 	}
 
 	finishedControls()
 	{
-		if (this.status === 'finished')
+		if (this.isFinished())
 			return;
 		if (this.score.left >= this.settings.maxScore || this.score.right >= this.settings.maxScore)
 		{

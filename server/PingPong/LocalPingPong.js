@@ -35,7 +35,6 @@ class LocalPingPong extends PingPong
 		localPlayer.down = player.inputsGet('s');
 	}
 
-
 	// değişicek
 	getGameState()
 	{

@@ -1,24 +1,6 @@
 import PingPong from './PingPong/PingPong.js';
 import LocalPingPong from './PingPong/LocalPingPong.js';
-
-const TICK_RATE = 1000 / 60; // 30 FPS
-
-const DEFAULT_GAME_PROPERTIES = {
-	width: 800,
-	height: 600,
-
-	paddleWidth: 10,
-	paddleHeight: 100,
-	paddleSpeed: 700,
-
-	ballRadius: 7,
-	ballSpeed: 800,
-	ballSpeedIncrease: 100,
-
-	maxPlayers: 2,
-
-	maxScore: 100
-}
+import { TICK_RATE, DEFAULT_GAME_PROPERTIES } from './utils/constants.js';
 
 class GameManager
 {
@@ -40,7 +22,7 @@ class GameManager
 		if (this.games.has(gameId))
 			throw new Error(`Game with ID ${gameId} already exists`);
 		let game;
-		const gameProperties = {...DEFAULT_GAME_PROPERTIES, gameMode, ...properties};
+		const gameProperties = {...DEFAULT_GAME_PROPERTIES, gameMode: gameMode, ...properties};
 		if (gameMode === 'local')
 			game = new LocalPingPong(gameProperties);
 		else
@@ -131,6 +113,7 @@ class GameManager
 				game.resume();
 		}
 	}
+
 	update(callback)
 	{
 		const currentTime = Date.now();

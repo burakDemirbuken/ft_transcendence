@@ -40,14 +40,14 @@ class ArcadeMachine
         this.screenMaterial = null;
         this.isActive = false;
         this.screenSize = SCREEN_SIZE;
-		console.log(`ArcadeMachine initialized with screen size: ${this.screenSize.width}x${this.screenSize.height}`);
+		this.joystick1 = null;
     }
 
     async load(arcadeSettings)
 	{
         try
 		{
-			const result = await BABYLON.SceneLoader.ImportMeshAsync("", "./src/assets/models/arcade/", "arcade.obj", this.scene);
+			const result = await BABYLON.SceneLoader.ImportMeshAsync("", "./assets/models/naber/", "arcade.obj", this.scene);
 			this.meshs = result.meshes;
 			this.position = arcadeSettings.position || { x: 0, y: 0, z: 0 };
 
@@ -128,6 +128,35 @@ class ArcadeMachine
 			}
 			mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);
 		}
+	}
+
+	joystickMove(number, direction)
+	{
+		if (!this.body)
+			return;
+
+		const joystick = this.meshs.find(m => {
+			const name = m.name.toLowerCase();
+			return name === `joystick${number}`;
+		});
+
+		if (!joystick) {
+			console.warn(`Joystick${number} not found. Available meshes:`, this.meshs.map(m => m.name));
+			return;
+		}
+
+		const tiltAngle = 0.3;
+
+		if (direction === 'up')
+			joystick.rotation = new BABYLON.Vector3(-tiltAngle, 0, 0);
+		else if (direction === 'down')
+			joystick.rotation = new BABYLON.Vector3(tiltAngle, 0, 0);
+		else if (direction === 'left')
+			joystick.rotation = new BABYLON.Vector3(0, -tiltAngle, 0);
+		else if (direction === 'right')
+			joystick.rotation = new BABYLON.Vector3(0, tiltAngle, 0);
+		else if (direction === 'reset')
+			joystick.rotation = new BABYLON.Vector3(0, 0, 0);
 	}
 
 	#createEnhancedDebugInfo(screenMesh)

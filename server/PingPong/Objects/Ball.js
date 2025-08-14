@@ -6,7 +6,7 @@ class Ball extends EventEmitter
 	constructor(x, y, radius, ballSpeed, canvasSize)
 	{
 		super();
-		this.speed = ballSpeed;
+		this.speed = ballSpeed / 2;
 		this.defaultSpeed = ballSpeed;
 		this.directionX = Math.random() < 0.5 ? -1 : 1;
 		this.directionY = Math.random();
@@ -60,7 +60,7 @@ class Ball extends EventEmitter
 	{
 		this.pos.x = this.defaultPos.x;
 		this.pos.y = this.defaultPos.y;
-		this.speed = this.defaultSpeed;
+		this.speed = this.defaultSpeed / 2;
 		this.directionX = 0;
 		this.directionY = 0;
 		this.oldPos = { x: this.pos.x, y: this.pos.y };

@@ -1,0 +1,163 @@
+import { TOURNAMENT_GAME_PROPERTIES } from './utils/constants.js';
+import PingPong from './PingPong/PingPong.js';
+
+function shuffle(array)
+{
+	const arr = [...array];
+	for (let i = arr.length - 1; i > 0; i--)
+	{
+		const j = Math.floor(Math.random() * (i + 1));
+		[arr[i], arr[j]] = [arr[j], arr[i]];
+	}
+	return arr;
+}
+
+class Tournament
+{
+	constructor(tournamentName, properties)
+	{
+		this.tournamentName = tournamentName;
+		this.properties = properties;
+		this.participants = [];
+		this.players = null;
+
+		this.matches = new Map(); // Round -> Matchs array
+
+		this.startTime = null;
+		this.endTime = null;
+
+		this.currentMatches = [];
+		this.currentRound = 0;
+		this.maxRounds = Math.ceil(Math.log2(this.properties.maxPlayers));
+
+		this.status = 'waiting'; // 'waiting', 'running', 'finished', "ready2start"
+	}
+
+	matchMaking()
+	{
+		if (this.players.length < this.properties.minPlayers)
+			throw new Error(`Not enough players to start the tournament. Minimum required: ${this.properties.minPlayers}, current: ${this.players.length}`);
+		if (this.players.length > this.properties.maxPlayers)
+			throw new Error(`Too many players for the tournament. Maximum allowed: ${this.properties.maxPlayers}, current: ${this.players.length}`);
+
+		this.players = shuffle(this.participants);
+		for (let i = 0; i < this.players.length; i += 2)
+		{
+			if (i + 1 < this.players.length)
+			{
+				const match = {
+					matchId: `${this.tournamentName}-match-${Date.now()}`,
+					player1: this.players[i],
+					player2: this.players[i + 1],
+					winner: null,
+					loser: null,
+					game: new PingPong({
+						...TOURNAMENT_GAME_PROPERTIES,
+						gameMode: 'tournament',
+					}),
+				};
+				match.game.initializeGame();
+				match.game.addPlayer(match.player1);
+				match.game.addPlayer(match.player2);
+				if (!this.matches.has(this.currentRound))
+					this.matches.set(this.currentRound, []);
+				this.matches.get(this.currentRound).push(match);
+				this.currentMatches.push(match);
+			}
+		}
+
+		this.status = 'ready2start';
+		return {
+			matchs: this.matches.get(this.currentRound).map(match => ({
+				matchId: match.matchId,
+				player1: match.player1,
+				player2: match.player2,
+				winner: match.winner,
+				loser: match.loser,
+			}))
+		};
+	}
+
+	update(deltaTime)
+	{
+		if (this.status !== 'running')
+			return;
+
+		this.currentMatches.forEach(match => {
+			match.game.update(deltaTime);
+			if (match.game.isFinished())
+			{
+				const winner = match.game.getWinner();
+				const loser = match.game.getLoser();
+				match.winner = winner;
+				match.loser = loser;
+				console.log(`🏆 Match ${match.matchId} finished. Winner: ${winner.id}, Loser: ${loser.id}`);
+			}
+		});
+
+		this.currentMatches = this.currentMatches.filter(match => !match.game.isFinished());
+
+		if (this.currentMatches.length === 0)
+		{
+			this.currentRound++;
+			if (this.currentRound >= this.maxRounds)
+			{
+				this.status = 'finished';
+				console.log(`🏁 Tournament ${this.tournamentName} finished!`);
+			}
+			else
+			{
+				//? burada tekrardan arcade makinesi yüklemesi yapılsın mı yoksa mevcut makineler üzerinden mi devam edilsin?
+				// yeni maçları eşleştir
+			}
+		}
+	}
+
+	addParticipant(player)
+	{
+		if (this.participants.length < this.properties.maxPlayers)
+		{
+			if (this.participants.some(p => p.id === player.id))
+				throw new Error(`Player with ID ${player.id} is already in the tournament`);
+			this.participants.push(player);
+			console.log(`👤 Player ${player.id} added to tournament`);
+		}
+		else
+			throw new Error(`Tournament is full, cannot add player ${player.id}`);
+	}
+
+	removeParticipant(playerId)
+	{
+		const index = this.participants.findIndex(p => p.id === playerId);
+		if (index !== -1)
+			this.participants.splice(index, 1);
+	}
+
+	isFull()
+	{
+		return this.participants.length === this.properties.maxPlayers;
+	}
+
+	getState()
+	{
+		return {
+			tournamentName: this.tournamentName,
+			properties: this.properties,
+			participants: this.participants.map(p => ({ id: p.id, name: p.name })),
+			status: this.status,
+			currentRound: this.currentRound,
+			maxRounds: this.maxRounds,
+			matches: Array.from(this.matches.entries()).map(([round, matchs]) => ({
+				round,
+				matchs: matchs.map(match => ({
+					matchId: match.matchId,
+					player1: match.player1.id,
+					player2: match.player2.id,
+					winner: match.winner ? match.winner.id : null,
+					loser: match.loser ? match.loser.id : null,
+				}))
+			})),
+		};
+	}
+
+}

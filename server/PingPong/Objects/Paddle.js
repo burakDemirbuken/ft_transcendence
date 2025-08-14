@@ -1,10 +1,8 @@
 import Vector2D from '../utils/Vector2D.js';
 
-const PADDLE_SPEED = 700;
-
 class Paddle
 {
-	constructor(x , y, width, height, canvasSize)
+	constructor(x , y, width, height, paddleSpeed, canvasSize)
 	{
 
 		this.down = false;
@@ -16,6 +14,7 @@ class Paddle
 		this.defaultPos = new Vector2D(x, y);
 		this.height = height;
 		this.width = width;
+		this.paddleSpeed = paddleSpeed;
 	}
 
 	update(deltaTime)
@@ -23,9 +22,9 @@ class Paddle
 		const deltaTimeInSeconds = deltaTime / 1000;
 
 		if (this.down)
-			this.pos.y += PADDLE_SPEED * deltaTimeInSeconds;
+			this.pos.y += this.paddleSpeed * deltaTimeInSeconds;
 		if (this.up && this.pos.y >= 0)
-			this.pos.y -= PADDLE_SPEED * deltaTimeInSeconds;
+			this.pos.y -= this.paddleSpeed * deltaTimeInSeconds;
 
 		if (this.pos.y + this.height > this.canvasSize.height)
 			this.pos.y = this.canvasSize.height - this.height;
