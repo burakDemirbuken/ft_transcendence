@@ -323,6 +323,30 @@ class PingPong extends EventEmitter
 		return this.players.length === this.settings.maxPlayers;
 	}
 
+	getWinner()
+	{
+		if (!this.isFinished())
+			return null;
+	}
+
+	getLoser()
+	{
+		if (!this.isFinished())
+			return null;
+	}
+
+	getScore()
+	{
+		if (this.status !== 'not initialized')
+			return {
+				left: "-",
+				right: "-"
+			};
+		return {
+			left: this.score.left,
+			right: this.score.right
+		};
+	}
 }
 
 export default PingPong;
