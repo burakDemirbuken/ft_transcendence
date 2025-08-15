@@ -1,13 +1,12 @@
-@import url("style/color.css");
-@import url("style/page.css");
-@import url("style/header.css");
+@import url("profile_style/color.css");
+@import url("profile_style/page.css");
+@import url("profile_style/header.css");
 
-@import url("style/dashboard.css");
-@import url("style/tournaments.css");
-@import url("style/history.css");
-@import url("style/achievement.css");
-@import url("style/responsive.css");
-
+@import url("profile_style/dashboard.css");
+@import url("profile_style/tournaments.css");
+@import url("profile_style/history.css");
+@import url("profile_style/achievement.css");
+@import url("profile_style/responsive.css");
 
 * {
     margin: 0;
