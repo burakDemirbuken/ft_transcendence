@@ -25,10 +25,7 @@ class PingPong extends EventEmitter
 		this.paddles = new Map(); // playerId -> Paddle instance
 		this.players = []; // Player instances
 
-		this.score = {
-			left: 0,
-			right: 0
-		};
+		this.team = new Map(); // number -> { playersId: [], score: 0 }
 
 		console.log(`🆕 Game created with settings: ${JSON.stringify(this.settings)}`);
 	}
@@ -40,6 +37,9 @@ class PingPong extends EventEmitter
 		{
 			this.players.push(player);
 			this.paddles.set(player.id, this.createPaddle(this.players.length));
+			if (!this.team.has(this.players.length % 2 ? 1 : 2))
+				this.team.set(this.players.length % 2 ? 1 : 2, { playersId: [], score: 0 });
+			this.team.get(this.players.length % 2 ? 1 : 2).playersId.push(player.id);
 		}
 	}
 
@@ -90,9 +90,9 @@ class PingPong extends EventEmitter
 				if (border === 'left' || border === 'right')
 				{
 					if (border === 'right')
-						this.score.right++;
+						this.team.get(1).score++;
 					else
-						this.score.left++;
+						this.team.get(2).score++;
 					this.emit('goal', border);
 					this.ball.reset();
 					const interval = setInterval(() =>
@@ -156,11 +156,11 @@ class PingPong extends EventEmitter
 	{
 		if (this.isFinished())
 			return;
-		if (this.score.left >= this.settings.maxScore || this.score.right >= this.settings.maxScore)
+		if (this.team.get(1).score >= this.settings.maxScore || this.team.get(2).score >= this.settings.maxScore)
 		{
 			this.status = 'finished';
 			this.emit('gameFinished', this.getGameState());
-			console.log(`🏁 Game finished! Final Score - Left: ${this.score.left}, Right: ${this.score.right}`);
+			console.log(`🏁 Game finished! Final Score - Left: ${this.team.get(1).score}, Right: ${this.team.get(2).score}`);
 		}
 	}
 
@@ -305,8 +305,8 @@ class PingPong extends EventEmitter
 					...this.ball.getState(),
 				},
 				score: {
-					left: this.score.left,
-					right: this.score.right
+					left: this.team.get(1).score,
+					right: this.team.get(2).score
 				},
 			}
 		};
@@ -343,9 +343,21 @@ class PingPong extends EventEmitter
 				right: "-"
 			};
 		return {
-			left: this.score.left,
-			right: this.score.right
+			left: this.team.get(1).score,
+			right: this.team.get(2).score
 		};
+	}
+
+	dispose()
+	{
+		this.ball = null;
+		this.paddles.clear();
+		this.players = [];
+		this.status = 'not initialized';
+		this.gameTime = 0;
+		this.lastUpdateTime = 0;
+		this.deltaTime = 0;
+		console.log('🗑️ Game disposed');
 	}
 }
 

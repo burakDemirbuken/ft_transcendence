@@ -1,5 +1,6 @@
 import { TOURNAMENT_GAME_PROPERTIES } from '../utils/constants.js';
 import PingPong from '../PingPong/PingPong.js';
+import EventEmitter from '../utils/EventEmitter.js';
 
 function shuffle(array)
 {
@@ -12,10 +13,11 @@ function shuffle(array)
 	return arr;
 }
 
-class Tournament
+class Tournament extends EventEmitter
 {
 	constructor(tournamentName, properties)
 	{
+		super();
 		this.tournamentName = tournamentName;
 		this.properties = properties;
 		this.participants = [];
@@ -28,7 +30,7 @@ class Tournament
 
 		this.currentMatches = [];
 		this.currentRound = 0;
-		this.maxRounds = Math.ceil(Math.log2(this.properties.maxPlayers));
+		this.maxRounds = Math.ceil(Math.log2(this.properties.playerCount));
 
 		for (let i = 0; i < this.maxRounds; i++)
 		{
@@ -38,6 +40,8 @@ class Tournament
 			for (let j = 0; j < matchCount; j++)
 			{
 				matchs.push({
+						round: i,
+						matchNumber: j,
 						matchId: null,
 						player1: null,
 						player2: null,
@@ -100,11 +104,12 @@ class Tournament
 				round: index,
 				matchs: round.matchs.map(match => ({
 					matchId: match.matchId,
+					matchNumber: match.matchNumber,
 					player1: match.player1,
 					player2: match.player2,
-					score: match.game?.getScore() || null,
-					winner: match.game?.getWinner() || null,
-					loser: match.game?.getLoser() || null,
+					score: match.score,
+					winner: match.winner,
+					loser: match.loser,
 				}))
 			})),
 			status: this.status,
@@ -115,7 +120,10 @@ class Tournament
 	nextRound()
 	{
 		if (this.currentRound >= this.maxRounds)
+		{
+			this.emit('tournamentFinished', this.matchMakingInfo());
 			return;
+		}
 
 		this.currentRound++;
 		this.currentMatches = [];
@@ -140,6 +148,7 @@ class Tournament
 		}
 
 		this.status = 'ready2start';
+		this.emit('nextRound', this.getMatchmakingInfo());
 	}
 
 	update(deltaTime)
@@ -147,34 +156,30 @@ class Tournament
 		if (this.status !== 'running')
 			return;
 
-		this.currentMatches.forEach(match => {
-			match.game.update(deltaTime);
-			if (match.game.isFinished())
-			{
-				const winner = match.game.getWinner();
-				const loser = match.game.getLoser();
-				match.winner = winner;
-				match.loser = loser;
-				console.log(`🏆 Match ${match.matchId} finished. Winner: ${winner.id}, Loser: ${loser.id}`);
-			}
-		});
+		let	finishedMatchesCount = 0;
 
-		this.currentMatches = this.currentMatches.filter(match => !match.game.isFinished());
+		this.currentMatches.forEach(
+			(match) =>
+			{
+				if (!match.game)
+					return;
+				finishedMatchesCount = 0;
+				match.game.update(deltaTime);
+				match.score = match.game.getScore();
+				if (match.game.isFinished())
+				{
+					finishedMatchesCount++;
+					match.winner = match.game.getWinner();
+					match.loser = match.game.getLoser();
+					match.game.dispose();
+					match.game = null;
+					console.log(`🏆 Match ${match.matchId} finished. Winner: ${winner.id}, Loser: ${loser.id}`);
+				}
+			}
+		);
 
-		if (this.currentMatches.length === 0)
-		{
-			this.currentRound++;
-			if (this.currentRound >= this.maxRounds)
-			{
-				this.status = 'finished';
-				console.log(`🏁 Tournament ${this.tournamentName} finished!`);
-			}
-			else
-			{
-				//? burada tekrardan arcade makinesi yüklemesi yapılsın mı yoksa mevcut makineler üzerinden mi devam edilsin?
-				// yeni maçları eşleştir
-			}
-		}
+		if (finishedMatchesCount === this.currentMatches.length)
+			this.nextRound();
 	}
 
 	addParticipant(player)
@@ -192,6 +197,7 @@ class Tournament
 
 	removeParticipant(playerId)
 	{
+		//TODO: eğer kullanıcı çıkarsa mevcut oyunuda mağlup say
 		const index = this.participants.findIndex(p => p.id === playerId);
 		if (index !== -1)
 			this.participants.splice(index, 1);
@@ -202,25 +208,36 @@ class Tournament
 		return this.participants.length === this.properties.maxPlayers;
 	}
 
+	start()
+	{
+		if (this.status !== 'ready2start')
+			throw new Error(`Tournament is not ready to start, current status: ${this.status}`);
+
+		this.startTime = Date.now();
+		this.status = 'running';
+		this.emit('tournamentStarted', this.getMatchmakingInfo());
+		this.currentMatches.forEach(
+			(match) =>
+			{
+				if (match.game)
+					match.game.start();
+			}
+		);
+	}
+
 	getState()
 	{
 		return {
-			tournamentName: this.tournamentName,
-			participants: this.participants.map(p => ({ id: p.id, name: p.name })),
-			status: this.status,
-			currentRound: this.currentRound,
-			maxRounds: this.maxRounds,
-			matches: Array.from(this.matches.entries()).map(([round, matchs]) => ({
-				round,
-				matchs: matchs.map(match => ({
-					matchId: match.matchId,
-					player1: match.player1.id,
-					player2: match.player2.id,
-					winner: match.winner ? match.winner.id : null,
-					loser: match.loser ? match.loser.id : null,
-				}))
+			matches: Array.from(this.currentMatches).map(match => ({
+				matchId: match.matchId,
+				matchNumber: match.matchNumber,
+				player1: match.player1,
+				player2: match.player2,
+				gameState: match.game.getGameState(),
 			})),
 		};
 	}
 
 }
+
+export default Tournament;

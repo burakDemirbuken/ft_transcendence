@@ -14,3 +14,4 @@ TODO:
 - [ ] redis araştır.
 - [ ] kogami code entegre et. "nice try"
 - [ ] oyuncuların eşleşle sistemini bildirmek için bayblon.js de tablo halinde ekrana bastır.
+- [ ] oyunda eğer kullanıcı çıkarsa mevcut oyunuda mağlup say.

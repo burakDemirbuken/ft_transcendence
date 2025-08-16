@@ -15,8 +15,10 @@ class LocalPingPong extends PingPong
 		if (this.players.length !== 0)
 			throw new Error("LocalPingPong can only have one player");
 		this.players.push(player);
+		this.team.set(1, { playersId: [player.id], score: 0 });
+		this.team.set(2, { playersId: ["Player2"], score: 0 });
 		this.paddles.set(player.id, this.createPaddle(2));
-		this.paddles.set("local", this.createPaddle(1));
+		this.paddles.set("Player2", this.createPaddle(1));
 	}
 
 	paddleControls()
@@ -26,7 +28,7 @@ class LocalPingPong extends PingPong
 
 		const player = this.players[0];
 		const localPlayer = this.paddles.get(this.players[0].id);
-		const localPaddle = this.paddles.get("local");
+		const localPaddle = this.paddles.get("Player2");
 
 		localPaddle.up = player.inputsGet('ArrowUp');
 		localPaddle.down = player.inputsGet('ArrowDown');
@@ -45,13 +47,11 @@ class LocalPingPong extends PingPong
 				...this.paddles.get(this.players[0].id).getState(),
 			},
 			{
-				id: "local",
+				id: "Player2",
 				name: "Player2",
-				...this.paddles.get("local").getState(),
+				...this.paddles.get("Player2").getState(),
 			}
 		];
-
-
 
 		return {
 			currentState: this.status, // 'waiting', 'running', 'finished'
@@ -62,8 +62,8 @@ class LocalPingPong extends PingPong
 					...this.ball.getState(),
 				},
 				score: {
-					left: this.score.left,
-					right: this.score.right
+					left: this.team.get(1).score,
+					right: this.team.get(2).score
 				},
 			}
 		};
