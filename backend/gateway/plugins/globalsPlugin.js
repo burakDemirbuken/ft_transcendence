@@ -12,6 +12,7 @@ async function globalsPlugin(fastify, options) {
 		user: "http://user:3002",
 		gameserver: "http://gameserver:3003",
 		livechat: "http://livechat:3004",
+		email: "http://email:3005",
 	};
 
 	const settings = {
@@ -26,10 +27,16 @@ async function globalsPlugin(fastify, options) {
 	const publicpaths = {
 		'/auth/login': true,
 		'/auth/register': true,
-		'/auth/forgot-password': true,
-		'/auth/reset-password': true,
-		'/auth/verify-email': true,
-		'/auth/refresh': true,
+		'/auth/verify-2fa': true,
+		'/auth/refresh-token': true,
+		'/auth/check-email': true,
+		'/auth/check-username': true,
+		'/auth/test': true,
+		'/auth/health': true,
+		'/auth/stats': true,
+		'/email/test': true,
+		'/email/health': true,
+		'/email/test-connection': true,
 	};
 
 	const adminpaths = {

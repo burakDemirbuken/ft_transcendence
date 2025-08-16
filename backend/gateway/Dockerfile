@@ -14,4 +14,4 @@ RUN npm install && \
 	npm cache clean --force
 
 
-CMD ["npm", "run", "test:db:watch"]
+CMD ["npm", "run", "dev"]

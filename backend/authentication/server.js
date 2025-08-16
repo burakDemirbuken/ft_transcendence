@@ -28,24 +28,15 @@ await fastify.register(jwt, {
   }
 })
 
+
 // Routes'ları register et
 await fastify.register(authRoutes)
-
-// Health check
-fastify.get('/health', async (req, rep) => {
-  rep.send({
-    status: 'OK',
-    service: 'authentication',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  })
-})
 
 // 404 handler
 fastify.setNotFoundHandler(async (req, rep) => {
   rep.status(404).send({
     success: false,
-    error: 'Route bulunamadı',
+    error: 'Route bulunamadııı',
     path: req.url
   })
 })
@@ -69,4 +60,8 @@ fastify.listen({
     process.exit(1);
   }
   console.log(`🚀 API çalışıyor: ${address}`);
+  
+  // Tüm route'ları listele
+  console.log("📋 Registered routes:");
+  fastify.printRoutes();
 })

@@ -14,19 +14,18 @@ export default async function allRoutes(gateway, opts) {
 
 		fastify.route({
 			method: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
-			url: '/:gateway/*',
+			url: '/:serviceName/*',
 			handler: async (request, reply) => {
-				const totalPath = request.params['*'].split('/');
-				const serviceName = totalPath[0];
+				const serviceName = request.params.serviceName;
+				const restPath = request.params['*'] || '';
 				const servicePath = gateway.services[serviceName];
 				 
-				console.log(`Service requested: ${serviceName}, Path: ${request.params['*']}`);
+				console.log(`Service requested: ${serviceName}, Path: ${restPath}`);
 				console.log(`Service URL: ${servicePath}`);
 				
 				if (servicePath === undefined)
 					return reply.code(404).send({ error: 'Service not found' });
 
-				const restPath = totalPath.slice(1).join('/') || '';
 				const targetUrl = restPath ? `${servicePath}/${restPath}` : servicePath;
 				
 				console.log(`Target URL: ${targetUrl}`);
@@ -38,13 +37,24 @@ export default async function allRoutes(gateway, opts) {
 
 				try {
 					// Forward the request to the target service
+					const headers = { ...request.headers };
+					
+					// Remove headers that shouldn't be forwarded or might cause conflicts
+					delete headers['content-type'];
+					delete headers['content-length']; // Critical: Remove original content-length
+					delete headers['host']; // Remove original host
+					delete headers['connection'];
+					delete headers['transfer-encoding'];
+					
+					const body = request.method !== 'GET' && request.method !== 'HEAD' ? JSON.stringify(request.body) : undefined;
+					
 					const response = await fetch(finalUrl, {
 						method: request.method,
 						headers: {
-							'Content-Type': request.headers['content-type'] || 'application/json',
-							...request.headers
+							'Content-Type': 'application/json',
+							...headers
 						},
-						body: request.method !== 'GET' && request.method !== 'HEAD' ? JSON.stringify(request.body) : undefined
+						body: body
 					});
 
 					// Get the response data
@@ -69,11 +79,17 @@ export default async function allRoutes(gateway, opts) {
 
 					return parsedData;
 				} catch (error) {
-					gateway.log.error(`Error forwarding request to ${finalUrl}: ${error.message}`);
+					gateway.log.error(`Error forwarding request to ${finalUrl}`);
+					gateway.log.error(`Error details:`, error);
+					gateway.log.error(`Error message: ${error.message}`);
+					gateway.log.error(`Error code: ${error.code}`);
+					gateway.log.error(`Error cause: ${error.cause}`);
+					
 					return reply.code(500).send({ 
 						error: 'Internal server error', 
 						message: 'Failed to forward request to service',
-						service: serviceName
+						service: serviceName,
+						details: error.message
 					});
 				}
 			}
