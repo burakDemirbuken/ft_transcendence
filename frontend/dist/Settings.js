@@ -19,5 +19,25 @@ export default class extends AView {
             return yield response.text();
         });
     }
+    setEventHandlers() {
+        return __awaiter(this, void 0, void 0, function* () { });
+    }
+    unsetEventHandlers() {
+        return __awaiter(this, void 0, void 0, function* () { });
+    }
+    setStylesheet() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = "styles/settings.css";
+            document.head.appendChild(link);
+        });
+    }
+    unsetStylesheet() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const link = document.querySelector("link[href='styles/settings.css']");
+            document.head.removeChild(link);
+        });
+    }
 }
 //# sourceMappingURL=Settings.js.map

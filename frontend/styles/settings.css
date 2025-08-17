@@ -1,0 +1,19 @@
+/* Base nav item style */
+.nav-item {
+  color: #333; /* Normal color */
+}
+
+/* Hover style for ANY nav item (including active) */
+.nav-item:hover {
+  color: #007bff; /* Highlight color */
+}
+
+/* Active item style (when nothing is hovered) */
+.nav-item.active {
+  color: #007bff; /* Same as hover */
+}
+
+/* Override: When another item is hovered, de-highlight active (unless active is hovered itself) */
+.nav:hover .nav-item.active:not(:hover) {
+  color: #333; /* Revert to normal */
+}

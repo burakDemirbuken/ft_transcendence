@@ -53,9 +53,13 @@ document.addEventListener("DOMContentLoaded", () => {
 			console.log("hey?")
 			e.preventDefault();
 			navigateTo(e.target.getAttribute("href").replace(/^\//, ''));
+			document.querySelector(".selected")?.classList.toggle("selected");
+			e.target.classList.toggle("selected");
 		} else if (e.target.matches("[id='toggle']")) {
 			console.log("hey");
-			document.querySelector("#navbar")?.classList.toggle("active");
+			document.querySelector("#navbar")?.classList.toggle("collapse");
+			document.querySelector(".selected")?.classList.toggle("selected");
+			e.target.classList.toggle("selected");
 		}
 	})
 });

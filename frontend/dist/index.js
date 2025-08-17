@@ -53,15 +53,19 @@ export function navigateTo(page) {
 }
 document.addEventListener("DOMContentLoaded", () => {
     document.body.addEventListener("click", e => {
-        var _a;
+        var _a, _b, _c;
         if (e.target.matches("[data-link]")) {
             console.log("hey?");
             e.preventDefault();
             navigateTo(e.target.getAttribute("href").replace(/^\//, ''));
+            (_a = document.querySelector(".selected")) === null || _a === void 0 ? void 0 : _a.classList.toggle("selected");
+            e.target.classList.toggle("selected");
         }
         else if (e.target.matches("[id='toggle']")) {
             console.log("hey");
-            (_a = document.querySelector("#navbar")) === null || _a === void 0 ? void 0 : _a.classList.toggle("active");
+            (_b = document.querySelector("#navbar")) === null || _b === void 0 ? void 0 : _b.classList.toggle("collapse");
+            (_c = document.querySelector(".selected")) === null || _c === void 0 ? void 0 : _c.classList.toggle("selected");
+            e.target.classList.toggle("selected");
         }
     });
 });
