@@ -47,6 +47,7 @@ class Tournament extends EventEmitter
 						player2: null,
 						score: null,
 						winner: null,
+						matchStatus: 'not_started', // 'not_started', 'in_progress', 'finished'
 						loser: null,
 						game: null,
 					}
@@ -79,6 +80,7 @@ class Tournament extends EventEmitter
 				match.matchId = `${this.tournamentName}-match-${Date.now()}`;
 				match.player1 = this.players[i];
 				match.player2 = this.players[i + 1];
+				match.matchStatus = 'not_started';
 				match.winner = null;
 				match.loser = null;
 				match.game = new PingPong({
@@ -105,6 +107,7 @@ class Tournament extends EventEmitter
 				matchs: round.matchs.map(match => ({
 					matchId: match.matchId,
 					matchNumber: match.matchNumber,
+					matchStatus: match.matchStatus,
 					player1: match.player1,
 					player2: match.player2,
 					score: match.score,
@@ -166,11 +169,13 @@ class Tournament extends EventEmitter
 				finishedMatchesCount = 0;
 				match.game.update(deltaTime);
 				match.score = match.game.getScore();
+				match.status = 'in_progress';
 				if (match.game.isFinished())
 				{
 					finishedMatchesCount++;
 					match.winner = match.game.getWinner();
 					match.loser = match.game.getLoser();
+					match.matchStatus = 'finished';
 					match.game.dispose();
 					match.game = null;
 					console.log(`🏆 Match ${match.matchId} finished. Winner: ${winner.id}, Loser: ${loser.id}`);

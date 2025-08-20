@@ -7,7 +7,7 @@ class GameManager
 	constructor()
 	{
 		this.games = new Map();
-		this.gameMode
+		this.gameMode = null; 
 		this.updateInterval = null;
 		this.lastUpdateTime = Date.now();
 	}
