@@ -2,17 +2,6 @@ import { TOURNAMENT_GAME_PROPERTIES } from '../utils/constants.js';
 import PingPong from '../PingPong/PingPong.js';
 import EventEmitter from '../utils/EventEmitter.js';
 
-function shuffle(array)
-{
-	const arr = [...array];
-	for (let i = arr.length - 1; i > 0; i--)
-	{
-		const j = Math.floor(Math.random() * (i + 1));
-		[arr[i], arr[j]] = [arr[j], arr[i]];
-	}
-	return arr;
-}
-
 class Tournament extends EventEmitter
 {
 	constructor(tournamentName, properties)
@@ -69,6 +58,17 @@ class Tournament extends EventEmitter
 			throw new Error(`Not enough players to start the tournament. Minimum required: ${this.properties.minPlayers}, current: ${this.players.length}`);
 		if (this.players.length > this.properties.maxPlayers)
 			throw new Error(`Too many players for the tournament. Maximum allowed: ${this.properties.maxPlayers}, current: ${this.players.length}`);
+
+		function shuffle(array)
+		{
+			const arr = [...array];
+			for (let i = arr.length - 1; i > 0; i--)
+			{
+				const j = Math.floor(Math.random() * (i + 1));
+				[arr[i], arr[j]] = [arr[j], arr[i]];
+			}
+			return arr;
+		}
 
 		this.players = shuffle(this.participants);
 		let matchs = this.matches.get(this.currentRound).matchs;

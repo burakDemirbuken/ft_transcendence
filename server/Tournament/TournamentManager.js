@@ -7,15 +7,15 @@ const exampleTournamentProperty = {
 	playerCount: 8,
 };
 
-class TournamentManager
+class TournamentManager extends EventEmitter
 {
 	constructor()
 	{
+		super();
 		this.tournaments = new Map(); // tournamentId -> Tournament instance
 		this.settings = null;
 		this.updateInterval = null;
 		this.lastUpdateTime = Date.now();
-		this.updateInterval = null;
 	}
 
 	createUniqueTournamentId()
@@ -35,7 +35,7 @@ class TournamentManager
 		const tournament = new Tournament(property.name, property);
 		this.tournaments.set(tournamentId, tournament);
 		console.log(`🆕 Tournament ${tournamentId} created with properties: ${JSON.stringify(property)}`);
-		return { tournamentId, tournament };
+		return tournamentId;
 	}
 
 	// TODOO: throwları ele al hangi throw nereye gidecek vs
@@ -47,21 +47,30 @@ class TournamentManager
 		tournament.addParticipant(player);
 	}
 
-	initialize(callback)
+	start()
 	{
-		this.updateInterval = setInterval(() => this.update(callback), TICK_RATE);
+		this.updateInterval = setInterval(() => this.update(), TICK_RATE);
 	}
 
+	stop()
+	{
+		if (this.updateInterval)
+		{
+			clearInterval(this.updateInterval);
+			this.updateInterval = null;
+		}
+	}
 
-	update(callback)
+	update()
 	{
 		const currentTime = Date.now();
 		const deltaTime = currentTime - this.lastUpdateTime;
 		this.lastUpdateTime = currentTime;
 
-		for (const tournament of this.tournaments.values())
+		for (const [tournamentId, tournament] of this.tournaments.entries())
 		{
-			callback({
+			tournament.update(deltaTime);
+			this.emit(`tournament_${tournamentId}_update`, {
 				participants: tournament.participants,
 				matchMakingInfo: tournament.getMatchmakingInfo(),
 				tournamentState: tournament.getState()
