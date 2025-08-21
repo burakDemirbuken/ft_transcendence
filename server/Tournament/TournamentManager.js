@@ -27,12 +27,19 @@ class TournamentManager extends EventEmitter
 	{
 		const tournamentId = this.createUniqueTournamentId();
 		if (this.tournaments.has(tournamentId))
-			throw new Error(`Tournament with ID ${tournamentId} already exists`);
+			return (this.emit('error', new Error(`Tournament with ID ${tournamentId} already exists`)));
 		if (!property.playerCount || Math.min(property.playerCount) < 2)
-			throw new Error(`Invalid player count: ${property.playerCount}`);
+			return (this.emit('error', new Error(`Invalid player count: ${property.playerCount}`)));
 		if (Math.log2(property.playerCount) % 1 !== 0)
-			throw new Error(`Tournament Count must be a power of 2: ${property.playerCount}`);
+			return (this.emit('error', new Error(`Tournament Count must be a power of 2: ${property.playerCount}`)));
 		const tournament = new Tournament(property.name, property);
+		tournament.on('update', (data) => this.emit(`tournament_${tournamentId}`, { type: 'update', payload: data }));
+		tournament.on('finished', (data) => this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data }));
+		tournament.on('matchmaking', (data) => this.emit(`tournament_${tournamentId}`, { type: 'matchmaking', payload: data }));
+		tournament.on('error', (error) =>
+		{
+			// hata durumlarında kullanıcıya bildirim gönder
+		});
 		this.tournaments.set(tournamentId, tournament);
 		console.log(`🆕 Tournament ${tournamentId} created with properties: ${JSON.stringify(property)}`);
 		return tournamentId;
@@ -43,7 +50,7 @@ class TournamentManager extends EventEmitter
 	{
 		const tournament = this.tournaments.get(tournamentId);
 		if (!tournament)
-			throw new Error(`Tournament with ID ${tournamentId} does not exist`);
+			return this.emit('error', new Error(`Tournament with ID ${tournamentId} does not exist`));
 		tournament.addParticipant(player);
 	}
 
@@ -70,10 +77,21 @@ class TournamentManager extends EventEmitter
 		for (const [tournamentId, tournament] of this.tournaments.entries())
 		{
 			tournament.update(deltaTime);
-			this.emit(`tournament_${tournamentId}_update`, {
-				participants: tournament.participants,
-				matchMakingInfo: tournament.getMatchmakingInfo(),
-				tournamentState: tournament.getState()
+			if (tournament.isFinished())
+			{
+				console.log(`🏁 Tournament ${tournamentId} finished`);
+				this.emit(`tournament_${tournamentId}`,{type: 'finished', payload: tournament.getFinishedInfo()});
+				this.tournaments.delete(tournamentId);
+				continue;
+			}
+
+			this.emit(`tournament_${tournamentId}`, {
+				type: 'update',
+				payload: {
+					participants: tournament.participants,
+					matchMakingInfo: tournament.getMatchmakingInfo(),
+					tournamentState: tournament.getState()
+				}
 			});
 		}
 

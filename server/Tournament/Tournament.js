@@ -54,10 +54,10 @@ class Tournament extends EventEmitter
 
 	matchMaking()
 	{
-		if (this.players.length < this.properties.minPlayers)
-			throw new Error(`Not enough players to start the tournament. Minimum required: ${this.properties.minPlayers}, current: ${this.players.length}`);
-		if (this.players.length > this.properties.maxPlayers)
-			throw new Error(`Too many players for the tournament. Maximum allowed: ${this.properties.maxPlayers}, current: ${this.players.length}`);
+		if (this.status !== 'waiting')
+			return this.emit('error', new Error(`Tournament is not in waiting state, current status: ${this.status}`));
+		if (this.participants.length < this.properties.playerCount)
+			return this.emit('error', new Error(`Not enough participants to start matchmaking, current count: ${this.participants.length}, required: ${this.properties.playerCount}`));
 
 		function shuffle(array)
 		{
@@ -123,10 +123,7 @@ class Tournament extends EventEmitter
 	nextRound()
 	{
 		if (this.currentRound >= this.maxRounds)
-		{
-			this.emit('tournamentFinished', this.matchMakingInfo());
-			return;
-		}
+			return this.emit('tournamentFinished', this.matchMakingInfo());
 
 		this.currentRound++;
 		this.currentMatches = [];
@@ -183,8 +180,11 @@ class Tournament extends EventEmitter
 			}
 		);
 
-		if (finishedMatchesCount === this.currentMatches.length)
-			this.nextRound();
+		this.emit("update", {
+			participants: this.participants,
+			matchMakingInfo: this.getMatchmakingInfo(),
+			tournamentState: this.getState()
+		});
 	}
 
 	addParticipant(player)
@@ -192,12 +192,12 @@ class Tournament extends EventEmitter
 		if (this.participants.length < this.properties.maxPlayers)
 		{
 			if (this.participants.some(p => p.id === player.id))
-				throw new Error(`Player with ID ${player.id} is already in the tournament`);
+				return this.emit('error', new Error(`Player with ID ${player.id} is already in the tournament`));
 			this.participants.push(player);
 			console.log(`👤 Player ${player.id} added to tournament`);
 		}
 		else
-			throw new Error(`Tournament is full, cannot add player ${player.id}`);
+			this.emit('error', new Error(`Tournament is full, cannot add player ${player.id}`));
 	}
 
 	removeParticipant(playerId)
@@ -213,11 +213,15 @@ class Tournament extends EventEmitter
 		return this.participants.length === this.properties.maxPlayers;
 	}
 
+	isFinished()
+	{
+		return this.status === 'finished' || this.currentRound >= this.maxRounds;
+	}
+
 	start()
 	{
 		if (this.status !== 'ready2start')
-			throw new Error(`Tournament is not ready to start, current status: ${this.status}`);
-
+			return this.emit('error', new Error(`Tournament is not ready to start, current status: ${this.status}`));
 		this.startTime = Date.now();
 		this.status = 'running';
 		this.emit('tournamentStarted', this.getMatchmakingInfo());
@@ -243,6 +247,13 @@ class Tournament extends EventEmitter
 		};
 	}
 
+	getFinishedInfo()
+	{
+		return {
+			// finish state
+		}
+
+	}
 }
 
 export default Tournament;
