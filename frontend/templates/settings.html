@@ -1,5 +1,41 @@
-<nav class="nav">
-  <a href="#" class="nav-item">Home</a>
-  <a href="#" class="nav-item active">About</a> <!-- Stays blue until hover elsewhere -->
-  <a href="#" class="nav-item">Contact</a>
-</nav>
+<div class="settings-container">
+	<form id="settings-form">
+		<h2>Settings</h2>
+		<div class="settings-box">
+			<div class="setting-section s1">
+				<summary> <h3>Information</h3> </summary>
+				<div class="settings-content">
+					<label>
+						<span>User Name</span>
+						<input type="text" name="uname" value="uname">
+					</label>
+					<label>
+						<span>Email</span>
+						<input type="email" name="email" value="krktbtl@gmail.com">
+					</label>
+					<label>
+						<span>Password</span>
+						<input type="password" name="pass" value="pass">
+					</label>
+				</div>
+			</div>
+			<div class="setting-section s2">
+				<summary><h3>Language</h3></summary>
+				<div class="settings-content">
+					<ul>
+						<li>Deutsch</li>
+						<li>English</li>
+						<li class="current">Türkçe</li>
+						<li>日本語</li>
+					</ul>
+				</div>
+			</div>
+			<div class="setting-section s3">
+				<summary><h3 class="delete">Delete Account</h3></summary>
+				<div class="settings-content">
+					<button>Delete Account</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>

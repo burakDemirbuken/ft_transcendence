@@ -1,5 +1,10 @@
 import AView from "./AView.js";
 
+let currentlyOpen = null;
+
+// async function toggle(e) {
+// }
+
 export default class extends AView {
 	constructor() {
 		super();
@@ -11,8 +16,21 @@ export default class extends AView {
 		return await response.text();
 	}
 
-	async setEventHandlers() {}
-	async unsetEventHandlers() {}
+	async setEventHandlers() {
+		const detailsElements = document.querySelectorAll('details');
+
+		detailsElements.forEach(details => {
+			details.addEventListener('click', toggle);
+		});
+	}
+
+	async unsetEventHandlers() {
+		const detailsElements = document.querySelectorAll('details');
+
+		// detailsElements.forEach(details => {
+		// 	details.removeEventListener('click', toggle);
+		// });
+	}
 
 	async setStylesheet() {
 		const link = document.createElement("link");

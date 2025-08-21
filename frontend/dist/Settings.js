@@ -8,6 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import AView from "./AView.js";
+let currentlyOpen = null;
+// async function toggle(e) {
+// }
 export default class extends AView {
     constructor() {
         super();
@@ -20,10 +23,20 @@ export default class extends AView {
         });
     }
     setEventHandlers() {
-        return __awaiter(this, void 0, void 0, function* () { });
+        return __awaiter(this, void 0, void 0, function* () {
+            const detailsElements = document.querySelectorAll('details');
+            detailsElements.forEach(details => {
+                details.addEventListener('click', toggle);
+            });
+        });
     }
     unsetEventHandlers() {
-        return __awaiter(this, void 0, void 0, function* () { });
+        return __awaiter(this, void 0, void 0, function* () {
+            const detailsElements = document.querySelectorAll('details');
+            // detailsElements.forEach(details => {
+            // 	details.removeEventListener('click', toggle);
+            // });
+        });
     }
     setStylesheet() {
         return __awaiter(this, void 0, void 0, function* () {

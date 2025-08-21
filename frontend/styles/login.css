@@ -1,7 +1,8 @@
 .login-container {
 	position: relative;
 	width: 100%;
-	height: 100%;
+	height: 100vh;
+	height: 100dvh;
 	background:
 		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
 		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
