@@ -80,6 +80,11 @@ class NetworkManager
 		if (this.socket)
 			this.socket.close();
 	}
+
+	isConnected()
+	{
+		return this.isConnected;
+	}
 }
 
 export default NetworkManager;

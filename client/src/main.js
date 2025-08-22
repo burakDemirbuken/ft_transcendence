@@ -251,18 +251,18 @@ function initialize()
 }
 
 // Call initialize when DOM is ready
-if (document.readyState === 'loading') {
+if (document.readyState === 'loading')
 	document.addEventListener('DOMContentLoaded', initialize);
-} else {
+else
 	initialize();
-}
 
 // Tournament UI Management
 let currentTournament = null;
 let isHost = false;
 let currentPlayerReady = false;
 
-function createTournament() {
+function createTournament()
+{
 	const tournamentId = 'TOUR-' + Math.random().toString(36).substr(2, 8).toUpperCase();
 
 	// Mock tournament creation
@@ -987,19 +987,23 @@ function showAddParticipantDialog() {
 }
 
 // Turnuvaya katılımcı ekleme
-function addParticipantToTournament(playerData) {
-    if (!currentTournament) {
+function addParticipantToTournament(playerData)
+{
+    if (!currentTournament)
+	{
         console.log('❌ Aktif turnuva bulunamadı');
         return false;
     }
 
-    if (currentTournament.players.length >= currentTournament.maxPlayers) {
+    if (currentTournament.players.length >= currentTournament.maxPlayers)
+	{
         showStatus('Turnuva dolu! Maksimum katılımcı sayısına ulaşıldı.', 'error');
         return false;
     }
 
     const existingPlayer = currentTournament.players.find(p => p.id === playerData.id);
-    if (existingPlayer) {
+    if (existingPlayer)
+	{
         showStatus('Bu oyuncu zaten turnuvada!', 'warning');
         return false;
     }
@@ -1125,7 +1129,6 @@ window.toggleCustomRoomReady = toggleCustomRoomReady;
 window.updateGameSetting = updateGameSetting;
 window.startCustomGame = startCustomGame;
 window.leaveCustomRoom = leaveCustomRoom;
-
 // Export participant management functions
 window.showAddParticipantDialog = showAddParticipantDialog;
 window.addParticipantToTournament = addParticipantToTournament;

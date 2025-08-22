@@ -35,13 +35,15 @@ class GameCore
 			() =>
 			{
 				this.scene.render();
-			});
+			}
+		);
 
 		window.addEventListener("resize",
 			() =>
 			{
 				this.engine.resize();
-			});
+			}
+		);
 	}
 
 	joystickMove(number, direction)
@@ -149,22 +151,19 @@ attachCameraToMachineFront(machineId, distance = 5, height = 2) {
 }
 // ...existing code... */
 
-	async setViewMode(mode, machineCount = 1)
+	async loadScene(mode, machineCount = 1)
 	{
 		this.viewMode = mode;
 
 		this.clearMachines();
 		switch (mode)
 		{
-			case 'single':
 			case 'multiple':
+			case 'local':
 				await this.setupSingleMachine();
 				break;
 			case 'tournament':
 				await this.setupTournamentMachines(machineCount);
-				break;
-			case 'local':
-				await this.setupSingleMachine();
 				break;
 			default:
 				throw new Error(`Unknown view mode: ${mode}`);
@@ -214,7 +213,7 @@ attachCameraToMachineFront(machineId, distance = 5, height = 2) {
 			const machine = new ArcadeMachine(`tournament_${i}`, this.scene, { x, y: 0, z });
 			await machine.load();
 
-			machine.mesh.rotation.y = angle + Math.PI;
+			machine.meshs.rotation.y = angle + Math.PI;
 
 			machine.setActive(false);
 			this.arcadeMachines.set(`tournament_${i}`, machine);

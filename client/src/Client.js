@@ -86,22 +86,19 @@ class Client
 		return `${randomName}${randomNumber}`;
 	}
 
+//		await this.gameCore.loadScene(gameConfig.gameMode);
+
+
 	async initialize(gameConfig)
 	{
-		if (!this.canvas || !gameConfig || !gameConfig.arcade)
-			throw new Error('Canvas or game configuration is missing');
+		if (!this.canvas)
+			throw new Error('Canvas is missing');
 
 		// Store gameConfig as instance variable for later use
-		this.gameConfig = gameConfig;
-
 		await this.gameCore.initialize(this.canvas, gameConfig.arcade);
-		await this.gameCore.setViewMode(gameConfig.gameMode);
 		if (!gameConfig.gameRender)
 			throw new Error('Game render configuration is missing');
 		this.renderer.initialize(gameConfig.gameRender);
-
-		const hostname = window.location.hostname || 'localhost';
-		console.log(`🌐 Using hostname: ${hostname}`);
 
 		if (!gameConfig.matchId)
 		{
@@ -115,21 +112,23 @@ class Client
 			matchId: gameConfig.matchId,
 			gameMode: gameConfig.gameMode
 		});
-		const url = `ws://${hostname}:3000/ws?${params.toString()}`;
+		this.setupGameControls();
+	}
+
+	connectWebSocket(params)
+	{
+		const param = new URLSearchParams(params);
+		const url = `ws://${window.location.hostname}:3000/ws?${param.toString()}`;
 		this.networkManager.connect(url);
 		this.setupEventListeners();
 	}
 
-	createCustomRoom()
+	// Placeholder for future implementation
+	// createTournamentRoom() can be implemented to handle tournament room creation logic
+
+	createTournamentRoom()
 	{
 
-	}
-
-	generateUniqueMatchId()
-	{
-		const timestamp = Date.now().toString(36);
-		const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
-		return `match-${timestamp}-${randomPart}`;
 	}
 
 	setupEventListeners()
@@ -147,6 +146,12 @@ class Client
 		this.networkManager.on("error",
 			(error) => console.error('connection error:', error)
 		);
+	}
+
+	setupGameControls()
+	{
+		if (!this.networkManager.isConnected())
+			throw new Error('NetworkManager is not connected');
 
 		this.inputManager.onKey("w",
 			() =>
