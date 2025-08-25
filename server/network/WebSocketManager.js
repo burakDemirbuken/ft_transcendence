@@ -36,7 +36,9 @@ class WebSocketManager
 
 						if (!name)
 						{
-						    console.warn('⚠️ User name eksik ama devam ediliyor');
+						    console.warn('⚠️ User name, connection kapatılıyor');
+						    connection.socket.close(1008, 'User name required');
+						    return;
 						}
 
 						if (this.clients.has(id))
@@ -79,12 +81,6 @@ class WebSocketManager
 								this.clients.delete(id);
 							}
 						);
-
-						console.log('🟢 Yeni bağlantı:', {
-						    userId: id,
-						    userName: name,
-						    totalClients: this.clients.size + 1
-						});
 					}
 				);
 			}.bind(this)

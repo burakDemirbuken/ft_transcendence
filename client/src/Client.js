@@ -50,7 +50,6 @@ const exampleGameConfig =
 
 import GameCore from './core/GameCore.js';
 import NetworkManager from './network/NetworkManager.js';
-import GameStateManager from './GameStateManager.js';
 import GameRenderer from './rendering/GameRenderer.js';
 import InputManager from './input/InputManager.js';
 
@@ -65,27 +64,9 @@ class Client
 		this.inputManager = new InputManager();
 		this.gameState = null;
 
-
 		// ? this.gameStateManager = new GameStateManager();
 		this.isRunning = false;
 	}
-
-	TEST_generateRandomId()
-	{
-		return Math.random().toString(36).substr(2, 6).toUpperCase();
-	}
-
-	TEST_generateRandomName()
-	{
-		const names = [
-			'Player', 'Gamer', 'User', 'Tester', 'Demo',
-			'Alpha', 'Beta', 'Gamma', 'Delta', 'Echo'
-		];
-		const randomName = names[Math.floor(Math.random() * names.length)];
-		const randomNumber = Math.floor(Math.random() * 999) + 1;
-		return `${randomName}${randomNumber}`;
-	}
-
 //		await this.gameCore.loadScene(gameConfig.gameMode);
 
 
@@ -94,32 +75,16 @@ class Client
 		if (!this.canvas)
 			throw new Error('Canvas is missing');
 
-		// Store gameConfig as instance variable for later use
 		await this.gameCore.initialize(this.canvas, gameConfig.arcade);
 		if (!gameConfig.gameRender)
 			throw new Error('Game render configuration is missing');
 		this.renderer.initialize(gameConfig.gameRender);
-
-		if (!gameConfig.matchId)
-		{
-			gameConfig.matchId = this.generateUniqueMatchId();
-			console.log(`Generated match ID: ${gameConfig.matchId}`);
-		}
-
-		const params = new URLSearchParams({
-			id: this.TEST_generateRandomId(),
-			name: this.TEST_generateRandomName(),
-			matchId: gameConfig.matchId,
-			gameMode: gameConfig.gameMode
-		});
 		this.setupGameControls();
 	}
 
-	connectWebSocket(params)
+	connectToServer(endPoint, params = {})
 	{
-		const param = new URLSearchParams(params);
-		const url = `ws://${window.location.hostname}:3000/ws?${param.toString()}`;
-		this.networkManager.connect(url);
+		this.networkManager.connect(endPoint, params);
 		this.setupEventListeners();
 	}
 
@@ -128,8 +93,12 @@ class Client
 
 	createTournamentRoom()
 	{
-
+		if (!this.networkManager.isConnected())
+			throw new Error('NetworkManager is not connected');
+		this.networkManager.send("createRoom", {mode: "tournament"});
 	}
+
+	crea
 
 	setupEventListeners()
 	{
@@ -145,6 +114,15 @@ class Client
 		);
 		this.networkManager.on("error",
 			(error) => console.error('connection error:', error)
+		);
+		this.networkManager.on("createRoomResponse",
+			(data) =>
+			{
+				if (data.success)
+					console.log(`Tournament room created. Code: ${data.roomCode}`);
+				else
+					console.error(`Failed to create tournament room: ${data.message}`);
+			}
 		);
 	}
 
@@ -217,11 +195,6 @@ class Client
 				// Game over ekranı
 				break;
 		}
-	}
-
-	connectToServer(url)
-	{
-		this.networkManager.connect(url);
 	}
 
 	startGame()

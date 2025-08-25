@@ -1,20 +1,21 @@
 class NetworkManager
 {
-	constructor()
+	constructor(ip, port)
 	{
 		this.socket = null;
-		this.isConnected = false;
 		this.callbacks = new Map();
+		this.serverAddress = `ws://${ip}:${port}`;
 	}
 
-	connect(url)
+	connect(endPoint, params = {})
 	{
-		console.log('Connecting to server:', url);
+		const param = new URLSearchParams(params);
+		const url = `${endPoint}?${param.toString()}`;
+		console.log('Connecting to server at', url);
 		this.socket = new WebSocket(url);
 		this.socket.onopen =
 			() =>
 			{
-				this.isConnected = true;
 				this.triggerCallback('connected');
 			};
 		this.socket.onmessage =
@@ -27,7 +28,6 @@ class NetworkManager
 		this.socket.onclose =
 			() =>
 			{
-				this.isConnected = false;
 				console.log('Connection closed');
 				this.triggerCallback('disconnected');
 			};
@@ -49,6 +49,8 @@ class NetworkManager
 	{
 		if (this.isConnected)
 			this.socket.send(JSON.stringify({ type, payload }));
+		else
+			throw new Error('Cannot send message: not connected to server');
 	}
 
 	on(event, callback)
@@ -83,7 +85,7 @@ class NetworkManager
 
 	isConnected()
 	{
-		return this.isConnected;
+		return this.socket && this.socket.readyState === WebSocket.OPEN;
 	}
 }
 

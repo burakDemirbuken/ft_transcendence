@@ -2,14 +2,14 @@ import Client from './Client.js';
 import * as constants from './utils/constants.js';
 
 let client = new Client("renderCanvas");
-let currentGameSession = null;
 let gameState = {
 	isInGame: false,
 	gameMode: null,
 	tournamentData: null
 };
 
-const exampleGameConfig = {
+const exampleGameConfig =
+{
 	type: "config",
 
 	payload:
@@ -82,12 +82,26 @@ function tournamentGameStart(tournamentData)
 	startGameWithMode("tournament", tournamentData);
 }
 
+
+function TEST_generateRandomId()
+{
+	return Math.random().toString(36).substr(2, 6).toUpperCase();
+}
+
+function TEST_generateRandomName()
+{
+	const names = [
+		'Player', 'Gamer', 'User', 'Tester', 'Demo',
+		'Alpha', 'Beta', 'Gamma', 'Delta', 'Echo'
+	];
+	const randomName = names[Math.floor(Math.random() * names.length)];
+	const randomNumber = Math.floor(Math.random() * 999) + 1;
+	return `${randomName}${randomNumber}`;
+}
+
 function startGameWithMode(mode, additionalData = null)
 {
-	// Hide UI panels when game starts
 	hideGameUI();
-
-	// Update game configuration
 	exampleGameConfig.payload.gameMode = mode;
 
 	// Handle additional data based on mode

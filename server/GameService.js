@@ -32,7 +32,7 @@ class GameService
 				(query) =>
 				{
 					console.log('🟢 New client connecting:', query);
-					if (!query.id || !query.name || !query.matchId || !query.gameMode)
+					if (!query.id || !query.name)
 					{
 						console.error('❌ Missing required parameters in query:', query);
 						return;
@@ -40,14 +40,14 @@ class GameService
 
 					try
 					{
-						//? gameId serverda oluşup gitse daha sağlıklı olmaz mı?
+						/* //? gameId serverda oluşup gitse daha sağlıklı olmaz mı?
 						if (!this.gameManager.hasGame(query.matchId))
 							this.gameManager.createGame(query.gameMode, query.matchId);
-
+						*/
 						const player = new Player(query.id, query.name);
 						this.Players.set(query.id, player);
 
-						this.gameManager.addPlayerToGame(query.gameMode, query.matchId, player);
+						//this.gameManager.addPlayerToGame(query.gameMode, query.matchId, player);
 					}
 					catch (error)
 					{

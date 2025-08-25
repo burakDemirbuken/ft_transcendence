@@ -59,11 +59,9 @@ class ArcadeMachine
         }
 
 		const light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(this.position.x, this.position.y + 1, this.position.z), this.scene);
-		light1.intensity = 0.4; // Reduced from 0.7
-
+		light1.intensity = 0.4;
 
         this.createGameScreen();
-
         return this;
     }
 
@@ -92,23 +90,6 @@ class ArcadeMachine
             console.warn(`Screen mesh not found. Available meshes: ${this.meshs.map(m => m.name).join(', ')}`);
         }
     }
-
-	#fixUVMapping(mesh)
-	{
-		const uvs = mesh.getVerticesData(BABYLON.VertexBuffer.UVKind);
-
-		if (uvs)
-		{
-			if (uvs.length === 8)
-			{
-				uvs[0] = 1; uvs[1] = 1;
-				uvs[2] = 0; uvs[3] = 1;
-				uvs[4] = 0; uvs[5] = 0;
-				uvs[6] = 1; uvs[7] = 0;
-			}
-			mesh.setVerticesData(BABYLON.VertexBuffer.UVKind, uvs);
-		}
-	}
 
 	joystickMove(number, direction)
 	{
