@@ -3,6 +3,8 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile
+    image: game-server
+    container_name: game-server
     ports:
       - "3000:3000"
     volumes:

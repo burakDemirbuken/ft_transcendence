@@ -8,6 +8,10 @@ let gameState = {
 	tournamentData: null
 };
 
+const ip = window.location.hostname;
+const port = 3030;
+
+
 const exampleGameConfig =
 {
 	type: "config",
@@ -61,6 +65,78 @@ const exampleGameConfig =
 	}
 };
 
+const exampleCustomProperties =
+{
+	canvasWidth: 800,
+	canvasHeight: 600,
+
+	paddleWidth: 10,
+	paddleHeight: 100,
+	paddleSpeed: 700,
+
+	ballRadius: 7,
+	ballSpeed: 600,
+	ballSpeedIncrease: 100,
+
+	maxPlayers: 2,
+
+	maxScore: 11
+};
+
+/*
+const exampleResponseCustomRoom =
+{
+	id: "ROOM-12345",
+	name: "Custom Room",
+	type: "custom",
+	status: "waiting", // "waiting", "in_game", "completed"
+	maxPlayers: 2,
+	host: "player1",
+	players:
+	[
+		{ id: "player1", name: "Host", status: "ready", isHost: true },
+		{ id: "player2", name: "Player 2", status: "waiting", isHost: false }
+	],
+	gameSettings:
+	{
+		gameMode: "custom",
+		maxScore: 5,
+		ballSpeed: 1.0,
+		paddleSpeed: 1.0,
+		difficulty: "normal" // "easy", "normal", "hard"
+	},
+	createdAt: 1633036800000 // Timestamp
+};
+*/
+
+async function requestCreateRoom(mode)
+{
+	const response = await fetch(`http://${ip}:${port}/api/create-custom-room`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(
+			{
+				playerName: TEST_generateRandomName(),
+				playerId: TEST_generateRandomId(),
+				gameMode: mode,
+				properties: {
+					...exampleCustomProperties
+				}
+			})
+	});
+
+	if (!response.ok) {
+		showGameError('Failed to create custom room. Please try again.');
+		return response;
+	}
+
+	const data = await response.json();
+	console.log('Custom room created:', data);
+	return data;
+	// Open custom room creation interface
+	//createCustomRoom();
+}
+
 function localGameStart()
 {
 	startGameWithMode("local");
@@ -71,9 +147,12 @@ function aiGameStart()
 	startGameWithMode("ai");
 }
 
-function customGameStart()
+async function customGameStart()
 {
-	// Open custom room creation interface
+	const response = await requestCreateRoom();
+	if (!response.ok) return;
+
+	console.log('Custom room created:', response.data);
 	createCustomRoom();
 }
 
@@ -626,38 +705,15 @@ let customRooms = new Map(); // Store custom rooms
 let currentCustomRoom = null;
 let isCustomRoomHost = false;
 
-function createCustomRoom() {
-	const roomId = 'ROOM-' + Math.random().toString(36).substr(2, 8).toUpperCase();
-
-	// Create new custom room
-	const newRoom = {
-		id: roomId,
-		name: 'Custom Room',
-		type: 'custom',
-		status: 'waiting',
-		maxPlayers: 2, // Default for custom 1v1
-		host: 'current_player',
-		players: [
-			{ id: 'current_player', name: 'You (Host)', status: 'waiting', isHost: true }
-		],
-		gameSettings: {
-			gameMode: 'custom',
-			maxScore: 5,
-			ballSpeed: 1.0,
-			paddleSpeed: 1.0,
-			difficulty: 'normal'
-		},
-		createdAt: Date.now()
-	};
-
-	customRooms.set(roomId, newRoom);
-	currentCustomRoom = newRoom;
+function createCustomRoom(roomData) {
+	customRooms.set(roomData.id, roomData);
+	currentCustomRoom = roomData;
 	isCustomRoomHost = true;
 
 	showCustomRoomInterface();
 	showStatus('Custom room created successfully!', 'success');
 
-	console.log('🏠 Custom room created:', roomId);
+	console.log('🏠 Custom room created:', roomData.id);
 	return roomId;
 }
 

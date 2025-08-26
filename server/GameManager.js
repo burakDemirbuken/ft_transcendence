@@ -1,35 +1,32 @@
 import PingPong from './PingPong/PingPong.js';
 import LocalPingPong from './PingPong/LocalPingPong.js';
 import { TICK_RATE, DEFAULT_GAME_PROPERTIES } from './utils/constants.js';
+import EventEmitter from './utils/EventEmitter.js';
 
-class GameManager
+class GameManager extends EventEmitter
 {
 	constructor()
 	{
+		super();
 		this.games = new Map();
-		this.gameMode = null; 
 		this.updateInterval = null;
 		this.lastUpdateTime = Date.now();
 	}
 
-	createCustomMatch(property)
-	{
-
-	}
-
-	createGame(gameMode, gameId, properties = {})
+	createRoom(properties)
 	{
 		if (this.games.has(gameId))
 			throw new Error(`Game with ID ${gameId} already exists`);
 		let game;
-		const gameProperties = {...DEFAULT_GAME_PROPERTIES, gameMode: gameMode, ...properties};
-		if (gameMode === 'local')
-			game = new LocalPingPong(gameProperties);
+		if (properties.gameMode === 'local')
+			game = new LocalPingPong(properties);
 		else
-			game = new PingPong(gameProperties);
-		this.games.set(gameId, game);
+			game = new PingPong(properties);
+
+
+		this.games.set(game.id, game);
 		game.initializeGame();
-		console.log(`🆕 Game ${gameId} created with mode: ${gameMode}`);
+		console.log(`🆕 Game ${game.id} created with mode: ${properties.gameMode}`);
 		return game;
 	}
 
@@ -88,9 +85,9 @@ class GameManager
 		return null;
 	}
 
-	start(callback)
+	start()
 	{
-		this.updateInterval = setInterval(() => this.update(callback), TICK_RATE);
+		this.updateInterval = setInterval(() => this.update(), TICK_RATE);
 	}
 
 	stop()
@@ -114,7 +111,7 @@ class GameManager
 		}
 	}
 
-	update(callback)
+	update()
 	{
 		const currentTime = Date.now();
 		const deltaTime = currentTime - this.lastUpdateTime;
@@ -129,7 +126,7 @@ class GameManager
 			if (game.isRunning())
 			{
 				game.update(deltaTime);
-				callback(game.getGameState(), game.players);
+				this.emit('gameUpdate', {state: game.getGameState(), players: game.players.map(p => p.id)});
 			}
 		}
 	}

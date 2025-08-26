@@ -1,8 +1,7 @@
-import WebSocketManager from './network/WebSocketManager.js';
+import NetworkManager from './network/NetworkManager.js';
 import GameManager from './GameManager.js';
 import Player from './Player.js';
-import Fastify from 'fastify';
-
+import RoomManager from './RoomManager.js';
 /*
 exampleWebSocketMessage=
 {
@@ -16,9 +15,10 @@ class GameService
 {
 	constructor()
 	{
-		this.fastify = Fastify({ logger: false });
 		this.gameManager = new GameManager();
-		this.webSocketManager = new WebSocketManager(this.fastify);
+		this.networkManager = new NetworkManager();
+		this.roomManager = new RoomManager();
+		this.connectionId = new Map(); // connectionId -> playerId
 		this.Players = new Map(); // playerId -> Player instance
 	}
 
@@ -28,50 +28,52 @@ class GameService
 		{
 			console.log('Starting Game Server...');
 
-			this.webSocketManager.start(
-				(query) =>
+			this.networkManager.onClientConnect(
+				(connectionId, query) =>
 				{
 					console.log('🟢 New client connecting:', query);
 					if (!query.id || !query.name)
 					{
 						console.error('❌ Missing required parameters in query:', query);
+						this.networkManager.send(connectionId, {type: 'error', payload: 'Missing required parameters: id and name'});
+						this.networkManager.disconnectConnection(connectionId);
 						return;
 					}
-
-					try
-					{
-						/* //? gameId serverda oluşup gitse daha sağlıklı olmaz mı?
-						if (!this.gameManager.hasGame(query.matchId))
-							this.gameManager.createGame(query.gameMode, query.matchId);
-						*/
-						const player = new Player(query.id, query.name);
-						this.Players.set(query.id, player);
-
-						//this.gameManager.addPlayerToGame(query.gameMode, query.matchId, player);
-					}
-					catch (error)
-					{
-						console.error('❌ Error during client connection setup:', error);
-					}
-				},
-				(clientId, message) =>
-				{
-					this.handleWebSocketMessage(message, clientId);
-				},
-				(clientId) =>
-				{
-					console.log('WebSocket client disconnected:', clientId);
-					this.gameManager.removeGame(this.gameManager.getPlayerGameId(clientId));
-					this.Players.delete(clientId);
+					const player = new Player(query.id, query.name);
+					this.Players.set(query.id, player);
 				}
 			);
+
+			this.networkManager.onMessage(
+				(connectionId, message) =>
+				{
+					this.handleWebSocketMessage(message, this.connectionId.get(connectionId));
+				}
+			);
+
+			this.networkManager.onClose(
+				(connectionId) =>
+				{
+					//? bağlantısı koptuğunda yapılacaklar burada
+					this.connectionId.delete(connectionId);
+				}
+			);
+
+			this.networkManager.onError(
+				(connectionId, error) =>
+				{
+					console.error('❌ WebSocket error from client:', connectionId, error);
+				}
+			);
+
+			await this.networkManager.start({ host: '0.0.0.0', port: 3000 });
 
 			this.gameManager.start(
 				(gameData, players) =>
 				{
 					players.forEach((player) =>
 					{
-						this.webSocketManager.sendToClient(player.id, {type: 'stateChange', payload: gameData});
+						this.networkManager.sendToClient(player.id, {type: 'stateChange', payload: gameData});
 					});
 				}
 			);
@@ -95,13 +97,28 @@ class GameService
 
 	handleWebSocketMessage(message, clientId)
 	{
+		//! jwt doğrulama burada yapılabilir
 		const player = this.Players.get(clientId);
 		if (!player)
 		{
 			console.warn('Player not found for clientId:', clientId);
 			return;
 		}
-		player.inputsSet(message.type, message.payload.action);
+		switch (message.type)
+		{
+			case 'createRoom':
+
+				this.gameManager.createRoom(message.payload);
+				break;
+			case 'joinRoom':
+				this.gameManager.addPlayerToGame(message.payload.roomCode, player);
+				break;
+			case 'playerAction':
+				player.inputsSet(message.payload.key, message.payload.action);
+				break;
+			default:
+				break;
+		}
 	}
 
 	async stop()
@@ -109,7 +126,7 @@ class GameService
 		console.log('Stopping Game Server...');
 
 		this.gameManager.stop();
-		this.webSocketManager.stop();
+		this.networkManager.stop();
 
 		console.log('Game Server stopped!');
 	}

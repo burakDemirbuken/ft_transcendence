@@ -135,44 +135,44 @@ class Client
 			() =>
 			{
 				if (this.gameCore) this.gameCore.joystickMove(1, 'up');
-				this.networkManager.send("w", {action: true});
+				this.networkManager.send("playerAction", {key: "w", ,action: true});
 			},
 			() =>
 			{
 				if (this.gameCore) this.gameCore.joystickMove(1, 'reset');
-				this.networkManager.send("w", {action: false});
+				this.networkManager.send("playerAction", {key: "w", action: false});
 			}
 		);
 		this.inputManager.onKey("s",
 			() =>
 			{
 				if (this.gameCore) this.gameCore.joystickMove(1, 'down');
-				this.networkManager.send("s", {action: true});
+				this.networkManager.send("playerAction", {key: "s", action: true});
 			},
 			() =>
 			{
 				if (this.gameCore) this.gameCore.joystickMove(1, 'reset');
-				this.networkManager.send("s", {action: false});
+				this.networkManager.send("playerAction", {key: "s", action: false});
 			}
 		);
 		// Arrow keys for same player (alternative controls)
 		this.inputManager.onKey("ArrowUp",
-			() => this.networkManager.send("ArrowUp", {action: true}),
-			() => this.networkManager.send("ArrowUp", {action: false})
+			() => this.networkManager.send("playerAction", {key: "ArrowUp", action: true}),
+			() => this.networkManager.send("playerAction", {key: "ArrowUp", action: false})
 		);
 
 		this.inputManager.onKey("ArrowDown",
-			() => this.networkManager.send("ArrowDown", {action: true}),
-			() => this.networkManager.send("ArrowDown", {action: false})
+			() => this.networkManager.send("playerAction", {key: "ArrowDown", action: true}),
+			() => this.networkManager.send("playerAction", {key: "ArrowDown", action: false})
 		);
 
 		this.inputManager.onKey("r",
-			() => this.networkManager.send("r", {action: true}),
-			() => this.networkManager.send("r", {action: false})
+			() => this.networkManager.send("playerAction", {key: "r", action: true}),
+			() => this.networkManager.send("playerAction", {key: "r", action: false})
 		);
 		this.inputManager.onKey("Escape",
-			() => this.networkManager.send("Escape", {action: true}),
-			() => this.networkManager.send("Escape", {action: false})
+			() => this.networkManager.send("playerAction", {key: "Escape", action: true}),
+			() => this.networkManager.send("playerAction", {key: "Escape", action: false})
 		);
 	}
 
