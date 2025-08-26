@@ -135,7 +135,7 @@ class Client
 			() =>
 			{
 				if (this.gameCore) this.gameCore.joystickMove(1, 'up');
-				this.networkManager.send("playerAction", {key: "w", ,action: true});
+				this.networkManager.send("playerAction", {key: "w", action: true});
 			},
 			() =>
 			{
