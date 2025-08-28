@@ -18,7 +18,7 @@ class GameService
 		this.gameManager = new GameManager();
 		this.networkManager = new NetworkManager();
 		this.roomManager = new RoomManager();
-		this.connectionId = new Map(); // connectionId -> playerId
+		this.connectionId = new Map(); //  playerId -> connectionId
 		this.Players = new Map(); // playerId -> Player instance
 	}
 
@@ -41,6 +41,7 @@ class GameService
 					}
 					const player = new Player(query.id, query.name);
 					this.Players.set(query.id, player);
+					this.connectionId.set(query.id, connectionId);
 				}
 			);
 
@@ -68,16 +69,6 @@ class GameService
 
 			await this.networkManager.start({ host: '0.0.0.0', port: 3000 });
 
-			this.gameManager.start(
-				(gameData, players) =>
-				{
-					players.forEach((player) =>
-					{
-						this.networkManager.sendToClient(player.id, {type: 'stateChange', payload: gameData});
-					});
-				}
-			);
-
 			console.log('✅ Game Server started successfully!');
 		}
 		catch (error)
@@ -85,14 +76,6 @@ class GameService
 			console.error('❌ Error starting Game Server:', error);
 			throw error;
 		}
-	}
-
-	createLocalIdAndName()
-	{
-		return {
-			id: `local-${Math.random().toString(36).substring(2, 15)}`,
-			name: `LocalPlayer-${Math.random().toString(36).substring(2, 15)}`
-		};
 	}
 
 	handleWebSocketMessage(message, clientId)
@@ -107,8 +90,26 @@ class GameService
 		switch (message.type)
 		{
 			case 'createRoom':
-
-				this.gameManager.createRoom(message.payload);
+				const roomId = this.roomManager.createRoom(player.id, message.payload.name, message.payload.properties);
+				this.roomManager.on(`room${roomId}_Update`, ({roomState}) => {
+					roomState.players.forEach(p => {
+						const connId = this.connectionId.get(p.id);
+						if (connId)
+							this.networkManager.send(connId, { type: 'roomUpdate', payload: roomState });
+					});
+				});
+				this.roomManager.on(`room${roomId}_Delete`, () => {
+					this.roomManager.close
+				});
+				this.roomManager.on(`room${roomId}_Started`, ({ gameSettings, players }) => {
+					players.forEach(p => {
+						const connId = this.connectionId.get(p.id);
+						if (connId)
+							this.networkManager.send(connId, { type: 'gameStarted', payload: { gameSettings, players } });
+					});
+					// burada oyun init edilip başlatılacak
+				});
+				this.roomManager.on(`room${roomId}_Error`, ({ error }) => {});
 				break;
 			case 'joinRoom':
 				this.gameManager.addPlayerToGame(message.payload.roomCode, player);

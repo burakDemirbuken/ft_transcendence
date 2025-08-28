@@ -22,9 +22,33 @@ const exampleResponseCustomRoom =
 	},
 	createdAt: 1633036800000 // Timestamp
 };
+
+const exampleCreateRoomPayload =
+{
+	name: "Custom",
+	properties:
+	{
+		type: "custom",
+		gameSettings:
+		{
+			paddleWidth: 10,
+			paddleHeight: 100,
+			paddleSpeed: 700,
+
+			ballRadius: 7,
+			ballSpeed: 600,
+			ballSpeedIncrease: 100,
+
+			maxPlayers: 2,
+
+			maxScore: 11
+		}
+	}
+};
 */
 
-import { DEFAULT_GAME_PROPERTIES } from "./utils/constants";
+import { DEFAULT_GAME_PROPERTIES } from "./utils/constants.js";
+import EventEmitter from "./utils/EventEmitter.js";
 
 class RoomManager extends EventEmitter
 {
@@ -36,12 +60,14 @@ class RoomManager extends EventEmitter
 
 	createRoom(hostId, name, properties = {type: 'classic', gameSettings: { ...DEFAULT_GAME_PROPERTIES }})
 	{
+		this._validateRoomCreation(hostId, properties);
+
 		const roomId = this._generateRoomId();
 		const room = {
 			id: roomId,
 			name: name || `Room-${roomId}`,
 			type: properties.type,
-			status: 'waiting',
+			status: 'waiting', // "waiting", "in_game", "completed", "startable"
 			maxPlayers: properties.gameSettings.maxPlayers || 2,
 			host: hostId,
 			players: [],
@@ -58,6 +84,8 @@ class RoomManager extends EventEmitter
 	{
 		return this.rooms.get(roomId) || null;
 	}
+
+
 
 	deleteRoom(roomId)
 	{
@@ -80,6 +108,8 @@ class RoomManager extends EventEmitter
 			throw new Error(`Player with ID ${player.id} is already in room ${roomId}`);
 
 		room.players.push({ id: player.id, name: player.name, status: 'waiting', isHost: player.id === room.host });
+		this.notifyRoomUpdate(roomId);
+		return room;
 	}
 
 	removePlayerFromRoom(roomId, playerId)
@@ -97,6 +127,86 @@ class RoomManager extends EventEmitter
 		else if (room.host === playerId)
 			room.host = room.players[0].id; // Assign new host
 		room.status = 'waiting';
+
+		// Oda güncellenmesini bildir
+		if (room.players.length > 0) {
+			this.notifyRoomUpdate(roomId);
+		}
+		else {
+			this.emit(`room${room.id}_Deleted`);
+		}
+
+		return room;
+	}
+
+	updateRoomSettings(roomId, settings)
+	{
+		const room = this.getRoom(roomId);
+		if (!room)
+			throw new Error(`Room with ID ${roomId} does not exist`);
+		room.gameSettings = { ...room.gameSettings, ...settings };
+		this.notifyRoomUpdate(roomId);
+		return room;
+	}
+
+	playerReadyStatus(roomId, playerId, isReady)
+	{
+		const room = this.getRoom(roomId);
+		if (!room)
+			throw new Error(`Room with ID ${roomId} does not exist`);
+		const player = room.players.find(p => p.id === playerId);
+		if (!player)
+			throw new Error(`Player with ID ${playerId} is not in room ${roomId}`);
+		player.status = isReady ? 'ready' : 'waiting';
+		const allPlayersReady = room.players.every(p => p.status === 'ready');
+		if (allPlayersReady) {
+			room.status = 'startable';
+		}
+		this.notifyRoomUpdate(roomId);
+		return room;
+	}
+
+	updateRoomStatus(roomId, status)
+	{
+		const room = this.getRoom(roomId);
+		if (!room)
+			throw new Error(`Room with ID ${roomId} does not exist`);
+		if (!['waiting', 'in_game', 'completed'].includes(status))
+			throw new Error(`Invalid room status: ${status}`);
+
+		room.status = status;
+		this.notifyRoomUpdate(roomId);
+		return room;
+	}
+
+	startGame(roomId, hostId)
+	{
+		const room = this.getRoom(roomId);
+		if (!room)
+			throw new Error(`Room with ID ${roomId} does not exist`);
+
+		if (room.host !== hostId)
+			throw new Error('Only the host can start the game');
+
+		if (room.status !== 'startable')
+			throw new Error('Game can only be started when room status is startable');
+
+		if (room.players.length < 2)
+			throw new Error('At least 2 players are required to start the game');
+
+		const allPlayersReady = room.players.every(player => player.status === 'ready');
+		if (!allPlayersReady)
+			throw new Error('All players must be ready before starting the game');
+
+		room.status = 'in_game';
+
+		this.emit(`room${room.id}_Started`, {
+			gameSettings: room.gameSettings,
+			players: room.players
+		});
+
+		this.notifyRoomUpdate(roomId);
+
 		return room;
 	}
 
@@ -128,17 +238,50 @@ class RoomManager extends EventEmitter
 		};
 	}
 
-	updateRoomStatus(roomId, status)
+	notifyRoomUpdate(roomId)
 	{
 		const room = this.getRoom(roomId);
 		if (!room)
 			throw new Error(`Room with ID ${roomId} does not exist`);
-		if (!['waiting', 'in_game', 'completed'].includes(status))
-			throw new Error(`Invalid room status: ${status}`);
-		room.status = status;
-		this.emit('roomStatusChange', { roomId: room.id, status: room.status });
+		this.emit(`room${room.id}_Update`, {
+			roomState: this.getRoomState(roomId)
+		});
+
 		return room;
 	}
+
+	_validateRoomCreation(hostId, properties)
+	{
+		const basicValidations = [
+			{ condition: !hostId, message: 'Host ID is required to create a room' },
+			{ condition: !properties || !properties.gameSettings, message: 'Game settings are required to create a room' },
+			{ condition: !['classic', 'custom', 'tournament'].includes(properties.type), message: 'Invalid room type. Must be "classic", "custom", or "tournament"' }
+		];
+
+		const gameSettingsValidations = [
+			{ field: 'paddleWidth', message: 'Invalid paddle width in game settings' },
+			{ field: 'paddleHeight', message: 'Invalid paddle height in game settings' },
+			{ field: 'paddleSpeed', message: 'Invalid paddle speed in game settings' },
+			{ field: 'ballRadius', message: 'Invalid ball radius in game settings' },
+			{ field: 'ballSpeed', message: 'Invalid ball speed in game settings' },
+			{ field: 'ballSpeedIncrease', message: 'Invalid ball speed increase in game settings' },
+			{ field: 'maxScore', message: 'Invalid max score in game settings' }
+		];
+
+		for (const validation of basicValidations) {
+			if (validation.condition) {
+				throw new Error(validation.message);
+			}
+		}
+
+		const settings = properties.gameSettings;
+		for (const validation of gameSettingsValidations) {
+			if (!settings[validation.field] || settings[validation.field] <= 0) {
+				throw new Error(validation.message);
+			}
+		}
+	}
+
 }
 
 export default RoomManager;
