@@ -95,18 +95,17 @@ class GameService
 
 		try
 		{
-			if (this._isRoomMessage(message.type))
+			const [namespace, action] = message.type.split('/');
+			switch (namespace)
 			{
-				this._handleRoomMessage(message, player);
-			}
-			else if (this._isGameMessage(message.type))
-			{
-				this._handleGameMessage(message, player);
-			}
-			else
-			{
-				console.warn('Unknown message type:', message.type);
-				this._sendErrorToPlayer(player.id, `Unknown message type: ${message.type}`);
+				case 'room':
+					this._handleRoomMessage(action, message.payload, player);
+					break;
+				case 'game':
+					this._handleGameMessage(action, message.payload, player);
+					break;
+				default:
+					throw new Error(`Unhandled message namespace: ${namespace}`);
 			}
 		}
 		catch (error)
@@ -125,52 +124,40 @@ class GameService
 		});
 	}
 
-	_handleRoomMessage(message, player)
+	_handleRoomMessage(action, payload, player)
 	{
-		switch (message.type)
+		switch (action)
 		{
-			case 'createRoom':
-				this._handleCreateRoom(message, player);
+			case 'create':
+				this._handleCreateRoom(payload, player);
 				break;
-			case 'joinRoom':
-				this._handleJoinRoom(message, player);
+			case 'join':
+				this._handleJoinRoom(payload, player);
 				break;
-			case 'leaveRoom':
-				this._handleLeaveRoom(message, player);
+			case 'leave':
+				this._handleLeaveRoom(payload, player);
 				break;
 			case 'setReady':
-				this._handleSetReady(message, player);
+				this._handleSetReady(payload, player);
 				break;
 			case 'startGame':
-				this._handleStartGame(message, player);
+				this._handleStartGame(payload, player);
 				break;
 			default:
 				throw new Error(`Unhandled room message type: ${message.type}`);
 		}
 	}
 
-	_handleGameMessage(message, player)
+	_handleGameMessage(action, payload, player)
 	{
-		switch (message.type)
+		switch (action)
 		{
 			case 'playerAction':
-				this._handlePlayerAction(message, player);
+				this._handlePlayerAction(payload, player);
 				break;
 			default:
 				throw new Error(`Unhandled game message type: ${message.type}`);
 		}
-	}
-
-	_isRoomMessage(messageType)
-	{
-		const roomMessages = ['createRoom', 'joinRoom', 'leaveRoom', 'setReady', 'startGame'];
-		return roomMessages.includes(messageType);
-	}
-
-	_isGameMessage(messageType)
-	{
-		const gameMessages = ['playerAction', 'gameAction', 'pauseGame'];
-		return gameMessages.includes(messageType);
 	}
 
 	_handleCreateRoom(message, player)
@@ -178,16 +165,16 @@ class GameService
 		const roomId = this.roomManager.createRoom(player.id, message.payload.name, message.payload.properties);
 
 		this.roomManager.on(`room${roomId}_Update`, ({roomState}) => {
-			this._sendPlayers(roomState.players, { type: 'roomUpdate', payload: roomState });
+			this._sendPlayers(roomState.players, { type: 'room/update', payload: roomState });
 		});
 
 		this.roomManager.on(`room${roomId}_Started`, ({ gameSettings, players }) => {
-			this._sendPlayers(players, { type: 'gameStarted', payload: { gameSettings, players } });
+			this._sendPlayers(players, { type: 'game/started', payload: { gameSettings, players } });
 		});
 
 		const connId = this.connectionId.get(player.id);
 		if (connId)
-			this.networkManager.send(connId, JSON.stringify({ type: 'roomCreated', payload: { roomId } }));
+			this.networkManager.send(connId, JSON.stringify({ type: 'room/created', payload: { roomId } }));
 	}
 
 	_handleJoinRoom(message, player)
@@ -210,10 +197,9 @@ class GameService
 		this.roomManager.startGame(message.payload.roomId, player.id);
 	}
 
-	_handlePlayerAction(message, player)
+	_handlePlayerAction(payload, player)
 	{
-		player.inputsSet(message.payload.key, message.payload.action);
-		player.lastActivity = Date.now();
+		player.inputsSet(payload.key, payload.action);
 	}
 
 	_sendErrorToPlayer(playerId, errorMessage)

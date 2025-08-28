@@ -1,7 +1,12 @@
-import Client from './Client.js';
+import GameClient from './GameClient.js';
 import * as constants from './utils/constants.js';
 
-let client = new Client("renderCanvas");
+import GameClient from './GameClient.js';
+import RoomManager from './RoomUi.js';
+import * as constants from './utils/constants.js';
+import App from './App.js';
+
+const app = new App();
 let gameState = {
 	isInGame: false,
 	gameMode: null,
@@ -109,34 +114,6 @@ const exampleResponseCustomRoom =
 };
 */
 
-async function requestCreateRoom(mode)
-{
-	const response = await fetch(`http://${ip}:${port}/api/create-custom-room`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(
-			{
-				playerName: TEST_generateRandomName(),
-				playerId: TEST_generateRandomId(),
-				gameMode: mode,
-				properties: {
-					...exampleCustomProperties
-				}
-			})
-	});
-
-	if (!response.ok) {
-		showGameError('Failed to create custom room. Please try again.');
-		return response;
-	}
-
-	const data = await response.json();
-	console.log('Custom room created:', data);
-	return data;
-	// Open custom room creation interface
-	//createCustomRoom();
-}
-
 function localGameStart()
 {
 	startGameWithMode("local");
@@ -149,33 +126,34 @@ function aiGameStart()
 
 async function customGameStart()
 {
-	const response = await requestCreateRoom();
-	if (!response.ok) return;
+	try {
+		// Use RoomManager to create custom room
+		const roomData = {
+			id: 'ROOM-' + Math.random().toString(36).substr(2, 8).toUpperCase(),
+			name: 'Custom Game Room',
+			type: 'custom',
+			status: 'waiting',
+			maxPlayers: 2,
+			host: 'current_player',
+			players: [
+				{ id: 'current_player', name: 'You (Host)', status: 'waiting', isHost: true }
+			],
+			gameSettings: {
+				...exampleCustomProperties
+			},
+			createdAt: Date.now()
+		};
 
-	console.log('Custom room created:', response.data);
-	createCustomRoom();
+		roomManager.createCustomRoom(roomData);
+	} catch (error) {
+		console.error('❌ Failed to start custom game:', error);
+		showGameError('Failed to create custom room: ' + error.message);
+	}
 }
 
 function tournamentGameStart(tournamentData)
 {
 	startGameWithMode("tournament", tournamentData);
-}
-
-
-function TEST_generateRandomId()
-{
-	return Math.random().toString(36).substr(2, 6).toUpperCase();
-}
-
-function TEST_generateRandomName()
-{
-	const names = [
-		'Player', 'Gamer', 'User', 'Tester', 'Demo',
-		'Alpha', 'Beta', 'Gamma', 'Delta', 'Echo'
-	];
-	const randomName = names[Math.floor(Math.random() * names.length)];
-	const randomNumber = Math.floor(Math.random() * 999) + 1;
-	return `${randomName}${randomNumber}`;
 }
 
 function startGameWithMode(mode, additionalData = null)
@@ -194,8 +172,8 @@ function startGameWithMode(mode, additionalData = null)
 	gameState.gameMode = mode;
 
 	try {
-		client.initialize(exampleGameConfig.payload);
-		client.startGame();
+		gameClient.initialize(exampleGameConfig.payload);
+		gameClient.startGame();
 		gameState.isInGame = true;
 		console.log(`🎮 Game started in ${mode} mode`);
 	} catch (error) {
@@ -205,64 +183,18 @@ function startGameWithMode(mode, additionalData = null)
 	}
 }
 
-function hideGameUI()
-{
-	const uiOverlay = document.querySelector('.ui-overlay');
-	if (uiOverlay) {
-		uiOverlay.style.display = 'none';
-	}
-}
-
-function showGameUI()
-{
-	const uiOverlay = document.querySelector('.ui-overlay');
-	if (uiOverlay) {
-		uiOverlay.style.display = 'flex';
-	}
-}
-
-function showGameError(message)
-{
-	// Create or update error display
-	let errorEl = document.getElementById('gameError');
-	if (!errorEl) {
-		errorEl = document.createElement('div');
-		errorEl.id = 'gameError';
-		errorEl.style.cssText = `
-			position: fixed;
-			top: 20px;
-			right: 20px;
-			background: rgba(255, 0, 0, 0.9);
-			color: white;
-			padding: 15px;
-			border-radius: 8px;
-			z-index: 2000;
-			max-width: 300px;
-		`;
-		document.body.appendChild(errorEl);
-	}
-
-	errorEl.textContent = message;
-	errorEl.style.display = 'block';
-
-	// Auto-hide after 5 seconds
-	setTimeout(() => {
-		if (errorEl) {
-			errorEl.style.display = 'none';
-		}
-	}, 5000);
-}
 
 function joinGame()
 {
-	const customGameId = document.getElementById("customGameId").value;
+	const customGameId = document.getElementById("customGameId")?.value?.trim();
 	if (!customGameId)
 	{
 		showGameError("Please enter a valid Game ID.");
 		return;
 	}
 
-	startGameWithMode("multiple", { matchId: customGameId });
+	// Use RoomManager to join room
+	roomManager.joinCustomRoom(customGameId);
 }
 
 // Tournament integration functions
@@ -306,42 +238,6 @@ function reportTournamentResult(gameResult)
 	}
 }
 
-// Keyboard controls for game
-function setupKeyboardControls()
-{
-	document.addEventListener('keydown', (event) => {
-		if (!gameState.isInGame) return;
-
-		// ESC to exit game
-		if (event.key === 'Escape') {
-			exitGame();
-		}
-	});
-}
-
-function exitGame()
-{
-	if (gameState.isInGame) {
-		console.log('🚪 Exiting game...');
-
-		// TODO: Notify server if in online/tournament mode
-		if (gameState.gameMode === "multiple" || gameState.gameMode === "tournament") {
-			// Send disconnect message to server
-		}
-
-		gameState.isInGame = false;
-		gameState.gameMode = null;
-		gameState.tournamentData = null;
-		showGameUI();
-	}
-}
-
-// Initialize when page loads
-function initialize()
-{
-	setupKeyboardControls();
-	console.log('🎮 Game system initialized');
-}
 
 // Call initialize when DOM is ready
 if (document.readyState === 'loading')
@@ -468,39 +364,6 @@ function closeTournamentRoom() {
 	currentPlayerReady = false;
 }
 
-function toggleReady() {
-	if (!currentTournament) return;
-
-	currentPlayerReady = !currentPlayerReady;
-
-	// Update current player's status in the tournament
-	const currentPlayer = currentTournament.players.find(p => p.id === 'current_player');
-	if (currentPlayer) {
-	currentPlayer.status = currentPlayerReady ? 'ready' : 'waiting';
-	}
-
-	// Update UI
-	updateReadyButton();
-	showTournamentRoom();
-
-	const statusMessage = currentPlayerReady ? 'You are ready!' : 'You are not ready';
-	showStatus(statusMessage, currentPlayerReady ? 'success' : 'info');
-
-	// TODO: Send ready state to server
-	console.log('Player ready state changed:', currentPlayerReady);
-}
-
-function updateReadyButton() {
-	const readyBtn = document.getElementById('readyBtn');
-
-	if (currentPlayerReady) {
-	readyBtn.textContent = 'Not Ready';
-	readyBtn.className = 'btn btn-not-ready';
-	} else {
-	readyBtn.textContent = 'Mark Ready';
-	readyBtn.className = 'btn btn-ready';
-	}
-}
 
 function startTournament() {
 	if (!isHost || !currentTournament) {
@@ -701,339 +564,6 @@ function showStatus(message, type = 'info') {
 }
 
 // Custom Room Management
-let customRooms = new Map(); // Store custom rooms
-let currentCustomRoom = null;
-let isCustomRoomHost = false;
-
-function createCustomRoom(roomData) {
-	customRooms.set(roomData.id, roomData);
-	currentCustomRoom = roomData;
-	isCustomRoomHost = true;
-
-	showCustomRoomInterface();
-	showStatus('Custom room created successfully!', 'success');
-
-	console.log('🏠 Custom room created:', roomData.id);
-	return roomId;
-}
-
-function joinCustomRoom(roomId) {
-	if (!roomId) {
-		const inputRoomId = document.getElementById('customRoomId')?.value?.trim();
-		if (!inputRoomId) {
-			showStatus('Please enter a valid Room ID', 'error');
-			return;
-		}
-		roomId = inputRoomId;
-	}
-
-	// Mock joining (in real implementation, this would be a server request)
-	const room = customRooms.get(roomId);
-	if (!room) {
-		// Create mock room for demonstration
-		const mockRoom = {
-			id: roomId,
-			name: 'Joined Custom Room',
-			type: 'custom',
-			status: 'waiting',
-			maxPlayers: 2,
-			host: 'other_player',
-			players: [
-				{ id: 'other_player', name: 'Host', status: 'ready', isHost: true },
-				{ id: 'current_player', name: 'You', status: 'waiting', isHost: false }
-			],
-			gameSettings: {
-				gameMode: 'custom',
-				maxScore: 5,
-				ballSpeed: 1.0,
-				paddleSpeed: 1.0,
-				difficulty: 'normal'
-			},
-			createdAt: Date.now() - 30000
-		};
-		customRooms.set(roomId, mockRoom);
-		currentCustomRoom = mockRoom;
-		isCustomRoomHost = false;
-	} else if (room.players.length >= room.maxPlayers) {
-		showStatus('Room is full', 'error');
-		return;
-	} else {
-		// Add player to existing room
-		room.players.push({
-			id: 'current_player',
-			name: 'You',
-			status: 'waiting',
-			isHost: false
-		});
-		currentCustomRoom = room;
-		isCustomRoomHost = false;
-	}
-
-	showCustomRoomInterface();
-	showStatus('Joined custom room successfully!', 'success');
-
-	console.log('🚪 Joined custom room:', roomId);
-}
-
-function showCustomRoomInterface() {
-	if (!currentCustomRoom) return;
-
-	// Hide other UI elements
-	const tournamentRoom = document.getElementById('tournamentRoom');
-	if (tournamentRoom) {
-		tournamentRoom.style.display = 'none';
-	}
-
-	// Create or show custom room interface
-	let customRoomEl = document.getElementById('customRoomInterface');
-	if (!customRoomEl) {
-		customRoomEl = createCustomRoomInterface();
-		document.body.appendChild(customRoomEl);
-	}
-
-	updateCustomRoomDisplay();
-	customRoomEl.style.display = 'block';
-}
-
-function createCustomRoomInterface() {
-	const roomInterface = document.createElement('div');
-	roomInterface.id = 'customRoomInterface';
-	roomInterface.className = 'tournament-room'; // Reuse tournament room styling
-	roomInterface.innerHTML = `
-		<button class="close-btn" onclick="closeCustomRoom()">&times;</button>
-
-		<div class="tournament-header">
-			<div class="tournament-title" id="customRoomTitle">Custom Room</div>
-			<div class="tournament-id" id="customRoomId">ID: ROOM-12345</div>
-		</div>
-
-		<div class="tournament-info">
-			<div class="info-item">
-				<div class="info-label">Status</div>
-				<div class="info-value" id="customRoomStatus">Waiting</div>
-			</div>
-			<div class="info-item">
-				<div class="info-label">Players</div>
-				<div class="info-value" id="customRoomPlayerCount">0/2</div>
-			</div>
-			<div class="info-item">
-				<div class="info-label">Game Mode</div>
-				<div class="info-value">Custom 1v1</div>
-			</div>
-			<div class="info-item">
-				<div class="info-label">Max Score</div>
-				<div class="info-value" id="customRoomMaxScore">5</div>
-			</div>
-		</div>
-
-		<div class="participants-list">
-			<div class="participants-title">👥 Players</div>
-			<div id="customRoomPlayersList">
-				<!-- Players will be populated here -->
-			</div>
-		</div>
-
-		<div class="tournament-info" id="gameSettingsPanel" style="margin-top: 15px;">
-			<div class="participants-title">⚙️ Game Settings</div>
-			<div class="info-item">
-				<div class="info-label">Max Score</div>
-				<select id="maxScoreSelect" onchange="updateGameSetting('maxScore', this.value)" ${!isCustomRoomHost ? 'disabled' : ''}>
-					<option value="3">3 Points</option>
-					<option value="5" selected>5 Points</option>
-					<option value="7">7 Points</option>
-					<option value="10">10 Points</option>
-				</select>
-			</div>
-			<div class="info-item">
-				<div class="info-label">Ball Speed</div>
-				<select id="ballSpeedSelect" onchange="updateGameSetting('ballSpeed', this.value)" ${!isCustomRoomHost ? 'disabled' : ''}>
-					<option value="0.5">Slow</option>
-					<option value="1.0" selected>Normal</option>
-					<option value="1.5">Fast</option>
-					<option value="2.0">Very Fast</option>
-				</select>
-			</div>
-			<div class="info-item">
-				<div class="info-label">Paddle Speed</div>
-				<select id="paddleSpeedSelect" onchange="updateGameSetting('paddleSpeed', this.value)" ${!isCustomRoomHost ? 'disabled' : ''}>
-					<option value="0.5">Slow</option>
-					<option value="1.0" selected>Normal</option>
-					<option value="1.5">Fast</option>
-					<option value="2.0">Very Fast</option>
-				</select>
-			</div>
-		</div>
-
-		<div class="tournament-actions">
-			<button class="btn btn-primary" id="customRoomReadyBtn" onclick="toggleCustomRoomReady()">
-				Mark Ready
-			</button>
-			<button class="btn btn-success" id="startCustomGameBtn" onclick="startCustomGame()" style="display: none;">
-				Start Game
-			</button>
-			<button class="btn btn-warning" onclick="leaveCustomRoom()">
-				Leave Room
-			</button>
-		</div>
-	`;
-
-	return roomInterface;
-}
-
-function updateCustomRoomDisplay() {
-	if (!currentCustomRoom) return;
-
-	// Update room info
-	document.getElementById('customRoomTitle').textContent = currentCustomRoom.name;
-	document.getElementById('customRoomId').textContent = `ID: ${currentCustomRoom.id}`;
-	document.getElementById('customRoomStatus').textContent = currentCustomRoom.status;
-	document.getElementById('customRoomPlayerCount').textContent = `${currentCustomRoom.players.length}/${currentCustomRoom.maxPlayers}`;
-	document.getElementById('customRoomMaxScore').textContent = currentCustomRoom.gameSettings.maxScore;
-
-	// Update players list
-	const playersList = document.getElementById('customRoomPlayersList');
-	playersList.innerHTML = currentCustomRoom.players.map(player => `
-		<div class="participant-item">
-			<span class="participant-name">
-				${player.name}
-				${player.isHost ? ' 👑' : ''}
-			</span>
-			<span class="participant-status ${player.status === 'ready' ? 'status-ready' : 'status-waiting'}">
-				${player.status === 'ready' ? '✅ Ready' : '⏳ Waiting'}
-			</span>
-		</div>
-	`).join('');
-
-	// Update game settings
-	document.getElementById('maxScoreSelect').value = currentCustomRoom.gameSettings.maxScore;
-	document.getElementById('ballSpeedSelect').value = currentCustomRoom.gameSettings.ballSpeed;
-	document.getElementById('paddleSpeedSelect').value = currentCustomRoom.gameSettings.paddleSpeed;
-
-	// Update ready button
-	updateCustomRoomReadyButton();
-
-	// Update start button
-	updateCustomRoomStartButton();
-}
-
-function updateCustomRoomReadyButton() {
-	const currentPlayer = currentCustomRoom.players.find(p => p.id === 'current_player');
-	const readyBtn = document.getElementById('customRoomReadyBtn');
-
-	if (currentPlayer && readyBtn) {
-		if (currentPlayer.status === 'ready') {
-			readyBtn.textContent = 'Not Ready';
-			readyBtn.className = 'btn btn-not-ready';
-		} else {
-			readyBtn.textContent = 'Mark Ready';
-			readyBtn.className = 'btn btn-ready';
-		}
-	}
-}
-
-function updateCustomRoomStartButton() {
-	const startBtn = document.getElementById('startCustomGameBtn');
-	if (!startBtn) return;
-
-	const allPlayersReady = currentCustomRoom.players.length >= 2 &&
-	                       currentCustomRoom.players.every(player => player.status === 'ready');
-
-	if (isCustomRoomHost && currentCustomRoom.players.length >= 2) {
-		startBtn.style.display = 'block';
-		if (allPlayersReady) {
-			startBtn.disabled = false;
-			startBtn.textContent = 'Start Game';
-		} else {
-			startBtn.disabled = true;
-			startBtn.textContent = 'Waiting for all players to be ready...';
-		}
-	} else {
-		startBtn.style.display = 'none';
-	}
-}
-
-function toggleCustomRoomReady() {
-	if (!currentCustomRoom) return;
-
-	const currentPlayer = currentCustomRoom.players.find(p => p.id === 'current_player');
-	if (!currentPlayer) return;
-
-	currentPlayer.status = currentPlayer.status === 'ready' ? 'waiting' : 'ready';
-
-	updateCustomRoomDisplay();
-
-	const statusMessage = currentPlayer.status === 'ready' ? 'You are ready!' : 'You are not ready';
-	showStatus(statusMessage, currentPlayer.status === 'ready' ? 'success' : 'info');
-
-	console.log('🎯 Player ready state changed:', currentPlayer.status);
-}
-
-function updateGameSetting(setting, value) {
-	if (!isCustomRoomHost || !currentCustomRoom) {
-		showStatus('Only the host can change game settings', 'error');
-		return;
-	}
-
-	currentCustomRoom.gameSettings[setting] = parseFloat(value) || value;
-	updateCustomRoomDisplay();
-
-	showStatus(`Game setting updated: ${setting} = ${value}`, 'info');
-	console.log('⚙️ Game setting updated:', setting, value);
-}
-
-function startCustomGame() {
-	if (!isCustomRoomHost || !currentCustomRoom) {
-		showStatus('Only the host can start the game', 'error');
-		return;
-	}
-
-	const allPlayersReady = currentCustomRoom.players.every(player => player.status === 'ready');
-	if (!allPlayersReady) {
-		showStatus('All players must be ready before starting', 'error');
-		return;
-	}
-
-	if (currentCustomRoom.players.length < 2) {
-		showStatus('At least 2 players required to start', 'error');
-		return;
-	}
-
-	currentCustomRoom.status = 'in_progress';
-	showStatus('Starting custom game...', 'success');
-
-	// Close custom room interface
-	closeCustomRoom();
-
-	// Start the game with custom settings
-	const gameData = {
-		roomId: currentCustomRoom.id,
-		gameSettings: currentCustomRoom.gameSettings,
-		players: currentCustomRoom.players,
-		isHost: isCustomRoomHost
-	};
-
-	startGameWithMode("custom", gameData);
-	console.log('🎮 Custom game started:', gameData);
-}
-
-function leaveCustomRoom() {
-	if (!currentCustomRoom) return;
-
-	showStatus('Left custom room', 'info');
-	closeCustomRoom();
-
-	console.log('🚪 Left custom room:', currentCustomRoom.id);
-}
-
-function closeCustomRoom() {
-	const customRoomEl = document.getElementById('customRoomInterface');
-	if (customRoomEl) {
-		customRoomEl.style.display = 'none';
-	}
-
-	currentCustomRoom = null;
-	isCustomRoomHost = false;
-}
 
 // Manuel katılımcı ekleme fonksiyonları
 function showAddParticipantDialog() {

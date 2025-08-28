@@ -16,6 +16,11 @@ class GameCore
 
 	async initialize(canvas, gameConfig)
 	{
+		// Check if BABYLON is available
+		if (typeof BABYLON === 'undefined') {
+			throw new Error('BABYLON.js is not loaded. Please ensure the library is included.');
+		}
+
 		this.engine = new BABYLON.Engine(canvas, true);
 		this.scene = new BABYLON.Scene(this.engine);
 

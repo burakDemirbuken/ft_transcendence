@@ -41,7 +41,7 @@ const exampleGameConfig =
 			},
 			paddleSize:
 			{
-				width: 10,
+				height: 10,
 			}
 		},
 	}
@@ -49,17 +49,17 @@ const exampleGameConfig =
 */
 
 import GameCore from './core/GameCore.js';
-import NetworkManager from './network/NetworkManager.js';
 import GameRenderer from './rendering/GameRenderer.js';
 import InputManager from './input/InputManager.js';
+import EventEmitter from './utils/EventEmitter.js';
 
-class Client
+class GameClient extends EventEmitter
 {
-	constructor(canvasId)
+	constructor()
 	{
-		this.canvas = document.getElementById(canvasId);
+		super(); // Call parent constructor first
+		this.canvas = null;
 		this.gameCore = new GameCore();
-		this.networkManager = new NetworkManager();
 		this.renderer = new GameRenderer(this.gameCore);
 		this.inputManager = new InputManager();
 		this.gameState = null;
@@ -69,8 +69,13 @@ class Client
 	}
 //		await this.gameCore.loadScene(gameConfig.gameMode);
 
+
+// oyun başladığında initialize edilecek sahne yüklenecek oyun oynanmaya hazır hale gelecek
 	async initialize(gameConfig)
 	{
+		if (!gameConfig || !gameConfig.canvasId)
+			throw new Error('Game configuration is missing canvasId');
+		this.canvas = document.getElementById(gameConfig.canvasId);
 		if (!this.canvas)
 			throw new Error('Canvas is missing');
 
@@ -96,6 +101,7 @@ class Client
 			throw new Error('NetworkManager is not connected');
 		this.networkManager.send("createRoom", {mode: "tournament"});
 	}
+
 
 	setupEventListeners()
 	{
@@ -132,44 +138,44 @@ class Client
 			() =>
 			{
 				if (this.gameCore) this.gameCore.joystickMove(1, 'up');
-				this.networkManager.send("playerAction", {key: "w", action: true});
+				this.networkManager.send("game/playerAction", {key: "w", action: true});
 			},
 			() =>
 			{
 				if (this.gameCore) this.gameCore.joystickMove(1, 'reset');
-				this.networkManager.send("playerAction", {key: "w", action: false});
+				this.networkManager.send("game/playerAction", {key: "w", action: false});
 			}
 		);
 		this.inputManager.onKey("s",
 			() =>
 			{
 				if (this.gameCore) this.gameCore.joystickMove(1, 'down');
-				this.networkManager.send("playerAction", {key: "s", action: true});
+				this.networkManager.send("game/playerAction", {key: "s", action: true});
 			},
 			() =>
 			{
 				if (this.gameCore) this.gameCore.joystickMove(1, 'reset');
-				this.networkManager.send("playerAction", {key: "s", action: false});
+				this.networkManager.send("game/playerAction", {key: "s", action: false});
 			}
 		);
 		// Arrow keys for same player (alternative controls)
 		this.inputManager.onKey("ArrowUp",
-			() => this.networkManager.send("playerAction", {key: "ArrowUp", action: true}),
-			() => this.networkManager.send("playerAction", {key: "ArrowUp", action: false})
+			() => this.networkManager.send("game/playerAction", {key: "ArrowUp", action: true}),
+			() => this.networkManager.send("game/playerAction", {key: "ArrowUp", action: false})
 		);
 
 		this.inputManager.onKey("ArrowDown",
-			() => this.networkManager.send("playerAction", {key: "ArrowDown", action: true}),
-			() => this.networkManager.send("playerAction", {key: "ArrowDown", action: false})
+			() => this.networkManager.send("game/playerAction", {key: "ArrowDown", action: true}),
+			() => this.networkManager.send("game/playerAction", {key: "ArrowDown", action: false})
 		);
 
 		this.inputManager.onKey("r",
-			() => this.networkManager.send("playerAction", {key: "r", action: true}),
-			() => this.networkManager.send("playerAction", {key: "r", action: false})
+			() => this.networkManager.send("game/playerAction", {key: "r", action: true}),
+			() => this.networkManager.send("game/playerAction", {key: "r", action: false})
 		);
 		this.inputManager.onKey("Escape",
-			() => this.networkManager.send("playerAction", {key: "Escape", action: true}),
-			() => this.networkManager.send("playerAction", {key: "Escape", action: false})
+			() => this.networkManager.send("game/playerAction", {key: "Escape", action: true}),
+			() => this.networkManager.send("game/playerAction", {key: "Escape", action: false})
 		);
 	}
 
@@ -226,4 +232,4 @@ class Client
 		this.gameCore.dispose();
 	}
 }
-export default Client;
+export default GameClient;
