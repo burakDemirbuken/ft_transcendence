@@ -69,7 +69,6 @@ class Client
 	}
 //		await this.gameCore.loadScene(gameConfig.gameMode);
 
-
 	async initialize(gameConfig)
 	{
 		if (!this.canvas)
@@ -97,8 +96,6 @@ class Client
 			throw new Error('NetworkManager is not connected');
 		this.networkManager.send("createRoom", {mode: "tournament"});
 	}
-
-	crea
 
 	setupEventListeners()
 	{

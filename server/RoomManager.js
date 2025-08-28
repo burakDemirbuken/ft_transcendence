@@ -97,7 +97,7 @@ class RoomManager extends EventEmitter
 		return false;
 	}
 
-	addPlayerToRoom(roomId, player)
+	joinRoom(roomId, player)
 	{
 		const room = this.getRoom(roomId);
 		if (!room)
@@ -109,10 +109,9 @@ class RoomManager extends EventEmitter
 
 		room.players.push({ id: player.id, name: player.name, status: 'waiting', isHost: player.id === room.host });
 		this.notifyRoomUpdate(roomId);
-		return room;
 	}
 
-	removePlayerFromRoom(roomId, playerId)
+	leaveRoom(roomId, playerId)
 	{
 		const room = this.getRoom(roomId);
 		if (!room)
