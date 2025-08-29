@@ -14,11 +14,17 @@ const exampleResponseCustomRoom =
 	],
 	gameSettings:
 	{
-		gameMode: "custom",
-		maxScore: 5,
-		ballSpeed: 1.0,
-		paddleSpeed: 1.0,
-		difficulty: "normal" // "easy", "normal", "hard"
+		paddleWidth: 10,
+		paddleHeight: 100,
+		paddleSpeed: 700,
+
+		ballRadius: 7,
+		ballSpeed: 600,
+		ballSpeedIncrease: 100,
+
+		maxPlayers: 2,
+
+		maxScore: 11
 	},
 	createdAt: 1633036800000 // Timestamp
 };

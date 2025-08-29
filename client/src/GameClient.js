@@ -129,56 +129,6 @@ class GameClient extends EventEmitter
 		);
 	}
 
-	setupGameControls()
-	{
-		if (!this.networkManager.isConnected())
-			throw new Error('NetworkManager is not connected');
-
-		this.inputManager.onKey("w",
-			() =>
-			{
-				if (this.gameCore) this.gameCore.joystickMove(1, 'up');
-				this.networkManager.send("game/playerAction", {key: "w", action: true});
-			},
-			() =>
-			{
-				if (this.gameCore) this.gameCore.joystickMove(1, 'reset');
-				this.networkManager.send("game/playerAction", {key: "w", action: false});
-			}
-		);
-		this.inputManager.onKey("s",
-			() =>
-			{
-				if (this.gameCore) this.gameCore.joystickMove(1, 'down');
-				this.networkManager.send("game/playerAction", {key: "s", action: true});
-			},
-			() =>
-			{
-				if (this.gameCore) this.gameCore.joystickMove(1, 'reset');
-				this.networkManager.send("game/playerAction", {key: "s", action: false});
-			}
-		);
-		// Arrow keys for same player (alternative controls)
-		this.inputManager.onKey("ArrowUp",
-			() => this.networkManager.send("game/playerAction", {key: "ArrowUp", action: true}),
-			() => this.networkManager.send("game/playerAction", {key: "ArrowUp", action: false})
-		);
-
-		this.inputManager.onKey("ArrowDown",
-			() => this.networkManager.send("game/playerAction", {key: "ArrowDown", action: true}),
-			() => this.networkManager.send("game/playerAction", {key: "ArrowDown", action: false})
-		);
-
-		this.inputManager.onKey("r",
-			() => this.networkManager.send("game/playerAction", {key: "r", action: true}),
-			() => this.networkManager.send("game/playerAction", {key: "r", action: false})
-		);
-		this.inputManager.onKey("Escape",
-			() => this.networkManager.send("game/playerAction", {key: "Escape", action: true}),
-			() => this.networkManager.send("game/playerAction", {key: "Escape", action: false})
-		);
-	}
-
 	handleStateChange(data)
 	{
 		const { oldState, newState } = data;

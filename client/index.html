@@ -347,6 +347,54 @@
       color: #667eea;
       border: 1px solid rgba(102, 126, 234, 0.3);
     }
+
+    /* Toggle Switch Styles */
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 60px;
+      height: 30px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .toggle-switch.active {
+      background: linear-gradient(45deg, #11998e, #38ef7d);
+      border-color: #38ef7d;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 26px;
+      height: 26px;
+      background: white;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(30px);
+    }
+
+    .toggle-label {
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
   </style>
 </head>
 <body>
@@ -368,6 +416,20 @@
         <button class="btn btn-primary" onclick="customGameStart()">Create Custom Game</button>
         <input type="text" class="input-field" id="customRoomId" placeholder="Enter Room ID">
         <button class="btn btn-success" onclick="joinCustomRoom()">Join Custom Game</button>
+      </div>
+    </div>
+
+    <!-- Quick Test Panel -->
+    <div class="ui-panel">
+      <div class="panel-title">⚡ Quick Test</div>
+      <div class="button-group">
+        <div class="toggle-container">
+          <span class="toggle-label">Hazır Ol</span>
+          <div class="toggle-switch" id="readyToggle" onclick="app.readyState()">
+            <div class="toggle-slider"></div>
+          </div>
+        </div>
+        <button class="btn btn-success" onclick="nABERmUDUR()">Oyunu Başlat</button>
       </div>
     </div>
 
@@ -430,7 +492,7 @@
       </button>
     </div>
   </div>
-
+<!-- Değer alma: -->
   <canvas id="renderCanvas"></canvas>
   <script type="module" src="src/main.js"></script>
 </body>

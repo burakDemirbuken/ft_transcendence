@@ -21,10 +21,10 @@ class NetworkManager
 		if (this.fastify.server.listening)
 			throw new Error('WebSocket server already started');
 
-		const { onClientConnect, onMessage, onClose, onError } = this.callbacks;
+		const { onConnect, onMessage, onClose, onError } = this.callbacks;
 
-		if (!onClientConnect || !onMessage || !onClose || !onError
-				|| typeof onClientConnect !== 'function' || typeof onMessage !== 'function' || typeof onClose !== 'function' || typeof onError !== 'function')
+		if (!onConnect || !onMessage || !onClose || !onError
+				|| typeof onConnect !== 'function' || typeof onMessage !== 'function' || typeof onClose !== 'function' || typeof onError !== 'function')
 		{
 			throw new Error('WebSocket callbacks not properly set');
 		}

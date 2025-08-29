@@ -44,35 +44,50 @@ class RoomUi extends EventTarget
 	 * Update room data from App
 	 * @param {Object} roomData - Room data from server/App
 	 */
-	updateRoomData(roomData)
+	WwupdateRoomData(roomData)
 	{
 		if (!roomData) return;
 
-		if (roomData.type === 'custom') {
-			this.currentCustomRoom = roomData;
-			this.customRooms.set(roomData.id, roomData);
+		try {
+			// Normalize server data to ensure consistency
+			const normalizedData = this._normalizeServerData(roomData);
 
-			// Check if current player is host
-			this.isCustomRoomHost = roomData.players?.some(p =>
-				p.id === 'current_player' && p.isHost
-			) || false;
+			if (normalizedData.type === 'custom') {
+				this.currentCustomRoom = normalizedData;
+				this.customRooms.set(normalizedData.id, normalizedData);
 
-			this._updateCustomRoomDisplay();
-		} else if (roomData.type === 'tournament') {
-			this.currentTournament = roomData;
+				// Check if current player is host
+				this.isCustomRoomHost = normalizedData.players?.some(p =>
+					p.id === 'current_player' && p.isHost
+				) || false;
 
-			// Check if current player is host
-			this.isHost = roomData.players?.some(p =>
-				p.id === 'current_player' && p.isHost
-			) || false;
+				this._updateCustomRoomDisplay();
+			} else if (normalizedData.type === 'tournament') {
+				this.currentTournament = normalizedData;
 
-			this._updateTournamentDisplay();
+				// Check if current player is host
+				this.isHost = normalizedData.players?.some(p =>
+					p.id === 'current_player' && p.isHost
+				) || false;
+
+				this._updateTournamentDisplay();
+			}
+
+			// Update player ready status if available
+			const currentPlayer = normalizedData.players?.find(p => p.id === 'current_player');
+			if (currentPlayer) {
+				this.currentPlayerReady = currentPlayer.status === 'ready';
+			}
+
+			// Emit event for external listeners
+			this.dispatchEvent(new CustomEvent('roomDataUpdated', {
+				detail: { roomData: normalizedData }
+			}));
+
+		} catch (error) {
+			console.error('Error updating room data:', error);
+			this.showStatus('Error updating room data: ' + error.message, 'error');
 		}
-
-		// Emit event for external listeners
-		this.dispatchEvent(new CustomEvent('roomDataUpdated', {
-			detail: { roomData }
-		}));
 	}
 
 	/**
@@ -108,7 +123,7 @@ class RoomUi extends EventTarget
 
 		console.log('🏠 Custom room created:', roomData.id);
 
-		// Emit event for App
+		// Emit event to App
 		this.dispatchEvent(new CustomEvent('customRoomCreated', {
 			detail: { roomId: roomData.id, roomData }
 		}));
@@ -169,7 +184,7 @@ class RoomUi extends EventTarget
 	}
 
 	/**
-	 * Create mock room data for demonstration
+	 * Create mock room data for demonstration (matches server format)
 	 */
 	_createMockCustomRoom(roomId)
 	{
@@ -184,11 +199,14 @@ class RoomUi extends EventTarget
 				{ id: 'other_player', name: 'Host', status: 'ready', isHost: true }
 			],
 			gameSettings: {
-				gameMode: 'custom',
-				maxScore: 5,
-				ballSpeed: 1.0,
-				paddleSpeed: 1.0,
-				difficulty: 'normal'
+				paddleWidth: 10,
+				paddleHeight: 100,
+				paddleSpeed: 700,
+				ballRadius: 7,
+				ballSpeed: 600,
+				ballSpeedIncrease: 100,
+				maxPlayers: 2,
+				maxScore: 11
 			},
 			createdAt: Date.now() - 30000
 		};
@@ -263,28 +281,38 @@ class RoomUi extends EventTarget
 				<div class="info-item">
 					<div class="info-label">Max Score</div>
 					<select id="maxScoreSelect" onchange="window.roomUi.updateGameSetting('maxScore', this.value)">
-						<option value="3">3 Points</option>
-						<option value="5" selected>5 Points</option>
+						<option value="5">5 Points</option>
 						<option value="7">7 Points</option>
-						<option value="10">10 Points</option>
+						<option value="11" selected>11 Points</option>
+						<option value="15">15 Points</option>
+						<option value="21">21 Points</option>
 					</select>
 				</div>
 				<div class="info-item">
 					<div class="info-label">Ball Speed</div>
 					<select id="ballSpeedSelect" onchange="window.roomUi.updateGameSetting('ballSpeed', this.value)">
-						<option value="0.5">Slow</option>
-						<option value="1.0" selected>Normal</option>
-						<option value="1.5">Fast</option>
-						<option value="2.0">Very Fast</option>
+						<option value="400">Slow</option>
+						<option value="600" selected>Normal</option>
+						<option value="800">Fast</option>
+						<option value="1000">Very Fast</option>
 					</select>
 				</div>
 				<div class="info-item">
 					<div class="info-label">Paddle Speed</div>
 					<select id="paddleSpeedSelect" onchange="window.roomUi.updateGameSetting('paddleSpeed', this.value)">
-						<option value="0.5">Slow</option>
-						<option value="1.0" selected>Normal</option>
-						<option value="1.5">Fast</option>
-						<option value="2.0">Very Fast</option>
+						<option value="500">Slow</option>
+						<option value="700" selected>Normal</option>
+						<option value="900">Fast</option>
+						<option value="1200">Very Fast</option>
+					</select>
+				</div>
+				<div class="info-item">
+					<div class="info-label">Ball Speed Increase</div>
+					<select id="ballSpeedIncreaseSelect" onchange="window.roomUi.updateGameSetting('ballSpeedIncrease', this.value)">
+						<option value="50">Low (+50)</option>
+						<option value="100" selected>Normal (+100)</option>
+						<option value="150">High (+150)</option>
+						<option value="200">Very High (+200)</option>
 					</select>
 				</div>
 			</div>
@@ -312,6 +340,8 @@ class RoomUi extends EventTarget
 	{
 		if (!this.currentCustomRoom) return;
 
+		console.log('🔄 Updating custom room display with data:', this.currentCustomRoom);
+
 		// Update room info
 		const titleEl = document.getElementById('customRoomTitle');
 		const idEl = document.getElementById('customRoomId');
@@ -319,44 +349,89 @@ class RoomUi extends EventTarget
 		const playerCountEl = document.getElementById('customRoomPlayerCount');
 		const maxScoreEl = document.getElementById('customRoomMaxScore');
 
-		if (titleEl) titleEl.textContent = this.currentCustomRoom.name;
-		if (idEl) idEl.textContent = `ID: ${this.currentCustomRoom.id}`;
-		if (statusEl) statusEl.textContent = this.currentCustomRoom.status;
-		if (playerCountEl) playerCountEl.textContent = `${this.currentCustomRoom.players.length}/${this.currentCustomRoom.maxPlayers}`;
-		if (maxScoreEl) maxScoreEl.textContent = this.currentCustomRoom.gameSettings.maxScore;
+		if (titleEl) {
+			titleEl.textContent = this.currentCustomRoom.name;
+			console.log('📝 Room title updated:', this.currentCustomRoom.name);
+		}
+		if (idEl) {
+			idEl.textContent = `ID: ${this.currentCustomRoom.id}`;
+			console.log('🆔 Room ID updated:', this.currentCustomRoom.id);
+		}
+		if (statusEl) {
+			statusEl.textContent = this.currentCustomRoom.status;
+			console.log('📊 Room status updated:', this.currentCustomRoom.status);
+		}
+		if (playerCountEl) {
+			const playerCountText = `${this.currentCustomRoom.players.length}/${this.currentCustomRoom.maxPlayers}`;
+			playerCountEl.textContent = playerCountText;
+			console.log('👥 Player count updated:', playerCountText);
+		}
+		if (maxScoreEl) {
+			maxScoreEl.textContent = this.currentCustomRoom.gameSettings.maxScore;
+			console.log('🎯 Max score updated:', this.currentCustomRoom.gameSettings.maxScore);
+		}
 
 		// Update players list
 		const playersList = document.getElementById('customRoomPlayersList');
 		if (playersList) {
-			playersList.innerHTML = this.currentCustomRoom.players.map(player => `
-				<div class="participant-item">
-					<span class="participant-name">
-						${player.name}
-						${player.isHost ? ' 👑' : ''}
-					</span>
-					<span class="participant-status ${player.status === 'ready' ? 'status-ready' : 'status-waiting'}">
-						${player.status === 'ready' ? '✅ Ready' : '⏳ Waiting'}
-					</span>
-				</div>
-			`).join('');
+			console.log('👥 Updating players list:', this.currentCustomRoom.players);
+			playersList.innerHTML = this.currentCustomRoom.players.map(player => {
+				console.log('👤 Processing player:', player);
+				return `
+					<div class="participant-item">
+						<span class="participant-name">
+							${player.name}
+							${player.isHost ? ' 👑' : ''}
+						</span>
+						<span class="participant-status ${player.status === 'ready' ? 'status-ready' : 'status-waiting'}">
+							${player.status === 'ready' ? '✅ Ready' : '⏳ Waiting'}
+						</span>
+					</div>
+				`;
+			}).join('');
 		}
 
-		// Update game settings
+		// Update game settings selects to match server format
+		console.log('⚙️ Updating game settings:', this.currentCustomRoom.gameSettings);
 		const maxScoreSelect = document.getElementById('maxScoreSelect');
 		const ballSpeedSelect = document.getElementById('ballSpeedSelect');
 		const paddleSpeedSelect = document.getElementById('paddleSpeedSelect');
+		const ballSpeedIncreaseSelect = document.getElementById('ballSpeedIncreaseSelect');
 
 		if (maxScoreSelect) {
+			// Clear all selected options first
+			Array.from(maxScoreSelect.options).forEach(option => option.selected = false);
+			// Set the correct value and select the option
 			maxScoreSelect.value = this.currentCustomRoom.gameSettings.maxScore;
+			const selectedOption = maxScoreSelect.querySelector(`option[value="${this.currentCustomRoom.gameSettings.maxScore}"]`);
+			if (selectedOption) selectedOption.selected = true;
 			maxScoreSelect.disabled = !this.isCustomRoomHost;
+			console.log('🎯 Max score select updated:', this.currentCustomRoom.gameSettings.maxScore);
 		}
 		if (ballSpeedSelect) {
+			Array.from(ballSpeedSelect.options).forEach(option => option.selected = false);
 			ballSpeedSelect.value = this.currentCustomRoom.gameSettings.ballSpeed;
+			const selectedOption = ballSpeedSelect.querySelector(`option[value="${this.currentCustomRoom.gameSettings.ballSpeed}"]`);
+			if (selectedOption) selectedOption.selected = true;
 			ballSpeedSelect.disabled = !this.isCustomRoomHost;
+			console.log('⚡ Ball speed select updated:', this.currentCustomRoom.gameSettings.ballSpeed);
 		}
 		if (paddleSpeedSelect) {
+			Array.from(paddleSpeedSelect.options).forEach(option => option.selected = false);
 			paddleSpeedSelect.value = this.currentCustomRoom.gameSettings.paddleSpeed;
+			const selectedOption = paddleSpeedSelect.querySelector(`option[value="${this.currentCustomRoom.gameSettings.paddleSpeed}"]`);
+			if (selectedOption) selectedOption.selected = true;
 			paddleSpeedSelect.disabled = !this.isCustomRoomHost;
+			console.log('🏓 Paddle speed select updated:', this.currentCustomRoom.gameSettings.paddleSpeed);
+		}
+		if (ballSpeedIncreaseSelect) {
+			Array.from(ballSpeedIncreaseSelect.options).forEach(option => option.selected = false);
+			const increaseValue = this.currentCustomRoom.gameSettings.ballSpeedIncrease || 100;
+			ballSpeedIncreaseSelect.value = increaseValue;
+			const selectedOption = ballSpeedIncreaseSelect.querySelector(`option[value="${increaseValue}"]`);
+			if (selectedOption) selectedOption.selected = true;
+			ballSpeedIncreaseSelect.disabled = !this.isCustomRoomHost;
+			console.log('🚀 Ball speed increase select updated:', increaseValue);
 		}
 
 		// Update buttons
@@ -891,7 +966,7 @@ class RoomUi extends EventTarget
 			if (statusEl && statusEl.textContent === message) {
 				statusEl.style.display = 'none';
 			}
-		}, 3000);
+		}, 5000);
 
 		// Emit status event
 		this.dispatchEvent(new CustomEvent('statusMessage', {
@@ -923,6 +998,90 @@ class RoomUi extends EventTarget
 		if (customRoomInterface) {
 			customRoomInterface.style.display = 'none';
 		}
+	}
+
+	// ================================
+	// SERVER DATA HANDLING
+	// ================================
+
+	/**
+	 * Validate and normalize server room data
+	 * @param {Object} serverData - Raw data from server
+	 * @returns {Object} Normalized room data
+	 */
+	_normalizeServerData(serverData)
+	{
+		if (!serverData || !serverData.id) {
+			throw new Error('Invalid server data: missing room ID');
+		}
+
+		// Ensure all required fields exist with defaults
+		const normalized = {
+			id: serverData.id,
+			name: serverData.name || 'Unnamed Room',
+			type: serverData.type || 'custom',
+			status: serverData.status || 'waiting',
+			maxPlayers: serverData.maxPlayers || 2,
+			host: serverData.host || null,
+			players: Array.isArray(serverData.players) ? serverData.players : [],
+			gameSettings: this._normalizeGameSettings(serverData.gameSettings || {}),
+			createdAt: serverData.createdAt || Date.now()
+		};
+
+		// Validate players array
+		normalized.players = normalized.players.map(player => ({
+			id: player.id || 'unknown',
+			name: player.name || 'Unknown Player',
+			status: player.status || 'waiting',
+			isHost: Boolean(player.isHost)
+		}));
+
+		return normalized;
+	}
+
+	/**
+	 * Normalize game settings to match server format
+	 * @param {Object} settings - Game settings from server
+	 * @returns {Object} Normalized game settings
+	 */
+	_normalizeGameSettings(settings)
+	{
+		return {
+			// Paddle settings
+			paddleWidth: settings.paddleWidth || 10,
+			paddleHeight: settings.paddleHeight || 100,
+			paddleSpeed: settings.paddleSpeed || 700,
+
+			// Ball settings
+			ballRadius: settings.ballRadius || 7,
+			ballSpeed: settings.ballSpeed || 600,
+			ballSpeedIncrease: settings.ballSpeedIncrease || 100,
+
+			// Game settings
+			maxPlayers: settings.maxPlayers || 2,
+			maxScore: settings.maxScore || 11
+		};
+	}
+
+	/**
+	 * Convert internal setting name to display name
+	 * @param {string} settingName - Internal setting name
+	 * @returns {string} Display name
+	 */
+	_getSettingDisplayName(settingName)
+	{
+		const displayNames = {
+			paddleWidth: 'Paddle Width',
+			paddleHeight: 'Paddle Height',
+			paddleSpeed: 'Paddle Speed',
+			ballRadius: 'Ball Size',
+			ballSpeed: 'Ball Speed',
+			ballSpeedIncrease: 'Ball Speed Increase',
+			maxPlayers: 'Max Players',
+			maxScore: 'Max Score'
+		};
+
+		return displayNames[settingName] || settingName;
 	}
 
 	// ================================
@@ -959,6 +1118,74 @@ class RoomUi extends EventTarget
 	getPlayerReadyStatus()
 	{
 		return this.currentPlayerReady;
+	}
+
+	/**
+	 * Handle server-specific room status updates
+	 * @param {string} status - Room status from server
+	 * @param {Object} additionalData - Additional status data
+	 */
+	handleRoomStatusUpdate(status, additionalData = {})
+	{
+		const statusMessages = {
+			'waiting': 'Waiting for players...',
+			'in_game': 'Game in progress',
+			'completed': 'Game completed',
+			'starting': 'Game starting...',
+			'paused': 'Game paused',
+			'error': 'Room error occurred'
+		};
+
+		const message = statusMessages[status] || `Room status: ${status}`;
+		const messageType = status === 'error' ? 'error' :
+						   status === 'completed' ? 'success' : 'info';
+
+		this.showStatus(message, messageType);
+
+		// Update current room status
+		if (this.currentCustomRoom) {
+			this.currentCustomRoom.status = status;
+			this._updateCustomRoomDisplay();
+		}
+		if (this.currentTournament) {
+			this.currentTournament.status = status;
+			this._updateTournamentDisplay();
+		}
+
+		// Emit status change event
+		this.dispatchEvent(new CustomEvent('roomStatusChanged', {
+			detail: { status, additionalData }
+		}));
+
+		console.log('🏠 Room status updated:', status, additionalData);
+	}
+
+	/**
+	 * Handle server errors
+	 * @param {string} errorType - Type of error
+	 * @param {string} message - Error message
+	 * @param {Object} details - Error details
+	 */
+	handleServerError(errorType, message, details = {})
+	{
+		const errorMessages = {
+			'room_not_found': 'Room not found',
+			'room_full': 'Room is full',
+			'permission_denied': 'Permission denied',
+			'invalid_settings': 'Invalid game settings',
+			'network_error': 'Network connection error',
+			'timeout': 'Request timeout'
+		};
+
+		const displayMessage = errorMessages[errorType] || message || 'An error occurred';
+		this.showStatus(displayMessage, 'error');
+
+		// Emit error event for App to handle
+		this.dispatchEvent(new CustomEvent('serverError', {
+			detail: { errorType, message: displayMessage, details }
+		}));
+
+		console.error('🚨 Server error:', errorType, message, details);
 	}
 }
 

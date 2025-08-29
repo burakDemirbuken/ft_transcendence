@@ -40,13 +40,27 @@ class TournamentManager extends EventEmitter
 		{
 			// hata durumlarında kullanıcıya bildirim gönder
 		});
+		tournament.on('started', (data) => this.emit(`tournament_${tournamentId}`, { type: 'started', payload: data }));
 		this.tournaments.set(tournamentId, tournament);
 		console.log(`🆕 Tournament ${tournamentId} created with properties: ${JSON.stringify(property)}`);
 		return tournamentId;
 	}
 
+	leaveTournament(tournamentId, player)
+	{
+		const tournament = this.tournaments.get(tournamentId);
+		if (!tournament)
+			return this.emit('error', new Error(`Tournament with ID ${tournamentId} does not exist`));
+		tournament.removeParticipant(player);
+		if (tournament.isEmpty())
+		{
+			this.tournaments.delete(tournamentId);
+			console.log(`🗑️ Tournament ${tournamentId} deleted as it became empty`);
+		}
+	}
+
 	// TODOO: throwları ele al hangi throw nereye gidecek vs
-	addPlayerToTournament(tournamentId, player)
+	joinTournament(tournamentId, player)
 	{
 		const tournament = this.tournaments.get(tournamentId);
 		if (!tournament)
@@ -54,9 +68,14 @@ class TournamentManager extends EventEmitter
 		tournament.addParticipant(player);
 	}
 
-	start()
+	startTournament(tournamentId, playerId)
 	{
-		this.updateInterval = setInterval(() => this.update(), TICK_RATE);
+		// TODOO: sadece admin başlatabilmeli
+		// TODOO: Herkes hazır mı kontrolü
+		const tournament = this.tournaments.get(tournamentId);
+		if (!tournament)
+			return this.emit('error', new Error(`Tournament with ID ${tournamentId} does not exist`));
+		tournament.start();
 	}
 
 	stop()

@@ -12,48 +12,23 @@ class App
 		this.networkManager = new NetworkManager();
 		this.roomUi = new RoomUi();
 
-		this._setupEventListeners();
+		// Game ready state
+		this.isReady = false;
+
 		this._setupGlobalExports();
+		this._setupNetworkListeners();
 	}
 
-	_setupEventListeners()
+	readyState()
 	{
-		// Listen to RoomUi events
-		this.roomUi.addEventListener('customRoomCreated', (event) => {
-			console.log('Custom room created:', event.detail);
-			this.networkManager.send('room/create', {id: this.playerId, name: this.playerName});
-			// TODO: Send to server via NetworkManager
-		});
+		this.isReady = !this.isReady;
+		console.log("readyState fonksiyonu çağrıldı");
+		const toggle = document.getElementById('readyToggle');
 
-		this.roomUi.addEventListener('joinCustomRoomRequested', (event) => {
-			console.log('Join custom room requested:', event.detail);
-			this.networkManager.send('room/join', {id: this.playerId, roomId: event.detail.roomId});
-		});
-
-		this.roomUi.addEventListener('tournamentCreated', (event) => {
-			console.log('Tournament created:', event.detail);
-			this.networkManager.send('tournament/create', {id: this.playerId, name: event.detail.name});
-		});
-
-		this.roomUi.addEventListener('joinTournamentRequested', (event) => {
-			console.log('Join tournament requested:', event.detail);
-			this.networkManager.send('tournament/join', {id: this.playerId, tournamentId: event.detail.tournamentId});
-		});
-
-		this.roomUi.addEventListener('customGameStarted', (event) => {
-			console.log('Custom game started:', event.detail);
-			this.startGame(event.detail);
-		});
-
-		this.roomUi.addEventListener('playerReadyChanged', (event) => {
-			console.log('Player ready changed:', event.detail);
-			this.networkManager.send('player/ready', {id: this.playerId, isReady: event.detail.isReady});
-		});
-
-		this.roomUi.addEventListener('gameSettingChanged', (event) => {
-			console.log('Game setting changed:', event.detail);
-			// TODO: Send setting change to server via NetworkManager
-		});
+		if (this.isReady)
+			toggle.classList.add('active');
+		else
+			toggle.classList.remove('active');
 	}
 
 	_setupGlobalExports()
@@ -75,14 +50,52 @@ class App
 		window.localGameStart = () => this.startLocalGame();
 		window.aiGameStart = () => this.startAIGame();
 		window.customGameStart = () => this.createCustomGame();
+
+		// Export ready toggle function
+		window.toggleReady = () => this.toggleReady();
+		window.getReadyState = () => this.getReadyState();
 	}
 
-	/**
-	 * Update room data from server
-	 */
-	updateRoomData(roomData)
+	_setupNetworkListeners()
 	{
-		this.roomUi.updateRoomData(roomData);
+		// Listen to NetworkManager events
+		this.networkManager.on('connected', () => {
+			console.log('✅ Connected to server');
+			this.roomUi.showStatus('Connected to server', 'success');
+		});
+
+		this.networkManager.on('disconnected', (data) => {
+			console.log('🔌 Disconnected from server:', data);
+			this.roomUi.showStatus('Disconnected from server', 'warning');
+		});
+
+		this.networkManager.on('error', (error) => {
+			console.error('❌ Network error:', error);
+			this.roomUi.showStatus('Network connection error', 'error');
+		});
+
+		// Listen to game-specific network events
+		this.networkManager.on('room/update', (data) => {
+			console.log('Room updated:', data);
+		});
+
+		this.networkManager.on('tournament/created', (data) => {
+			this.roomUi.showStatus('Tournament ID: ' + data.tournamentData.id, 'info');
+		});
+
+		this.networkManager.on('tournament/started', (data) => {
+			this.startLocalGame();
+		});
+			this.networkManager.on('tournament/update', (data) => {
+			console.log('tournament updated:', data);
+		});
+
+		this.networkManager.on('tournament/created', (data) => {
+			this.roomUi.showStatus('tournament ID: ' + data.id, 'info');
+		});
+
+		this.networkManager.on('tournament/started', (data) => {
+		});
 	}
 
 	/**
@@ -125,11 +138,14 @@ class App
 				{ id: 'current_player', name: 'You (Host)', status: 'waiting', isHost: true }
 			],
 			gameSettings: {
-				gameMode: 'custom',
-				maxScore: 5,
-				ballSpeed: 1.0,
-				paddleSpeed: 1.0,
-				difficulty: 'normal'
+				paddleWidth: 10,
+				paddleHeight: 100,
+				paddleSpeed: 700,
+				ballRadius: 7,
+				ballSpeed: 600,
+				ballSpeedIncrease: 100,
+				maxPlayers: 2,
+				maxScore: 11
 			},
 			createdAt: Date.now()
 		};
@@ -154,6 +170,77 @@ class App
 		this.loadGame(gameConfig);
 	}
 
+	/**
+	 * Send message to server when connection is ready
+	 */
+	//! Ai
+	_sendWhenConnected(type, payload)
+	{
+		if (this.networkManager.isConnected) {
+			try {
+				this.networkManager.send(type, payload);
+			} catch (error) {
+				console.error('❌ Failed to send message:', error);
+				this.roomUi.showStatus('Failed to send to server', 'error');
+			}
+		} else {
+			// Queue message for when connection is ready
+			console.log('⏳ Queueing message until connected:', type);
+			this.roomUi.showStatus('Connecting to server...', 'info');
+
+			const sendWhenReady = () => {
+				this.networkManager.send(type, payload);
+				this.networkManager.off('connected', sendWhenReady);
+			};
+
+			this.networkManager.on('connected', sendWhenReady);
+		}
+	}
+
+	/**
+	 * Toggle ready state
+	 */
+	toggleReady()
+	{
+		this.isReady = !this.isReady;
+
+		// Update button appearance
+		const readyBtn = document.getElementById('readyToggleBtn');
+		if (readyBtn) {
+			if (this.isReady) {
+				readyBtn.textContent = 'Hazır ✅';
+				readyBtn.className = 'btn btn-success';
+				this.roomUi.hideGameUI();
+				console.log('🟢 Player is READY');
+			} else {
+				readyBtn.textContent = 'Hazır Ol';
+				readyBtn.className = 'btn btn-warning';
+				this.roomUi.showGameUI();
+				console.log('🟡 Player is NOT READY');
+			}
+		}
+
+		return this.isReady;
+	}
+
+	/**
+	 * Check if player is ready
+	 */
+	getReadyState()
+	{
+		return this.isReady;
+	}
+
+	/**
+	 * Force set ready state
+	 */
+	setReady(ready = true)
+	{
+		this.isReady = ready;
+		this.toggleReady(); // Update UI
+		return this.isReady;
+	}
+
 	_TEST_generateRandomId()
 	{
 		return Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -172,12 +259,21 @@ class App
 
 	initialize()
 	{
-		// Get IP from URL
+		// Get IP from URL with fallback for Docker
 		const ip = window.location.hostname;
-		this.networkManager.connect(`ws://${ip}:3000`, {
-			id: this._TEST_generateRandomId(),
-			name: this._TEST_generateRandomName()
-		});
+		console.log('🌐 Connecting to:', `ws://${ip}:3000/ws`);
+
+		// Try to connect to WebSocket server with fallback
+		try {
+			this.networkManager.connect(`ws://${ip}:3000/ws`, {
+				id: this.playerId,
+				name: this.playerName
+			});
+		} catch (error) {
+			console.warn('❌ WebSocket connection failed:', error);
+			console.log('🎮 Continuing in offline mode...');
+			this.roomUi.showStatus('Running in offline mode - WebSocket unavailable', 'warning');
+		}
 
 		console.log('🎮 App initialized successfully');
 	}
@@ -210,22 +306,22 @@ class App
 	handleNetworkEvent(eventType, data)
 	{
 		switch (eventType) {
-			case 'roomCreated':
+			case 'room/created':
 				this.updateRoomData(data.roomData);
 				break;
-			case 'roomJoined':
+			case 'room/joined':
 				this.updateRoomData(data.roomData);
 				break;
-			case 'playerJoined':
+			case 'player/joined':
 				this.updateRoomData(data.roomData);
 				break;
-			case 'playerLeft':
+			case 'player/left':
 				this.updateRoomData(data.roomData);
 				break;
-			case 'playerReadyChanged':
+			case 'player/readyChanged':
 				this.updateRoomData(data.roomData);
 				break;
-			case 'gameSettingChanged':
+			case 'game/settingChanged':
 				this.updateRoomData(data.roomData);
 				break;
 			case 'gameStarted':
@@ -244,6 +340,39 @@ class App
 				console.log('Unhandled network event:', eventType, data);
 		}
 	}
+
+	// ================================
+	// SERVER DATA EXAMPLES & DOCS
+	// ================================
+
+	/**
+	 * Example of expected server room data format:
+	 *
+	 * {
+	 *   id: "ROOM-12345",
+	 *   name: "Custom Room",
+	 *   type: "custom", // or "tournament"
+	 *   status: "waiting", // "waiting", "in_game", "completed"
+	 *   maxPlayers: 2,
+	 *   host: "player1",
+	 *   players: [
+	 *     { id: "player1", name: "Host", status: "ready", isHost: true },
+	 *     { id: "player2", name: "Player 2", status: "waiting", isHost: false }
+	 *   ],
+	 *   gameSettings: {
+	 *     paddleWidth: 10,
+	 *     paddleHeight: 100,
+	 *     paddleSpeed: 700,
+	 *     ballRadius: 7,
+	 *     ballSpeed: 600,
+	 *     ballSpeedIncrease: 100,
+	 *     maxPlayers: 2,
+	 *     maxScore: 11
+	 *   },
+	 *   createdAt: 1633036800000
+	 * }
+	 */
+
 }
 
 // Initialize app when DOM is ready

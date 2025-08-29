@@ -2,6 +2,11 @@ import { TOURNAMENT_GAME_PROPERTIES } from '../utils/constants.js';
 import PingPong from '../PingPong/PingPong.js';
 import EventEmitter from '../utils/EventEmitter.js';
 
+
+// TODOO: Host playerId eklen
+// TODOO: Herkes hazır mı kontrolü
+// TODOO: Oyuncu çıkarsa ne olacak?
+
 class Tournament extends EventEmitter
 {
 	constructor(tournamentName, properties)
@@ -11,6 +16,9 @@ class Tournament extends EventEmitter
 		this.properties = properties;
 		this.participants = [];
 		this.players = null;
+		this.hostPlayerId = properties.hostPlayerId;
+		if (!this.hostPlayerId)
+			throw new Error('Tournament must have a hostPlayerId');
 
 		this.matches = new Map(); // Round -> Matchs array
 
@@ -218,13 +226,20 @@ class Tournament extends EventEmitter
 		return this.status === 'finished' || this.currentRound >= this.maxRounds;
 	}
 
-	start()
+	isEmpty()
 	{
+		return this.participants.length === 0;
+	}
+
+	start(hostPlayerId)
+	{
+		if (hostPlayerId !== this.hostPlayerId)
+			return this.emit('error', new Error(`Only the host player can start the tournament`));
 		if (this.status !== 'ready2start')
 			return this.emit('error', new Error(`Tournament is not ready to start, current status: ${this.status}`));
 		this.startTime = Date.now();
 		this.status = 'running';
-		this.emit('tournamentStarted', this.getMatchmakingInfo());
+		this.emit('started', this.getMatchmakingInfo());
 		this.currentMatches.forEach(
 			(match) =>
 			{

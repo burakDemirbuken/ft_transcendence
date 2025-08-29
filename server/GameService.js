@@ -2,6 +2,7 @@ import NetworkManager from './network/NetworkManager.js';
 import GameManager from './GameManager.js';
 import Player from './Player.js';
 import RoomManager from './RoomManager.js';
+import TournamentManager from './Tournament/TournamentManager.js';
 /*
 exampleWebSocketMessage=
 {
@@ -18,6 +19,7 @@ class GameService
 		this.gameManager = new GameManager();
 		this.networkManager = new NetworkManager();
 		this.roomManager = new RoomManager();
+		this.tournamentManager = new TournamentManager();
 		this.connectionId = new Map(); //  playerId -> connectionId
 		this.Players = new Map(); // playerId -> Player instance
 	}
@@ -104,6 +106,9 @@ class GameService
 				case 'game':
 					this._handleGameMessage(action, message.payload, player);
 					break;
+				case 'tournament':
+					this._handleTornamentMessage(action, message.payload, player);
+					break;
 				default:
 					throw new Error(`Unhandled message namespace: ${namespace}`);
 			}
@@ -159,6 +164,26 @@ class GameService
 				throw new Error(`Unhandled game message type: ${message.type}`);
 		}
 	}
+
+	_handleTornamentMessage(action, payload, player)
+	{
+		switch (action)
+		{
+			case 'create':
+				this.tournamentManager.createTournament(player.id, payload.name, payload.settings);
+				break;
+			case 'join':
+				this.tournamentManager.joinTournament(payload.tournamentId, player);
+				break;
+			case 'leave':
+				this.tournamentManager.leaveTournament(payload.tournamentId, player.id);
+				break;
+			case 'start':
+				this.tournamentManager.startTournament(payload.tournamentId, player.id);
+				break;
+			default:
+				throw new Error(`Unhandled tournament message type: ${message.type}`);
+		}
 
 	_handleCreateRoom(message, player)
 	{

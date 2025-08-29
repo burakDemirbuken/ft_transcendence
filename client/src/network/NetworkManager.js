@@ -3,40 +3,45 @@ class NetworkManager
 	constructor(ip, port)
 	{
 		this.socket = null;
+		this.isConnected = false;
 		this.callbacks = new Map();
 		this.serverAddress = `ws://${ip}:${port}`;
 	}
 
 	connect(endPoint, params = {})
 	{
-		const param = new URLSearchParams(params);
-		const url = `${endPoint}?${param.toString()}`;
-		console.log('Connecting to server at', url);
-		this.socket = new WebSocket(url);
-		this.socket.onopen =
-			() =>
-			{
+		try {
+			const param = new URLSearchParams(params);
+			const url = `${endPoint}?${param.toString()}`;
+			console.log('Connecting to server at', url);
+			this.socket = new WebSocket(url);
+
+			this.socket.onopen = () => {
+				console.log('✅ WebSocket connected successfully');
+				this.isConnected = true;
 				this.triggerCallback('connected');
 			};
-		this.socket.onmessage =
-			(event) =>
-			{
+
+			this.socket.onmessage = (event) => {
 				const data = JSON.parse(event.data);
 				this.handleMessage(data);
 			};
 
-		this.socket.onclose =
-			() =>
-			{
-				console.log('Connection closed');
-				this.triggerCallback('disconnected');
+			this.socket.onclose = (event) => {
+				console.log('🔌 WebSocket connection closed:', event.code, event.reason);
+				this.isConnected = false;
+				this.triggerCallback('disconnected', { code: event.code, reason: event.reason });
 			};
 
-		this.socket.onerror =
-			(error) =>
-			{
+			this.socket.onerror = (error) => {
+				console.error('❌ WebSocket error:', error);
 				this.triggerCallback('error', error);
 			};
+
+		} catch (error) {
+			console.error('❌ Failed to create WebSocket connection:', error);
+			throw error;
+		}
 	}
 
 	handleMessage(data)
