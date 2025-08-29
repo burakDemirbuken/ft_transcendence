@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+    --font-family: 'Orbitron', monospace;
+
+    /* Ana renkler */
+    --color-primary: #00ffff;
+    --color-secondary: #ff00ff;
+    --color-accent: #007bff;
+    --color-success: #00ff00;
+    --color-text: #ffffff;
+    --color-muted: #888;
+    --color-dark: #0a0a0a;
+    --color-darker: #1a1a2e;
+    --color-deep: #16213e;
+    --color-important: #ff4444;
+    --color-streak: #ff6600;
+
+    --color-online: #00ff00;
+    --color-offline: #808080;
+    --border-glow-online: rgba(0, 255, 0, 0.5);
+    --border-glow-offline: rgba(128, 128, 128, 0.5);
+
+    /* Arkaplanlar */
+    --bg-primary: rgba(0, 0, 0, 0.7);
+    --bg-secondary: rgba(10, 10, 10, 0.9);
+    --bg-overlay-light: rgba(255, 255, 255, 0.1);
+    --bg-overlay-dark: rgba(0, 0, 0, 0.5);
+    --bg-radial: rgba(0, 255, 255, 0.1);
+    --bg-radial-two: rgba(255, 0, 255, 0.1);
+    --bg-popup: rgb(34, 34, 34);
+    --bg-streak: rgba(255, 102, 0, 0.1);
+
+
+    /* Kenarlık ve gölge */
+    --border-light: #333;
+    --border-medium: #666;
+    --border-glow: rgba(0, 255, 255, 0.5);
+    --shadow-glow: rgba(0, 255, 255, 0.3);
+    --box-shadow: rgba(0, 0, 0, 0.3);
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 2px solid transparent;
+    color: var(--color-text);
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--color-primary));
+    background-size: 300%;
+    border-radius: 8px;
+    cursor: pointer;
+    animation: neonFlow 4s linear infinite;
+    box-shadow: 0 0 15px var(--color-primary);
+    transition: all 0.3s ease-in-out;
+}
+
+.btn:hover {
+    box-shadow: 0 0 25px var(--color-primary), 0 0 35px var(--color-secondary);
+    transform: translateY(-2px);
+}
+
+@keyframes neonFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}

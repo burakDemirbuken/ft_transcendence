@@ -1,0 +1,75 @@
+<div class="login-container">
+	<div id="ball"></div>
+	<div class="paddle paddle-left"></div>
+	<div class="paddle paddle-right"></div>
+	<div id="net"></div>
+	<form id="loginForm">
+		<button id="lang" type="button" data-i18n="lang">ENG</button>
+		<p id="error"></p>
+		<div class="field active" data-step="welcome">
+			<h2 data-i18n="welcome.title">Welcome!</h2>
+			<p data-i18n="welcome.prompt" class="blink">Press Start Button...</p>
+			<button class="enter" type="button">></button>
+		</div>
+		<div class="field" data-step="username" inert="">
+			<label>
+				<span data-i18n="username" class="prompt">Enter Username</span>
+				<div class="input-wrapper">
+					<span class="caret" aria-hidden="true">></span>
+					<input type="text" name="username" maxlength="20" required>
+				</div>
+			</label>
+			<div class="buttons">
+				<button class="back" type="button" ><</button>
+				<button class="enter" type="button">></button>
+			</div>
+		</div>
+		<div class="field" data-step="email" inert="">
+			<label>
+				<span data-i18n="email" class="prompt">Enter email</span>
+				<div class="input-wrapper">
+					<span class="caret" aria-hidden="true">></span>
+					<input type="email" name="email" maxlength="254" required>
+				</div>
+			</label>
+			<div class="buttons">
+				<button class="back" type="button" ><</button>
+				<button class="enter" type="button">></button>
+			</div>
+		</div>
+		<div class="field" data-step="password" inert="">
+			<label>
+				<span data-i18n="password" class="prompt">Enter Password</span>
+				<div class="input-wrapper">
+					<span class="caret" aria-hidden="true">></span>
+					<input type="password" name="password" maxlength="128" required>
+				</div>
+			</label>
+			<div class="buttons">
+				<button class="back" type="button" ><</button>
+				<button class="enter" type="button">></button>
+			</div>
+		</div>
+		<div class="field" data-step="2fa" inert="">
+			<label>
+				<span data-i18n="code" class="prompt">Enter Code</span>
+				<div class="input-wrapper">
+					<span class="caret" aria-hidden="true">></span>
+					<input type="text" pattern="[0-9]*" inputmode="numeric" name="code" maxlength="20" required>
+				</div>
+			</label>
+			<div class="buttons">
+				<button class="back" type="button" ><</button>
+				<button class="enter" type="button">></button>
+			</div>
+		</div>
+		<button id="rme" type="button" data-i18n="rme">Remember Me</button>
+	</form>
+	<div class="particles">
+		<div class="particle"></div>
+		<div class="particle"></div>
+		<div class="particle"></div>
+		<div class="particle"></div>
+		<div class="particle"></div>
+	</div>
+</div>

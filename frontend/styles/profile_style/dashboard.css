@@ -1,0 +1,281 @@
+/* Card Settings */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    perspective: 1000px; /* 3D efekt için */
+}
+
+/* chart card */
+.chart-card {
+    grid-column: span 1;
+}
+
+.stat-card.chart-card {
+    max-width: 800px;
+    width: 100%;
+	margin: 0 auto;
+}
+
+/* Performance Card */
+.performance-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    grid-column: span 1;
+}
+
+.perf-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.perf-label {
+    color: var(--color-muted);
+}
+
+.perf-value {
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.perf-value.win {
+    color: var(--color-success);
+    text-shadow: 0 0 10px var(--color-success);
+}
+
+.perf-value.loss {
+    color: var(--color-important);
+    text-shadow: 0 0 10px var(--color-important);
+}
+
+/* Streak Card */
+.streak-display {
+    text-align: center;
+}
+
+.streak-current {
+    margin-bottom: 20px;
+}
+
+.streak-number {
+    display: block;
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--color-streak);
+    text-shadow: 0 0 20px var(--color-streak);
+    animation: streakPulse 2s ease-in-out infinite;
+}
+
+@keyframes streakPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.streak-text {
+    color: var(--color-muted);
+    font-size: 1.1rem;
+}
+
+.streak-best {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: var(--bg-streak);
+    border-radius: 8px;
+}
+
+.streak-value {
+    color: var(--color-streak);
+    font-weight: 700;
+}
+
+.streak-flames {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.flame {
+    width: 20px;
+    height: 30px;
+    background: linear-gradient(180deg, var(--color-streak), var(--color-important));
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: flame 1s ease-in-out infinite alternate;
+}
+
+.flame:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.flame:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+@keyframes flame {
+    0% { transform: scale(1) rotate(-2deg); }
+    100% { transform: scale(1.2) rotate(2deg); }
+}
+
+/* Last Matches */
+.matches-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.match-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    background: var(--bg-overlay-dark);
+    border-radius: 8px;
+    border-left: 4px solid transparent;
+}
+
+.match-item.win {
+    border-left-color: var(--color-success);
+}
+
+.match-item.loss {
+    border-left-color: var(--color-important);
+}
+
+.match-result {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.match-item.win .match-result {
+    background: var(--color-success);
+    box-shadow: 0 0 10px var(--color-success);
+}
+
+.match-item.loss .match-result {
+    background: var(--color-important);
+    box-shadow: 0 0 10px var(--color-important);
+}
+
+.match-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.opponent {
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.score {
+    color: var(--color-muted);
+    font-size: 0.9rem;
+}
+
+.match-time {
+    color: var(--border-medium);
+    font-size: 0.8rem;
+}
+
+/* Stat Cards */
+.stat-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-light);
+    border-radius: 15px;
+    padding: 25px;
+    backdrop-filter: blur(10px);
+    transition: all 0.2s ease-out;
+    transform-style: preserve-3d;
+    will-change: transform, box-shadow;
+    cursor: pointer;
+}
+
+.stat-card h3 i {
+    font-size: 1.5rem;
+    color: var(--color-primary);
+}
+
+.stat-card h3 {
+    color: var(--color-primary);
+    text-shadow: 0 0 10px var(--color-primary);
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+}
+
+.glow-btn {
+    position: relative;
+    overflow: hidden;
+    color: var(--color-primary);
+    background-color: transparent;
+    border: none;
+    font-weight: bold;
+    box-shadow: 0 0 8px var(--color-primary);
+    transition: color 0.3s, background-color 0.3s, box-shadow 0.3s;
+    border-radius: 6px;
+}
+
+.glow-btn .btn-glow {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s ease;
+    pointer-events: none;
+}
+
+.glow-btn:hover .btn-glow {
+    left: 100%;
+}
+
+.glow-btn:hover {
+    background-color: var(--color-primary);
+    color: black;
+    box-shadow: 0 0 12px var(--color-primary), 0 0 24px var(--color-primary);
+}
+
+/* Detailed Stats Styles */
+.detailed-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+/* Detailed Stats */
+.stats-table {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #333;
+}
+
+.stat-name {
+    color: #888;
+}
+
+.stat-row .stat-value {
+    color: var(--color-primary);
+    font-weight: 700;
+    text-shadow: 0 0 10px var(--color-primary);
+}
