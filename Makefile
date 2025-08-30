@@ -1,11 +1,16 @@
 # Variables
-SRCS_FILE = ./backend
-COMPOSE_FILE = $(SRCS_FILE)/docker-compose.yml
+COMPOSE_FILE = ./docker-compose.yml
 COMPOSE_CMD = docker-compose -f $(COMPOSE_FILE)
 
 # Service names
-SERVICES = authentication gateway nginx
-ALL_SERVICES = authentication gateway gameserver user livechat nginx frontend
+SERVICES = authentication gateway sqlite nginx
+ALL_SERVICES = authentication gateway gameserver sqlite user livechat nginx frontend
+
+# Volume directories (adjust these paths as needed)
+VOLUME_BASE_DIR = ${HOME}/microservice/volumes
+NGINX_DATA_DIR = $(VOLUME_BASE_DIR)/nginx_data
+GATEWAY_SRC_DIR = $(VOLUME_BASE_DIR)/gateway/srcs
+SQLITE_DATA_DIR = $(VOLUME_BASE_DIR)/databases/data
 
 # Colors for output
 GREEN = \033[0;32m
@@ -14,7 +19,52 @@ YELLOW = \033[1;33m
 BLUE = \033[0;34m
 NC = \033[0m
 
-all: up
+all: volumes up
+
+# Create all volume directories
+volumes: $(NGINX_DATA_DIR) $(GATEWAY_SRC_DIR) $(SQLITE_DATA_DIR)
+	@echo "$(GREEN)All volume directories created successfully!$(NC)"
+
+# Create nginx data directory
+$(NGINX_DATA_DIR):
+	@echo "$(YELLOW)Creating nginx data directory...$(NC)"
+	@mkdir -p $(NGINX_DATA_DIR)
+	@chmod 755 $(NGINX_DATA_DIR)
+
+# Create gateway source directory
+$(GATEWAY_SRC_DIR):
+	@echo "$(YELLOW)Creating gateway source directory...$(NC)"
+	@mkdir -p $(GATEWAY_SRC_DIR)
+	@chmod 755 $(GATEWAY_SRC_DIR)
+
+# Create sqlite data directory
+$(SQLITE_DATA_DIR):
+	@echo "$(YELLOW)Creating sqlite data directory...$(NC)"
+	@mkdir -p $(SQLITE_DATA_DIR)
+	@chmod 755 $(SQLITE_DATA_DIR)
+
+# Create individual volume directories
+create-nginx-volume: $(NGINX_DATA_DIR)
+	@echo "$(GREEN)Nginx volume directory created: $(NGINX_DATA_DIR)$(NC)"
+
+create-gateway-volume: $(GATEWAY_SRC_DIR)
+	@echo "$(GREEN)Gateway volume directory created: $(GATEWAY_SRC_DIR)$(NC)"
+
+create-sqlite-volume: $(SQLITE_DATA_DIR)
+	@echo "$(GREEN)SQLite volume directory created: $(SQLITE_DATA_DIR)$(NC)"
+
+# Remove volume directories
+clean-volumes:
+	@echo "$(RED)Removing volume directories...$(NC)"
+	@rm -rf $(NGINX_DATA_DIR) $(GATEWAY_SRC_DIR) $(SQLITE_DATA_DIR)
+	@echo "$(RED)Volume directories removed$(NC)"
+
+# Check volume directories
+check-volumes:
+	@echo "$(GREEN)Volume directory status:$(NC)"
+	@echo "Nginx data: $(if $(wildcard $(NGINX_DATA_DIR)),$(GREEN)EXISTS$(NC),$(RED)MISSING$(NC)) - $(NGINX_DATA_DIR)"
+	@echo "Gateway src: $(if $(wildcard $(GATEWAY_SRC_DIR)),$(GREEN)EXISTS$(NC),$(RED)MISSING$(NC)) - $(GATEWAY_SRC_DIR)"
+	@echo "SQLite data: $(if $(wildcard $(SQLITE_DATA_DIR)),$(GREEN)EXISTS$(NC),$(RED)MISSING$(NC)) - $(SQLITE_DATA_DIR)"
 
 # Build and start containers
 up:
@@ -64,13 +114,15 @@ shell-gateway:
 	@echo "$(GREEN)Entering shell for gateway service$(NC)"
 	@$(COMPOSE_CMD) exec -it gateway /bin/sh
 
+
+
 # Clean non-persistent data
 clean: stop
 	@echo "$(RED)Cleaning up...$(NC)"
 	@docker system prune -f
 
 # Full cleanup
-fclean:
+fclean: clean-volumes
 	@echo "$(RED)Performing full cleanup...$(NC)"
 	@$(COMPOSE_CMD) down --remove-orphans --volumes --rmi all 2>/dev/null || true
 	@docker system prune -a --volumes -f
@@ -193,37 +245,14 @@ help:
 	@echo "  make dev-authentication # Development mode for authentication"
 
 .PHONY: all up down stop status logs clean fclean re health list-services help \
+        volumes create-nginx-volume create-gateway-volume create-sqlite-volume \
+        clean-volumes check-volumes \
+        $(addprefix up-,$(ALL_SERVICES)) \
+        $(addprefix down-,$(ALL_SERVICES)) \
+        $(addprefix restart-,$(ALL_SERVICES)) \
+        $(addprefix build-,$(ALL_SERVICES)) \
+        $(addprefix rebuild-,$(ALL_SERVICES)) \
         $(addprefix logs-,$(ALL_SERVICES)) \
         $(addprefix shell-,$(ALL_SERVICES)) \
         $(addprefix dev-,$(ALL_SERVICES)) \
         $(ALL_SERVICES)
-DOCKER_COMPOSE       = docker compose
-DOCKER_COMPOSE_FILE  = docker-compose.yml
-
-
-all: run
-
-build:
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) build
-
-run: stop build
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) up
-
-stop:
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) down
-
-logs:
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) logs -f
-
-clean: stop
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) down --volumes --remove-orphans
-
-list:
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) ps -a
-
-nodejs:
-	docker exec -it node_service sh
-
-re: stop run
-
-.PHONY: all build run stop logs clean nodejs re

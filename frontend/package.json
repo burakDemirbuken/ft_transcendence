@@ -1,0 +1,19 @@
+{
+  "name": "ft-transcendence-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "serve": "http-server . -p 8080"
+  },
+  "dependencies": {
+    "chart.js": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "http-server": "^14.0.0"
+  }
+}
