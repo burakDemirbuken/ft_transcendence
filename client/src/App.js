@@ -1,6 +1,8 @@
 import NetworkManager from './network/NetworkManager.js';
 import GameClient from "./GameClient.js";
 import RoomUi from './RoomUi.js';
+import localGameConfig from './json/LocalGameConfig.json' assert { type: 'json' };
+import InputManager from './input/InputManager.js';
 
 class App
 {
@@ -11,6 +13,8 @@ class App
 		this.gameClient = new GameClient("renderCanvas");
 		this.networkManager = new NetworkManager();
 		this.roomUi = new RoomUi();
+		this.inputManager = new InputManager();
+
 
 		// Game ready state
 		this.isReady = false;
@@ -103,11 +107,7 @@ class App
 	 */
 	startLocalGame()
 	{
-		const gameConfig = {
-			gameMode: "local",
-			// Add other local game config
-		};
-		this.loadGame(gameConfig);
+		this.loadGame(localGameConfig);
 	}
 
 	/**
@@ -153,17 +153,14 @@ class App
 		this.roomUi.createCustomRoom(roomData);
 	}
 
-	/**
-	 * Start game with given data
-	 */
 	startGame(gameData)
 	{
 		this.roomUi.hideGameUI();
 
 		const gameConfig = {
+			canvas: gameData.canvas,
 			gameMode: gameData.gameSettings?.gameMode || "custom",
 			roomId: gameData.roomId,
-			players: gameData.players,
 			settings: gameData.gameSettings
 		};
 
@@ -280,9 +277,6 @@ class App
 
 	loadGame(gameConfig)
 	{
-		// Add canvas reference to game config
-		gameConfig.canvas = document.getElementById('renderCanvas');
-
 		this.gameClient.initialize(gameConfig).then(() =>
 		{
 			console.log('✅ Game initialized successfully');

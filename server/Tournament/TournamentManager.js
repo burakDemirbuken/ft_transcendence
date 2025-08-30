@@ -1,6 +1,7 @@
 import { TICK_RATE } from '../utils/constants.js';
-import PingPong from './Pingpong/Pingpong.js';
+import PingPong from '../PingPong/PingPong.js';
 import Tournament from './Tournament.js';
+import EventEmitter from '../utils/EventEmitter.js';
 
 const exampleTournamentProperty = {
 	name: "Example Tournament",

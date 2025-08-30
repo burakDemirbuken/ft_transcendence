@@ -1,67 +1,16 @@
-/*
-const exampleGameConfig =
-{
-	type: "config",
-
-	payload:
-	{
-		gameMode: "local", // "local", "online", "tournament", "ai"
-
-		arcade:
-		{
-			position:
-			{
-				x: 0,
-				y: 0,
-				z: 0
-			},
-			type: "classic", // "classic", "modern", "pong1971"
-			machine:
-			{
-				path: "../models/arcade/classic/",
-				model: "arcade.obj",
-				colors:
-				{
-					body: "#FF0000",
-					sides: "#00FF00",
-					joystick: "#0000FF",
-					buttons: "#FFFF00"
-				}
-			}
-		},
-		gameRender:
-		{
-			colors:
-			{
-				background: "#000000",
-				paddle: "#FFFFFF",
-				ball: "#FFFFFF",
-				text: "#FFFFFF",
-				accent: "#00FF00"
-			},
-			paddleSize:
-			{
-				height: 10,
-			}
-		},
-	}
-};
-*/
 
 import GameCore from './core/GameCore.js';
-import GameRenderer from './rendering/GameRenderer.js';
-import InputManager from './input/InputManager.js';
+import Renderer from './rendering/Renderer.js';
 import EventEmitter from './utils/EventEmitter.js';
 
 class GameClient extends EventEmitter
 {
 	constructor()
 	{
-		super(); // Call parent constructor first
+		super();
 		this.canvas = null;
 		this.gameCore = new GameCore();
-		this.renderer = new GameRenderer(this.gameCore);
-		this.inputManager = new InputManager();
+		this.renderer = new Renderer(this.gameCore);
 		this.gameState = null;
 
 		// ? this.gameStateManager = new GameStateManager();
@@ -79,6 +28,31 @@ class GameClient extends EventEmitter
 		if (!this.canvas)
 			throw new Error('Canvas is missing');
 
+		switch (gameConfig.GameMode)
+		{
+			case 'local':
+				this.localGameInitialize(gameConfig);
+				break;
+			case 'multiple':
+				this.multiplayerGameInitialize(gameConfig);
+				break;
+			case 'tournament':
+				this.tournamentGameInitialize(gameConfig);
+				break;
+			case 'ai':
+				this.aiGameInitialize(gameConfig);
+				break;
+			case 'custom':
+				this.customGameInitialize(gameConfig);
+				break;
+			case 'classic':
+				this.classicGameInitialize(gameConfig);
+				break;
+			default:
+				throw new Error(`Unknown game mode: ${gameConfig.GameMode}`);
+		}
+
+
 		await this.gameCore.initialize(this.canvas, gameConfig.arcade);
 		if (!gameConfig.gameRender)
 			throw new Error('Game render configuration is missing');
@@ -86,48 +60,9 @@ class GameClient extends EventEmitter
 		this.setupGameControls();
 	}
 
-	connectToServer(endPoint, params = {})
-	{
-		this.networkManager.connect(endPoint, params);
-		this.setupEventListeners();
-	}
-
-	// Placeholder for future implementation
-	// createTournamentRoom() can be implemented to handle tournament room creation logic
-
-	createTournamentRoom()
-	{
-		if (!this.networkManager.isConnected())
-			throw new Error('NetworkManager is not connected');
-		this.networkManager.send("createRoom", {mode: "tournament"});
-	}
 
 
-	setupEventListeners()
-	{
-		this.networkManager.on("stateChange",
-			(data) =>
-			{
-				this.render(data.gameData, this.gameCore.getMachine("main"));
-				this.gameState = data.gameData;
-			}
-		);
-		this.networkManager.on("connected",
-			() => console.log('✅ Connected to server')
-		);
-		this.networkManager.on("error",
-			(error) => console.error('connection error:', error)
-		);
-		this.networkManager.on("createRoomResponse",
-			(data) =>
-			{
-				if (data.success)
-					console.log(`Tournament room created. Code: ${data.roomCode}`);
-				else
-					console.error(`Failed to create tournament room: ${data.message}`);
-			}
-		);
-	}
+
 
 	handleStateChange(data)
 	{

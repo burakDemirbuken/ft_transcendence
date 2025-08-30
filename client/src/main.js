@@ -1,5 +1,11 @@
 import * as constants from './utils/constants.js';
 import App from './App.js';
+import tournamentConfig from './json/TournamentConfig.json' assert { type: 'json' };
+import localconfig from './json/LocalConfig.json' assert { type: 'json' };
+import aiConfig from './json/AiConfig.json' assert { type: 'json' };
+import customConfig from './json/CustomConfig.json' assert { type: 'json' };
+import multiplayerConfig from './json/MultiplayerConfig.json' assert { type: 'json' };
+
 
 const app = new App();
 let gameState = {
@@ -83,6 +89,10 @@ const exampleCustomProperties =
 	maxScore: 11
 };
 
+localGameStart()
+{
+	app.localGameStart();
+}
 
 function nABERmUDUR()
 {

@@ -127,7 +127,7 @@ const exampleGameRenderConfig =
 
 import * as constants from '../utils/constants.js';
 
-class GameRenderer
+class Renderer
 {
 	constructor(gameCore)
 	{
@@ -273,4 +273,4 @@ class GameRenderer
 	}
 }
 
-export default GameRenderer;
+export default Renderer;

@@ -12,8 +12,6 @@ export const DEFAULT_GAME_PROPERTIES = {
 	ballSpeed: 600,
 	ballSpeedIncrease: 100,
 
-	maxPlayers: 2,
-
 	maxScore: 11
 };
 

@@ -184,6 +184,7 @@ class GameService
 			default:
 				throw new Error(`Unhandled tournament message type: ${message.type}`);
 		}
+	}
 
 	_handleCreateRoom(message, player)
 	{
@@ -234,7 +235,7 @@ class GameService
 			this.networkManager.send(connId, JSON.stringify({ type: 'error', payload: { message: errorMessage } }));
 	}
 
-	async stop()
+	stop()
 	{
 		console.log('Stopping Game Server...');
 
@@ -244,5 +245,6 @@ class GameService
 		console.log('Game Server stopped!');
 	}
 }
+
 
 export default GameService;
