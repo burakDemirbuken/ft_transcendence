@@ -67,29 +67,6 @@ services:
       - EMAIL_PORT=3005
       - HOST=0.0.0.0
 
-  #gameserver:
-  #  container_name: gameserver
-  #  build: ./gameserver
-  #  restart: on-failure
-  #  networks:
-  #    - transcendency
-  #  expose:
-  #    - 3000
-
-  # user:
-  #   container_name: user
-  #   build: ./user
-  #   restart: on-failure
-  #   networks:
-  #     - transcendency
-
-  # livechat:
-  #   container_name: livechat
-  #   build: ./livechat
-  #   restart: on-failure
-  #   networks:
-  #     - transcendency
-
   nginx:
     container_name: nginx
     build: ../nginx

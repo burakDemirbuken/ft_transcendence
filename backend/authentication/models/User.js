@@ -1,71 +1,116 @@
-import bcrypt from 'bcryptjs'
-import crypto from 'crypto'
+import { DataTypes } from 'sequelize';
+import sequelize from './database.js';
+import bcrypt from 'bcryptjs';
 
-class User {
-  constructor(username, email, password) {
-    this.id = crypto.randomUUID()
-    this.username = username
-    this.email = email
-    this.password = this.hashPassword(password)
-    this.createdAt = new Date().toISOString()
-    this.updatedAt = new Date().toISOString()
-    this.isActive = true
-    this.emailVerified = false
-    this.lastLoginAt = null
-  }
-
-  hashPassword(password) {
-    const saltRounds = 10
-    return bcrypt.hashSync(password, saltRounds)
-  }
-
-  static validatePassword(inputPassword, hashedPassword) {
-    return bcrypt.compareSync(inputPassword, hashedPassword)
-  }
-
-  updatePassword(newPassword) {
-    this.password = this.hashPassword(newPassword)
-    this.updatedAt = new Date().toISOString()
-  }
-
-  markLogin() {
-    this.lastLoginAt = new Date().toISOString()
-    this.updatedAt = new Date().toISOString()
-  }
-
-  toSafeObject() {
-    return {
-      id: this.id,
-      username: this.username,
-      email: this.email,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-      lastLoginAt: this.lastLoginAt,
-      isActive: this.isActive,
-      emailVerified: this.emailVerified
+/**
+ * Simplified User Model
+ * Core fields only: id, username, email, password, is_active, last_login_at
+ */
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
+  username: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    unique: true,
+    validate: {
+      len: [3, 50],
+      notEmpty: true,
+      isAlphanumeric: true
     }
+  },
+  email: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    unique: true,
+    validate: {
+      isEmail: true,
+      notEmpty: true
+    }
+  },
+  password: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+      len: [6, 255]
+    }
+  },
+  is_active: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  last_login_at: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
+}, {
+  tableName: 'users',
+  timestamps: true,
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
+  indexes: [
+    {
+      unique: true,
+      fields: ['email']
+    },
+    {
+      unique: true,
+      fields: ['username']
+    }
+  ]
+});
 
-  static validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
+/**
+ * Hash password before creating user
+ */
+User.beforeCreate(async (user) => {
+  if (user.password) {
+    const salt = await bcrypt.genSalt(12);
+    user.password = await bcrypt.hash(user.password, salt);
   }
+});
 
-  static validateUsername(username) {
-    if (!username) return false
-    if (username.length < 3 || username.length > 20) return false
-    // Alphanumeric ve underscore, sadece harf ile başlayabilir
-    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_]*$/
-    return usernameRegex.test(username)
+/**
+ * Hash password before updating user
+ */
+User.beforeUpdate(async (user) => {
+  if (user.changed('password')) {
+    const salt = await bcrypt.genSalt(12);
+    user.password = await bcrypt.hash(user.password, salt);
   }
+});
 
-  static validatePassword(password) {
-    if (!password) return false
-    if (password.length < 6) return false
-    // En az bir büyük harf, bir küçük harf, bir rakam
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/
-    return passwordRegex.test(password)
-  }
-}
+/**
+ * Instance Methods
+ */
+User.prototype.validatePassword = async function(password) {
+  return await bcrypt.compare(password, this.password);
+};
 
-export default User
+User.prototype.markLogin = async function() {
+  this.last_login_at = new Date();
+  await this.save();
+};
+
+User.prototype.toSafeObject = function() {
+  const obj = this.toJSON();
+  delete obj.password;
+  return obj;
+};
+
+/**
+ * Static Methods
+ */
+User.findByEmail = async function(email) {
+  return await this.findOne({ where: { email: email.toLowerCase() } });
+};
+
+User.findByUsername = async function(username) {
+  return await this.findOne({ where: { username } });
+};
+
+export default User;

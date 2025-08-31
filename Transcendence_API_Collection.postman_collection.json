@@ -1,0 +1,183 @@
+{
+  "info": {
+    "name": "🎮 Transcendence Authentication API",
+    "description": "Complete authentication flow with email verification and 2FA",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://localhost:8080/api/auth"
+    },
+    {
+      "key": "test_email", 
+      "value": "your-email@gmail.com"
+    },
+    {
+      "key": "test_username",
+      "value": "postmantest"
+    },
+    {
+      "key": "test_password",
+      "value": "PostmanTest123"
+    }
+  ],
+  "item": [
+    {
+      "name": "🏥 Health Check",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/health",
+        "description": "Check service status"
+      }
+    },
+    {
+      "name": "✅ Check Username Available",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/check-username?username={{test_username}}",
+        "description": "Check if username is available"
+      }
+    },
+    {
+      "name": "✅ Check Email Available", 
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/check-email?email={{test_email}}",
+        "description": "Check if email is available"
+      }
+    },
+    {
+      "name": "📝 Register User",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/register",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{test_username}}\",\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\"\n}"
+        },
+        "description": "Register new user (will send verification email)"
+      }
+    },
+    {
+      "name": "✉️ Verify Email (Manual Token)",
+      "request": {
+        "method": "GET", 
+        "url": "{{base_url}}/verify-email?token=REPLACE_WITH_TOKEN_FROM_LOGS",
+        "description": "Verify email with token from authentication logs"
+      }
+    },
+    {
+      "name": "🚪 Login User (2FA trigger)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/login",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"login\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\"\n}"
+        },
+        "description": "Login user (will send 2FA code to email)"
+      }
+    },
+    {
+      "name": "🔐 Verify 2FA (Manual Code)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/verify-2fa", 
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"code\": \"REPLACE_WITH_CODE_FROM_LOGS\"\n}"
+        },
+        "description": "Verify 2FA with code from authentication logs"
+      }
+    },
+    {
+      "name": "👤 Get Profile (Authenticated)",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/profile",
+        "description": "Get user profile (requires authentication cookie)"
+      }
+    },
+    {
+      "name": "🚪 Logout",
+      "request": {
+        "method": "POST", 
+        "url": "{{base_url}}/logout",
+        "description": "Logout user (clear authentication cookie)"
+      }
+    },
+    {
+      "name": "❌ Login Wrong Password (Error Test)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/login",
+        "header": [
+          {
+            "key": "Content-Type", 
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"login\": \"{{test_email}}\",\n  \"password\": \"wrongpassword\"\n}"
+        },
+        "description": "Test wrong password (should return HTML error page)"
+      }
+    },
+    {
+      "name": "❌ Invalid 2FA Code (Error Test)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/verify-2fa",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{test_email}}\",\n  \"code\": \"999999\"\n}"
+        },
+        "description": "Test invalid 2FA code (should return HTML error page)"
+      }
+    },
+    {
+      "name": "❌ Duplicate Register (Error Test)",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/register", 
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{test_username}}\",\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\"\n}"
+        },
+        "description": "Test duplicate registration (should return HTML error page)"
+      }
+    }
+  ]
+}

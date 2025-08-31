@@ -1,67 +1,92 @@
-import Fastify from 'fastify'
-import cookie from '@fastify/cookie'
-import jwt from '@fastify/jwt'
-import cors from '@fastify/cors'
-import authRoutes from './routes/authRoutes.js'
+import Fastify from 'fastify';
+import cookie from '@fastify/cookie';
+import jwt from '@fastify/jwt';
+import cors from '@fastify/cors';
+import path from 'path';
+import fs from 'fs';
+
+// Import database and models
+import { sequelize, testConnection } from './models/database.js';
+import User from './models/User.js';
+import authRoutes from './routes/authRoutes.js';
 
 const fastify = Fastify({ 
   logger: {
-    level: 'info',
+    level: process.env.LOG_LEVEL || 'info',
   }
-})
+});
 
-// CORS ayarları
+// CORS configuration
 await fastify.register(cors, {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: process.env.CORS_ORIGIN || true,
   credentials: true,
-})
+});
 
-// Cookie desteği
-await fastify.register(cookie)
+// Cookie support
+await fastify.register(cookie);
 
-// JWT ayarları
+// JWT configuration
 await fastify.register(jwt, {
-  secret: process.env.JWT_SECRET || 'default_secret_change_in_production',
+  secret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
   cookie: {
     cookieName: 'accessToken',
     signed: false,
   }
-})
+});
 
-
-// Routes'ları register et
-await fastify.register(authRoutes)
+// Register routes
+await fastify.register(authRoutes);
 
 // 404 handler
-fastify.setNotFoundHandler(async (req, rep) => {
-  rep.status(404).send({
+fastify.setNotFoundHandler(async (request, reply) => {
+  reply.status(404).send({
     success: false,
-    error: 'Route bulunamadııı',
-    path: req.url
-  })
-})
+    error: 'Route not found',
+    path: request.url,
+    service: 'authentication-service'
+  });
+});
 
 // Error handler
-fastify.setErrorHandler(async (error, req, rep) => {
-  req.log.error(error)
-  rep.status(500).send({
+fastify.setErrorHandler(async (error, request, reply) => {
+  request.log.error(error);
+  reply.status(500).send({
     success: false,
-    error: 'Sunucu hatası'
-  })
-})
+    error: 'Internal server error',
+    message: error.message
+  });
+});
 
-fastify.listen({ 
-  port: process.env.PORT || 3001, 
-  host: process.env.HOST || '0.0.0.0' 
-}, (err, address) => {
-  if (err) {
-    console.log("error");
-    fastify.log.error(err);
+// Start server
+const start = async () => {
+  try {
+    // Ensure data directory exists
+    const dataDir = path.join(process.cwd(), 'data');
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+
+    // Test database connection
+    await testConnection();
+    
+    // Sync database models
+    await sequelize.sync({ force: false });
+    console.log('✅ Database models synchronized');
+
+    // Start the server
+    await fastify.listen({
+      port: process.env.PORT || 3001,
+      host: process.env.HOST || '0.0.0.0'
+    });
+
+    console.log('🚀 Authentication Service started successfully');
+    console.log('📋 Available routes:');
+    fastify.printRoutes();
+
+  } catch (error) {
+    fastify.log.error('Failed to start server:', error);
     process.exit(1);
   }
-  console.log(`🚀 API çalışıyor: ${address}`);
-  
-  // Tüm route'ları listele
-  console.log("📋 Registered routes:");
-  fastify.printRoutes();
-})
+};
+
+start();

@@ -9,9 +9,6 @@ async function globalsPlugin(fastify, options) {
 		auth: "http://authentication:3001",
 		gateway: "http://gateway:3000",
 		nginx: "http://nginx:9000",
-		user: "http://user:3002",
-		gameserver: "http://gameserver:3003",
-		livechat: "http://livechat:3004",
 		email: "http://email:3005",
 	};
 
@@ -27,6 +24,10 @@ async function globalsPlugin(fastify, options) {
 	const publicpaths = {
 		'/auth/login': true,
 		'/auth/register': true,
+		'/auth/verify-email': true,
+		'/auth/forgot-password': true,
+		'/auth/reset-password': true,
+		'/auth/resend-verification': true,
 		'/auth/verify-2fa': true,
 		'/auth/refresh-token': true,
 		'/auth/check-email': true,
