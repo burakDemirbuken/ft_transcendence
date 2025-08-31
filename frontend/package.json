@@ -5,15 +5,17 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "start": "node dist/index.js",
     "serve": "http-server . -p 8080"
   },
   "dependencies": {
-    "chart.js": "^4.0.0"
+    "chart.js": "^4.4.3"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0",
-    "http-server": "^14.0.0"
+    "typescript": "^5.5.3",
+    "@types/node": "^20.14.10",
+    "http-server": "^14.1.1",
+    "@types/chart.js": "^2.9.41",
+    "@types/navigo": "^7.0.4",
+    "@types/express": "^4.17.0"
   }
 }

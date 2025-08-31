@@ -12,11 +12,11 @@ COPY ./conf/nginx.conf /etc/nginx/nginx.conf
 COPY ./conf/default.conf /etc/nginx/conf.d/default.conf
 COPY ./nginx_entry.sh /entry.sh
 
-RUN mkdir -p /var/www/html && \
-mkdir -p etc/nginx/ssl && \
-adduser -D -g 'www' www && \
-chown -R www:www /var/www/html && \
-chmod +x /entry.sh
+RUN mkdir -p /usr/share/nginx/html && \
+	mkdir -p etc/nginx/ssl && \
+	adduser -D -g 'www' www && \
+	chown -R www:www /usr/share/nginx/html && \
+	chmod +x /entry.sh
 
 ENTRYPOINT [ "/entry.sh" ]
 

@@ -27,6 +27,12 @@ volumes:
       type: none
       device: ${HOME}/ft_transcendence/backend/email
       o: bind
+  user_src:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${HOME}/ft_transcendence/backend/user
+      o: bind
 
 services:
   frontend:
@@ -107,12 +113,17 @@ services:
   #  expose:
   #    - 3004
 
-  # user:
-  #   container_name: user
-  #   build: ./user
-  #   restart: on-failure
-  #   networks:
-  #     - transcendency
+  user:
+    container_name: user
+    build: ./user
+    restart: on-failure
+    expose:
+      - 3006
+    volumes:
+      - user_src:/app
+      - /app/node_modules
+    networks:
+      - transcendency
 
   # livechat:
   #   container_name: livechat

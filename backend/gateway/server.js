@@ -3,13 +3,21 @@ import globalsPlugin from './plugins/globalsPlugin.js'
 import allRoutes from './routes/index.js'
 import cookie from '@fastify/cookie'
 import jwt from '@fastify/jwt'
+/* import cors from '@fastify/cors' */
 
 const gateway = Fastify({ logger: true })
 
-await gateway.register(globalsPlugin);
+/* await gateway.register(cors, {
+	origin: '*',
+	methods: ['GET', 'POST', 'PUT', 'DELETE'],
+	allowedHeaders: ['Content-Type', 'Authorization'],
+	exposedHeaders: ['Authorization'],
+	credentials: true
+}); */
 
+await gateway.register(globalsPlugin);
 await gateway.register(jwt, {
-secret: gateway.secrets.jwtSecret,
+	secret: gateway.secrets.jwtSecret, //?
 });
 
 await gateway.register(cookie);

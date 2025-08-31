@@ -35,6 +35,59 @@ class EmailService {
     }
   }
 
+  async sendEmailVerification(email, token, verificationUrl, username = null) {
+    try {
+      const mailOptions = {
+        from: config.email.from,
+        to: email,
+        subject: '✉️ Email Adresinizi Doğrulayın - ft_transcendence',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #007bff; text-align: center;">✉️ Email Adresinizi Doğrulayın</h2>
+            ${username ? `<p>Merhaba <strong>${username}</strong>,</p>` : '<p>Merhaba,</p>'}
+            <p>ft_transcendence hesabınızı oluşturduğunuz için teşekkürler! Hesabınızı aktifleştirmek için email adresinizi doğrulamanız gerekiyor.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${verificationUrl}" 
+                 style="background-color: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Email Adresimi Doğrula
+              </a>
+            </div>
+            
+            <p>Yukarıdaki butona tıklayamıyorsanız, aşağıdaki linki kopyalayıp tarayıcınıza yapıştırabilirsiniz:</p>
+            <p style="background-color: #f4f4f4; padding: 10px; word-break: break-all; font-size: 12px;">
+              ${verificationUrl}
+            </p>
+            
+            <p><strong>Bu link 24 saat süreyle geçerlidir.</strong></p>
+            
+            <p style="color: #666; font-size: 12px;">
+              Bu hesabı siz oluşturmadıysanız, bu e-postayı görmezden gelebilirsiniz.
+            </p>
+            
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+            <p style="color: #999; font-size: 12px; text-align: center;">
+              ft_transcendence Team<br>
+              ${new Date().toLocaleString('tr-TR')}
+            </p>
+          </div>
+        `
+      }
+
+      const info = await this.transporter.sendMail(mailOptions)
+      console.log(`✅ Email doğrulama kodu gönderildi: ${email} - MessageId: ${info.messageId}`)
+      
+      return {
+        success: true,
+        messageId: info.messageId,
+        email: email
+      }
+    } catch (error) {
+      console.error(`❌ Email doğrulama kodu gönderilemedi: ${email}`, error.message)
+      throw error
+    }
+  }
+
   async send2FACode(email, code, username = null) {
     try {
       const mailOptions = {

@@ -1,6 +1,48 @@
 import EmailService from '../services/EmailService.js'
 
 class EmailController {
+  async sendVerification(req, rep) {
+    try {
+      const { to, username, verificationUrl, token } = req.body
+
+      // Validasyon
+      if (!to || !token || !verificationUrl) {
+        return rep.status(400).send({
+          success: false,
+          error: 'Email, token ve verificationUrl gerekli'
+        })
+      }
+
+      // Email format kontrolü
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(to)) {
+        return rep.status(400).send({
+          success: false,
+          error: 'Geçersiz email formatı'
+        })
+      }
+
+      const result = await EmailService.sendEmailVerification(to, token, verificationUrl, username)
+      
+      rep.send({
+        success: true,
+        message: 'Email doğrulama kodu başarıyla gönderildi',
+        data: {
+          email: result.email,
+          messageId: result.messageId
+        }
+      })
+
+    } catch (error) {
+      req.log.error('Email verification error:', error)
+      rep.status(500).send({
+        success: false,
+        error: 'Email doğrulama kodu gönderilemedi',
+        details: error.message
+      })
+    }
+  }
+
   async send2FA(req, rep) {
     try {
       const { email, code, username } = req.body

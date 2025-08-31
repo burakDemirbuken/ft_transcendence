@@ -48,12 +48,15 @@ export default async function allRoutes(gateway, opts) {
 					
 					const body = request.method !== 'GET' && request.method !== 'HEAD' ? JSON.stringify(request.body) : undefined;
 					
+					const fetchHeaders = { ...headers };
+					// Only add Content-Type if there's a body
+					if (body) {
+						fetchHeaders['Content-Type'] = 'application/json';
+					}
+					
 					const response = await fetch(finalUrl, {
 						method: request.method,
-						headers: {
-							'Content-Type': 'application/json',
-							...headers
-						},
+						headers: fetchHeaders,
 						body: body
 					});
 

@@ -30,4 +30,7 @@ export default async function emailRoutes(fastify, opts) {
   
   // Test connection endpoint
   fastify.get('/test-connection', EmailController.testConnection)
+
+  // Email verification endpoint
+  fastify.post('/send-verification', EmailController.sendVerification)
 }

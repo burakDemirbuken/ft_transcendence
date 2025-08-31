@@ -19,29 +19,6 @@ else
     echo "SSL certificates already exist, skipping generation."
 fi
 
-# Create SSL configuration file
-cat > /etc/nginx/ssl/ssl.conf << 'EOF'
-# SSL Settings
-ssl_session_cache shared:SSL:10m;
-ssl_session_timeout 10m;
-
-# Modern SSL configuration
-ssl_protocols TLSv1.2 TLSv1.3;
-ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:DES-CBC3-SHA;
-ssl_prefer_server_ciphers on;
-
-# OCSP Stapling
-ssl_stapling on;
-ssl_stapling_verify on;
-
-# Security headers (can be overridden in server blocks)
-add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-add_header X-Content-Type-Options nosniff always;
-add_header X-Frame-Options DENY always;
-add_header X-XSS-Protection "1; mode=block" always;
-add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-EOF
-
 echo "SSL configuration file created!"
 
 # Start nginx
