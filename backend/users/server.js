@@ -1,11 +1,11 @@
 import Fastify from 'fastify'
+import db from './plugins/db.js'
 
 const fastify = Fastify({
   logger: true
 })
 
-fastify.register(require('./plugins/db'))
-
+fastify.register(db)
 
 fastify.listen({ port: 3006, host: '0.0.0.0' }, async (err, address) => {
     if (err) {

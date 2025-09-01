@@ -31,7 +31,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ${HOME}/ft_transcendence/backend/user
+      device: ${HOME}/ft_transcendence/backend/users
       o: bind
 
 services:
@@ -115,7 +115,7 @@ services:
 
   user:
     container_name: user
-    build: ./user
+    build: ./backend/users
     restart: on-failure
     expose:
       - 3006

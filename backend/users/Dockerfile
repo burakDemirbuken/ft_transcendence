@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 
@@ -6,6 +6,8 @@ RUN mkdir -p data
 
 COPY package*.json ./
 COPY . .
+
+RUN apk add --no-cache sqlite
 
 RUN npm install
 

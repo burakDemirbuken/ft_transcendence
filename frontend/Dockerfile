@@ -1,18 +1,15 @@
-FROM node:20-alpine
+FROM node:24-alpine
+
+RUN apk upgrade --no-cache && \
+	apk update --no-cache
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy source code
 COPY . .
 
-# Build TypeScript to JavaScript
+RUN npm install
+
 RUN npm run build
 
-# Keep container running for volume mount
-CMD ["tail", "-f", "/dev/null"]
+CMD ["npm", "start"]
