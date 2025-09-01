@@ -8,10 +8,11 @@ class GameCore
 		this.engine = null;
 		this.scene = null;
 		this.camera = null;
-		this.arcadeMachines = new Map();
 		this.isInitialized = false;
 		this.viewMode = 'single';
 		this.gameConfig = null;
+		this.arcadeMachines = new Map();
+
 	}
 
 	async initialize(canvas, gameConfig)
@@ -49,11 +50,6 @@ class GameCore
 				this.engine.resize();
 			}
 		);
-	}
-
-	joystickMove(number, direction)
-	{
-		this.arcadeMachines.get('main').joystickMove(number, direction);
 	}
 
 /* // ...existing code...
@@ -156,44 +152,11 @@ attachCameraToMachineFront(machineId, distance = 5, height = 2) {
 }
 // ...existing code... */
 
-	async loadScene(mode, machineCount = 1)
+	setCameraPosition(newPosition, targetPosition)
 	{
-		this.viewMode = mode;
-
-		this.clearMachines();
-		switch (mode)
-		{
-			case 'multiple':
-			case 'local':
-				await this.setupSingleMachine();
-				break;
-			case 'tournament':
-				await this.setupTournamentMachines(machineCount);
-				break;
-			default:
-				throw new Error(`Unknown view mode: ${mode}`);
-		}
-
-		this.setCameraPositionForMode(this.arcadeMachines.get('main'));
-	}
-
-	setCameraPositionForMode(mainMachine)
-	{
-		if (!this.camera || !mainMachine)
-			return;
-
-		if (!mainMachine.meshs || !Array.isArray(mainMachine.meshs))
-		{
-			console.warn("mainMachine.meshs is not available or not an array");
-			return;
-		}
-
-		const screen = mainMachine.meshs.find(m => m.name === "screen");
-		if (screen)
-		{
-			this.camera.setTarget(new BABYLON.Vector3(screen.position.x, screen.position.y + 3.75, screen.position.z));
-			this.camera.position = new BABYLON.Vector3(mainMachine.position.x, mainMachine.position.y + 4.5, mainMachine.position.z + 2.5);
-		}
+		this.camera.position = newPosition;
+		if (targetPosition)
+			this.camera.setTarget(targetPosition);
 	}
 
 	async setupSingleMachine()

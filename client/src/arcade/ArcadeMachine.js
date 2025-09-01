@@ -29,9 +29,8 @@ import { SCREEN_SIZE } from "../utils/constants.js";
 
 class ArcadeMachine
 {
-	constructor(id, scene)
+	constructor(scene)
 	{
-        this.id = id;
         this.scene = scene;
         this.position = null;
         this.meshs = null;
@@ -62,6 +61,7 @@ class ArcadeMachine
 		light1.intensity = 0.4;
 
         this.createGameScreen();
+		this.setActive(true);
         return this;
     }
 

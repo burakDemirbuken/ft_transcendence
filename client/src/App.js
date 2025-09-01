@@ -1,5 +1,5 @@
 import NetworkManager from './network/NetworkManager.js';
-import GameClient from "./GameClient.js";
+import GameRenderer from "./GameRenderer.js";
 import RoomUi from './RoomUi.js';
 import localGameConfig from './json/LocalGameConfig.json' assert { type: 'json' };
 import InputManager from './input/InputManager.js';
@@ -10,7 +10,7 @@ class App
 	{
 		this.playerId = this._TEST_generateRandomId();
 		this.playerName = this._TEST_generateRandomName();
-		this.gameClient = new GameClient("renderCanvas");
+		this.gameRenderer = new GameRenderer();
 		this.networkManager = new NetworkManager();
 		this.roomUi = new RoomUi();
 		this.inputManager = new InputManager();
@@ -23,41 +23,42 @@ class App
 		this._setupNetworkListeners();
 	}
 
-	readyState()
+	_localGameControllerSetup()
 	{
-		this.isReady = !this.isReady;
-		console.log("readyState fonksiyonu çağrıldı");
-		const toggle = document.getElementById('readyToggle');
+		this.inputManager.onKey("w",
+			() =>
+			{
+				this.gameRenderer.joystickMove(1, 'up');
+				this.networkManager.send("w", {action: true});
+			},
+			() =>
+			{
+				this.gameRenderer.joystickMove(1, 'neutral');
+				this.networkManager.send("w", {action: false});
+			}
+		);
+		this.inputManager.onKey("s",
+			() =>
+			{
+				this.gameRenderer.joystickMove(1, 'down');
+				this.networkManager.send("s", {action: true});
+			},
+			() =>
+			{
+				this.gameRenderer.joystickMove(1, 'neutral');
+				this.networkManager.send("s", {action: false});
+			}
+		);
+		// Arrow keys for same player (alternative controls)
+		this.inputManager.onKey("ArrowUp",
+			() => this.networkManager.send("ArrowUp", {action: true}),
+			() => this.networkManager.send("ArrowUp", {action: false})
+		);
 
-		if (this.isReady)
-			toggle.classList.add('active');
-		else
-			toggle.classList.remove('active');
-	}
-
-	_setupGlobalExports()
-	{
-		// Export App instance and RoomUi for HTML onclick handlers
-		window.app = this;
-		window.roomUi = this.roomUi;
-
-		// Export individual functions for HTML compatibility
-		window.createTournament = () => this.roomUi.createTournament();
-		window.joinTournament = () => this.roomUi.joinTournament();
-		window.toggleReady = () => this.roomUi.toggleReady();
-		window.startTournament = () => this.roomUi.startTournament();
-		window.leaveTournament = () => this.roomUi.leaveTournament();
-		window.closeTournamentRoom = () => this.roomUi.closeTournamentRoom();
-		window.joinCustomRoom = (roomId) => this.roomUi.joinCustomRoom(roomId);
-
-		// Export game functions
-		window.localGameStart = () => this.startLocalGame();
-		window.aiGameStart = () => this.startAIGame();
-		window.customGameStart = () => this.createCustomGame();
-
-		// Export ready toggle function
-		window.toggleReady = () => this.toggleReady();
-		window.getReadyState = () => this.getReadyState();
+		this.inputManager.onKey("ArrowDown",
+			() => this.networkManager.send("ArrowDown", {action: true}),
+			() => this.networkManager.send("ArrowDown", {action: false})
+		);
 	}
 
 	_setupNetworkListeners()
@@ -102,56 +103,6 @@ class App
 		});
 	}
 
-	/**
-	 * Start local game
-	 */
-	startLocalGame()
-	{
-		this.loadGame(localGameConfig);
-	}
-
-	/**
-	 * Start AI game
-	 */
-	startAIGame()
-	{
-		const gameConfig = {
-			gameMode: "ai",
-			// Add other AI game config
-		};
-		this.loadGame(gameConfig);
-	}
-
-	/**
-	 * Create custom game
-	 */
-	createCustomGame()
-	{
-		const roomData = {
-			id: 'ROOM-' + this._TEST_generateRandomId(),
-			name: 'Custom Game Room',
-			type: 'custom',
-			status: 'waiting',
-			maxPlayers: 2,
-			host: 'current_player',
-			players: [
-				{ id: 'current_player', name: 'You (Host)', status: 'waiting', isHost: true }
-			],
-			gameSettings: {
-				paddleWidth: 10,
-				paddleHeight: 100,
-				paddleSpeed: 700,
-				ballRadius: 7,
-				ballSpeed: 600,
-				ballSpeedIncrease: 100,
-				maxPlayers: 2,
-				maxScore: 11
-			},
-			createdAt: Date.now()
-		};
-
-		this.roomUi.createCustomRoom(roomData);
-	}
 
 	startGame(gameData)
 	{
@@ -167,76 +118,6 @@ class App
 		this.loadGame(gameConfig);
 	}
 
-	/**
-	 * Send message to server when connection is ready
-	 */
-	//! Ai
-	_sendWhenConnected(type, payload)
-	{
-		if (this.networkManager.isConnected) {
-			try {
-				this.networkManager.send(type, payload);
-			} catch (error) {
-				console.error('❌ Failed to send message:', error);
-				this.roomUi.showStatus('Failed to send to server', 'error');
-			}
-		} else {
-			// Queue message for when connection is ready
-			console.log('⏳ Queueing message until connected:', type);
-			this.roomUi.showStatus('Connecting to server...', 'info');
-
-			const sendWhenReady = () => {
-				this.networkManager.send(type, payload);
-				this.networkManager.off('connected', sendWhenReady);
-			};
-
-			this.networkManager.on('connected', sendWhenReady);
-		}
-	}
-
-	/**
-	 * Toggle ready state
-	 */
-	toggleReady()
-	{
-		this.isReady = !this.isReady;
-
-		// Update button appearance
-		const readyBtn = document.getElementById('readyToggleBtn');
-		if (readyBtn) {
-			if (this.isReady) {
-				readyBtn.textContent = 'Hazır ✅';
-				readyBtn.className = 'btn btn-success';
-				this.roomUi.hideGameUI();
-				console.log('🟢 Player is READY');
-			} else {
-				readyBtn.textContent = 'Hazır Ol';
-				readyBtn.className = 'btn btn-warning';
-				this.roomUi.showGameUI();
-				console.log('🟡 Player is NOT READY');
-			}
-		}
-
-		return this.isReady;
-	}
-
-	/**
-	 * Check if player is ready
-	 */
-	getReadyState()
-	{
-		return this.isReady;
-	}
-
-	/**
-	 * Force set ready state
-	 */
-	setReady(ready = true)
-	{
-		this.isReady = ready;
-		this.toggleReady(); // Update UI
-		return this.isReady;
-	}
 
 	_TEST_generateRandomId()
 	{
@@ -274,7 +155,7 @@ class App
 
 		console.log('🎮 App initialized successfully');
 	}
-
+	//* Kaldığım aşama: En son oyun controllerini ayarladın. Bunu kullanarak local game başlat
 	loadGame(gameConfig)
 	{
 		this.gameClient.initialize(gameConfig).then(() =>
