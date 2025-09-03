@@ -86,6 +86,8 @@ class GameService
 			console.error('❌ Error starting Game Server:', error);
 			throw error;
 		}
+		this.setupRoomEvents();
+
 	}
 
 	handleWebSocketMessage(message, clientId)
@@ -94,29 +96,20 @@ class GameService
 		const player = this.Players.get(clientId);
 		if (!player)
 			throw new Error('Player not found for clientId: ' + clientId);
-
-		try
+		const [namespace, action] = message.type.split('/');
+		switch (namespace)
 		{
-			const [namespace, action] = message.type.split('/');
-			switch (namespace)
-			{
-				case 'room':
-					this._handleRoomMessage(action, message.payload, player);
-					break;
-				case 'game':
-					this._handleGameMessage(action, message.payload, player);
-					break;
-				case 'tournament':
-					this._handleTornamentMessage(action, message.payload, player);
-					break;
-				default:
-					throw new Error(`Unhandled message namespace: ${namespace}`);
-			}
-		}
-		catch (error)
-		{
-			console.error('❌ Error handling message:', error);
-			this._sendErrorToPlayer(player.id, error.message);
+			case 'room':
+				this.roomManager.handleRoomMessage(action, message.payload, player);
+				break;
+			case 'game':
+				this.gameManager.handleGameMessage(action, message.payload, player);
+				break;
+			case 'tournament':
+				this._handleTornamentMessage(action, message.payload, player);
+				break;
+			default:
+				throw new Error(`Unhandled message namespace: ${namespace}`);
 		}
 	}
 
@@ -127,42 +120,6 @@ class GameService
 			if (connId)
 				this.networkManager.send(connId, JSON.stringify(message));
 		});
-	}
-
-	_handleRoomMessage(action, payload, player)
-	{
-		switch (action)
-		{
-			case 'create':
-				this._handleCreateRoom(payload, player);
-				break;
-			case 'join':
-				this._handleJoinRoom(payload, player);
-				break;
-			case 'leave':
-				this._handleLeaveRoom(payload, player);
-				break;
-			case 'setReady':
-				this._handleSetReady(payload, player);
-				break;
-			case 'startGame':
-				this._handleStartGame(payload, player);
-				break;
-			default:
-				throw new Error(`Unhandled room message type: ${message.type}`);
-		}
-	}
-
-	_handleGameMessage(action, payload, player)
-	{
-		switch (action)
-		{
-			case 'playerAction':
-				this._handlePlayerAction(payload, player);
-				break;
-			default:
-				throw new Error(`Unhandled game message type: ${message.type}`);
-		}
 	}
 
 	_handleTornamentMessage(action, payload, player)
@@ -186,46 +143,47 @@ class GameService
 		}
 	}
 
-	_handleCreateRoom(message, player)
+	setupRoomEvents()
 	{
-		const roomId = this.roomManager.createRoom(player.id, message.payload.name, message.payload.properties);
+		this.roomManager.on('room_Created',
+			({roomState}) =>
+			{
+				const roomId = roomState.id;
+				this.roomManager.on(`room${roomId}_Update`, ({roomState}) => {
+					this._sendPlayers(roomState.players, { type: 'room/update', payload: roomState });
+				});
 
-		this.roomManager.on(`room${roomId}_Update`, ({roomState}) => {
-			this._sendPlayers(roomState.players, { type: 'room/update', payload: roomState });
-		});
+				this.roomManager.on(`room${roomId}_Started`,
+					({ gameSettings, players, type}) =>
+					{
+						this._sendPlayers(players, { type: 'game/started' });
 
-		this.roomManager.on(`room${roomId}_Started`, ({ gameSettings, players }) => {
-			this._sendPlayers(players, { type: 'game/started', payload: { gameSettings, players } });
-		});
-
-		const connId = this.connectionId.get(player.id);
-		if (connId)
-			this.networkManager.send(connId, JSON.stringify({ type: 'room/created', payload: { roomId } }));
-	}
-
-	_handleJoinRoom(message, player)
-	{
-		this.roomManager.joinRoom(message.payload.roomId, player);
-	}
-
-	_handleLeaveRoom(message, player)
-	{
-		this.roomManager.leaveRoom(message.payload.roomId, player);
-	}
-
-	_handleSetReady(message, player)
-	{
-		this.roomManager.playerReadyStatus(message.payload.roomId, player.id, message.payload.isReady);
-	}
-
-	_handleStartGame(message, player)
-	{
-		this.roomManager.startGame(message.payload.roomId, player.id);
-	}
-
-	_handlePlayerAction(payload, player)
-	{
-		player.inputsSet(payload.key, payload.action);
+						//! sahne yüklenmeden oyunun hemen başlaması sıkıntı olabilir.
+						gameId = this.gameManager.createGame(type, gameSettings);
+						players.forEach((p) => this.gameManager.addPlayerToGame(type, gameId, this.Players.get(p.id)));
+						this.gameManager.on(`game${gameId}_StateUpdate`,
+							(gameState, players) => this._sendPlayers(players, { type: 'game/stateUpdate', payload: gameState })
+						);
+						this.gameManager.on(`game${gameId}_Ended`,
+							(results, players) =>
+							{
+								this._sendPlayers(players, { type: 'game/ended', payload: results });
+								//? oyun bittiğinde yapılacak işlemler
+							}
+						);
+					}
+				);
+				this.roomManager.on(`room${roomId}_Closed`,
+					() =>
+					{
+						//? oda kapandığında yapılacak işlemler
+					}
+				);
+				const connId = this.connectionId.get(roomState.host);
+				if (connId)
+					this.networkManager.send(connId, JSON.stringify({ type: 'room/created', payload: { roomId: roomState.id } }));
+			}
+		);
 	}
 
 	_sendErrorToPlayer(playerId, errorMessage)

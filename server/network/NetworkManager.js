@@ -148,11 +148,7 @@ class NetworkManager
 		if (!client)
 			throw new Error(`No client found with connectionId: ${connectionId}`);
 		if (client.readyState === 1)
-		{
-			if (typeof message !== 'string')
-				throw new Error('Message must be a string');
-			client.send(message);
-		}
+			client.send(JSON.stringify(message));
 	}
 
 	getConnectionCount()

@@ -1,7 +1,9 @@
 import NetworkManager from './network/NetworkManager.js';
 import GameRenderer from "./GameRenderer.js";
 import RoomUi from './RoomUi.js';
-import localGameConfig from './json/LocalGameConfig.json' assert { type: 'json' };
+
+//!
+import localGameConfig from './json/LocalConfig.js';
 import InputManager from './input/InputManager.js';
 
 class App
@@ -11,113 +13,120 @@ class App
 		this.playerId = this._TEST_generateRandomId();
 		this.playerName = this._TEST_generateRandomName();
 		this.gameRenderer = new GameRenderer();
-		this.networkManager = new NetworkManager();
+		this.networkManager = new NetworkManager(window.location.hostname, 3000);
 		this.roomUi = new RoomUi();
 		this.inputManager = new InputManager();
 
-
-		// Game ready state
-		this.isReady = false;
-
-		this._setupGlobalExports();
 		this._setupNetworkListeners();
+		this._gameControllerSetup();
 	}
+	//* Kaldım: server kısmındaki dataların gönderimi tamamlandı. Şimdi client tarafında bu dataların işlenmesi ve local game in başlatılması gerekiyor.
 
-	_localGameControllerSetup()
+	_gameControllerSetup()
 	{
 		this.inputManager.onKey("w",
 			() =>
 			{
 				this.gameRenderer.joystickMove(1, 'up');
-				this.networkManager.send("w", {action: true});
+				this.networkManager.send('game/playerAction', {key: "w", action: true});
 			},
 			() =>
 			{
 				this.gameRenderer.joystickMove(1, 'neutral');
-				this.networkManager.send("w", {action: false});
+				this.networkManager.send('game/playerAction', {key: "w", action: false});
 			}
 		);
 		this.inputManager.onKey("s",
 			() =>
 			{
 				this.gameRenderer.joystickMove(1, 'down');
-				this.networkManager.send("s", {action: true});
+				this.networkManager.send('game/playerAction', {key: "s", action: true});
 			},
 			() =>
 			{
 				this.gameRenderer.joystickMove(1, 'neutral');
-				this.networkManager.send("s", {action: false});
+				this.networkManager.send('game/playerAction', {key: "s", action: false});
 			}
 		);
 		// Arrow keys for same player (alternative controls)
 		this.inputManager.onKey("ArrowUp",
-			() => this.networkManager.send("ArrowUp", {action: true}),
-			() => this.networkManager.send("ArrowUp", {action: false})
+			() => this.networkManager.send('game/playerAction', {key: "ArrowUp", action: true}),
+			() => this.networkManager.send('game/playerAction', {key: "ArrowUp", action: false})
 		);
 
 		this.inputManager.onKey("ArrowDown",
-			() => this.networkManager.send("ArrowDown", {action: true}),
-			() => this.networkManager.send("ArrowDown", {action: false})
+			() => this.networkManager.send('game/playerAction', {key: "ArrowDown", action: true}),
+			() => this.networkManager.send('game/playerAction', {key: "ArrowDown", action: false})
+		);
+
+		this.inputManager.onKey("escape",
+			() => this.networkManager.send('game/playerAction', {key: "escape", action: true}),
+			() => this.networkManager.send('game/playerAction', {key: "escape", action: false})
 		);
 	}
 
 	_setupNetworkListeners()
 	{
-		// Listen to NetworkManager events
-		this.networkManager.on('connected', () => {
+		this.networkManager.onConnect(() =>
+		{
 			console.log('✅ Connected to server');
-			this.roomUi.showStatus('Connected to server', 'success');
 		});
 
-		this.networkManager.on('disconnected', (data) => {
-			console.log('🔌 Disconnected from server:', data);
-			this.roomUi.showStatus('Disconnected from server', 'warning');
+		this.networkManager.onMessage((data) =>
+		{
+			this.handleNetworkEvent(data.type, data.payload);
 		});
 
-		this.networkManager.on('error', (error) => {
+		this.networkManager.onClose((event) =>
+		{
+			console.log('🔌 Disconnected from server:', event.code, event.reason);
+		});
+
+		this.networkManager.onError((error) =>
+		{
 			console.error('❌ Network error:', error);
-			this.roomUi.showStatus('Network connection error', 'error');
 		});
 
-		// Listen to game-specific network events
-		this.networkManager.on('room/update', (data) => {
-			console.log('Room updated:', data);
-		});
-
-		this.networkManager.on('tournament/created', (data) => {
-			this.roomUi.showStatus('Tournament ID: ' + data.tournamentData.id, 'info');
-		});
-
-		this.networkManager.on('tournament/started', (data) => {
-			this.startLocalGame();
-		});
-			this.networkManager.on('tournament/update', (data) => {
-			console.log('tournament updated:', data);
-		});
-
-		this.networkManager.on('tournament/created', (data) => {
-			this.roomUi.showStatus('tournament ID: ' + data.id, 'info');
-		});
-
-		this.networkManager.on('tournament/started', (data) => {
-		});
+		this.networkManager.connect({ id: this.playerId, name: this.playerName });
 	}
 
-
-	startGame(gameData)
+	localGame()
 	{
-		this.roomUi.hideGameUI();
-
-		const gameConfig = {
-			canvas: gameData.canvas,
-			gameMode: gameData.gameSettings?.gameMode || "custom",
-			roomId: gameData.roomId,
-			settings: gameData.gameSettings
-		};
-
-		this.loadGame(gameConfig);
+		this._createRoom("local");
 	}
 
+	aiGame()
+	{
+		this.loadGame("ai");
+	}
+
+	customGame()
+	{
+		this._createRoom('classic');
+	}
+
+	joinCustomRoom()
+	{
+
+	}
+
+	readyState(readyState)
+	{
+		this.networkManager.send('room/setReady', {isReady: readyState });
+		this.roomUi.updateReadyState(readyState);
+	}
+
+	_createRoom(mode)
+	{
+		if (!this.networkManager.isConnect())
+			throw new Error('Not connected to server');
+		const data = {
+			mode: mode,
+			host: this.playerId,
+			gameStettings: localGameConfig.gameSettings
+		};
+		this.networkManager.send('room/create', data);
+	}
 
 	_TEST_generateRandomId()
 	{
@@ -135,30 +144,9 @@ class App
 		return `${randomName}${randomNumber}`;
 	}
 
-	initialize()
-	{
-		// Get IP from URL with fallback for Docker
-		const ip = window.location.hostname;
-		console.log('🌐 Connecting to:', `ws://${ip}:3000/ws`);
-
-		// Try to connect to WebSocket server with fallback
-		try {
-			this.networkManager.connect(`ws://${ip}:3000/ws`, {
-				id: this.playerId,
-				name: this.playerName
-			});
-		} catch (error) {
-			console.warn('❌ WebSocket connection failed:', error);
-			console.log('🎮 Continuing in offline mode...');
-			this.roomUi.showStatus('Running in offline mode - WebSocket unavailable', 'warning');
-		}
-
-		console.log('🎮 App initialized successfully');
-	}
-	//* Kaldığım aşama: En son oyun controllerini ayarladın. Bunu kullanarak local game başlat
 	loadGame(gameConfig)
 	{
-		this.gameClient.initialize(gameConfig).then(() =>
+		this.gameRenderer.initialize(gameConfig).then(() =>
 		{
 			console.log('✅ Game initialized successfully');
 			this.gameClient.startGame();
@@ -166,7 +154,6 @@ class App
 		.catch((error) =>
 		{
 			console.error('❌ Error initializing game:', error);
-			this.roomUi.showGameError('Failed to start game: ' + error.message);
 			this.roomUi.showGameUI();
 		});
 	}
@@ -180,42 +167,58 @@ class App
 	 */
 	handleNetworkEvent(eventType, data)
 	{
-		switch (eventType) {
-			case 'room/created':
-				this.updateRoomData(data.roomData);
+		const [event, subEvent] = eventType.split('/');
+
+		switch (event)
+		{
+			case 'room':
+				this._handleRoomEvent(subEvent, data);
 				break;
-			case 'room/joined':
-				this.updateRoomData(data.roomData);
+			case 'game':
+				this._handleGameEvent(subEvent, data);
 				break;
-			case 'player/joined':
-				this.updateRoomData(data.roomData);
-				break;
-			case 'player/left':
-				this.updateRoomData(data.roomData);
-				break;
-			case 'player/readyChanged':
-				this.updateRoomData(data.roomData);
-				break;
-			case 'game/settingChanged':
-				this.updateRoomData(data.roomData);
-				break;
-			case 'gameStarted':
-				this.startGame(data.gameData);
-				break;
-			case 'tournamentCreated':
-				this.updateRoomData(data.tournamentData);
-				break;
-			case 'tournamentJoined':
-				this.updateRoomData(data.tournamentData);
-				break;
-			case 'tournamentStarted':
-				this.roomUi.showStatus('Tournament started!', 'success');
+			case 'error':
+				this.roomUi.showGameError(data.message || 'An unknown error occurred');
 				break;
 			default:
 				console.log('Unhandled network event:', eventType, data);
 		}
 	}
 
+	_handleRoomEvent(subEvent, data)
+	{
+		switch (subEvent)
+		{
+			case 'created':
+				this.networkManager.send('room/join', { roomId: data.roomId });
+			default:
+				console.log('Unhandled room event:', subEvent, data);
+		}
+	}
+
+	_handleGameEvent(subEvent, data)
+	{
+		switch (subEvent)
+		{
+			case 'started':
+				this.gameRenderer.initialize({
+						canvasId: "renderCanvas",
+						gameMode: data.gameMode,
+					}).then(
+					() =>
+					{
+						// servera init edildiğini bildir
+					}).catch((error) =>
+					{
+						console.error('❌ Error initializing game renderer:', error);
+					}
+				);
+
+				break;
+			default:
+				console.log('Unhandled game event:', subEvent, data);
+		}
+	}
 	// ================================
 	// SERVER DATA EXAMPLES & DOCS
 	// ================================
@@ -247,21 +250,5 @@ class App
 	 *   createdAt: 1633036800000
 	 * }
 	 */
-
 }
-
-// Initialize app when DOM is ready
-let app;
-
-function initializeApp() {
-	app = new App();
-	app.initialize();
-}
-
-if (document.readyState === 'loading') {
-	document.addEventListener('DOMContentLoaded', initializeApp);
-} else {
-	initializeApp();
-}
-
 export default App;

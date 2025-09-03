@@ -1,4 +1,4 @@
-{
+export default {
 	"canvasId": "renderCanvas",
 	"gameMode": "local",
 	"arcade":
@@ -40,4 +40,4 @@
 		"ballSpeedIncrease": 100,
 		"maxScore": 11
 	}
-}
+};

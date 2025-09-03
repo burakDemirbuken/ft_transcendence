@@ -30,7 +30,11 @@ class GameRenderer extends EventEmitter
 		if (!this.canvas)
 			throw new Error('Canvas is missing');
 
-		switch (gameConfig.GameMode)
+		if (!gameConfig.gameRender)
+			throw new Error('Game render configuration is missing');
+		await this.gameCore.initialize(this.canvas, gameConfig.arcade);
+		this.renderer.initialize(gameConfig.gameRender);
+		switch (gameConfig.gameMode)
 		{
 			case 'local':
 				this._localGameInitialize(gameConfig);
@@ -53,12 +57,6 @@ class GameRenderer extends EventEmitter
 			default:
 				throw new Error(`Unknown game mode: ${gameConfig.GameMode}`);
 		}
-
-		await this.gameCore.initialize(this.canvas, gameConfig.arcade);
-		if (!gameConfig.gameRender)
-			throw new Error('Game render configuration is missing');
-		this.renderer.initialize(gameConfig.gameRender);
-		this.setupGameControls();
 	}
 
 	async _localGameInitialize()

@@ -1,4 +1,4 @@
-{
+const multiplayerConfig = {
 	"canvasId": "renderCanvas",
 	"gameMode": "multiplayer",
 	"arcade":
@@ -40,4 +40,6 @@
 		"ballSpeedIncrease": 100,
 		"maxScore": 11
 	}
-}
+};
+
+export default multiplayerConfig;

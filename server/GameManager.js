@@ -13,18 +13,41 @@ class GameManager extends EventEmitter
 		this.lastUpdateTime = Date.now();
 	}
 
-	createRoom(properties)
+	uniqueGameId()
 	{
-		if (this.games.has(gameId))
-			throw new Error(`Game with ID ${gameId} already exists`);
+		do {
+			var id = 'game_' + Date.now();
+		} while (this.games.has(id));
+		return id;
+	}
+
+	handleGameMessage(action, payload, player)
+	{
+		switch (action)
+		{
+			case 'playerAction':
+				const player = this.getPlayerGame(player.id);
+				if (!player)
+					throw new Error(`Player ${player.id} is not in any game`);
+				player.handlePlayerAction(payload);
+				break;
+			default:
+				throw new Error(`Unhandled game message type: ${message.type}`);
+		}
+	}
+
+	createGame(gameMode, properties)
+	{
+		const gameId = this.uniqueGameId();
 		let game;
-		if (properties.gameMode === 'local')
+		if (gameMode === 'local')
 			game = new LocalPingPong(properties);
-		else
+		else if (gameMode === 'classic')
 			game = new PingPong(properties);
+		else
+			throw new Error(`Unsupported game mode: ${gameMode}`);
 
-
-		this.games.set(game.id, game);
+		this.games.set(gameId, game);
 		game.initializeGame();
 		console.log(`🆕 Game ${game.id} created with mode: ${properties.gameMode}`);
 		return game;
@@ -126,7 +149,7 @@ class GameManager extends EventEmitter
 			if (game.isRunning())
 			{
 				game.update(deltaTime);
-				this.emit('gameUpdate', {state: game.getGameState(), players: game.players.map(p => p.id)});
+				this.emit(`game${game.id}_StateUpdate`, {state: game.getGameState(), players: game.players.map(p => p.id)});
 			}
 		}
 	}

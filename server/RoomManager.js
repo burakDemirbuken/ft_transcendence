@@ -32,23 +32,16 @@ const exampleResponseCustomRoom =
 const exampleCreateRoomPayload =
 {
 	name: "Custom",
-	properties:
+	gameMode: "classic", // "classic", "multiplayer", "tournament", "ai", "local"
+	gameSettings:
 	{
-		type: "custom",
-		gameSettings:
-		{
-			paddleWidth: 10,
-			paddleHeight: 100,
-			paddleSpeed: 700,
-
-			ballRadius: 7,
-			ballSpeed: 600,
-			ballSpeedIncrease: 100,
-
-			maxPlayers: 2,
-
-			maxScore: 11
-		}
+		paddleWidth: 10,
+		paddleHeight: 100,
+		paddleSpeed: 700,
+		ballRadius: 7,
+		ballSpeed: 600,
+		ballSpeedIncrease: 100,
+		maxScore: 11
 	}
 };
 */
@@ -64,34 +57,65 @@ class RoomManager extends EventEmitter
 		this.rooms = new Map();
 	}
 
-	createRoom(hostId, name, properties = {type: 'classic', gameSettings: { ...DEFAULT_GAME_PROPERTIES }})
+	handleRoomMessage(action, payload, player)
 	{
-		this._validateRoomCreation(hostId, properties);
+		switch (action)
+		{
+			case 'create':
+				this.createRoom(player.id, payload);
+				break;
+			case 'join':
+				this.joinRoom(payload.roomId, player);
+				break;
+			case 'leave':
+				this.leaveRoom(payload.roomId, player.id);
+				break;
+			case 'setReady':
+				this.playerReadyStatus(player.id, payload.isReady);
+				break;
+			case 'startGame':
+				this.startGame(payload.roomId, player.id);
+				break;
+			default:
+				throw new Error(`Unhandled room message type: ${message.type}`);
+		}
+	}
+
+	createRoom(hostId, payload)
+	{
+		//this._validateRoomCreation(hostId, properties);
 
 		const roomId = this._generateRoomId();
+		let maxPlayers = 2;
+		if (payload.gameMode === 'classic')
+			maxPlayers = 2;
+		else if (payload.gameMode === 'multiplayer')
+			maxPlayers = 4;
+		else if (payload.gameMode === 'ai' || payload.gameMode === 'local')
+			maxPlayers = 1;
+		else
+			throw new Error(`Invalid game mode: ${payload.gameMode}`);
 		const room = {
 			id: roomId,
-			name: name || `Room-${roomId}`,
-			type: properties.type,
+			name: payload.name,
+			gameMode: payload.gameMode,
 			status: 'waiting', // "waiting", "in_game", "completed", "startable"
-			maxPlayers: properties.gameSettings.maxPlayers || 2,
+			maxPlayers: maxPlayers,
 			host: hostId,
 			players: [],
 			//? izleyiciler eklenebilir mi?
 			spectators: [],
-			gameSettings: properties.gameSettings || {},
+			gameSettings: payload.gameSettings || {},
 			createdAt: Date.now()
 		};
 		this.rooms.set(roomId, room);
-		return roomId;
+		this.emit(`room_Created`, { roomState: room });
 	}
 
 	getRoom(roomId)
 	{
 		return this.rooms.get(roomId) || null;
 	}
-
-
 
 	deleteRoom(roomId)
 	{
@@ -154,21 +178,23 @@ class RoomManager extends EventEmitter
 		return room;
 	}
 
-	playerReadyStatus(roomId, playerId, isReady)
+	playerReadyStatus(playerId, isReady)
 	{
-		const room = this.getRoom(roomId);
-		if (!room)
-			throw new Error(`Room with ID ${roomId} does not exist`);
-		const player = room.players.find(p => p.id === playerId);
-		if (!player)
-			throw new Error(`Player with ID ${playerId} is not in room ${roomId}`);
-		player.status = isReady ? 'ready' : 'waiting';
-		const allPlayersReady = room.players.every(p => p.status === 'ready');
-		if (allPlayersReady) {
-			room.status = 'startable';
+		for (const [roomId, room] of this.rooms.entries())
+		{
+			const player = room.players.find(p => p.id === playerId);
+			if (player)
+			{
+				player.status = isReady ? 'ready' : 'waiting';
+				const allPlayersReady = room.players.every(p => p.status === 'ready');
+				if (allPlayersReady)
+					room.status = 'startable';
+				else
+					room.status = 'waiting';
+				this.notifyRoomUpdate(roomId);
+			}
 		}
-		this.notifyRoomUpdate(roomId);
-		return room;
+		throw new Error(`Player with ID ${playerId} is not in any room`);
 	}
 
 	updateRoomStatus(roomId, status)
@@ -207,7 +233,8 @@ class RoomManager extends EventEmitter
 
 		this.emit(`room${room.id}_Started`, {
 			gameSettings: room.gameSettings,
-			players: room.players
+			players: room.players,
+			gameMode: room.gameMode
 		});
 
 		this.notifyRoomUpdate(roomId);
@@ -232,7 +259,7 @@ class RoomManager extends EventEmitter
 		return {
 			id: room.id,
 			name: room.name,
-			type: room.type,
+			gameMode: room.gameMode,
 			status: room.status,
 			maxPlayers: room.maxPlayers,
 			host: room.host,
@@ -254,39 +281,6 @@ class RoomManager extends EventEmitter
 
 		return room;
 	}
-
-	_validateRoomCreation(hostId, properties)
-	{
-		const basicValidations = [
-			{ condition: !hostId, message: 'Host ID is required to create a room' },
-			{ condition: !properties || !properties.gameSettings, message: 'Game settings are required to create a room' },
-			{ condition: !['classic', 'custom', 'tournament'].includes(properties.type), message: 'Invalid room type. Must be "classic", "custom", or "tournament"' }
-		];
-
-		const gameSettingsValidations = [
-			{ field: 'paddleWidth', message: 'Invalid paddle width in game settings' },
-			{ field: 'paddleHeight', message: 'Invalid paddle height in game settings' },
-			{ field: 'paddleSpeed', message: 'Invalid paddle speed in game settings' },
-			{ field: 'ballRadius', message: 'Invalid ball radius in game settings' },
-			{ field: 'ballSpeed', message: 'Invalid ball speed in game settings' },
-			{ field: 'ballSpeedIncrease', message: 'Invalid ball speed increase in game settings' },
-			{ field: 'maxScore', message: 'Invalid max score in game settings' }
-		];
-
-		for (const validation of basicValidations) {
-			if (validation.condition) {
-				throw new Error(validation.message);
-			}
-		}
-
-		const settings = properties.gameSettings;
-		for (const validation of gameSettingsValidations) {
-			if (!settings[validation.field] || settings[validation.field] <= 0) {
-				throw new Error(validation.message);
-			}
-		}
-	}
-
 }
 
 export default RoomManager;

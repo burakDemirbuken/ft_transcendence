@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PinPong Test</title>
   <link rel="icon" href="data:,">
+  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/babylonjs@latest/babylon.js"></script>
   <script src="https://unpkg.com/babylonjs-loaders@latest/babylonjs.loaders.js"></script>
   <style>
@@ -404,8 +405,8 @@
     <div class="ui-panel">
       <div class="panel-title">🎮 Single Player</div>
       <div class="button-group">
-        <button class="btn btn-primary" onclick="localGameStart()">Local Game</button>
-        <button class="btn btn-primary" onclick="aiGameStart()">AI Game</button>
+        <button class="btn btn-primary" id="localGameBtn">Local Game</button>
+        <button class="btn btn-primary" id="aiGameBtn">AI Game</button>
       </div>
     </div>
 
@@ -413,9 +414,9 @@
     <div class="ui-panel">
       <div class="panel-title">🏠 Custom Game</div>
       <div class="button-group">
-        <button class="btn btn-primary" onclick="customGameStart()">Create Custom Game</button>
+        <button class="btn btn-primary" id="customGameBtn">Create Custom Game</button>
         <input type="text" class="input-field" id="customRoomId" placeholder="Enter Room ID">
-        <button class="btn btn-success" onclick="joinCustomRoom()">Join Custom Game</button>
+        <button class="btn btn-success" id="joinCustomRoomBtn">Join Custom Game</button>
       </div>
     </div>
 
@@ -425,11 +426,11 @@
       <div class="button-group">
         <div class="toggle-container">
           <span class="toggle-label">Hazır Ol</span>
-          <div class="toggle-switch" id="readyToggle" onclick="app.readyState()">
+          <div class="toggle-switch" id="readyToggle">
             <div class="toggle-slider"></div>
           </div>
         </div>
-        <button class="btn btn-success" onclick="nABERmUDUR()">Oyunu Başlat</button>
+        <button class="btn btn-success" id="startGameBtn">Oyunu Başlat</button>
       </div>
     </div>
 
@@ -438,9 +439,9 @@
       <div class="panel-title">🏆 Tournament</div>
       <div id="tournamentStatus"></div>
       <div class="button-group">
-        <button class="btn btn-warning" onclick="createTournament()">Create Tournament</button>
+        <button class="btn btn-warning" id="createTournamentBtn">Create Tournament</button>
         <input type="text" class="input-field" id="customTournamentId" placeholder="Enter Tournament ID">
-        <button class="btn btn-success" onclick="joinTournament()">Join Tournament</button>
+        <button class="btn btn-success" id="joinTournamentBtn">Join Tournament</button>
       </div>
     </div>
   </div>
@@ -497,3 +498,5 @@
   <script type="module" src="src/main.js"></script>
 </body>
 </html>
+
+

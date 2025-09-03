@@ -1,6 +1,6 @@
-{
+export default {
 	"canvasId": "renderCanvas",
-	"gameMode": "classic",
+	"gameMode": "Ai",
 	"arcade":
 	{
 		"position":
@@ -39,5 +39,9 @@
 		"ballSpeed": 600,
 		"ballSpeedIncrease": 100,
 		"maxScore": 11
+	},
+	"AiDifficulty":
+	{
+
 	}
-}
+};

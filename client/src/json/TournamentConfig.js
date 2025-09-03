@@ -1,20 +1,35 @@
-{
+export default {
 	"canvasId": "renderCanvas",
-	"gameMode": "Ai",
-	"arcade":
-	{
-		"position":
+	"gameMode": "Tournament",
+	"arcades":
+	[
 		{
-			"x": 0,
-			"y": 0,
-			"z": 0
+			"position":
+			{
+				"x": -150,
+				"y": 0,
+				"z": 0
+			},
+			"machine":
+			{
+				"path": "../models/arcade/classic/",
+				"model": "arcade.obj"
+			}
 		},
-		"machine":
 		{
-			"path": "../models/arcade/classic/",
-			"model": "arcade.obj"
+			"position":
+			{
+				"x": 150,
+				"y": 0,
+				"z": 0
+			},
+			"machine":
+			{
+				"path": "../models/arcade/classic/",
+				"model": "arcade.obj"
+			}
 		}
-	},
+	],
 	"gameRender":
 	{
 		"colors":
@@ -39,9 +54,5 @@
 		"ballSpeed": 600,
 		"ballSpeedIncrease": 100,
 		"maxScore": 11
-	},
-	"AiDifficulty":
-	{
-
 	}
-}
+};
