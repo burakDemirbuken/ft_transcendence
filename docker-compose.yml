@@ -54,7 +54,7 @@ services:
     build: ./backend/nginx
     restart: on-failure
     volumes:
-      - frontend_src:/var/www/html
+      - frontend_src:/usr/share/nginx/html
     networks:
       - transcendency
     ports:
