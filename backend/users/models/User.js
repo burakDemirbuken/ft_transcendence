@@ -20,6 +20,7 @@ module.exports = (sequelize) => {
         },
         avatarUrl: {
             type: DataTypes.STRING
+            //defaultValue: null
         },
         bio: {
             type: DataTypes.TEXT
