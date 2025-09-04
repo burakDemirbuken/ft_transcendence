@@ -49,11 +49,11 @@ class GameManager extends EventEmitter
 
 		this.games.set(gameId, game);
 		game.initializeGame();
-		console.log(`🆕 Game ${game.id} created with mode: ${properties.gameMode}`);
-		return game;
+		console.log(`🆕 Game ${gameId} created with mode: ${properties.gameMode}`);
+		return gameId;
 	}
 
-	addPlayerToGame(gameMode, gameId, player)
+	addPlayerToGame(gameId, player)
 	{
 		if (!this.games.has(gameId))
 			throw new Error(`Game with ID ${gameId} does not exist`);

@@ -37,7 +37,15 @@ class NetworkManager
 			};
 
 			this.socket.onmessage = (event) => {
-				onMessage(JSON.parse(event.data));
+				try {
+					const data = event.data;
+					const stringData = data.toString();
+					const parsedData = JSON.parse(stringData);
+					onMessage(parsedData);
+				} catch (error) {
+					console.error('❌ Failed to parse WebSocket message:', error);
+					console.error('Raw message data:', event.data);
+				}
 			};
 
 			this.socket.onclose = (event) => {

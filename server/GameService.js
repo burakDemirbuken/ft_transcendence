@@ -21,7 +21,43 @@ class GameService
 		this.roomManager = new RoomManager();
 		this.tournamentManager = new TournamentManager();
 		this.connectionId = new Map(); //  playerId -> connectionId
-		this.Players = new Map(); // playerId -> Player instance
+		this.players = new Map(); // playerId -> Player instance
+
+		setInterval(
+			() =>
+			{
+				console.log('--- Connected Players ---');
+				console.log('');
+				console.log(`Total connected players: ${this.players.size}`);
+				this.players.forEach((player) => {
+					console.log(`Player:\nname: ${player.name}\nid: ${player.id}\nconnectionId: ${this.connectionId.get(player.id)}`);
+					console.log('');
+				});
+				console.log('-------------------------');
+				console.log('--- Active Rooms ---');
+				this.roomManager.rooms.forEach((room) => {
+					console.log(`Room ${room.id}:\n\tType: ${room.type}\n\tHost: ${room.host}\n\tPlayers: ${room.players.length}/${room.maxPlayers}\n\tStatus: ${room.status}`);
+					console.log('\tPlayer List:');
+					room.players.forEach((p) => {
+						console.log(`\t\t- ${p.name} (id: ${p.id}, status: ${p.status}, isHost: ${p.isHost})`);
+					});
+					console.log('');
+				});
+				console.log('-------------------------');
+				console.log('');
+			},
+			1000
+		);
+	}
+
+	_getplayerByConnectionId(connectionId)
+	{
+		for (let [playerId, connId] of this.connectionId.entries())
+		{
+			if (connId === connectionId)
+				return this.players.get(playerId);
+		}
+		return null;
 	}
 
 	async start()
@@ -33,7 +69,6 @@ class GameService
 			this.networkManager.onClientConnect(
 				(connectionId, query) =>
 				{
-					console.log('🟢 New client connecting:', query);
 					if (!query.id || !query.name)
 					{
 						console.error('❌ Missing required parameters in query:', query);
@@ -41,8 +76,9 @@ class GameService
 						this.networkManager.disconnectConnection(connectionId);
 						return;
 					}
+					console.log('🟢 New client id:', query.id, 'name:', query.name, 'connectionId:', connectionId);
 					const player = new Player(query.id, query.name);
-					this.Players.set(query.id, player);
+					this.players.set(query.id, player);
 					this.connectionId.set(query.id, connectionId);
 				}
 			);
@@ -50,9 +86,18 @@ class GameService
 			this.networkManager.onMessage(
 				(connectionId, message) =>
 				{
+					console.log('📩 Message from client:', connectionId, message);
 					try
 					{
-						this.handleWebSocketMessage(message, this.connectionId.get(connectionId));
+						const player = this._getplayerByConnectionId(connectionId);
+						if (!player)
+						{
+							console.error('❌ Player not found for connectionId:', connectionId);
+							this.networkManager.send(connectionId, {type: 'error', payload: 'Player not found'});
+							this.networkManager.disconnectConnection(connectionId);
+							return;
+						}
+						this.handleWebSocketMessage(message, player.id);
 					}
 					catch (error)
 					{
@@ -66,7 +111,17 @@ class GameService
 				(connectionId) =>
 				{
 					//? bağlantısı koptuğunda yapılacaklar burada
-					this.connectionId.delete(connectionId);
+					const player = this._getplayerByConnectionId(connectionId);
+					if (!player)
+					{
+						console.error('❌ Player not found for disconnected connectionId:', connectionId);
+						return;
+					}
+					console.log('🔌 Client disconnected:', connectionId, 'Player ID:', player.id);
+					this.roomManager.leaveRoom(player.id);
+					this.players.delete(player.id);
+					this.connectionId.delete(player.id);
+
 				}
 			);
 
@@ -93,7 +148,7 @@ class GameService
 	handleWebSocketMessage(message, clientId)
 	{
 		//! jwt doğrulama burada yapılabilir
-		const player = this.Players.get(clientId);
+		const player = this.players.get(clientId);
 		if (!player)
 			throw new Error('Player not found for clientId: ' + clientId);
 		const [namespace, action] = message.type.split('/');
@@ -118,7 +173,7 @@ class GameService
 		players.forEach(p => {
 			const connId = this.connectionId.get(p.id);
 			if (connId)
-				this.networkManager.send(connId, JSON.stringify(message));
+				this.networkManager.send(connId, message);
 		});
 	}
 
@@ -154,13 +209,14 @@ class GameService
 				});
 
 				this.roomManager.on(`room${roomId}_Started`,
-					({ gameSettings, players, type}) =>
+					({gameSettings, players, gameMode}) =>
 					{
-						this._sendPlayers(players, { type: 'game/started' });
+						this._sendPlayers(players, { type: 'game/started' , payload: { gameMode: gameMode }});
 
 						//! sahne yüklenmeden oyunun hemen başlaması sıkıntı olabilir.
-						gameId = this.gameManager.createGame(type, gameSettings);
-						players.forEach((p) => this.gameManager.addPlayerToGame(type, gameId, this.Players.get(p.id)));
+						console.log("GAME MODE: ", gameMode);
+						const gameId = this.gameManager.createGame(gameMode, gameSettings);
+						players.forEach((p) => this.gameManager.addPlayerToGame(gameId, this.players.get(p.id)));
 						this.gameManager.on(`game${gameId}_StateUpdate`,
 							(gameState, players) => this._sendPlayers(players, { type: 'game/stateUpdate', payload: gameState })
 						);
@@ -181,7 +237,7 @@ class GameService
 				);
 				const connId = this.connectionId.get(roomState.host);
 				if (connId)
-					this.networkManager.send(connId, JSON.stringify({ type: 'room/created', payload: { roomId: roomState.id } }));
+					this.networkManager.send(connId, { type: 'room/created', payload: { roomId: roomState.id } });
 			}
 		);
 	}
@@ -190,7 +246,7 @@ class GameService
 	{
 		const connId = this.connectionId.get(playerId);
 		if (connId)
-			this.networkManager.send(connId, JSON.stringify({ type: 'error', payload: { message: errorMessage } }));
+			this.networkManager.send(connId, { type: 'error', payload: { message: errorMessage } });
 	}
 
 	stop()

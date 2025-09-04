@@ -74,7 +74,7 @@ class RoomManager extends EventEmitter
 				this.playerReadyStatus(player.id, payload.isReady);
 				break;
 			case 'startGame':
-				this.startGame(payload.roomId, player.id);
+				this.startGame(player.id);
 				break;
 			default:
 				throw new Error(`Unhandled room message type: ${message.type}`);
@@ -141,25 +141,28 @@ class RoomManager extends EventEmitter
 		this.notifyRoomUpdate(roomId);
 	}
 
-	leaveRoom(roomId, playerId)
+	leaveRoom(playerId)
 	{
-		const room = this.getRoom(roomId);
+		const room = this._getRoomWithPlayer(playerId);
 		if (!room)
-			throw new Error(`Room with ID ${roomId} does not exist`);
+		{
+			console.warn(`Player with ID ${playerId} is not in any room`);
+			return;
+		}
 		const playerIndex = room.players.findIndex(p => p.id === playerId);
 		if (playerIndex === -1)
-			throw new Error(`Player with ID ${playerId} is not in room ${roomId}`);
+			throw new Error(`Player with ID ${playerId} is not in room ${room.id}`);
 
 		room.players.splice(playerIndex, 1);
 		if (room.players.length === 0)
-			this.deleteRoom(roomId);
+			this.deleteRoom(room.id);
 		else if (room.host === playerId)
 			room.host = room.players[0].id; // Assign new host
 		room.status = 'waiting';
 
 		// Oda güncellenmesini bildir
 		if (room.players.length > 0) {
-			this.notifyRoomUpdate(roomId);
+			this.notifyRoomUpdate(room.id);
 		}
 		else {
 			this.emit(`room${room.id}_Deleted`);
@@ -192,6 +195,7 @@ class RoomManager extends EventEmitter
 				else
 					room.status = 'waiting';
 				this.notifyRoomUpdate(roomId);
+				return;
 			}
 		}
 		throw new Error(`Player with ID ${playerId} is not in any room`);
@@ -210,20 +214,27 @@ class RoomManager extends EventEmitter
 		return room;
 	}
 
-	startGame(roomId, hostId)
+	_getRoomWithPlayer(playerId)
 	{
-		const room = this.getRoom(roomId);
-		if (!room)
-			throw new Error(`Room with ID ${roomId} does not exist`);
+		for (const room of this.rooms.values())
+		{
+			if (room.players.find(p => p.id === playerId))
+				return room;
+		}
+		return null;
+	}
 
-		if (room.host !== hostId)
+	startGame(playerId)
+	{
+		const room = this._getRoomWithPlayer(playerId);
+		if (!room)
+			throw new Error(`Room with player ID ${playerId} does not exist`);
+
+		if (room.host !== playerId)
 			throw new Error('Only the host can start the game');
 
-		if (room.status !== 'startable')
-			throw new Error('Game can only be started when room status is startable');
-
-		if (room.players.length < 2)
-			throw new Error('At least 2 players are required to start the game');
+		if (room.players.length !== room.maxPlayers)
+			throw new Error('Room is not full');
 
 		const allPlayersReady = room.players.every(player => player.status === 'ready');
 		if (!allPlayersReady)
@@ -237,10 +248,11 @@ class RoomManager extends EventEmitter
 			gameMode: room.gameMode
 		});
 
-		this.notifyRoomUpdate(roomId);
+		this.notifyRoomUpdate(room.id);
 
 		return room;
 	}
+
 
 	_generateRoomId()
 	{

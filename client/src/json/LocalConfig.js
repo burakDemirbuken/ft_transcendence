@@ -1,43 +1,28 @@
 export default {
-	"canvasId": "renderCanvas",
-	"gameMode": "local",
-	"arcade":
+	canvasId: "renderCanvas",
+	gameMode: "local",
+	arcade:
 	{
-		"position":
+		position:
 		{
-			"x": 0,
-			"y": 0,
-			"z": 0
+			x: 0,
+			y: 0,
+			z: 0
 		},
-		"machine":
+		machine:
 		{
-			"path": "../models/arcade/classic/",
-			"model": "arcade.obj"
+			path: "../models/arcade/classic/",
+			model: "arcade.obj"
 		}
 	},
-	"gameRender":
+	gameSettings:
 	{
-		"colors":
-		{
-			"background": "#000000",
-			"paddle": "#FFFFFF",
-			"ball": "#FFFFFF",
-			"text": "#FFFFFF",
-			"accent": "#00FF00"
-		},
-		"paddleSize":
-		{
-			"height": 10
-		}
-	},
-	"gameSettings":
-	{
-		"paddleWidth": 10,
-		"paddleHeight": 100,
-		"paddleSpeed": 700,
-		"ballRadius": 7,
-		"ballSpeed": 600,
-		"ballSpeedIncrease": 100,
-		"maxScore": 11
+		paddleWidth: 10,
+		paddleHeight: 100,
+		paddleSpeed: 700,
+		ballRadius: 7,
+		ballSpeed: 600,
+		ballSpeedIncrease: 100,
+		maxScore: 11
 	}
 };

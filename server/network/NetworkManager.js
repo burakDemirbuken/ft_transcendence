@@ -38,16 +38,27 @@ class NetworkManager
 					{
 						const client = connection.socket;
 						const connectionId = this._generateConnectionId();
-						console.log('🟢 New WebSocket connection:', connectionId, req.query);
 						this.connections.set(connectionId, client);
 						onConnect(connectionId, req.query);
 
-						client.on('message', (message) => onMessage(connectionId, message));
+						client.on('message', (message) =>
+							{
+								try
+								{
+									const messageString = message.toString();
+									const parsedMessage = JSON.parse(messageString);
+									onMessage(connectionId, parsedMessage);
+								}
+								catch (error)
+								{
+									console.error('❌ Error parsing message:', error);
+									console.log('Raw message:', message);
+								}
+							});
 
 						client.on('close',
 							() =>
 							{
-								console.log('🔴 WebSocket connection closed:', connectionId);
 								this.connections.delete(connectionId);
 								onClose(connectionId);
 							}
@@ -90,7 +101,7 @@ class NetworkManager
 
 	onMessage(callback)
 	{
-		this.callbacks.onMessage = callback;
+		this.callbacks.onMessage= callback;
 	}
 
 	onClose(callback)
@@ -118,28 +129,6 @@ class NetworkManager
 		this.fastify.close();
 		this.connections.clear();
 		this.callbacks.clear();
-	}
-
-	broadcast(message)
-	{
-		const data = typeof message === 'string' ? message : JSON.stringify(message);
-		this.connections.forEach(
-			(client) =>
-			{
-				if (client.readyState === 1)
-				{
-					try
-					{
-						client.send(data);
-					}
-					catch (error)
-					{
-						console.error('❌ Error sending message to client:', error);
-						this.connections.delete(client);
-					}
-				}
-			}
-		);
 	}
 
 	send(connectionId, message)

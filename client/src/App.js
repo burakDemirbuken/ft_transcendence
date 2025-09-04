@@ -74,6 +74,17 @@ class App
 
 		this.networkManager.onMessage((data) =>
 		{
+			// Defensive programming: ensure data has the expected structure
+			if (!data || typeof data !== 'object') {
+				console.error('❌ Received invalid message format:', data);
+				return;
+			}
+
+			if (!data.type) {
+				console.error('❌ Received message without type field:', data);
+				return;
+			}
+
 			this.handleNetworkEvent(data.type, data.payload);
 		});
 
@@ -110,10 +121,14 @@ class App
 
 	}
 
+	startGame()
+	{
+		this.networkManager.send('room/startGame');
+	}
+
 	readyState(readyState)
 	{
 		this.networkManager.send('room/setReady', {isReady: readyState });
-		this.roomUi.updateReadyState(readyState);
 	}
 
 	_createRoom(mode)
@@ -121,7 +136,7 @@ class App
 		if (!this.networkManager.isConnect())
 			throw new Error('Not connected to server');
 		const data = {
-			mode: mode,
+			gameMode: mode,
 			host: this.playerId,
 			gameStettings: localGameConfig.gameSettings
 		};
@@ -178,7 +193,7 @@ class App
 				this._handleGameEvent(subEvent, data);
 				break;
 			case 'error':
-				this.roomUi.showGameError(data.message || 'An unknown error occurred');
+				this.roomUi.showGameError(data || 'Unknown error from server');
 				break;
 			default:
 				console.log('Unhandled network event:', eventType, data);
@@ -204,6 +219,7 @@ class App
 				this.gameRenderer.initialize({
 						canvasId: "renderCanvas",
 						gameMode: data.gameMode,
+						gameRender: localGameConfig.gameRender,
 					}).then(
 					() =>
 					{
