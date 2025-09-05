@@ -186,6 +186,7 @@
             </div>
         </section>
         <!-- Tournaments Tab -->
+
         <section id="tournaments" class="tab-content">
             <div class="tournaments-header">
                 <h3><i class="fa-solid fa-trophy"></i> Turnuva Geçmişi</h3>
@@ -203,223 +204,53 @@
                     </select>
                 </div>
             </div>
-            <div class="tournaments-grid">
-                <!-- Turnuva Kartları -->
-                <div class="tournament-card" data-year="2025" data-type="league">
-                    <div class="tournament-header">
-                        <div class="tournament-badge elite">
-                            <i class="fa-solid fa-crown"></i>
-                        </div>
-                        <div class="tournament-info">
-                            <h4 class="tournament-name">Neon Masters League 2025</h4>
-                            <span class="tournament-date">15 Temmuz - 30 Temmuz 2025</span>
-                        </div>
-                        <div class="tournament-result gold">
-                            <i class="fa-solid fa-medal"></i>
-                            <span>1.</span>
-                        </div>
-                    </div>
-                    <div class="tournament-stats">
-                        <div class="tournament-stat">
-                            <span class="stat-label">Maçlar</span>
-                            <span class="stat-value">12/12</span>
-                        </div>
-                        <div class="tournament-stat">
-                            <span class="stat-label">G/M</span>
-                            <span class="stat-value">11/1</span>
-                        </div>
-                        <div class="tournament-stat">
-                            <span class="stat-label">Puan</span>
-                            <span class="stat-value">1250</span>
-                        </div>
-                    </div>
-                    <div class="tournament-details">
-                        <div class="tournament-highlight">
-                            <span>En İyi Performans:</span> NeonKiller'a karşı 11-2
-                        </div>
-                        <button class="view-details-btn">
-                            <i class="fa-solid fa-chevron-down"></i> Detayları Göster
-                        </button>
-                        <div class="tournament-matches-detail">
-                            <div class="tournament-match win">
-                                <span class="match-round">Final</span>
-                                <span class="match-opponent">CyberPaddle</span>
-                                <span class="match-score">11-7</span>
-                            </div>
-                            <div class="tournament-match win">
-                                <span class="match-round">Yarı Final</span>
-                                <span class="match-opponent">TableMaster</span>
-                                <span class="match-score">11-9</span>
-                            </div>
-                            <div class="tournament-match win">
-                                <span class="match-round">Çeyrek Final</span>
-                                <span class="match-opponent">NeonKiller</span>
-                                <span class="match-score">11-2</span>
-                            </div>
-                        </div>
-                    </div>
+            <div class="tournament-table" id="tournament-table">
+                <div class="tournament-row header">
+                    <span>Turnuva Adı</span><span>Başlangıç</span><span>Bitiş</span><span>Toplam Maç</span>
                 </div>
-                <div class="tournament-card" data-year="2025" data-type="knockout">
-                    <div class="tournament-header">
-                        <div class="tournament-badge premium">
-                            <i class="fa-solid fa-star"></i>
-                        </div>
-                        <div class="tournament-info">
-                            <h4 class="tournament-name">Neon Cup 2025</h4>
-                            <span class="tournament-date">5 Haziran - 10 Haziran 2025</span>
-                        </div>
-                        <div class="tournament-result silver">
-                            <i class="fa-solid fa-medal"></i>
-                            <span>2.</span>
-                        </div>
-                    </div>
-                    <div class="tournament-stats">
-                        <div class="tournament-stat">
-                            <span class="stat-label">Maçlar</span>
-                            <span class="stat-value">8/8</span>
-                        </div>
-                        <div class="tournament-stat">
-                            <span class="stat-label">G/M</span>
-                            <span class="stat-value">7/1</span>
-                        </div>
-                        <div class="tournament-stat">
-                            <span class="stat-label">Puan</span>
-                            <span class="stat-value">850</span>
-                        </div>
-                    </div>
-                    <div class="tournament-details">
-                        <div class="tournament-highlight">
-                            <span>En İyi Performans:</span> PongPro'ya karşı 11-4
-                        </div>
-                        <button class="view-details-btn">
-                            <i class="fa-solid fa-chevron-down"></i> Detayları Göster
-                        </button>
-                        <div class="tournament-matches-detail">
-                            <div class="tournament-match loss">
-                                <span class="match-round">Final</span>
-                                <span class="match-opponent">TableMaster</span>
-                                <span class="match-score">8-11</span>
-                            </div>
-                            <div class="tournament-match win">
-                                <span class="match-round">Yarı Final</span>
-                                <span class="match-opponent">PongPro</span>
-                                <span class="match-score">11-4</span>
-                            </div>
-                            <div class="tournament-match win">
-                                <span class="match-round">Çeyrek Final</span>
-                                <span class="match-opponent">NeonSmasher</span>
-                                <span class="match-score">11-6</span>
-                            </div>
-                        </div>
-                    </div>
+				<!-- Burası database eklendikten sonra silinecek (BAŞLANGIÇ) -->
+                <div class="tournament-row"
+                     data-name="Yaz Turnuvası"
+                     data-start="2025-07-01"
+                     data-end="2025-07-15"
+                     data-matches="12"
+                     data-players='[
+                       {"etap":0, "kutu":1, "kazanan":true, "skor":11, "text":"Oyuncu 1"},
+                       {"etap":0, "kutu":2, "kazanan":false, "skor":1, "text":"Oyuncu 2"},
+                       {"etap":0, "kutu":3, "kazanan":true, "skor":11, "text":"Oyuncu 3"},
+                       {"etap":0, "kutu":4, "kazanan":false, "skor":0, "text":"Oyuncu 4"},
+                       {"etap":1, "kutu":1, "kazanan":null, "text":"Oyuncu 1"},
+                       {"etap":1, "kutu":2, "kazanan":null, "text":"Oyuncu 2"},
+                     ]'>
+                    <span>Yaz Turnuvası</span><span>01.07.2025</span><span>15.07.2025</span><span>12</span>
                 </div>
-                <div class="tournament-card" data-year="2025" data-type="special">
-                    <div class="tournament-header">
-                        <div class="tournament-badge special">
-                            <i class="fa-solid fa-bolt"></i>
-                        </div>
-                        <div class="tournament-info">
-                            <h4 class="tournament-name">Neon Blitz Turnuvası</h4>
-                            <span class="tournament-date">15 Mayıs 2025</span>
-                        </div>
-                        <div class="tournament-result bronze">
-                            <i class="fa-solid fa-medal"></i>
-                            <span>3.</span>
-                        </div>
-                    </div>
-                    <div class="tournament-stats">
-                        <div class="tournament-stat">
-                            <span class="stat-label">Maçlar</span>
-                            <span class="stat-value">5/5</span>
-                        </div>
-                        <div class="tournament-stat">
-                            <span class="stat-label">G/M</span>
-                            <span class="stat-value">3/2</span>
-                        </div>
-                        <div class="tournament-stat">
-                            <span class="stat-label">Puan</span>
-                            <span class="stat-value">350</span>
-                        </div>
-                    </div>
-                    <div class="tournament-details">
-                        <div class="tournament-highlight">
-                            <span>En İyi Performans:</span> GlowPaddle'a karşı 11-3
-                        </div>
-                        <button class="view-details-btn">
-                            <i class="fa-solid fa-chevron-down"></i> Detayları Göster
-                        </button>
-                        <div class="tournament-matches-detail">
-                            <div class="tournament-match loss">
-                                <span class="match-round">Yarı Final</span>
-                                <span class="match-opponent">CyberPaddle</span>
-                                <span class="match-score">9-11</span>
-                            </div>
-                            <div class="tournament-match win">
-                                <span class="match-round">Çeyrek Final</span>
-                                <span class="match-opponent">GlowPaddle</span>
-                                <span class="match-score">11-3</span>
-                            </div>
-                            <div class="tournament-match win">
-                                <span class="match-round">İlk Tur</span>
-                                <span class="match-opponent">NeonRookie</span>
-                                <span class="match-score">11-5</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="tournament-row"
+                     data-name="Bahar Turnuvası"
+                     data-start="2025-05-20"
+                     data-end="2025-06-01"
+                     data-matches="33"
+                     data-players='[
+                       {"etap":0, "kutu":1, "kazanan":true, "skor":11, "text":"Oyuncu 1"},
+                       {"etap":0, "kutu":2, "kazanan":false, "skor":1, "text":"Oyuncu 2"},
+                       {"etap":0, "kutu":3, "kazanan":true, "skor":11, "text":"Oyuncu 3"},
+                       {"etap":0, "kutu":4, "kazanan":false, "skor":0, "text":"Oyuncu 4"},
+                       {"etap":0, "kutu":5, "kazanan":false, "skor":0, "text":"Oyuncu 5"},
+                       {"etap":0, "kutu":6, "kazanan":true, "skor":0, "text":"Oyuncu 6"},
+                       {"etap":0, "kutu":7, "kazanan":false, "skor":0, "text":"Oyuncu 7"},
+                       {"etap":0, "kutu":8, "kazanan":true, "skor":0, "text":"Oyuncu 8"},
+                       {"etap":1, "kutu":1, "kazanan":null, "text":"Oyuncu 1"},
+                       {"etap":1, "kutu":2, "kazanan":null, "text":"Oyuncu 2"},
+                       {"etap":1, "kutu":3, "kazanan":null, "text":"Oyuncu 3"},
+                       {"etap":1, "kutu":4, "kazanan":null, "text":"Oyuncu 4"}
+                     ]'>
+                    <span>Kış Turnuvası</span><span>20.05.2025</span><span>01.06.2025</span><span>33</span>
                 </div>
-                <div class="tournament-card" data-year="2024" data-type="league">
-                    <div class="tournament-header">
-                        <div class="tournament-badge elite">
-                            <i class="fa-solid fa-crown"></i>
-                        </div>
-                        <div class="tournament-info">
-                            <h4 class="tournament-name">Neon Masters League 2024</h4>
-                            <span class="tournament-date">10 Temmuz - 25 Temmuz 2024</span>
-                        </div>
-                        <div class="tournament-result top8">
-                            <i class="fa-solid fa-award"></i>
-                            <span>5.</span>
-                        </div>
-                    </div>
-                    <div class="tournament-stats">
-                        <div class="tournament-stat">
-                            <span class="stat-label">Maçlar</span>
-                            <span class="stat-value">8/12</span>
-                        </div>
-                        <div class="tournament-stat">
-                            <span class="stat-label">G/M</span>
-                            <span class="stat-value">5/3</span>
-                        </div>
-                        <div class="tournament-stat">
-                            <span class="stat-label">Puan</span>
-                            <span class="stat-value">450</span>
-                        </div>
-                    </div>
-                    <div class="tournament-details">
-                        <div class="tournament-highlight">
-                            <span>En İyi Performans:</span> PaddlePro'ya karşı 11-6
-                        </div>
-                        <button class="view-details-btn">
-                            <i class="fa-solid fa-chevron-down"></i> Detayları Göster
-                        </button>
-                        <div class="tournament-matches-detail">
-                            <div class="tournament-match loss">
-                                <span class="match-round">Çeyrek Final</span>
-                                <span class="match-opponent">TableMaster</span>
-                                <span class="match-score">7-11</span>
-                            </div>
-                            <div class="tournament-match win">
-                                <span class="match-round">Son 16</span>
-                                <span class="match-opponent">PaddlePro</span>
-                                <span class="match-score">11-6</span>
-                            </div>
-                            <div class="tournament-match win">
-                                <span class="match-round">Grup Aşaması</span>
-                                <span class="match-opponent">NeonBeginner</span>
-                                <span class="match-score">11-2</span>
-                            </div>
-                        </div>
-                    </div>
+				<!-- Burası database eklendikten sonra silinecek (BİTİŞ) -->
+            </div>
+			<div id="overlay">
+                <div id="turnuva-wrapper">
+                    <div id="turnuva"></div>
+                    <div id="close-btn">×</div>
                 </div>
             </div>
         </section>
