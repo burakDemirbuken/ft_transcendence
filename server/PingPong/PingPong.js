@@ -10,7 +10,7 @@ class PingPong extends EventEmitter
 	{
 		super();
 		this.status = 'not initialized'; // 'waiting', 'playing', 'paused', 'finished', 'not initialized'
-		this.gameMode = property.gameMode || 'online'; // 'local', 'online', 'tournament', 'ai'
+		this.gameMode = property.gameMode; // 'local', 'online', 'tournament', 'ai'
 
 		this.deltaTime = 0;
 		this.lastUpdateTime = 0;
@@ -26,8 +26,6 @@ class PingPong extends EventEmitter
 		this.players = []; // Player instances
 
 		this.team = new Map(); // number -> { playersId: [], score: 0 }
-
-		console.log(`🆕 Game created with settings: ${JSON.stringify(this.settings)}`);
 	}
 
 	addPlayer(player)

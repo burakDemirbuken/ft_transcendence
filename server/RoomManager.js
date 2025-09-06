@@ -85,6 +85,7 @@ class RoomManager extends EventEmitter
 	{
 		//this._validateRoomCreation(hostId, properties);
 
+		console.log('Creating room with payload:', payload);
 		const roomId = this._generateRoomId();
 		let maxPlayers = 2;
 		if (payload.gameMode === 'classic')
@@ -105,9 +106,10 @@ class RoomManager extends EventEmitter
 			players: [],
 			//? izleyiciler eklenebilir mi?
 			spectators: [],
-			gameSettings: payload.gameSettings || {},
+			gameSettings: payload.gameSettings,
 			createdAt: Date.now()
 		};
+		console.log('Room created:', room);
 		this.rooms.set(roomId, room);
 		this.emit(`room_Created`, { roomState: room });
 	}

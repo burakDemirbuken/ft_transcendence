@@ -36,7 +36,7 @@ class GameService
 				console.log('-------------------------');
 				console.log('--- Active Rooms ---');
 				this.roomManager.rooms.forEach((room) => {
-					console.log(`Room ${room.id}:\n\tType: ${room.type}\n\tHost: ${room.host}\n\tPlayers: ${room.players.length}/${room.maxPlayers}\n\tStatus: ${room.status}`);
+					console.log(`Room ${room.id}:\n\tGame Mode: ${room.gameMode}\n\tHost: ${room.host}\n\tPlayers: ${room.players.length}/${room.maxPlayers}\n\tStatus: ${room.status}`);
 					console.log('\tPlayer List:');
 					room.players.forEach((p) => {
 						console.log(`\t\t- ${p.name} (id: ${p.id}, status: ${p.status}, isHost: ${p.isHost})`);
@@ -45,8 +45,19 @@ class GameService
 				});
 				console.log('-------------------------');
 				console.log('');
+				console.log('--- Active Games ---');
+				this.gameManager.games.forEach((game) => {
+					console.log(`Game ${game.id}:\n\tMode: ${game.gameMode}\n\tStatus: ${game.status}\n\tPlayers: ${game.players.length}`);
+					console.log('\tPlayer List:');
+					game.players.forEach((p) => {
+						console.log(`\t\t- ${p.name} (id: ${p.id})`);
+					});
+					console.log('');
+				});
+				console.log('-------------------------');
+				console.log('');
 			},
-			1000
+			5000
 		);
 	}
 
@@ -177,27 +188,6 @@ class GameService
 		});
 	}
 
-	_handleTornamentMessage(action, payload, player)
-	{
-		switch (action)
-		{
-			case 'create':
-				this.tournamentManager.createTournament(player.id, payload.name, payload.settings);
-				break;
-			case 'join':
-				this.tournamentManager.joinTournament(payload.tournamentId, player);
-				break;
-			case 'leave':
-				this.tournamentManager.leaveTournament(payload.tournamentId, player.id);
-				break;
-			case 'start':
-				this.tournamentManager.startTournament(payload.tournamentId, player.id);
-				break;
-			default:
-				throw new Error(`Unhandled tournament message type: ${message.type}`);
-		}
-	}
-
 	setupRoomEvents()
 	{
 		this.roomManager.on('room_Created',
@@ -214,7 +204,9 @@ class GameService
 						this._sendPlayers(players, { type: 'game/started' , payload: { gameMode: gameMode }});
 
 						//! sahne yüklenmeden oyunun hemen başlaması sıkıntı olabilir.
-						console.log("GAME MODE: ", gameMode);
+						console.log("gameMode:", gameMode);
+						console.log('Starting game for room:', roomId, 'with players:', players.map(p => p.id));
+						console.log('Game settings:', gameSettings);
 						const gameId = this.gameManager.createGame(gameMode, gameSettings);
 						players.forEach((p) => this.gameManager.addPlayerToGame(gameId, this.players.get(p.id)));
 						this.gameManager.on(`game${gameId}_StateUpdate`,

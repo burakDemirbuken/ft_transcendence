@@ -24,16 +24,16 @@ class GameRenderer extends EventEmitter
 // oyun başladığında initialize edilecek sahne yüklenecek oyun oynanmaya hazır hale gelecek
 	async initialize(gameConfig)
 	{
+		console.log('🚀 Initializing game renderer with config:', gameConfig);
 		if (!gameConfig || !gameConfig.canvasId)
 			throw new Error('Game configuration is missing canvasId');
 		this.canvas = document.getElementById(gameConfig.canvasId);
 		if (!this.canvas)
 			throw new Error('Canvas is missing');
-
-		if (!gameConfig.gameRender)
+		if (!gameConfig.renderConfig)
 			throw new Error('Game render configuration is missing');
 		await this.gameCore.initialize(this.canvas, gameConfig.arcade);
-		this.renderer.initialize(gameConfig.gameRender);
+		this.renderer.initialize(gameConfig.renderConfig);
 		switch (gameConfig.gameMode)
 		{
 			case 'local':
@@ -59,16 +59,18 @@ class GameRenderer extends EventEmitter
 		}
 	}
 
-	async _localGameInitialize()
+	async _localGameInitialize(config)
 	{
-		this._singleArcadeInitialize();
+		this._singleArcadeInitialize(config);
 	}
 
-	async  _singleArcadeInitialize()
+	async  _singleArcadeInitialize(config)
 	{
 		const mainMachine = new ArcadeMachine(this.gameCore.scene);
-		await mainMachine.load(gameConfig.arcade);
-		this.gameCore.setCameraPosition({x: mainMachine.position.x, y: mainMachine.position.y + 4.5, z: mainMachine.position.z + 2.5}, mainMachine.position);
+		await mainMachine.load(config.arcade);
+		this.gameCore.setCameraPosition(
+			{x: mainMachine.position.x, y: mainMachine.position.y + 4.5, z: mainMachine.position.z + 2.5},
+			{ x: mainMachine.position.x, y: mainMachine.position.y + 3.75, z: mainMachine.position.z });
 		this.arcadeMachines.set('main', mainMachine);
 	}
 

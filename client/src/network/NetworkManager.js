@@ -41,6 +41,7 @@ class NetworkManager
 					const data = event.data;
 					const stringData = data.toString();
 					const parsedData = JSON.parse(stringData);
+					console.log('📩 Received message:', parsedData);
 					onMessage(parsedData);
 				} catch (error) {
 					console.error('❌ Failed to parse WebSocket message:', error);

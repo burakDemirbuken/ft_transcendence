@@ -5,6 +5,11 @@ import RoomUi from './RoomUi.js';
 //!
 import localGameConfig from './json/LocalConfig.js';
 import InputManager from './input/InputManager.js';
+import rendererConfig from './json/rendererConfig.js';
+
+
+
+
 
 class App
 {
@@ -136,9 +141,10 @@ class App
 		if (!this.networkManager.isConnect())
 			throw new Error('Not connected to server');
 		const data = {
+			name: `${this.playerName}'s Room`,
 			gameMode: mode,
 			host: this.playerId,
-			gameStettings: localGameConfig.gameSettings
+			gameSettings: localGameConfig.gameSettings
 		};
 		this.networkManager.send('room/create', data);
 	}
@@ -215,11 +221,58 @@ class App
 	{
 		switch (subEvent)
 		{
+			/*
+{
+	type: "config",
+
+	payload:
+	{
+		arcade:
+		{
+			position:
+			{
+				x: 0,
+				y: 0,
+				z: 0
+			},
+			type: "classic", // "classic", "modern", "pong1971"
+			machine:
+			{
+				path: "../models/arcade/classic/",
+				model: "arcade.obj",
+				colors:
+				{
+					body: "#FF0000",
+					sides: "#00FF00",
+					joystick: "#0000FF",
+					buttons: "#FFFF00"
+				}
+			}
+		},
+		gameRender:
+		{
+			colors:
+			{
+				background: "#000000",
+				paddle: "#FFFFFF",
+				ball: "#FFFFFF",
+				text: "#FFFFFF",
+				accent: "#00FF00"
+			},
+			paddleSize:
+			{
+				width: 10,
+			}
+		},
+	}
+};
+*/
 			case 'started':
 				this.gameRenderer.initialize({
 						canvasId: "renderCanvas",
 						gameMode: data.gameMode,
-						gameRender: localGameConfig.gameRender,
+						renderConfig: rendererConfig,
+						arcade: localGameConfig.arcade
 					}).then(
 					() =>
 					{
@@ -229,6 +282,7 @@ class App
 						console.error('❌ Error initializing game renderer:', error);
 					}
 				);
+				this.roomUi.showGameUI();
 
 				break;
 			default:

@@ -154,9 +154,8 @@ attachCameraToMachineFront(machineId, distance = 5, height = 2) {
 
 	setCameraPosition(newPosition, targetPosition)
 	{
-		this.camera.position = newPosition;
-		if (targetPosition)
-			this.camera.setTarget(targetPosition);
+		this.camera.position = new BABYLON.Vector3(newPosition.x, newPosition.y, newPosition.z);
+		this.camera.setTarget(new BABYLON.Vector3(targetPosition.x, targetPosition.y, targetPosition.z));
 	}
 
 	async setupSingleMachine()
