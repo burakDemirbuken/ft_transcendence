@@ -3,12 +3,9 @@ import GameRenderer from "./GameRenderer.js";
 import RoomUi from './RoomUi.js';
 
 //!
-import localGameConfig from './json/LocalConfig.js';
+import gameConfig from './json/GameConfig.js';
 import InputManager from './input/InputManager.js';
 import rendererConfig from './json/rendererConfig.js';
-
-
-
 
 
 class App
@@ -32,24 +29,24 @@ class App
 		this.inputManager.onKey("w",
 			() =>
 			{
-				this.gameRenderer.joystickMove(1, 'up');
+				// this.gameRenderer.joystickMove(1, 'up');
 				this.networkManager.send('game/playerAction', {key: "w", action: true});
 			},
 			() =>
 			{
-				this.gameRenderer.joystickMove(1, 'neutral');
+				// this.gameRenderer.joystickMove(1, 'neutral');
 				this.networkManager.send('game/playerAction', {key: "w", action: false});
 			}
 		);
 		this.inputManager.onKey("s",
 			() =>
 			{
-				this.gameRenderer.joystickMove(1, 'down');
+				// this.gameRenderer.joystickMove(1, 'down');
 				this.networkManager.send('game/playerAction', {key: "s", action: true});
 			},
 			() =>
 			{
-				this.gameRenderer.joystickMove(1, 'neutral');
+				// this.gameRenderer.joystickMove(1, 'neutral');
 				this.networkManager.send('game/playerAction', {key: "s", action: false});
 			}
 		);
@@ -116,14 +113,15 @@ class App
 		this.loadGame("ai");
 	}
 
-	customGame()
+	createRoom()
 	{
 		this._createRoom('classic');
 	}
 
-	joinCustomRoom()
+	joinRoom()
 	{
-
+		const roomId = document.getElementById('roomId').value;
+		this._joinRoom(roomId);
 	}
 
 	startGame()
@@ -221,58 +219,20 @@ class App
 	{
 		switch (subEvent)
 		{
-			/*
-{
-	type: "config",
-
-	payload:
-	{
-		arcade:
-		{
-			position:
-			{
-				x: 0,
-				y: 0,
-				z: 0
-			},
-			type: "classic", // "classic", "modern", "pong1971"
-			machine:
-			{
-				path: "../models/arcade/classic/",
-				model: "arcade.obj",
-				colors:
-				{
-					body: "#FF0000",
-					sides: "#00FF00",
-					joystick: "#0000FF",
-					buttons: "#FFFF00"
-				}
-			}
-		},
-		gameRender:
-		{
-			colors:
-			{
-				background: "#000000",
-				paddle: "#FFFFFF",
-				ball: "#FFFFFF",
-				text: "#FFFFFF",
-				accent: "#00FF00"
-			},
-			paddleSize:
-			{
-				width: 10,
-			}
-		},
-	}
-};
-*/
 			case 'started':
 				this.gameRenderer.initialize({
 						canvasId: "renderCanvas",
 						gameMode: data.gameMode,
-						renderConfig: rendererConfig,
-						arcade: localGameConfig.arcade
+						renderConfig:
+						{
+							...rendererConfig,
+							paddleSize:
+							{
+								width: gameConfig.gameSettings.paddleWidth,
+								height: gameConfig.gameSettings.paddleHeight
+							},
+						},
+						arcade: gameConfig.arcade
 					}).then(
 					() =>
 					{
@@ -282,8 +242,12 @@ class App
 						console.error('❌ Error initializing game renderer:', error);
 					}
 				);
-				this.roomUi.showGameUI();
-
+				this.roomUi.hideGameUI();
+				this.gameRenderer.startRendering();
+				break;
+			case 'stateUpdate':
+				//! 2. parametre değişecek
+				this.gameRenderer.gameState = data.gameData;
 				break;
 			default:
 				console.log('Unhandled game event:', subEvent, data);

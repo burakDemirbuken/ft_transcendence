@@ -21,15 +21,29 @@ class GameManager extends EventEmitter
 		return id;
 	}
 
+	removePlayerFromGame(playerId)
+	{
+		for (const [gameId, game] of this.games.entries())
+		{
+			if (game.hasPlayer(playerId))
+			{
+				game.removePlayer(playerId);
+				console.log(`👤 Player ${playerId} removed from game ${gameId}`);
+				if (game.players.length === 0)
+				{
+					this.removeGame(gameId);
+				}
+				return;
+			}
+		}
+	}
+
 	handleGameMessage(action, payload, player)
 	{
 		switch (action)
 		{
 			case 'playerAction':
-				const player = this.getPlayerGame(player.id);
-				if (!player)
-					throw new Error(`Player ${player.id} is not in any game`);
-				player.handlePlayerAction(payload);
+				player.inputsSet(payload.key, payload.action);
 				break;
 			default:
 				throw new Error(`Unhandled game message type: ${message.type}`);
@@ -149,7 +163,7 @@ class GameManager extends EventEmitter
 			if (game.isRunning())
 			{
 				game.update(deltaTime);
-				this.emit(`game${game.id}_StateUpdate`, {state: game.getGameState(), players: game.players.map(p => p.id)});
+				this.emit(`game${gameId}_StateUpdate`, {gameState: game.getGameState(), players: game.players.map(p => p.id)});
 			}
 		}
 	}

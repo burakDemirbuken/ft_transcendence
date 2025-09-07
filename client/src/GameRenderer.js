@@ -14,6 +14,7 @@ class GameRenderer extends EventEmitter
 		this.arcadeMachines = new Map();
 		this.renderer = new Renderer(this.gameCore);
 		this.gameState = null;
+		this.currentGameMode = null;
 
 		// ? this.gameStateManager = new GameStateManager();
 		this.isRunning = false;
@@ -34,7 +35,8 @@ class GameRenderer extends EventEmitter
 			throw new Error('Game render configuration is missing');
 		await this.gameCore.initialize(this.canvas, gameConfig.arcade);
 		this.renderer.initialize(gameConfig.renderConfig);
-		switch (gameConfig.gameMode)
+		this.currentGameMode = gameConfig.gameMode;
+		switch (this.currentGameMode)
 		{
 			case 'local':
 				this._localGameInitialize(gameConfig);
@@ -74,47 +76,46 @@ class GameRenderer extends EventEmitter
 		this.arcadeMachines.set('main', mainMachine);
 	}
 
-	handleStateChange(data)
-	{
-		const { oldState, newState } = data;
-
-		switch (newState)
-		{
-			case 'ready':
-				this.renderer.renderWaitingScreen('Hazır...');
-				break;
-			case 'waiting':
-				this.renderer.renderWaitingScreen();
-				break;
-			case 'playing':
-				// Oyun modu aktif edilecek
-				break;
-			case 'gameOver':
-				// Game over ekranı
-				break;
-		}
-	}
-
-	startGame()
+	startRendering()
 	{
 		this.isRunning = true;
 		this.gameLoop();
 	}
 
-	render(data, machine)
+	//! machine name değişecek
+	render(data)
 	{
 		if (!this.isRunning)
 			return;
+		let machine;
+		if (this.currentGameMode === "local" || this.currentGameMode === "classic" || this.currentGameMode === "ai")
+			machine = this.arcadeMachines.get('main');
+		else
+			throw new Error(`Unknown game mode for rendering: ${this.currentGameMode}`);
+		if (!machine)
+		{
+			this.renderer.renderWaitingScreen('No arcade machines available for rendering', 'main');
+			return;
+		}
+		this._renderMachine(data, machine);
+	}
+
+	_renderMachine(data, machine)
+	{
+		if (!machine)
+			throw new Error('Arcade machine not found for rendering');
 		this.renderer.renderGame(data, machine);
-		if (machine && typeof machine.updatePreview === 'function')
-			machine.updatePreview();
+		machine.updatePreview();
 	}
 
 	gameLoop()
 	{
 		if (!this.isRunning)
 			return;
-		this.render(this.gameState, this.gameCore.getMachine("main"));
+		if (this.gameState)
+			this.render(this.gameState);
+		else
+			this.renderer.renderWaitingScreen("Waiting for game state...", 'main');
 		requestAnimationFrame(() => this.gameLoop());
 	}
 

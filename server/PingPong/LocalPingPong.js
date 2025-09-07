@@ -23,9 +23,6 @@ class LocalPingPong extends PingPong
 
 	paddleControls()
 	{
-		if (this.players.length === 0)
-			return;
-
 		const player = this.players[0];
 		const localPlayer = this.paddles.get(this.players[0].id);
 		const localPaddle = this.paddles.get("Player2");

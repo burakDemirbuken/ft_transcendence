@@ -170,10 +170,7 @@ class Renderer
 		if (gameData.players)
 		{
 			gameData.players.forEach(
-				(player) =>
-				{
-					this.renderPaddle(ctx, player.position);
-				});
+				(player) => this.renderPaddle(ctx, player.position));
 		}
 		if (gameData.ball)
 			this.renderBall(ctx, gameData.ball);

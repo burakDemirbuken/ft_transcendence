@@ -41,6 +41,31 @@ class PingPong extends EventEmitter
 		}
 	}
 
+	removePlayer(playerId)
+	{
+		const playerIndex = this.players.findIndex(p => p.id === playerId);
+		if (playerIndex !== -1)
+		{
+			this.players.splice(playerIndex, 1);
+			this.paddles.delete(playerId);
+			for (const [teamNumber, teamInfo] of this.team.entries())
+			{
+				const index = teamInfo.playersId.indexOf(playerId);
+				if (index !== -1)
+				{
+					teamInfo.playersId.splice(index, 1);
+					if (teamInfo.playersId.length === 0)
+						this.team.delete(teamNumber);
+					break;
+				}
+			}
+		}
+		else
+		{
+			console.warn(`⚠️ Player ${playerId} not found in game`);
+		}
+	}
+
 	createPaddle(number)
 	{
 		let paddlePos = { x: 0, y: this.settings.canvasHeight / 2 - this.settings.paddleHeight / 2 };
@@ -232,7 +257,7 @@ class PingPong extends EventEmitter
 		{
 			this.initializeGame();
 		}
-
+		console.log('▶️ Starting game...');
 		this.status = 'countdown';
 		const interval = setInterval(() =>
 		{

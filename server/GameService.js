@@ -59,6 +59,7 @@ class GameService
 			},
 			5000
 		);
+		this.gameManager.start();
 	}
 
 	_getplayerByConnectionId(connectionId)
@@ -97,7 +98,6 @@ class GameService
 			this.networkManager.onMessage(
 				(connectionId, message) =>
 				{
-					console.log('📩 Message from client:', connectionId, message);
 					try
 					{
 						const player = this._getplayerByConnectionId(connectionId);
@@ -130,6 +130,7 @@ class GameService
 					}
 					console.log('🔌 Client disconnected:', connectionId, 'Player ID:', player.id);
 					this.roomManager.leaveRoom(player.id);
+					this.gameManager.removePlayerFromGame(player.id);
 					this.players.delete(player.id);
 					this.connectionId.delete(player.id);
 
@@ -204,18 +205,15 @@ class GameService
 						this._sendPlayers(players, { type: 'game/started' , payload: { gameMode: gameMode }});
 
 						//! sahne yüklenmeden oyunun hemen başlaması sıkıntı olabilir.
-						console.log("gameMode:", gameMode);
-						console.log('Starting game for room:', roomId, 'with players:', players.map(p => p.id));
-						console.log('Game settings:', gameSettings);
 						const gameId = this.gameManager.createGame(gameMode, gameSettings);
 						players.forEach((p) => this.gameManager.addPlayerToGame(gameId, this.players.get(p.id)));
 						this.gameManager.on(`game${gameId}_StateUpdate`,
-							(gameState, players) => this._sendPlayers(players, { type: 'game/stateUpdate', payload: gameState })
+							({gameState, players}) => this._sendPlayers(this.getPlayers(players), { type: 'game/stateUpdate', payload: gameState })
 						);
 						this.gameManager.on(`game${gameId}_Ended`,
 							(results, players) =>
 							{
-								this._sendPlayers(players, { type: 'game/ended', payload: results });
+								this._sendPlayers(this.getPlayers(players), { type: 'game/ended', payload: results });
 								//? oyun bittiğinde yapılacak işlemler
 							}
 						);
@@ -232,6 +230,23 @@ class GameService
 					this.networkManager.send(connId, { type: 'room/created', payload: { roomId: roomState.id } });
 			}
 		);
+	}
+
+	getPlayer(playerId)
+	{
+		return this.players.get(playerId);
+	}
+
+	getPlayers(playerIds)
+	{
+		let players = [];
+		playerIds.forEach(id => {
+			const player = this.getPlayer(id);
+			if (player)
+				players.push(player);
+		});
+		return players;
+
 	}
 
 	_sendErrorToPlayer(playerId, errorMessage)

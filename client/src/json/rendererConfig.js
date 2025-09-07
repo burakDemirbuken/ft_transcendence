@@ -1,4 +1,5 @@
 export default {
+	canvasId: "renderCanvas",
 	colors:
 	{
 		background: "#000000",
@@ -9,6 +10,11 @@ export default {
 	},
 	paddleSize:
 	{
-		height: 10
+		width: 10,
+		height: 100
+	},
+	ball:
+	{
+		radius: 7
 	}
 };
