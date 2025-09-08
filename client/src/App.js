@@ -110,7 +110,7 @@ class App
 
 	aiGame()
 	{
-		this.loadGame("ai");
+		this._createRoom("ai");
 	}
 
 	createRoom()
@@ -142,7 +142,7 @@ class App
 			name: `${this.playerName}'s Room`,
 			gameMode: mode,
 			host: this.playerId,
-			gameSettings: localGameConfig.gameSettings
+			gameSettings: gameConfig.gameSettings
 		};
 		this.networkManager.send('room/create', data);
 	}
@@ -232,7 +232,11 @@ class App
 								height: gameConfig.gameSettings.paddleHeight
 							},
 						},
-						arcade: gameConfig.arcade
+						arcade:
+						{
+							position: { x: 0, y: 0, z: 0 },
+
+						}
 					}).then(
 					() =>
 					{
