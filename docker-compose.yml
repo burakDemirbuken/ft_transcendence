@@ -6,7 +6,20 @@ services:
     image: game-server
     container_name: game-server
     ports:
-      - "3000:3000"
+      - "3001:3001"
     volumes:
       - ./server:/app
+      - /app/node_modules
+    depends_on:
+      - ai
+  ai:
+    build:
+      context: ./ai/ai_transcendence
+      dockerfile: Dockerfile
+    image: ai-server
+    container_name: ai-server
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./ai/ai_transcendence:/app
       - /app/node_modules

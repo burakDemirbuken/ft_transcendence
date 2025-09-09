@@ -1,4 +1,5 @@
-import NetworkManager from './network/NetworkManager.js';
+import WebSocketServer from './network/WebSocketServer.js';
+import WebSocketClient from './network/WebSocketClient.js';
 import GameManager from './GameManager.js';
 import Player from './Player.js';
 import RoomManager from './RoomManager.js';
@@ -11,13 +12,14 @@ exampleWebSocketMessage=
 	name: 'Player 1',
 
 */
-
+// ws://localhost:3000
 class GameService
 {
 	constructor()
 	{
 		this.gameManager = new GameManager();
-		this.networkManager = new NetworkManager();
+		this.websocketServer = new WebSocketServer();
+		this.websocketClient = new WebSocketClient('ai-server', 3000);
 		this.roomManager = new RoomManager();
 		this.tournamentManager = new TournamentManager();
 		this.connectionId = new Map(); //  playerId -> connectionId
@@ -60,6 +62,25 @@ class GameService
 			5000
 		);
 		this.gameManager.start();
+		this._aiConnect();
+	}
+
+	_aiConnect()
+	{
+		this.websocketClient.onConnect(() => {
+			console.log('✅ AI connected to game server successfully');
+		});
+		this.websocketClient.onMessage((message) => {
+			console.log('📨 AI received message from server:', message);
+		});
+		this.websocketClient.onClose((event) => {
+			console.log('🔌 AI disconnected from game server:', event);
+		});
+		this.websocketClient.onError((error) => {
+
+		});
+		console.log('🔗 Attempting to connect AI client to WebSocket server...');
+		this.websocketClient.connect();
 	}
 
 	_getplayerByConnectionId(connectionId)
@@ -78,14 +99,14 @@ class GameService
 		{
 			console.log('Starting Game Server...');
 
-			this.networkManager.onClientConnect(
+			this.websocketServer.onClientConnect(
 				(connectionId, query) =>
 				{
 					if (!query.id || !query.name)
 					{
 						console.error('❌ Missing required parameters in query:', query);
-						this.networkManager.send(connectionId, {type: 'error', payload: 'Missing required parameters: id and name'});
-						this.networkManager.disconnectConnection(connectionId);
+						this.websocketServer.send(connectionId, {type: 'error', payload: 'Missing required parameters: id and name'});
+						this.websocketServer.disconnectConnection(connectionId);
 						return;
 					}
 					console.log('🟢 New client id:', query.id, 'name:', query.name, 'connectionId:', connectionId);
@@ -95,7 +116,7 @@ class GameService
 				}
 			);
 
-			this.networkManager.onMessage(
+			this.websocketServer.onMessage(
 				(connectionId, message) =>
 				{
 					try
@@ -104,8 +125,8 @@ class GameService
 						if (!player)
 						{
 							console.error('❌ Player not found for connectionId:', connectionId);
-							this.networkManager.send(connectionId, {type: 'error', payload: 'Player not found'});
-							this.networkManager.disconnectConnection(connectionId);
+							this.websocketServer.send(connectionId, {type: 'error', payload: 'Player not found'});
+							this.websocketServer.disconnectConnection(connectionId);
 							return;
 						}
 						this.handleWebSocketMessage(message, player.id);
@@ -113,12 +134,12 @@ class GameService
 					catch (error)
 					{
 						console.error('❌ Error processing message from client:', error);
-						this.networkManager.send(connectionId, {type: 'error', payload: error.message});
+						this.websocketServer.send(connectionId, {type: 'error', payload: error.message});
 					}
 				}
 			);
 
-			this.networkManager.onClose(
+			this.websocketServer.onClose(
 				(connectionId) =>
 				{
 					//? bağlantısı koptuğunda yapılacaklar burada
@@ -137,14 +158,14 @@ class GameService
 				}
 			);
 
-			this.networkManager.onError(
+			this.websocketServer.onError(
 				(connectionId, error) =>
 				{
 					console.error('❌ WebSocket error from client:', connectionId, error);
 				}
 			);
 
-			await this.networkManager.start({ host: '0.0.0.0', port: 3000 });
+			await this.websocketServer.start({ host: '0.0.0.0', port: 3001 });
 
 			console.log('✅ Game Server started successfully!');
 		}
@@ -185,7 +206,7 @@ class GameService
 		players.forEach(p => {
 			const connId = this.connectionId.get(p.id);
 			if (connId)
-				this.networkManager.send(connId, message);
+				this.websocketServer.send(connId, message);
 		});
 	}
 
@@ -227,7 +248,7 @@ class GameService
 				);
 				const connId = this.connectionId.get(roomState.host);
 				if (connId)
-					this.networkManager.send(connId, { type: 'room/created', payload: { roomId: roomState.id } });
+					this.websocketServer.send(connId, { type: 'room/created', payload: { roomId: roomState.id } });
 			}
 		);
 	}
@@ -253,7 +274,7 @@ class GameService
 	{
 		const connId = this.connectionId.get(playerId);
 		if (connId)
-			this.networkManager.send(connId, { type: 'error', payload: { message: errorMessage } });
+			this.websocketServer.send(connId, { type: 'error', payload: { message: errorMessage } });
 	}
 
 	stop()
@@ -261,7 +282,7 @@ class GameService
 		console.log('Stopping Game Server...');
 
 		this.gameManager.stop();
-		this.networkManager.stop();
+		this.websocketServer.stop();
 
 		console.log('Game Server stopped!');
 	}

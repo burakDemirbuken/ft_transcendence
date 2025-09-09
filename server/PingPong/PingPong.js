@@ -26,6 +26,7 @@ class PingPong extends EventEmitter
 		this.players = []; // Player instances
 
 		this.team = new Map(); // number -> { playersId: [], score: 0 }
+		this.lastGoal = null;
 	}
 
 	addPlayer(player)
@@ -113,9 +114,15 @@ class PingPong extends EventEmitter
 				if (border === 'left' || border === 'right')
 				{
 					if (border === 'right')
+					{
+						this.lastGoal = 'right';
 						this.team.get(1).score++;
+					}
 					else
+					{
+						this.lastGoal = 'left';
 						this.team.get(2).score++;
+					}
 					this.emit('goal', border);
 					this.ball.reset();
 					const interval = setInterval(() =>

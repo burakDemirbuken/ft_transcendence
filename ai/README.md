@@ -7,10 +7,55 @@
 	```json
 	(.venv) ➜  test git:(nisa) ✗ python client_test_1.py
 	WebSocket sunucusuna bağlandı!
-	Oyun başlatma verisi gönderildi: {"type": "init_game", "ai_config": {"difficulty": "hard"}}
-	Oyun başlatma cevabı: {"type": "game_initialized", "game_id": "bb7df626", "ai_difficulty": "hard", "success": true}
-	Oyun verisi gönderildi: {"type": "game_data", "ball": {"x": 600, "y": 250, "speed_x": 5, "speed_y": -3}, "paddle": {"ai_y": 200, "ai_speed_y": 0, "opponent_y": 300, "length": 80}, "game_area": {"width": 800, "height": 600}, "score": {"ai_score": 2, "human_score": 3, "ai_scored": false, "human_scored": true}}
-	AI cevabı alındı: {"type": "ai_decision", "direction": "up", "game_id": "bb7df626"}
+	Oyun başlatma verisi gönderildi:
+	{
+		"type": "init_game",
+		"ai_config":
+		{
+			"difficulty": "hard"
+		}
+	}
+	Oyun başlatma cevabı:
+	{
+		"type": "game_initialized",
+		"game_id": "bb7df626",
+		"ai_difficulty": "hard",
+		"success": true
+	}
+	Oyun verisi gönderildi:
+	{
+		"type": "game_data",
+		"ball":
+		{
+			"x": 600,
+			"y": 250,
+			"speed_x": 5,
+			"speed_y": -3
+		},
+		"paddle":
+		{
+			"ai_y": 200,
+			"ai_speed_y": 0,
+			"opponent_y": 300,
+			"length": 80
+		},
+		"game_area": {
+			"width": 800,
+			"height": 600
+		},
+		"score": {
+			"ai_score": 2,
+			"human_score": 3,
+			"ai_scored": false,
+			"human_scored": true
+		}
+	}
+	AI cevabı alındı:
+	{
+		"type": "ai_decision",
+		"direction": "up",
+		"game_id": "bb7df626"
+	}
 	AI kararı: up
 	```
 

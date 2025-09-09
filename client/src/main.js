@@ -2,6 +2,11 @@ import App from './App.js';
 
 let app;
 
+$(document).ready(() => {
+	app = new App();
+});
+
+
 $('#localGameBtn').on('click', () => {
 	app.localGame();
 });
@@ -44,8 +49,4 @@ $('#joinTournamentBtn').on('click', () => {
 	} else {
 		alert('Please enter a valid Tournament ID');
 	}
-});
-
-$(document).ready(() => {
-	app = new App();
 });

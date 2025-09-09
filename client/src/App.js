@@ -1,4 +1,4 @@
-import NetworkManager from './network/NetworkManager.js';
+import WebSocketClient from './network/WebSocketClient.js';
 import GameRenderer from "./GameRenderer.js";
 import RoomUi from './RoomUi.js';
 
@@ -15,7 +15,7 @@ class App
 		this.playerId = this._TEST_generateRandomId();
 		this.playerName = this._TEST_generateRandomName();
 		this.gameRenderer = new GameRenderer();
-		this.networkManager = new NetworkManager(window.location.hostname, 3000);
+		this.webSocketClient = new WebSocketClient(window.location.hostname, 3001);
 		this.roomUi = new RoomUi();
 		this.inputManager = new InputManager();
 
@@ -30,51 +30,51 @@ class App
 			() =>
 			{
 				// this.gameRenderer.joystickMove(1, 'up');
-				this.networkManager.send('game/playerAction', {key: "w", action: true});
+				this.webSocketClient.send('game/playerAction', {key: "w", action: true});
 			},
 			() =>
 			{
 				// this.gameRenderer.joystickMove(1, 'neutral');
-				this.networkManager.send('game/playerAction', {key: "w", action: false});
+				this.webSocketClient.send('game/playerAction', {key: "w", action: false});
 			}
 		);
 		this.inputManager.onKey("s",
 			() =>
 			{
 				// this.gameRenderer.joystickMove(1, 'down');
-				this.networkManager.send('game/playerAction', {key: "s", action: true});
+				this.webSocketClient.send('game/playerAction', {key: "s", action: true});
 			},
 			() =>
 			{
 				// this.gameRenderer.joystickMove(1, 'neutral');
-				this.networkManager.send('game/playerAction', {key: "s", action: false});
+				this.webSocketClient.send('game/playerAction', {key: "s", action: false});
 			}
 		);
 		// Arrow keys for same player (alternative controls)
 		this.inputManager.onKey("ArrowUp",
-			() => this.networkManager.send('game/playerAction', {key: "ArrowUp", action: true}),
-			() => this.networkManager.send('game/playerAction', {key: "ArrowUp", action: false})
+			() => this.webSocketClient.send('game/playerAction', {key: "ArrowUp", action: true}),
+			() => this.webSocketClient.send('game/playerAction', {key: "ArrowUp", action: false})
 		);
 
 		this.inputManager.onKey("ArrowDown",
-			() => this.networkManager.send('game/playerAction', {key: "ArrowDown", action: true}),
-			() => this.networkManager.send('game/playerAction', {key: "ArrowDown", action: false})
+			() => this.webSocketClient.send('game/playerAction', {key: "ArrowDown", action: true}),
+			() => this.webSocketClient.send('game/playerAction', {key: "ArrowDown", action: false})
 		);
 
 		this.inputManager.onKey("escape",
-			() => this.networkManager.send('game/playerAction', {key: "escape", action: true}),
-			() => this.networkManager.send('game/playerAction', {key: "escape", action: false})
+			() => this.webSocketClient.send('game/playerAction', {key: "escape", action: true}),
+			() => this.webSocketClient.send('game/playerAction', {key: "escape", action: false})
 		);
 	}
 
 	_setupNetworkListeners()
 	{
-		this.networkManager.onConnect(() =>
+		this.webSocketClient.onConnect(() =>
 		{
 			console.log('✅ Connected to server');
 		});
 
-		this.networkManager.onMessage((data) =>
+		this.webSocketClient.onMessage((data) =>
 		{
 			// Defensive programming: ensure data has the expected structure
 			if (!data || typeof data !== 'object') {
@@ -90,17 +90,16 @@ class App
 			this.handleNetworkEvent(data.type, data.payload);
 		});
 
-		this.networkManager.onClose((event) =>
+		this.webSocketClient.onClose((event) =>
 		{
 			console.log('🔌 Disconnected from server:', event.code, event.reason);
 		});
 
-		this.networkManager.onError((error) =>
+		this.webSocketClient.onError((error) =>
 		{
-			console.error('❌ Network error:', error);
 		});
 
-		this.networkManager.connect({ id: this.playerId, name: this.playerName });
+		this.webSocketClient.connect({ id: this.playerId, name: this.playerName });
 	}
 
 	localGame()
@@ -126,17 +125,17 @@ class App
 
 	startGame()
 	{
-		this.networkManager.send('room/startGame');
+		this.webSocketClient.send('room/startGame');
 	}
 
 	readyState(readyState)
 	{
-		this.networkManager.send('room/setReady', {isReady: readyState });
+		this.webSocketClient.send('room/setReady', {isReady: readyState });
 	}
 
 	_createRoom(mode)
 	{
-		if (!this.networkManager.isConnect())
+		if (!this.webSocketClient.isConnect())
 			throw new Error('Not connected to server');
 		const data = {
 			name: `${this.playerName}'s Room`,
@@ -144,7 +143,7 @@ class App
 			host: this.playerId,
 			gameSettings: gameConfig.gameSettings
 		};
-		this.networkManager.send('room/create', data);
+		this.webSocketClient.send('room/create', data);
 	}
 
 	_TEST_generateRandomId()
@@ -209,7 +208,8 @@ class App
 		switch (subEvent)
 		{
 			case 'created':
-				this.networkManager.send('room/join', { roomId: data.roomId });
+				console.log("Room created:", data);
+				this.webSocketClient.send('room/join', { roomId: data.roomId });
 			default:
 				console.log('Unhandled room event:', subEvent, data);
 		}
@@ -289,4 +289,5 @@ class App
 	 * }
 	 */
 }
+
 export default App;
