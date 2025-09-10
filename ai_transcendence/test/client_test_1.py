@@ -6,32 +6,15 @@ import time
 async def test_websocket():
     uri = "ws://localhost:3000"
 
+    # Oyun alanı boyutları (sabit)
+    game_width = 800
+    game_height = 600
+
     # Oyun başlatma verisi
     init_game_data = {
         "type": "init_game",
         "ai_config": {
             "difficulty": "hard"
-        }
-    }
-
-    # Test verisi - oyun durumunu simüle eder
-    test_game_data = {
-        "type": "game_data",
-        "ball": {
-            "x": 600,
-            "y": 250,
-            "speed_x": 5,
-            "speed_y": -3
-        },
-        "paddle": {
-            "ai_y": 200,
-            "height": 80,
-            "ai_speed_y": 0,
-            "opponent_y": 300
-        },
-        "game_area": {
-            "width": 800,
-            "height": 600
         }
     }
 
@@ -58,35 +41,104 @@ async def test_websocket():
 
             # 2. Farklı durumlar için AI kararlarını test et
             test_scenarios = [
-                # Normal durum
-                {"ball": {"x": 600, "y": 250, "speed_x": 5, "speed_y": -3}},
+                # Senaryo 1: Normal paddle yüksekliği (80px)
+                {
+                    "description": "Normal paddle yüksekliği (80px)",
+                    "ball": {"x": 600, "y": 300, "speed_x": -5, "speed_y": -3},
+                    "paddle": {"ai_y": 300, "height": 80}
+                },
 
-                # Top hızla yaklaşıyor
-                {"ball": {"x": 700, "y": 300, "speed_x": 10, "speed_y": 5}},
+                # Senaryo 2: Uzun paddle (120px)
+                {
+                    "description": "Uzun paddle (120px)",
+                    "ball": {"x": 700, "y": 100, "speed_x": -8, "speed_y": 2},
+                    "paddle": {"ai_y": 300, "height": 120}
+                },
 
-                # Top uzakta
-                {"ball": {"x": 100, "y": 400, "speed_x": 3, "speed_y": -2}},
+                # Senaryo 3: Kısa paddle (50px)
+                {
+                    "description": "Kısa paddle (50px)",
+                    "ball": {"x": 650, "y": 500, "speed_x": -6, "speed_y": -4},
+                    "paddle": {"ai_y": 300, "height": 50}
+                },
 
-                # AI skor kazandı
-                {"ball": {"x": 400, "y": 200, "speed_x": -5, "speed_y": 2}, "scored_for_me": True},
+                # Senaryo 4: Top üstte, paddle üstte
+                {
+                    "description": "Top üstte, paddle üstte",
+                    "ball": {"x": 700, "y": 100, "speed_x": -7, "speed_y": -2},
+                    "paddle": {"ai_y": 100, "height": 80}
+                },
 
-                # AI skor kaybetti
-                {"ball": {"x": 400, "y": 200, "speed_x": -5, "speed_y": 2}, "scored_against_me": True},
+                # Senaryo 5: Top altta, paddle altta
+                {
+                    "description": "Top altta, paddle altta",
+                    "ball": {"x": 700, "y": 500, "speed_x": -10, "speed_y": 5},
+                    "paddle": {"ai_y": 500, "height": 80}
+                },
 
-                # Çok hızlı top
-                {"ball": {"x": 650, "y": 150, "speed_x": 15, "speed_y": 8}}
+                # Senaryo 6: Çok uzun paddle (200px)
+                {
+                    "description": "Çok uzun paddle (200px)",
+                    "ball": {"x": 600, "y": 300, "speed_x": -5, "speed_y": 0},
+                    "paddle": {"ai_y": 300, "height": 200}
+                },
+
+                # Senaryo 7: Çok kısa paddle (30px)
+                {
+                    "description": "Çok kısa paddle (30px)",
+                    "ball": {"x": 600, "y": 300, "speed_x": -5, "speed_y": 0},
+                    "paddle": {"ai_y": 300, "height": 30}
+                },
+
+                # Senaryo 8: AI skor kazandı
+                {
+                    "description": "AI skor kazandı",
+                    "ball": {"x": 400, "y": 300, "speed_x": -5, "speed_y": 2},
+                    "paddle": {"ai_y": 300, "height": 80},
+                    "scored_for_me": True
+                },
+
+                # Senaryo 9: AI skor kaybetti
+                {
+                    "description": "AI skor kaybetti",
+                    "ball": {"x": 400, "y": 300, "speed_x": -5, "speed_y": 2},
+                    "paddle": {"ai_y": 300, "height": 80},
+                    "scored_against_me": True
+                }
             ]
 
             for i, scenario in enumerate(test_scenarios):
-                print(f"\n--- Test Senaryosu {i+1} ---")
+                print(f"\n--- Test Senaryosu {i+1}: {scenario['description']} ---")
 
-                # Temel veriyi kopyala ve senaryo değişikliklerini uygula
-                current_data = test_game_data.copy()
-                current_data["ball"].update(scenario.get("ball", {}))
+                # Paddle yüksekliğini al
+                paddle_height = scenario["paddle"]["height"]
+                paddle_y = scenario["paddle"]["ai_y"]
+
+                # Paddle konumunun sınırlar içinde olduğunu kontrol et
+                min_paddle_y = paddle_height // 2
+                max_paddle_y = game_height - (paddle_height // 2)
+
+                if paddle_y < min_paddle_y:
+                    print(f"Uyarı: Paddle konumu çok yukarıda, {min_paddle_y} olarak düzeltildi")
+                    scenario["paddle"]["ai_y"] = min_paddle_y
+                elif paddle_y > max_paddle_y:
+                    print(f"Uyarı: Paddle konumu çok aşağıda, {max_paddle_y} olarak düzeltildi")
+                    scenario["paddle"]["ai_y"] = max_paddle_y
+
+                # Test verisini oluştur
+                current_data = {
+                    "type": "game_data",
+                    "ball": scenario["ball"],
+                    "paddle": scenario["paddle"],
+                    "game_area": {
+                        "width": game_width,
+                        "height": game_height
+                    }
+                }
 
                 # Ek parametreleri ekle
                 for key, value in scenario.items():
-                    if key != "ball":
+                    if key not in ["description", "ball", "paddle"]:
                         current_data[key] = value
 
                 # Veriyi gönder
@@ -101,6 +153,27 @@ async def test_websocket():
 
                 if 'target_y' in ai_decision:
                     print(f"AI hedef Y: {ai_decision['target_y']}")
+
+                    # Paddle'ın mevcut konumu ile hedef konum arasındaki farkı göster
+                    current_paddle_y = scenario["paddle"]["ai_y"]
+                    target_y = ai_decision['target_y']
+                    diff = target_y - current_paddle_y
+
+                    if abs(diff) < 5:
+                        move_direction = "sabit kalıyor"
+                    elif diff < 0:
+                        move_direction = "yukarı hareket ediyor"
+                    else:
+                        move_direction = "aşağı hareket ediyor"
+
+                    print(f"Paddle {current_paddle_y} konumundan {target_y} konumuna {move_direction} (Fark: {diff:.1f})")
+
+                    # Hedef konumun sınırlar içinde olup olmadığını kontrol et
+                    if target_y < min_paddle_y:
+                        print(f"Uyarı: AI hedefi sınırın dışında (çok yukarıda): {target_y} < {min_paddle_y}")
+                    elif target_y > max_paddle_y:
+                        print(f"Uyarı: AI hedefi sınırın dışında (çok aşağıda): {target_y} > {max_paddle_y}")
+
                 elif 'error' in ai_decision:
                     print(f"Hata: {ai_decision['error']}")
 
