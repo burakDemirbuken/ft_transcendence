@@ -1,11 +1,12 @@
 import asyncio
 import websockets
 import json
+import time
 
 async def test_websocket():
     uri = "ws://localhost:3000"
 
-    # Önce oyun başlatma verisi
+    # Oyun başlatma verisi
     init_game_data = {
         "type": "init_game",
         "ai_config": {
@@ -24,19 +25,13 @@ async def test_websocket():
         },
         "paddle": {
             "ai_y": 200,
+            "height": 80,
             "ai_speed_y": 0,
-            "opponent_y": 300,
-            "length": 80
+            "opponent_y": 300
         },
         "game_area": {
             "width": 800,
             "height": 600
-        },
-        "score": {
-            "ai_score": 2,
-            "human_score": 3,
-            "ai_scored": False,
-            "human_scored": True
         }
     }
 
@@ -54,28 +49,68 @@ async def test_websocket():
             print(f"Oyun başlatma cevabı: {init_response}")
 
             init_result = json.loads(init_response)
-            if not init_result.get('success', False):
-                print("Oyun başlatılamadı!")
+            game_id = init_result.get('game_id', 'bilinmeyen')
+            print(f"Oyun ID: {game_id}")
+
+            if 'error' in init_result:
+                print(f"Oyun başlatılamadı: {init_result['error']}")
                 return
 
-            # 2. Şimdi oyun verilerini gönder
-            game_message = json.dumps(test_game_data)
-            await websocket.send(game_message)
-            print(f"Oyun verisi gönderildi: {game_message}")
+            # 2. Farklı durumlar için AI kararlarını test et
+            test_scenarios = [
+                # Normal durum
+                {"ball": {"x": 600, "y": 250, "speed_x": 5, "speed_y": -3}},
 
-            # AI kararını bekle
-            game_response = await websocket.recv()
-            print(f"AI cevabı alındı: {game_response}")
+                # Top hızla yaklaşıyor
+                {"ball": {"x": 700, "y": 300, "speed_x": 10, "speed_y": 5}},
 
-            # JSON'u parse et
-            ai_decision = json.loads(game_response)
-            if 'direction' in ai_decision:
-                print(f"AI kararı: {ai_decision['direction']}")
-            else:
-                print(f"Hata: {ai_decision.get('error', 'Bilinmeyen hata')}")
+                # Top uzakta
+                {"ball": {"x": 100, "y": 400, "speed_x": 3, "speed_y": -2}},
+
+                # AI skor kazandı
+                {"ball": {"x": 400, "y": 200, "speed_x": -5, "speed_y": 2}, "scored_for_me": True},
+
+                # AI skor kaybetti
+                {"ball": {"x": 400, "y": 200, "speed_x": -5, "speed_y": 2}, "scored_against_me": True},
+
+                # Çok hızlı top
+                {"ball": {"x": 650, "y": 150, "speed_x": 15, "speed_y": 8}}
+            ]
+
+            for i, scenario in enumerate(test_scenarios):
+                print(f"\n--- Test Senaryosu {i+1} ---")
+
+                # Temel veriyi kopyala ve senaryo değişikliklerini uygula
+                current_data = test_game_data.copy()
+                current_data["ball"].update(scenario.get("ball", {}))
+
+                # Ek parametreleri ekle
+                for key, value in scenario.items():
+                    if key != "ball":
+                        current_data[key] = value
+
+                # Veriyi gönder
+                game_message = json.dumps(current_data)
+                print(f"Gönderilen veri: {game_message}")
+                await websocket.send(game_message)
+
+                # AI kararını bekle
+                game_response = await websocket.recv()
+                ai_decision = json.loads(game_response)
+                print(f"AI cevabı: {game_response}")
+
+                if 'target_y' in ai_decision:
+                    print(f"AI hedef Y: {ai_decision['target_y']}")
+                elif 'error' in ai_decision:
+                    print(f"Hata: {ai_decision['error']}")
+
+                # Kısa bir bekleme ekle
+                await asyncio.sleep(1)
 
     except Exception as e:
         print(f"Hata: {e}")
+        import traceback
+        traceback.print_exc()
 
 if __name__ == "__main__":
     asyncio.run(test_websocket())

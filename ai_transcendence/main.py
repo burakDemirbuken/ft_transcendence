@@ -226,52 +226,78 @@ async def handle_join_game(websocket, client_id: str, data: dict):
         await websocket.send(json.dumps(response))
 
 async def handle_game_data(websocket, client_id: str, data: dict):
-    """Normal oyun verisi işleme"""
+    """Oyun verisini işle ve AI kararını döndür"""
     try:
-        # Client'ın AI'ını bul
+        # Client için AI'ı bul
         ai_player = ai_manager.get_ai_for_client(client_id)
+        game_id = ai_manager.get_client_game_id(client_id)
+
         if not ai_player:
-            raise ValueError("Client için AI bulunamadı. Önce oyun başlatın.")
+            raise ValueError("Bu client için AI bulunamadı")
 
         # AI kararını al
-        decision = get_ai_decision(ai_player, data)
-        direction = convert_decision_to_direction(decision)
+        target_y = ai_player.get_move(
+            data['ball']['x'], data['ball']['y'],
+            data['ball']['speed_x'], data['ball']['speed_y'],
+            data['paddle']['ai_y'], data['paddle']['height'], data['game_area']['height'],
+            data.get('scored_for_me', False), data.get('scored_against_me', False)
+        )
 
-        # Cevabı hazırla
+        # Konsola AI kararını yazdır
+        import time
+        print(f"[{time.strftime('%H:%M:%S')}] Oyun {game_id} - AI karar verdi: Hedef Y = {target_y:.2f}")
+        print(f"  Top: ({data['ball']['x']:.1f}, {data['ball']['y']:.1f}), "
+              f"Hız: ({data['ball']['speed_x']:.1f}, {data['ball']['speed_y']:.1f})")
+        print(f"  Raket: Y = {data['paddle']['ai_y']:.1f}")
+
+        if data.get('scored_for_me', False):
+            print("  AI skor kazandı! ✓")
+        if data.get('scored_against_me', False):
+            print("  AI skor kaybetti! ✗")
+
+        # Özel modları göster
+        if ai_player.rage_mode:
+            print("  🔥 RAGE MODE AKTİF!")
+        if ai_player.tired_mode:
+            print("  😴 TIRED MODE AKTİF!")
+        if ai_player.super_focus:
+            print("  🎯 SUPER FOCUS AKTİF!")
+
+        # Yanıtı oluştur
         response = {
             "type": "ai_decision",
-            "direction": direction,
-            "game_id": ai_manager.get_client_game_id(client_id)
+            "target_y": target_y,
+            "game_id": game_id
         }
 
         await websocket.send(json.dumps(response))
 
     except Exception as e:
-        response = {
-            "type": "ai_decision",
-            "error": str(e)
-        }
-        await websocket.send(json.dumps(response))
+        print(f"Oyun verisi işleme hatası: {e}")
+        import traceback
+        traceback.print_exc()
+        await websocket.send(json.dumps({"error": str(e)}))
 
 async def handle_legacy_init(websocket, client_id: str, data: dict):
-    """Eski format desteği (geriye uyumluluk)"""
+    """Eski format oyun başlatma (geriye uyumluluk)"""
     try:
         ai_config = data.get('ai_config', {})
-        game_id = str(uuid.uuid4())[:8]
+        game_id = str(uuid.uuid4())[:8]  # Kısa ID
 
-        # AI oluştur
+        # AI oluştur ve oyunu başlat
         ai_manager.create_game_ai(game_id, ai_config)
         ai_manager.assign_client_to_game(client_id, game_id)
 
-        # Aynı mesajı game_data olarak işle
-        data_copy = data.copy()
-        del data_copy['ai_config']  # ai_config'i çıkar
+        print(f"Eski format ile oyun başlatıldı: {game_id} (Client: {client_id})")
 
-        await handle_game_data(websocket, client_id, data_copy)
+        # Oyun verisini işle
+        await handle_game_data(websocket, client_id, data)
 
     except Exception as e:
-        response = {"error": str(e)}
-        await websocket.send(json.dumps(response))
+        print(f"Eski format başlatma hatası: {e}")
+        import traceback
+        traceback.print_exc()
+        await websocket.send(json.dumps({"error": str(e)}))
 
 print("==> main.py başlatıldı")
 

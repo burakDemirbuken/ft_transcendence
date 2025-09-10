@@ -1,3 +1,4 @@
+import math
 import random
 
 class PingPongAI:
@@ -7,7 +8,7 @@ class PingPongAI:
         self.hits = 0
         self.misses = 0
 
-        # Zorluk seviyesi
+        # Zorluk sevixyesi
         self.difficulty = difficulty
         self.custom_settings = custom_settings
         self.setup_difficulty()
@@ -29,15 +30,6 @@ class PingPongAI:
         self.super_focus = False
         self.focus_counter = 0
 
-        # Sabit değerler
-        self.BALL_SPEED = 5
-        self.PADDLE_SPEED = 8
-        self.BALL_RADIUS = 10
-        self.PADDLE_WIDTH = 10
-        self.PADDLE_HEIGHT = 100
-        self.WIDTH = 800
-        self.HEIGHT = 600
-
     def setup_difficulty(self):
         """Zorluk seviyesine göre parametreleri ayarla"""
         if self.difficulty == "custom" and self.custom_settings:
@@ -57,6 +49,7 @@ class PingPongAI:
             self.fatigue_enabled = self.custom_settings['fatigue_system']
             self.focus_enabled = self.custom_settings['focus_mode']
             self.adaptive_enabled = self.custom_settings['adaptive_difficulty']
+            self.prediction_lines = self.custom_settings['show_prediction']
 
         else:
             # Varsayılan zorluk seviyeleri
@@ -106,6 +99,7 @@ class PingPongAI:
             self.fatigue_enabled = False
             self.focus_enabled = False
             self.adaptive_enabled = False
+            self.prediction_lines = False
 
     def update_special_modes(self, scored_against_me=False, scored_for_me=False):
         """Özel modları güncelle"""
@@ -188,7 +182,7 @@ class PingPongAI:
 
         return False
 
-    def predict_ball_y(self, ball_x, ball_y, ball_speed_x, ball_speed_y, paddle_x):
+    def predict_ball_y(self, ball_x, ball_y, ball_speed_x, ball_speed_y, paddle_x, screen_height):
         """Topun paddle_x konumuna geldiğinde Y pozisyonunu tahmin eder"""
         if abs(ball_speed_x) < 0.1:
             return ball_y
@@ -200,18 +194,19 @@ class PingPongAI:
         predicted_y = ball_y + ball_speed_y * time_to_reach
 
         bounces = 0
-        while (predicted_y < 0 or predicted_y > self.HEIGHT) and bounces < 10:
+        while (predicted_y < 0 or predicted_y > screen_height) and bounces < 10:
             if predicted_y < 0:
                 predicted_y = -predicted_y
-            elif predicted_y > self.HEIGHT:
-                predicted_y = 2 * self.HEIGHT - predicted_y
+            elif predicted_y > screen_height:
+                predicted_y = 2 * screen_height - predicted_y
             bounces += 1
 
         return predicted_y
 
     def get_move(self, ball_x, ball_y, ball_speed_x, ball_speed_y,
-                 my_paddle_y, scored_for_me=False, scored_against_me=False):
-        """AI'ın hareket kararını verir"""
+                 my_paddle_y, paddle_height, screen_height,
+                 scored_for_me=False, scored_against_me=False):
+        """AI'ın hareket kararını verir - hedef Y konumunu döndürür"""
 
         if scored_for_me or scored_against_me:
             if scored_for_me:
@@ -234,8 +229,11 @@ class PingPongAI:
         # Mevcut performans değerlerini al
         current_accuracy, current_error = self.get_current_stats()
 
-        paddle_center = my_paddle_y + self.PADDLE_HEIGHT / 2
-        screen_center = self.HEIGHT / 2
+        paddle_center = my_paddle_y + paddle_height / 2
+        screen_center = screen_height / 2
+
+        # Hedef Y konumu
+        target_y = None
 
         if ball_speed_x > 0 and ball_x > 400:
             if not self.should_lose_next:
@@ -243,45 +241,48 @@ class PingPongAI:
 
         if self.should_lose_next and ball_speed_x > 0:
             if random.random() < 0.7:
-                predicted_y = self.predict_ball_y(ball_x, ball_y, ball_speed_x, ball_speed_y, 780)
+                predicted_y = self.predict_ball_y(ball_x, ball_y, ball_speed_x, ball_speed_y, 780, screen_height)
                 wrong_target = predicted_y + random.choice([-150, 150])
-                wrong_target = max(50, min(self.HEIGHT - 50, wrong_target))
-                return self._move_to_target(paddle_center, wrong_target)
+                target_y = max(paddle_height/2, min(screen_height - paddle_height/2, wrong_target))
             else:
-                return 0
-
-        if random.random() < current_error:
-            return random.choice([-1, 0, 1])
-
-        if ball_speed_x <= 0 or ball_x < 200:
+                # Mevcut konumda kal
+                target_y = paddle_center
+        elif random.random() < current_error:
+            # Rastgele bir konum seç
+            target_y = random.uniform(paddle_height/2, screen_height - paddle_height/2)
+        elif ball_speed_x <= 0 or ball_x < 200:
             self.is_frozen = False
             self.target_locked = False
             self.locked_target = None
-            return self._move_to_center(paddle_center, screen_center)
-
-        if ball_speed_x > 0:
-            if ball_x > (self.WIDTH - self.freeze_distance):
+            # Merkeze git
+            target_y = screen_center
+        elif ball_speed_x > 0:
+            if ball_x > (800 - self.freeze_distance):
                 self.is_frozen = True
-                return 0
-
-            elif ball_x > (self.WIDTH - self.prepare_distance):
+                # Mevcut konumda kal
+                target_y = paddle_center
+            elif ball_x > (800 - self.prepare_distance):
                 if not self.target_locked:
-                    predicted_y = self.predict_ball_y(ball_x, ball_y, ball_speed_x, ball_speed_y, 780)
+                    predicted_y = self.predict_ball_y(ball_x, ball_y, ball_speed_x, ball_speed_y, 780, screen_height)
                     noise_range = 50 * (1 - current_accuracy)
                     noise = random.uniform(-noise_range, noise_range)
                     self.locked_target = predicted_y + noise
                     self.target_locked = True
 
-                return self._move_to_target(paddle_center, self.locked_target)
-
+                target_y = self.locked_target
             else:
-                predicted_y = self.predict_ball_y(ball_x, ball_y, ball_speed_x, ball_speed_y, 780)
+                predicted_y = self.predict_ball_y(ball_x, ball_y, ball_speed_x, ball_speed_y, 780, screen_height)
                 noise_range = 30 * (1 - current_accuracy)
                 noise = random.uniform(-noise_range, noise_range)
                 target_y = predicted_y + noise
-                return self._move_to_target(paddle_center, target_y)
+        else:
+            # Varsayılan olarak merkeze git
+            target_y = screen_center
 
-        return self._move_to_center(paddle_center, screen_center)
+        # Hedef Y konumunu sınırlar içinde tut
+        target_y = max(paddle_height/2, min(screen_height - paddle_height/2, target_y))
+
+        return target_y - paddle_height/2  # Paddle'ın üst kenarının Y konumunu döndür
 
     def _move_to_target(self, current_pos, target_pos):
         """Belirli bir hedefe hareket et"""
@@ -329,3 +330,55 @@ class PingPongAI:
             if self.difficulty in ["hard", "impossible", "custom"]:
                 self.freeze_distance = max(80, self.freeze_distance - 3)
 
+    def get_difficulty_info(self):
+        """Zorluk seviyesi bilgilerini döndür"""
+        difficulty_names = {
+            "easy": "KOLAY",
+            "medium": "ORTA",
+            "hard": "ZOR",
+            "impossible": "İMKANSIZ",
+            "custom": "ÖZEL"
+        }
+
+        return {
+            "name": difficulty_names.get(self.difficulty, "ORTA"),
+            "reaction": f"{self.reaction_speed:.1f}",
+            "accuracy": f"{self.prediction_accuracy:.1f}",
+            "error_rate": f"{self.error_rate*100:.0f}%",
+            "target_win_rate": f"{self.target_win_rate*100:.0f}%"
+        }
+
+    def get_stats(self):
+        """İstatistikleri döndür"""
+        total_games = max(self.games_played, 1)
+        total_attempts = max(self.hits + self.misses, 1)
+        current_win_rate = (self.wins / total_games) * 100
+
+        return {
+            'games': self.games_played,
+            'wins': self.wins,
+            'win_rate': current_win_rate,
+            'target_win_rate': self.target_win_rate * 100,
+            'hit_rate': (self.hits / total_attempts) * 100,
+            'hits': self.hits,
+            'misses': self.misses,
+            'freeze_distance': self.freeze_distance,
+            'is_frozen': self.is_frozen,
+            'target_locked': self.target_locked,
+            'difficulty': self.difficulty,
+            'consecutive_wins': self.consecutive_wins,
+            'should_lose_next': self.should_lose_next,
+            'rage_mode': getattr(self, 'rage_mode', False),
+            'tired_mode': getattr(self, 'tired_mode', False),
+            'super_focus': getattr(self, 'super_focus', False),
+            'rage_counter': getattr(self, 'rage_counter', 0),
+            'prediction_lines': getattr(self, 'prediction_lines', False)
+        }
+
+    def get_prediction_line(self, ball_x, ball_y, ball_speed_x, ball_speed_y):
+        """Tahmin çizgisi için koordinatları döndür"""
+        if not getattr(self, 'prediction_lines', False) or ball_speed_x <= 0:
+            return None
+
+        predicted_y = self.predict_ball_y(ball_x, ball_y, ball_speed_x, ball_speed_y, 780, 600)
+        return predicted_y
