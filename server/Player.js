@@ -14,13 +14,13 @@ class Player
 		this.inputs = new Map(); // type -> boolean(true: pressed, false: not pressed)
 	}
 
-	inputsSet(key, value)
+	inputSet(key, value)
 	{
 		this.inputs.set(key, value);
 		this.lastActivity = Date.now();
 	}
 
-	inputsGet(key)
+	inputGet(key)
 	{
 		return this.inputs.get(key);
 	}

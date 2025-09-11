@@ -193,9 +193,6 @@ class GameService
 			case 'game':
 				this.gameManager.handleGameMessage(action, message.payload, player);
 				break;
-			case 'tournament':
-				this._handleTornamentMessage(action, message.payload, player);
-				break;
 			default:
 				throw new Error(`Unhandled message namespace: ${namespace}`);
 		}
@@ -217,7 +214,7 @@ class GameService
 			{
 				const roomId = roomState.id;
 				this.roomManager.on(`room${roomId}_Update`, ({roomState}) => {
-					this._sendPlayers(roomState.players, { type: 'room/update', payload: roomState });
+					this._sendPlayers(roomState.players, { type: 'tour/update', payload: roomState });
 				});
 
 				this.roomManager.on(`room${roomId}_Started`,

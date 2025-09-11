@@ -206,8 +206,8 @@ class PingPongAI:
     def get_move(self, ball_x, ball_y, ball_speed_x, ball_speed_y,
                  my_paddle_y, paddle_height, screen_height,
                  scored_for_me=False, scored_against_me=False):
-        """AI'ın hareket kararını verir"""
-
+        """AI'ın hareket kararını verir - hedef Y konumunu döndürür"""
+    
         if scored_for_me or scored_against_me:
             if scored_for_me:
                 self.wins += 1
@@ -217,48 +217,50 @@ class PingPongAI:
                 self.misses += 1
                 self.consecutive_wins = 0
             self.games_played += 1
-
+    
             # Özel modları güncelle
             self.update_special_modes(scored_against_me, scored_for_me)
-
+    
             self.is_frozen = False
             self.target_locked = False
             self.locked_target = None
             self.should_lose_next = False
-
+    
         # Mevcut performans değerlerini al
         current_accuracy, current_error = self.get_current_stats()
-
+    
         paddle_center = my_paddle_y + paddle_height / 2
         screen_center = screen_height / 2
-
+    
+        # Hedef Y konumu
+        target_y = None
+    
         if ball_speed_x > 0 and ball_x > 400:
             if not self.should_lose_next:
                 self.should_lose_next = self.should_intentionally_lose()
-
+    
         if self.should_lose_next and ball_speed_x > 0:
             if random.random() < 0.7:
                 predicted_y = self.predict_ball_y(ball_x, ball_y, ball_speed_x, ball_speed_y, 780, screen_height)
                 wrong_target = predicted_y + random.choice([-150, 150])
-                wrong_target = max(50, min(screen_height - 50, wrong_target))
-                return self._move_to_target(paddle_center, wrong_target)
+                target_y = max(paddle_height/2, min(screen_height - paddle_height/2, wrong_target))
             else:
-                return 0
-
-        if random.random() < current_error:
-            return random.choice([-1, 0, 1])
-
-        if ball_speed_x <= 0 or ball_x < 200:
+                # Mevcut konumda kal
+                target_y = paddle_center
+        elif random.random() < current_error:
+            # Rastgele bir konum seç
+            target_y = random.uniform(paddle_height/2, screen_height - paddle_height/2)
+        elif ball_speed_x <= 0 or ball_x < 200:
             self.is_frozen = False
             self.target_locked = False
             self.locked_target = None
-            return self._move_to_center(paddle_center, screen_center)
-
-        if ball_speed_x > 0:
+            # Merkeze git
+            target_y = screen_center
+        elif ball_speed_x > 0:
             if ball_x > (800 - self.freeze_distance):
                 self.is_frozen = True
-                return 0
-
+                # Mevcut konumda kal
+                target_y = paddle_center
             elif ball_x > (800 - self.prepare_distance):
                 if not self.target_locked:
                     predicted_y = self.predict_ball_y(ball_x, ball_y, ball_speed_x, ball_speed_y, 780, screen_height)
@@ -266,17 +268,21 @@ class PingPongAI:
                     noise = random.uniform(-noise_range, noise_range)
                     self.locked_target = predicted_y + noise
                     self.target_locked = True
-
-                return self._move_to_target(paddle_center, self.locked_target)
-
+    
+                target_y = self.locked_target
             else:
                 predicted_y = self.predict_ball_y(ball_x, ball_y, ball_speed_x, ball_speed_y, 780, screen_height)
                 noise_range = 30 * (1 - current_accuracy)
                 noise = random.uniform(-noise_range, noise_range)
                 target_y = predicted_y + noise
-                return self._move_to_target(paddle_center, target_y)
-
-        return self._move_to_center(paddle_center, screen_center)
+        else:
+            # Varsayılan olarak merkeze git
+            target_y = screen_center
+    
+        # Hedef Y konumunu sınırlar içinde tut
+        target_y = max(paddle_height/2, min(screen_height - paddle_height/2, target_y))
+    
+        return target_y - paddle_height/2  # Paddle'ın üst kenarının Y konumunu döndür
 
     def _move_to_target(self, current_pos, target_pos):
         """Belirli bir hedefe hareket et"""

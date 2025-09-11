@@ -152,8 +152,8 @@ class PingPong extends EventEmitter
 			const paddle = this.paddles.get(player.id);
 			if (paddle)
 			{
-				paddle.up = player.inputsGet('w') || player.inputsGet('ArrowUp');
-				paddle.down = player.inputsGet('s') || player.inputsGet('ArrowDown');
+				paddle.up = player.inputGet('w') || player.inputGet('ArrowUp');
+				paddle.down = player.inputGet('s') || player.inputGet('ArrowDown');
 			}
 		}
 	}
@@ -271,7 +271,6 @@ class PingPong extends EventEmitter
 			this.status = 'playing';
 			clearInterval(interval);
 		}, 1000);
-
 	}
 
 	pause()
@@ -346,7 +345,6 @@ class PingPong extends EventEmitter
 	{
 		return this.players.some(p => p.id === playerId);
 	}
-
 
 	isFull()
 	{

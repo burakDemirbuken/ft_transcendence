@@ -8,6 +8,8 @@ class AIPingPong extends PingPong
 		this.gameMode = "ai";
 		this.settings.maxPlayers = 1;
 		console.log(`🎮 AIPingPong created with mode: ${this.gameMode}`);
+		this.targetPosition = { x: 0, y: 0 };
+
 	}
 
 	addPlayer(player)
@@ -30,6 +32,11 @@ class AIPingPong extends PingPong
 		localPaddle.down = player.inputsGet('ArrowDown') || player.inputsGet('s');
 
 		const aiPaddle = this.paddles.get("AI");
+	}
+
+	initializeGame()
+	{
+		super.initializeGame();
 	}
 
 	getGameState()
@@ -104,6 +111,13 @@ class AIPingPong extends PingPong
 					}, 1000);
 			}, 1000
 		);
+	}
+
+	stop()
+	{
+		this.status = 'stopped';
+		// interval stop
+		console.log(`⏸️ Game stopped`);
 	}
 }
 

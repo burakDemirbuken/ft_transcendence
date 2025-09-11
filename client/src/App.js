@@ -102,25 +102,41 @@ class App
 		this.webSocketClient.connect({ id: this.playerId, name: this.playerName });
 	}
 
-	localGame()
+	createRoom(mode)
 	{
-		this._createRoom("local");
+		try
+		{
+
+			if (!this.webSocketClient.isConnect())
+				throw new Error('Not connected to server');
+			const data = {
+				name: `${this.playerName}'s Room`,
+				gameMode: mode,
+				host: this.playerId,
+				gameSettings: gameConfig.gameSettings
+			};
+			this.webSocketClient.send('room/create', data);
+		}
+		catch (error)
+		{
+			console.error('❌ Error creating room:', error);
+		}
 	}
 
-	aiGame()
+	joinRoom(roomId)
 	{
-		this._createRoom("ai");
-	}
-
-	createRoom()
-	{
-		this._createRoom('classic');
-	}
-
-	joinRoom()
-	{
-		const roomId = document.getElementById('roomId').value;
-		this._joinRoom(roomId);
+		try
+		{
+			if (!this.webSocketClient.isConnect())
+				throw new Error('Not connected to server');
+			if (!roomId)
+				throw new Error('Room ID is required to join a room');
+			this.webSocketClient.send('room/join', { roomId });
+		}
+		catch (error)
+		{
+			console.error('❌ Error joining room:', error);
+		}
 	}
 
 	startGame()
@@ -131,19 +147,6 @@ class App
 	readyState(readyState)
 	{
 		this.webSocketClient.send('room/setReady', {isReady: readyState });
-	}
-
-	_createRoom(mode)
-	{
-		if (!this.webSocketClient.isConnect())
-			throw new Error('Not connected to server');
-		const data = {
-			name: `${this.playerName}'s Room`,
-			gameMode: mode,
-			host: this.playerId,
-			gameSettings: gameConfig.gameSettings
-		};
-		this.webSocketClient.send('room/create', data);
 	}
 
 	_TEST_generateRandomId()

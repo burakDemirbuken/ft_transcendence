@@ -1,4 +1,10 @@
-import PingPong from './PingPong.js';
+constructor(parameters)
+	{
+		super(parameters);
+		this.gameMode = "ai";
+		this.settings.maxPlayers = 1;
+		console.log(`🎮 AIPingPong created with mode: ${this.gameMode}`);
+	}import PingPong from './PingPong.js';
 
 class LocalPingPong extends PingPong
 {
@@ -27,11 +33,11 @@ class LocalPingPong extends PingPong
 		const localPlayer = this.paddles.get(this.players[0].id);
 		const localPaddle = this.paddles.get("Player2");
 
-		localPaddle.up = player.inputsGet('ArrowUp');
-		localPaddle.down = player.inputsGet('ArrowDown');
+		localPaddle.up = player.inputGet('ArrowUp');
+		localPaddle.down = player.inputGet('ArrowDown');
 
-		localPlayer.up = player.inputsGet('w');
-		localPlayer.down = player.inputsGet('s');
+		localPlayer.up = player.inputGet('w');
+		localPlayer.down = player.inputGet('s');
 	}
 
 	// değişicek

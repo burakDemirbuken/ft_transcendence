@@ -118,17 +118,21 @@ prev_left_score = 0
 prev_right_score = 0
 clock = pygame.time.Clock()
 
+last_ai_decision_time = 0
+AI_DECISION_INTERVAL = 1.0  # 1 saniye
+ai_target_y = None  # AI'ın belirlediği hedef konum
+
 def send_data_to_ai(game_data):
     """Verileri yapay zekaya gönder - Thread kullanmadan"""
-    try:
-        # Konsola yazdır (test için)
-        print(f"[{time.strftime('%H:%M:%S')}] AI Verisi: Skor H:{game_data['scores']['human']} AI:{game_data['scores']['ai']}, "
-              f"Top: ({game_data['ball_position']['x']:.0f},{game_data['ball_position']['y']:.0f}), "
-              f"AI Durum: {game_data['ai_stats']['difficulty']}, "
-              f"Kazanma Oranı: {game_data['ai_stats']['win_rate']:.1f}%")
+    # try:
+    #     # Konsola yazdır (test için)
+    #     print(f"[{time.strftime('%H:%M:%S')}] AI Verisi: Skor H:{game_data['scores']['human']} AI:{game_data['scores']['ai']}, "
+    #           f"Top: ({game_data['ball_position']['x']:.0f},{game_data['ball_position']['y']:.0f}), "
+    #           f"AI Durum: {game_data['ai_stats']['difficulty']}, "
+    #           f"Kazanma Oranı: {game_data['ai_stats']['win_rate']:.1f}%")
 
-    except Exception as e:
-        print(e)
+    # except Exception as e:
+    #     print(e)
 
 def collect_game_data():
     """Oyun verilerini topla"""
@@ -642,13 +646,41 @@ while running:
     elif game_state == PLAYING and ai_player:
         current_time = time.time()
 
-        # 1 saniyede bir AI'ya veri gönder (Thread kullanmadan)
-        if current_time - last_ai_update_time >= AI_UPDATE_INTERVAL:
+        # 1 saniyede bir AI'ya veri gönder ve karar al
+        if current_time - last_ai_decision_time >= AI_DECISION_INTERVAL:
+            # Skor değişimlerini kontrol et
+            scored_for_ai = (right_score > prev_right_score)
+            scored_against_ai = (left_score > prev_left_score)
+
+            # AI'dan hedef konumu al
+            ai_target_y = ai_player.get_move(
+                ball_pos[0], ball_pos[1],
+                ball_speed[0], ball_speed[1],
+                right_paddle.y, PADDLE_HEIGHT, HEIGHT,
+                scored_for_ai, scored_against_ai
+            )
+
+            # Konsola AI kararını yazdır
+            print(f"[{time.strftime('%H:%M:%S')}] AI karar verdi: Hedef Y = {ai_target_y:.2f}")
+            print(f"  Top: ({ball_pos[0]:.1f}, {ball_pos[1]:.1f}), Hız: ({ball_speed[0]:.1f}, {ball_speed[1]:.1f})")
+            print(f"  Raket: Y = {right_paddle.y:.1f}")
+
+            if scored_for_ai:
+                print("  AI skor kazandı! ✓")
+            if scored_against_ai:
+                print("  AI skor kaybetti! ✗")
+
+            # Skor değişikliklerini güncelle
+            prev_right_score = right_score
+            prev_left_score = left_score
+
+            # Veri gönderim zamanını güncelle
+            last_ai_decision_time = current_time
+
+            # Debug için konsola yazdır
             game_data = collect_game_data()
             if game_data:
-                # Direkt çağır (thread yok)
                 send_data_to_ai(game_data)
-            last_ai_update_time = current_time
 
         keys = pygame.key.get_pressed()
 
@@ -658,22 +690,14 @@ while running:
         if keys[pygame.K_s] and left_paddle.bottom < HEIGHT:
             left_paddle.y += PADDLE_SPEED  # Sabit hız kullan
 
-        # AI hareket kararı
-        scored_for_ai = (right_score > prev_right_score)
-        scored_against_ai = (left_score > prev_left_score)
-
-        ai_move = ai_player.get_move(
-            ball_pos[0], ball_pos[1],
-            ball_speed[0], ball_speed[1],
-            right_paddle.y, PADDLE_HEIGHT, HEIGHT,
-            scored_for_ai, scored_against_ai
-        )
-
-        # AI paddle hareketi - SABİT HIZ (sadece hareket kararı değişir)
-        if ai_move == 1 and right_paddle.bottom < HEIGHT:
-            right_paddle.y += PADDLE_SPEED  # Sabit hız kullan
-        elif ai_move == -1 and right_paddle.top > 0:
-            right_paddle.y -= PADDLE_SPEED  # Sabit hız kullan
+        # Her frame'de AI paddle'ını hedef konuma doğru hareket ettir
+        if ai_target_y is not None:
+            if right_paddle.y < ai_target_y - PADDLE_SPEED/2:
+                right_paddle.y += PADDLE_SPEED
+            elif right_paddle.y > ai_target_y + PADDLE_SPEED/2:
+                right_paddle.y -= PADDLE_SPEED
+            # Sınırları kontrol et
+            right_paddle.y = max(0, min(HEIGHT - PADDLE_HEIGHT, right_paddle.y))
 
         # Skor takibi güncelle
         prev_left_score = left_score

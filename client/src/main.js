@@ -8,21 +8,21 @@ $(document).ready(() => {
 
 
 $('#localGameBtn').on('click', () => {
-	app.localGame();
+	app.createRoom("local");
 });
 
 $('#aiGameBtn').on('click', () => {
-	app.aiGame();
+	app.createRoom("ai");
 });
 
-$('#customGameBtn').on('click', () => {
-	app.customGame();
+$('#createGameBtn').on('click', () => {
+	app.createRoom("classic");
 });
 
-$('#joinCustomRoomBtn').on('click', () => {
-	const roomId = $('#customRoomId').val().trim();
+$('#joinRoomBtn').on('click', () => {
+	const roomId = $('#roomId').val().trim();
 	if (roomId) {
-		app.joinCustomRoom(roomId);
+		app.joinRoom(roomId);
 	} else {
 		alert('Please enter a valid Room ID');
 	}

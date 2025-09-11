@@ -1,5 +1,7 @@
 import PingPong from './PingPong/PingPong.js';
 import LocalPingPong from './PingPong/LocalPingPong.js';
+import AiPingPong from './PingPong/AiPingPong.js';
+
 import { TICK_RATE, DEFAULT_GAME_PROPERTIES } from './utils/constants.js';
 import EventEmitter from './utils/EventEmitter.js';
 
@@ -43,7 +45,7 @@ class GameManager extends EventEmitter
 		switch (action)
 		{
 			case 'playerAction':
-				player.inputsSet(payload.key, payload.action);
+				player.inputSet(payload.key, payload.action);
 				break;
 			default:
 				throw new Error(`Unhandled game message type: ${message.type}`);
@@ -58,6 +60,8 @@ class GameManager extends EventEmitter
 			game = new LocalPingPong(properties);
 		else if (gameMode === 'classic')
 			game = new PingPong(properties);
+		else if (gameMode === 'ai')
+			game = new AiPingPong(properties);
 		else
 			throw new Error(`Unsupported game mode: ${gameMode}`);
 
