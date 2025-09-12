@@ -1,6 +1,8 @@
 import PingPong from './PingPong/PingPong.js';
 import LocalPingPong from './PingPong/LocalPingPong.js';
 import AiPingPong from './PingPong/AiPingPong.js';
+import aiNetwork from './network/AiNetworkManager.js';
+
 
 import { TICK_RATE, DEFAULT_GAME_PROPERTIES } from './utils/constants.js';
 import EventEmitter from './utils/EventEmitter.js';
@@ -61,13 +63,15 @@ class GameManager extends EventEmitter
 		else if (gameMode === 'classic')
 			game = new PingPong(properties);
 		else if (gameMode === 'ai')
+		{
 			game = new AiPingPong(properties);
+			aiNetwork.initGame(properties.difficulty, properties.settings);2
+		}
 		else
 			throw new Error(`Unsupported game mode: ${gameMode}`);
 
 		this.games.set(gameId, game);
 		game.initializeGame();
-		console.log(`🆕 Game ${gameId} created with mode: ${properties.gameMode}`);
 		return gameId;
 	}
 
@@ -78,11 +82,15 @@ class GameManager extends EventEmitter
 		const game = this.games.get(gameId);
 		game.addPlayer(player);
 		console.log(`👤 Player ${player.id} added to game ${gameId}`);
-		if (game.isFull())
-		{
-			console.log(`🚀 Starting game ${gameId} with players ${game.players.map(p => p.id).join(", ")}`);
-			game.start();
-		}
+	}
+
+	gameStart(gameId)
+	{
+		const game = this.games.get(gameId);
+		if (!game)
+			throw new Error(`Game with ID ${gameId} does not exist`);
+		game.start();
+		console.log(`▶️ Game ${gameId} started`);
 	}
 
 	removeGame(gameId)

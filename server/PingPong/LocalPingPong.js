@@ -1,10 +1,4 @@
-constructor(parameters)
-	{
-		super(parameters);
-		this.gameMode = "ai";
-		this.settings.maxPlayers = 1;
-		console.log(`🎮 AIPingPong created with mode: ${this.gameMode}`);
-	}import PingPong from './PingPong.js';
+import PingPong from './PingPong.js';
 
 class LocalPingPong extends PingPong
 {

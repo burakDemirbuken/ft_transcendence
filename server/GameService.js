@@ -1,5 +1,4 @@
 import WebSocketServer from './network/WebSocketServer.js';
-import WebSocketClient from './network/WebSocketClient.js';
 import GameManager from './GameManager.js';
 import Player from './Player.js';
 import RoomManager from './RoomManager.js';
@@ -235,6 +234,7 @@ class GameService
 								//? oyun bittiğinde yapılacak işlemler
 							}
 						);
+						this.gameManager.gameStart(gameId);
 					}
 				);
 				this.roomManager.on(`room${roomId}_Closed`,

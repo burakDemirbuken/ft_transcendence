@@ -1,4 +1,5 @@
 import PingPong from './PingPong.js';
+import AiNetwork from '../network/AiNetworkManager.js';
 
 class AIPingPong extends PingPong
 {
@@ -8,8 +9,7 @@ class AIPingPong extends PingPong
 		this.gameMode = "ai";
 		this.settings.maxPlayers = 1;
 		console.log(`🎮 AIPingPong created with mode: ${this.gameMode}`);
-		this.targetPosition = { x: 0, y: 0 };
-
+		this.targetPaddlePosition = { x: 0, y: 0 };
 	}
 
 	addPlayer(player)
@@ -34,9 +34,10 @@ class AIPingPong extends PingPong
 		const aiPaddle = this.paddles.get("AI");
 	}
 
-	initializeGame()
+	initializeGame(property)
 	{
 		super.initializeGame();
+		AiNetwork.initGame(property.difficulty, property.settings);
 	}
 
 	getGameState()
