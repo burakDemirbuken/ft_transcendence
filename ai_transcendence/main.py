@@ -228,49 +228,59 @@ async def handle_join_game(websocket, client_id: str, data: dict):
 async def handle_game_data(websocket, client_id: str, data: dict):
     """Oyun verisini işle ve AI kararını döndür"""
     try:
-        # Client için AI'ı bul
-        ai_player = ai_manager.get_ai_for_client(client_id)
-        game_id = ai_manager.get_client_game_id(client_id)
+        # Game ID'yi mesajdan al
+        game_id = data.get('game_id')
 
-        if not ai_player:
-            raise ValueError("Bu client için AI bulunamadı")
+        if game_id:
+            # Mesajdaki game_id kullan
+            ai_player = ai_manager.game_ais.get(game_id)
+            if not ai_player:
+                raise ValueError(f"Oyun {game_id} bulunamadı")
+        else:
+            # Fallback: Client'ın mevcut oyununu kullan
+            # Client için AI'ı bul
+            ai_player = ai_manager.get_ai_for_client(client_id)
+            game_id = ai_manager.get_client_game_id(client_id)
 
-        # AI kararını al
-        target_y = ai_player.get_move(
-            data['ball']['x'], data['ball']['y'],
-            data['ball']['speed_x'], data['ball']['speed_y'],
-            data['paddle']['ai_y'], data['paddle']['height'], data['game_area']['height'],
-            data.get('scored_for_me', False), data.get('scored_against_me', False)
-        )
+            if not ai_player:
+                raise ValueError("Bu client için AI bulunamadı")
 
-        # Konsola AI kararını yazdır
-        import time
-        print(f"[{time.strftime('%H:%M:%S')}] Oyun {game_id} - AI karar verdi: Hedef Y = {target_y:.2f}")
-        print(f"  Top: ({data['ball']['x']:.1f}, {data['ball']['y']:.1f}), "
-              f"Hız: ({data['ball']['speed_x']:.1f}, {data['ball']['speed_y']:.1f})")
-        print(f"  Raket: Y = {data['paddle']['ai_y']:.1f}")
+            # AI kararını al
+            target_y = ai_player.get_move(
+                data['ball']['x'], data['ball']['y'],
+                data['ball']['speed_x'], data['ball']['speed_y'],
+                data['paddle']['ai_y'], data['paddle']['height'], data['game_area']['height'],
+                data.get('scored_for_me', False), data.get('scored_against_me', False)
+            )
 
-        if data.get('scored_for_me', False):
-            print("  AI skor kazandı! ✓")
-        if data.get('scored_against_me', False):
-            print("  AI skor kaybetti! ✗")
+            # Konsola AI kararını yazdır
+            import time
+            print(f"[{time.strftime('%H:%M:%S')}] Oyun {game_id} - AI karar verdi: Hedef Y = {target_y:.2f}")
+            print(f"  Top: ({data['ball']['x']:.1f}, {data['ball']['y']:.1f}), "
+                  f"Hız: ({data['ball']['speed_x']:.1f}, {data['ball']['speed_y']:.1f})")
+            print(f"  Raket: Y = {data['paddle']['ai_y']:.1f}")
 
-        # Özel modları göster
-        if ai_player.rage_mode:
-            print("  🔥 RAGE MODE AKTİF!")
-        if ai_player.tired_mode:
-            print("  😴 TIRED MODE AKTİF!")
-        if ai_player.super_focus:
-            print("  🎯 SUPER FOCUS AKTİF!")
+            if data.get('scored_for_me', False):
+                print("  AI skor kazandı! ✓")
+            if data.get('scored_against_me', False):
+                print("  AI skor kaybetti! ✗")
 
-        # Yanıtı oluştur
-        response = {
-            "type": "ai_decision",
-            "target_y": target_y,
-            "game_id": game_id
-        }
+            # Özel modları göster
+            if ai_player.rage_mode:
+                print("  🔥 RAGE MODE AKTİF!")
+            if ai_player.tired_mode:
+                print("  😴 TIRED MODE AKTİF!")
+            if ai_player.super_focus:
+                print("  🎯 SUPER FOCUS AKTİF!")
 
-        await websocket.send(json.dumps(response))
+            # Yanıtı oluştur
+            response = {
+                "type": "ai_decision",
+                "target_y": target_y,
+                "game_id": game_id
+            }
+
+            await websocket.send(json.dumps(response))
 
     except Exception as e:
         print(f"Oyun verisi işleme hatası: {e}")
