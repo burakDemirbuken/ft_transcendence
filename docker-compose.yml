@@ -14,11 +14,11 @@ services:
       - ai
   ai:
     build:
-      context: ./ai/ai_transcendence
+      context: ./ai_transcendence
       dockerfile: Dockerfile
     image: ai-server
     container_name: ai-server
     ports:
       - "3000:3000"
     volumes:
-      - ./ai/ai_transcendence:/app
+      - ./ai_transcendence:/app
