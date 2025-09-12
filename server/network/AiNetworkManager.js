@@ -1,4 +1,5 @@
 import WebSocketClient from './WebSocketClient.js';
+import EventEmitter from '../utils/EventEmitter.js';
 
 class AiNetworkManager extends EventEmitter
 {
@@ -7,19 +8,19 @@ class AiNetworkManager extends EventEmitter
 		super();
 		this.socket = new WebSocketClient('ai-server', 3000);
 
-		this.socket.on('open', () => {
+		this.socket.onConnect('open', () => {
 			console.log('🤖 Connected to AI server');
 		});
 
-		this.socket.on('close', () => {
+		this.socket.onClose('close', () => {
 			console.log('⚠️ Disconnected from AI server');
 		});
 
-		this.socket.on('error', (error) => {
+		this.socket.onError('error', (error) => {
 			console.error('❌ AI server connection error:', error);
 		});
 
-		this.socket.on('message', (data) => {
+		this.socket.onMessage('message', (data) => {
 			try
 			{
 				const message = JSON.parse(data);
@@ -32,8 +33,6 @@ class AiNetworkManager extends EventEmitter
 		});
 
 		this.socket.connect();
-
-		this.gameIds = new Set();
 	}
 
 	sendMessage(message)
@@ -48,30 +47,19 @@ class AiNetworkManager extends EventEmitter
 		}
 	}
 
-	initGame(difficulty, settings = {})
+	initGame(difficulty, gameId, settings = {})
 	{
 		let data;
+		data = {
+			type: 'init_game',
+			ai_config:
+			{
+				difficulty: difficulty
+			},
+			gameId: gameId,
+		};
 		if (difficulty === "custom")
-		{
-			data = {
-				type: 'init_game',
-				ai_config:
-				{
-					difficulty: difficulty,
-					custom_settings: settings
-				}
-			};
-		}
-		else
-		{
-			data = {
-				type: 'init_game',
-				ai_config:
-				{
-					difficulty: difficulty
-				}
-			};
-		}
+			data.ai_config.settings = settings;
 		this.sendMessage(JSON.stringify(data));
 	}
 
