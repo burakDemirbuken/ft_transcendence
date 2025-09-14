@@ -102,19 +102,21 @@ class App
 		this.webSocketClient.connect({ id: this.playerId, name: this.playerName });
 	}
 
-	createRoom(mode)
+	createRoom(mode, aiSettings = {})
 	{
 		try
 		{
 
 			if (!this.webSocketClient.isConnect())
 				throw new Error('Not connected to server');
-			const data = {
+			let data = {
 				name: `${this.playerName}'s Room`,
 				gameMode: mode,
 				host: this.playerId,
 				gameSettings: gameConfig.gameSettings
 			};
+			if (mode === 'ai')
+				data = { ...data, aiSettings: aiSettings };
 			this.webSocketClient.send('room/create', data);
 		}
 		catch (error)

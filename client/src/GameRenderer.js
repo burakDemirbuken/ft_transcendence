@@ -61,7 +61,12 @@ class GameRenderer extends EventEmitter
 		}
 	}
 
-	async _localGameInitialize(config)
+	_aiGameInitialize(config)
+	{
+		this._singleArcadeInitialize(config);
+	}
+
+	_localGameInitialize(config)
 	{
 		this._singleArcadeInitialize(config);
 	}

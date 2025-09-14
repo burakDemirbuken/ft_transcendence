@@ -5,34 +5,42 @@ class AiNetworkManager extends EventEmitter
 {
 	constructor()
 	{
-		super();
-		this.socket = new WebSocketClient('ai-server', 3000);
+		try
+		{
+			super();
+			this.socket = new WebSocketClient('ai-server', 3000);
 
-		this.socket.onConnect('open', () => {
-			console.log('🤖 Connected to AI server');
-		});
+			this.socket.onConnect(() => {
+				console.log('🤖 Connected to AI server');
+			});
 
-		this.socket.onClose('close', () => {
-			console.log('⚠️ Disconnected from AI server');
-		});
+			this.socket.onClose(() => {
+				console.log('⚠️ Disconnected from AI server');
+			});
 
-		this.socket.onError('error', (error) => {
-			console.error('❌ AI server connection error:', error);
-		});
+			this.socket.onError((error) => {
+				console.error('❌ AI server connection error:', error);
+			});
 
-		this.socket.onMessage('message', (data) => {
-			try
-			{
-				const message = JSON.parse(data);
-				this.handleMessage(message);
-			}
-			catch (error)
-			{
-				console.error('❌ Error parsing AI server message:', error);
-			}
-		});
+			this.socket.onMessage((data) => {
+				try
+				{
+					console.log('📩 Received message from AI server:', data);
+					this.handleMessage(data);
+				}
+				catch (error)
+				{
+					console.error('❌ Error parsing AI server message:', error);
+				}
+			});
 
-		this.socket.connect();
+			this.socket.connect();
+
+		}
+		catch (error)
+		{
+			console.error('❌ Failed to initialize AI Network Manager:', error);
+		}
 	}
 
 	sendMessage(message)
@@ -56,10 +64,11 @@ class AiNetworkManager extends EventEmitter
 			{
 				difficulty: difficulty
 			},
-			gameId: gameId,
+			game_id: gameId,
 		};
 		if (difficulty === "custom")
 			data.ai_config.settings = settings;
+		console.log('🤖 Sending game initialization to AI server:', data);
 		this.sendMessage(JSON.stringify(data));
 	}
 
@@ -72,6 +81,8 @@ class AiNetworkManager extends EventEmitter
 				break;
 			case "ai_decision":
 				this.emit(`aiGame${message.game_id}_direction`, message.direction);
+			case "error":
+				console.error('❌ AI server error:', message.error);
 				break;
 		}
 	}

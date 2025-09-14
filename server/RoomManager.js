@@ -106,8 +106,10 @@ class RoomManager extends EventEmitter
 			//? izleyiciler eklenebilir mi?
 			spectators: [],
 			gameSettings: payload.gameSettings,
-			createdAt: Date.now()
+			createdAt: Date.now(),
+			aiSettings: payload.aiSettings || {}
 		};
+		console.log(`${JSON.stringify(room)} created by host ${hostId}`);
 		this.rooms.set(roomId, room);
 		this.emit(`room_Created`, { roomState: room });
 	}
@@ -245,7 +247,8 @@ class RoomManager extends EventEmitter
 		this.emit(`room${room.id}_Started`, {
 			gameSettings: room.gameSettings,
 			players: room.players,
-			gameMode: room.gameMode
+			gameMode: room.gameMode,
+			aiSettings: room.aiSettings || {}
 		});
 
 		this.notifyRoomUpdate(room.id);

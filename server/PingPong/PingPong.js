@@ -15,6 +15,7 @@ class PingPong extends EventEmitter
 		this.deltaTime = 0;
 		this.lastUpdateTime = 0;
 		this.gameTime = 0;
+		this.id = property.id || null;
 
 		this.settings = {
 			...DEFAULT_GAME_PROPERTIES,
@@ -101,7 +102,8 @@ class PingPong extends EventEmitter
 		);
 		this.ball.launchBall({x: Math.random() < 0.5 ? -1 : 1, y: Math.random() - 0.5});
 		this.eventListeners();
-		this.status = 'waiting';
+		if (this.gameMode !== 'ai')
+			this.status = 'waiting';
 	}
 
 	eventListeners()

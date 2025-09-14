@@ -12,7 +12,7 @@ $('#localGameBtn').on('click', () => {
 });
 
 $('#aiGameBtn').on('click', () => {
-	app.createRoom("ai");
+	app.createRoom("ai", { difficulty: 'hard' });
 });
 
 $('#createGameBtn').on('click', () => {

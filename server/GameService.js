@@ -18,7 +18,6 @@ class GameService
 	{
 		this.gameManager = new GameManager();
 		this.websocketServer = new WebSocketServer();
-		this.websocketClient = new WebSocketClient('ai-server', 3000);
 		this.roomManager = new RoomManager();
 		this.tournamentManager = new TournamentManager();
 		this.connectionId = new Map(); //  playerId -> connectionId
@@ -38,6 +37,7 @@ class GameService
 				console.log('--- Active Rooms ---');
 				this.roomManager.rooms.forEach((room) => {
 					console.log(`Room ${room.id}:\n\tGame Mode: ${room.gameMode}\n\tHost: ${room.host}\n\tPlayers: ${room.players.length}/${room.maxPlayers}\n\tStatus: ${room.status}`);
+					console.log(`Room Settings: ${JSON.stringify(room.gameSettings, null, 2)}`);
 					console.log('\tPlayer List:');
 					room.players.forEach((p) => {
 						console.log(`\t\t- ${p.name} (id: ${p.id}, status: ${p.status}, isHost: ${p.isHost})`);
@@ -61,25 +61,6 @@ class GameService
 			5000
 		);
 		this.gameManager.start();
-		this._aiConnect();
-	}
-
-	_aiConnect()
-	{
-		this.websocketClient.onConnect(() => {
-			console.log('✅ AI connected to game server successfully');
-		});
-		this.websocketClient.onMessage((message) => {
-			console.log('📨 AI received message from server:', message);
-		});
-		this.websocketClient.onClose((event) => {
-			console.log('🔌 AI disconnected from game server:', event);
-		});
-		this.websocketClient.onError((error) => {
-
-		});
-		console.log('🔗 Attempting to connect AI client to WebSocket server...');
-		this.websocketClient.connect();
 	}
 
 	_getplayerByConnectionId(connectionId)
@@ -217,13 +198,12 @@ class GameService
 				});
 
 				this.roomManager.on(`room${roomId}_Started`,
-					({gameSettings, players, gameMode}) =>
+					(room) =>
 					{
-						this._sendPlayers(players, { type: 'game/started' , payload: { gameMode: gameMode }});
-
+						this._sendPlayers(room.players, { type: 'game/started' , payload: { gameMode: room.gameMode }});
 						//! sahne yüklenmeden oyunun hemen başlaması sıkıntı olabilir.
-						const gameId = this.gameManager.createGame(gameMode, gameSettings);
-						players.forEach((p) => this.gameManager.addPlayerToGame(gameId, this.players.get(p.id)));
+						const gameId = this.gameManager.createGame(room.gameMode, room.gameSettings, room.aiSettings);
+						room.players.forEach((p) => this.gameManager.addPlayerToGame(gameId, this.players.get(p.id)));
 						this.gameManager.on(`game${gameId}_StateUpdate`,
 							({gameState, players}) => this._sendPlayers(this.getPlayers(players), { type: 'game/stateUpdate', payload: gameState })
 						);

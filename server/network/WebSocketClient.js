@@ -3,7 +3,6 @@ class NetworkManager
 	constructor(ip, port)
 	{
 		this.socket = null;
-		this.isConnected = false;
 		this.serverAddress = `ws://${ip}:${port}`;
 
 		this.callbacks = {
@@ -32,7 +31,6 @@ class NetworkManager
 
 			this.socket.onopen = () => {
 				console.log('✅ WebSocket connected successfully');
-				this.isConnected = true;
 				onConnect();
 			};
 
@@ -50,7 +48,6 @@ class NetworkManager
 
 			this.socket.onclose = (event) => {
 				console.log('🔌 WebSocket connection closed:', event.code, event.reason);
-				this.isConnected = false;
 				onClose({ code: event.code, reason: event.reason });
 			};
 
@@ -87,7 +84,7 @@ class NetworkManager
 
 	send(type, payload)
 	{
-		if (this.isConnected)
+		if (this.isConnected())
 			this.socket.send(JSON.stringify({ type, payload }));
 		else
 			throw new Error('Cannot send message: not connected to server');
@@ -95,12 +92,11 @@ class NetworkManager
 
 	disconnect()
 	{
-		this.isConnected = false;
 		if (this.socket)
 			this.socket.close();
 	}
 
-	isConnect()
+	isConnected()
 	{
 		return this.socket && this.socket.readyState === WebSocket.OPEN;
 	}

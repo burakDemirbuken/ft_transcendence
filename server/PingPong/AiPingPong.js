@@ -28,16 +28,10 @@ class AIPingPong extends PingPong
 		const player = this.players[0];
 		const localPaddle = this.paddles.get(this.players[0].id);
 
-		localPaddle.up = player.inputsGet('ArrowUp') || player.inputsGet('w');
-		localPaddle.down = player.inputsGet('ArrowDown') || player.inputsGet('s');
+		localPaddle.up = player.inputGet('ArrowUp') || player.inputGet('w');
+		localPaddle.down = player.inputGet('ArrowDown') || player.inputGet('s');
 
 		const aiPaddle = this.paddles.get("AI");
-	}
-
-	initializeGame(property)
-	{
-		super.initializeGame();
-		AiNetwork.initGame(property.difficulty, property.settings);
 	}
 
 	getGameState()
@@ -63,21 +57,22 @@ class AIPingPong extends PingPong
 				ball: {
 					...this.ball.getState(),
 				},
-			}
+				score: {
+					left: this.team.get(1).score,
+					right: this.team.get(2).score
+				}
+			},
 		};
 	}
 
 	start()
 	{
-		if (this.status === 'not initialized')
-			this.initializeGame();
 		this.status = 'countdown';
 		setTimeout(
 			() =>
 			{
 				this.status = 'playing';
 				this.emit('gameStarted');
-				clearInterval(interval);
 				const interval = setInterval(
 					() =>
 					{
@@ -86,8 +81,8 @@ class AIPingPong extends PingPong
 								type: "game_state",
 								ball:
 								{
-									x: this.ball.position.x,
-									y: this.ball.position.y,
+									x: this.ball.pos.x,
+									y: this.ball.pos.y,
 									speed_x: this.ball.speed,
 									speed_y: this.ball.speed,
 								},
@@ -106,7 +101,8 @@ class AIPingPong extends PingPong
 									human_score: this.team.get(2).score,
 									ai_scored: this.lastGoal === 'left',
 									human_scored: this.lastGoal === 'right',
-								}
+								},
+								game_id: this.id
 							}
 						);
 					}, 1000);

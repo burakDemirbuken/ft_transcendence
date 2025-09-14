@@ -1,7 +1,7 @@
 import PingPong from './PingPong/PingPong.js';
 import LocalPingPong from './PingPong/LocalPingPong.js';
 import AiPingPong from './PingPong/AiPingPong.js';
-import aiNetwork from './network/AiNetworkManager.js';
+import AiNetwork from './network/AiNetworkManager.js';
 
 
 import { TICK_RATE, DEFAULT_GAME_PROPERTIES } from './utils/constants.js';
@@ -15,6 +15,21 @@ class GameManager extends EventEmitter
 		this.games = new Map();
 		this.updateInterval = null;
 		this.lastUpdateTime = Date.now();
+		AiNetwork.on('game_initialized',
+			(data) =>
+			{
+				console.log('🤖 AI Game initialized:', data);
+				for (const [gameId, game] of this.games.entries())
+				{
+					if (data.game_id === gameId)
+					{
+						game.status = 'waiting';
+						console.log(`🤖 AI Game ${gameId} initialized and set to waiting`);
+						break;
+					}
+				}
+			}
+		);
 	}
 
 	uniqueGameId()
@@ -34,9 +49,7 @@ class GameManager extends EventEmitter
 				game.removePlayer(playerId);
 				console.log(`👤 Player ${playerId} removed from game ${gameId}`);
 				if (game.players.length === 0)
-				{
 					this.removeGame(gameId);
-				}
 				return;
 			}
 		}
@@ -54,9 +67,10 @@ class GameManager extends EventEmitter
 		}
 	}
 
-	createGame(gameMode, properties)
+	createGame(gameMode, properties ,aiSettings = {})
 	{
 		const gameId = this.uniqueGameId();
+		properties.id = gameId;
 		let game;
 		if (gameMode === 'local')
 			game = new LocalPingPong(properties);
@@ -65,18 +79,13 @@ class GameManager extends EventEmitter
 		else if (gameMode === 'ai')
 		{
 			game = new AiPingPong(properties);
-			aiNetwork.initGame(properties.difficulty, properties.settings);
-			aiNetwork.on('game_initialized',
-				(id) => {
-				if (id === gameId)
-					console.log(`🤖 AI game initialized for game ID: ${gameId}`);
-			});
+			console.log(`🤖 AI Game ${gameId} initialized with settings: ${JSON.stringify(properties, null, 2)}`);
+			AiNetwork.initGame(aiSettings.difficulty, gameId, aiSettings.settings);
 		}
 		else
 			throw new Error(`Unsupported game mode: ${gameMode}`);
-
-		this.games.set(gameId, game);
 		game.initializeGame();
+		this.games.set(gameId, game);
 		return gameId;
 	}
 
