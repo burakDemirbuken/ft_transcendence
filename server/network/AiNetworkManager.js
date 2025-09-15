@@ -87,18 +87,17 @@ class AiNetworkManager extends EventEmitter
 		}
 	}
 
-	sendData(gameData)
+	sendData(gameId, gameData)
 	{
 		if (!this.socket.isConnected())
 			throw new Error('AI server is not connected');
-		if (!this.gameIds.has(gameId))
-			throw new Error(`Game ID ${gameId} not recognized by AI Network Manager`);
 
 		const message = {
 			type: 'game_data',
 			game_id: gameId,
-			data: gameData,
+			...gameData,
 		};
+		console.log('🤖 Sending game data to AI server:', message);
 		this.sendMessage(JSON.stringify(message));
 	}
 

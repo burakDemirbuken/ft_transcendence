@@ -76,9 +76,8 @@ class AIPingPong extends PingPong
 				const interval = setInterval(
 					() =>
 					{
-						this.emit('ai_state',
+						AiNetwork.sendData(this.id,
 							{
-								type: "game_state",
 								ball:
 								{
 									x: this.ball.pos.x,
@@ -102,7 +101,6 @@ class AIPingPong extends PingPong
 									ai_scored: this.lastGoal === 'left',
 									human_scored: this.lastGoal === 'right',
 								},
-								game_id: this.id
 							}
 						);
 					}, 1000);

@@ -77,11 +77,7 @@ class GameManager extends EventEmitter
 		else if (gameMode === 'classic')
 			game = new PingPong(properties);
 		else if (gameMode === 'ai')
-		{
 			game = new AiPingPong(properties);
-			console.log(`🤖 AI Game ${gameId} initialized with settings: ${JSON.stringify(properties, null, 2)}`);
-			AiNetwork.initGame(aiSettings.difficulty, gameId, aiSettings.settings);
-		}
 		else
 			throw new Error(`Unsupported game mode: ${gameMode}`);
 		game.initializeGame();
