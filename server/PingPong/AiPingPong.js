@@ -13,6 +13,7 @@ class AIPingPong extends PingPong
 		this.aiSettings = parameters.aiSettings || { difficulty: 'medium' };
 		this._aiSendInterval = null;
 		this._lastTargetY = null;
+		this._aiDir = 0; // -1 up, 1 down, 0 none
 	}
 
 	addPlayer(player)
@@ -37,16 +38,33 @@ class AIPingPong extends PingPong
 		const aiPaddle = this.paddles.get("AI");
 		if (aiPaddle)
 		{
-			// AI hedefini her frame takip et (decisions 1s'de bir gelir)
-			const targetCenterY = (this._lastTargetY != null) ? this._lastTargetY : aiPaddle.pos.y;
+			// AI target_y üst kenar olarak geliyor; merkeze çevir
+			const targetCenterY = (this._lastTargetY != null)
+				? (this._lastTargetY + aiPaddle.height / 2)
+				: (aiPaddle.pos.y + aiPaddle.height / 2);
 			const paddleCenterY = aiPaddle.pos.y + aiPaddle.height / 2;
-			const deadzone = 3;
-			aiPaddle.up = false;
-			aiPaddle.down = false;
-			if (paddleCenterY > targetCenterY + deadzone)
-				aiPaddle.up = true;
-			else if (paddleCenterY < targetCenterY - deadzone)
-				aiPaddle.down = true;
+			const diff = targetCenterY - paddleCenterY;
+			const enterThreshold = 10; // yön değiştirmek için daha geniş eşik
+			const exitThreshold = 4;   // hareketi bırakmak için dar eşik
+
+			let nextDir = this._aiDir;
+			if (this._aiDir === 0)
+			{
+				if (diff > enterThreshold) nextDir = 1;
+				else if (diff < -enterThreshold) nextDir = -1;
+			}
+			else if (this._aiDir === 1)
+			{
+				if (diff <= exitThreshold) nextDir = 0;
+			}
+			else if (this._aiDir === -1)
+			{
+				if (diff >= -exitThreshold) nextDir = 0;
+			}
+
+			this._aiDir = nextDir;
+			aiPaddle.up = this._aiDir === -1;
+			aiPaddle.down = this._aiDir === 1;
 		}
 	}
 
