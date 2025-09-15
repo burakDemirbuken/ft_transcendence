@@ -35,7 +35,7 @@ class GameManager extends EventEmitter
 	uniqueGameId()
 	{
 		do {
-			var id = 'game_' + Date.now();
+			var id = Date.now();
 		} while (this.games.has(id));
 		return id;
 	}
@@ -71,6 +71,7 @@ class GameManager extends EventEmitter
 	{
 		const gameId = this.uniqueGameId();
 		properties.id = gameId;
+		properties.aiSettings = aiSettings;
 		let game;
 		if (gameMode === 'local')
 			game = new LocalPingPong(properties);

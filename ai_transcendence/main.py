@@ -84,15 +84,25 @@ def convert_decision_to_direction(decision):
 
 def get_ai_decision(ai_player: PingPongAI, game_data: dict):
     """Mevcut AI ile karar ver"""
-    # Oyun verilerini al
-    ball = game_data['ball']
-    paddle = game_data['paddle']
-    game_area = game_data.get('game_area', {})
-    score = game_data.get('score', {})
+    ball = game_data.get('ball') or {}
+    paddle = game_data.get('paddle') or {}
+    game_area = game_data.get('game_area') or {}
+    score = game_data.get('score') or {}
+
+    # Varsayılanlar
+    bx = ball.get('x', 0)
+    by = ball.get('y', 0)
+    bvx = ball.get('speed_x', 0)
+    bvy = ball.get('speed_y', 0)
+    ai_y = paddle.get('ai_y', 0)
+    width = game_area.get('width', 800)
+    height = game_area.get('height', 600)
+    ai_scored = score.get('ai_scored', False)
+    human_scored = score.get('human_scored', False)
 
     # AI'a oyun alanı bilgilerini ver (eğer AI class'ı destekliyorsa)
-    if game_area and hasattr(ai_player, 'set_game_area'):
-        ai_player.set_game_area(game_area['width'], game_area['height'])
+    if hasattr(ai_player, 'set_game_area'):
+        ai_player.set_game_area(width, height)
 
     # AI'a raket bilgilerini ver (eğer AI class'ı destekliyorsa)
     if hasattr(ai_player, 'set_paddle_info'):
@@ -100,11 +110,11 @@ def get_ai_decision(ai_player: PingPongAI, game_data: dict):
 
     # AI kararını al
     decision = ai_player.get_move(
-        ball['x'], ball['y'],
-        ball['speed_x'], ball['speed_y'],
-        paddle['ai_y'],
-        score.get('ai_scored', False),
-        score.get('human_scored', False)
+        bx, by,
+        bvx, bvy,
+        ai_y,
+        ai_scored,
+        human_scored
     )
 
     return decision
@@ -228,59 +238,98 @@ async def handle_join_game(websocket, client_id: str, data: dict):
 async def handle_game_data(websocket, client_id: str, data: dict):
     """Oyun verisini işle ve AI kararını döndür"""
     try:
-        # Game ID'yi mesajdan al
+        # 1) AI instance'ını bul (önce game_id ile, yoksa client eşleşmesi ile)
         game_id = data.get('game_id')
+        ai_player = None
 
         if game_id:
-            # Mesajdaki game_id kullan
             ai_player = ai_manager.game_ais.get(game_id)
             if not ai_player:
-                raise ValueError(f"Oyun {game_id} bulunamadı")
+                # Bu game_id için AI yoksa otomatik oluştur ve client'ı ata
+                ai_manager.create_game_ai(str(game_id), {"difficulty": "medium"})
+                ai_manager.assign_client_to_game(client_id, str(game_id))
+                ai_player = ai_manager.game_ais.get(str(game_id))
+                game_id = str(game_id)
         else:
-            # Fallback: Client'ın mevcut oyununu kullan
-            # Client için AI'ı bul
             ai_player = ai_manager.get_ai_for_client(client_id)
             game_id = ai_manager.get_client_game_id(client_id)
-
             if not ai_player:
-                raise ValueError("Bu client için AI bulunamadı")
+                # Client için bir oyun ve AI yoksa otomatik oluştur
+                auto_game_id = str(uuid.uuid4())[:8]
+                ai_manager.create_game_ai(auto_game_id, {"difficulty": "medium"})
+                ai_manager.assign_client_to_game(client_id, auto_game_id)
+                ai_player = ai_manager.get_ai_for_client(client_id)
+                game_id = auto_game_id
 
-            # AI kararını al
+        # 2) AI kararını al (eksik anahtarlar için güvenli okuma, target_y korunur)
+        ball = data.get('ball') or {}
+        paddle = data.get('paddle') or {}
+        game_area = data.get('game_area') or {}
+
+        bx = ball.get('x')
+        by = ball.get('y')
+        bvx = ball.get('speed_x')
+        bvy = ball.get('speed_y')
+        ai_y = paddle.get('ai_y')
+        # Sunucudan paddle yüksekliği gelmiyor; oyun ayarlarına göre tahmin
+        paddle_h = paddle.get('height', 100)
+        area_h = game_area.get('height', 600)
+
+        # Zorunlu alanlar yoksa önceki hedefi koru (AI sınıfında yoksa None döner)
+        can_compute = all(v is not None for v in [bx, by, bvx, bvy, ai_y])
+
+        if can_compute:
+            print(f"[AI INPUT] bx={bx:.2f}, by={by:.2f}, bvx={bvx:.2f}, bvy={bvy:.2f}, ai_y={ai_y:.2f}, ph={paddle_h}, ah={area_h}")
             target_y = ai_player.get_move(
-                data['ball']['x'], data['ball']['y'],
-                data['ball']['speed_x'], data['ball']['speed_y'],
-                data['paddle']['ai_y'], data['paddle']['height'], data['game_area']['height'],
+                bx, by,
+                bvx, bvy,
+                ai_y, paddle_h, area_h,
                 data.get('scored_for_me', False), data.get('scored_against_me', False)
             )
+            # Eğer hesaplanan sonuç anormal derecede 0 ise basit bir takip fallback'i uygula
+            try:
+                is_zeroish = abs(float(target_y)) < 1e-6
+            except Exception:
+                is_zeroish = False
 
-            # Konsola AI kararını yazdır
-            import time
-            print(f"[{time.strftime('%H:%M:%S')}] Oyun {game_id} - AI karar verdi: Hedef Y = {target_y:.2f}")
-            print(f"  Top: ({data['ball']['x']:.1f}, {data['ball']['y']:.1f}), "
-                  f"Hız: ({data['ball']['speed_x']:.1f}, {data['ball']['speed_y']:.1f})")
-            print(f"  Raket: Y = {data['paddle']['ai_y']:.1f}")
+            if is_zeroish and (abs(bvx) > 1e-3 or abs(bvy) > 1e-3):
+                simple_target = max(paddle_h/2, min(area_h - paddle_h/2, by))
+                target_y = simple_target - paddle_h/2
+                print(f"[AI OUTPUT-FALLBACK] target_y={target_y:.2f}")
+            else:
+                print(f"[AI OUTPUT] target_y={target_y:.2f}")
+        else:
+            # Hesaplanamıyorsa mevcut hedefi koru: paddle merkezini hedefle
+            target_y = (ai_y or 0)
+            try:
+                print(f"[AI OUTPUT-NOCOMPUTE] target_y={float(target_y):.2f}")
+            except Exception:
+                print(f"[AI OUTPUT-NOCOMPUTE] target_y={target_y}")
 
-            if data.get('scored_for_me', False):
-                print("  AI skor kazandı! ✓")
-            if data.get('scored_against_me', False):
-                print("  AI skor kaybetti! ✗")
+        # 3) Log
+        import time
+        print(f"[{time.strftime('%H:%M:%S')}] Oyun {game_id} - AI karar verdi: Hedef Y = {target_y:.2f}")
+        if can_compute:
+            print(f"  Top: ({bx:.1f}, {by:.1f}), Hız: ({bvx:.1f}, {bvy:.1f})")
+            print(f"  Raket: Y = {ai_y:.1f}")
+        else:
+            print("  Eksik alan(lar) nedeniyle önceki target_y korundu")
 
-            # Özel modları göster
-            if ai_player.rage_mode:
-                print("  🔥 RAGE MODE AKTİF!")
-            if ai_player.tired_mode:
-                print("  😴 TIRED MODE AKTİF!")
-            if ai_player.super_focus:
-                print("  🎯 SUPER FOCUS AKTİF!")
+        # 4) Yanıtı gönder (frontend beklediği formatta)
+        # Yanıtı oluştur
+        response = {
+            "type": "ai_decision",
+            "target_y": target_y,
+            "game_id": game_id
+        }
 
-            # Yanıtı oluştur
-            response = {
-                "type": "ai_decision",
-                "target_y": target_y,
-                "game_id": game_id
-            }
+        # Nihai karar bilgisini her durumda yazdır
+        try:
+            print(f"[AI DECISION] game_id={game_id} target_y={float(target_y):.2f}")
+        except Exception:
+            print(f"[AI DECISION] game_id={game_id} target_y={target_y}")
 
-            await websocket.send(json.dumps(response))
+        await websocket.send(json.dumps(response))
 
     except Exception as e:
         print(f"Oyun verisi işleme hatası: {e}")
@@ -292,7 +341,7 @@ async def handle_legacy_init(websocket, client_id: str, data: dict):
     """Eski format oyun başlatma (geriye uyumluluk)"""
     try:
         ai_config = data.get('ai_config', {})
-        game_id = str(uuid.uuid4())[:8]  # Kısa ID
+        game_id = data.get("game_id")
 
         # AI oluştur ve oyunu başlat
         ai_manager.create_game_ai(game_id, ai_config)

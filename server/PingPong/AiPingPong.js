@@ -10,6 +10,9 @@ class AIPingPong extends PingPong
 		this.settings.maxPlayers = 1;
 		console.log(`🎮 AIPingPong created with mode: ${this.gameMode}`);
 		this.targetPaddlePosition = { x: 0, y: 0 };
+		this.aiSettings = parameters.aiSettings || { difficulty: 'medium' };
+		this._aiSendInterval = null;
+		this._lastTargetY = null;
 	}
 
 	addPlayer(player)
@@ -32,6 +35,19 @@ class AIPingPong extends PingPong
 		localPaddle.down = player.inputGet('ArrowDown') || player.inputGet('s');
 
 		const aiPaddle = this.paddles.get("AI");
+		if (aiPaddle)
+		{
+			// AI hedefini her frame takip et (decisions 1s'de bir gelir)
+			const targetCenterY = (this._lastTargetY != null) ? this._lastTargetY : aiPaddle.pos.y;
+			const paddleCenterY = aiPaddle.pos.y + aiPaddle.height / 2;
+			const deadzone = 3;
+			aiPaddle.up = false;
+			aiPaddle.down = false;
+			if (paddleCenterY > targetCenterY + deadzone)
+				aiPaddle.up = true;
+			else if (paddleCenterY < targetCenterY - deadzone)
+				aiPaddle.down = true;
+		}
 	}
 
 	getGameState()
@@ -68,22 +84,36 @@ class AIPingPong extends PingPong
 	start()
 	{
 		this.status = 'countdown';
+		// AI sunucusunda bu oyun için AI instance'ını başlat
+		try
+		{
+			const difficulty = this.aiSettings?.difficulty || 'medium';
+			AiNetwork.initGame(difficulty, this.id, this.aiSettings?.custom_settings || {});
+		}
+		catch (e)
+		{
+			console.error('❌ Failed to init AI game on AI server:', e);
+		}
 		setTimeout(
 			() =>
 			{
 				this.status = 'playing';
 				this.emit('gameStarted');
-				const interval = setInterval(
+				this._aiSendInterval = setInterval(
 					() =>
 					{
+						if (this.status !== 'playing')
+							return;
+						if (!this.team.get(1) || !this.team.get(2))
+							return;
 						AiNetwork.sendData(this.id,
 							{
 								ball:
 								{
 									x: this.ball.pos.x,
 									y: this.ball.pos.y,
-									speed_x: this.ball.speed,
-									speed_y: this.ball.speed,
+									speed_x: this.ball.directionX * this.ball.speed,
+									speed_y: this.ball.directionY * this.ball.speed,
 								},
 								paddle:
 								{
@@ -106,12 +136,23 @@ class AIPingPong extends PingPong
 					}, 1000);
 			}, 1000
 		);
+
+		// AI kararlarını dinle ve hedef Y'yi kaydet
+		AiNetwork.on(`aiGame${this.id}_target`, (targetY) =>
+		{
+			if (typeof targetY === 'number')
+				this._lastTargetY = targetY;
+		});
 	}
 
 	stop()
 	{
 		this.status = 'stopped';
-		// interval stop
+		if (this._aiSendInterval)
+		{
+			clearInterval(this._aiSendInterval);
+			this._aiSendInterval = null;
+		}
 		console.log(`⏸️ Game stopped`);
 	}
 }

@@ -82,10 +82,20 @@ class NetworkManager
 		this.callbacks.onError = callback;
 	}
 
+	// Var olan mesajlaşma şekli (type, payload)
 	send(type, payload)
 	{
 		if (this.isConnected())
 			this.socket.send(JSON.stringify({ type, payload }));
+		else
+			throw new Error('Cannot send message: not connected to server');
+	}
+
+	// Ham JSON string gönderimi (AI sunucusu üst seviye alanları bekliyor)
+	sendRaw(messageString)
+	{
+		if (this.isConnected())
+			this.socket.send(messageString);
 		else
 			throw new Error('Cannot send message: not connected to server');
 	}
