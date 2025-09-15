@@ -20,12 +20,12 @@ function goToNextField(field)
 
 function showError(message:string)
 {
-	const form = document.querySelector("#loginForm");
+	const activeField = document.querySelector(".active");
 	const error = document.querySelector("#error");
 	error.textContent = message;
-	form.classList.add('shake')
+	activeField.classList.add('shake')
 	setTimeout(() => {
-		form.classList.remove('shake');
+		activeField.classList.remove('shake');
 	}, 500);
 }
 
@@ -39,13 +39,12 @@ async function username() {
 		return ;
 	}
 
-	const graphemeLength = [...username].length;
-	if (graphemeLength < 1 || graphemeLength > 20) {
+	if (username.length < 1 || username.length > 20) {
 		showError("uname has to be 1-20 characters long");
 		return ;
 	}
 
-	if (!/^[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
+	if (!/^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
 		showError("uname has to be valid characters")
 		return ;
 	}
@@ -96,7 +95,7 @@ async function login() {
 		return ;
 	}
 
-	if (password.length < 4 || password.length > 128) {
+	if (password.length < 8 || password.length > 128) {
 		showError("invalid password");
 		return ;
 	}

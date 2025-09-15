@@ -1,4 +1,5 @@
 {
+	"sidebar": {},
 	"login": {
 		"lang": "ENG",
 		"welcome": {
@@ -10,5 +11,9 @@
 		"password": "Enter Password",
 		"code": "Enter Code",
 		"rme": "Remember Me"
-	}
+	},
+	"profile": {},
+	"friends": {},
+	"chat": {},
+	"settings": {}
 }
