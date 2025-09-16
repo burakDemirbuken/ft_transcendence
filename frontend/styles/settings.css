@@ -6,6 +6,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	font-size: min(1.4rem, 0.7rem + 1vw);
 }
 
 #settings-form {
