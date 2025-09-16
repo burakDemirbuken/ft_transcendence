@@ -15,7 +15,6 @@ COPY ./nginx_entry.sh /entry.sh
 RUN mkdir -p /usr/share/nginx/html && \
 	mkdir -p etc/nginx/ssl && \
 	adduser -D -g 'www' www && \
-	chown -R www:www /usr/share/nginx/html && \
 	chmod +x /entry.sh
 
 ENTRYPOINT [ "/entry.sh" ]

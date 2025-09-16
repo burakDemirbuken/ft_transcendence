@@ -25,4 +25,9 @@ echo "SSL configuration file created!"
 
 # Start nginx
 echo "Starting nginx..."
+
+# Fix file ownership and permissions for nginx html directory
+echo "Setting correct permissions for web files..."
+chmod -R 777 /usr/share/nginx/html
+
 exec "$@"

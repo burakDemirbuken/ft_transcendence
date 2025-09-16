@@ -19,11 +19,7 @@ YELLOW = \033[1;33m
 BLUE = \033[0;34m
 NC = \033[0m
 
-all: volumes up
-
-# Create all volume directories
-volumes: $(NGINX_DATA_DIR) $(GATEWAY_SRC_DIR) $(SQLITE_DATA_DIR)
-	@echo "$(GREEN)All volume directories created successfully!$(NC)"
+all: up
 
 # Create nginx data directory
 $(NGINX_DATA_DIR):

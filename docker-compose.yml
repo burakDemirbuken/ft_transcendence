@@ -7,31 +7,31 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ${HOME}/ft_transcendence/frontend
+      device: ./frontend
       o: bind
   gateway_src:
     driver: local
     driver_opts:
       type: none
-      device: ${HOME}/ft_transcendence/backend/gateway
+      device: ./backend/gateway
       o: bind
   authentication_src:
     driver: local
     driver_opts:
       type: none
-      device: ${HOME}/ft_transcendence/backend/authentication
+      device: ./backend/authentication
       o: bind
   email_src:
     driver: local
     driver_opts:
       type: none
-      device: ${HOME}/ft_transcendence/backend/email
+      device: ./backend/email
       o: bind
   user_src:
     driver: local
     driver_opts:
       type: none
-      device: ${HOME}/ft_transcendence/backend/users
+      device: ./backend/users
       o: bind
 
 services:
@@ -58,7 +58,7 @@ services:
     networks:
       - transcendency
     ports:
-      - 443:443
+      - 8080:8080
     depends_on:
       - gateway
 

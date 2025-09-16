@@ -8,6 +8,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY . .
 
+RUN chown 777 /app/index.html -R
+
 RUN npm install
 
 RUN npm run build
