@@ -29,12 +29,14 @@ export default class extends AView {
 					</div>
 				</div>
 				<div class="friend-actions">
-					<select class="friend-action" name="friend-action">
-						<option selected disabled></option>
-						<option value="play">Play</option>
-						<option value="message">Message</option>
-						<option value="unfriend">Unfriend</option>
-					</select>
+					<div class="friend-menu">
+						<button class="menu-btn">⋮</button>
+						<div class="menu-options">
+							<button class="option">Play</button>
+							<button class="option">Message</button>
+							<button class="option">Unfriend</button>
+						</div>
+					</div>
 				</div>
 			`;
 			div.classList.add("friend");
