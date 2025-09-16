@@ -1,7 +1,8 @@
 import Sequelize from 'sequelize';
 import fp from 'fastify-plugin';
+import profileRoute from './routes/profile.js'
 
-module.exports = fp(async (fastify, opts) => {
+module.exports = fp(async (fastify) => {
     const seq = new Sequelize({
         dialect: 'sqlite',
         storage: 'users.sqlite',
