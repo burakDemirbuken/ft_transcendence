@@ -76,7 +76,7 @@
 		},
 		"dash": {
 			"psum": {
-				"title": "Performance Sum",
+				"title": "Performance Overview",
 				"mwon": "Matches Won",
 				"mlose": "Matches Lost",
 				"mdur": "Match Duration Average",
@@ -141,7 +141,7 @@
 			}
 		},
 		"mhistory": {
-			"title": "Mach History and Analysis",
+			"title": "Match History and Analysis",
 			"opts": {
 				"alltimes": "All Times",
 				"last7": "Last 7 days",
@@ -154,7 +154,7 @@
 				"date": "DATE",
 				"match": "MATCH",
 				"score": "SCORE",
-				"time": "TIME",
+				"time": "DURATION",
 				"result": "RESULT",
 				"analysis": "ANALYSIS",
 				"res": {
@@ -165,7 +165,7 @@
 		},
 		"achiev": {
 			"fwin": {
-				"title": "First Win",
+				"title": "First Victory",
 				"active": "Win your first match",
 				"passive": "You won your first match!"
 			},
@@ -175,7 +175,7 @@
 				"passive": "Win 10 matches in a row"
 			},
 			"swin": {
-				"title": "First Win",
+				"title": "Fast Victory",
 				"active": "You won in less than 3 minutes!",
 				"passive": "Win in less than 3 minutes"
 			},
@@ -185,7 +185,7 @@
 				"passive": "Win 100 matches"
 			},
 			"pserie": {
-				"title": "Perfect Serie",
+				"title": "Perfect Series",
 				"active": "You won 25 matches in a row!",
 				"passive": "Win 25 matches in a row"
 			},

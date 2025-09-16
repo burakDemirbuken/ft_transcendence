@@ -116,83 +116,83 @@
 				"mwon": "Kazanılan Maç"
 			},
 			"dstats": {
-				"title": "Detailed Statistics",
-				"tpts": "Total Points",
-				"ascore": "Average Score Difference",
-				"mfastest": "Fastest Win",
-				"mlongest": "Longest Match"
+				"title": "Detaylı İstatistikler",
+				"tpts": "Toplam Puan",
+				"ascore": "Ortalama Skor Farkı",
+				"mfastest": "En Hızlı Galibiyet",
+				"mlongest": "En Uzun Maç"
 			}
 		},
 		"thistory": {
-			"title": "Tournament History",
+			"title": "Turnuva Geçmişi",
 			"opts": {
-				"allyears": "All Years",
-				"alltour": "All Tournaments",
-				"ltour": "Leauge Tournemants",
-				"elimtour": "Elimination Tournaments",
-				"special": "Special Events"
+				"allyears": "Tüm Yıllar",
+				"alltour": "Tüm Turnuvalar",
+				"ltour": "Lig Turnuvaları",
+				"elimtour": "Eleme Turnuvaları",
+				"special": "Özel Etkinlikler"
 			},
 			"table": {
-				"matches": "Matches",
-				"v/d": "V/D",
-				"score": "Score",
-				"bestper": "Best Performance",
-				"showdetail": "Show Details"
+				"matches": "Maçlar",
+				"v/d": "G/M",
+				"score": "Puan",
+				"bestper": "En İyi Performans",
+				"showdetail": "Detayları Göster"
 			}
 		},
 		"mhistory": {
-			"title": "Mach History and Analysis",
+			"title": "Maç Geçmişi ve Analizi",
 			"opts": {
-				"alltimes": "All Times",
-				"last7": "Last 7 days",
-				"last30": "Last 30 days",
-				"allres": "All Results",
-				"onlywon": "Only Wins",
-				"onlylost": "Only Losses"
+				"alltimes": "Tüm Zamanlar",
+				"last7": "Son 7 gün",
+				"last30": "Son 30 gün",
+				"allres": "Tüm Sonuçlar",
+				"onlywon": "Sadece Galibiyetler",
+				"onlylost": "Sadece Mağlubiyetler"
 			},
 			"table": {
-				"date": "DATE",
-				"match": "MATCH",
-				"score": "SCORE",
-				"time": "TIME",
-				"result": "RESULT",
-				"analysis": "ANALYSIS",
+				"date": "TARIH",
+				"match": "RAKIP",
+				"score": "SKOR",
+				"time": "SÜRE",
+				"result": "SONUÇ",
+				"analysis": "ANALIZ",
 				"res": {
-					"vic": "Victory",
-					"def": "Defeat"
+					"vic": "Gaibiyet",
+					"def": "Mağlubiyet"
 				}
 			}
 		},
 		"achiev": {
 			"fwin": {
-				"title": "First Win",
-				"active": "Win your first match",
-				"passive": "You won your first match!"
+				"title": "İlk Galibiyet",
+				"active": "İlk maçını kazandın!",
+				"passive": "İlk maçını kazanman gerekiyor"
 			},
 			"smaster": {
 				"title": "Streak Master",
-				"active": "You won 10 matches in a row!",
-				"passive": "Win 10 matches in a row"
+				"active": "10 maç üst üste kazandın!",
+				"passive": "10 maç üst üste kazanman gerekiyor"
 			},
 			"swin": {
-				"title": "First Win",
-				"active": "You won in less than 3 minutes!",
-				"passive": "Win in less than 3 minutes"
+				"title": "Hızlı Galibiyet",
+				"active": "3 dakikadan kısa sürede kazandın!",
+				"passive": "3 dakikadan kısa sürede kazanman gerekiyor"
 			},
 			"nking": {
-				"title": "Neon King",
-				"active": "You won 100 matches!",
-				"passive": "Win 100 matches"
+				"title": "Neon Kralı",
+				"active": "100 maç kazandın!",
+				"passive": "100 maç kazanman gerekiyor"
 			},
 			"pserie": {
-				"title": "Perfect Serie",
-				"active": "You won 25 matches in a row!",
-				"passive": "Win 25 matches in a row"
+				"title": "Mükemmel Seri",
+				"active": "25 maç üst üste kazandın!",
+				"passive": "25 maç üst üste kazanman gerekiyor"
 			},
 			"lplayer": {
-				"title": "Legendary Player",
-				"active": "You played 500 matches!",
-				"passive": "Play 500 matches"
+				"title": "Efsane Oyuncu",
+				"active": "500 maç oynadın!",
+				"passive": "500 maç oynaman gerekiyor"
 			}
 		}
 	},
