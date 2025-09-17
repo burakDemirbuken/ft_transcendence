@@ -25,7 +25,6 @@ class AiNetworkManager extends EventEmitter
 			this.socket.onMessage((data) => {
 				try
 				{
-					console.log('📩 Received message from AI server:', data);
 					this.handleMessage(data);
 				}
 				catch (error)
@@ -68,7 +67,6 @@ class AiNetworkManager extends EventEmitter
 		};
 		if (difficulty === "custom")
 			data.ai_config.settings = settings;
-		console.log('🤖 Sending game initialization to AI server:', data);
 		this.sendMessage(JSON.stringify(data));
 	}
 
@@ -99,7 +97,6 @@ class AiNetworkManager extends EventEmitter
 			game_id: gameId,
 			...gameData,
 		};
-		console.log('🤖 Sending game data to AI server:', message);
 		this.sendMessage(JSON.stringify(message));
 	}
 

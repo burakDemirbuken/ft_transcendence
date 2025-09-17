@@ -8,8 +8,11 @@ class Ball extends EventEmitter
 		super();
 		this.speed = ballSpeed / 2;
 		this.defaultSpeed = ballSpeed;
-		this.directionX = Math.random() < 0.5 ? -1 : 1;
-		this.directionY = Math.random();
+		this.direction =
+		{
+			x : Math.random() < 0.5 ? -1 : 1,
+			y : Math.random()
+		}
 		this.lastGoal = null;
 
 		this.pos = new Vector2D(x, y);
@@ -26,8 +29,8 @@ class Ball extends EventEmitter
 		const deltaTimeInSeconds = deltaTime / 1000;
 
 		this.oldPos = { x: this.pos.x, y: this.pos.y };
-		this.pos.x += this.directionX * this.speed * deltaTimeInSeconds;
-		this.pos.y += this.directionY * this.speed * deltaTimeInSeconds;
+		this.pos.x += this.direction.x * this.speed * deltaTimeInSeconds;
+		this.pos.y += this.direction.y * this.speed * deltaTimeInSeconds;
 
 		this.checkBorders();
 	}
@@ -52,8 +55,8 @@ class Ball extends EventEmitter
 	launchBall(direction, speed = this.speed)
 	{
 		this.speed = speed;
-		this.directionX = direction.x;
-		this.directionY = direction.y;
+		this.direction.x = direction.x;
+		this.direction.y = direction.y;
 	}
 
 	reset()
@@ -61,8 +64,8 @@ class Ball extends EventEmitter
 		this.pos.x = this.defaultPos.x;
 		this.pos.y = this.defaultPos.y;
 		this.speed = this.defaultSpeed / 2;
-		this.directionX = 0;
-		this.directionY = 0;
+		this.direction.x = 0;
+		this.direction.y = 0;
 		this.oldPos = { x: this.pos.x, y: this.pos.y };
 	}
 
@@ -89,8 +92,8 @@ class Ball extends EventEmitter
 			},
 			direction:
 			{
-				x: this.directionX,
-				y: this.directionY
+				x: this.direction.x,
+				y: this.direction.y
 			},
 			radius: this.width / 2,
 			speed: this.speed

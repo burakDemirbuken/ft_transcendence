@@ -136,12 +136,12 @@ class PingPong extends EventEmitter
 				else if (border === 'top')
 				{
 					this.ball.revertPosition();
-					this.ball.launchBall({x: this.ball.directionX, y: Math.abs(this.ball.directionY)});
+					this.ball.launchBall({x: this.ball.direction.x, y: Math.abs(this.ball.direction.y)});
 				}
 				else if (border === 'bottom')
 				{
 					this.ball.revertPosition();
-					this.ball.launchBall({x: this.ball.directionX, y: -Math.abs(this.ball.directionY)});
+					this.ball.launchBall({x: this.ball.direction.x, y: -Math.abs(this.ball.direction.y)});
 				}
 			}
 		);
@@ -220,7 +220,7 @@ class PingPong extends EventEmitter
 					const side = collisionDetails.side;
 					this.separateBallFromPaddle(this.ball, paddle, side);
 					if (side === "top" || side === "bottom")
-						this.ball.launchBall({x: this.ball.directionX, y: -this.ball.directionY});
+						this.ball.launchBall({x: this.ball.direction.x, y: -this.ball.direction.y});
 					else if (side === "left" || side === "right")
 						this.adjustBallAngle(paddle);
 					return collisionDetails.colliding;
@@ -232,9 +232,9 @@ class PingPong extends EventEmitter
 
 	adjustBallAngle(paddle)
 	{
-		const relativeIntersectY = (paddle.pos.y + paddle.height / 2) - this.ball.pos.y;
+		const relativeIntersectY = (paddle.pos.y + paddle.height / 2) - this.ball.pos.y + this.ball.height / 2;
 		const normalizedRelativeIntersectionY = relativeIntersectY / (paddle.height / 2);
-		this.ball.launchBall({x: -this.ball.directionX, y: -normalizedRelativeIntersectionY},
+		this.ball.launchBall({x: -this.ball.direction.x, y: -normalizedRelativeIntersectionY},
 										this.ball.defaultSpeed + this.settings.ballSpeedIncrease * Math.abs(normalizedRelativeIntersectionY));
 	}
 
@@ -245,7 +245,7 @@ class PingPong extends EventEmitter
 
 		if (side === 'left' || side === 'right')
 		{
-			if (ball.directionX < 0)
+			if (ball.direction.x < 0)
 				newX = paddle.pos.x + paddle.width + 1;
 			else
 				newX = paddle.pos.x - ball.width - 1;

@@ -6,6 +6,49 @@ class Collision2D
 	// RECTANGLE COLLISION METHODS
 	// ============================
 
+	static _getX(obj)
+	{
+		if (!obj) return 0;
+		return obj.x || (obj.pos && obj.pos.x) || (obj.position && obj.position.x) || 0;
+	};
+
+	static _getY(obj)
+	{
+		if (!obj) return 0;
+		return obj.y || (obj.pos && obj.pos.y) || (obj.position && obj.position.y) || 0;
+	};
+
+	static _getOldX(obj)
+	{
+		if (!obj) return Collision2D._getX(obj);
+		return obj.oldX !== undefined ? obj.oldX :
+				(obj.oldPos && obj.oldPos.x) ||
+				(obj.oldPosition && obj.oldPosition.x) ||
+				Collision2D._getX(obj);
+	};
+
+	static _getOldY(obj)
+	{
+		if (!obj) return Collision2D._getY(obj);
+		return obj.oldY !== undefined ? obj.oldY :
+				(obj.oldPos && obj.oldPos.y) ||
+				(obj.oldPosition && obj.oldPosition.y) ||
+				Collision2D._getY(obj);
+	};
+
+	static _getWidth(obj)
+	{
+		if (!obj) return 0;
+		return obj.width || (obj.size && obj.size.width) || (obj.size && obj.size.x) || 0;
+	};
+
+	static _getHeight(obj)
+	{
+		if (!obj) return 0;
+		return obj.height || (obj.size && obj.size.height) || (obj.size && obj.size.y) || 0;
+	};
+
+
 	/**
 	 * rectangle to rectangle collision detection (AABB)
 	 * @param {Object} rect1 - {x, y, width, height}
@@ -15,31 +58,12 @@ class Collision2D
 	static rectangleToRectangle(rect1, rect2, returnDetails = false)
 	{
 		// Null check and safe property access
-		const getX = (obj) => {
-			if (!obj) return 0;
-			return obj.x || (obj.pos && obj.pos.x) || (obj.position && obj.position.x) || 0;
-		};
 
-		const getY = (obj) => {
-			if (!obj) return 0;
-			return obj.y || (obj.pos && obj.pos.y) || (obj.position && obj.position.y) || 0;
-		};
+		const rect1Pos = new Vector2D(Collision2D._getX(rect1), Collision2D._getY(rect1));
+		const rect1Size = { width: Collision2D._getWidth(rect1), height: Collision2D._getHeight(rect1) };
 
-		const getWidth = (obj) => {
-			if (!obj) return 0;
-			return obj.width || (obj.size && obj.size.width) || (obj.size && obj.size.x) || 0;
-		};
-
-		const getHeight = (obj) => {
-			if (!obj) return 0;
-			return obj.height || (obj.size && obj.size.height) || (obj.size && obj.size.y) || 0;
-		};
-
-		const rect1Pos = new Vector2D(getX(rect1), getY(rect1));
-		const rect1Size = { width: getWidth(rect1), height: getHeight(rect1) };
-
-		const rect2Pos = new Vector2D(getX(rect2), getY(rect2));
-		const rect2Size = { width: getWidth(rect2), height: getHeight(rect2) };
+		const rect2Pos = new Vector2D(Collision2D._getX(rect2), Collision2D._getY(rect2));
+		const rect2Size = { width: Collision2D._getWidth(rect2), height: Collision2D._getHeight(rect2) };
 
 		const isColliding =
 		(
@@ -58,37 +82,47 @@ class Collision2D
 		const overlapX = Math.min(rect1Pos.x + rect1Size.width - rect2Pos.x, rect2Pos.x + rect2Size.width - rect1Pos.x);
 		const overlapY = Math.min(rect1Pos.y + rect1Size.height - rect2Pos.y, rect2Pos.y + rect2Size.height - rect1Pos.y);
 
-		let side, normalX = 0, normalY = 0, penetration;
+		let side, normalX = 0, normalY = 0, penetration = 0;
 
-		if (overlapX < overlapY)
+		const rect1OldPos = new Vector2D(Collision2D._getOldX(rect1), Collision2D._getOldY(rect1));
+		console.log("XXXXXXXXXXXXXXXXXXXXXX rect1OldPos:", rect1OldPos);
+
+		if (rect1OldPos.y < rect2Pos.y + rect2Size.height &&
+			rect1OldPos.y + rect1Size.height > rect2Pos.y)
 		{
 			penetration = overlapX;
-			if (rect1Pos.x < rect2Pos.x)
+			if (rect2Pos.x > rect1OldPos.x + rect1Size.width)
 			{
-				side = 'right';
+				side = 'left';
 				normalX = -1;
 			}
 			else
 			{
-				side = 'left';
+				side = 'right';
 				normalX = 1;
 			}
 		}
 		else
 		{
 			penetration = overlapY;
-			if (rect1Pos.y > rect2Pos.y)
+			if (rect2Pos.y > rect1OldPos.y + rect1Size.height)
 			{
-				side = 'bottom';
+				side = 'top';
 				normalY = -1;
 			}
 			else
 			{
-				side = 'top';
+				side = 'bottom';
 				normalY = 1;
 			}
 		}
-
+		console.log("XXXXXXXXXXXXXXXXXXXXXX detected on side:", {
+			colliding: true,
+			side: side,
+			overlap: { x: overlapX, y: overlapY },
+			normal: { x: normalX, y: normalY },
+			penetration: penetration
+		});
 		return {
 			colliding: true,
 			side: side,
@@ -116,54 +150,18 @@ class Collision2D
 			return returnDetails ? { colliding: false } : false;
 		}
 
-		const getX = (obj) => {
-			if (!obj) return 0;
-			return obj.x || (obj.pos && obj.pos.x) || (obj.position && obj.position.x) || 0;
-		};
+		const rect1X = Collision2D._getX(rect1);
+		const rect1Y = Collision2D._getY(rect1);
+		const rect1W = Collision2D._getWidth(rect1);
+		const rect1H = Collision2D._getHeight(rect1);
 
-		const getY = (obj) => {
-			if (!obj) return 0;
-			return obj.y || (obj.pos && obj.pos.y) || (obj.position && obj.position.y) || 0;
-		};
+		const rect2X = Collision2D._getX(rect2);
+		const rect2Y = Collision2D._getY(rect2);
+		const rect2W = Collision2D._getWidth(rect2);
+		const rect2H = Collision2D._getHeight(rect2);
 
-		const getWidth = (obj) => {
-			if (!obj) return 0;
-			return obj.width || (obj.size && obj.size.width) || (obj.size && obj.size.x) || 0;
-		};
-
-		const getHeight = (obj) => {
-			if (!obj) return 0;
-			return obj.height || (obj.size && obj.size.height) || (obj.size && obj.size.y) || 0;
-		};
-
-		const getOldX = (obj) => {
-			if (!obj) return getX(obj);
-			return obj.oldX !== undefined ? obj.oldX :
-				   (obj.oldPos && obj.oldPos.x) ||
-				   (obj.oldPosition && obj.oldPosition.x) ||
-				   getX(obj);
-		};
-
-		const getOldY = (obj) => {
-			if (!obj) return getY(obj);
-			return obj.oldY !== undefined ? obj.oldY :
-				   (obj.oldPos && obj.oldPos.y) ||
-				   (obj.oldPosition && obj.oldPosition.y) ||
-				   getY(obj);
-		};
-
-		const rect1X = getX(rect1);
-		const rect1Y = getY(rect1);
-		const rect1W = getWidth(rect1);
-		const rect1H = getHeight(rect1);
-
-		const rect2X = getX(rect2);
-		const rect2Y = getY(rect2);
-		const rect2W = getWidth(rect2);
-		const rect2H = getHeight(rect2);
-
-		const oldX = getOldX(rect1);
-		const oldY = getOldY(rect1);
+		const oldX = Collision2D._getOldX(rect1);
+		const oldY = Collision2D._getOldY(rect1);
 
 		const currentCollision = Collision2D.rectangleToRectangle(rect1, rect2, returnDetails);
 		if (currentCollision === true || (currentCollision && currentCollision.colliding)) {
@@ -225,7 +223,7 @@ class Collision2D
 			collisionPoint: { x: collisionX, y: collisionY },
 			side: side,
 			normal: normal,
-			penetration: 0, // At exact collision time, no penetration
+			penetration: 0,
 			trajectoryStart: { x: oldX, y: oldY },
 			trajectoryEnd: { x: rect1X, y: rect1Y }
 		};
@@ -385,11 +383,8 @@ class Collision2D
 			return { obj1: { x: 0, y: 0 }, obj2: { x: 0, y: 0 } };
 		}
 
-		const getX = (obj) => obj.x || (obj.pos && obj.pos.x) || (obj.position && obj.position.x) || 0;
-		const getY = (obj) => obj.y || (obj.pos && obj.pos.y) || (obj.position && obj.position.y) || 0;
-
-		const originalX = getX(obj1);
-		const originalY = getY(obj1);
+		const originalX = Collision2D._getX(obj1);
+		const originalY = Collision2D._getY(obj1);
 
 		let newX = originalX + collisionDetails.normal.x * collisionDetails.penetration;
 		let newY = originalY + collisionDetails.normal.y * collisionDetails.penetration;

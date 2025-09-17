@@ -130,8 +130,8 @@ class AIPingPong extends PingPong
 								{
 									x: this.ball.pos.x,
 									y: this.ball.pos.y,
-									speed_x: this.ball.directionX * this.ball.speed,
-									speed_y: this.ball.directionY * this.ball.speed,
+									speed_x: this.ball.direction.x * this.ball.speed,
+									speed_y: this.ball.direction.y * this.ball.speed,
 								},
 								paddle:
 								{
