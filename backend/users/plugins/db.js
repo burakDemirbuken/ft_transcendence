@@ -6,7 +6,7 @@ module.exports = fp(async (fastify) => {
     const seq = new Sequelize({
         dialect: 'sqlite',
         storage: 'users.sqlite',
-        logging: true, //?
+        logging: true,
     })
 
     const models = require('./../models')(seq)

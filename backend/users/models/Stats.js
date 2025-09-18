@@ -32,7 +32,7 @@ module.exports = (sequelize) => {
         },
         /*level: {
             type: DataTypes.INTEGER,
-            defaultValue: 1
+            defaultValue: 0
         }*/
     }, {
         sequelize,
