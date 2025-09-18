@@ -8,6 +8,163 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import AView from "./AView.js";
+let currentFrPage = "friends";
+function handle_clicks(e) {
+    if (e.target.classList.contains("pg-switch")) {
+        document.querySelector(`#${currentFrPage}`).classList.remove("pg-actv");
+        let frpage = document.querySelector(`.${currentFrPage}`);
+        frpage.classList.remove("pg-actv");
+        frpage === null || frpage === void 0 ? void 0 : frpage.setAttribute("inert", "");
+        currentFrPage = e.target.id;
+        document.querySelector(`#${currentFrPage}`).classList.add("pg-actv");
+        frpage = document.querySelector(`.${currentFrPage}`);
+        frpage.classList.add("pg-actv");
+        frpage === null || frpage === void 0 ? void 0 : frpage.removeAttribute("inert");
+    }
+    else if (e.target.classList.contains("option")) {
+        // if (e.target.id === "play")
+        //	; // send play request
+        // else if (e.target.id === "msg")
+        //	; // send play request
+        // else if (e.target.id === "unfr")
+        //	; // send play request
+    }
+}
+function createFriends() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const usr = yield fetch("mockdata/friendslist.json");
+        const userList = yield usr.json();
+        for (const user of userList) {
+            const div = document.createElement("div");
+            // <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
+            div.innerHTML = `
+			<div class="user-profile">
+				<div class="user-avatar">
+					${user.avatar_url}
+				</div>
+				<div class="user-info">
+					<span class="uname">${user.username}</span>
+				</div>
+			</div>
+			<div class="user-actions">
+				<div class="user-menu">
+					<button class="menu-btn">⋮</button>
+					<div class="menu-options">
+						<button id="play" class="option">Play</button>
+						<button id="msg" class="option">Message</button>
+						<button id="unfr" class="option">Unfriend</button>
+					</div>
+				</div>
+			</div>
+		`;
+            div.classList.add("friend");
+            div.classList.add("online");
+            const friends = document.querySelector(".friends");
+            console.log(friends);
+            friends.appendChild(div);
+        }
+    });
+}
+function createInvites() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const usr = yield fetch("mockdata/invitelist.json");
+        const userList = yield usr.json();
+        for (const user of userList) {
+            const div = document.createElement("div");
+            // <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
+            div.innerHTML = `
+			<div class="user-profile">
+				<div class="user-avatar">
+					${user.avatar_url}
+				</div>
+				<div class="user-info">
+					<span class="uname">${user.username}</span>
+				</div>
+			</div>
+			<div class="user-actions">
+				<div class="user-menu">
+					<button class="menu-btn">⋮</button>
+					<div class="menu-options">
+						<button id="undo" class="option">Undo</button>
+					</div>
+				</div>
+			</div>
+		`;
+            div.classList.add("friend");
+            div.classList.add("online");
+            const friends = document.querySelector(".invites");
+            console.log(friends);
+            friends.appendChild(div);
+        }
+    });
+}
+function createRequests() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const usr = yield fetch("mockdata/requestlist.json");
+        const userList = yield usr.json();
+        for (const user of userList) {
+            const div = document.createElement("div");
+            // <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
+            div.innerHTML = `
+			<div class="user-profile">
+				<div class="user-avatar">
+					${user.avatar_url}
+				</div>
+				<div class="user-info">
+					<span class="uname">${user.username}</span>
+				</div>
+			</div>
+			<div class="user-actions">
+				<div class="user-menu">
+					<button class="menu-btn">⋮</button>
+					<div class="menu-options">
+						<button id="accept" class="option">Accept</button>
+						<button id="decline" class="option">Decline</button>
+					</div>
+				</div>
+			</div>
+		`;
+            div.classList.add("friend");
+            div.classList.add("online");
+            const friends = document.querySelector(".requests");
+            console.log(friends);
+            friends.appendChild(div);
+        }
+    });
+}
+function createBlocked() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const usr = yield fetch("mockdata/blockedlist.json");
+        const userList = yield usr.json();
+        for (const user of userList) {
+            const div = document.createElement("div");
+            // <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
+            div.innerHTML = `
+			<div class="user-profile">
+				<div class="user-avatar">
+					${user.avatar_url}
+				</div>
+				<div class="user-info">
+					<span class="uname">${user.username}</span>
+				</div>
+			</div>
+			<div class="user-actions">
+				<div class="user-menu">
+					<button class="menu-btn">⋮</button>
+					<div class="menu-options">
+						<button id="unblock" class="option">Unblock</button>
+					</div>
+				</div>
+			</div>
+		`;
+            div.classList.add("friend");
+            div.classList.add("online");
+            const friends = document.querySelector(".blocked");
+            console.log(friends);
+            friends.appendChild(div);
+        }
+    });
+}
 export default class extends AView {
     constructor() {
         super();
@@ -21,46 +178,21 @@ export default class extends AView {
     }
     setDynamicContent() {
         return __awaiter(this, void 0, void 0, function* () {
-            const fr = yield fetch("mockdata/friendslist.json");
-            const friendlist = yield fr.json();
-            for (const friend of friendlist) {
-                console.log(friend);
-                const div = document.createElement("div");
-                // <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
-                div.innerHTML = `
-				<div class="friend-profile">
-					<div class="friend-avatar">
-						${friend.avatar_url}
-					</div>
-					<div class="friend-info">
-						<span class="uname">"${friend.username}"</span>
-						<span class="level">[═══════----------------------]</span>
-					</div>
-				</div>
-				<div class="friend-actions">
-					<div class="friend-menu">
-						<button class="menu-btn">⋮</button>
-						<div class="menu-options">
-							<button class="option">Play</button>
-							<button class="option">Message</button>
-							<button class="option">Unfriend</button>
-						</div>
-					</div>
-				</div>
-			`;
-                div.classList.add("friend");
-                div.classList.add("online");
-                const friends = document.querySelector(".friends");
-                console.log(friends);
-                friends.appendChild(div);
-            }
+            createFriends();
+            createInvites();
+            createRequests();
+            createBlocked();
         });
     }
     setEventHandlers() {
-        return __awaiter(this, void 0, void 0, function* () { });
+        return __awaiter(this, void 0, void 0, function* () {
+            document.addEventListener("click", handle_clicks);
+        });
     }
     unsetEventHandlers() {
-        return __awaiter(this, void 0, void 0, function* () { });
+        return __awaiter(this, void 0, void 0, function* () {
+            document.removeEventListener("click", handle_clicks);
+        });
     }
     setStylesheet() {
         return __awaiter(this, void 0, void 0, function* () {

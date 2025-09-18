@@ -41,7 +41,9 @@
 	position: relative;
 }
 
-.friend-nav button:hover::after, .friend-nav button:focus::after {
+.friend-nav button:hover::after,
+.friend-nav button:focus::after,
+.friend-nav button.pg-actv::after {
 	content: "";
 	position: absolute;
 	bottom: 0;
@@ -66,6 +68,15 @@
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
 	gap: .5em;
+
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity .3s ease;
+}
+
+.subpage.pg-actv {
+	opacity: 1;
+	pointer-events: all;
 }
 
 .subpage .friend {
@@ -80,14 +91,14 @@
 	padding: .5em;
 }
 
-.friend-profile {
+.user-profile {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: 1em;
 }
 
-.friend-avatar {
+.user-avatar {
 	width: 3.5rem;
 	height: 3.5rem;
 	border-radius: 50%;
@@ -102,7 +113,7 @@
 	flex-shrink: 0;
 }
 
-.friend.online .friend-avatar {
+.user.online .user-avatar {
 	border-color: #0f0;
 	box-shadow: 0 0 5px #0c0;
 }
@@ -114,17 +125,17 @@
 	object-fit: cover;
 }
 
-.friend-info {
+.user-info {
 	display: flex;
 	flex-direction: column;
 }
 
-.friend-info .uname {
+.user-info .uname {
 	font-family: "PixeloidSans";
 	text-shadow: 0 0 15px #0ff;
 }
 
-.friend-actions {
+.user-actions {
 	position: relative;
 	display: flex;
 	align-items: center;
@@ -133,7 +144,7 @@
 	cursor: pointer;
 }
 
-.friend-menu {
+.user-menu {
 	position: relative;
 	display: inline-block;
 }
@@ -158,10 +169,10 @@
 	border: 1px solid #333;
 
 	overflow: hidden;
-	z-index: 1;
+	z-index: 200;
 }
 
-.friend-menu:hover .menu-options {
+.user-menu:hover .menu-options, .user-menu:focus .menu-options {
 	display: block;
 }
 

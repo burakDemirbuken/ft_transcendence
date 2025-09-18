@@ -1,26 +1,25 @@
 <div class="friends-container">
 	<nav class="friend-nav">
 		<ul>
-			<li><button>Friends</button></li>
-			<li><button>Requests</button></li>
-			<li><button>Invites</button></li>
-			<li><button>Blocked</button></li>
+			<li><button id="friends" class="pg-switch pg-actv">Friends</button></li>
+			<li><button id="requests" class="pg-switch">Requests</button></li>
+			<li><button id="invites" class="pg-switch">Invites</button></li>
+			<li><button id="blocked" class="pg-switch">Blocked</button></li>
 		</ul>
 	</nav>
 	<div class="friend-page-box">
-		<div class="subpage friends">
+		<div class="subpage friends pg-actv">
 			<div class="friend">
-				<div class="friend-profile">
-					<div class="friend-avatar">
+				<div class="user-profile">
+					<div class="user-avatar">
 						<img src="https://img.freepik.com/premium-vector/avatar-young-man-minimalist-cartoon-icon-drawing-vector-illustration_608387-13.jpg?w=360" alt="description">
 					</div>
-					<div class="friend-info">
+					<div class="user-info">
 						<span class="uname">Username</span>
-						<span class="level">[═══════----------------------]</span>
 					</div>
 				</div>
-				<div class="friend-actions">
-					<div class="friend-menu">
+				<div class="user-actions">
+					<div class="user-menu">
 						<button class="menu-btn">⋮</button>
 						<div class="menu-options">
 							<button class="option">Play</button>
@@ -31,9 +30,9 @@
 				</div>
 			</div>
 		</div>
-		<div class="subpage requests"></div>
-		<div class="subpage invites"></div>
-		<div class="subpage blocked"></div>
+		<div class="subpage requests" inert=""></div>
+		<div class="subpage invites" inert=""></div>
+		<div class="subpage blocked" inert=""></div>
 		</div>
 	</div>
 </div>
