@@ -1,24 +1,24 @@
 services:
   node:
     build:
-      context: ./server
+      context: ./backend/gameServer
       dockerfile: Dockerfile
     image: game-server
     container_name: game-server
     ports:
       - "3001:3001"
     volumes:
-      - ./server:/app
+      - ./backend/gameServer:/app
       - /app/node_modules
     depends_on:
       - ai
   ai:
     build:
-      context: ./ai_transcendence
+      context: ./backend/aiServer
       dockerfile: Dockerfile
     image: ai-server
     container_name: ai-server
     ports:
       - "3000:3000"
     volumes:
-      - ./ai_transcendence:/app
+      - ./backend/aiServer:/app
