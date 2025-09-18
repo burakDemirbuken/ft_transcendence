@@ -2,15 +2,20 @@ import { Sequelize, DataTypes, Model } from '@sequelize/core';
 
 module.exports = (sequelize) => {
 
-    class MatchHistory extends Model {}
-
-    MatchHistory.init({
-        id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
-        },
-        teamOneID: {
+	class Round extends Model {}
+	
+	Round.init({
+		id: {
+			type: DataTypes.INTEGER,
+			primaryKey: true,
+			autoIncrement: true
+		},
+		roundNumber: {
+			type: DataTypes.INTEGER,
+			foreignKey: true, 
+			allowNull: false
+		},
+		teamOneID: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
@@ -45,18 +50,14 @@ module.exports = (sequelize) => {
 			},
 			onDelete: 'CASCADE'
 		},
-        matchDate: {
-            type: DataTypes.DATE,
-        },
-        matchtype: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
+		matchDate: {
+			type: DataTypes.DATE,
+		},
 	}, {
-        sequelize,
-        modelName: 'MatchHistory',
-        tableName: 'match_histories'
-    })
+		sequelize,
+		modelName: 'Round',
+		tableName: 'rounds'
+	})
 
-    return MatchHistory
+	return Round
 }

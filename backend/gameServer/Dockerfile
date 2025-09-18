@@ -1,17 +1,12 @@
-# En güncel Node.js sürümünü kullan
-FROM node:latest
+FROM node:24-alpine
 
-# Sistemi güncelle ve temel araçları kur
-RUN apt update && apt install -y
+RUN apk upgrade --no-cache && \
+	apk update --no-cache
 
-# Çalışma dizinine geç
 WORKDIR /app
 
-# Uygulama dosyalarını kopyala
 COPY . .
 
-# Bağımlılıkları yükle
 RUN npm install
 
-# Sunucuyu başlat
 CMD [ "npm", "run", "dev" ]

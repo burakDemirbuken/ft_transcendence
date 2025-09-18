@@ -33,6 +33,18 @@ volumes:
       type: none
       device: ./backend/users
       o: bind
+  aiServer_src:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/aiServer
+      o: bind
+  gameServer:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/gameServer
+      o: bind
 
 services:
   frontend:
@@ -104,14 +116,17 @@ services:
       - EMAIL_PORT=3005
       - HOST=0.0.0.0
 
-  #gameserver:
-  #  container_name: gameserver
-  #  build: ./gameserver
-  #  restart: on-failure
-  #  networks:
-  #    - transcendency
-  #  expose:
-  #    - 3004
+  gameserver:
+    container_name: gameserver
+    build: ./backend/gameServer
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 3002
+    volumes:
+      - gameServer:/app
+      - /app/node_modules
 
   user:
     container_name: user
@@ -125,11 +140,14 @@ services:
     networks:
       - transcendency
 
-  # livechat:
-  #   container_name: livechat
-  #   build: ./livechat
-  #   restart: on-failure
-  #   networks:
-  #     - transcendency
-
+  aiserver:
+    container_name: ai-server
+    build: ./backend/aiServer
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 3003
+    volumes:
+      - aiServer_src:/app
 

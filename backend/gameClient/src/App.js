@@ -15,7 +15,7 @@ class App
 		this.playerId = this._TEST_generateRandomId();
 		this.playerName = this._TEST_generateRandomName();
 		this.gameRenderer = new GameRenderer();
-		this.webSocketClient = new WebSocketClient(window.location.hostname, 3001);
+		this.webSocketClient = new WebSocketClient(window.location.hostname, 3002);
 		this.roomUi = new RoomUi();
 		this.inputManager = new InputManager();
 

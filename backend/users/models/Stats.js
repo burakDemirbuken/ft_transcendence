@@ -8,11 +8,16 @@ module.exports = (sequelize) => {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
+            autoIncrement: true
         },
         userId: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true
+            references: {
+                model: 'Users',
+                key: 'id'
+            },
+            onDelete: 'CASCADE'
         },
         gamesPlayed: {
             type: DataTypes.INTEGER,
@@ -34,7 +39,7 @@ module.exports = (sequelize) => {
             type: DataTypes.INTEGER,
             defaultValue: 0
         }*/
-    }, {
+	}, {
         sequelize,
         modelName: 'Stats',
         tableName: 'stats'

@@ -25,6 +25,7 @@ module.exports = (sequelize) => {
         bio: {
             type: DataTypes.TEXT
         },
+	}, {
         sequelize,
         modelName: 'User',
         tableName: 'users'

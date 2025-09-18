@@ -38,14 +38,6 @@ export default async function allRoutes(gateway, opts) {
 				try {
 					// Forward the request to the target service
 					const headers = { ...request.headers };
-					
-					// Remove headers that shouldn't be forwarded or might cause conflicts
-					delete headers['content-type'];
-					delete headers['content-length']; // Critical: Remove original content-length
-					delete headers['host']; // Remove original host
-					delete headers['connection'];
-					delete headers['transfer-encoding'];
-					
 					const body = request.method !== 'GET' && request.method !== 'HEAD' ? JSON.stringify(request.body) : undefined;
 					
 					const fetchHeaders = { ...headers };

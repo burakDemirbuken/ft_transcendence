@@ -145,7 +145,7 @@ class GameService
 				}
 			);
 
-			await this.websocketServer.start({ host: '0.0.0.0', port: 3001 });
+			await this.websocketServer.start({ host: '0.0.0.0', port: 3002 });
 
 			console.log('✅ Game Server started successfully!');
 		}
