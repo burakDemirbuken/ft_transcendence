@@ -55,7 +55,7 @@ echo "🧪 Test page: http://$SERVER_IP:$PORT/test.html"
 echo ""
 
 # Client klasörüne git
-cd "$(dirname "$0")/client"
+cd "$(dirname "$0")" || { echo "❌ Failed to change directory"; exit 1; }
 
 echo "📂 Current directory: $(pwd)"
 echo "📁 Files:"

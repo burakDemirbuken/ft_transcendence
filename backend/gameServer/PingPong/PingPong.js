@@ -12,8 +12,9 @@ class PingPong extends EventEmitter
 		this.status = 'not initialized'; // 'waiting', 'playing', 'paused', 'finished', 'not initialized'
 		this.gameMode = property.gameMode; // 'local', 'online', 'tournament', 'ai'
 
-		this.deltaTime = 0;
 		this.lastUpdateTime = 0;
+		this.startTime = 0;
+		this.finishTime = 0;
 		this.gameTime = 0;
 		this.id = property.id || null;
 
@@ -168,7 +169,6 @@ class PingPong extends EventEmitter
 		if (this.status !== 'playing')
 			return new Error('Game is not currently playing: ' + this.status);
 
-		this.deltaTime = deltaTime;
 		this.gameTime += deltaTime;
 		this.lastUpdateTime = Date.now();
 
@@ -191,7 +191,35 @@ class PingPong extends EventEmitter
 		if (this.team.get(1).score >= this.settings.maxScore || this.team.get(2).score >= this.settings.maxScore)
 		{
 			this.status = 'finished';
-			this.emit('gameFinished', this.getGameState());
+			this.finishTime = Date.now();
+			this.emit('gameFinished',
+				{
+					players: this.players.map(p => p.id),
+					results:
+					{
+						team1:
+						{
+							score: this.team.get(1).score,
+							playersId: this.team.get(1).playersId
+						},
+						team2:
+						{
+							score: this.team.get(2).score,
+							playersId: this.team.get(2).playersId
+						},
+						winner: this.team.get(1).score > this.team.get(2).score ? 1 : 2,
+						time:
+						{
+							start: this.startTime,
+							finish: this.finishTime,
+							duration: this.gameTime
+						},
+						matchType: this.gameMode,
+
+					}
+
+				}
+			);
 			console.log(`🏁 Game finished! Final Score - Left: ${this.team.get(1).score}, Right: ${this.team.get(2).score}`);
 		}
 	}
@@ -259,6 +287,7 @@ class PingPong extends EventEmitter
 
 	start()
 	{
+		this.startTime = Date.now();
 		if (this.settings.maxPlayers && this.players.length < this.settings.maxPlayers)
 			return new Error(`Not enough players to start the game. Required: ${this.settings.maxPlayers}, Current: ${this.players.length}`);
 
@@ -306,7 +335,6 @@ class PingPong extends EventEmitter
 			paddle.reset();
 		this.gameTime = 0;
 		this.lastUpdateTime = 0;
-		this.deltaTime = 0;
 		this.start();
 	}
 
@@ -386,7 +414,6 @@ class PingPong extends EventEmitter
 		this.status = 'not initialized';
 		this.gameTime = 0;
 		this.lastUpdateTime = 0;
-		this.deltaTime = 0;
 		console.log('🗑️ Game disposed');
 	}
 }
