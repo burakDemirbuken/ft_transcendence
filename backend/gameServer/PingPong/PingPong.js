@@ -207,7 +207,7 @@ class PingPong extends EventEmitter
 							score: this.team.get(2).score,
 							playersId: this.team.get(2).playersId
 						},
-						winner: this.team.get(1).score > this.team.get(2).score ? 1 : 2,
+						winner: "team"+this.team.get(1).score > this.team.get(2).score ? 1 : 2,
 						time:
 						{
 							start: this.startTime,
