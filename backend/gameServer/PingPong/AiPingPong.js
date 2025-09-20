@@ -101,7 +101,7 @@ class AIPingPong extends PingPong
 
 	start()
 	{
-		this.status = 'countdown';
+		this.startTime = Date.now();
 		// AI sunucusunda bu oyun için AI instance'ını başlat
 		try
 		{
@@ -112,6 +112,7 @@ class AIPingPong extends PingPong
 		{
 			console.error('❌ Failed to init AI game on AI server:', e);
 		}
+		this.status = 'countdown';
 		setTimeout(
 			() =>
 			{

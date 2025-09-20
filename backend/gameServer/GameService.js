@@ -23,7 +23,7 @@ class GameService
 		this.connectionId = new Map(); //  playerId -> connectionId
 		this.players = new Map(); // playerId -> Player instance
 
-		setInterval(
+		/* setInterval(
 			() =>
 			{
 				console.log('--- Connected Players ---');
@@ -59,7 +59,7 @@ class GameService
 				console.log('');
 			},
 			5000
-		);
+		); */
 		this.gameManager.start();
 	}
 
@@ -208,10 +208,19 @@ class GameService
 							({gameState, players}) => this._sendPlayers(this.getPlayers(players), { type: 'game/stateUpdate', payload: gameState })
 						);
 						this.gameManager.on(`game${gameId}_Ended`,
-							(results, players) =>
+							({results, players}) =>
 							{
+								console.log(`Game ${gameId} ended. Results:`, JSON.stringify(results, null, 2));
+								console.log('Players:', players);
 								this._sendPlayers(this.getPlayers(players), { type: 'game/ended', payload: results });
-								//? oyun bittiğinde yapılacak işlemler
+								fetch('http://user:3006/internal/match', {
+									method: 'POST',
+									headers: { 'Content-Type': 'application/json' },
+									body: JSON.stringify({
+										gameId: gameId,
+										...results
+									})
+								});
 							}
 						);
 						this.gameManager.gameStart(gameId);

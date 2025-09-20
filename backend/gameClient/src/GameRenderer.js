@@ -41,20 +41,14 @@ class GameRenderer extends EventEmitter
 			case 'local':
 				this._localGameInitialize(gameConfig);
 				break;
-			case 'multiple':
-				this._multiplayerGameInitialize(gameConfig);
-				break;
-			case 'tournament':
-				this._tournamentGameInitialize(gameConfig);
-				break;
 			case 'ai':
 				this._aiGameInitialize(gameConfig);
 				break;
-			case 'custom':
-				this._customGameInitialize(gameConfig);
-				break;
 			case 'classic':
 				this._classicGameInitialize(gameConfig);
+				break;
+			case 'tournament':
+				this._tournamentGameInitialize(gameConfig);
 				break;
 			default:
 				throw new Error(`Unknown game mode: ${gameConfig.GameMode}`);

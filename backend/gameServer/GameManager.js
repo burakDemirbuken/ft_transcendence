@@ -82,6 +82,7 @@ class GameManager extends EventEmitter
 		else
 			throw new Error(`Unsupported game mode: ${gameMode}`);
 		game.initializeGame();
+		game.on('gameFinished', (results, players) => this.emit(`game${gameId}_Ended`, results, players));
 		this.games.set(gameId, game);
 		return gameId;
 	}

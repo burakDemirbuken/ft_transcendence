@@ -4,7 +4,7 @@ DOCKER_COMPOSE_FILE = docker-compose.yml
 all: run
 
 run: stop
-	./start_client.sh &
+	./backend/gameClient/start_client.sh &
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) up --build
 
 stop:
