@@ -45,9 +45,12 @@ module.exports = (sequelize) => {
 			},
 			onDelete: 'CASCADE'
 		},
-        matchDate: {
-            type: DataTypes.DATE,
+        matchStartDate: {
+            type: DataTypes.DATE
         },
+		matchEndDate: {
+			type: DataTypes.DATE
+		},
         matchtype: {
             type: DataTypes.STRING,
             allowNull: false

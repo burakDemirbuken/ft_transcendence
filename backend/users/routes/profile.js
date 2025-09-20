@@ -5,16 +5,15 @@ export default async function profileRoute(fastify) {
 			where: { id: request.query.id },
 			include: fastify.db.models.Stats.findOne({ 
 				where: { userId: request.query.id },
-				raw: true
 			}),
-			raw: true
 		})
 
 		if (!profile) {
 			return reply.code(404).send({ error: 'User not found' })	
 		}
+		//jsona sok
 
-		return profile
+		return profile.toJson()
 	});
 
 	fastify.delete('/profile', async (request, reply) => {
