@@ -2,7 +2,7 @@ FROM node:24-alpine
 
 WORKDIR /app
 
-RUN mkdir -p data
+RUN mkdir -p database
 
 COPY package*.json ./
 COPY . .

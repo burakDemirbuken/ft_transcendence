@@ -2,9 +2,9 @@ import { Sequelize, DataTypes, Model } from '@sequelize/core';
 
 module.exports = (sequelize) => {
 
-	class TournementHistory extends Model {}
+	class TournamentHistory extends Model {}
 
-	TournementHistory.init({
+	TournamentHistory.init({
 		id: {
 			type: DataTypes.INTEGER,
 			primaryKey: true,
@@ -24,9 +24,9 @@ module.exports = (sequelize) => {
 		}
 	}, {
 		sequelize,
-		modelName: 'TournementHistory',
-		tableName: 'tournement_histories'
+		modelName: 'TournamentHistory',
+		tableName: 'tournament_histories'
 	})
 	
-	return TournementHistory
+	return TournamentHistory
 }

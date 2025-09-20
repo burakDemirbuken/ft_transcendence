@@ -1,13 +1,15 @@
 import Fastify from 'fastify'
-import db from './plugins/db.js'
+import gamedataRoute from './routes/gamedata.js'
+import profileRoute from './routes/profile.js'
+import friendRoute from './routes/friend.js'
 
 const fastify = Fastify({
   logger: true
 })
 
-
-
-fastify.register(db)
+fastify.register(gamedataRoute)
+fastify.register(profileRoute)
+fastify.register(friendRoute)
 
 fastify.listen({ port: 3006, host: '0.0.0.0' }, async (err, address) => {
     if (err) {
