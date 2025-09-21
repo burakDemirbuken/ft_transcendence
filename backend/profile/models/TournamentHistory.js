@@ -1,6 +1,4 @@
-import { Sequelize, DataTypes, Model } from '@sequelize/core';
-
-module.exports = (sequelize) => {
+export default (sequelize, DataTypes, Model) => {
 
 	class TournamentHistory extends Model {}
 
@@ -14,7 +12,7 @@ module.exports = (sequelize) => {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: 'Rounds',
+				model: 'rounds',
 				key: 'id'
 			},
 			onDelete: 'CASCADE'

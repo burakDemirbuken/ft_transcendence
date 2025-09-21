@@ -1,10 +1,8 @@
-import { Sequelize, DataTypes, Model } from '@sequelize/core';
+export default (sequelize, DataTypes, Model) => {
 
-module.exports = (sequelize) => {
+    class Profile extends Model {}
 
-    class User extends Model {}
-
-    User.init({
+    Profile.init({
         id: {
             type: DataTypes.STRING,
             primaryKey: true
@@ -27,8 +25,8 @@ module.exports = (sequelize) => {
         },
 	}, {
         sequelize,
-        modelName: 'User',
-        tableName: 'users'
+        modelName: 'Profile',
+        tableName: 'profiles'
     })
-    return User
+    return Profile
 }

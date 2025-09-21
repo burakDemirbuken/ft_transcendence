@@ -1,15 +1,16 @@
 import fp from 'fastify-plugin'
 import dotenv from 'dotenv'
 
-
 dotenv.config()
 
 async function globalsPlugin(fastify, options) {
 	const services = {
 		auth: "http://authentication:3001",
 		gateway: "http://gateway:3000",
-		nginx: "http://nginx:9000",
+//		nginx: "http://nginx:9000",
 		email: "http://email:3005",
+		profile: "http://profile:3006",
+		gameServer: "http://gameserver:3003"
 	};
 
 	const settings = {
@@ -69,38 +70,3 @@ export default fp(globalsPlugin, {
 	name: 'paths-plugin', //??
 	fastify: '4.x'
 });
-
-/* // Backward compatibility için globals objesini de export et
-export const gl = {
-	services: {
-		auth: "http://authentication:3001",
-		gateway: "http://gateway:3000",
-		nginx: "http://nginx:9000",
-		user: "http://user:3002",
-		gameserver: "http://gameserver:3003",
-		livechat: "http://livechat:3004",
-	},
-	settings: {
-		port: 3000,
-		host: process.env.HOST || '0.0.0.0',
-	},
-	secrets: {
-		jwtSecret: process.env.JWT_SECRET || 'default_secret',
-	},
-	publicpaths: {
-		'/auth/login': true,
-		'/auth/register': true,
-		'/auth/forgot-password': true,
-		'/auth/reset-password': true,
-		'/auth/verify-email': true,
-		'/auth/refresh': true,
-	},
-	adminpaths: {
-		'/auth/admin': true,
-		'/user/admin': true,
-		'/admin/users': true,
-		'/admin/ban-user': true,
-		'/admin/user-role': true,
-	},
-};
- */

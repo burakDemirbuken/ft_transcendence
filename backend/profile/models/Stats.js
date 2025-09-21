@@ -1,6 +1,4 @@
-import { Sequelize, DataTypes, Model } from '@sequelize/core';
-
-module.exports = (sequelize) => {
+export default (sequelize, DataTypes, Model) => {
 
     class Stats extends Model {}
 
@@ -14,7 +12,7 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING,
             allowNull: false,
             references: {
-                model: 'Users',
+                model: 'profiles',
                 key: 'id'
             },
             onDelete: 'CASCADE'

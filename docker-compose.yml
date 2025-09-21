@@ -3,48 +3,48 @@ networks:
     driver: bridge
 
 volumes:
-  frontend_src:
+#  frontend_src:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      device: ./frontend
+#      o: bind
+#  gateway_src:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      device: ./backend/gateway
+#      o: bind
+#  authentication_src:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      device: ./backend/authentication
+#      o: bind
+#  email_src:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      device: ./backend/email
+#      o: bind
+  profile_src:
     driver: local
     driver_opts:
       type: none
-      device: ./frontend
+      device: ./backend/profiles
       o: bind
-  gateway_src:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/gateway
-      o: bind
-  authentication_src:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/authentication
-      o: bind
-  email_src:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/email
-      o: bind
-  user_src:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/users
-      o: bind
-  aiServer_src:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/aiServer
-      o: bind
-  gameServer:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/gameServer
-      o: bind
+#  aiServer_src:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      device: ./backend/aiServer
+#      o: bind
+#  gameServer:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      device: ./backend/gameServer
+#      o: bind
 
 services:
 #  frontend:
@@ -111,45 +111,45 @@ services:
 #      - /app/node_modules
 #    environment:
 #      - EMAIL_SERVICE=gmail
-#      - EMAIL_USER=forty2transcendence@gmail.com
+#      - EMAIL_profile=forty2transcendence@gmail.com
 #      - EMAIL_PASS=gfyk pfqi gvpm ahtx
 #      - EMAIL_PORT=3005
 #      - HOST=0.0.0.0
-#
-  gameserver:
-    container_name: gameserver
-    build: ./backend/gameServer
-    restart: on-failure
-    networks:
-      - transcendency
-    expose:
-      - 3002
-    ports:
-      - "3002:3002"
-    volumes:
-      - gameServer:/app
-      - /app/node_modules
 
-  user:
-    container_name: user
-    build: ./backend/users
+#  gameserver:
+#    container_name: gameserver
+#    build: ./backend/gameServer
+#    restart: on-failure
+#    networks:
+#      - transcendency
+#    expose:
+#      - 3002
+#    ports:
+#      - "3002:3002"
+#    volumes:
+#      - gameServer:/app
+#      - /app/node_modules
+#
+  profile:
+    container_name: profile
+    build: ./backend/profiles
     restart: on-failure
     expose:
       - 3006
     volumes:
-      - user_src:/app
+      - profile_src:/app
       - /app/node_modules
     networks:
       - transcendency
 
-  aiserver:
-    container_name: ai-server
-    build: ./backend/aiServer
-    restart: on-failure
-    networks:
-      - transcendency
-    expose:
-      - 3003
-    volumes:
-      - aiServer_src:/app
+#  aiserver:
+#    container_name: ai-server
+#    build: ./backend/aiServer
+#    restart: on-failure
+#    networks:
+#      - transcendency
+#    expose:
+#      - 3003
+#    volumes:
+#      - aiServer_src:/app
 

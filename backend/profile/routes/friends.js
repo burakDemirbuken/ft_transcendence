@@ -1,4 +1,4 @@
-export default async function friendsRoute(fastify, sequelize) {
+export default async function friendsRoute(fastify) {
 
 	fastify.post('/add', async (request, reply) => {
 
