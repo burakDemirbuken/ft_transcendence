@@ -1,0 +1,331 @@
+.login-container {
+	position: relative;
+	width: 100%;
+	height: 100vh;
+	height: 100dvh;
+	background:
+		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+		linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#ball {
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	background: radial-gradient(circle, #00ffff 0%, #0080ff 100%);
+	border-radius: 50%;
+	box-shadow:
+		0 0 20px #00ffff,
+		0 0 40px #00ffff,
+		0 0 60px #00ffff;
+	animation: ballMove 4s linear infinite;
+	z-index: 0;
+}
+
+@keyframes ballMove {
+	0% { left: 10%; top: 20%; }
+	25% { left: 90%; top: 80%; }
+	50% { left: 90%; top: 20%; }
+	75% { left: 10%; top: 80%; }
+	100% { left: 10%; top: 20%; }
+}
+
+.paddle {
+	position: absolute;
+	width: 8px;
+	height: 80px;
+	background: linear-gradient(180deg, #ff00ff 0%, #8000ff 100%);
+	box-shadow:
+		0 0 15px #f0f,
+		inset 0 0 15px rgba(255, 255, 255, 0.2);
+	border-radius: 4px;
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.paddle-left {
+	left: 5%;
+	animation: paddleLeft 2s ease-in-out infinite alternate;
+}
+
+.paddle-right {
+	right: 5%;
+	animation: paddleRight 2s ease-in-out infinite alternate;
+}
+
+@keyframes paddleLeft {
+	0% { top: 40%; }
+	100% { top: 60%; }
+}
+
+@keyframes paddleRight {
+	0% { top: 60%; }
+	100% { top: 40%; }
+}
+
+#net {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	width: 2px;
+	height: 100%;
+	background: repeating-linear-gradient(
+		to bottom,
+		transparent 0px,
+		transparent 10px,
+		#00ff00 10px,
+		#00ff00 20px
+	);
+	transform: translateX(-50%);
+	opacity: 0.6;
+}
+
+#loginForm {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	color: #f50;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	font-family: "PixeloidSansBold";
+	z-index: 0;
+}
+
+#lang {
+	position: absolute;
+	top: 1.5em;
+	left: 1.5em;
+	color: white;
+	background: none;
+	border: none;
+	outline: none;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+#lang:focus, #lang:hover {
+	text-shadow:
+		1px 1px 0 #09c,
+		2px 2px 0 #09c;
+}
+
+#rme {
+	position: absolute;
+	bottom: 1.5em;
+	right: 1.5em;
+	color: #bbb;
+	background: none;
+	border: none;
+	outline: none;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+#rme.active {
+	color: white;
+}
+
+#rme.active:focus, #rme.active:hover {
+	text-shadow:
+		1px 1px 0 #09c,
+		2px 2px 0 #09c;
+}
+
+#rme:focus, #rme:hover {
+	text-shadow:
+		1px 1px 0 #069,
+		2px 2px 0 #069;
+}
+
+.buttons {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 60px;
+	width: 100%;
+}
+
+.enter, .back {
+	position: relative;
+	background: #111;
+	color: #ddd;
+	border: 2px solid #ddd;
+	border-image:
+		linear-gradient(45deg, #c0c, #0cc) 1;
+	font-family: inherit;
+	font-size: 2rem;
+	width: 10%;
+}
+
+.enter:hover::after, .back:hover::after, .enter:focus::after, .back:focus::after {
+	position:absolute;
+	content:  "";
+	top: -8%;
+	left: -4%;
+	width: 108%;
+	height: 116%;
+	background: linear-gradient(45deg, #c0c, #0cc);
+	z-index: -1;
+}
+
+.enter:focus, .enter:hover, .back:focus, .back:hover {
+	outline: none;
+}
+
+#error {
+	position: absolute;
+	top: 25%;
+	font-size: min(2rem, 1rem + 1vw);
+}
+
+.field {
+	position: absolute;
+	font-size: clamp(1.8rem, 5vw + 1rem, 5rem);
+	opacity: 0;
+	transition: opacity 0.3s ease-in-out;
+	pointer-events: none;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 30px;
+
+	color: #ddd;
+	text-shadow:
+		3px 3px 0 #0cc,
+		/* 6px 6px 0 #900, */
+		9px 9px 0 #606;
+}
+
+.field.active {
+	opacity: 1;
+	pointer-events: all;
+}
+
+label {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
+.input-wrapper {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
+.field input {
+	background: transparent;
+	outline: none;
+	border: none;
+	color: #0df;
+	/* text-shadow:
+		3px 3px #0cc,
+		9px 9px #606; */
+	font-family: inherit;
+	font-size: min(3rem, 1rem + 2vw);
+	width: 3ch;
+	min-width: 1ch;
+	max-width: 20ch;
+}
+
+@keyframes flicker { to { opacity: 1; } }
+.blink {
+	opacity: 0;
+	animation: flicker 1.5s infinite alternate;
+}
+
+@keyframes shake {
+	0%, 100% { transform: translateX(0); }
+	10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+	20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+.shake {
+	animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.particles {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.particle {
+	position: absolute;
+	width: 4px;
+	height: 4px;
+	background: #00ffff;
+	border-radius: 50%;
+	box-shadow: 0 0 10px #00ffff;
+	animation: float 6s linear infinite;
+}
+
+.particle:nth-child(1) {
+	left: 10%;
+	animation-delay: 0s;
+	background: #ff00ff;
+	box-shadow: 0 0 10px #ff00ff;
+}
+
+.particle:nth-child(2) {
+	left: 30%;
+	animation-delay: 2s;
+	background: #00ff00;
+	box-shadow: 0 0 10px #00ff00;
+}
+
+.particle:nth-child(3) {
+	left: 50%;
+	animation-delay: 4s;
+	background: #ffff00;
+	box-shadow: 0 0 10px #ffff00;
+}
+
+.particle:nth-child(4) {
+	left: 70%;
+	animation-delay: 1s;
+	background: #ff0080;
+	box-shadow: 0 0 10px #ff0080;
+}
+
+.particle:nth-child(5) {
+	left: 90%;
+	animation-delay: 3s;
+	background: #8000ff;
+	box-shadow: 0 0 10px #8000ff;
+}
+
+@keyframes float {
+	0% {
+		top: 100%;
+		opacity: 0;
+	}
+	10% {
+		opacity: 1;
+	}
+	90% {
+		opacity: 1;
+	}
+	100% {
+		top: -10%;
+		opacity: 0;
+	}
+}

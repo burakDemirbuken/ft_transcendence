@@ -95,7 +95,6 @@ class RoomManager extends EventEmitter
 			maxPlayers = 1;
 		else
 			throw new Error(`Invalid game mode: ${payload.gameMode}`);
-		console.log("Creating room with payload:", payload);
 		const room = {
 			id: roomId,
 			name: payload.name,
@@ -110,7 +109,6 @@ class RoomManager extends EventEmitter
 			createdAt: Date.now(),
 			aiSettings: payload.aiSettings || {}
 		};
-		console.log(`${JSON.stringify(room, null, 2)} created by host ${hostId}`);
 		this.rooms.set(roomId, room);
 		this.emit(`room_Created`, { roomState: room });
 	}

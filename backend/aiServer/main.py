@@ -370,14 +370,14 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--websocket":
         # WebSocket modu
         print("WebSocket sunucusu başlatılıyor...")
-        print("Adres: ws://localhost:3000")
+        print("Adres: ws://localhost:3003")
 
         async def start_websocket_server():
             """WebSocket sunucusunu başlat"""
             print("WebSocket sunucusu çalışıyor. Bağlantı bekleniyor...")
 
             # Sunucuyu başlat
-            server = await websockets.serve(handle_client, "0.0.0.0", 3000)
+            server = await websockets.serve(handle_client, "0.0.0.0", 3003)
 
             # Sunucuyu sonsuza kadar çalıştır
             await server.wait_closed()

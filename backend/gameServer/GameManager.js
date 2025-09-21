@@ -18,13 +18,11 @@ class GameManager extends EventEmitter
 		AiNetwork.on('game_initialized',
 			(data) =>
 			{
-				console.log('🤖 AI Game initialized:', data);
 				for (const [gameId, game] of this.games.entries())
 				{
 					if (data.game_id === gameId)
 					{
 						game.status = 'waiting';
-						console.log(`🤖 AI Game ${gameId} initialized and set to waiting`);
 						break;
 					}
 				}
@@ -67,11 +65,10 @@ class GameManager extends EventEmitter
 		}
 	}
 
-	createGame(gameMode, properties ,aiSettings = {})
+	createGame(gameMode, properties)
 	{
 		const gameId = this.uniqueGameId();
 		properties.id = gameId;
-		properties.aiSettings = aiSettings;
 		let game;
 		if (gameMode === 'local')
 			game = new LocalPingPong(properties);

@@ -8,7 +8,7 @@ class AiNetworkManager extends EventEmitter
 		try
 		{
 			super();
-			this.socket = new WebSocketClient('ai-server', 3000);
+			this.socket = new WebSocketClient('ai-server', 3003);
 
 			this.socket.onConnect(() => {
 				console.log('🤖 Connected to AI server');

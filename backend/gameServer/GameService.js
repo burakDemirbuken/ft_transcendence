@@ -145,7 +145,7 @@ class GameService
 				}
 			);
 
-			await this.websocketServer.start({ host: '0.0.0.0', port: 3001 });
+			await this.websocketServer.start({ host: '0.0.0.0', port: 3002 });
 
 			console.log('✅ Game Server started successfully!');
 		}
@@ -162,7 +162,8 @@ class GameService
 	{
 		//! jwt doğrulama burada yapılabilir
 		const player = this.players.get(clientId);
-		if (!player)
+
+		if (typeof(player) === "undefined")
 			throw new Error('Player not found for clientId: ' + clientId);
 		const [namespace, action] = message.type.split('/');
 		switch (namespace)
@@ -198,32 +199,20 @@ class GameService
 				});
 
 				this.roomManager.on(`room${roomId}_Started`,
-					(room) =>
+					({gameMode, gameSettings, players}) =>
 					{
-						this._sendPlayers(room.players, { type: 'game/started' , payload: { gameMode: room.gameMode }});
-						//! sahne yüklenmeden oyunun hemen başlaması sıkıntı olabilir.
-						const gameId = this.gameManager.createGame(room.gameMode, room.gameSettings, room.aiSettings);
-						room.players.forEach((p) => this.gameManager.addPlayerToGame(gameId, this.players.get(p.id)));
-						this.gameManager.on(`game${gameId}_StateUpdate`,
-							({gameState, players}) => this._sendPlayers(this.getPlayers(players), { type: 'game/stateUpdate', payload: gameState })
-						);
-						this.gameManager.on(`game${gameId}_Ended`,
-							({results, players}) =>
-							{
-								console.log(`Game ${gameId} ended. Results:`, JSON.stringify(results, null, 2));
-								console.log('Players:', players);
-								this._sendPlayers(this.getPlayers(players), { type: 'game/ended', payload: results });
-								fetch('http://user:3006/internal/match', {
-									method: 'POST',
-									headers: { 'Content-Type': 'application/json' },
-									body: JSON.stringify({
-										gameId: gameId,
-										...results
-									})
-								});
-							}
-						);
-						this.gameManager.gameStart(gameId);
+						try
+						{
+							this._sendPlayers(players, { type: 'game/started' , payload: { gameMode: gameMode, ...gameSettings }});
+							if (gameMode === 'tournament')
+								this.tournamentMatchCreate(gameSettings, players);
+							else
+								this.matchCreate(gameMode, gameSettings, players);
+						}
+						catch (error)
+						{
+							console.error('❌ Error starting match:', error);
+						}
 					}
 				);
 				this.roomManager.on(`room${roomId}_Closed`,
@@ -237,6 +226,47 @@ class GameService
 					this.websocketServer.send(connId, { type: 'room/created', payload: { roomId: roomState.id } });
 			}
 		);
+	}
+
+	matchCreate(gameMode, gameSettings, players)
+	{
+		const gameId = this.gameManager.createGame(gameMode, gameSettings);
+		players.forEach((p) => this.gameManager.addPlayerToGame(gameId, this.players.get(p.id)));
+		this.gameManager.on(`game${gameId}_StateUpdate`,
+			({gameState, players}) => this._sendPlayers(this.getPlayers(players), { type: 'game/stateUpdate', payload: gameState })
+		);
+		this.gameManager.on(`game${gameId}_Ended`,
+			({results, players}) =>
+			{
+				this._sendPlayers(this.getPlayers(players), { type: 'game/ended', payload: results });
+				//? XMLHTTPREQUEST
+				/* fetch('http://user:3006/internal/match', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						gameId: gameId,
+						...results
+					})
+				}); */
+			}
+		);
+		this.gameManager.gameStart(gameId);
+	}
+
+	tournamentMatchCreate(gameSettings, players)
+	{
+		const tournamentId = this.tournamentManager.createTournament(gameSettings);
+		players.forEach((p) => this.tournamentManager.joinTournament(tournamentId, this.players.get(p.id)));
+		this.tournamentManager.on(`tournament_${tournamentId}`,
+			({type, payload}) =>
+			{
+				switch (type)
+				{
+
+				}
+			}
+		);
+		this.tournamentManager.startTournament(tournamentId, players[0].id); //? şimdilik ilk oyuncu başlatıyor
 	}
 
 	getPlayer(playerId)

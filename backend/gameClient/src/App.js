@@ -3,7 +3,6 @@ import GameRenderer from "./GameRenderer.js";
 import RoomUi from './RoomUi.js';
 
 //!
-import gameConfig from './json/GameConfig.js';
 import InputManager from './input/InputManager.js';
 import rendererConfig from './json/rendererConfig.js';
 
@@ -15,7 +14,7 @@ class App
 		this.playerId = this._TEST_generateRandomId();
 		this.playerName = this._TEST_generateRandomName();
 		this.gameRenderer = new GameRenderer();
-		this.webSocketClient = new WebSocketClient(window.location.hostname, 3001);
+		this.webSocketClient = new WebSocketClient(window.location.hostname, 3002);
 		this.roomUi = new RoomUi();
 		this.inputManager = new InputManager();
 
@@ -102,7 +101,7 @@ class App
 		this.webSocketClient.connect({ id: this.playerId, name: this.playerName });
 	}
 
-	createRoom(mode, aiSettings = {})
+	createRoom(mode, gameSettings)
 	{
 		try
 		{
@@ -113,10 +112,8 @@ class App
 				name: `${this.playerName}'s Room`,
 				gameMode: mode,
 				host: this.playerId,
-				gameSettings: gameConfig.gameSettings
+				gameSettings: gameSettings
 			};
-			if (mode === 'ai')
-				data = { ...data, aiSettings: aiSettings };
 			this.webSocketClient.send('room/create', data);
 		}
 		catch (error)
@@ -225,6 +222,7 @@ class App
 		switch (subEvent)
 		{
 			case 'started':
+				console.log("Game started:", JSON.stringify(data, null, 2));
 				this.gameRenderer.initialize({
 						canvasId: "renderCanvas",
 						gameMode: data.gameMode,
@@ -233,8 +231,8 @@ class App
 							...rendererConfig,
 							paddleSize:
 							{
-								width: gameConfig.gameSettings.paddleWidth,
-								height: gameConfig.gameSettings.paddleHeight
+								width: data.gameSettings.paddleWidth,
+								height: data.gameSettings.paddleHeight
 							},
 						},
 						arcade:

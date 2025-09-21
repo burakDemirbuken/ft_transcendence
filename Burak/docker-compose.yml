@@ -6,7 +6,7 @@ services:
     image: game-server
     container_name: game-server
     ports:
-      - "3001:3001"
+      - "3002:3002"
     volumes:
       - ../backend/gameServer:/app
       - /app/node_modules
@@ -19,6 +19,6 @@ services:
     image: ai-server
     container_name: ai-server
     ports:
-      - "3000:3000"
+      - "3003:3003"
     volumes:
       - ../backend/aiServer:/app

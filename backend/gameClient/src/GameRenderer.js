@@ -16,7 +16,6 @@ class GameRenderer extends EventEmitter
 		this.gameState = null;
 		this.currentGameMode = null;
 
-		// ? this.gameStateManager = new GameStateManager();
 		this.isRunning = false;
 	}
 //		await this.gameCore.loadScene(gameConfig.gameMode);

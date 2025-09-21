@@ -131,7 +131,15 @@ class Tournament extends EventEmitter
 	nextRound()
 	{
 		if (this.currentRound >= this.maxRounds)
-			return this.emit('tournamentFinished', this.matchMakingInfo());
+			return this.emit('tournamentFinished',
+				{
+					players: this.participants,
+					data:
+					{
+						matchMakingInfo: this.getMatchmakingInfo()
+					}
+				}
+			);
 
 		this.currentRound++;
 		this.currentMatches = [];
@@ -156,7 +164,15 @@ class Tournament extends EventEmitter
 		}
 
 		this.status = 'ready2start';
-		this.emit('nextRound', this.getMatchmakingInfo());
+		this.emit('nextRound',
+			{
+				players: this.players,
+				data:
+				{
+					matchMakingInfo: this.getMatchmakingInfo()
+				}
+			}
+		);
 	}
 
 	update(deltaTime)
@@ -189,9 +205,12 @@ class Tournament extends EventEmitter
 		);
 
 		this.emit("update", {
-			participants: this.participants,
-			matchMakingInfo: this.getMatchmakingInfo(),
-			tournamentState: this.getState()
+			players: this.participants,
+			data:
+			{
+				matchMakingInfo: this.getMatchmakingInfo(),
+				tournamentState: this.getState()
+			}
 		});
 	}
 
@@ -239,7 +258,13 @@ class Tournament extends EventEmitter
 			return this.emit('error', new Error(`Tournament is not ready to start, current status: ${this.status}`));
 		this.startTime = Date.now();
 		this.status = 'running';
-		this.emit('started', this.getMatchmakingInfo());
+		this.emit('started', {
+			players: this.participants,
+			data:
+			{
+				matchMakingInfo: this.getMatchmakingInfo()
+			}
+		});
 		this.currentMatches.forEach(
 			(match) =>
 			{

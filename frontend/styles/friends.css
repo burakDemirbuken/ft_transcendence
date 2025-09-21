@@ -1,0 +1,169 @@
+.friends-container {
+	min-height: 100vh;
+	min-height: 100dvh;
+	width: 100%;
+	color: #eee;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.friend-nav {
+	width: 80%;
+	margin: 2rem;
+	border-radius: 5px;
+	border: 2px solid #0ff;
+	border-bottom: none;
+	background: #111;
+}
+
+.friend-nav ul{
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+}
+
+.friend-nav li {
+	list-style-type: none;
+}
+
+.friend-nav button {
+	background: none;
+	border: none;
+	outline: none;
+
+	height: auto;
+	font-family: "PixeloidSansBold";
+	color: #eee;
+	padding: 1.5em;
+
+	position: relative;
+}
+
+.friend-nav button:hover::after, .friend-nav button:focus::after {
+	content: "";
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 3px;
+	background: linear-gradient(45deg, #f0f, #0ff);
+}
+
+.friend-page-box {
+	width: 80%;
+	margin-top: 1rem;
+
+	display: flex;
+	justify-content: flex-start;
+}
+
+.friend-page-box .friend {
+	min-width: 400px;
+	background: #111;
+	border-radius: 10px;
+	border: 2px solid #333;
+
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: .5em;
+}
+
+.friend-profile {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1em;
+}
+
+.friend-avatar {
+	width: 3.5rem;
+	height: 3.5rem;
+	border-radius: 50%;
+
+	background: #000;
+	border: 2px solid #333;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	flex-shrink: 0;
+}
+
+.friend.online .friend-avatar {
+	border-color: #0f0;
+	box-shadow: 0 0 5px #0c0;
+}
+
+.friend-page-box img {
+	width: 3rem;
+	height: 3rem;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.friend-info {
+	display: flex;
+	flex-direction: column;
+}
+
+.friend-info .uname {
+	font-family: "PixeloidSans";
+	text-shadow: 0 0 5px #fff;
+}
+
+.friend-action {
+	appearance: none;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+
+	border: none;
+	background: none;
+	color: transparent;
+	/* cursor: pointer; */
+}
+
+.friend-actions {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	cursor: pointer;
+}
+
+.friend-actions::after {
+	content: "⋮";
+	position: absolute;
+	pointer-events: none;
+
+	font-size: 1.5em;
+	text-align: center;
+	background: none;
+}
+
+/* .friend-menu { position: relative; display: inline-block; }
+
+.menu-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 1.5rem; padding: 0.25rem 0.75rem;
+   color: #fff;
+}
+
+.menu-options {
+  display: none; position: absolute; background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-radius: 4px;
+}
+
+.friend-menu:hover .menu-options { display: block; }
+
+.option {
+	display: block; width: 100%; text-align: left;
+	padding: 0.5rem 1rem; border: none; background: none;
+}
+
+.option:hover { background: #f0f0f0; }
+ */

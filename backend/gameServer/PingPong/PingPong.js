@@ -20,8 +20,10 @@ class PingPong extends EventEmitter
 
 		this.settings = {
 			...DEFAULT_GAME_PROPERTIES,
-			...property
+			...property.gameSettings
 		};
+
+		console.log(`🎮 PingPong game created with mode: ${JSON.stringify(this.settings, null, 2)}`);
 
 		this.ball = null;
 		this.paddles = new Map(); // playerId -> Paddle instance
@@ -80,8 +82,6 @@ class PingPong extends EventEmitter
 			paddlePos.x = 200;
 		else if (number === 4)
 			paddlePos.x = this.settings.canvasWidth - this.settings.paddleWidth - 200;
-
-		console.log(`Creating paddle at position: ${JSON.stringify(paddlePos)}`);
 		return new Paddle(
 			paddlePos.x,
 			paddlePos.y,

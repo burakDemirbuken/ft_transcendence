@@ -1,6 +1,8 @@
 /**
  * Player class - Pure business logic, no WebSocket dependency
  * WebSocket connections are managed separately by WebSocketManager
+ *
+ * 
  */
 class Player
 {
@@ -10,7 +12,6 @@ class Player
 		this.name = name;
 		this.isReady = false;
 		this.lastActivity = Date.now();
-		this.status = 'online'; // 'online', 'offline', 'playing'
 		this.inputs = new Map(); // type -> boolean(true: pressed, false: not pressed)
 	}
 
@@ -31,7 +32,6 @@ class Player
 			id: this.id,
 			name: this.name,
 			isReady: this.isReady,
-			status: this.status,
 			lastActivity: this.lastActivity
 		};
 	}

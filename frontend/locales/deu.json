@@ -1,0 +1,14 @@
+{
+	"login": {
+		"lang": "DEU",
+		"welcome": {
+			"title": "Willkommen!",
+			"prompt": "Drücke die Starttaste..."
+		},
+		"username": "Nick Eingeben",
+		"email": "Email Eingeben",
+		"password": "Passwort Eingeben",
+		"code": "Schlüssel Eingeben",
+		"rme": "Login Merken"
+	}
+}
