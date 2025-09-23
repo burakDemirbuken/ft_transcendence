@@ -2,7 +2,7 @@
  * Player class - Pure business logic, no WebSocket dependency
  * WebSocket connections are managed separately by WebSocketManager
  *
- * 
+ *
  */
 class Player
 {
@@ -13,6 +13,7 @@ class Player
 		this.isReady = false;
 		this.lastActivity = Date.now();
 		this.inputs = new Map(); // type -> boolean(true: pressed, false: not pressed)
+		
 	}
 
 	inputSet(key, value)

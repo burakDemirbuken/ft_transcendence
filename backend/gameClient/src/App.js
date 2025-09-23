@@ -200,6 +200,9 @@ class App
 			case 'error':
 				this.roomUi.showGameError(data || 'Unknown error from server');
 				break;
+			case 'tournament':
+				this._handleTournamentEvent(subEvent, data);
+				break;
 			default:
 				console.log('Unhandled network event:', eventType, data);
 		}
@@ -209,11 +212,45 @@ class App
 	{
 		switch (subEvent)
 		{
-			case 'created':
-				console.log("Room created:", data);
-				this.webSocketClient.send('room/join', { roomId: data.roomId });
 			default:
 				console.log('Unhandled room event:', subEvent, data);
+		}
+	}
+
+	_handleTournamentEvent(subEvent, data)
+	{
+		switch (subEvent)
+		{
+			case 'started':
+				console.log("Tournament started:", JSON.stringify(data, null, 2));
+				this.gameRenderer.initialize({
+						canvasId: "renderCanvas",
+						gameMode: 'tournament',
+						renderConfig:
+						{
+							...rendererConfig,
+							paddleSize:
+							{
+								width: data.tournamentSettings.paddleWidth,
+								height: data.tournamentSettings.paddleHeight
+							},
+						}});
+				break;
+			case 'matchmaking':
+				console.log("Tournament matchmaking:", JSON.stringify(data, null, 2));
+				break;
+			case 'nextRound':
+				console.log("Tournament next round:", JSON.stringify(data, null, 2));
+				break;
+			case 'update':
+				console.log("Tournament update:", JSON.stringify(data, null, 2));
+				break;
+			case 'finished':
+				console.log("Tournament finished:", JSON.stringify(data, null, 2));
+				this.roomUi.showGameUI();
+				break;
+			default:
+				console.log('Unhandled tournament event:', subEvent, data);
 		}
 	}
 

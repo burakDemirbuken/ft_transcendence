@@ -9,7 +9,7 @@ const exampleResponseCustomRoom =
 	host: "player1",
 	players:
 	[
-		{ id: "player1", name: "Host", status: "ready", isHost: true },
+		{ id: "player1", name: "Host", status: "ready", isHost: true},
 		{ id: "player2", name: "Player 2", status: "waiting", isHost: false }
 	],
 	gameSettings:
@@ -45,9 +45,19 @@ const exampleCreateRoomPayload =
 	}
 };
 */
+/*
 
-import { DEFAULT_GAME_PROPERTIES } from "./utils/constants.js";
-import EventEmitter from "./utils/EventEmitter.js";
+TODO:
+odaların emitleri ayarlanacak.
+
+*/
+
+import ClassicRoom from "./ClassicRoom.js";
+import MultiPlayerRoom from "./MultiPlayerRoom.js";
+import TournamentRoom from "./TournamentRoom.js";
+import AIRoom from "./AIRoom.js";
+import LocalRoom from "./LocalRoom.js";
+import EventEmitter from "../utils/EventEmitter.js";
 
 class RoomManager extends EventEmitter
 {
@@ -59,13 +69,17 @@ class RoomManager extends EventEmitter
 
 	handleRoomMessage(action, payload, player)
 	{
+		console.log(`Handling room action: ${action} from player ${player.id}`);
+		console.log('Payload:', payload);
 		switch (action)
 		{
 			case 'create':
-				this.createRoom(player.id, payload);
+				this.createRoom(player, payload);
+				console.log(`Room created by player ${player.id}`);
 				break;
 			case 'join':
 				this.joinRoom(payload.roomId, player);
+				console.log(`Player ${player.id} joined room ${payload.roomId}`);
 				break;
 			case 'leave':
 				this.leaveRoom(payload.roomId, player.id);
@@ -81,41 +95,34 @@ class RoomManager extends EventEmitter
 		}
 	}
 
-	createRoom(hostId, payload)
+	createRoom(player, payload)
 	{
 		//this._validateRoomCreation(hostId, properties);
 
 		const roomId = this._generateRoomId();
-		let maxPlayers = 2;
+		let room;
 		if (payload.gameMode === 'classic')
-			maxPlayers = 2;
+			room = new ClassicRoom(payload.name, payload.gameSettings);
 		else if (payload.gameMode === 'multiplayer')
-			maxPlayers = 4;
-		else if (payload.gameMode === 'ai' || payload.gameMode === 'local')
-			maxPlayers = 1;
+			room = new MultiPlayerRoom(payload.name, payload.gameSettings);
+		else if (payload.gameMode === 'tournament')
+			room = new TournamentRoom(payload.name, payload.gameSettings);
+		else if (payload.gameMode === 'ai')
+			room = new AIRoom(payload.name, payload.gameSettings, payload.aiSettings);
+		else if (payload.gameMode === 'local')
+			room = new LocalRoom(payload.name, payload.gameSettings);
 		else
 			throw new Error(`Invalid game mode: ${payload.gameMode}`);
-		const room = {
-			id: roomId,
-			name: payload.name,
-			gameMode: payload.gameMode,
-			status: 'waiting', // "waiting", "in_game", "completed", "startable"
-			maxPlayers: maxPlayers,
-			host: hostId,
-			players: [],
-			//? izleyiciler eklenebilir mi?
-			spectators: [],
-			gameSettings: payload.gameSettings || { ...DEFAULT_GAME_PROPERTIES },
-			createdAt: Date.now(),
-			aiSettings: payload.aiSettings || {}
-		};
+		room.addPlayer(player);
 		this.rooms.set(roomId, room);
+		console.log(`Room ${roomId} created with mode ${payload.gameMode} by player ${player.id}`);
+		console.log('Current rooms:', Array.from(this.rooms.keys()));
 		this.emit(`room_Created`, { roomState: room });
 	}
 
 	getRoom(roomId)
 	{
-		return this.rooms.get(roomId) || null;
+		return this.rooms.get(roomId);
 	}
 
 	deleteRoom(roomId)
@@ -139,7 +146,7 @@ class RoomManager extends EventEmitter
 			throw new Error(`Player with ID ${player.id} is already in room ${roomId}`);
 
 		room.players.push({ id: player.id, name: player.name, status: 'waiting', isHost: player.id === room.host });
-		this.notifyRoomUpdate(roomId);
+		//this.notifyRoomUpdate(roomId);
 	}
 
 	leaveRoom(playerId)
@@ -163,7 +170,7 @@ class RoomManager extends EventEmitter
 
 		// Oda güncellenmesini bildir
 		if (room.players.length > 0) {
-			this.notifyRoomUpdate(room.id);
+			//this.notifyRoomUpdate(room.id);
 		}
 		else {
 			this.emit(`room${room.id}_Deleted`);
@@ -178,7 +185,7 @@ class RoomManager extends EventEmitter
 		if (!room)
 			throw new Error(`Room with ID ${roomId} does not exist`);
 		room.gameSettings = { ...room.gameSettings, ...settings };
-		this.notifyRoomUpdate(roomId);
+		//this.notifyRoomUpdate(roomId);
 		return room;
 	}
 
@@ -195,7 +202,7 @@ class RoomManager extends EventEmitter
 					room.status = 'startable';
 				else
 					room.status = 'waiting';
-				this.notifyRoomUpdate(roomId);
+				//this.notifyRoomUpdate(roomId);
 				return;
 			}
 		}
@@ -211,7 +218,7 @@ class RoomManager extends EventEmitter
 			throw new Error(`Invalid room status: ${status}`);
 
 		room.status = status;
-		this.notifyRoomUpdate(roomId);
+		//this.notifyRoomUpdate(roomId);
 		return room;
 	}
 
@@ -230,13 +237,6 @@ class RoomManager extends EventEmitter
 		const room = this._getRoomWithPlayer(playerId);
 		if (!room)
 			throw new Error(`Room with player ID ${playerId} does not exist`);
-
-		if (room.host !== playerId)
-			throw new Error('Only the host can start the game');
-
-		if (room.players.length !== room.maxPlayers)
-			throw new Error('Room is not full');
-
 		const allPlayersReady = room.players.every(player => player.status === 'ready');
 		if (!allPlayersReady)
 			throw new Error('All players must be ready before starting the game');
@@ -250,7 +250,7 @@ class RoomManager extends EventEmitter
 			aiSettings: room.aiSettings || {}
 		});
 
-		this.notifyRoomUpdate(room.id);
+		//room.notifyRoomUpdate(room.id);
 
 		return room;
 	}
@@ -284,13 +284,12 @@ class RoomManager extends EventEmitter
 		};
 	}
 
-	notifyRoomUpdate(roomId)
+	notifyRoomUpdate(Id)
 	{
-		const room = this.getRoom(roomId);
 		if (!room)
-			throw new Error(`Room with ID ${roomId} does not exist`);
+			throw new Error(`Room with ID ${room} does not exist`);
 		this.emit(`room${room.id}_Update`, {
-			roomState: this.getRoomState(roomId)
+			roomState: room.getState()
 		});
 
 		return room;

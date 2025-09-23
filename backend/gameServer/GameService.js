@@ -1,7 +1,7 @@
 import WebSocketServer from './network/WebSocketServer.js';
 import GameManager from './GameManager.js';
 import Player from './Player.js';
-import RoomManager from './RoomManager.js';
+import RoomManager from './Room/RoomManager.js';
 import TournamentManager from './Tournament/TournamentManager.js';
 /*
 exampleWebSocketMessage=
@@ -23,7 +23,7 @@ class GameService
 		this.connectionId = new Map(); //  playerId -> connectionId
 		this.players = new Map(); // playerId -> Player instance
 
-		/* setInterval(
+		setInterval(
 			() =>
 			{
 				console.log('--- Connected Players ---');
@@ -36,7 +36,7 @@ class GameService
 				console.log('-------------------------');
 				console.log('--- Active Rooms ---');
 				this.roomManager.rooms.forEach((room) => {
-					console.log(`Room ${room.id}:\n\tGame Mode: ${room.gameMode}\n\tHost: ${room.host}\n\tPlayers: ${room.players.length}/${room.maxPlayers}\n\tStatus: ${room.status}`);
+					console.log(`Room ${room}:\n\tGame Mode: ${room.gameMode}\n\tHost: ${room.host}\n\tPlayers: ${room.players.length}/${room.maxPlayers}\n\tStatus: ${room.status}`);
 					console.log(`Room Settings: ${JSON.stringify(room.gameSettings, null, 2)}`);
 					console.log('\tPlayer List:');
 					room.players.forEach((p) => {
@@ -59,7 +59,7 @@ class GameService
 				console.log('');
 			},
 			5000
-		); */
+		);
 		this.gameManager.start();
 	}
 
@@ -258,7 +258,7 @@ class GameService
 		const tournamentId = this.tournamentManager.createTournament(gameSettings);
 		players.forEach((p) => this.tournamentManager.joinTournament(tournamentId, this.players.get(p.id)));
 		this.tournamentManager.on(`tournament_${tournamentId}`,
-			({type, payload}) =>
+			({type, data, players}) =>
 			{
 				switch (type)
 				{

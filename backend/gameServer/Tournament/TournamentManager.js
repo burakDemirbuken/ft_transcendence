@@ -34,14 +34,16 @@ class TournamentManager extends EventEmitter
 		if (Math.log2(property.playerCount) % 1 !== 0)
 			throw new Error(`Tournament Count must be a power of 2: ${property.playerCount}`);
 		const tournament = new Tournament(property.name, property);
-		tournament.on('update', (data) => this.emit(`tournament_${tournamentId}`, { type: 'update', payload: data }));
-		tournament.on('finished', (data) => this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data }));
-		tournament.on('matchmaking', (data) => this.emit(`tournament_${tournamentId}`, { type: 'matchmaking', payload: data }));
+		tournament.on('update', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'update', payload: data, players }));
+		tournament.on('finished', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data, players }));
+		tournament.on('matchmaking', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'matchmaking', payload: data, players }));
+		tournament.on('nextRound', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'nextRound', payload: data, players }));
+		tournament.on('started', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'started', payload: data, players }));
 		tournament.on('error', (error) =>
 		{
 			// hata durumlarında kullanıcıya bildirim gönder
 		});
-		tournament.on('started', (data) => this.emit(`tournament_${tournamentId}`, { type: 'started', payload: data }));
+		tournament.on('started', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'started', payload: data, players }));
 		this.tournaments.set(tournamentId, tournament);
 		console.log(`🆕 Tournament ${tournamentId} created with properties: ${JSON.stringify(property)}`);
 		return tournamentId;
@@ -71,8 +73,6 @@ class TournamentManager extends EventEmitter
 
 	startTournament(tournamentId, playerId)
 	{
-		// TODOO: sadece admin başlatabilmeli
-		// TODOO: Herkes hazır mı kontrolü
 		const tournament = this.tournaments.get(tournamentId);
 		if (!tournament)
 			return this.emit('error', new Error(`Tournament with ID ${tournamentId} does not exist`));
@@ -100,7 +100,7 @@ class TournamentManager extends EventEmitter
 			if (tournament.isFinished())
 			{
 				console.log(`🏁 Tournament ${tournamentId} finished`);
-				this.emit(`tournament_${tournamentId}`,{type: 'finished', payload: tournament.getFinishedInfo()});
+				this.emit(`tournament_${tournamentId}`,{type: 'finished', payload: tournament.getFinishedInfo(), players: tournament.participants});
 				this.tournaments.delete(tournamentId);
 				continue;
 			}
@@ -109,8 +109,11 @@ class TournamentManager extends EventEmitter
 				type: 'update',
 				payload: {
 					participants: tournament.participants,
-					matchMakingInfo: tournament.getMatchmakingInfo(),
-					tournamentState: tournament.getState()
+					data:
+					{
+						matchMakingInfo: tournament.getMatchmakingInfo(),
+						tournamentState: tournament.getState()
+					}
 				}
 			});
 		}
