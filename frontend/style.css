@@ -5,77 +5,201 @@
 }
 
 body {
-	min-height: 100vh;
-	max-height: 100dvh;
-	height: 100dvh;
 	display: flex;
-	justify-content: center;
-	align-items: center;
+	justify-content: flex-start; /* merkeze değil sola sabitle */
+	align-items: stretch; /* Yüksekliği tam dolduracak */
+	min-height: 100dvh;
+	overflow-x: hidden;
 }
 
+/* navbar yanında içerik doğru davranışı için birkaç düzenleme */
 #content {
-	width: 100%;
-	height: 100%;
+	padding: 20px;
+	flex: 1;
+	width: auto;
+	min-height: 100dvh;
+	min-width: 0;
+	overflow-x: auto;
+	background:
+		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+		linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+	margin-left: 60px;
 }
 
 #navbar {
-	width: auto;
-	height: 100%;
+	max-width: 80%;        /* küçük ekranlarda taşmaması için */
+	width: 300px;
+	height: 100dvh;
+	max-height: 100dvh;
 	padding: 5px;
 	background: #111;
+
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
+
+	overflow-y: auto;
+	overflow-x: hidden;
+	-webkit-overflow-scrolling: touch; /* iOS'ta kaydırma hissini iyileştirir */
+	position: fixed;
+	top: 0;
+	left: 0;
+
+	transition: width .3s ease;
+	z-index: 10; /* içerik üzerine gelmesini sağlamak için */
+	flex-shrink: 0;  /* küçük ekranda daralmayı engelle */
+}
+
+/* üst kısım normal akışta */
+.nav-top {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* alt kısım en alta sabitleniyor */
+.nav-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: auto;  /* <-- en alta iter */
+}
+
+/* link/ butonların flex davranışını sınırla, taşmalar daha düzgün olsun */
+#navbar a, #navbar button {
+  font-size: 1em;
+  padding: 0.45em 0.85em;
+  gap: 0.8em;
+  display: flex;
+  align-items: center;
+}
+
+/* collapse durumunda da scroll koru */
+#navbar.collapse {
+	width: 60px;
+	overflow-y: auto;
+}
+
+/* opsiyonel: görünürlüğü artırmak için küçük scrollbar stili */
+#navbar::-webkit-scrollbar { width: 8px; }
+#navbar::-webkit-scrollbar-thumb {
+	border-radius: 6px;
+	background: rgba(255,255,255,0.06);
+}
+
+#navbar.collapse {
+	width: 60px;
+}
+
+#navbar.collapse #logo {
+	opacity: 0;
+}
+
+#navbar.collapse svg {
+	width: 1.4em;
+	height: 1.4em;
+}
+
+#navbar.collapse a, #navbar.collapse #toggle {
+	gap: 1.2em;
+	margin-left: 0;
+	margin-right: 0;
+	border-radius: .2em;
+}
+
+#navbar.collapse #toggle svg {
+	rotate: -180deg;
+}
+
+#navbar.collapse #toggle:hover, #navbar.collapse #toggle:focus,
+#navbar.collapse a:hover, #navbar.collapse a:focus,
+#navbar.collapse a.selected, #navbar.collapse #toggle.selected {
+	padding-left: .65em;
 }
 
 #navbar #logo {
 	font-family: "RocketClouds";
 	font-size: 1.5rem;
 	font-weight: bolder;
-	color: rgb(237, 48, 85);
-	padding: .5em .5em;
+
+	background: linear-gradient(to right, #f0f, #0ff);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill5-color: transparent;
+	color: transparent;
+
+	padding: 1em;
+	padding-bottom: .5em;
 	display: flex;
 	justify-content: center;
+	position: relative;
+	transition: opacity .3s ease;
 }
 
-#navbar a {
-	padding: .85em;
-	font-family: "PixeloidSans";
+#navbar #toggle, #navbar a {
+	margin: .40em;
+	padding: .45em;
+	padding-left: .85em;
+	cursor: pointer;
+
+	border: none;
+	outline: none;
+	background: transparent;
 	text-decoration: none;
+	font-family: "PixeloidSans";
+	font-size: 1em;
 	color: #ccc;
-	transition: font-size 0.2s ease;
+
+	display: flex;
+	align-items: center;
+	gap: .8em;
+
+	transition: gap .3s ease, margin .3s ease, border-radius .3s ease,
+		padding .2s ease, font-size .2s ease, color .2s ease;
+}
+
+#navbar #toggle:hover, #navbar #toggle:focus,
+#navbar a:hover, #navbar a:focus,
+#navbar a.selected, #navbar #toggle.selected{
+	font-size: 1.1em;
+	color: #eee;
+	padding-left: 1em;
+	background: #505;
 }
 
 #navbar svg {
-	width: 1em;
-	height: 1em;
+	width: 1.2em;
+	height: 1.2em;
 	fill: #fff;
+	flex-shrink: 0;
+	pointer-events: none;
+
+	transition: width .3s ease, height .3s ease, rotate .3s ease;
 }
 
-#navbar a:before {
-	content: ">";
-	text-shadow: 0 0 5px #f0f;
-	color: #f0f;
-	top: 0;
-	left: 0;
-	margin-left: 5px;
-	margin-right: 10px;
-	opacity: 0;
+#logout svg {
+	rotate: 180deg;
 }
 
-#navbar a:hover:before, #nav {
-	opacity: 1;
-}
-
-#navbar a:hover {
-	font-size: 1.2rem;
-	color: #eee;
-	/* text-shadow: 0 0 5px #fff; */
+.no-select {
+	-webkit-user-drag: none;
+	user-drag: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 @font-face {
 	font-family: "RocketClouds";
 	src: url('fonts/rocket-clouds-demo.regular.ttf'), format("tff");
+	font-weight: normal;
+}
+
+@font-face {
+	font-family: "RetroSignature";
+	src: url('fonts/retro-signature.regular.otf'), format("otf");
 	font-weight: normal;
 }
 

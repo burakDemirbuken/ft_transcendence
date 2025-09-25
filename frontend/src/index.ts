@@ -1,6 +1,7 @@
 import Login from "../dist/Login.js";
 import Settings from "../dist/Settings.js";
 import Profile from "../dist/Profile.js";
+import Home from "../dist/Home.js";
 
 const pageState = {
 	current: "login", // default
@@ -9,7 +10,7 @@ const pageState = {
 const routes = {
 	login: { template: "login", view: Login },
 	profile: { template: "profile", view: Profile },
-	// home: { template: "home", view: Home },
+	home: { template: "home", view: Home },
 	settings: { template: "settings", view: Settings }
 }
 
