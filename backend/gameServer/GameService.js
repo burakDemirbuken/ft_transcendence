@@ -191,9 +191,8 @@ class GameService
 	setupRoomEvents()
 	{
 		this.roomManager.on('room_Created',
-			({roomState}) =>
+			({roomState, roomId}) =>
 			{
-				const roomId = roomState.id;
 				this.roomManager.on(`room${roomId}_Update`, ({roomState}) => {
 					this._sendPlayers(roomState.players, { type: 'tour/update', payload: roomState });
 				});
@@ -201,6 +200,7 @@ class GameService
 				this.roomManager.on(`room${roomId}_Started`,
 					({gameMode, gameSettings, players}) =>
 					{
+						console.log(`🚀 Starting match in room ${roomId} with mode ${gameMode} and settings:`, gameSettings);
 						try
 						{
 							this._sendPlayers(players, { type: 'game/started' , payload: { gameMode: gameMode, ...gameSettings }});

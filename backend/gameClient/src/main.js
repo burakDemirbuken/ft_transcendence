@@ -48,7 +48,7 @@ $('#createTournamentBtn').on('click', () => {
 $('#joinTournamentBtn').on('click', () => {
 	const tournamentId = $('#customTournamentId').val().trim();
 	if (tournamentId) {
-		app.joinTournament(tournamentId);
+		app.joinRoom(tournamentId);
 	} else {
 		alert('Please enter a valid Tournament ID');
 	}

@@ -215,11 +215,10 @@ class PingPong extends EventEmitter
 							duration: this.gameTime
 						},
 						matchType: this.gameMode,
-
 					}
-
 				}
 			);
+			
 			console.log(`🏁 Game finished! Final Score - Left: ${this.team.get(1).score}, Right: ${this.team.get(2).score}`);
 		}
 	}

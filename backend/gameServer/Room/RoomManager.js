@@ -115,9 +115,7 @@ class RoomManager extends EventEmitter
 			throw new Error(`Invalid game mode: ${payload.gameMode}`);
 		room.addPlayer(player);
 		this.rooms.set(roomId, room);
-		console.log(`Room ${roomId} created with mode ${payload.gameMode} by player ${player.id}`);
-		console.log('Current rooms:', Array.from(this.rooms.keys()));
-		this.emit(`room_Created`, { roomState: room });
+		this.emit(`room_Created`, { roomState: room.getState(), roomId: roomId });
 	}
 
 	getRoom(roomId)
@@ -151,29 +149,21 @@ class RoomManager extends EventEmitter
 
 	leaveRoom(playerId)
 	{
-		const room = this._getRoomWithPlayer(playerId);
+		const {room, roomId} = this._getRoomWithPlayer(playerId);
 		if (!room)
-		{
-			console.warn(`Player with ID ${playerId} is not in any room`);
-			return;
-		}
-		const playerIndex = room.players.findIndex(p => p.id === playerId);
-		if (playerIndex === -1)
-			throw new Error(`Player with ID ${playerId} is not in room ${room.id}`);
+			throw new Error(`Player with ID ${playerId} is not in any room`);
 
-		room.players.splice(playerIndex, 1);
+		room.removePlayer(playerId);
 		if (room.players.length === 0)
-			this.deleteRoom(room.id);
+			this.deleteRoom(roomId);
 		else if (room.host === playerId)
 			room.host = room.players[0].id; // Assign new host
-		room.status = 'waiting';
 
-		// Oda güncellenmesini bildir
 		if (room.players.length > 0) {
 			//this.notifyRoomUpdate(room.id);
 		}
 		else {
-			this.emit(`room${room.id}_Deleted`);
+			this.emit(`room${roomId}_Deleted`);
 		}
 
 		return room;
@@ -224,35 +214,27 @@ class RoomManager extends EventEmitter
 
 	_getRoomWithPlayer(playerId)
 	{
-		for (const room of this.rooms.values())
+		for (const [roomId, room] of this.rooms.entries())
 		{
 			if (room.players.find(p => p.id === playerId))
-				return room;
+				return { room, roomId };
 		}
-		return null;
+		return { room: null, roomId: null };
 	}
 
 	startGame(playerId)
 	{
-		const room = this._getRoomWithPlayer(playerId);
+		const {room, roomId} = this._getRoomWithPlayer(playerId);
 		if (!room)
 			throw new Error(`Room with player ID ${playerId} does not exist`);
 		const allPlayersReady = room.players.every(player => player.status === 'ready');
 		if (!allPlayersReady)
 			throw new Error('All players must be ready before starting the game');
 
-		room.status = 'in_game';
+		const state = room.startGame(playerId);
 
-		this.emit(`room${room.id}_Started`, {
-			gameSettings: room.gameSettings,
-			players: room.players,
-			gameMode: room.gameMode,
-			aiSettings: room.aiSettings || {}
-		});
-
+		this.emit(`room${roomId}_Started`, state);
 		//room.notifyRoomUpdate(room.id);
-
-		return room;
 	}
 
 

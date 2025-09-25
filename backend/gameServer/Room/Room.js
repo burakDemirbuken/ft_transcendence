@@ -56,11 +56,6 @@ export default class Room extends EventEmitter
 			throw new Error('Room is not full');
 
 		this.status = 'in_game';
-		this.emit('gameStarted', {
-			gameSettings: this.gameSettings,
-			players: this.players,
-			gameMode: this.gameMode,
-		});
 		return {
 			gameSettings: this.gameSettings,
 			players: this.players,
