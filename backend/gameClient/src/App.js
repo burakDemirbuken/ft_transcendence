@@ -105,14 +105,12 @@ class App
 	{
 		try
 		{
-
 			if (!this.webSocketClient.isConnect())
 				throw new Error('Not connected to server');
 			let data = {
 				name: `${this.playerName}'s Room`,
 				gameMode: mode,
-				host: this.playerId,
-				gameSettings: gameSettings
+				...gameSettings
 			};
 			this.webSocketClient.send('room/create', data);
 		}
@@ -188,7 +186,7 @@ class App
 	handleNetworkEvent(eventType, data)
 	{
 		const [event, subEvent] = eventType.split('/');
-
+		console.log(`Received event: ${eventType} with data:`, data);
 		switch (event)
 		{
 			case 'room':
@@ -202,6 +200,9 @@ class App
 				break;
 			case 'tournament':
 				this._handleTournamentEvent(subEvent, data);
+				break;
+			case 'error':
+				this.roomUi.showGameError(data || 'Unknown error from server');
 				break;
 			default:
 				console.log('Unhandled network event:', eventType, data);
@@ -268,8 +269,8 @@ class App
 							...rendererConfig,
 							paddleSize:
 							{
-								width: data.gameSettings.paddleWidth,
-								height: data.gameSettings.paddleHeight
+								width: data.paddleWidth,
+								height: data.paddleHeight
 							},
 						},
 						arcade:

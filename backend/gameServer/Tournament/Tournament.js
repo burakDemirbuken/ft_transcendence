@@ -9,16 +9,13 @@ import EventEmitter from '../utils/EventEmitter.js';
 
 class Tournament extends EventEmitter
 {
-	constructor(tournamentName, properties)
+	constructor(tournamentSettings, gameSettings)
 	{
 		super();
-		this.tournamentName = tournamentName;
-		this.properties = properties;
+		this.tournamentName = tournamentSettings.name;
+		this.gameSettings = gameSettings;
 		this.participants = [];
 		this.players = null;
-		this.hostPlayerId = properties.hostPlayerId;
-		if (!this.hostPlayerId)
-			throw new Error('Tournament must have a hostPlayerId');
 
 		this.matches = new Map(); // Round -> Matchs array
 
@@ -27,7 +24,7 @@ class Tournament extends EventEmitter
 
 		this.currentMatches = [];
 		this.currentRound = 0;
-		this.maxRounds = Math.ceil(Math.log2(this.properties.playerCount));
+		this.maxRounds = Math.ceil(Math.log2(this.tournamentSettings.maxPlayers));
 
 		for (let i = 0; i < this.maxRounds; i++)
 		{
@@ -128,6 +125,61 @@ class Tournament extends EventEmitter
 		};
 	}
 
+	/*
+	{
+		tournament:
+		{
+			id: 1,
+			name: 'Champions Cup',
+			maxPlayers: 8,
+			rules: 'Single elimination',
+		},
+		gameCount: 2,
+		playersCount: 4,
+		spectatorsCount: 4,
+		games:
+		[
+			{ id: 1, players: [1, 2] },
+			{ id: 2, players: [3, 4] }
+		],
+		gameSettings:
+		{
+			paddleHeight: 100,
+			paddleWidth: 20,
+			ballRadius: 10,
+			fieldWidth: 800,
+			fieldHeight: 400,
+			paddleSpeed: 10,
+			ballSpeed: 5,
+		},
+		players:
+		[
+			{ id: 1, name: 'Alice', gameId: 1 },
+			{ id: 2, name: 'Bob', gameId: 1 },
+			{ id: 3, name: 'Charlie', gameId: 2 },
+			{ id: 4, name: 'Diana', gameId: 2 },
+		],
+		spectators: [
+			{ id: 5, name: 'Eve'},
+			{ id: 6, name: 'Frank'},
+			{ id: 7, name: 'Grace'},
+			{ id: 8, name: 'Heidi'}
+		]
+	}
+	*/
+	// BURADA KALDIN EN SON TURNUVA İNİT JSON DÖNDÜRÜCEN SONRASINDA CLİENTTE BUNU BASTIR.
+	initialData()
+	{
+		return {
+			tournament:
+			{
+				name: this.tournamentName,
+				maxPlayers: this.properties.maxPlayers,
+			},
+			gameCount: this.matches.get(0).matchs.length,
+
+		}
+	}
 	nextRound()
 	{
 		if (this.currentRound >= this.maxRounds)

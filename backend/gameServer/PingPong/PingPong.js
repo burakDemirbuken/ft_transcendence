@@ -20,7 +20,7 @@ class PingPong extends EventEmitter
 
 		this.settings = {
 			...DEFAULT_GAME_PROPERTIES,
-			...property.gameSettings
+			...property
 		};
 
 		console.log(`🎮 PingPong game created with mode: ${JSON.stringify(this.settings, null, 2)}`);
@@ -218,7 +218,7 @@ class PingPong extends EventEmitter
 					}
 				}
 			);
-			
+
 			console.log(`🏁 Game finished! Final Score - Left: ${this.team.get(1).score}, Right: ${this.team.get(2).score}`);
 		}
 	}

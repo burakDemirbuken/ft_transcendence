@@ -69,13 +69,10 @@ class RoomManager extends EventEmitter
 
 	handleRoomMessage(action, payload, player)
 	{
-		console.log(`Handling room action: ${action} from player ${player.id}`);
-		console.log('Payload:', payload);
 		switch (action)
 		{
 			case 'create':
 				this.createRoom(player, payload);
-				console.log(`Room created by player ${player.id}`);
 				break;
 			case 'join':
 				this.joinRoom(payload.roomId, player);
@@ -99,6 +96,12 @@ class RoomManager extends EventEmitter
 	{
 		//this._validateRoomCreation(hostId, properties);
 
+		for (const room of this.rooms.values())
+		{
+			if (room.players.find(p => p.id === player.id))
+				throw new Error(`Player with ID ${player.id} is already in a room`);
+		}
+
 		const roomId = this._generateRoomId();
 		let room;
 		if (payload.gameMode === 'classic')
@@ -106,7 +109,7 @@ class RoomManager extends EventEmitter
 		else if (payload.gameMode === 'multiplayer')
 			room = new MultiPlayerRoom(payload.name, payload.gameSettings);
 		else if (payload.gameMode === 'tournament')
-			room = new TournamentRoom(payload.name, payload.gameSettings);
+			room = new TournamentRoom(payload.name, payload.gameSettings, payload.tournamentSettings);
 		else if (payload.gameMode === 'ai')
 			room = new AIRoom(payload.name, payload.gameSettings, payload.aiSettings);
 		else if (payload.gameMode === 'local')
@@ -151,8 +154,10 @@ class RoomManager extends EventEmitter
 	{
 		const {room, roomId} = this._getRoomWithPlayer(playerId);
 		if (!room)
-			throw new Error(`Player with ID ${playerId} is not in any room`);
-
+		{
+			console.log(`Player with ID ${playerId} is not in any room`);
+			return null;
+		}
 		room.removePlayer(playerId);
 		if (room.players.length === 0)
 			this.deleteRoom(roomId);
@@ -232,7 +237,6 @@ class RoomManager extends EventEmitter
 			throw new Error('All players must be ready before starting the game');
 
 		const state = room.startGame(playerId);
-
 		this.emit(`room${roomId}_Started`, state);
 		//room.notifyRoomUpdate(room.id);
 	}
@@ -242,7 +246,7 @@ class RoomManager extends EventEmitter
 	{
 		let roomId;
 		do {
-			roomId = `ROOM-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+			roomId = `${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
 		} while (this.rooms.has(roomId));
 		return roomId;
 	}

@@ -4,5 +4,4 @@ export default {
 	aiSettings: {
 		difficulty: 'hard',
 	},
-	...gameConfig
 };

@@ -2,11 +2,14 @@ import Room from './Room.js';
 
 export default class TournamentRoom extends Room
 {
-	constructor(name, gameSettings)
+	constructor(name, gameSettings, tournamentSettings)
 	{
 		super(name, gameSettings);
 		this.gameMode = 'tournament';
-		this.maxPlayers = gameSettings.tournamentSettings.maxPlayers || 8;
+
+		this.tournamentSettings = tournamentSettings;
+		this.maxPlayers = tournamentSettings.maxPlayers || 8;
+		this.status = 'waiting';
 		this.spectators = [];
 	}
 
@@ -21,18 +24,20 @@ export default class TournamentRoom extends Room
 
 	startGame(playerId)
 	{
-		if (this.status !== 'startable')
-			throw new Error('Cannot start game, not all players are ready or room is not full');
 		if (this.host !== playerId)
 			throw new Error('Only the host can start the game');
+		if (this.status !== 'startable')
+			throw new Error('Cannot start game, not all players are ready or room is not full');
 		if (this.players.length < 2)
 			throw new Error('At least 2 players are required to start a tournament');
 
 		this.status = 'in_game';
-		this.emit('gameStarted', {
+		return {
 			gameSettings: this.gameSettings,
-			players: this.players
-		});
+			players: this.players,
+			gameMode: this.gameMode,
+			tournamentSettings: this.tournamentSettings
+		};
 	}
 
 	nextRound()

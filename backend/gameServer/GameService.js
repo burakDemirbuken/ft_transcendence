@@ -23,7 +23,7 @@ class GameService
 		this.connectionId = new Map(); //  playerId -> connectionId
 		this.players = new Map(); // playerId -> Player instance
 
-		setInterval(
+		/* setInterval(
 			() =>
 			{
 				console.log('--- Connected Players ---');
@@ -59,7 +59,7 @@ class GameService
 				console.log('');
 			},
 			5000
-		);
+		); */
 		this.gameManager.start();
 	}
 
@@ -134,7 +134,6 @@ class GameService
 					this.gameManager.removePlayerFromGame(player.id);
 					this.players.delete(player.id);
 					this.connectionId.delete(player.id);
-
 				}
 			);
 
@@ -166,6 +165,9 @@ class GameService
 		if (typeof(player) === "undefined")
 			throw new Error('Player not found for clientId: ' + clientId);
 		const [namespace, action] = message.type.split('/');
+		console.log(`Gelen namespace: ${namespace}`);
+		console.log(`Gelen action: ${action}`);
+		console.log(`Gelen payload: ${JSON.stringify(message.payload, null, 2)}`);
 		switch (namespace)
 		{
 			case 'room':
@@ -198,16 +200,19 @@ class GameService
 				});
 
 				this.roomManager.on(`room${roomId}_Started`,
-					({gameMode, gameSettings, players}) =>
+					(payload) =>
 					{
-						console.log(`🚀 Starting match in room ${roomId} with mode ${gameMode} and settings:`, gameSettings);
+						const {gameMode, gameSettings, players} = payload;
+						console.log(`Oyun modu: ${gameMode}`);
+						console.log(`Oyun bilgileri: ${JSON.stringify(payload, null, 2)}`);
+						console.log(`Oyuncular: ${JSON.stringify(players, null, 2)}`);
 						try
 						{
-							this._sendPlayers(players, { type: 'game/started' , payload: { gameMode: gameMode, ...gameSettings }});
 							if (gameMode === 'tournament')
-								this.tournamentMatchCreate(gameSettings, players);
+								this.tournamentMatchCreate(gameSettings, payload.tournamentSettings, players);
 							else
 								this.matchCreate(gameMode, gameSettings, players);
+
 						}
 						catch (error)
 						{
@@ -223,7 +228,7 @@ class GameService
 				);
 				const connId = this.connectionId.get(roomState.host);
 				if (connId)
-					this.websocketServer.send(connId, { type: 'room/created', payload: { roomId: roomState.id } });
+					this.websocketServer.send(connId, { type: 'room/created', payload: { roomState: roomState, roomId: roomId } });
 			}
 		);
 	}
@@ -251,11 +256,13 @@ class GameService
 			}
 		);
 		this.gameManager.gameStart(gameId);
+		this._sendPlayers(players, { type: 'game/started' , payload: { gameMode: gameMode, ...gameSettings }});
+
 	}
 
-	tournamentMatchCreate(gameSettings, players)
+	tournamentMatchCreate(gameSettings, tournamentSettings, players)
 	{
-		const tournamentId = this.tournamentManager.createTournament(gameSettings);
+		const tournamentId = this.tournamentManager.createTournament(gameSettings, tournamentSettings);
 		players.forEach((p) => this.tournamentManager.joinTournament(tournamentId, this.players.get(p.id)));
 		this.tournamentManager.on(`tournament_${tournamentId}`,
 			({type, data, players}) =>
@@ -267,6 +274,7 @@ class GameService
 			}
 		);
 		this.tournamentManager.startTournament(tournamentId, players[0].id); //? şimdilik ilk oyuncu başlatıyor
+		this._sendPlayers(players, { type: 'tournament/started' , payload: { gameMode: 'tournament', ...gameSettings, tournamentSettings }});
 	}
 
 	getPlayer(playerId)

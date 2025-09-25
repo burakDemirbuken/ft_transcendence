@@ -15,7 +15,7 @@ $('#localGameBtn').on('click', () => {
 });
 
 $('#aiGameBtn').on('click', () => {
-	app.createRoom("ai", { ...aiConfig });
+	app.createRoom("ai", { ...aiConfig, ...gameConfig });
 });
 
 $('#createGameBtn').on('click', () => {

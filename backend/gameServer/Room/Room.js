@@ -23,6 +23,7 @@ export default class Room extends EventEmitter
 			throw new Error('Room is full');
 		if (this.players.length === 0)
 			this.host = player.id;
+		
 		this.players.push({ ...player, isReady: false });
 	}
 
@@ -48,10 +49,10 @@ export default class Room extends EventEmitter
 
 	startGame(playerId)
 	{
-		if (this.status !== 'startable')
-			throw new Error('Cannot start game, not all players are ready or room is not full');
 		if (this.host !== playerId)
 			throw new Error('Only the host can start the game');
+		if (this.status !== 'startable')
+			throw new Error('Cannot start game, not all players are ready or room is not full');
 		if (this.players.length !== this.maxPlayers)
 			throw new Error('Room is not full');
 
