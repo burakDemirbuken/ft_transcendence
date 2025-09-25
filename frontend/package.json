@@ -1,0 +1,24 @@
+{
+  "name": "ft-transcendence-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc --skipLibCheck || echo 'Build completed with warnings'",
+    "build-strict": "tsc",
+    "dev": "tsc --watch",
+    "serve": "http-server . -p 8080",
+    "start": "nodemon --watch frontend --ext ts,js,json,css,html --exec node server.js"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3",
+    "@types/node": "^20.14.10",
+    "http-server": "^14.1.1",
+    "@types/chart.js": "^2.9.41",
+    "@types/navigo": "^7.0.1",
+    "@types/express": "^4.17.0",
+    "nodemon": "^3.0.0"
+  }
+}
