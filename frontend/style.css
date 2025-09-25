@@ -6,14 +6,19 @@
 
 body {
 	display: flex;
-	justify-content: center;
-	align-items: start;
+	justify-content: flex-start; /* merkeze değil sola sabitle */
+	align-items: stretch; /* Yüksekliği tam dolduracak */
+	min-height: 100dvh;
+	overflow-x: hidden;
 }
 
+/* navbar yanında içerik doğru davranışı için birkaç düzenleme */
 #content {
-	width: 100%;
-	min-height: 100vh;
+	flex: 1;
+	width: auto;
 	min-height: 100dvh;
+	min-width: 0;
+	overflow-x: auto;
 	background:
 		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
 		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
@@ -21,9 +26,10 @@ body {
 }
 
 #navbar {
+	max-width: 80%;        /* küçük ekranlarda taşmaması için */
 	width: 300px;
-	height: 100vh;
 	height: 100dvh;
+	max-height: 100dvh;
 	padding: 5px;
 	background: #111;
 
@@ -31,12 +37,49 @@ body {
 	flex-direction: column;
 	gap: 5px;
 
-	overflow: hidden;
+	overflow-y: auto;
+	overflow-x: hidden;
+	-webkit-overflow-scrolling: touch; /* iOS'ta kaydırma hissini iyileştirir */
 	position: sticky;
 	top: 0;
 	left: 0;
 
 	transition: width .3s ease;
+	z-index: 10; /* içerik üzerine gelmesini sağlamak için */
+	flex-shrink: 0;  /* küçük ekranda daralmayı engelle */
+}
+
+/* üst kısım normal akışta */
+.nav-top {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* alt kısım en alta sabitleniyor */
+.nav-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: auto;  /* <-- en alta iter */
+}
+
+/* link/ butonların flex davranışını sınırla, taşmalar daha düzgün olsun */
+#navbar a, #navbar button {
+	flex: 0 0 auto;
+}
+
+/* collapse durumunda da scroll koru */
+#navbar.collapse {
+	width: 60px;
+	overflow-y: auto;
+}
+
+/* opsiyonel: görünürlüğü artırmak için küçük scrollbar stili */
+#navbar::-webkit-scrollbar { width: 8px; }
+#navbar::-webkit-scrollbar-thumb {
+	border-radius: 6px;
+	background: rgba(255,255,255,0.06);
 }
 
 #navbar.collapse {
