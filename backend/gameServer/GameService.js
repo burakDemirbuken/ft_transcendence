@@ -23,7 +23,7 @@ class GameService
 		this.connectionId = new Map(); //  playerId -> connectionId
 		this.players = new Map(); // playerId -> Player instance
 
-		/* setInterval(
+		setInterval(
 			() =>
 			{
 				console.log('--- Connected Players ---');
@@ -57,9 +57,20 @@ class GameService
 				});
 				console.log('-------------------------');
 				console.log('');
+				console.log('--- Active Tournaments ---');
+				this.tournamentManager.tournaments.forEach((tournament, id) => {
+					console.log(`Tournament ${id}:\n\tStatus: ${tournament.status}\n\tPlayers: ${tournament.players.length}/${tournament.maxPlayers}`);
+					console.log('\tPlayer List:');
+					tournament.players.forEach((p) => {
+						console.log(`\t\t- ${p.name} (id: ${p.id})`);
+					});
+					console.log('');
+				});
+				console.log('-------------------------');
+				console.log('');
 			},
 			5000
-		); */
+		);
 		this.gameManager.start();
 	}
 
@@ -132,6 +143,7 @@ class GameService
 					console.log('🔌 Client disconnected:', connectionId, 'Player ID:', player.id);
 					this.roomManager.leaveRoom(player.id);
 					this.gameManager.removePlayerFromGame(player.id);
+					this.tournamentManager.leaveTournament(player.id);
 					this.players.delete(player.id);
 					this.connectionId.delete(player.id);
 				}
@@ -273,8 +285,8 @@ class GameService
 				}
 			}
 		);
-		this.tournamentManager.startTournament(tournamentId, players[0].id); //? şimdilik ilk oyuncu başlatıyor
-		this._sendPlayers(players, { type: 'tournament/started' , payload: { gameMode: 'tournament', ...gameSettings, tournamentSettings }});
+		const initData = this.tournamentManager.initTournament(tournamentId);
+		this._sendPlayers(players, { type: 'tournament/initial' , payload: { gameMode: 'tournament', ... initData }});
 	}
 
 	getPlayer(playerId)

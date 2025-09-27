@@ -42,14 +42,22 @@ class ArcadeMachine
 		this.joystick1 = null;
     }
 
-    async load(arcadeSettings)
+    async load(position, angle)
 	{
         try
 		{
 			const result = await BABYLON.SceneLoader.ImportMeshAsync("", "./assets/models/arcade/", "arcade.glb", this.scene);
 			this.meshs = result.meshes;
+			this.position = position || { x: 0, y: 0, z: 0 };
+			this.angle = angle || 45;
 
-			this.position = arcadeSettings.position || { x: 0, y: 0, z: 0 };
+			this.meshs.forEach(mesh => {
+				mesh.position.x = this.position.x;
+				mesh.position.y = this.position.y;
+				mesh.position.z = this.position.z;
+
+				mesh.rotation.y = this.angle;
+			});
         }
 		catch (error)
 		{
@@ -83,7 +91,6 @@ class ArcadeMachine
         if (screenMesh)
 		{
             screenMesh.material = this.screenMaterial;
-            this.#createEnhancedDebugInfo(screenMesh);
         }
 		else
 		{
@@ -182,6 +189,7 @@ class ArcadeMachine
 		mesh.animations = [animationX, animationY];
 	}
 
+		//!! SİLİNECEK
 	#createEnhancedDebugInfo(screenMesh)
 	{
 		const oldDebug = document.getElementById('debug-texture');

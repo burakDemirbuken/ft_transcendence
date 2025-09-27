@@ -246,7 +246,8 @@ class RoomManager extends EventEmitter
 	{
 		let roomId;
 		do {
-			roomId = `${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+			//!!!!!
+			roomId = `Naber`;
 		} while (this.rooms.has(roomId));
 		return roomId;
 	}

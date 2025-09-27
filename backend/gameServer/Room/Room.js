@@ -7,7 +7,7 @@ export default class Room extends EventEmitter
 		super();
 		this.name = name;
 		this.gameMode = null;
-		this.status = 'waiting'; // "waiting", "in_game", "completed", "startable"
+		this.status = 'startable'; // "waiting", "in_game", "completed", "startable"
 		this.maxPlayers = null;
 		this.host = null;
 		this.players = [];
@@ -23,7 +23,6 @@ export default class Room extends EventEmitter
 			throw new Error('Room is full');
 		if (this.players.length === 0)
 			this.host = player.id;
-		
 		this.players.push({ ...player, isReady: false });
 	}
 
@@ -51,7 +50,7 @@ export default class Room extends EventEmitter
 	{
 		if (this.host !== playerId)
 			throw new Error('Only the host can start the game');
-		if (this.status !== 'startable')
+		if (this.allPlayersReady() === false)
 			throw new Error('Cannot start game, not all players are ready or room is not full');
 		if (this.players.length !== this.maxPlayers)
 			throw new Error('Room is not full');
@@ -62,6 +61,13 @@ export default class Room extends EventEmitter
 			players: this.players,
 			gameMode: this.gameMode,
 		};
+	}
+
+	allPlayersReady()
+	{
+		//!!
+		return true;
+		return this.players.every(p => p.isReady);
 	}
 
 	getState()

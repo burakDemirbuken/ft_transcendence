@@ -47,15 +47,36 @@ class TournamentManager extends EventEmitter
 		);
 		tournament.on('error', (error) => this.emit('error', new Error(`Tournament ${tournamentId} error: ${error.message}`)));
 		this.tournaments.set(tournamentId, tournament);
-		return {tournamentId: tournamentId, initialData: tournament.initialData()};
+		return tournamentId;
 	}
 
-	leaveTournament(tournamentId, player)
+	initTournament(TournamentId)
+	{
+		const tournament = this.tournaments.get(TournamentId);
+		if (!tournament)
+			throw new Error(`Tournament with ID ${TournamentId} does not exist`);
+		return tournament.init();
+	}
+
+	leaveTournament(playerId)
+	{
+		for (const [tournamentId, tournament] of this.tournaments.entries())
+		{
+			if (tournament.players.find(p => p.id === playerId))
+			{
+				this.removePlayerFromTournament(tournamentId, playerId);
+				return;
+			}
+		}
+	}
+
+	removePlayerFromTournament(tournamentId, playerId)
 	{
 		const tournament = this.tournaments.get(tournamentId);
 		if (!tournament)
 			return this.emit('error', new Error(`Tournament with ID ${tournamentId} does not exist`));
-		tournament.removeParticipant(player);
+		tournament.removePlayer(playerId);
+		console.log(`👤 Player ${playerId} removed from tournament ${tournamentId}`);
 		if (tournament.isEmpty())
 		{
 			this.tournaments.delete(tournamentId);
@@ -66,10 +87,13 @@ class TournamentManager extends EventEmitter
 	// TODOO: throwları ele al hangi throw nereye gidecek vs
 	joinTournament(tournamentId, player)
 	{
+		console.log(`Player ${player.id} joining tournament ${tournamentId}`);
 		const tournament = this.tournaments.get(tournamentId);
 		if (!tournament)
 			return this.emit('error', new Error(`Tournament with ID ${tournamentId} does not exist`));
-		tournament.addParticipant(player);
+
+		tournament.addPlayer(player);
+		console.log(`Player ${player.id} joined tournament ${tournamentId}`);
 	}
 
 	startTournament(tournamentId)

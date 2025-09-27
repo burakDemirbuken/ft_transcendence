@@ -14,11 +14,11 @@ class GameRenderer extends EventEmitter
 		this.renderer = new Renderer(this.gameCore);
 		this.gameState = null;
 		this.currentGameMode = null;
+		this.playerMachine = null;
 
 		this.isRunning = false;
 	}
 //		await this.gameCore.loadScene(gameConfig.gameMode);
-
 
 // oyun başladığında initialize edilecek sahne yüklenecek oyun oynanmaya hazır hale gelecek
 	async initialize(gameConfig)
@@ -37,106 +37,76 @@ class GameRenderer extends EventEmitter
 		switch (this.currentGameMode)
 		{
 			case 'local':
-				this._localGameInitialize(gameConfig);
-				break;
 			case 'ai':
-				this._aiGameInitialize(gameConfig);
-				break;
 			case 'classic':
-				this._classicGameInitialize(gameConfig);
+				await this.classicInitialize(gameConfig);
 				break;
 			case 'tournament':
-				this._tournamentGameInitialize(gameConfig);
+				await this.tournamentInitialize(gameConfig.arcadeCount, gameConfig.arcadeOwnerNumber);
 				break;
 			default:
 				throw new Error(`Unknown game mode: ${gameConfig.GameMode}`);
 		}
 	}
 
-	_classicGameInitialize(config)
+/*
+	canvasId: "renderCanvas",
+	gameMode: 'tournament',
+	renderConfig:
 	{
-		this._singleArcadeInitialize(config);
-	}
+		...rendererConfig,
+		paddleSize:
+		{
+			width: data.gameSettings.paddleWidth,
+			height: data.gameSettings.paddleHeight
+		},
+	},
+	arcadeCount: data.gameCount,
+	arcadeOwnerNumber: data.games.findIndex(g => g.players.includes(this.playerId)) + 1,
+*/
 
-	_aiGameInitialize(config)
+	async tournamentInitialize(arcadeCount, playerOwnerNumber)
 	{
-		this._singleArcadeInitialize(config);
-	}
 
-	_localGameInitialize(config)
-	{
-		this._singleArcadeInitialize(config);
-	}
+		const radius = 5; // Yuvarlağın yarıçapı
+		const angleStep = (Math.PI * 2) / arcadeCount; // Her oyuncu arası açı
+		console.log(`angleStep: ${angleStep.toFixed(2)} radians for ${arcadeCount} players`);
 
-	_tournamentGameInitialize(config)
-	{
-		this._multiArcadeInitialize(config);
-	}
-
-	async _multiArcadeInitialize(config)
-	{
-		console.log('🏟️ Initializing tournament arena with config:', JSON.stringify(config, null, 2));
-		if (!config.tournament || !config.tournament.players) {
-			throw new Error('Tournament configuration is missing players data');
-		}
-
-		const players = config.tournament.players;
-		const playerCount = players.length;
-		const radius = 15; // Yuvarlağın yarıçapı
-		const angleStep = (Math.PI * 2) / playerCount; // Her oyuncu arası açı
-
-		// Merkezi kamera konumu
 		const centerPosition = { x: 0, y: 0, z: 0 };
 
-		// Her oyuncu için arcade machine oluştur
-		for (let i = 0; i < playerCount; i++) {
-			const player = players[i];
+		for (let i = 0; i < arcadeCount; i++)
+		{
 			const angle = i * angleStep;
-
-			// Yuvarlak düzende pozisyon hesapla
+			console.log(`Angle for player ${i + 1}: ${angle.toFixed(2)} radians`);
 			const position = {
 				x: Math.cos(angle) * radius,
 				y: 0,
 				z: Math.sin(angle) * radius
 			};
 
-			// Arcade machine oluştur
 			const machine = new ArcadeMachine(this.gameCore.scene);
-			machine.playerId = player.id;
-			machine.playerName = player.name;
-			machine.position = position;
-			machine.angle = angle;
 
-			// Machine'i yükle ve konumlandır
-			await machine.load(config.arcade);
-			machine.setPosition(position.x, position.y, position.z);
+			await machine.load(position, angle + Math.PI);
 
-			// Machine'i merkeze doğru döndür
-			machine.setRotation(0, angle + Math.PI, 0);
-
-			// Machine'i map'e ekle (oyuncu ID'si ile)
-			this.arcadeMachines.set(player.id, machine);
-
-			console.log(`🎮 Created arcade machine for player ${player.name} at position (${position.x.toFixed(2)}, ${position.z.toFixed(2)})`);
+			this.arcadeMachines.set(i + 1, machine);
+			console.log(`🎮 Created arcade machine for player ${i + 1} at position (${JSON.stringify(position, null, 2)})`);
 		}
-
-		// Kamerayı merkeze konumlandır ve yukarıdan baksın
+		this.playerMachine = this.arcadeMachines.get(playerOwnerNumber);
 		this.gameCore.setCameraPosition(
-			{ x: 0, y: 20, z: 0 }, // Yukarıdan bakış
-			{ x: 0, y: 0, z: 0 }   // Merkeze bak
+			{ x: this.playerMachine.position.x, y: this.playerMachine.position.y + 4.5, z: this.playerMachine.position.z + 2.5},
+			{ x: this.playerMachine.position.x, y: this.playerMachine.position.y + 3.75, z: this.playerMachine.position.z }
 		);
-
-		console.log(`🏟️ Tournament arena initialized with ${playerCount} players`);
+		console.log(`🏟️ Tournament arena initialized with ${arcadeCount} players`);
 	}
 
-	async  _singleArcadeInitialize(config)
+	async classicInitialize(config)
 	{
-		const mainMachine = new ArcadeMachine(this.gameCore.scene);
-		await mainMachine.load(config.arcade);
+		this.playerMachine = new ArcadeMachine(this.gameCore.scene);
+		await this.playerMachine.load();
 		this.gameCore.setCameraPosition(
-			{x: mainMachine.position.x, y: mainMachine.position.y + 4.5, z: mainMachine.position.z + 2.5},
-			{ x: mainMachine.position.x, y: mainMachine.position.y + 3.75, z: mainMachine.position.z });
-		this.arcadeMachines.set('main', mainMachine);
+			{ x: this.playerMachine.position.x, y: this.playerMachine.position.y + 4.5, z: this.playerMachine.position.z + 2.5},
+			{ x: this.playerMachine.position.x, y: this.playerMachine.position.y + 3.75, z: this.playerMachine.position.z });
+		this.arcadeMachines.set('main', this.playerMachine);
 	}
 
 	startRendering()

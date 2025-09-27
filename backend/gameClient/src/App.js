@@ -21,7 +21,6 @@ class App
 		this._setupNetworkListeners();
 		this._gameControllerSetup();
 	}
-	//* Kaldım: server kısmındaki dataların gönderimi tamamlandı. Şimdi client tarafında bu dataların işlenmesi ve local game in başlatılması gerekiyor.
 
 	_gameControllerSetup()
 	{
@@ -218,10 +217,73 @@ class App
 		}
 	}
 
+/*
+	{
+	"gameMode": "tournament",
+	"tournament": {
+		"name": "Default Tournament",
+		"maxPlayers": 8
+	},
+	"gameCount": 1,
+	"playersCount": 2,
+	"games": [
+		{
+		"matchNumber": 0,
+		"players": [
+			"6T7AEI",
+			"9GILGR"
+		]
+		}
+	],
+	"gameSettings": {
+		"paddleWidth": 10,
+		"paddleHeight": 100,
+		"paddleSpeed": 700,
+		"ballRadius": 7,
+		"ballSpeed": 600,
+		"ballSpeedIncrease": 100,
+		"maxScore": 11
+	},
+	"players": [
+		{
+		"id": "6T7AEI",
+		"name": "Player166",
+		"gameNumber": 1
+		},
+		{
+		"id": "9GILGR",
+		"name": "Alpha177",
+		"gameNumber": 1
+		}
+	]
+	}
+*/
+
 	_handleTournamentEvent(subEvent, data)
 	{
 		switch (subEvent)
 		{
+			case 'initial':
+				console.log("Tournament initial data:", JSON.stringify(data, null, 2));
+				this.roomUi.hideGameUI();
+				this.gameRenderer.initialize(
+					{
+						canvasId: "renderCanvas",
+						gameMode: 'tournament',
+						renderConfig:
+						{
+							...rendererConfig,
+							paddleSize:
+							{
+								width: data.gameSettings.paddleWidth,
+								height: data.gameSettings.paddleHeight
+							},
+						},
+						arcadeCount: data.gameCount,
+						arcadeOwnerNumber: data.games.findIndex(g => g.players.includes(this.playerId)) + 1,
+					}
+				);
+				break;
 			case 'started':
 				console.log("Tournament started:", JSON.stringify(data, null, 2));
 				this.gameRenderer.initialize({
