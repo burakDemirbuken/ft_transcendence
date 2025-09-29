@@ -65,9 +65,6 @@
 .subpage {
 	position: absolute;
 	width: 100%;
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-	gap: .5em;
 
 	opacity: 0;
 	pointer-events: none;
@@ -77,6 +74,58 @@
 .subpage.pg-actv {
 	opacity: 1;
 	pointer-events: all;
+}
+
+.user-grid {
+	width: 100%;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+	gap: .5em;
+}
+
+.requests {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	gap: 2em;
+}
+
+.search-bar form {
+	display: flex;
+	align-items: center;
+	gap: .5em;
+}
+
+.search-bar input {
+	background: #111;
+
+	height: 2rem;
+	width: 250px;
+	border: 2px solid #333;
+	border-radius: 3px;
+
+	color: #c0c;
+	padding-left: .4em;
+}
+
+.search-bar input::placeholder {
+	padding-left: .4em;
+}
+
+.search-bar button {
+	width: 2rem;
+	height: 2rem;
+	border-radius: 50%;
+
+	border: 2px solid #333;
+	background: #000;
+}
+
+.search-bar svg {
+	fill: #c0c;
+	background: none;
+	padding: .4em;
 }
 
 .subpage .friend {
