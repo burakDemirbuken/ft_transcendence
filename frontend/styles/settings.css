@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
 .settings-container {
 	width: 100%;
 	min-height: 100vh;
@@ -14,7 +16,7 @@
 
 	background: #111;
 	border-radius: 15px;
-	border: 2px solid #666;
+	border: 2px solid #0cc;
 
 	padding: 2em;
 	padding-top: 1em;
@@ -51,20 +53,23 @@
 
 	font-family: "RocketClouds";
 	font-size: xx-large;
-	text-shadow: 0 0 5px #fff;
+	text-shadow: 0 0 10px #fff;
 }
 
 .settings-container h3 {
 	width: 100%;
 	color: #0ff;
 
+	font-family: "Orbitron", monospace;
+	text-shadow: 0 0 10px #0cc;
 	border-bottom: 1px solid #fff;
-	padding: .2em;
 	margin-bottom: .5em;
+	padding-bottom: .2em;
 }
 
 .settings-container h3.delete {
-	color: #f20
+	color: #f20;
+	text-shadow: 0 0 10px #c20;
 }
 
 .settings-container button {
@@ -74,14 +79,17 @@
 	padding: .3em;
 	border-radius: 3px;
 	border: 1px solid #555;
-	background: #1c1c1c;
+	background: #111;
 	color: #c20;
+
+	transition: all .1s ease-in-out;
 }
 
 .settings-container button:hover, .settings-container button:hover {
-	box-shadow: 0 0 5px #fff, inset 0 0 5px #999;
-	border-color: #999;
-	color: #c00;
+	box-shadow: 0 0 10px #c20;
+	border-color: #910;
+	background-color: #c20;
+	color: #111;
 }
 
 .settings-container .setting-section {
@@ -107,14 +115,14 @@
 
 .settings-container li {
 	list-style-type: none;
-	color: #999;
+	color: #ccc;
 	padding: 0 .2em;
 }
 
 .settings-container li.current {
 	list-style-type: none;
-	background-image: linear-gradient(45deg, #505, #055);
-	color: #ccc;
+	background-color: #606;
+	color: #fff;
 	padding: 0 .2em;
 }
 
@@ -124,10 +132,10 @@
 	color: #0ff;
 }
 
-.settings-container label {
+.s1 .settings-content label {
 	display: flex;
 	flex-direction: column;
-	color: #eee;
+	color: #ccc;
 }
 
 .settings-container span {
@@ -136,15 +144,15 @@
 
 .settings-container input {
 	max-width: 400px;
-	border-radius: 3px;
-	padding: .3em .5em;
-	background: none;
-	border: 2px solid #909;
-	box-shadow: inset 0 0 5px #909;
-	font-size: .9em;
+	border-radius: 4px;
+	padding: .2em .4em;
+	margin: 0 .5em;
+	background: #111;
+	border: 2px solid #444;
+	/* box-shadow: inset 0 0 5px #909; */
+	font-size: .8em;
 	color: #fff;
 }
-
 
 .settings-container input:focus, .settings-container input:hover {
 	border-color: #c0c;
