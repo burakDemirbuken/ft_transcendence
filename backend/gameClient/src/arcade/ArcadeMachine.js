@@ -49,15 +49,15 @@ class ArcadeMachine
 			const result = await BABYLON.SceneLoader.ImportMeshAsync("", "./assets/models/arcade/", "arcade.glb", this.scene);
 			this.meshs = result.meshes;
 			this.position = position || { x: 0, y: 0, z: 0 };
-			this.angle = angle || 45;
-
-			this.meshs.forEach(mesh => {
-				mesh.position.x = this.position.x;
-				mesh.position.y = this.position.y;
-				mesh.position.z = this.position.z;
-
-				mesh.rotation.y = this.angle;
-			});
+			this.angle = angle;
+			const parentMesh = this.meshs.find(mesh => mesh.parent === null) || this.meshs[0];
+			if (parentMesh)
+			{
+				parentMesh.position = new BABYLON.Vector3(this.position.x, this.position.y, this.position.z);
+				parentMesh.rotation = new BABYLON.Vector3(0, this.angle, 0);
+			}
+			else
+				console.warn("Parent mesh not found. Using default position and rotation.");
         }
 		catch (error)
 		{

@@ -351,7 +351,24 @@ class Tournament extends EventEmitter
 		return {
 			// finish state
 		}
+	}
 
+	destroy()
+	{
+		this.currentMatches.forEach(
+			(match) =>
+			{
+				if (match.game)
+				{
+					match.game.dispose();
+					match.game = null;
+				}
+			}
+		);
+		this.players = [];
+		this.matches.clear();
+		this.currentMatches = [];
+		this.status = 'finished';
 	}
 }
 

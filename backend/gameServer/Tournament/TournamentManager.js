@@ -79,6 +79,7 @@ class TournamentManager extends EventEmitter
 		console.log(`👤 Player ${playerId} removed from tournament ${tournamentId}`);
 		if (tournament.isEmpty())
 		{
+			this.tournaments.get(tournamentId).destroy();
 			this.tournaments.delete(tournamentId);
 			console.log(`🗑️ Tournament ${tournamentId} deleted as it became empty`);
 		}

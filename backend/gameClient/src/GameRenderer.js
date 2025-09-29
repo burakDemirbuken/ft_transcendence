@@ -70,33 +70,43 @@ class GameRenderer extends EventEmitter
 
 		const radius = 5; // Yuvarlağın yarıçapı
 		const angleStep = (Math.PI * 2) / arcadeCount; // Her oyuncu arası açı
-		console.log(`angleStep: ${angleStep.toFixed(2)} radians for ${arcadeCount} players`);
 
 		const centerPosition = { x: 0, y: 0, z: 0 };
 
 		for (let i = 0; i < arcadeCount; i++)
 		{
 			const angle = i * angleStep;
-			console.log(`Angle for player ${i + 1}: ${angle.toFixed(2)} radians`);
 			const position = {
-				x: Math.cos(angle) * radius,
+				x: Math.round(Math.cos(angle) * radius * 1000) / 1000,
 				y: 0,
-				z: Math.sin(angle) * radius
+				z: Math.round(Math.sin(angle) * radius * 1000) / 1000
 			};
 
+       		const rotationAngle = Math.atan2(-position.x, -position.z) + Math.PI;
 			const machine = new ArcadeMachine(this.gameCore.scene);
-
-			await machine.load(position, angle + Math.PI);
-
+			await machine.load(position, rotationAngle);
 			this.arcadeMachines.set(i + 1, machine);
-			console.log(`🎮 Created arcade machine for player ${i + 1} at position (${JSON.stringify(position, null, 2)})`);
 		}
+
 		this.playerMachine = this.arcadeMachines.get(playerOwnerNumber);
-		this.gameCore.setCameraPosition(
-			{ x: this.playerMachine.position.x, y: this.playerMachine.position.y + 4.5, z: this.playerMachine.position.z + 2.5},
-			{ x: this.playerMachine.position.x, y: this.playerMachine.position.y + 3.75, z: this.playerMachine.position.z }
-		);
-		console.log(`🏟️ Tournament arena initialized with ${arcadeCount} players`);
+
+		const cameraDistance = 3;
+		const cameraHeight = 4.5;
+
+		const machineRotation = this.playerMachine.angle;
+		const cameraPosition = {
+			x: this.playerMachine.position.x + Math.cos(machineRotation + Math.PI) * cameraDistance,
+			y: this.playerMachine.position.y + cameraHeight,
+			z: this.playerMachine.position.z + Math.sin(machineRotation + Math.PI) * cameraDistance
+		};
+
+		const lookAtPosition = {
+			x: this.playerMachine.position.x,
+			y: this.playerMachine.position.y + 3.75,
+			z: this.playerMachine.position.z
+		};
+
+		this.gameCore.setCameraPosition(cameraPosition, lookAtPosition);
 	}
 
 	async classicInitialize(config)
