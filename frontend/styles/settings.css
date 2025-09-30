@@ -12,7 +12,7 @@
 }
 
 #settings-form {
-	width: max(18rem, 75% + 5rem);
+	width: max(16rem, 75% + 5rem);
 
 	background: #111;
 	border-radius: 15px;
@@ -30,7 +30,7 @@
 }
 
 .settings-container .settings-box {
-	width: max(16rem, 82% + 6rem);
+	width: max(14rem, 82% + 5rem);
 	display: flex;
 	flex-wrap: wrap;
 	gap: max(1em, 2% + .5em);
@@ -52,7 +52,6 @@
 	justify-content: center;
 
 	font-family: "RocketClouds";
-	font-size: xx-large;
 	text-shadow: 0 0 10px #fff;
 }
 

@@ -91,7 +91,7 @@ function login() {
             showError("password can't be empty");
             return;
         }
-        if (password.length < 8 || password.length > 128) {
+        if (password.length < 4 || password.length > 128) {
             showError("invalid password");
             return;
         }
@@ -104,7 +104,9 @@ function login() {
             headers: new Headers({ "Content-Type": "application/json" }),
             body: JSON.stringify(user),
         });
+        console.log("sends");
         const response = yield fetch(request);
+        console.log("responds");
         const json = yield response.json();
         if (response.ok) {
             document.querySelector("#error").textContent = json.message;
