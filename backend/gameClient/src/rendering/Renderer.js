@@ -129,9 +129,8 @@ import * as constants from '../utils/constants.js';
 
 class Renderer
 {
-	constructor(gameCore)
+	constructor()
 	{
-		this.gameCore = gameCore;
 		this.screenSize = constants.SCREEN_SIZE;
 		this.paddleSize = null;
 		this.ballSize = null;
@@ -163,14 +162,18 @@ class Renderer
 			this.renderWaitingScreen('Waiting for game data...', machine);
 			return;
 		}
-
 		const ctx = machine.getScreenContext();
 		this.clearScreen(ctx);
 
+		console.log('data', JSON.stringify(gameData, null, 2));
 		if (gameData.players)
 		{
 			gameData.players.forEach(
-				(player) => this.renderPaddle(ctx, player.position));
+				(player) =>
+				{
+					this.renderPaddle(ctx, player.position);
+				}
+			);
 		}
 		if (gameData.ball)
 			this.renderBall(ctx, gameData.ball);
@@ -180,35 +183,6 @@ class Renderer
 		this.renderCenterLine(ctx);
 
 		machine.updateScreen();
-	}
-
-	renderSingleGame(gameData)
-	{
-		const machineId = `main`;
-		this.renderGame(gameData, machineId);
-	}
-
-	// TODOO: turnuva için render ayarlanacak.
-	renderTournament(tournamentData)
-	{
-		if (tournamentData.matches)
-		{
-			tournamentData.matches.forEach(
-				(match, index) =>
-				{
-					const machineId = `tournament_${index}`;
-
-					if (match.isActive)
-					{
-						this.gameCore.setActiveMachine(machineId);
-						this.renderGame(match.gameData, machineId);
-					}
-					else
-					{
-						this.renderWaitingScreen(`Maç ${index + 1}`, machineId);
-					}
-				});
-		}
 	}
 
 	clearScreen(ctx)
@@ -253,11 +227,8 @@ class Renderer
 		ctx.setLineDash([]);
 	}
 
-	renderWaitingScreen(message, machineId = 'main')
+	renderWaitingScreen(message, machine)
 	{
-		const machine = this.gameCore.getMachine(machineId);
-		if (!machine) return;
-
 		const ctx = machine.getScreenContext();
 		this.clearScreen(ctx);
 

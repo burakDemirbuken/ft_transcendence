@@ -28,40 +28,40 @@ class App
 			() =>
 			{
 				// this.gameRenderer.joystickMove(1, 'up');
-				this.webSocketClient.send('game/playerAction', {key: "w", action: true});
+				this.webSocketClient.send('player/playerAction', {key: "w", action: true});
 			},
 			() =>
 			{
 				// this.gameRenderer.joystickMove(1, 'neutral');
-				this.webSocketClient.send('game/playerAction', {key: "w", action: false});
+				this.webSocketClient.send('player/playerAction', {key: "w", action: false});
 			}
 		);
 		this.inputManager.onKey("s",
 			() =>
 			{
 				// this.gameRenderer.joystickMove(1, 'down');
-				this.webSocketClient.send('game/playerAction', {key: "s", action: true});
+				this.webSocketClient.send('player/playerAction', {key: "s", action: true});
 			},
 			() =>
 			{
 				// this.gameRenderer.joystickMove(1, 'neutral');
-				this.webSocketClient.send('game/playerAction', {key: "s", action: false});
+				this.webSocketClient.send('player/playerAction', {key: "s", action: false});
 			}
 		);
 		// Arrow keys for same player (alternative controls)
 		this.inputManager.onKey("ArrowUp",
-			() => this.webSocketClient.send('game/playerAction', {key: "ArrowUp", action: true}),
-			() => this.webSocketClient.send('game/playerAction', {key: "ArrowUp", action: false})
+			() => this.webSocketClient.send('player/playerAction', {key: "ArrowUp", action: true}),
+			() => this.webSocketClient.send('player/playerAction', {key: "ArrowUp", action: false})
 		);
 
 		this.inputManager.onKey("ArrowDown",
-			() => this.webSocketClient.send('game/playerAction', {key: "ArrowDown", action: true}),
-			() => this.webSocketClient.send('game/playerAction', {key: "ArrowDown", action: false})
+			() => this.webSocketClient.send('player/playerAction', {key: "ArrowDown", action: true}),
+			() => this.webSocketClient.send('player/playerAction', {key: "ArrowDown", action: false})
 		);
 
 		this.inputManager.onKey("escape",
-			() => this.webSocketClient.send('game/playerAction', {key: "escape", action: true}),
-			() => this.webSocketClient.send('game/playerAction', {key: "escape", action: false})
+			() => this.webSocketClient.send('player/playerAction', {key: "escape", action: true}),
+			() => this.webSocketClient.send('player/playerAction', {key: "escape", action: false})
 		);
 	}
 
@@ -161,20 +161,6 @@ class App
 		return `${randomName}${randomNumber}`;
 	}
 
-	loadGame(gameConfig)
-	{
-		this.gameRenderer.initialize(gameConfig).then(() =>
-		{
-			console.log('✅ Game initialized successfully');
-			this.gameClient.startGame();
-		})
-		.catch((error) =>
-		{
-			console.error('❌ Error initializing game:', error);
-			this.roomUi.showGameUI();
-		});
-	}
-
 	// ================================
 	// NETWORK EVENT HANDLERS
 	// ================================
@@ -185,7 +171,6 @@ class App
 	handleNetworkEvent(eventType, data)
 	{
 		const [event, subEvent] = eventType.split('/');
-		console.log(`Received event: ${eventType} with data:`, data);
 		switch (event)
 		{
 			case 'room':
@@ -217,56 +202,13 @@ class App
 		}
 	}
 
-/*
-	{
-	"gameMode": "tournament",
-	"tournament": {
-		"name": "Default Tournament",
-		"maxPlayers": 8
-	},
-	"gameCount": 1,
-	"playersCount": 2,
-	"games": [
-		{
-		"matchNumber": 0,
-		"players": [
-			"6T7AEI",
-			"9GILGR"
-		]
-		}
-	],
-	"gameSettings": {
-		"paddleWidth": 10,
-		"paddleHeight": 100,
-		"paddleSpeed": 700,
-		"ballRadius": 7,
-		"ballSpeed": 600,
-		"ballSpeedIncrease": 100,
-		"maxScore": 11
-	},
-	"players": [
-		{
-		"id": "6T7AEI",
-		"name": "Player166",
-		"gameNumber": 1
-		},
-		{
-		"id": "9GILGR",
-		"name": "Alpha177",
-		"gameNumber": 1
-		}
-	]
-	}
-*/
-
 	_handleTournamentEvent(subEvent, data)
 	{
 		switch (subEvent)
 		{
 			case 'initial':
-				console.log("Tournament initial data:", JSON.stringify(data, null, 2));
-				this.roomUi.hideGameUI();
-				this.gameRenderer.initialize(
+				const playerArcadeNumber = data.games.find(g => g.players.includes(this.playerId)).matchNumber;
+				this.loadGame(
 					{
 						canvasId: "renderCanvas",
 						gameMode: 'tournament',
@@ -280,50 +222,39 @@ class App
 							},
 						},
 						arcadeCount: data.gameCount,
-						arcadeOwnerNumber: data.games.findIndex(g => g.players.includes(this.playerId)) + 1,
+						arcadeOwnerNumber: playerArcadeNumber,
 					}
 				);
 				break;
-			case 'started':
-				console.log("Tournament started:", JSON.stringify(data, null, 2));
-				this.gameRenderer.initialize({
-						canvasId: "renderCanvas",
-						gameMode: 'tournament',
-						renderConfig:
-						{
-							...rendererConfig,
-							paddleSize:
-							{
-								width: data.tournamentSettings.paddleWidth,
-								height: data.tournamentSettings.paddleHeight
-							},
-						}});
-				break;
-			case 'matchmaking':
-				console.log("Tournament matchmaking:", JSON.stringify(data, null, 2));
-				break;
-			case 'nextRound':
-				console.log("Tournament next round:", JSON.stringify(data, null, 2));
-				break;
 			case 'update':
-				console.log("Tournament update:", JSON.stringify(data, null, 2));
-				break;
-			case 'finished':
-				console.log("Tournament finished:", JSON.stringify(data, null, 2));
-				this.roomUi.showGameUI();
+				this.gameRenderer.gameState = data;
 				break;
 			default:
 				console.log('Unhandled tournament event:', subEvent, data);
 		}
 	}
 
+	loadGame(gameConfig)
+	{
+		this.gameRenderer.initialize(gameConfig).then(
+			() =>
+			{
+				this.webSocketClient.send('player/initialized');
+				this.roomUi.hideGameUI();
+				this.gameRenderer.startRendering();
+			}).catch((error) =>
+			{
+				console.error('❌ Error initializing game renderer:', error);
+			}
+		);
+	}
+
 	_handleGameEvent(subEvent, data)
 	{
 		switch (subEvent)
 		{
-			case 'started':
-				console.log("Game started:", JSON.stringify(data, null, 2));
-				this.gameRenderer.initialize({
+			case 'initial':
+				this.loadGame({
 						canvasId: "renderCanvas",
 						gameMode: data.gameMode,
 						renderConfig:
@@ -335,25 +266,10 @@ class App
 								height: data.paddleHeight
 							},
 						},
-						arcade:
-						{
-							position: { x: 0, y: 0, z: 0 },
-
-						}
-					}).then(
-					() =>
-					{
-						// servera init edildiğini bildir
-					}).catch((error) =>
-					{
-						console.error('❌ Error initializing game renderer:', error);
 					}
 				);
-				this.roomUi.hideGameUI();
-				this.gameRenderer.startRendering();
 				break;
 			case 'stateUpdate':
-				//! 2. parametre değişecek
 				this.gameRenderer.gameState = data.gameData;
 				break;
 			default:

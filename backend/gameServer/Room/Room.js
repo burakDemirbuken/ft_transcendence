@@ -23,7 +23,10 @@ export default class Room extends EventEmitter
 			throw new Error('Room is full');
 		if (this.players.length === 0)
 			this.host = player.id;
-		this.players.push({ ...player, isReady: false });
+		//! deneme için her zaman ready
+		this.players.push({ ...player, isReady: true });
+		console.log(`BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB`);
+		console.log(this.players);
 	}
 
 	removePlayer(playerId)
@@ -65,8 +68,6 @@ export default class Room extends EventEmitter
 
 	allPlayersReady()
 	{
-		//!!
-		return true;
 		return this.players.every(p => p.isReady);
 	}
 

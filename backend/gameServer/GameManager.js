@@ -57,9 +57,6 @@ class GameManager extends EventEmitter
 	{
 		switch (action)
 		{
-			case 'playerAction':
-				player.inputSet(payload.key, payload.action);
-				break;
 			default:
 				throw new Error(`Unhandled game message type: ${message.type}`);
 		}
@@ -90,7 +87,6 @@ class GameManager extends EventEmitter
 			throw new Error(`Game with ID ${gameId} does not exist`);
 		const game = this.games.get(gameId);
 		game.addPlayer(player);
-		console.log(`👤 Player ${player.id} added to game ${gameId}`);
 	}
 
 	gameStart(gameId)
@@ -176,15 +172,15 @@ class GameManager extends EventEmitter
 		this.lastUpdateTime = currentTime;
 		for (const [gameId, game] of this.games.entries())
 		{
-			if (game.players.length === 0)
-			{
-				this.removeGame(gameId);
-				continue;
-			}
 			if (game.isRunning())
 			{
 				game.update(deltaTime);
 				this.emit(`game${gameId}_StateUpdate`, {gameState: game.getGameState(), players: game.players.map(p => p.id)});
+			}
+			else if (game.status === 'waiting')
+			{
+				if (game.players.every(p => p.initialized))
+					this.gameStart(gameId);
 			}
 		}
 	}

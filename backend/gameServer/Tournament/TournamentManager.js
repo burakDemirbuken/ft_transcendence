@@ -1,5 +1,4 @@
 import { TICK_RATE } from '../utils/constants.js';
-import PingPong from '../PingPong/PingPong.js';
 import Tournament from './Tournament.js';
 import EventEmitter from '../utils/EventEmitter.js';
 
@@ -19,6 +18,11 @@ class TournamentManager extends EventEmitter
 		this.lastUpdateTime = Date.now();
 	}
 
+	start()
+	{
+		this.updateInterval = setInterval(() => this.update(), TICK_RATE);
+	}
+
 	createUniqueTournamentId()
 	{
 		return `tournament-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
@@ -34,15 +38,15 @@ class TournamentManager extends EventEmitter
 		if (Math.log2(tournamentSettings.maxPlayers) % 1 !== 0)
 			throw new Error(`Tournament Count must be a power of 2: ${tournamentSettings.maxPlayers}`);
 		const tournament = new Tournament(tournamentSettings, gameSettings);
-		tournament.on('update', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'update', payload: data, players }));
-		tournament.on('finished', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data, players }));
-		tournament.on('matchmaking', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'matchmaking', payload: data, players }));
-		tournament.on('nextRound', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'nextRound', payload: data, players }));
+		tournament.on('update', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'update', payload: data, players: players }));
+		tournament.on('finished', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data, players: players }));
+		tournament.on('matchmaking', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'matchmaking', payload: data, players: players }));
+		tournament.on('nextRound', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'nextRound', payload: data, players: players }));
 		tournament.on('started',
 			({data, players}) =>
 				{
 					console.log(`🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁`, JSON.stringify(data, null ,2));
-					this.emit(`tournament_${tournamentId}`, { type: 'started', payload: data, players });
+					this.emit(`tournament_${tournamentId}`, { type: 'started', payload: data, players: players });
 				}
 		);
 		tournament.on('error', (error) => this.emit('error', new Error(`Tournament ${tournamentId} error: ${error.message}`)));
@@ -97,14 +101,6 @@ class TournamentManager extends EventEmitter
 		console.log(`Player ${player.id} joined tournament ${tournamentId}`);
 	}
 
-	startTournament(tournamentId)
-	{
-		const tournament = this.tournaments.get(tournamentId);
-		if (!tournament)
-			return this.emit('error', new Error(`Tournament with ID ${tournamentId} does not exist`));
-		tournament.start();
-	}
-
 	update()
 	{
 		const currentTime = Date.now();
@@ -113,7 +109,15 @@ class TournamentManager extends EventEmitter
 
 		for (const [tournamentId, tournament] of this.tournaments.entries())
 		{
-			tournament.update(deltaTime);
+			if (tournament.isRunning())
+			{
+				tournament.update(deltaTime);
+			}
+			else if (tournament.status === `waiting`)
+			{
+				if (tournament.players.every(p => p.initialized))
+					tournament.start();
+			}
 			if (tournament.isFinished())
 			{
 				console.log(`🏁 Tournament ${tournamentId} finished`);
@@ -121,18 +125,6 @@ class TournamentManager extends EventEmitter
 				this.tournaments.delete(tournamentId);
 				continue;
 			}
-
-			this.emit(`tournament_${tournamentId}`, {
-				type: 'update',
-				payload: {
-					participants: tournament.participants,
-					data:
-					{
-						matchMakingInfo: tournament.getMatchmakingInfo(),
-						tournamentState: tournament.getState()
-					}
-				}
-			});
 		}
 
 	}

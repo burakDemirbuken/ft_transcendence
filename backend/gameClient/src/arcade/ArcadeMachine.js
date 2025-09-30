@@ -49,7 +49,7 @@ class ArcadeMachine
 			const result = await BABYLON.SceneLoader.ImportMeshAsync("", "./assets/models/arcade/", "arcade.glb", this.scene);
 			this.meshs = result.meshes;
 			this.position = position || { x: 0, y: 0, z: 0 };
-			this.angle = angle;
+			this.angle = angle || 0;
 			const parentMesh = this.meshs.find(mesh => mesh.parent === null) || this.meshs[0];
 			if (parentMesh)
 			{
@@ -75,7 +75,7 @@ class ArcadeMachine
 
 	createGameScreen()
 	{
-        this.gameScreen = new BABYLON.DynamicTexture(`gameScreen_${this.id}`, this.screenSize, this.scene);
+        this.gameScreen = new BABYLON.DynamicTexture(`gameScreen`, this.screenSize, this.scene);
 
 		this.gameScreen.hasAlpha = false;
 		this.gameScreen.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
@@ -83,7 +83,7 @@ class ArcadeMachine
 
 		this.gameScreen.updateSamplingMode(BABYLON.Texture.NEAREST_SAMPLINGMODE);
 
-        this.screenMaterial = new BABYLON.StandardMaterial(`screenMaterial_${this.id}`, this.scene);
+        this.screenMaterial = new BABYLON.StandardMaterial(`screenMaterial`, this.scene);
         this.screenMaterial.diffuseTexture = this.gameScreen;
         this.screenMaterial.emissiveTexture = this.gameScreen;
 

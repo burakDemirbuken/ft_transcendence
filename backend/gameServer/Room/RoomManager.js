@@ -146,7 +146,7 @@ class RoomManager extends EventEmitter
 		if (room.players.find(p => p.id === player.id))
 			throw new Error(`Player with ID ${player.id} is already in room ${roomId}`);
 
-		room.players.push({ id: player.id, name: player.name, status: 'waiting', isHost: player.id === room.host });
+		room.addPlayer(player);
 		//this.notifyRoomUpdate(roomId);
 	}
 
@@ -192,12 +192,6 @@ class RoomManager extends EventEmitter
 			if (player)
 			{
 				player.status = isReady ? 'ready' : 'waiting';
-				const allPlayersReady = room.players.every(p => p.status === 'ready');
-				if (allPlayersReady)
-					room.status = 'startable';
-				else
-					room.status = 'waiting';
-				//this.notifyRoomUpdate(roomId);
 				return;
 			}
 		}
@@ -232,8 +226,7 @@ class RoomManager extends EventEmitter
 		const {room, roomId} = this._getRoomWithPlayer(playerId);
 		if (!room)
 			throw new Error(`Room with player ID ${playerId} does not exist`);
-		const allPlayersReady = room.players.every(player => player.status === 'ready');
-		if (!allPlayersReady)
+		if (!room.allPlayersReady())
 			throw new Error('All players must be ready before starting the game');
 
 		const state = room.startGame(playerId);

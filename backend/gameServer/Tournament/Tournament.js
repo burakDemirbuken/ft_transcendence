@@ -99,7 +99,6 @@ class Tournament extends EventEmitter
 				this.currentMatches.push(match);
 			}
 		}
-		this.status = 'ready2start';
 	}
 
 	getMatchmakingInfo()
@@ -266,8 +265,7 @@ class Tournament extends EventEmitter
 			players: this.players,
 			data:
 			{
-				matchMakingInfo: this.getMatchmakingInfo(),
-				tournamentState: this.getState()
+				...this.getState()
 			}
 		});
 	}
@@ -309,19 +307,20 @@ class Tournament extends EventEmitter
 		return this.players.length === 0;
 	}
 
-	start(hostPlayerId)
+	isRunning()
 	{
-		if (hostPlayerId !== this.hostPlayerId)
-			return this.emit('error', new Error(`Only the host player can start the tournament`));
-		if (this.status !== 'ready2start')
-			return this.emit('error', new Error(`Tournament is not ready to start, current status: ${this.status}`));
+		return this.status === 'running';
+	}
+
+	start()
+	{
 		this.startTime = Date.now();
 		this.status = 'running';
 		this.emit('started', {
 			players: this.players,
 			data:
 			{
-				matchMakingInfo: this.getMatchmakingInfo()
+
 			}
 		});
 		this.currentMatches.forEach(
@@ -339,8 +338,14 @@ class Tournament extends EventEmitter
 			matches: Array.from(this.currentMatches).map(match => ({
 				matchId: match.matchId,
 				matchNumber: match.matchNumber,
-				player1: match.player1,
-				player2: match.player2,
+				player1:
+				{
+					name: match.player1.name,
+				},
+				player2:
+				{
+					name: match.player2.name,
+				},
 				gameState: match.game.getGameState(),
 			})),
 		};

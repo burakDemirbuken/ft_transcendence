@@ -30,7 +30,7 @@ class GameService
 				console.log('');
 				console.log(`Total connected players: ${this.players.size}`);
 				this.players.forEach((player) => {
-					console.log(`Player:\nname: ${player.name}\nid: ${player.id}\nconnectionId: ${this.connectionId.get(player.id)}`);
+					console.log(`Player:\nname: ${player.name}\nid: ${player.id}\nconnectionId: ${this.connectionId.get(player.id)}\n`);
 					console.log('');
 				});
 				console.log('-------------------------');
@@ -40,7 +40,7 @@ class GameService
 					console.log(`Room Settings: ${JSON.stringify(room.gameSettings, null, 2)}`);
 					console.log('\tPlayer List:');
 					room.players.forEach((p) => {
-						console.log(`\t\t- ${p.name} (id: ${p.id}, status: ${p.status}, isHost: ${p.isHost})`);
+						console.log(`\t\t- ${p.name} (id: ${p.id}, status: ${p.isReady ? 'ready' : 'waiting'}, isHost: ${p.isHost})`);
 					});
 					console.log('');
 				});
@@ -51,7 +51,7 @@ class GameService
 					console.log(`Game ${game.id}:\n\tMode: ${game.gameMode}\n\tStatus: ${game.status}\n\tPlayers: ${game.players.length}`);
 					console.log('\tPlayer List:');
 					game.players.forEach((p) => {
-						console.log(`\t\t- ${p.name} (id: ${p.id})`);
+						console.log(`\t\t- ${p.name} (id: ${p.id}) initialized: ${p.initialized}`);
 					});
 					console.log('');
 				});
@@ -62,7 +62,7 @@ class GameService
 					console.log(`Tournament ${id}:\n\tStatus: ${tournament.status}\n\tPlayers: ${tournament.players.length}/${tournament.maxPlayers}`);
 					console.log('\tPlayer List:');
 					tournament.players.forEach((p) => {
-						console.log(`\t\t- ${p.name} (id: ${p.id})`);
+						console.log(`\t\t- ${p.name} (id: ${p.id}) initialized: ${p.initialized}`);
 					});
 					console.log('');
 				});
@@ -72,6 +72,7 @@ class GameService
 			5000
 		);
 		this.gameManager.start();
+		this.tournamentManager.start();
 	}
 
 	_getplayerByConnectionId(connectionId)
@@ -185,20 +186,37 @@ class GameService
 			case 'room':
 				this.roomManager.handleRoomMessage(action, message.payload, player);
 				break;
-			case 'game':
-				this.gameManager.handleGameMessage(action, message.payload, player);
+			case 'player':
+				this.handlePlayerMessage(action, message.payload, player);
 				break;
 			default:
 				throw new Error(`Unhandled message namespace: ${namespace}`);
 		}
 	}
 
-	_sendPlayers(players, message)
+	handlePlayerMessage(action, payload, player)
+	{
+		switch (action)
+		{
+			case 'playerAction':
+				player.inputSet(payload.key, payload.action);
+				break;
+			case 'initialized':
+				player.initialized = true;
+				break;
+			default:
+				throw new Error(`Unhandled player message type: ${action}`);
+		}
+	}
+
+	sendPlayers(players, message)
 	{
 		players.forEach(p => {
 			const connId = this.connectionId.get(p.id);
 			if (connId)
+			{
 				this.websocketServer.send(connId, message);
+			}
 		});
 	}
 
@@ -208,22 +226,23 @@ class GameService
 			({roomState, roomId}) =>
 			{
 				this.roomManager.on(`room${roomId}_Update`, ({roomState}) => {
-					this._sendPlayers(roomState.players, { type: 'tour/update', payload: roomState });
+					this.sendPlayers(roomState.players, { type: 'tour/update', payload: roomState });
 				});
 
 				this.roomManager.on(`room${roomId}_Started`,
 					(payload) =>
 					{
 						const {gameMode, gameSettings, players} = payload;
+						const playersInstances = players.map(p => this.players.get(p.id)).filter(p => p);
 						console.log(`Oyun modu: ${gameMode}`);
 						console.log(`Oyun bilgileri: ${JSON.stringify(payload, null, 2)}`);
 						console.log(`Oyuncular: ${JSON.stringify(players, null, 2)}`);
 						try
 						{
 							if (gameMode === 'tournament')
-								this.tournamentMatchCreate(gameSettings, payload.tournamentSettings, players);
+								this.tournamentMatchCreate(gameSettings, payload.tournamentSettings, playersInstances);
 							else
-								this.matchCreate(gameMode, gameSettings, players);
+								this.matchCreate(gameMode, gameSettings, playersInstances);
 
 						}
 						catch (error)
@@ -250,12 +269,12 @@ class GameService
 		const gameId = this.gameManager.createGame(gameMode, gameSettings);
 		players.forEach((p) => this.gameManager.addPlayerToGame(gameId, this.players.get(p.id)));
 		this.gameManager.on(`game${gameId}_StateUpdate`,
-			({gameState, players}) => this._sendPlayers(this.getPlayers(players), { type: 'game/stateUpdate', payload: gameState })
+			({gameState, players}) => this.sendPlayers(this.getPlayers(players), { type: 'game/stateUpdate', payload: gameState })
 		);
 		this.gameManager.on(`game${gameId}_Ended`,
 			({results, players}) =>
 			{
-				this._sendPlayers(this.getPlayers(players), { type: 'game/ended', payload: results });
+				this.sendPlayers(this.getPlayers(players), { type: 'game/ended', payload: results });
 				//? XMLHTTPREQUEST
 				/* fetch('http://user:3006/internal/match', {
 					method: 'POST',
@@ -267,9 +286,7 @@ class GameService
 				}); */
 			}
 		);
-		this.gameManager.gameStart(gameId);
-		this._sendPlayers(players, { type: 'game/started' , payload: { gameMode: gameMode, ...gameSettings }});
-
+		this.sendPlayers(players, { type: 'game/initial' , payload: { gameMode: gameMode, ...gameSettings }});
 	}
 
 	tournamentMatchCreate(gameSettings, tournamentSettings, players)
@@ -277,16 +294,18 @@ class GameService
 		const tournamentId = this.tournamentManager.createTournament(gameSettings, tournamentSettings);
 		players.forEach((p) => this.tournamentManager.joinTournament(tournamentId, this.players.get(p.id)));
 		this.tournamentManager.on(`tournament_${tournamentId}`,
-			({type, data, players}) =>
+			({type, payload, players}) =>
 			{
 				switch (type)
 				{
-
+					case 'update':
+						this.sendPlayers(players, { type: 'tournament/update', payload: payload });
+						break;
 				}
 			}
 		);
 		const initData = this.tournamentManager.initTournament(tournamentId);
-		this._sendPlayers(players, { type: 'tournament/initial' , payload: { gameMode: 'tournament', ... initData }});
+		this.sendPlayers(players, { type: 'tournament/initial' , payload: { gameMode: 'tournament', ... initData }});
 	}
 
 	getPlayer(playerId)

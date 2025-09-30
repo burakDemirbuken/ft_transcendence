@@ -6,7 +6,7 @@ class LocalPingPong extends PingPong
 	{
 		super(property);
 		this.gameMode = "local";
-		this.settings.maxPlayers = 1;
+		this.maxPlayers = 1;
 		console.log(`🎮 LocalPingPong created with mode: ${this.gameMode}`);
 	}
 
@@ -19,6 +19,7 @@ class LocalPingPong extends PingPong
 		this.team.set(2, { playersId: ["Player2"], score: 0 });
 		this.paddles.set(player.id, this.createPaddle(2));
 		this.paddles.set("Player2", this.createPaddle(1));
+		console.log(`👤 Player ${player.id} added to LocalPingPong`);
 	}
 
 	paddleControls()
