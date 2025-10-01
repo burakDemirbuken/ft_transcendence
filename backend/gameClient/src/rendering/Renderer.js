@@ -1,130 +1,3 @@
-
-/*
-const exampleGameState =
-{
-	currentState: 'waiting', // 'waiting', 'playing', 'finished'
-	gameData:
-	{
-		players:
-		[
-			{
-				id: 'player1',
-				name: 'Player 1',
-				position:
-				{
-					x: 0,
-					y: 0
-				},
-				direction: "up", // "up", "down", "stop"
-			},
-			{
-				id: 'player2',
-				name: 'Player 2',
-				position:
-				{
-					x: 0,
-					y: 0
-				},
-				direction: "up", // "up", "down", "stop"
-			}
-		],
-		ball:
-		{
-			position:
-			{
-				x: 0,
-				y: 0
-			},
-			direction:
-			{
-				x: 1,
-				y: 1
-			},
-			radius: 10,
-			speed: 5
-		},
-		score: { player1: 0, player2: 0 },
-	}
-}
-
-{
-	"type":"stateChange",
-	"payload":
-	{
-		"currentState":"running",
-		"gameData":
-		{
-			"status":"running",
-			"players":
-			[
-				{
-					"id":"OASCBT",
-					"name":"Tester422",
-					"score":0,
-					"position":
-					{
-						"x":10,
-						"y":250
-					}
-				},
-				{
-					"id":"ONX57I",
-					"name":"User989",
-					"score":0,
-					"position":
-					{
-						"x":780,
-						"y":250
-					}
-				}
-			],
-			"ball":
-			{
-				"position":
-				{
-					"x":-151581,
-					"y":529
-				},
-				"direction":
-				{
-					"x":-1,
-					"y":1
-				},
-				"radius":7,
-				"speed":3
-			},
-			"score":
-			{
-				"team1":0,
-				"team2":0
-			}
-		}
-	}
-}
-
-const exampleGameRenderConfig =
-{
-	colors:
-	{
-		background: '#000000',
-
-		paddle: '#FFFFFF',
-		ball: '#FFFFFF',
-		text: '#FFFFFF',
-		accent: '#00FF00'
-	},
-	paddleSize:
-	{
-		width: 10,
-		height: 100
-	},
-	ball:
-	{
-		radius: 10,
-	}
-};
-*/
-
 import * as constants from '../utils/constants.js';
 
 class Renderer
@@ -162,6 +35,13 @@ class Renderer
 			this.renderWaitingScreen('Waiting for game data...', machine);
 			return;
 		}
+
+		if (gameData.currentState === "finished")
+		{
+			this.finishScreen(gameData, machine);
+			return;
+		}
+
 		const ctx = machine.getScreenContext();
 		this.clearScreen(ctx);
 
@@ -236,6 +116,22 @@ class Renderer
 		ctx.font = '32px Arial';
 		ctx.textAlign = 'center';
 		ctx.fillText(message || 'Oyuncu Bekleniyor...', this.screenWidth / 2, this.screenHeight / 2);
+
+		machine.updateScreen();
+	}
+
+	finishScreen(gameData, machine)
+	{
+		const ctx = machine.getScreenContext();
+		this.clearScreen(ctx);
+
+		ctx.fillStyle = this.colors.text;
+		ctx.font = '32px Arial';
+		ctx.textAlign = 'center';
+		ctx.fillText(`${winner.name} kazandı!`, this.screenWidth / 2, this.screenHeight / 2);
+
+		ctx.font = '24px Arial';
+		ctx.fillText(`Skor: ${scores[winner.id]}`, this.screenWidth / 2, this.screenHeight / 2 + 40);
 
 		machine.updateScreen();
 	}

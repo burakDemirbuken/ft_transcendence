@@ -26,6 +26,8 @@ class Tournament extends EventEmitter
 		this.currentRound = 0;
 		this.maxRounds = Math.ceil(Math.log2(this.maxPlayers));
 
+		this.finishedMatchesCount = 0;
+
 		for (let i = 0; i < this.maxRounds; i++)
 		{
 			const matchs = [];
@@ -36,6 +38,7 @@ class Tournament extends EventEmitter
 				matchs.push({
 						round: i,
 						matchNumber: j,
+						state: null,
 						matchId: null,
 						player1: null,
 						player2: null,
@@ -96,6 +99,15 @@ class Tournament extends EventEmitter
 				match.game.initializeGame();
 				match.game.addPlayer(match.player1);
 				match.game.addPlayer(match.player2);
+				match.state = match.game.getGameState();
+				match.game.on('finished', ({ players, results }) =>
+				{
+					this.finishedMatchesCount++;
+					match.winner = results.winner;
+					match.loser = results.loser;
+					match.matchStatus = 'finished';
+					match.game.off('finished');
+				});
 				this.currentMatches.push(match);
 			}
 		}
@@ -124,42 +136,6 @@ class Tournament extends EventEmitter
 		};
 	}
 
-	/*
-	{
-		tournament:
-		{
-			id: 1,
-			name: 'Champions Cup',
-			maxPlayers: 8,
-			rules: 'Single elimination',
-		},
-		gameCount: 2,
-		playersCount: 4,
-		games:
-		[
-			{ id: 1, players: [1, 2] },
-			{ id: 2, players: [3, 4] }
-		],
-		gameSettings:
-		{
-			paddleHeight: 100,
-			paddleWidth: 20,
-			ballRadius: 10,
-			fieldWidth: 800,
-			fieldHeight: 400,
-			paddleSpeed: 10,
-			ballSpeed: 5,
-		},
-		players:
-		[
-			{ id: 1, name: 'Alice', gameId: 1 },
-			{ id: 2, name: 'Bob', gameId: 1 },
-			{ id: 3, name: 'Charlie', gameId: 2 },
-			{ id: 4, name: 'Diana', gameId: 2 },
-		]
-	}
-	*/
-	// BURADA KALDIN EN SON TURNUVA İNİT JSON DÖNDÜRÜCEN SONRASINDA CLİENTTE BUNU BASTIR.
 	init()
 	{
 		this.matchMaking();
@@ -214,9 +190,18 @@ class Tournament extends EventEmitter
 				...TOURNAMENT_GAME_PROPERTIES,
 				gameMode: 'tournament',
 			});
+			match.game.on('finished', ({ players, results }) =>
+			{
+				this.finishedMatchesCount++;
+				match.winner = results.winner;
+				match.loser = results.loser;
+				match.matchStatus = 'finished';
+				match.game.off('finished');
+			});
 			match.game.initializeGame();
 			match.game.addPlayer(this.matches.get(this.currentRound - 1).matchs[i].winner);
 			match.game.addPlayer(this.matches.get(this.currentRound - 1).matchs[i + 1]?.winner || null);
+			match.state = match.game.getGameState();
 			this.currentMatches.push(match);
 		}
 
@@ -237,37 +222,47 @@ class Tournament extends EventEmitter
 		if (this.status !== 'running')
 			return;
 
-		let	finishedMatchesCount = 0;
-
 		this.currentMatches.forEach(
 			(match) =>
 			{
-				if (!match.game)
+				if (match.game.isFinished())
 					return;
-				finishedMatchesCount = 0;
 				match.game.update(deltaTime);
+				match.state = match.game.getGameState();
 				match.score = match.game.getScore();
 				match.status = 'in_progress';
-				if (match.game.isFinished())
-				{
-					finishedMatchesCount++;
-					match.winner = match.game.getWinner();
-					match.loser = match.game.getLoser();
-					match.matchStatus = 'finished';
-					match.game.dispose();
-					match.game = null;
-					console.log(`🏆 Match ${match.matchId} finished. Winner: ${winner.id}, Loser: ${loser.id}`);
-				}
 			}
 		);
 
-		this.emit("update", {
-			players: this.players,
-			data:
+		if (this.finishedMatchesCount === this.currentMatches.length)
+		{
+			if (this.currentRound + 1 >= this.maxRounds)
 			{
-				...this.getState()
+				this.status = 'finished';
+				this.endTime = Date.now();
+				this.emit('finished', {
+						players: this.players,
+						data:
+						{
+							matchMakingInfo: this.getMatchmakingInfo(),
+							tournamentDuration: this.endTime - this.startTime,
+						}
+					}
+				);
 			}
-		});
+			else
+				this.nextRound();
+		}
+		else
+		{
+			this.emit("update", {
+				players: this.players,
+				data:
+				{
+					...this.getState()
+				}
+			});
+		}
 	}
 
 	addPlayer(player)
@@ -346,7 +341,7 @@ class Tournament extends EventEmitter
 				{
 					name: match.player2.name,
 				},
-				gameState: match.game.getGameState(),
+				gameState: match.state,
 			})),
 		};
 	}

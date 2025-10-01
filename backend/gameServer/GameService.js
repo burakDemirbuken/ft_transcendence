@@ -301,6 +301,9 @@ class GameService
 					case 'update':
 						this.sendPlayers(players, { type: 'tournament/update', payload: payload });
 						break;
+					case 'nextRound':
+						this.sendPlayers(players, { type: 'tournament/nextRound', payload: payload });
+						break;
 				}
 			}
 		);

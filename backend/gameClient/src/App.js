@@ -119,6 +119,11 @@ class App
 		}
 	}
 
+	nextRound()
+	{
+		this.webSocketClient.send('tournament/nextRound');
+	}
+
 	joinRoom(roomId)
 	{
 		try
@@ -229,6 +234,9 @@ class App
 			case 'update':
 				this.gameRenderer.gameState = data;
 				break;
+			case 'nextRound':
+				this.gameRenderer.reset();
+				this.roomUi.showGameUI();
 			default:
 				console.log('Unhandled tournament event:', subEvent, data);
 		}

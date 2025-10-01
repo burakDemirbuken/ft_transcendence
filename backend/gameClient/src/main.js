@@ -35,6 +35,10 @@ $('#startGameBtn').on('click', () => {
 	app.startGame();
 });
 
+$('#nextRoundBtn').on('click', () => {
+	app.nextRound();
+});
+
 let ready = false;
 $('#readyToggle').on('click', () => {
 	ready = !ready;
