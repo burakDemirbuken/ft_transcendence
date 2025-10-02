@@ -41,14 +41,15 @@ export default async function friendChangeRoutes(fastify) {
     })
 
     fastify.post('/remove', async (request, reply) => {
+        //unfriend someone
         const { userid, peerid } = request.body
-        const result = await fastify.sequelize.models.Friend.destroy({
+        const deletedCount = await fastify.sequelize.models.Friend.destroy({
             where: {
                 userid,
                 peerid
             }
         })
-        if (result) {
+        if (deletedCount > 0) {
             return reply.status(204).send()
         } else {
             return reply.status(404).send()

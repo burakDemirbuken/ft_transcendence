@@ -21,30 +21,30 @@ export default fp(async (fastify) => {
 		const Round = RoundModel(sequelize, DataTypes, Model);
 		const Stats = StatsModel(sequelize, DataTypes, Model);
 
-		Profile.hasMany(Team, { foreignKey: 'playerOneId' })
-		Profile.hasMany(Team, { foreignKey: 'playerTwoId' })
-		Team.belongsTo(Profile, { as: 'PlayerOne', foreignKey: 'playerOneId', targetKey: 'id' })
-		Team.belongsTo(Profile, { as: 'PlayerTwo', foreignKey: 'playerTwoId', targetKey: 'id' })
+		Profile.hasMany(Team, { foreignKey: 'playerOneId', onDelete: 'SET NULL', hooks: true })
+		Profile.hasMany(Team, { foreignKey: 'playerTwoId', onDelete: 'SET NULL', hooks: true })
+		Team.belongsTo(Profile, { as: 'PlayerOne', foreignKey: 'playerOneId', targetKey: 'id', onDelete: 'SET NULL' })
+		Team.belongsTo(Profile, { as: 'PlayerTwo', foreignKey: 'playerTwoId', targetKey: 'id', onDelete: 'SET NULL' })
 
-		Profile.hasOne(Stats, { foreignKey: 'userId' })
-		Stats.belongsTo(Profile, { foreignKey: 'userId', targetKey: 'id' })
+		Profile.hasOne(Stats, { foreignKey: 'userId', onDelete: 'CASCADE', hooks: true })
+		Stats.belongsTo(Profile, { foreignKey: 'userId', targetKey: 'id', onDelete: 'CASCADE' })
 
-		Team.hasMany(MatchHistory, { foreignKey: 'teamOneID'})
-		Team.hasMany(MatchHistory, { foreignKey: 'teamTwoID'})
-		Team.hasMany(MatchHistory, { foreignKey: 'winnerTeamID'})
-		MatchHistory.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneID', targetKey: 'id' })
-		MatchHistory.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoID', targetKey: 'id' })
-		MatchHistory.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamID', targetKey: 'id' })
+		Team.hasMany(MatchHistory, { foreignKey: 'teamOneID', onDelete: 'CASCADE', hooks: true })
+		Team.hasMany(MatchHistory, { foreignKey: 'teamTwoID', onDelete: 'CASCADE', hooks: true })
+		Team.hasMany(MatchHistory, { foreignKey: 'winnerTeamID', onDelete: 'CASCADE', hooks: true })
+		MatchHistory.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneID', targetKey: 'id', onDelete: 'CASCADE' })
+		MatchHistory.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoID', targetKey: 'id', onDelete: 'CASCADE' })
+		MatchHistory.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamID', targetKey: 'id', onDelete: 'CASCADE' })
 
-		Team.hasMany(Round, { foreignKey: 'teamOneID'})
-		Team.hasMany(Round, { foreignKey: 'teamTwoID'})
-		Team.hasMany(Round, { foreignKey: 'winnerTeamID'})
-		Round.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneID', targetKey: 'id' })
-		Round.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoID', targetKey: 'id' })
-		Round.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamID', targetKey: 'id' })
+		Team.hasMany(Round, { foreignKey: 'teamOneID', onDelete: 'CASCADE', hooks: true })
+		Team.hasMany(Round, { foreignKey: 'teamTwoID', onDelete: 'CASCADE', hooks: true })
+		Team.hasMany(Round, { foreignKey: 'winnerTeamID', onDelete: 'CASCADE', hooks: true })
+		Round.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneID', targetKey: 'id', onDelete: 'CASCADE' })
+		Round.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoID', targetKey: 'id', onDelete: 'CASCADE' })
+		Round.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamID', targetKey: 'id', onDelete: 'CASCADE' })
 
-		Round.hasMany(TournamentHistory, { foreignKey: 'roundID' })
-		TournamentHistory.belongsTo(Round, { foreignKey: 'roundID', targetKey: 'id' })
+		Round.hasMany(TournamentHistory, { foreignKey: 'roundID', onDelete: 'CASCADE', hooks: true })
+		TournamentHistory.belongsTo(Round, { foreignKey: 'roundID', targetKey: 'id', onDelete: 'CASCADE' })
 
 		await sequelize.sync({ alter: true })
 

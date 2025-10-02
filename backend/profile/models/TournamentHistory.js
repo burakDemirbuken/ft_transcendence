@@ -15,7 +15,7 @@ export default (sequelize, DataTypes, Model) => {
 				model: 'rounds',
 				key: 'id'
 			},
-			onDelete: 'CASCADE'
+			onDelete: 'SET NULL'
 		},
 		tournementDate: {
 			type: DataTypes.DATE,

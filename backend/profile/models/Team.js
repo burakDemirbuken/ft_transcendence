@@ -10,21 +10,21 @@ export default (sequelize, DataTypes, Model) => {
 		},
 		playerOneId: {
 			type: DataTypes.STRING,
-			allowNull: false,
+			allowNull: true,
 			references: {
 				model: 'profiles',
 				key: 'id'
 			},
-			onDelete: 'CASCADE'
+			onDelete: 'SET NULL'
 		},
 		playerTwoId: {
 			type: DataTypes.STRING,
-			allowNull: false,
+			allowNull: true,
 			references: {
 				model: 'profiles',
 				key: 'id'
 			},
-			onDelete: 'CASCADE'
+			onDelete: 'SET NULL'
 		},
 	}, {
 		sequelize,

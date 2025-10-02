@@ -15,7 +15,7 @@ export default (sequelize, DataTypes, Model) => {
 				model: 'teams',
 				key: 'id'
 			},
-			onDelete: 'CASCADE'
+			onDelete: 'SET NULL'
 		},
 		teamTwoID: {
 			type: DataTypes.INTEGER,
@@ -24,7 +24,7 @@ export default (sequelize, DataTypes, Model) => {
 				model: 'teams',
 				key: 'id'
 			},
-			onDelete: 'CASCADE'
+			onDelete: 'SET NULL'
 		},
 		teamOneScore: {
 			type: DataTypes.INTEGER,
@@ -41,7 +41,7 @@ export default (sequelize, DataTypes, Model) => {
 				model: 'teams',
 				key: 'id'
 			},
-			onDelete: 'CASCADE'
+			onDelete: 'SET NULL'
 		},
         matchStartDate: {
             type: DataTypes.DATE

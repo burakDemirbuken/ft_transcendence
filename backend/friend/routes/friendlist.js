@@ -15,4 +15,9 @@ export default async function friendListRoutes(fastify) {
         //return reply.code(200).send(friends.map(friend => friend.userid === id ? friend.peerid : friend.userid))
         return reply.code(200).send(friends)
     })
+
+    fastify.delete('/list', async (request, reply) => {
+        // delete friendships if both peerid and userid null
+        // if it's not both null, set given id to null 
+    })
 }
