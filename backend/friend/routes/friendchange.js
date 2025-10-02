@@ -1,15 +1,14 @@
-export default async function friendChangeRoutes(fastify, sequelize) {
+export default async function friendChangeRoutes(fastify) {
     fastify.post('/send', async (request, reply) => {
         const { userid, peerid } = request.body
-        await sequelize.models.Friend.create({ userid, peerid, status: 'pending' })
+        await fastify.sequelize.models.Friend.create({ userid, peerid, status: 'pending' })
         return reply.status(201).send()
     })
 
     fastify.post('/accept', async (request, reply) => {
-        const { userid, peerid } = request.body
-        const friend = await sequelize.models.Friend.findOne({
+        const { peerid } = request.body
+        const friend = await fastify.sequelize.models.Friend.findOne({
             where: {
-                userid,
                 peerid,
                 status: 'pending'
             }
@@ -25,7 +24,7 @@ export default async function friendChangeRoutes(fastify, sequelize) {
 
     fastify.post('/block', async (request, reply) => {
         const { userid, peerid } = request.body
-        let friend = await sequelize.models.Friend.findOne({
+        let friend = await fastify.sequelize.models.Friend.findOne({
             where: {
                 userid,
                 peerid
@@ -43,7 +42,7 @@ export default async function friendChangeRoutes(fastify, sequelize) {
 
     fastify.post('/remove', async (request, reply) => {
         const { userid, peerid } = request.body
-        const result = await sequelize.models.Friend.destroy({
+        const result = await fastify.sequelize.models.Friend.destroy({
             where: {
                 userid,
                 peerid

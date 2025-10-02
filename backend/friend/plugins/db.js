@@ -12,6 +12,12 @@ export default fp(async (fastify, opts) => {
 
     await sequelize.sync({ alter: true })
 
+    fastify.decorate('sequelize', sequelize)
+
+    fastify.addHook('onClose', async (fastifyInstance, done) => {
+        await fastifyInstance.sequelize.close()
+        done()
+    })
 }, {
     name: 'friend-db',
     fastify: '4.x'

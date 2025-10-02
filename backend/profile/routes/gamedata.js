@@ -1,12 +1,14 @@
 export default async function gamedataRoute(fastify) {
 
 	fastify.post('/internal/match', async (request, reply) => {
+		const { r_player1, r_player2, r_winner, r_score, r_duration} = request.body;
+
 		fastify.sequelize.models.MatchHistory.create({
-			player1: request.body.player1,
-			player2: request.body.player2,
-			winner: request.body.winner,
-			score: request.body.score,
-			duration: request.body.duration
+			player1: r_player1,
+			player2: r_player2,
+			winner: r_winner,
+			score: r_score,
+			duration: r_duration
 		}).then(match => {
 			reply.code(201).send(match);
 		}).catch(err => {

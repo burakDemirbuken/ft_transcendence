@@ -5,7 +5,6 @@ import TeamModel from '../models/Team.js';
 import MatchHistoryModel from '../models/MatchHistory.js';
 import TournamentHistoryModel from '../models/TournamentHistory.js';
 import RoundModel from '../models/Round.js';
-import FriendModel from '../models/Friend.js';
 import StatsModel from '../models/Stats.js';
 
 export default fp(async (fastify) => {
@@ -20,7 +19,6 @@ export default fp(async (fastify) => {
 		const MatchHistory = MatchHistoryModel(sequelize, DataTypes, Model);
 		const TournamentHistory = TournamentHistoryModel(sequelize, DataTypes, Model);
 		const Round = RoundModel(sequelize, DataTypes, Model);
-		const Friend = FriendModel(sequelize, DataTypes, Model);
 		const Stats = StatsModel(sequelize, DataTypes, Model);
 
 		Profile.hasMany(Team, { foreignKey: 'playerOneId' })
@@ -44,11 +42,6 @@ export default fp(async (fastify) => {
 		Round.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneID', targetKey: 'id' })
 		Round.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoID', targetKey: 'id' })
 		Round.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamID', targetKey: 'id' })
-
-		Profile.hasMany(Friend, { foreignKey: 'userid'})
-		Profile.hasMany(Friend, { foreignKey: 'peerid'})
-		Friend.belongsTo(Profile, { as: 'User', foreignKey: 'userid', targetKey: 'id' })
-		Friend.belongsTo(Profile, { as: 'Peer', foreignKey: 'peerid', targetKey: 'id' })
 
 		Round.hasMany(TournamentHistory, { foreignKey: 'roundID' })
 		TournamentHistory.belongsTo(Round, { foreignKey: 'roundID', targetKey: 'id' })

@@ -1,9 +1,9 @@
 import { Op } from 'sequelize'
 
-export default async function friendListRoutes(fastify, sequelize) {
+export default async function friendListRoutes(fastify) {
     fastify.get('/list', async (request, reply) => {
         const { id } = request.query
-        const friends = await sequelize.models.Friend.findAll({
+        const friends = await fastify.sequelize.models.Friend.findAll({
             where: {
                 [Op.or]: [
                     { userid: id },
