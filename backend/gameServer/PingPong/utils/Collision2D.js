@@ -85,7 +85,6 @@ class Collision2D
 		let side, normalX = 0, normalY = 0, penetration = 0;
 
 		const rect1OldPos = new Vector2D(Collision2D._getOldX(rect1), Collision2D._getOldY(rect1));
-		console.log("XXXXXXXXXXXXXXXXXXXXXX rect1OldPos:", rect1OldPos);
 
 		if (rect1OldPos.y < rect2Pos.y + rect2Size.height &&
 			rect1OldPos.y + rect1Size.height > rect2Pos.y)
@@ -116,13 +115,6 @@ class Collision2D
 				normalY = 1;
 			}
 		}
-		console.log("XXXXXXXXXXXXXXXXXXXXXX detected on side:", {
-			colliding: true,
-			side: side,
-			overlap: { x: overlapX, y: overlapY },
-			normal: { x: normalX, y: normalY },
-			penetration: penetration
-		});
 		return {
 			colliding: true,
 			side: side,

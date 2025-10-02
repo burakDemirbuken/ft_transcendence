@@ -10,21 +10,11 @@ export default (sequelize, DataTypes, Model) => {
         },
         userid: {
             type: DataTypes.STRING,
-            allowNull: false,
-            references: {
-                model: 'profiles',
-                key: 'id'
-            },
-            onDelete: 'CASCADE'
+            allowNull: false
         },
         peerid: {
             type: DataTypes.STRING,
-            allowNull: false,
-            references: {
-                model: 'profiles',
-                key: 'id'
-            },
-            onDelete: 'CASCADE'
+            allowNull: false
         },
         status: {
             type: DataTypes.ENUM('pending', 'accepted', 'blocked'),

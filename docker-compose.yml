@@ -31,7 +31,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ./backend/profiles
+      device: ./backend/profile
       o: bind
 #  aiServer_src:
 #    driver: local
@@ -45,6 +45,14 @@ volumes:
 #      type: none
 #      device: ./backend/gameServer
 #      o: bind
+  room_src:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/room
+      o: bind
+
+
 
 services:
 #  frontend:
@@ -129,15 +137,38 @@ services:
 #    volumes:
 #      - gameServer:/app
 #      - /app/node_modules
-#
+
+  room:
+    container_name: room
+    build: ./backend/room
+    restart: on-failure
+    expose:
+      - 3004
+    volumes:
+      - room_src:/app
+      - /app/node_modules
+    networks:
+      - transcendency
+
   profile:
     container_name: profile
-    build: ./backend/profiles
+    build: ./backend/profile
     restart: on-failure
     expose:
       - 3006
     volumes:
       - profile_src:/app
+      - /app/node_modules
+    networks:
+      - transcendency
+  
+  friend:
+    container_name: friend
+    build: ./backend/friend
+    restart: on-failure
+    expose:
+      - 3007
+    volumes:
       - /app/node_modules
     networks:
       - transcendency

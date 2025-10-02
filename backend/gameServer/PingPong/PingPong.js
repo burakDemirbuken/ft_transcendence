@@ -6,22 +6,26 @@ import { DEFAULT_GAME_PROPERTIES, PADDLE_SPACE } from '../utils/constants.js';
 
 class PingPong extends EventEmitter
 {
-	constructor(property = {})
+	constructor(property)
 	{
 		super();
 		this.status = 'not initialized'; // 'waiting', 'playing', 'paused', 'finished', 'not initialized'
-		this.gameMode = property.gameMode; // 'local', 'online', 'tournament', 'ai'
+		this.gameMode = "classic"; // 'local', 'online', 'tournament', 'ai'
 
 		this.lastUpdateTime = 0;
 		this.startTime = 0;
 		this.finishTime = 0;
 		this.gameTime = 0;
-		this.id = property.id || null;
+
+		this.id = null;
 
 		this.settings = {
 			...DEFAULT_GAME_PROPERTIES,
 			...property
 		};
+		this.maxPlayers = 2;
+
+		console.log(`🎮 PingPong game created with mode: ${JSON.stringify(this.settings, null, 2)}`);
 
 		this.ball = null;
 		this.paddles = new Map(); // playerId -> Paddle instance
@@ -33,14 +37,12 @@ class PingPong extends EventEmitter
 
 	addPlayer(player)
 	{
-		console.log(`👤 Player ${player.id} added to game`);
-		if (this.players.length < this.settings.maxPlayers)
+		if (this.players.length < this.maxPlayers)
 		{
 			this.players.push(player);
 			this.paddles.set(player.id, this.createPaddle(this.players.length));
-			if (!this.team.has(this.players.length % 2 ? 1 : 2))
-				this.team.set(this.players.length % 2 ? 1 : 2, { playersId: [], score: 0 });
 			this.team.get(this.players.length % 2 ? 1 : 2).playersId.push(player.id);
+			console.log(`👤 Player ${player.id} added to game`);
 		}
 	}
 
@@ -80,8 +82,6 @@ class PingPong extends EventEmitter
 			paddlePos.x = 200;
 		else if (number === 4)
 			paddlePos.x = this.settings.canvasWidth - this.settings.paddleWidth - 200;
-
-		console.log(`Creating paddle at position: ${JSON.stringify(paddlePos)}`);
 		return new Paddle(
 			paddlePos.x,
 			paddlePos.y,
@@ -101,6 +101,8 @@ class PingPong extends EventEmitter
 			this.settings.ballSpeed,
 			{width: this.settings.canvasWidth, height: this.settings.canvasHeight}
 		);
+		this.team.set(1, { playersId: [], score: 0 });
+		this.team.set(2, { playersId: [], score: 0 });
 		this.ball.launchBall({x: Math.random() < 0.5 ? -1 : 1, y: Math.random() - 0.5});
 		this.eventListeners();
 		if (this.gameMode !== 'ai')
@@ -207,7 +209,7 @@ class PingPong extends EventEmitter
 							score: this.team.get(2).score,
 							playersId: this.team.get(2).playersId
 						},
-						winner: this.team.get(1).score > this.team.get(2).score ? 1 : 2,
+						winner: "team"+this.team.get(1).score > this.team.get(2).score ? 1 : 2,
 						time:
 						{
 							start: this.startTime,
@@ -215,11 +217,10 @@ class PingPong extends EventEmitter
 							duration: this.gameTime
 						},
 						matchType: this.gameMode,
-
 					}
-
 				}
 			);
+
 			console.log(`🏁 Game finished! Final Score - Left: ${this.team.get(1).score}, Right: ${this.team.get(2).score}`);
 		}
 	}
@@ -288,8 +289,8 @@ class PingPong extends EventEmitter
 	start()
 	{
 		this.startTime = Date.now();
-		if (this.settings.maxPlayers && this.players.length < this.settings.maxPlayers)
-			return new Error(`Not enough players to start the game. Required: ${this.settings.maxPlayers}, Current: ${this.players.length}`);
+		if (this.maxPlayers && this.players.length < this.maxPlayers)
+			return new Error(`Not enough players to start the game. Required: ${this.maxPlayers}, Current: ${this.players.length}`);
 
 		if (this.status === 'not initialized')
 		{
@@ -350,7 +351,6 @@ class PingPong extends EventEmitter
 		for (const player of this.players)
 		{
 			playerStates.push({
-				id: player.id,
 				name: player.name,
 				...this.paddles.get(player.id).getState(),
 			});
@@ -378,13 +378,14 @@ class PingPong extends EventEmitter
 
 	isFull()
 	{
-		return this.players.length === this.settings.maxPlayers;
+		return this.players.length === this.maxPlayers;
 	}
 
 	getWinner()
 	{
 		if (!this.isFinished())
 			return null;
+
 	}
 
 	getLoser()

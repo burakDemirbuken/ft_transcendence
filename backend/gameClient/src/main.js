@@ -1,4 +1,7 @@
 import App from './App.js';
+import gameConfig from './json/GameConfig.js';
+import aiConfig from './json/AiConfig.js';
+import tournamentConfig from './json/TournamentConfig.js';
 
 let app;
 
@@ -8,15 +11,15 @@ $(document).ready(() => {
 
 
 $('#localGameBtn').on('click', () => {
-	app.createRoom("local");
+	app.createRoom("local", { ...gameConfig });
 });
 
 $('#aiGameBtn').on('click', () => {
-	app.createRoom("ai", { difficulty: 'hard' });
+	app.createRoom("ai", { ...aiConfig, ...gameConfig });
 });
 
 $('#createGameBtn').on('click', () => {
-	app.createRoom("classic");
+	app.createRoom("classic", { ...gameConfig });
 });
 
 $('#joinRoomBtn').on('click', () => {
@@ -39,14 +42,14 @@ $('#readyToggle').on('click', () => {
 });
 
 $('#createTournamentBtn').on('click', () => {
-	app.createTournament();
+	app.createRoom("tournament", { ...tournamentConfig });
 });
 
 $('#joinTournamentBtn').on('click', () => {
-	const tournamentId = $('#customTournamentId').val().trim();
+	app.joinRoom("Naber");
+	/* const tournamentId = $('#customTournamentId').val().trim();
 	if (tournamentId) {
-		app.joinTournament(tournamentId);
 	} else {
 		alert('Please enter a valid Tournament ID');
-	}
+	} */
 });

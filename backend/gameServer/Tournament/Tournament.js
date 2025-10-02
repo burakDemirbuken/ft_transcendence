@@ -9,17 +9,14 @@ import EventEmitter from '../utils/EventEmitter.js';
 
 class Tournament extends EventEmitter
 {
-	constructor(tournamentName, properties)
+	constructor(tournamentSettings, gameSettings)
 	{
 		super();
-		this.tournamentName = tournamentName;
-		this.properties = properties;
-		this.participants = [];
-		this.players = null;
-		this.hostPlayerId = properties.hostPlayerId;
-		if (!this.hostPlayerId)
-			throw new Error('Tournament must have a hostPlayerId');
-
+		this.tournamentName = tournamentSettings.name;
+		this.maxPlayers = tournamentSettings.maxPlayers;
+		this.tournamentSettings = tournamentSettings;
+		this.gameSettings = gameSettings;
+		this.players = [];
 		this.matches = new Map(); // Round -> Matchs array
 
 		this.startTime = null;
@@ -27,7 +24,7 @@ class Tournament extends EventEmitter
 
 		this.currentMatches = [];
 		this.currentRound = 0;
-		this.maxRounds = Math.ceil(Math.log2(this.properties.playerCount));
+		this.maxRounds = Math.ceil(Math.log2(this.maxPlayers));
 
 		for (let i = 0; i < this.maxRounds; i++)
 		{
@@ -64,8 +61,9 @@ class Tournament extends EventEmitter
 	{
 		if (this.status !== 'waiting')
 			return this.emit('error', new Error(`Tournament is not in waiting state, current status: ${this.status}`));
-		if (this.participants.length < this.properties.playerCount)
-			return this.emit('error', new Error(`Not enough participants to start matchmaking, current count: ${this.participants.length}, required: ${this.properties.playerCount}`));
+	// ? BYE olucak mı
+	//	if (this.players.length < this.properties.playerCount)
+	//		return this.emit('error', new Error(`Not enough players to start matchmaking, current count: ${this.players.length}, required: ${this.properties.playerCount}`));
 
 		function shuffle(array)
 		{
@@ -78,7 +76,7 @@ class Tournament extends EventEmitter
 			return arr;
 		}
 
-		this.players = shuffle(this.participants);
+		this.players = shuffle(this.players);
 		let matchs = this.matches.get(this.currentRound).matchs;
 		for (let i = 0; i < this.players.length; i += 2)
 		{
@@ -101,8 +99,6 @@ class Tournament extends EventEmitter
 				this.currentMatches.push(match);
 			}
 		}
-
-		this.status = 'ready2start';
 	}
 
 	getMatchmakingInfo()
@@ -124,14 +120,83 @@ class Tournament extends EventEmitter
 				}))
 			})),
 			status: this.status,
-			participants: this.participants.map(p => ({ id: p.id, name: p.name })),
+			participants: this.players.map(p => ({ id: p.id, name: p.name })),
 		};
+	}
+
+	/*
+	{
+		tournament:
+		{
+			id: 1,
+			name: 'Champions Cup',
+			maxPlayers: 8,
+			rules: 'Single elimination',
+		},
+		gameCount: 2,
+		playersCount: 4,
+		games:
+		[
+			{ id: 1, players: [1, 2] },
+			{ id: 2, players: [3, 4] }
+		],
+		gameSettings:
+		{
+			paddleHeight: 100,
+			paddleWidth: 20,
+			ballRadius: 10,
+			fieldWidth: 800,
+			fieldHeight: 400,
+			paddleSpeed: 10,
+			ballSpeed: 5,
+		},
+		players:
+		[
+			{ id: 1, name: 'Alice', gameId: 1 },
+			{ id: 2, name: 'Bob', gameId: 1 },
+			{ id: 3, name: 'Charlie', gameId: 2 },
+			{ id: 4, name: 'Diana', gameId: 2 },
+		]
+	}
+	*/
+	// BURADA KALDIN EN SON TURNUVA İNİT JSON DÖNDÜRÜCEN SONRASINDA CLİENTTE BUNU BASTIR.
+	init()
+	{
+		this.matchMaking();
+		return {
+			tournament:
+			{
+				name: this.tournamentName,
+				maxPlayers: this.maxPlayers,
+			},
+			gameCount: this.currentMatches.length,
+			playersCount: this.players.length,
+			games: this.currentMatches.map(match => ({
+				matchNumber: match.matchNumber,
+				players: [match.player1 ? match.player1.id : null, match.player2 ? match.player2.id : null],
+			})),
+			gameSettings: this.gameSettings,
+			players: this.players.map(p => ({
+				id: p.id,
+				name: p.name,
+				gameNumber: this.currentMatches.findIndex(m => m.player1?.id === p.id || m.player2?.id === p.id) + 1
+			})),
+
+		}
 	}
 
 	nextRound()
 	{
 		if (this.currentRound >= this.maxRounds)
-			return this.emit('tournamentFinished', this.matchMakingInfo());
+			return this.emit('tournamentFinished',
+				{
+					players: this.players,
+					data:
+					{
+						matchMakingInfo: this.getMatchmakingInfo()
+					}
+				}
+			);
 
 		this.currentRound++;
 		this.currentMatches = [];
@@ -156,7 +221,15 @@ class Tournament extends EventEmitter
 		}
 
 		this.status = 'ready2start';
-		this.emit('nextRound', this.getMatchmakingInfo());
+		this.emit('nextRound',
+			{
+				players: this.players,
+				data:
+				{
+					matchMakingInfo: this.getMatchmakingInfo()
+				}
+			}
+		);
 	}
 
 	update(deltaTime)
@@ -189,36 +262,39 @@ class Tournament extends EventEmitter
 		);
 
 		this.emit("update", {
-			participants: this.participants,
-			matchMakingInfo: this.getMatchmakingInfo(),
-			tournamentState: this.getState()
+			players: this.players,
+			data:
+			{
+				...this.getState()
+			}
 		});
 	}
 
-	addParticipant(player)
+	addPlayer(player)
 	{
-		if (this.participants.length < this.properties.maxPlayers)
+		if (this.players.length < this.maxPlayers)
 		{
-			if (this.participants.some(p => p.id === player.id))
+			if (this.players.some(p => p.id === player.id))
 				return this.emit('error', new Error(`Player with ID ${player.id} is already in the tournament`));
-			this.participants.push(player);
+			this.players.push(player);
 			console.log(`👤 Player ${player.id} added to tournament`);
 		}
 		else
 			this.emit('error', new Error(`Tournament is full, cannot add player ${player.id}`));
 	}
 
-	removeParticipant(playerId)
+	removePlayer(playerId)
 	{
-		//TODO: eğer kullanıcı çıkarsa mevcut oyunuda mağlup say
-		const index = this.participants.findIndex(p => p.id === playerId);
+		const index = this.players.findIndex(p => p.id === playerId);
 		if (index !== -1)
-			this.participants.splice(index, 1);
+			this.players.splice(index, 1);
+		else
+			this.emit('error', new Error(`Player with ID ${playerId} is not in the tournament`));
 	}
 
 	isFull()
 	{
-		return this.participants.length === this.properties.maxPlayers;
+		return this.players.length === this.properties.maxPlayers;
 	}
 
 	isFinished()
@@ -228,18 +304,25 @@ class Tournament extends EventEmitter
 
 	isEmpty()
 	{
-		return this.participants.length === 0;
+		return this.players.length === 0;
 	}
 
-	start(hostPlayerId)
+	isRunning()
 	{
-		if (hostPlayerId !== this.hostPlayerId)
-			return this.emit('error', new Error(`Only the host player can start the tournament`));
-		if (this.status !== 'ready2start')
-			return this.emit('error', new Error(`Tournament is not ready to start, current status: ${this.status}`));
+		return this.status === 'running';
+	}
+
+	start()
+	{
 		this.startTime = Date.now();
 		this.status = 'running';
-		this.emit('started', this.getMatchmakingInfo());
+		this.emit('started', {
+			players: this.players,
+			data:
+			{
+
+			}
+		});
 		this.currentMatches.forEach(
 			(match) =>
 			{
@@ -255,8 +338,14 @@ class Tournament extends EventEmitter
 			matches: Array.from(this.currentMatches).map(match => ({
 				matchId: match.matchId,
 				matchNumber: match.matchNumber,
-				player1: match.player1,
-				player2: match.player2,
+				player1:
+				{
+					name: match.player1.name,
+				},
+				player2:
+				{
+					name: match.player2.name,
+				},
 				gameState: match.game.getGameState(),
 			})),
 		};
@@ -267,7 +356,24 @@ class Tournament extends EventEmitter
 		return {
 			// finish state
 		}
+	}
 
+	destroy()
+	{
+		this.currentMatches.forEach(
+			(match) =>
+			{
+				if (match.game)
+				{
+					match.game.dispose();
+					match.game = null;
+				}
+			}
+		);
+		this.players = [];
+		this.matches.clear();
+		this.currentMatches = [];
+		this.status = 'finished';
 	}
 }
 

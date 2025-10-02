@@ -7,24 +7,27 @@ class EventEmitter
 
 	on(event, callback)
 	{
-		if (!this.eventCallbacks.has(event))
-			this.eventCallbacks.set(event, []);
-		this.eventCallbacks.get(event).push(callback);
+		this.eventCallbacks.set(event, callback);
 	}
 
 	off(event, callback)
 	{
 		if (this.eventCallbacks.has(event))
 		{
-			const callbacks = this.eventCallbacks.get(event);
-			this.eventCallbacks.set(event, callbacks.filter(cb => cb !== callback));
+			const existingCallback = this.eventCallbacks.get(event);
+			if (existingCallback === callback)
+				this.eventCallbacks.delete(event);
 		}
 	}
 
 	emit(event, data)
 	{
 		if (this.eventCallbacks.has(event))
-			this.eventCallbacks.get(event).forEach(callback => callback(data));
+		{
+			const callback = this.eventCallbacks.get(event);
+			if (callback)
+				callback(data);
+		}
 	}
 }
 

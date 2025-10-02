@@ -7,8 +7,7 @@ class AIPingPong extends PingPong
 	{
 		super(parameters);
 		this.gameMode = "ai";
-		this.settings.maxPlayers = 1;
-		console.log(`🎮 AIPingPong created with mode: ${this.gameMode}`);
+		this.maxPlayers = 1;
 		this.targetPaddlePosition = { x: 0, y: 0 };
 		this.aiSettings = parameters.aiSettings || { difficulty: 'medium' };
 		this._aiSendInterval = null;

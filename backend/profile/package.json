@@ -19,8 +19,5 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
-  },
-  "keywords": ["users", "microservice", "fastify", "sequelize"],
-  "author": "ft_transcendence team",
-  "license": "MIT"
+  }
 }

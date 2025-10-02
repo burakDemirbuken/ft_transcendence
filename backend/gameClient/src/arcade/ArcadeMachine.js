@@ -42,14 +42,22 @@ class ArcadeMachine
 		this.joystick1 = null;
     }
 
-    async load(arcadeSettings)
+    async load(position, angle)
 	{
         try
 		{
 			const result = await BABYLON.SceneLoader.ImportMeshAsync("", "./assets/models/arcade/", "arcade.glb", this.scene);
 			this.meshs = result.meshes;
-
-			this.position = arcadeSettings.position || { x: 0, y: 0, z: 0 };
+			this.position = position || { x: 0, y: 0, z: 0 };
+			this.angle = angle || 0;
+			const parentMesh = this.meshs.find(mesh => mesh.parent === null) || this.meshs[0];
+			if (parentMesh)
+			{
+				parentMesh.position = new BABYLON.Vector3(this.position.x, this.position.y, this.position.z);
+				parentMesh.rotation = new BABYLON.Vector3(0, this.angle, 0);
+			}
+			else
+				console.warn("Parent mesh not found. Using default position and rotation.");
         }
 		catch (error)
 		{
@@ -67,7 +75,7 @@ class ArcadeMachine
 
 	createGameScreen()
 	{
-        this.gameScreen = new BABYLON.DynamicTexture(`gameScreen_${this.id}`, this.screenSize, this.scene);
+        this.gameScreen = new BABYLON.DynamicTexture(`gameScreen`, this.screenSize, this.scene);
 
 		this.gameScreen.hasAlpha = false;
 		this.gameScreen.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
@@ -75,7 +83,7 @@ class ArcadeMachine
 
 		this.gameScreen.updateSamplingMode(BABYLON.Texture.NEAREST_SAMPLINGMODE);
 
-        this.screenMaterial = new BABYLON.StandardMaterial(`screenMaterial_${this.id}`, this.scene);
+        this.screenMaterial = new BABYLON.StandardMaterial(`screenMaterial`, this.scene);
         this.screenMaterial.diffuseTexture = this.gameScreen;
         this.screenMaterial.emissiveTexture = this.gameScreen;
 
@@ -83,7 +91,6 @@ class ArcadeMachine
         if (screenMesh)
 		{
             screenMesh.material = this.screenMaterial;
-            this.#createEnhancedDebugInfo(screenMesh);
         }
 		else
 		{
@@ -182,6 +189,7 @@ class ArcadeMachine
 		mesh.animations = [animationX, animationY];
 	}
 
+		//!! SİLİNECEK
 	#createEnhancedDebugInfo(screenMesh)
 	{
 		const oldDebug = document.getElementById('debug-texture');

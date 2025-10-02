@@ -35,13 +35,25 @@ class NetworkManager
 			};
 
 			this.socket.onmessage = (event) => {
-				try {
+				try
+				{
 					const data = event.data;
 					const stringData = data.toString();
 					const parsedData = JSON.parse(stringData);
-					onMessage(parsedData);
-				} catch (error) {
-					console.error('❌ Failed to parse WebSocket message:', error);
+
+					try
+					{
+						onMessage(parsedData);
+					}
+					catch (callbackError)
+					{
+						console.error('❌ Error in onMessage callback:', callbackError);
+						console.error('Message data that caused error:', parsedData);
+					}
+				}
+				catch (parseError)
+				{
+					console.error('❌ Failed to parse WebSocket message:', parseError);
 					console.error('Raw message data:', event.data);
 				}
 			};
