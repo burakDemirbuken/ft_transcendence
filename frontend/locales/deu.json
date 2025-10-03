@@ -1,4 +1,59 @@
 {
+	"dates": {
+		"tago": {
+			"hago": "Stunden",
+			"dago": "Tagen",
+			"mago": "Monaten",
+			"yago": "Jahren"
+		},
+		"sday": {
+			"mon": "Mon",
+			"tue": "Die",
+			"wed": "Mit",
+			"thu": "Don",
+			"fri": "Fre",
+			"sat": "Sam",
+			"sun": "Son"
+		},
+		"smonth": {
+			"jan": "Jan",
+			"feb": "Feb",
+			"mar": "Mär",
+			"apr": "Apr",
+			"may": "Mai",
+			"jun": "Jun",
+			"jul": "Jul",
+			"aug": "Aug",
+			"sep": "Sep",
+			"oct": "Okt",
+			"nov": "Nov",
+			"dec": "Dez"
+		},
+		"lmonth": {
+			"jan": "Januar",
+			"feb": "Februar",
+			"mar": "März",
+			"apr": "April",
+			"may": "Mai",
+			"jun": "Juni",
+			"jul": "Juli",
+			"aug": "August",
+			"sep": "September",
+			"oct": "Oktober",
+			"nov": "November",
+			"dec": "Dezember"
+		}
+	},
+	"sidebar": {
+		"home": "HOME",
+		"play": "SPIELEN",
+		"profile": "PROFIL",
+		"chat": "CHAT",
+		"friends": "FREUNDE",
+		"collapse": "STÜRZEN",
+		"settings": "EINSTELLUNGEN",
+		"logout": "AUSLOGGEN"
+	},
 	"login": {
 		"lang": "DEU",
 		"welcome": {
@@ -10,5 +65,138 @@
 		"password": "Passwort Eingeben",
 		"code": "Schlüssel Eingeben",
 		"rme": "Login Merken"
-	}
+	},
+	"profile": {
+		"sections": {
+			"dashboard": "Dashboard",
+			"performance": "Leistungsanalyse",
+			"thishtory": "Turnierverlauf",
+			"mhistory": "Spielverlauf",
+			"achievements": "Errungenschaften"
+		},
+		"dash": {
+			"psum": {
+				"title": "Leistungsübersicht",
+				"mwon": "Gewonnene Spiele",
+				"mlose": "Verlorene Spiele",
+				"mdur": "Durchschnittliche Spieldauer",
+				"gdur": "Gesamtspielzeit"
+			},
+			"streak": {
+				"title": "Siegeserie",
+				"curr": "Aktuelle Serie",
+				"best": "Beste Serie"
+			},
+			"mlast": {
+				"title": "Letzte Spiele"
+			},
+			"wperf": {
+				"title": "Wöchentliche Leistung",
+				"mwon": "Gewonnene Spiele"
+			}
+		},
+		"perf": {
+			"winlose": {
+				"title": "Gewinn-/Verlustrate",
+				"won": "Gewonnen",
+				"lost": "Verloren"
+			},
+			"skills": {
+				"title": "Fähigkeiten",
+				"speed": "Shnelligkeit",
+				"accur": "Präzision",
+				"defence": "Verteidigung",
+				"attack": "Angriff",
+				"strat": "Strategie",
+				"dur": "Dauerhaftigkeit"
+			},
+			"mprog": {
+				"title": "Monatlicher Fortschritt",
+				"mtotal": "Gesamtzahl der Spiele",
+				"mwon": "Gewonnene Spiele"
+			},
+			"dstats": {
+				"title": "Detaillierte Statistiken",
+				"tpts": "Gesamtpunktzahl",
+				"ascore": "Durchschnittliche Punktedifferenz",
+				"mfastest": "Schnellster Sieg",
+				"mlongest": "Längstes Spiel"
+			}
+		},
+		"thistory": {
+			"title": "Turnierverlauf",
+			"opts": {
+				"allyears": "Alle Jahre",
+				"alltour": "Alle Turniere",
+				"ltour": "Ligaturniere",
+				"elimtour": "Ausscheidungsturniere",
+				"special": "Sonderveranstaltungen"
+			},
+			"table": {
+				"matches": "Spiele",
+				"v/d": "S/V",
+				"score": "Punktzahl",
+				"bestper": "Beste Leistung",
+				"showdetail": "Details Anzeigen"
+			}
+		},
+		"mhistory": {
+			"title": "Spielverlauf und Analyse",
+			"opts": {
+				"alltimes": "Alle Zeiten",
+				"last7": "Letzten 7 Tage",
+				"last30": "Letzten 30 Tage",
+				"allres": "Alle Ergebnisse",
+				"onlywon": "Nur Siege",
+				"onlylost": "Nur Verluste"
+			},
+			"table": {
+				"date": "DATUM",
+				"match": "SPIEL",
+				"score": "PUNKTZAHL",
+				"time": "DAUER",
+				"result": "ERGEBNIS",
+				"analysis": "ANALYSE",
+				"res": {
+					"vic": "Sieg",
+					"def": "Verlust"
+				}
+			}
+		},
+		"achiev": {
+			"fwin": {
+				"title": "Erster Sieg",
+				"active": "Du hast dein erstes Spiel gewonnen!",
+				"passive":"Gewinne dein erstes Spiel"
+			},
+			"smaster": {
+				"title": "Streak Master",
+				"active": "Du hast hintereinander 10 Spiele gewonnen!",
+				"passive": "Gewinne 10 Spiele hintereinander"
+			},
+			"swin": {
+				"title": "Schneller Sieg",
+				"active": "Du hast in weniger als 3 Minuten gewonnen!",
+				"passive": "Gewinne in weniger als 3 Minuten"
+			},
+			"nking": {
+				"title": "Neon König",
+				"active": "Du hast 100 Spiele gewonnen!",
+				"passive": "Gewinne 100 Spiele"
+			},
+			"pserie": {
+				"title": "Perfekte Serie",
+				"active": "Du hast hinterainander 25 Spiele gewonnen!",
+				"passive": "Gewinne 25 Spiele hintereinander"
+			},
+			"lplayer": {
+				"title": "Legendärer Spieler",
+				"active": "Du hast 500 Spiele gespielt!",
+				"passive": "Spiele 500 Spiele"
+			}
+		}
+	},
+	"friends": {},
+	"chat": {},
+	"settings": {}
 }

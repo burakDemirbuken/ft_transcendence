@@ -24,12 +24,12 @@ function goToNextField(field) {
     step === null || step === void 0 ? void 0 : step.removeAttribute("inert");
 }
 function showError(message) {
-    const form = document.querySelector("#loginForm");
+    const activeField = document.querySelector(".active");
     const error = document.querySelector("#error");
     error.textContent = message;
-    form.classList.add('shake');
+    activeField.classList.add('shake');
     setTimeout(() => {
-        form.classList.remove('shake');
+        activeField.classList.remove('shake');
     }, 500);
 }
 function username() {
@@ -41,12 +41,11 @@ function username() {
             showError("uname cant be empty");
             return;
         }
-        const graphemeLength = [...username].length;
-        if (graphemeLength < 1 || graphemeLength > 20) {
+        if (username.length < 1 || username.length > 20) {
             showError("uname has to be 1-20 characters long");
             return;
         }
-        if (!/^[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
+        if (!/^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
             showError("uname has to be valid characters");
             return;
         }
@@ -105,7 +104,9 @@ function login() {
             headers: new Headers({ "Content-Type": "application/json" }),
             body: JSON.stringify(user),
         });
+        console.log("sends");
         const response = yield fetch(request);
+        console.log("responds");
         const json = yield response.json();
         if (response.ok) {
             document.querySelector("#error").textContent = json.message;
