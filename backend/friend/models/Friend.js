@@ -8,11 +8,11 @@ export default (sequelize, DataTypes, Model) => {
             autoIncrement: true,
             primaryKey: true
         },
-        userid: {
+        userName: {
             type: DataTypes.STRING,
             allowNull: false
         },
-        peerid: {
+        peerName: {
             type: DataTypes.STRING,
             allowNull: false
         },
@@ -23,7 +23,7 @@ export default (sequelize, DataTypes, Model) => {
         indexes: [
             {
                 unique: true,
-                fields: ['userid', 'peerid']
+                fields: ['userName', 'peerName']
             }
         ],
         sequelize,

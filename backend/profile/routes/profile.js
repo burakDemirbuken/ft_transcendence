@@ -1,14 +1,14 @@
 export default async function profileRoute(fastify) {
 
 	fastify.get('/profile', async (request, reply) => { 
-		const { userName } = request.body ?? {};
+		const { UserName } = request.body ?? {};
 
-		if (!userName) {
+		if (!UserName) {
 			return reply.code(400).send({ error: 'Username is required' });
 		}
 
 		const userProfile = await fastify.sequelize.models.Profile.findOne({
-			where: { userName: userName },
+			where: { userName: UserName },
 			include: fastify.sequelize.models.Stats
 		});
 
@@ -20,30 +20,30 @@ export default async function profileRoute(fastify) {
 	});
 
 	fastify.delete('/profile', async (request, reply) => {
-		const { userName } = request.body ?? {};
-		
-		if (!userName) {
+		const { UserName } = request.body ?? {};
+
+		if (!UserName) {
 			return reply.code(400).send({ error: 'Username is required' });
 		}
 
 		const deletedCount = await fastify.sequelize.models.Profile.destroy({
-			where: { userName: userName }
+			where: { userName: UserName }
 		});
 
 		if (deletedCount === 0) {
 			return reply.code(404).send({ error: 'User not found' });
 		}
 
-		await Promise.all([
-			fetch('http://localhost:3007/list', { // if it's go through nginx /friend/list 
+		Promise.all([
+			fetch('http://localhost:3007/list', {
 				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ userName: userName })
+				body: JSON.stringify({ userName: UserName })
 			}),
 			fetch('http://localhost:3001/auth/delete', {
 				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ userName: userName })
+				body: JSON.stringify({ userName: UserName })
 			})
 		]).catch(err => { fastify.log.error('Error deleting user from other services:', err) })
 
@@ -51,14 +51,14 @@ export default async function profileRoute(fastify) {
 	});
 
 	fastify.put('/profile', async (request, reply) => {
-		const { userName, displayName, bio, avatarUrl } = request.body ?? {};
-		
-		if (!userName) {
+		const { UserName, displayName, bio, avatarUrl } = request.body ?? {};
+
+		if (!UserName) {
 			return reply.code(400).send({ error: 'Username is required' });
 		}
 
 		const userProfile = await fastify.sequelize.models.Profile.findOne({
-			where: { userName: userName }
+			where: { userName: UserName }
 		});
 
 		if (!userProfile) {

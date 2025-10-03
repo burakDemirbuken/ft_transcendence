@@ -22,41 +22,40 @@ async function globalsPlugin(fastify, options) {
 		jwtSecret: process.env.JWT_SECRET || 'default_secret',
 	};
 
-	const publicpaths = {
-		'/auth/login': true,
-		'/auth/register': true,
-		'/auth/verify-email': true,
-		'/auth/forgot-password': true,
-		'/auth/reset-password': true,
-		'/auth/resend-verification': true,
-		'/auth/verify-2fa': true,
-		'/auth/refresh-token': true,
-		'/auth/check-email': true,
-		'/auth/check-username': true,
-		'/auth/test': true,
-		'/auth/health': true,
-		'/auth/stats': true,
-		'/email/test': true,
-		'/email/health': true,
-		'/email/test-connection': true,
-	};
-
-	const adminpaths = {
-		'/auth/admin': true, //deneme
-	};
+	const publicPaths = [
+		/^\/auth\/login$/,
+		/^\/auth\/register$/,
+		/^\/auth\/verify-email/,
+		/^\/auth\/forgot-password$/,
+		/^\/auth\/reset-password$/,
+		/^\/auth\/resend-verification$/,
+		/^\/auth\/verify-2fa$/,
+		/^\/auth\/refresh-token$/,
+		/^\/auth\/check-email$/,
+		/^\/auth\/check-username$/,
+		/^\/auth\/test$/,
+		/^\/auth\/health$/,
+		/^\/auth\/stats$/,
+		/^\/email\/test$/,
+		/^\/email\/health$/,
+		/^\/email\/test-connection$/,
+	];
+	const adminPaths = [
+		/^\/auth\/admin$/,
+	];
 
 	fastify.decorate('services', services);
 	fastify.decorate('settings', settings);
 	fastify.decorate('secrets', secrets);
-	fastify.decorate('publicpaths', publicpaths);
-	fastify.decorate('adminpaths', adminpaths);
+	//fastify.decorate('publicpaths', publicpaths);
+	//fastify.decorate('adminpaths', adminpaths);
 
 	fastify.decorate('isPublicPath', function(path) {
-		return this.publicpaths[path] === true;
+		return publicPaths.some((pattern) => pattern.test(path));
 	});
 
 	fastify.decorate('isAdminPath', function(path) {
-		return this.adminpaths[path] === true;
+		return adminPaths.some((pattern) => pattern.test(path));
 	});
 
 	fastify.decorate('getServiceUrl', function(serviceName) {

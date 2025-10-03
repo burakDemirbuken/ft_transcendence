@@ -1,13 +1,13 @@
 import { verifyJWT, checkAdmin } from '../plugins/authorization.js'
 
-export default async function allRoutes(gateway, opts) {
-	gateway.register(async function (fastify) {
-		fastify.addHook('preHandler', async (request, reply) => {
+export default async function allRoutes(fastify) {
+	fastify.register(async function (fastify) {
+		fastify.addHook('onRequest', async (request, reply) => {
 			// Schema controll can be added here if needed
-			if (gateway.isPublicPath(request.path))
+			if (fastify.isPublicPath(request.path))
 				return;
 			//await verifyJWT(request, reply);
-			if (gateway.isAdminPath(request.path)) {
+			if (fastify.isAdminPath(request.path)) {
 				await checkAdmin(request, reply);
 			}
 		});
@@ -15,10 +15,10 @@ export default async function allRoutes(gateway, opts) {
 		fastify.route({
 			method: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
 			url: '/:serviceName/*',
-			handler: async (request, reply) => {
+			handler: async function (request, reply) {
 				const serviceName = request.params.serviceName;
 				const restPath = request.params['*'] || '';
-				const servicePath = gateway.services[serviceName];
+				const servicePath = fastify.services[serviceName];
 				 
 				console.log(`Service requested: ${serviceName}, Path: ${restPath}`);
 				console.log(`Service URL: ${servicePath}`);
@@ -74,11 +74,11 @@ export default async function allRoutes(gateway, opts) {
 
 					return parsedData;
 				} catch (error) {
-					gateway.log.error(`Error forwarding request to ${finalUrl}`);
-					gateway.log.error(`Error details:`, error);
-					gateway.log.error(`Error message: ${error.message}`);
-					gateway.log.error(`Error code: ${error.code}`);
-					gateway.log.error(`Error cause: ${error.cause}`);
+					fastify.log.error(`Error forwarding request to ${finalUrl}`);
+					fastify.log.error(`Error details:`, error);
+					fastify.log.error(`Error message: ${error.message}`);
+					fastify.log.error(`Error code: ${error.code}`);
+					fastify.log.error(`Error cause: ${error.cause}`);
 					
 					return reply.code(500).send({ 
 						error: 'Internal server error', 

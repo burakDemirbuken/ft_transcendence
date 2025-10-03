@@ -17,7 +17,19 @@ export default async function friendListRoutes(fastify) {
     })
 
     fastify.delete('/list', async (request, reply) => {
-        // delete friendships if both peerid and userid null
-        // if it's not both null, set given id to null 
+        const { UserName } = request.body ?? {};
+
+        if (!UserName) {
+            return reply.code(400).send({ error: 'Username is required' });
+        }
+
+        await fastify.sequelize.models.Friend.destroy({
+            where: { 
+                [Op.or]: [
+                    { userName: UserName },
+                    { peerName: UserName }
+                ]
+            }
+        })
     })
 }
