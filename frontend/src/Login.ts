@@ -251,39 +251,13 @@ async function back() {
 	}
 }
 
-async function applyTranslations() {
-	const translations = await I18n.nextLanguage();
-
-	const content = document.querySelector("#content");
-	const dataFields = content.querySelectorAll("[data-i18n]");
-	dataFields.forEach(datai18n => {
-		const nestedKeys = datai18n.getAttribute("data-i18n");
-		const keys = nestedKeys.split('.');
-
-		console.log(`The keys: ${keys}`);
-		let translation = translations.login;
-		for (const key of keys)
-		{
-			console.log(`Current key: ${key}`);
-			console.log(`Current object: ${JSON.stringify(translation, null, 2)}`);
-			translation = translation[key];
-			console.log(`Object after child: ${translation}`);
- 			if (translation === undefined)
-				break;
-		}
-
-		if (translation !== undefined)
-			datai18n.textContent = translation;
-	});
-}
-
 function move(e) {
 	if (e.target.classList.contains("enter"))
 		enter();
 	else if (e.target.classList.contains("back"))
 		back();
 	else if (e.target.matches("#lang")) {
-		applyTranslations();
+		I18n.nextLanguage();
 	}
 	else if (e.target.matches("#rme")) {
 		rememberMe = !rememberMe;
