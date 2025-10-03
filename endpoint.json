@@ -10,7 +10,6 @@
 				{
 					"method": "ANY",
 					"path": "/:serviceName/*",
-					"authRequired": null,
 					"description": "Forwards the incoming request.",
 					"notes": "Service specific config can be added."
 				}
@@ -26,67 +25,56 @@
 				{
 					"method": "GET",
 					"path": "/health",
-					"authRequired": false,
-					"description": "Service health probe returning uptime metadata."
+					"description": "Service health probe returning uptime metadata.(?)"
 				},
 				{
 					"method": "GET",
 					"path": "/check-email",
-					"authRequired": false,
 					"description": "Check if an email address is already registered (expects `email` query parameter)."
 				},
 				{
 					"method": "GET",
 					"path": "/check-username",
-					"authRequired": false,
 					"description": "Check if a username is already registered (expects `username` query parameter)."
 				},
 				{
 					"method": "POST",
 					"path": "/register",
-					"authRequired": false,
 					"description": "Create a new user account and trigger email verification."
 				},
 				{
 					"method": "POST",
 					"path": "/login",
-					"authRequired": false,
 					"description": "Authenticate an existing user with username/email and password; issues JWT tokens + cookies."
 				},
 				{
 					"method": "GET",
 					"path": "/verify-email",
-					"authRequired": false,
 					"description": "Verify user email using a token supplied via query string (token lifecycle stored in-memory)."
 				},
 				{
 					"method": "POST",
 					"path": "/verify-email",
-					"authRequired": false,
 					"description": "Verify user email using a token supplied in the request body."
 				},
 				{
 					"method": "POST",
 					"path": "/verify-2fa",
-					"authRequired": false,
 					"description": "Validate a 6-digit 2FA code that was emailed to the user."
 				},
 				{
 					"method": "GET",
-					"path": "/me",
-					"authRequired": true,
+					"path": "/me",			
 					"description": "Return the authenticated user's profile details (JWT required)."
 				},
 				{
 					"method": "GET",
-					"path": "/profile",
-					"authRequired": true,
+					"path": "/profile",			
 					"description": "Alias for `/me` that also returns the authenticated profile payload."
 				},
 				{
 					"method": "POST",
-					"path": "/logout",
-					"authRequired": true,
+					"path": "/logout",			
 					"description": "Invalidate the JWT cookie for the currently authenticated user."
 				}
 			]
@@ -101,61 +89,51 @@
 				{
 					"method": "GET",
 					"path": "/health",
-					"authRequired": false,
 					"description": "Health probe confirming the email service is reachable."
 				},
 				{
 					"method": "GET",
 					"path": "/test",
-					"authRequired": false,
 					"description": "Simple diagnostic endpoint returning static service metadata."
 				},
 				{
 					"method": "GET",
 					"path": "/test-connection",
-					"authRequired": false,
 					"description": "Connectivity check that delegates to `EmailController.testConnection`."
 				},
 				{
 					"method": "POST",
 					"path": "/send-2fa",
-					"authRequired": false,
 					"description": "Send a 2FA code email (expects `email`, `username`, `code`, `ip`)."
 				},
 				{
 					"method": "POST",
 					"path": "/send-welcome",
-					"authRequired": false,
 					"description": "Send the welcome/onboarding email after successful registration."
 				},
 				{
 					"method": "POST",
 					"path": "/send-login-notification",
-					"authRequired": false,
 					"description": "Send a security alert when a login occurs."
 				},
 				{
 					"method": "POST",
-					"path": "/send-deletion-code",
-					"authRequired": false,
+				    "path": "/send-deletion-code",
 					"description": "Send a confirmation code for account deletion workflows."
 				},
 				{
 					"method": "POST",
 					"path": "/send-deletion-confirmation",
-					"authRequired": false,
 					"description": "Notify the user that their account deletion has been processed."
 				},
 				{
 					"method": "POST",
 					"path": "/send-password-reset",
-					"authRequired": false,
 					"description": "Send a password reset link/code email."
 				},
 				{
 					"method": "POST",
 					"path": "/send-verification",
-					"authRequired": false,
 					"description": "Send a general verification email, used by the authentication service."
 				}
 			]
@@ -170,37 +148,31 @@
 				{
 					"method": "POST",
 					"path": "/send",
-					"authRequired": false,
 					"description": "Create a pending friend request between `userid` and `peerid`."
 				},
 				{
 					"method": "POST",
 					"path": "/accept",
-					"authRequired": false,
 					"description": "Accept a pending friend request identified by `peerid`."
 				},
 				{
 					"method": "POST",
 					"path": "/block",
-					"authRequired": false,
 					"description": "Block or create a blocked relationship between two users."
 				},
 				{
 					"method": "POST",
 					"path": "/remove",
-					"authRequired": false,
 					"description": "Remove an existing friendship between `userid` and `peerid`."
 				},
 				{
 					"method": "GET",
 					"path": "/list",
-					"authRequired": false,
 					"description": "Return accepted friends for the provided `id` query parameter."
 				},
 				{
 					"method": "DELETE",
 					"path": "/list",
-					"authRequired": false,
 					"description": "Delete friend records associated with the supplied `UserName` in the body."
 				}
 			]
@@ -215,37 +187,31 @@
 				{
 					"method": "GET",
 					"path": "/profile",
-					"authRequired": false,
 					"description": "Fetch profile + stats for `UserName` provided in the request body."
 				},
 				{
 					"method": "PUT",
 					"path": "/profile",
-					"authRequired": false,
 					"description": "Update profile fields (`displayName`, `bio`, `avatarUrl`) for the given `UserName`."
 				},
 				{
 					"method": "DELETE",
 					"path": "/profile",
-					"authRequired": false,
 					"description": "Delete the profile for `UserName` and trigger cascading deletes in friend/auth services."
 				},
 				{
 					"method": "POST",
 					"path": "/internal/match",
-					"authRequired": false,
 					"description": "Internal endpoint used by the game server to persist match history records."
 				},
 				{
 					"method": "POST",
 					"path": "/internal/tournament",
-					"authRequired": false,
 					"description": "Placeholder endpoint for tournament data ingestion (currently unimplemented)."
 				},
 				{
 					"method": "GET",
 					"path": "/internal/stats",
-					"authRequired": false,
 					"description": "Placeholder endpoint for aggregated statistics (currently unimplemented)."
 				}
 			],
@@ -261,13 +227,11 @@
 				{
 					"method": "WS",
 					"path": "/ws/client",
-					"authRequired": false,
 					"description": "Client-facing WebSocket for gameplay messaging."
 				},
 				{
 					"method": "WS",
 					"path": "/ws/server",
-					"authRequired": false,
 					"description": "Internal WebSocket endpoint used by the game server to exchange events."
 				}
 			]
@@ -283,7 +247,6 @@
 					"method": "WS",
 					"path": "/ws",
                     "notes": "can be change to /ws/game or /ws/match",
-					"authRequired": false,
 					"description": "Single WebSocket endpoint; clients must supply `id` and `name` as query parameters during handshake."
 				}
 			]
@@ -298,7 +261,6 @@
 				{
 					"method": "WS",
 					"path": "/",
-					"authRequired": false,
 					"description": "WebSocket endpoint accepting game state JSON messages (use the `--websocket` startup flag)."
 				}
 			]
