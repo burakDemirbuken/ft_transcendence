@@ -44,7 +44,7 @@
 			"dec": "December"
 		}
 	},
-	"sidebar": {
+	"navbar": {
 		"home": "HOME",
 		"play": "PLAY",
 		"profile": "PROFILE",

@@ -237,14 +237,24 @@ function back() {
 function applyTranslations() {
     return __awaiter(this, void 0, void 0, function* () {
         const translations = yield I18n.nextLanguage();
-        document.querySelector("[data-i18n='lang']").textContent = translations.login.lang;
-        document.querySelector("[data-i18n='welcome.title']").textContent = translations.login.welcome.title;
-        document.querySelector("[data-i18n='welcome.prompt']").textContent = translations.login.welcome.prompt;
-        document.querySelector("[data-i18n='username']").textContent = translations.login.username;
-        document.querySelector("[data-i18n='password']").textContent = translations.login.password;
-        document.querySelector("[data-i18n='email']").textContent = translations.login.email;
-        document.querySelector("[data-i18n='code']").textContent = translations.login.code;
-        document.querySelector("[data-i18n='rme']").textContent = translations.login.rme;
+        const content = document.querySelector("#content");
+        const dataFields = content.querySelectorAll("[data-i18n]");
+        dataFields.forEach(datai18n => {
+            const nestedKeys = datai18n.getAttribute("data-i18n");
+            const keys = nestedKeys.split('.');
+            console.log(`The keys: ${keys}`);
+            let translation = translations.login;
+            for (const key of keys) {
+                console.log(`Current key: ${key}`);
+                console.log(`Current object: ${JSON.stringify(translation, null, 2)}`);
+                translation = translation[key];
+                console.log(`Object after child: ${translation}`);
+                if (translation === undefined)
+                    break;
+            }
+            if (translation !== undefined)
+                datai18n.textContent = translation;
+        });
     });
 }
 function move(e) {
