@@ -16,6 +16,9 @@ export default class {
     getHtml() {
         return __awaiter(this, void 0, void 0, function* () { return ""; });
     }
+    setDynamicContent() {
+        return __awaiter(this, void 0, void 0, function* () { });
+    }
     setEventHandlers() {
         return __awaiter(this, void 0, void 0, function* () { });
     }

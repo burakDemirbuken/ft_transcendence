@@ -39,6 +39,7 @@ const router = function (page) {
             view = new route.view();
             view.setStylesheet();
             content.innerHTML = yield view.getHtml();
+            view.setDynamicContent();
             view.setEventHandlers();
         }
         else {
