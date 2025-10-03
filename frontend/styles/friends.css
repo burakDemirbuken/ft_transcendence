@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
 .friends-container {
 	min-height: 100vh;
 	min-height: 100dvh;
@@ -7,18 +9,24 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+
+	font-size: clamp(.8rem, .4rem + 2vw, 1rem);
 }
 
 .friend-nav {
-	width: 80%;
+	width: max(200px, 68% + 4rem);
 	margin: 2rem;
 	border-radius: 5px;
 	border: 2px solid #0ff;
 	border-bottom: none;
 	background: #111;
+
+	display: flex;
+	justify-content: center;
 }
 
 .friend-nav ul{
+	width: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: space-around;
@@ -34,9 +42,12 @@
 	outline: none;
 
 	height: auto;
-	font-family: "PixeloidSansBold";
+	font-family: "Orbitron", monospace;
+	font-size: clamp(.8rem, .4rem + 1vw, 1rem);
+	font-weight: bold;
+	text-shadow: 0 0 10px #c0c;
 	color: #eee;
-	padding: 1.5em;
+	padding: clamp(1em, .8em + 1vw, 1.5em) 0;
 
 	position: relative;
 }
@@ -53,21 +64,35 @@
 	background: linear-gradient(45deg, #f0f, #0ff);
 }
 
+.friend-nav select {
+	height: 3em;
+	background: none;
+	border: none;
+
+	font-family: "Orbitron", monospace;
+	font-weight: bold;
+	text-shadow: 0 0 10px #c0c;
+	color: #eee;
+
+	outline: none;
+	display: none;
+}
+
+.friend-nav option {
+	background: #111;
+	border: none;
+}
+
 .friend-page-box {
 	position: relative;
-	width: 80%;
+	width: max(80%, 260px);
+	height: 30px;
 	margin-top: 1rem;
-
-	display: flex;
-	justify-content: center;
 }
 
 .subpage {
 	position: absolute;
 	width: 100%;
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-	gap: .5em;
 
 	opacity: 0;
 	pointer-events: none;
@@ -79,8 +104,59 @@
 	pointer-events: all;
 }
 
+.user-grid {
+	width: 100%;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+	gap: .5em;
+}
+
+.requests {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	gap: 2em;
+}
+
+.search-bar form {
+	display: flex;
+	align-items: center;
+	gap: .5em;
+}
+
+.search-bar input {
+	background: #111;
+
+	height: 2rem;
+	width: 250px;
+	border: 2px solid #333;
+	border-radius: 3px;
+
+	color: #c0c;
+	padding-left: .4em;
+}
+
+.search-bar input::placeholder {
+	padding-left: .4em;
+}
+
+.search-bar button {
+	width: 2rem;
+	height: 2rem;
+	border-radius: 50%;
+
+	border: 2px solid #333;
+	background: #000;
+}
+
+.search-bar svg {
+	fill: #c0c;
+	background: none;
+	padding: .4em;
+}
+
 .subpage .friend {
-	min-width: 400px;
 	background: #111;
 	border-radius: 10px;
 	border: 2px solid #333;
@@ -99,8 +175,8 @@
 }
 
 .user-avatar {
+	aspect-ratio: 1/1;
 	width: 3.5rem;
-	height: 3.5rem;
 	border-radius: 50%;
 
 	background: #000;
@@ -119,8 +195,8 @@
 }
 
 .friend-page-box img {
+	aspect-ratio: 1/1;
 	width: 3rem;
-	height: 3rem;
 	border-radius: 50%;
 	object-fit: cover;
 }
@@ -153,7 +229,7 @@
 	background: none;
 	border: none;
 	cursor: pointer;
-	font-size: 1.5rem;
+	font-size: 1.4rem;
 	padding: 0.25rem 0.75rem;
 	color: #0df;
 	text-shadow: 0 0 5px #0df;
@@ -191,3 +267,16 @@
 	background: #181818;
 }
 
+@media (max-width: 520px) {
+	.friend-nav ul {
+		display: none;
+	}
+
+	.friend-nav select {
+		display: block;
+	}
+
+	.user-grid {
+		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	}
+}

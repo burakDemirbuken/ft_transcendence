@@ -121,9 +121,10 @@ async function createRequests() {
 		div.classList.add("friend");
 		div.classList.add("online");
 
-		const friends = document.querySelector(".requests");
-		console.log(friends);
-		friends.appendChild(div);
+		const req = document.querySelector(".requests");
+		const ugrid = req?.querySelector(".user-grid");
+		console.log(ugrid);
+		ugrid.appendChild(div);
 	}
 }
 

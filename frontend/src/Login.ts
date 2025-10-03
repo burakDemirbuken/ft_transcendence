@@ -95,7 +95,7 @@ async function login() {
 		return ;
 	}
 
-	if (password.length < 8 || password.length > 128) {
+	if (password.length < 4 || password.length > 128) {
 		showError("invalid password");
 		return ;
 	}
@@ -111,7 +111,9 @@ async function login() {
 		body: JSON.stringify(user),
 	});
 
+	console.log("sends");
 	const response = await fetch(request);
+	console.log("responds");
 	const json = await response.json();
 	if (response.ok) {
 		document.querySelector("#error").textContent = json.message;
