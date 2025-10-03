@@ -196,7 +196,35 @@
 			}
 		}
 	},
-	"friends": {},
-	"chat": {},
-	"settings": {}
+	"friends": {
+		"friends": {
+			"play": "Spiel",
+			"unfriend": "Auflösen"
+		},
+		"requests": {
+			"accept": "Akzeptieren",
+			"decline": "Ablehnen"
+		},
+		"invites": {
+			"undo": "Zurücknehmen"
+		},
+		"blocked": {
+			"unblock": "Entsperren"
+		}
+	},
+	"settings": {
+		"title": "Einstellungen",
+		"account": {
+			"title": "Konto",
+			"uname": "Benutzername",
+			"email": "Email",
+			"pass": "Passwort"
+		},
+		"language": "Sprache",
+		"dzone": {
+			"title": "Gefahrenzone",
+			"prompt": "Konto Löschen:",
+			"button": "Löschen"
+		}
+	}
 }

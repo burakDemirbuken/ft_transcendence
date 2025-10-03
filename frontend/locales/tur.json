@@ -196,8 +196,35 @@
 			}
 		}
 	},
-	"friends": {},
-	"chat": {},
-	"settings": {}
-
+	"friends": {
+		"friends": {
+			"play": "Oyna",
+			"unfriend": "Çıkar"
+		},
+		"requests": {
+			"accept": "Kabul et",
+			"decline": "Reddet"
+		},
+		"invites": {
+			"undo": "Geri al"
+		},
+		"blocked": {
+			"unblock": "Engeli Kaldır"
+		}
+	},
+	"settings": {
+		"title": "Ayarlar",
+		"account": {
+			"title": "Hesap",
+			"uname": "Kullanıcı Adı",
+			"email": "Email",
+			"pass": "Şifre"
+		},
+		"language": "Dil",
+		"dzone": {
+			"title": "Tehlikel Bölge",
+			"prompt": "Hesabı Sil:",
+			"button": "Sil"
+		}
+	}
 }
