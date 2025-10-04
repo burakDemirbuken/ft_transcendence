@@ -24,13 +24,9 @@ function applyTranslations(translations, sectionName) {
         dataFields.forEach(datai18n => {
             const nestedKeys = datai18n.getAttribute("data-i18n");
             const keys = nestedKeys.split('.');
-            console.log(`The keys: ${keys}`);
             let translation = translations[sectionName];
             for (const key of keys) {
-                console.log(`Current key: ${key}`);
-                console.log(`Current object: ${JSON.stringify(translation, null, 2)}`);
                 translation = translation[key];
-                console.log(`Object after child: ${translation}`);
                 if (translation === undefined)
                     break;
             }
