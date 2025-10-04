@@ -20,12 +20,12 @@ function goToNextField(field)
 
 function showError(message:string)
 {
-	const form = document.querySelector("#loginForm");
+	const activeField = document.querySelector(".active");
 	const error = document.querySelector("#error");
 	error.textContent = message;
-	form.classList.add('shake')
+	activeField.classList.add('shake')
 	setTimeout(() => {
-		form.classList.remove('shake');
+		activeField.classList.remove('shake');
 	}, 500);
 }
 
@@ -39,13 +39,12 @@ async function username() {
 		return ;
 	}
 
-	const graphemeLength = [...username].length;
-	if (graphemeLength < 1 || graphemeLength > 20) {
+	if (username.length < 1 || username.length > 20) {
 		showError("uname has to be 1-20 characters long");
 		return ;
 	}
 
-	if (!/^[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
+	if (!/^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
 		showError("uname has to be valid characters")
 		return ;
 	}
@@ -112,7 +111,9 @@ async function login() {
 		body: JSON.stringify(user),
 	});
 
+	console.log("sends");
 	const response = await fetch(request);
+	console.log("responds");
 	const json = await response.json();
 	if (response.ok) {
 		document.querySelector("#error").textContent = json.message;
@@ -250,25 +251,13 @@ async function back() {
 	}
 }
 
-async function applyTranslations() {
-	const translations = await I18n.nextLanguage();
-	document.querySelector("[data-i18n='lang']").textContent = translations.login.lang;
-	document.querySelector("[data-i18n='welcome.title']").textContent = translations.login.welcome.title;
-	document.querySelector("[data-i18n='welcome.prompt']").textContent = translations.login.welcome.prompt;
-	document.querySelector("[data-i18n='username']").textContent = translations.login.username;
-	document.querySelector("[data-i18n='password']").textContent = translations.login.password;
-	document.querySelector("[data-i18n='email']").textContent = translations.login.email;
-	document.querySelector("[data-i18n='code']").textContent = translations.login.code;
-	document.querySelector("[data-i18n='rme']").textContent = translations.login.rme;
-}
-
 function move(e) {
 	if (e.target.classList.contains("enter"))
 		enter();
 	else if (e.target.classList.contains("back"))
 		back();
 	else if (e.target.matches("#lang")) {
-		applyTranslations();
+		I18n.nextLanguage();
 	}
 	else if (e.target.matches("#rme")) {
 		rememberMe = !rememberMe;

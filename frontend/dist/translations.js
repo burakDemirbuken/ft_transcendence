@@ -10,11 +10,32 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const lang = {
     eng: { next: "tur" },
     tur: { next: "deu" },
-    deu: { next: "jpn" },
-    jpn: { next: "eng" }
+    deu: { next: "eng" },
 };
 const translationCache = new Map();
-export function loadTranslations(lang) {
+function applyTranslations(translations, sectionName) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let section;
+        if (sectionName === "navbar")
+            section = document.querySelector("#navbar");
+        else
+            section = document.querySelector("#content");
+        const dataFields = section.querySelectorAll("[data-i18n]");
+        dataFields.forEach(datai18n => {
+            const nestedKeys = datai18n.getAttribute("data-i18n");
+            const keys = nestedKeys.split('.');
+            let translation = translations[sectionName];
+            for (const key of keys) {
+                translation = translation[key];
+                if (translation === undefined)
+                    break;
+            }
+            if (translation !== undefined)
+                datai18n.textContent = translation;
+        });
+    });
+}
+export function getTranslations(lang) {
     return __awaiter(this, void 0, void 0, function* () {
         if (translationCache.has(lang)) {
             return translationCache.get(lang);
@@ -26,19 +47,26 @@ export function loadTranslations(lang) {
     });
 }
 class I18n {
-    static switchLanguage(newLang) {
+    static loadLanguage(section) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.currentLang = newLang;
-            return yield loadTranslations(newLang);
+            const translations = yield getTranslations(localStorage.getItem("langPref"));
+            applyTranslations(translations, section);
+        });
+    }
+    static switchLanguage(newLang, section) {
+        return __awaiter(this, void 0, void 0, function* () {
+            localStorage.setItem("langPref", newLang);
+            const translations = yield getTranslations(newLang);
+            applyTranslations(translations, section);
         });
     }
     static nextLanguage() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.currentLang = lang[this.currentLang].next;
-            return yield loadTranslations(this.currentLang);
+            localStorage.setItem("langPref", lang[localStorage.getItem("langPref")].next);
+            const translations = yield getTranslations(localStorage.getItem("langPref"));
+            applyTranslations(translations, "login");
         });
     }
 }
-I18n.currentLang = "eng";
 export default I18n;
 //# sourceMappingURL=translations.js.map

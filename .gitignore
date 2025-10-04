@@ -1,2 +1,4 @@
 server/node_modules
 .nf*
+node_modules
+notes.md

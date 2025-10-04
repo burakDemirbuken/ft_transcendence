@@ -1,14 +1,38 @@
-
 const lang = {
 	eng: { next: "tur" },
 	tur: { next: "deu" },
-	deu: { next: "jpn" },
-	jpn: { next: "eng" }
+	deu: { next: "eng" },
 }
 
 const translationCache = new Map();
 
-export async function loadTranslations(lang:string) {
+async function applyTranslations(translations, sectionName:string) {
+
+	let section;
+	if (sectionName === "navbar")
+		section = document.querySelector("#navbar");
+	else
+		section = document.querySelector("#content");
+
+	const dataFields = section.querySelectorAll("[data-i18n]");
+	dataFields.forEach(datai18n => {
+		const nestedKeys = datai18n.getAttribute("data-i18n");
+		const keys = nestedKeys.split('.');
+
+		let translation = translations[sectionName];
+		for (const key of keys)
+		{
+			translation = translation[key];
+ 			if (translation === undefined)
+				break;
+		}
+
+		if (translation !== undefined)
+			datai18n.textContent = translation;
+	});
+}
+
+export async function getTranslations(lang:string) {
 	if (translationCache.has(lang)) {
 		return translationCache.get(lang);
 	}
@@ -19,16 +43,21 @@ export async function loadTranslations(lang:string) {
 }
 
 class I18n {
-	static currentLang = "eng";
+	static async loadLanguage(section:string) {
+		const translations = await getTranslations(localStorage.getItem("langPref"));
+		applyTranslations(translations, section);
+	}
 
-	static async switchLanguage(newLang:string) {
-		this.currentLang = newLang;
-		return await loadTranslations(newLang);
+	static async switchLanguage(newLang:string, section:string) {
+		localStorage.setItem("langPref", newLang);
+		const translations = await getTranslations(newLang);
+		applyTranslations(translations, section);
 	}
 
 	static async nextLanguage() {
-		this.currentLang = lang[this.currentLang].next;
-		return await loadTranslations(this.currentLang);
+		localStorage.setItem("langPref", lang[localStorage.getItem("langPref")].next);
+		const translations = await getTranslations(localStorage.getItem("langPref"));
+		applyTranslations(translations, "login");
 	}
 }
 

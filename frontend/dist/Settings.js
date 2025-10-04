@@ -8,9 +8,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import AView from "./AView.js";
-let currentlyOpen = null;
-// async function toggle(e) {
-// }
+import I18n from './translations.js';
+function settingsClick(e) {
+    var _a;
+    if (!e.target.classList.contains("current") && e.target.classList.contains("lang")) {
+        if (e.target.classList.contains("eng")) {
+            I18n.switchLanguage("eng", "navbar");
+        }
+        else if (e.target.classList.contains("deu")) {
+            I18n.switchLanguage("deu", "navbar");
+        }
+        else if (e.target.classList.contains("tur")) {
+            I18n.switchLanguage("tur", "navbar");
+        }
+        I18n.loadLanguage("settings");
+        (_a = document.querySelector(".current")) === null || _a === void 0 ? void 0 : _a.classList.remove("current");
+        e.target.classList.add("current");
+    }
+    // ADD DELETE ACCOUNT
+}
+function settingsInput(e) {
+    console.log(e);
+    // ADD USER INFORMATION CHANGE
+}
 export default class extends AView {
     constructor() {
         super();
@@ -24,18 +44,14 @@ export default class extends AView {
     }
     setEventHandlers() {
         return __awaiter(this, void 0, void 0, function* () {
-            const detailsElements = document.querySelectorAll('details');
-            detailsElements.forEach(details => {
-                details.addEventListener('click', toggle);
-            });
+            document.addEventListener("click", settingsClick);
+            document.addEventListener("input", settingsInput);
         });
     }
     unsetEventHandlers() {
         return __awaiter(this, void 0, void 0, function* () {
-            const detailsElements = document.querySelectorAll('details');
-            // detailsElements.forEach(details => {
-            // 	details.removeEventListener('click', toggle);
-            // });
+            document.removeEventListener("click", settingsClick);
+            document.removeEventListener("input", settingsInput);
         });
     }
     setStylesheet() {

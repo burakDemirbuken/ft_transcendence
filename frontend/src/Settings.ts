@@ -1,9 +1,28 @@
 import AView from "./AView.js";
+import I18n from './translations.js';
 
-let currentlyOpen = null;
+function settingsClick(e) {
+	if (!e.target.classList.contains("current") && e.target.classList.contains("lang"))
+	{
+		if (e.target.classList.contains("eng")) {
 
-// async function toggle(e) {
-// }
+			I18n.switchLanguage("eng", "navbar");
+		} else if (e.target.classList.contains("deu")) {
+			I18n.switchLanguage("deu", "navbar");
+		} else if (e.target.classList.contains("tur")) {
+			I18n.switchLanguage("tur", "navbar");
+		}
+		I18n.loadLanguage("settings");
+		document.querySelector(".current")?.classList.remove("current");
+		e.target.classList.add("current");
+	}
+	// ADD DELETE ACCOUNT
+}
+
+function settingsInput(e) {
+	console.log(e);
+	// ADD USER INFORMATION CHANGE
+}
 
 export default class extends AView {
 	constructor() {
@@ -17,19 +36,13 @@ export default class extends AView {
 	}
 
 	async setEventHandlers() {
-		const detailsElements = document.querySelectorAll('details');
-
-		detailsElements.forEach(details => {
-			details.addEventListener('click', toggle);
-		});
+		document.addEventListener("click", settingsClick);
+		document.addEventListener("input", settingsInput);
 	}
 
 	async unsetEventHandlers() {
-		const detailsElements = document.querySelectorAll('details');
-
-		// detailsElements.forEach(details => {
-		// 	details.removeEventListener('click', toggle);
-		// });
+		document.removeEventListener("click", settingsClick);
+		document.removeEventListener("input", settingsInput);
 	}
 
 	async setStylesheet() {
