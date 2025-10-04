@@ -51,7 +51,7 @@ class Tournament extends EventEmitter
 				);
 			}
 
-			this.matches.set(i,{
+			this.matches.set(i, {
 					matchs: matchs,
 				}
 			);
@@ -78,7 +78,6 @@ class Tournament extends EventEmitter
 			}
 			return arr;
 		}
-
 		this.players = shuffle(this.players);
 		let matchs = this.matches.get(this.currentRound).matchs;
 		for (let i = 0; i < this.players.length; i += 2)
@@ -103,8 +102,8 @@ class Tournament extends EventEmitter
 				match.game.on('finished', ({ players, results }) =>
 				{
 					this.finishedMatchesCount++;
-					match.winner = results.winner;
-					match.loser = results.loser;
+					match.winner = match.game.getWinnerPlayers();
+					match.loser = match.game.getLoserPlayers();
 					match.matchStatus = 'finished';
 					match.game.off('finished');
 				});
@@ -139,6 +138,11 @@ class Tournament extends EventEmitter
 	init()
 	{
 		this.matchMaking();
+		return this.initData();
+	}
+
+	initData()
+	{
 		return {
 			tournament:
 			{
@@ -157,7 +161,6 @@ class Tournament extends EventEmitter
 				name: p.name,
 				gameNumber: this.currentMatches.findIndex(m => m.player1?.id === p.id || m.player2?.id === p.id) + 1
 			})),
-
 		}
 	}
 
@@ -176,12 +179,14 @@ class Tournament extends EventEmitter
 
 		this.currentRound++;
 		this.currentMatches = [];
+		const prevmatches = this.matches.get(this.currentRound - 1).matchs;
 		const matchs = this.matches.get(this.currentRound).matchs;
 		for (let i = 0; i < matchs.length; i++)
 		{
 			const match = matchs[i];
-			if (!match.player1 || !match.player2)
-				continue;
+/* 			if (!match.player1 || !match.player2)
+				continue;*/
+			// HATALI MATCHLAR
 
 			match.matchId = `${this.tournamentName}-match-${Date.now()}`;
 			match.winner = null;
@@ -199,22 +204,22 @@ class Tournament extends EventEmitter
 				match.game.off('finished');
 			});
 			match.game.initializeGame();
-			match.game.addPlayer(this.matches.get(this.currentRound - 1).matchs[i].winner);
-			match.game.addPlayer(this.matches.get(this.currentRound - 1).matchs[i + 1]?.winner || null);
+			console.log('PREVMATCHES Match 1 winner:', JSON.stringify(prevmatches[i * 2].winner, null, 2));
+			console.log('PREVMATCHES Match 2 winner:', JSON.stringify(prevmatches[i * 2 + 1].winner, null, 2));
+			match.game.addPlayer(prevmatches[i * 2].winner[0]);
+			match.game.addPlayer(prevmatches[i * 2 + 1].winner[0] || null);
 			match.state = match.game.getGameState();
 			this.currentMatches.push(match);
 		}
 
 		this.status = 'ready2start';
-		this.emit('nextRound',
+		this.emit('roundFinish', {
+			players: this.players,
+			data:
 			{
-				players: this.players,
-				data:
-				{
-					matchMakingInfo: this.getMatchmakingInfo()
-				}
+				matchMakingInfo: this.getMatchmakingInfo()
 			}
-		);
+		});
 	}
 
 	update(deltaTime)
@@ -240,7 +245,8 @@ class Tournament extends EventEmitter
 			{
 				this.status = 'finished';
 				this.endTime = Date.now();
-				this.emit('finished', {
+				this.emit('finished',
+					{
 						players: this.players,
 						data:
 						{
@@ -252,17 +258,15 @@ class Tournament extends EventEmitter
 			}
 			else
 				this.nextRound();
+			return
 		}
-		else
-		{
-			this.emit("update", {
-				players: this.players,
-				data:
-				{
-					...this.getState()
-				}
-			});
-		}
+		this.emit("update", {
+			players: this.players,
+			data:
+			{
+				...this.getState()
+			}
+		});
 	}
 
 	addPlayer(player)

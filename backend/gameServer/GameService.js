@@ -23,7 +23,7 @@ class GameService
 		this.connectionId = new Map(); //  playerId -> connectionId
 		this.players = new Map(); // playerId -> Player instance
 
-		setInterval(
+/* 		setInterval(
 			() =>
 			{
 				console.log('--- Connected Players ---');
@@ -70,7 +70,7 @@ class GameService
 				console.log('');
 			},
 			5000
-		);
+		); */
 		this.gameManager.start();
 		this.tournamentManager.start();
 	}
@@ -240,10 +240,9 @@ class GameService
 						try
 						{
 							if (gameMode === 'tournament')
-								this.tournamentMatchCreate(gameSettings, payload.tournamentSettings, playersInstances);
+								this.tournamentMatchCreate(roomId, gameSettings, payload.tournamentSettings, playersInstances);
 							else
-								this.matchCreate(gameMode, gameSettings, playersInstances);
-
+								this.matchCreate(roomId, gameMode, gameSettings, playersInstances);
 						}
 						catch (error)
 						{
@@ -257,6 +256,8 @@ class GameService
 						//? oda kapandığında yapılacak işlemler
 					}
 				);
+
+				this.roomManager.on(`room${roomId}_NextRound`, () => this.tournamentManager.nextRound(roomId));
 				const connId = this.connectionId.get(roomState.host);
 				if (connId)
 					this.websocketServer.send(connId, { type: 'room/created', payload: { roomState: roomState, roomId: roomId } });
@@ -264,9 +265,9 @@ class GameService
 		);
 	}
 
-	matchCreate(gameMode, gameSettings, players)
+	matchCreate(roomId, gameMode, gameSettings, players)
 	{
-		const gameId = this.gameManager.createGame(gameMode, gameSettings);
+		const gameId = this.gameManager.createGame(roomId, gameMode, gameSettings);
 		players.forEach((p) => this.gameManager.addPlayerToGame(gameId, this.players.get(p.id)));
 		this.gameManager.on(`game${gameId}_StateUpdate`,
 			({gameState, players}) => this.sendPlayers(this.getPlayers(players), { type: 'game/stateUpdate', payload: gameState })
@@ -289,9 +290,9 @@ class GameService
 		this.sendPlayers(players, { type: 'game/initial' , payload: { gameMode: gameMode, ...gameSettings }});
 	}
 
-	tournamentMatchCreate(gameSettings, tournamentSettings, players)
+	tournamentMatchCreate(roomId, gameSettings, tournamentSettings, players)
 	{
-		const tournamentId = this.tournamentManager.createTournament(gameSettings, tournamentSettings);
+		const tournamentId = this.tournamentManager.createTournament(roomId, gameSettings, tournamentSettings);
 		players.forEach((p) => this.tournamentManager.joinTournament(tournamentId, this.players.get(p.id)));
 		this.tournamentManager.on(`tournament_${tournamentId}`,
 			({type, payload, players}) =>
@@ -301,9 +302,11 @@ class GameService
 					case 'update':
 						this.sendPlayers(players, { type: 'tournament/update', payload: payload });
 						break;
-					case 'nextRound':
-						this.sendPlayers(players, { type: 'tournament/nextRound', payload: payload });
+					case 'roundFinish':
+						this.sendPlayers(players, { type: 'tournament/roundFinish', payload: payload });
 						break;
+					case 'nextRound':
+						this.sendPlayers(players, { type: 'tournament/initial', payload: payload });
 				}
 			}
 		);

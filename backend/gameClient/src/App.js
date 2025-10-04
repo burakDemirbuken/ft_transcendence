@@ -121,7 +121,7 @@ class App
 
 	nextRound()
 	{
-		this.webSocketClient.send('tournament/nextRound');
+		this.webSocketClient.send('room/nextRound');
 	}
 
 	joinRoom(roomId)
@@ -209,6 +209,7 @@ class App
 
 	_handleTournamentEvent(subEvent, data)
 	{
+		console.log('Tournament event:', subEvent, JSON.stringify(data, null, 2));
 		switch (subEvent)
 		{
 			case 'initial':
@@ -234,7 +235,7 @@ class App
 			case 'update':
 				this.gameRenderer.gameState = data;
 				break;
-			case 'nextRound':
+			case 'roundFinish':
 				this.gameRenderer.reset();
 				this.roomUi.showGameUI();
 			default:

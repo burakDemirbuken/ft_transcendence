@@ -62,9 +62,9 @@ class GameManager extends EventEmitter
 		}
 	}
 
-	createGame(gameMode, properties)
+	createGame(id, gameMode, properties)
 	{
-		const gameId = this.uniqueGameId();
+		const gameId = id;
 		properties.id = gameId;
 		let game;
 		if (gameMode === 'local')

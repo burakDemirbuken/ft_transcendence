@@ -25,8 +25,6 @@ class PingPong extends EventEmitter
 		};
 		this.maxPlayers = 2;
 
-		console.log(`🎮 PingPong game created with mode: ${JSON.stringify(this.settings, null, 2)}`);
-
 		this.ball = null;
 		this.paddles = new Map(); // playerId -> Paddle instance
 		this.players = []; // Player instances
@@ -209,7 +207,10 @@ class PingPong extends EventEmitter
 							score: this.team.get(2).score,
 							playersId: this.team.get(2).playersId
 						},
-						winner: "team"+this.team.get(1).score > this.team.get(2).score ? 1 : 2,
+						winnerTeam: this.getWinnerTeam(),
+						loserTeam: this.getLoserTeam(),
+						winnerPlayers: this.getWinnerPlayers(),
+						loserPlayers: this.getLoserPlayers(),
 						time:
 						{
 							start: this.startTime,
@@ -385,14 +386,30 @@ class PingPong extends EventEmitter
 	{
 		if (!this.isFinished())
 			return null;
-		return this.team.get(1).score > this.team.get(2).score ? this.team.get(1).playersId : this.team.get(2).playersId;
+		return this.team.get(1).score > this.team.get(2).score ? this.team.get(1) : this.team.get(2);
 	}
 
 	getLoserTeam()
 	{
 		if (!this.isFinished())
 			return null;
-		return this.team.get(1).score < this.team.get(2).score ? this.team.get(1).playersId : this.team.get(2).playersId;
+		return this.team.get(1).score < this.team.get(2).score ? this.team.get(1) : this.team.get(2);
+	}
+
+	getWinnerPlayers()
+	{
+		if (!this.isFinished())
+			return null;
+		const winningTeam = this.getWinnerTeam();
+		return this.players.filter(p => winningTeam.playersId.includes(p.id));
+	}
+
+	getLoserPlayers()
+	{
+		if (!this.isFinished())
+			return null;
+		const losingTeam = this.getLoserTeam();
+		return this.players.filter(p => losingTeam.playersId.includes(p.id));
 	}
 
 	getScore()

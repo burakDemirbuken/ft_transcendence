@@ -28,9 +28,9 @@ class TournamentManager extends EventEmitter
 		return `tournament-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 	}
 
-	createTournament(gameSettings, tournamentSettings)
+	createTournament(id, gameSettings, tournamentSettings)
 	{
-		const tournamentId = this.createUniqueTournamentId();
+		const tournamentId = id;
 		if (this.tournaments.has(tournamentId))
 			throw new Error(`Tournament with ID ${tournamentId} already exists`);
 		if (!tournamentSettings.maxPlayers || Math.min(tournamentSettings.maxPlayers) < 2)
@@ -40,7 +40,7 @@ class TournamentManager extends EventEmitter
 		const tournament = new Tournament(tournamentSettings, gameSettings);
 		tournament.on('update', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'update', payload: data, players: players }));
 		tournament.on('finished', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data, players: players }));
-		tournament.on('nextRound', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'nextRound', payload: data, players: players }));
+		tournament.on('roundFinish', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'roundFinish', payload: data, players: players }));
 		tournament.on('started',
 			({data, players}) =>
 				{
@@ -51,6 +51,14 @@ class TournamentManager extends EventEmitter
 		tournament.on('error', (error) => this.emit('error', new Error(`Tournament ${tournamentId} error: ${error.message}`)));
 		this.tournaments.set(tournamentId, tournament);
 		return tournamentId;
+	}
+
+	nextRound(TournamentId)
+	{
+		const tournament = this.tournaments.get(TournamentId);
+		if (!tournament)
+			throw new Error(`Tournament with ID ${TournamentId} does not exist`);
+		this.emit(`tournament_${TournamentId}`, { type: 'nextRound', payload: tournament.initData(), players: tournament.players });
 	}
 
 	initTournament(TournamentId)
