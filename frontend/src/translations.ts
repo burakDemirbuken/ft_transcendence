@@ -1,4 +1,3 @@
-
 const lang = {
 	eng: { next: "tur" },
 	tur: { next: "deu" },
@@ -48,17 +47,20 @@ export async function getTranslations(lang:string) {
 }
 
 class I18n {
-	static currentLang = "eng";
+	static async loadLanguage(section:string) {
+		const translations = await getTranslations(localStorage.getItem("langPref"));
+		applyTranslations(translations, section);
+	}
 
 	static async switchLanguage(newLang:string, section:string) {
-		this.currentLang = newLang;
+		localStorage.setItem("langPref", newLang);
 		const translations = await getTranslations(newLang);
 		applyTranslations(translations, section);
 	}
 
 	static async nextLanguage() {
-		this.currentLang = lang[this.currentLang].next;
-		const translations = await getTranslations(this.currentLang);
+		localStorage.setItem("langPref", lang[localStorage.getItem("langPref")].next);
+		const translations = await getTranslations(localStorage.getItem("langPref"));
 		applyTranslations(translations, "login");
 	}
 }

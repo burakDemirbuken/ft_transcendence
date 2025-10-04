@@ -50,7 +50,7 @@
 		"profile": "PROFİL",
 		"chat": "SOHBET",
 		"friends": "ARKADAŞLAR",
-		"collapse": "YIK",
+		"collapse": "DARALT",
 		"settings": "AYARLAR",
 		"logout": "ÇIKIŞ"
 	},
@@ -198,17 +198,21 @@
 	},
 	"friends": {
 		"friends": {
+			"title": "Arkadaşlar",
 			"play": "Oyna",
 			"unfriend": "Çıkar"
 		},
 		"requests": {
+			"title": "İstekler",
 			"accept": "Kabul et",
 			"decline": "Reddet"
 		},
 		"invites": {
+			"title": "Davetler",
 			"undo": "Geri al"
 		},
 		"blocked": {
+			"title": "Engellenmiş",
 			"unblock": "Engeli Kaldır"
 		}
 	},

@@ -51,21 +51,26 @@ export function getTranslations(lang) {
     });
 }
 class I18n {
+    static loadLanguage(section) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const translations = yield getTranslations(localStorage.getItem("langPref"));
+            applyTranslations(translations, section);
+        });
+    }
     static switchLanguage(newLang, section) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.currentLang = newLang;
+            localStorage.setItem("langPref", newLang);
             const translations = yield getTranslations(newLang);
             applyTranslations(translations, section);
         });
     }
     static nextLanguage() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.currentLang = lang[this.currentLang].next;
-            const translations = yield getTranslations(this.currentLang);
+            localStorage.setItem("langPref", lang[localStorage.getItem("langPref")].next);
+            const translations = yield getTranslations(localStorage.getItem("langPref"));
             applyTranslations(translations, "login");
         });
     }
 }
-I18n.currentLang = "eng";
 export default I18n;
 //# sourceMappingURL=translations.js.map

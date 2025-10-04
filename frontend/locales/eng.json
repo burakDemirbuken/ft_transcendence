@@ -198,17 +198,21 @@
 	},
 	"friends": {
 		"friends": {
+			"title": "Friends",
 			"play": "Play",
 			"unfriend": "Unfriend"
 		},
 		"requests": {
+			"title": "Requests",
 			"accept": "Accept",
 			"decline": "Decline"
 		},
 		"invites": {
+			"title": "Invitations",
 			"undo": "Undo"
 		},
 		"blocked": {
+			"title": "Blocked",
 			"unblock": "Unblock"
 		}
 	},

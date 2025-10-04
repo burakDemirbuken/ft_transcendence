@@ -3,6 +3,7 @@ import Settings from "../dist/Settings.js";
 import Profile from "../dist/Profile.js";
 import Play from "../dist/Play.js";
 import Friends from "../dist/Friends.js";
+import I18n from './translations.js';
 
 const pageState = {
 	current: "login", // default
@@ -36,6 +37,7 @@ const router = async function(page:string) {
 		view.setStylesheet();
 		content.innerHTML = await view.getHtml();
 		view.setDynamicContent();
+		I18n.loadLanguage(page);
 		view.setEventHandlers();
 	} else {
 		document.title = "Page Not Found";
@@ -91,6 +93,12 @@ window.addEventListener("popstate", (event) => {
 window.addEventListener("load", () => {
 	const urlPage = window.location.pathname.slice(1);
 	const initialPage = urlPage || history.state.page || "login";
+
+	if (!localStorage.getItem("langPref"))
+		localStorage.setItem("langPref", "eng");
+
+	I18n.loadLanguage("navbar");
+
 	router(initialPage);
 	history.replaceState({ page: initialPage }, "", `/${initialPage}`);
 });

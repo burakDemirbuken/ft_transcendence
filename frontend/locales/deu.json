@@ -198,17 +198,21 @@
 	},
 	"friends": {
 		"friends": {
+			"title": "Freunde",
 			"play": "Spiel",
 			"unfriend": "Auflösen"
 		},
 		"requests": {
+			"title": "Anfrage",
 			"accept": "Akzeptieren",
 			"decline": "Ablehnen"
 		},
 		"invites": {
+			"title": "Einladungen",
 			"undo": "Zurücknehmen"
 		},
 		"blocked": {
+			"title": "Blockierte",
 			"unblock": "Entsperren"
 		}
 	},
