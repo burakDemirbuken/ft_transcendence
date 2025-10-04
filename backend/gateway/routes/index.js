@@ -38,17 +38,22 @@ export default async function allRoutes(fastify) {
 				try {
 					// Forward the request to the target service
 					const headers = { ...request.headers };
-					const body = request.method !== 'GET' && request.method !== 'HEAD' ? JSON.stringify(request.body) : undefined;
 					
-					const fetchHeaders = { ...headers };
-					// Only add Content-Type if there's a body
-					if (body) {
-						fetchHeaders['Content-Type'] = 'application/json';
+					// Remove problematic headers
+					delete headers['host'];
+					delete headers['content-length'];
+					delete headers['connection'];
+					delete headers['content-type']; // Remove to avoid duplicates
+					
+					let body = undefined;
+					if (request.method !== 'GET' && request.method !== 'HEAD' && request.body) {
+						body = JSON.stringify(request.body);
+						headers['Content-Type'] = 'application/json';
 					}
 					
 					const response = await fetch(finalUrl, {
 						method: request.method,
-						headers: fetchHeaders,
+						headers: headers,
 						body: body
 					});
 

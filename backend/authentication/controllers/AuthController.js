@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import crypto from 'crypto';
+import { Op } from 'sequelize';
 
 /**
  * Memory-based storage for temporary data
@@ -141,13 +142,41 @@ function storeVerificationCode(email, type = '2fa') {
   return code;
 }
 
-// Cleanup expired codes every 5 minutes
-setInterval(() => {
+// Cleanup expired codes and unverified users every 5 minutes
+setInterval(async () => {
   const now = new Date();
+  const cleanupResults = {
+    expiredTokens: 0,
+    unverifiedUsers: 0
+  };
+  
+  // Clean expired tokens from memory
   for (const [email, data] of tempStorage.entries()) {
     if (data.expires < now) {
       tempStorage.delete(email);
+      cleanupResults.expiredTokens++;
     }
+  }
+  
+  try {
+    // Clean unverified users older than 30 minutes
+    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
+    const deletedCount = await User.destroy({
+      where: {
+        is_active: false,
+        created_at: {
+          [Op.lt]: thirtyMinutesAgo
+        }
+      }
+    });
+    
+    cleanupResults.unverifiedUsers = deletedCount;
+    
+    if (cleanupResults.expiredTokens > 0 || cleanupResults.unverifiedUsers > 0) {
+      console.log(`🧹 Cleanup completed:`, cleanupResults);
+    }
+  } catch (error) {
+    console.error('🧹 Cleanup error:', error);
   }
 }, 5 * 60 * 1000);
 
@@ -358,16 +387,30 @@ class AuthController {
       // Send verification email
       try {
         await sendVerificationEmail(email, username, verificationToken);
+        
+        reply.status(201).send({
+          success: true,
+          message: 'User registered successfully. Please check your email for verification code.',
+          user: newUser.toSafeObject(),
+          next_step: 'email_verification'
+        });
+        
       } catch (emailError) {
-        console.log('Email send failed, but user created:', emailError);
+        console.log('Email send failed, cleaning up user:', emailError);
+        
+        // Email gönderilemezse kullanıcıyı sil
+        await User.destroy({ where: { id: newUser.id } });
+        tempStorage.delete(email); // Token'ı da temizle
+        
+        const html = generateHTML(
+          'Email Hatası',
+          '❌ Email doğrulama kodu gönderilemedi!<br><br>Bu email adresi geçerli olmayabilir veya email servisi kullanılamıyor.<br><br>Lütfen geçerli bir email adresi ile tekrar deneyin.',
+          'error',
+          'https://localhost:8080',
+          5000
+        );
+        return reply.status(400).type('text/html; charset=utf-8').send(html);
       }
-
-      reply.status(201).send({
-        success: true,
-        message: 'User registered successfully. Please check your email for verification code.',
-        user: newUser.toSafeObject(),
-        next_step: 'email_verification'
-      });
 
     } catch (error) {
       console.log('Register error:', error);
