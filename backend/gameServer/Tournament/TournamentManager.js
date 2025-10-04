@@ -40,7 +40,6 @@ class TournamentManager extends EventEmitter
 		const tournament = new Tournament(tournamentSettings, gameSettings);
 		tournament.on('update', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'update', payload: data, players: players }));
 		tournament.on('finished', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data, players: players }));
-		tournament.on('matchmaking', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'matchmaking', payload: data, players: players }));
 		tournament.on('nextRound', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'nextRound', payload: data, players: players }));
 		tournament.on('started',
 			({data, players}) =>

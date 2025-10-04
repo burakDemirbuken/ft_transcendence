@@ -194,7 +194,7 @@ class PingPong extends EventEmitter
 		{
 			this.status = 'finished';
 			this.finishTime = Date.now();
-			this.emit('gameFinished',
+			this.emit('finished',
 				{
 					players: this.players.map(p => p.id),
 					results:
@@ -381,17 +381,18 @@ class PingPong extends EventEmitter
 		return this.players.length === this.maxPlayers;
 	}
 
-	getWinner()
+	getWinnerTeam()
 	{
 		if (!this.isFinished())
 			return null;
-
+		return this.team.get(1).score > this.team.get(2).score ? this.team.get(1).playersId : this.team.get(2).playersId;
 	}
 
-	getLoser()
+	getLoserTeam()
 	{
 		if (!this.isFinished())
 			return null;
+		return this.team.get(1).score < this.team.get(2).score ? this.team.get(1).playersId : this.team.get(2).playersId;
 	}
 
 	getScore()
