@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import Login from "../dist/Login.js";
 import Settings from "../dist/Settings.js";
 import Profile from "../dist/Profile.js";
@@ -25,30 +16,28 @@ const routes = {
     friends: { template: "friends", view: Friends }
 };
 let view = null;
-const router = function (page) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const content = document.querySelector("#content");
-        if (view) {
-            content === null || content === void 0 ? void 0 : content.innerHTML = "";
-            view.unsetEventHandlers();
-            view.unsetStylesheet();
-            view = null;
-        }
-        pageState.current = page;
-        const route = routes[page];
-        if (route) {
-            view = new route.view();
-            view.setStylesheet();
-            content.innerHTML = yield view.getHtml();
-            view.setDynamicContent();
-            I18n.loadLanguage(page);
-            view.setEventHandlers();
-        }
-        else {
-            document.title = "Page Not Found";
-            content.innerHTML = "<h2>404</h2><p>Page not found.</p>";
-        }
-    });
+const router = async function (page) {
+    const content = document.querySelector("#content");
+    if (view) {
+        content === null || content === void 0 ? void 0 : content.innerHTML = "";
+        view.unsetEventHandlers();
+        view.unsetStylesheet();
+        view = null;
+    }
+    pageState.current = page;
+    const route = routes[page];
+    if (route) {
+        view = new route.view();
+        view.setStylesheet();
+        content.innerHTML = await view.getHtml();
+        view.setDynamicContent();
+        I18n.loadLanguage(page);
+        view.setEventHandlers();
+    }
+    else {
+        document.title = "Page Not Found";
+        content.innerHTML = "<h2>404</h2><p>Page not found.</p>";
+    }
 };
 export function navigateTo(page) {
     history.pushState({ page }, "", `/${page}`);

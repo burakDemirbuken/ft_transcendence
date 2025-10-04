@@ -14,7 +14,7 @@ async function sendVerificationEmail(email, username, token) {
   try {
     const emailServiceUrl = process.env.EMAIL_SERVICE_URL || 'http://email:3005';
     const verificationUrl = `https://localhost:8080/api/auth/verify-email?token=${token}`;
-    
+
     const response = await fetch(`${emailServiceUrl}/send-verification`, {
       method: 'POST',
       headers: {
@@ -44,7 +44,7 @@ async function sendVerificationEmail(email, username, token) {
 async function send2FAEmail(email, username, code, userIP) {
   try {
     const emailServiceUrl = process.env.EMAIL_SERVICE_URL || 'http://email:3005';
-    
+
     const response = await fetch(`${emailServiceUrl}/send-2fa`, {
       method: 'POST',
       headers: {
@@ -75,7 +75,7 @@ async function send2FAEmail(email, username, code, userIP) {
 async function sendLoginNotification(email, username, userIP) {
   try {
     const emailServiceUrl = process.env.EMAIL_SERVICE_URL || 'http://email:3005';
-    
+
     const response = await fetch(`${emailServiceUrl}/send-login-notification`, {
       method: 'POST',
       headers: {
@@ -122,10 +122,10 @@ function generateVerificationCode() {
 function storeVerificationToken(email, type = 'email_verification') {
   const token = generateVerificationToken();
   const expires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes for token (longer than code)
-  
+
   tempStorage.set(email, { token, expires, type });
   console.log(`🔐 Verification token stored for ${email}: ${token} (expires: ${expires})`);
-  
+
   return token;
 }
 
@@ -135,10 +135,10 @@ function storeVerificationToken(email, type = 'email_verification') {
 function storeVerificationCode(email, type = '2fa') {
   const code = generateVerificationCode();
   const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes for codes
-  
+
   tempStorage.set(email, { code, expires, type });
   console.log(`🔐 Verification code stored for ${email}: ${code} (expires: ${expires})`);
-  
+
   return code;
 }
 
@@ -149,7 +149,7 @@ setInterval(async () => {
     expiredTokens: 0,
     unverifiedUsers: 0
   };
-  
+
   // Clean expired tokens from memory
   for (const [email, data] of tempStorage.entries()) {
     if (data.expires < now) {
@@ -157,7 +157,7 @@ setInterval(async () => {
       cleanupResults.expiredTokens++;
     }
   }
-  
+
   try {
     // Clean unverified users older than 30 minutes
     const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
@@ -169,9 +169,9 @@ setInterval(async () => {
         }
       }
     });
-    
+
     cleanupResults.unverifiedUsers = deletedCount;
-    
+
     if (cleanupResults.expiredTokens > 0 || cleanupResults.unverifiedUsers > 0) {
       console.log(`🧹 Cleanup completed:`, cleanupResults);
     }
@@ -190,11 +190,11 @@ function generateHTML(title, message, type = 'info', redirectUrl = null, redirec
     info: { bg: '#d1ecf1', border: '#bee5eb', text: '#0c5460' },
     warning: { bg: '#fff3cd', border: '#ffeaa7', text: '#856404' }
   };
-  
+
   const color = colors[type] || colors.info;
-  const redirectScript = redirectUrl ? 
+  const redirectScript = redirectUrl ?
     `<script>setTimeout(function() { window.location.href = '${redirectUrl}'; }, ${redirectDelay});</script>` : '';
-  
+
   return `<!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -275,7 +275,7 @@ function generateHTML(title, message, type = 'info', redirectUrl = null, redirec
  * Core functionality only: register, login, logout, profile
  */
 class AuthController {
-  
+
   // HEALTH CHECK
   async health(request, reply) {
     reply.send({
@@ -300,7 +300,7 @@ class AuthController {
       }
 
       const user = await User.findByUsername(username);
-      
+
       reply.send({
         exists: !!user,
         message: user ? 'Bu kullanıcı adı zaten alınmış' : 'Kullanıcı adı kullanılabilir'
@@ -315,7 +315,7 @@ class AuthController {
     }
   }
 
-  // CHECK EMAIL AVAILABILITY  
+  // CHECK EMAIL AVAILABILITY
   async checkEmail(request, reply) {
     try {
       const { email } = request.query;
@@ -328,7 +328,7 @@ class AuthController {
       }
 
       const user = await User.findByEmail(email);
-      
+
       reply.send({
         exists: !!user,
         message: user ? 'Bu e-posta adresi zaten kullanılıyor' : 'E-posta adresi kullanılabilir'
@@ -387,21 +387,21 @@ class AuthController {
       // Send verification email
       try {
         await sendVerificationEmail(email, username, verificationToken);
-        
+
         reply.status(201).send({
           success: true,
           message: 'User registered successfully. Please check your email for verification code.',
           user: newUser.toSafeObject(),
           next_step: 'email_verification'
         });
-        
+
       } catch (emailError) {
         console.log('Email send failed, cleaning up user:', emailError);
-        
+
         // Email gönderilemezse kullanıcıyı sil
         await User.destroy({ where: { id: newUser.id } });
         tempStorage.delete(email); // Token'ı da temizle
-        
+
         const html = generateHTML(
           'Email Hatası',
           '❌ Email doğrulama kodu gönderilemedi!<br><br>Bu email adresi geçerli olmayabilir veya email servisi kullanılamıyor.<br><br>Lütfen geçerli bir email adresi ile tekrar deneyin.',
@@ -431,8 +431,8 @@ class AuthController {
       console.log('🔍 Email verification attempt:', request.method, request.url);
       console.log('🔍 Query params:', request.query);
       console.log('🔍 Body params:', request.body);
-      
-      // Support both GET (?token=xxx) and POST ({token: xxx}) 
+
+      // Support both GET (?token=xxx) and POST ({token: xxx})
       const token = request.query.token || request.body.token;
 
       console.log('🔍 Extracted token:', token ? token.substring(0, 10) + '...' : 'NOT FOUND');
@@ -449,11 +449,11 @@ class AuthController {
       }
 
       console.log('🔍 Searching in tempStorage, current size:', tempStorage.size);
-      
+
       // Find email by token (since token is unique)
       let storedData = null;
       let userEmail = null;
-      
+
       for (const [emailKey, data] of tempStorage.entries()) {
         if (data.token === token && data.type === 'email_verification') {
           storedData = data;
@@ -515,11 +515,11 @@ class AuthController {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>✅ Email Doğrulandı - Transcendence</title>
             <style>
-              body { 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-                text-align: center; 
-                margin: 0; 
-                padding: 50px 20px; 
+              body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                text-align: center;
+                margin: 0;
+                padding: 50px 20px;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 min-height: 100vh;
                 color: #333;
@@ -535,23 +535,23 @@ class AuthController {
               .success-icon { font-size: 64px; margin-bottom: 20px; }
               h1 { color: #2e7d32; margin-bottom: 10px; }
               p { color: #666; line-height: 1.6; }
-              .btn { 
-                background: #1976d2; 
-                color: white; 
-                padding: 15px 30px; 
-                text-decoration: none; 
-                border-radius: 8px; 
-                display: inline-block; 
+              .btn {
+                background: #1976d2;
+                color: white;
+                padding: 15px 30px;
+                text-decoration: none;
+                border-radius: 8px;
+                display: inline-block;
                 margin-top: 30px;
                 font-weight: bold;
                 transition: background 0.3s;
               }
               .btn:hover { background: #1565c0; }
-              .user-info { 
-                background: #f5f5f5; 
-                padding: 15px; 
-                border-radius: 8px; 
-                margin: 20px 0; 
+              .user-info {
+                background: #f5f5f5;
+                padding: 15px;
+                border-radius: 8px;
+                margin: 20px 0;
               }
             </style>
           </head>
@@ -564,12 +564,12 @@ class AuthController {
                 <p><strong>Email:</strong> ${user.email}</p>
               </div>
               <p>Tebrikler! Email adresiniz doğrulandı. Artık Transcendence'e giriş yapabilirsiniz.</p>
-              <a href="https://localhost:8080" class="btn">🚀 Transcendence'e Giriş Yap</a>
+              <a href="https://localhost:8080/login" class="btn">🚀 Transcendence'e Giriş Yap</a>
             </div>
             <script>
               // 5 saniye sonra otomatik redirect
               setTimeout(() => {
-                window.location.href = 'https://localhost:8080';
+                window.location.href = 'https://localhost:8080/login';
               }, 5000);
             </script>
           </body>
@@ -630,7 +630,7 @@ class AuthController {
 
       // Find user by email or username
       const user = await User.findByEmail(login) || await User.findByUsername(login);
-      
+
       if (!user) {
         const html = generateHTML(
           'Giriş Hatası',
@@ -669,10 +669,10 @@ class AuthController {
 
       // Generate and send 2FA code
       const twoFACode = storeVerificationCode(user.email, '2fa');
-      
+
       // Get user's IP for security email
       const userIP = request.headers['x-forwarded-for'] || request.headers['x-real-ip'] || request.socket.remoteAddress || 'Unknown';
-      
+
       try {
         // Send 2FA code
         await send2FAEmail(user.email, user.username, twoFACode, userIP);
@@ -701,23 +701,37 @@ class AuthController {
   }
 
   // 2FA VERIFICATION
+// 2FA VERIFICATION (username OR email)
   async verify2FA(request, reply) {
     try {
-      const { email, code } = request.body;
-
-      if (!email || !code) {
+      const { login, code } = request.body;
+    
+      if (!login || !code) {
         const html = generateHTML(
           '2FA Doğrulama Hatası',
-          '❌ Email ve 2FA kodu gerekli!<br><br>Lütfen tüm alanları doldurun.',
+          '❌ Email/kullanıcı adı ve 2FA kodu gerekli!<br><br>Lütfen tüm alanları doldurun.',
           'error',
           'https://localhost:8080',
           5000
         );
         return reply.status(400).type('text/html; charset=utf-8').send(html);
       }
-
-      // Check stored 2FA code
-      const storedData = tempStorage.get(email);
+    
+      // Find user by email or username
+      const user = await User.findByEmail(login) || await User.findByUsername(login);
+      if (!user) {
+        const html = generateHTML(
+          '2FA Doğrulama Hatası',
+          '❌ Kullanıcı bulunamadı!<br><br>Lütfen bilgilerinizi kontrol edin.',
+          'error',
+          'https://localhost:8080',
+          5000
+        );
+        return reply.status(404).type('text/html; charset=utf-8').send(html);
+      }
+    
+      // Check stored 2FA code (always stored by user.email)
+      const storedData = tempStorage.get(user.email);
       if (!storedData || storedData.type !== '2fa') {
         const html = generateHTML(
           '2FA Doğrulama Hatası',
@@ -728,10 +742,10 @@ class AuthController {
         );
         return reply.status(400).type('text/html; charset=utf-8').send(html);
       }
-
+    
       // Check if expired
       if (storedData.expires < new Date()) {
-        tempStorage.delete(email);
+        tempStorage.delete(user.email);
         const html = generateHTML(
           '2FA Doğrulama Hatası',
           '⏰ 2FA kodunun süresi dolmuş!<br><br>Lütfen tekrar giriş yapmayı deneyin.',
@@ -741,7 +755,7 @@ class AuthController {
         );
         return reply.status(400).type('text/html; charset=utf-8').send(html);
       }
-
+    
       // Check if code matches
       if (storedData.code !== code) {
         const html = generateHTML(
@@ -753,33 +767,20 @@ class AuthController {
         );
         return reply.status(400).type('text/html; charset=utf-8').send(html);
       }
-
-      // Find user
-      const user = await User.findByEmail(email);
-      if (!user) {
-        const html = generateHTML(
-          '2FA Doğrulama Hatası',
-          '❌ Kullanıcı bulunamadı!<br><br>Hesap silinmiş olabilir.',
-          'error',
-          'https://localhost:8080',
-          5000
-        );
-        return reply.status(404).type('text/html; charset=utf-8').send(html);
-      }
-
+    
       // Update last login
       await user.markLogin();
-
+    
       // Generate JWT token
       const accessToken = await reply.jwtSign(
-        { 
+        {
           userId: user.id,
           username: user.username,
           email: user.email
         },
         { expiresIn: '24h' }
       );
-
+    
       // Set cookie
       reply.setCookie('accessToken', accessToken, {
         httpOnly: true,
@@ -788,26 +789,26 @@ class AuthController {
         path: '/',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
       });
-
+    
       // Remove 2FA code from memory
-      tempStorage.delete(email);
-
+      tempStorage.delete(user.email);
+    
       // Get user's IP for security notification
       const userIP = request.headers['x-forwarded-for'] || request.headers['x-real-ip'] || request.socket.remoteAddress || 'Unknown';
-
+    
       // Send login notification email
       try {
         await sendLoginNotification(user.email, user.username, userIP);
       } catch (emailError) {
         console.log('Login notification email failed:', emailError);
       }
-
+    
       reply.send({
         success: true,
         message: 'Login successful',
         user: user.toSafeObject()
       });
-
+    
     } catch (error) {
       console.log('2FA verification error:', error);
       const html = generateHTML(
@@ -821,11 +822,12 @@ class AuthController {
     }
   }
 
+
   // GET PROFILE
   async getProfile(request, reply) {
     try {
       const userId = request.user.userId;
-      
+
       const user = await User.findByPk(userId);
       if (!user) {
         return reply.status(404).send({
@@ -853,7 +855,7 @@ class AuthController {
     try {
       // Clear cookies
       reply.clearCookie('accessToken');
-      
+
       reply.send({
         success: true,
         message: 'Logout successful'

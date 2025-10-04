@@ -5,7 +5,6 @@ function settingsClick(e) {
 	if (!e.target.classList.contains("current") && e.target.classList.contains("lang"))
 	{
 		if (e.target.classList.contains("eng")) {
-
 			I18n.switchLanguage("eng", "navbar");
 		} else if (e.target.classList.contains("deu")) {
 			I18n.switchLanguage("deu", "navbar");

@@ -19,7 +19,7 @@ async function verifyJWT(request, reply) {
  * Authentication Routes
  */
 export default async function authRoutes(fastify, options) {
-  
+
   // Health check endpoint
   fastify.get('/health', authController.health);
 
@@ -106,9 +106,9 @@ export default async function authRoutes(fastify, options) {
     schema: {
       body: {
         type: 'object',
-        required: ['email', 'code'],
+        required: ['login', 'code'],
         properties: {
-          email: { type: 'string', format: 'email' },
+          login: { type: 'string' },
           code: { type: 'string', minLength: 6, maxLength: 6 }
         }
       }

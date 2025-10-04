@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import AView from "./AView.js";
 function getCSSVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -508,58 +499,48 @@ export default class extends AView {
         this.setTitle("Profile");
         profileManager = new ManagerProfile();
     }
-    getHtml() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const response = yield fetch(`templates/profile.html`);
-            return yield response.text();
-        });
+    async getHtml() {
+        const response = await fetch(`templates/profile.html`);
+        return await response.text();
     }
-    setEventHandlers() {
-        return __awaiter(this, void 0, void 0, function* () {
-            document.addEventListener("mousemove", handleCardMouseMove);
-            document.addEventListener("mouseout", resetCardShadow); // fare dışarı çıkınca gölgeyi sıfırlar
-            // İnternet durumu event listener'ları
-            profileManager.initConnectionStatus();
-            window.addEventListener('online', this.onlineHandler);
-            window.addEventListener('offline', this.offlineHandler);
-            // Tab tıklamaları
-            document.addEventListener('click', tabClickHandler);
-            // Filtreler
-            const timeFilter = document.getElementById('time-filter');
-            const resultFilter = document.getElementById('result-filter');
-            timeFilter === null || timeFilter === void 0 ? void 0 : timeFilter.addEventListener('change', timeFilterChangeHandler);
-            resultFilter === null || resultFilter === void 0 ? void 0 : resultFilter.addEventListener('change', resultFilterChangeHandler);
-            // Level progress animasyonu
-            profileManager.animateLevelProgress();
-        });
+    async setEventHandlers() {
+        document.addEventListener("mousemove", handleCardMouseMove);
+        document.addEventListener("mouseout", resetCardShadow); // fare dışarı çıkınca gölgeyi sıfırlar
+        // İnternet durumu event listener'ları
+        profileManager.initConnectionStatus();
+        window.addEventListener('online', this.onlineHandler);
+        window.addEventListener('offline', this.offlineHandler);
+        // Tab tıklamaları
+        document.addEventListener('click', tabClickHandler);
+        // Filtreler
+        const timeFilter = document.getElementById('time-filter');
+        const resultFilter = document.getElementById('result-filter');
+        timeFilter === null || timeFilter === void 0 ? void 0 : timeFilter.addEventListener('change', timeFilterChangeHandler);
+        resultFilter === null || resultFilter === void 0 ? void 0 : resultFilter.addEventListener('change', resultFilterChangeHandler);
+        // Level progress animasyonu
+        profileManager.animateLevelProgress();
     }
-    unsetEventHandlers() {
-        return __awaiter(this, void 0, void 0, function* () {
-            document.removeEventListener("mousemove", handleCardMouseMove);
-            document.removeEventListener("mouseout", resetCardShadow);
-            window.removeEventListener('online', this.onlineHandler);
-            window.removeEventListener('offline', this.offlineHandler);
-            document.removeEventListener('click', tabClickHandler);
-            const timeFilter = document.getElementById('time-filter');
-            const resultFilter = document.getElementById('result-filter');
-            timeFilter === null || timeFilter === void 0 ? void 0 : timeFilter.removeEventListener('change', timeFilterChangeHandler);
-            resultFilter === null || resultFilter === void 0 ? void 0 : resultFilter.removeEventListener('change', resultFilterChangeHandler);
-        });
+    async unsetEventHandlers() {
+        document.removeEventListener("mousemove", handleCardMouseMove);
+        document.removeEventListener("mouseout", resetCardShadow);
+        window.removeEventListener('online', this.onlineHandler);
+        window.removeEventListener('offline', this.offlineHandler);
+        document.removeEventListener('click', tabClickHandler);
+        const timeFilter = document.getElementById('time-filter');
+        const resultFilter = document.getElementById('result-filter');
+        timeFilter === null || timeFilter === void 0 ? void 0 : timeFilter.removeEventListener('change', timeFilterChangeHandler);
+        resultFilter === null || resultFilter === void 0 ? void 0 : resultFilter.removeEventListener('change', resultFilterChangeHandler);
     }
-    setStylesheet() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = "styles/profile.css";
-            document.head.appendChild(link);
-        });
+    async setStylesheet() {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "styles/profile.css";
+        document.head.appendChild(link);
     }
-    unsetStylesheet() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const link = document.querySelector("link[href='styles/profile.css']");
-            if (link)
-                document.head.removeChild(link);
-        });
+    async unsetStylesheet() {
+        const link = document.querySelector("link[href='styles/profile.css']");
+        if (link)
+            document.head.removeChild(link);
     }
 }
 //# sourceMappingURL=Profile.js.map

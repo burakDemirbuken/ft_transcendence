@@ -55,20 +55,19 @@ volumes:
 
 
 services:
-#  frontend:
-#    container_name: frontend
-#    build: ./frontend
-#    restart: on-failure
-#    volumes:
-#      - frontend_src:/app
-#      - /app/node_modules
-#    networks:
-#      - transcendency
-#    expose:
-#      - 3003
-#    depends_on:
-#      - nginx
-
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    restart: on-failure
+    volumes:
+      - frontend_src:/app
+      - /app/node_modules
+    networks:
+      - transcendency
+    expose:
+      - 3003
+    depends_on:
+      - nginx
   nginx:
     container_name: nginx
     build: ./backend/nginx
@@ -161,7 +160,7 @@ services:
 #      - /app/node_modules
 #    networks:
 #      - transcendency
-  
+
 #  friend:
 #    container_name: friend
 #    build: ./backend/friend

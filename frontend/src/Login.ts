@@ -49,7 +49,7 @@ async function username() {
 		return ;
 	}
 
-	const address = `http://localhost:3000/api/users/checkUsername?username=${username}`;
+	const address = `https://localhost:8080/api/auth/check-username?username=${username}`;
 	const response = await fetch(address);
 	const json = await response.json();
 	if(json.exists) {
@@ -95,17 +95,17 @@ async function login() {
 		return ;
 	}
 
-	if (password.length < 4 || password.length > 128) {
+	if (password.length < 8 || password.length > 128) {
 		showError("invalid password");
 		return ;
 	}
 
 	const user:Object = {
-		"username": formData.get("username"),
+		"login": formData.get("username"),
 		"password": formData.get("password")
 	};
 
-	const request = new Request("http://localhost:3000/api/users/login", {
+	const request = new Request("https://localhost:8080/api/auth/login", {
 		method: "POST",
 		headers: new Headers({ "Content-Type": "application/json" }),
 		body: JSON.stringify(user),
@@ -113,7 +113,7 @@ async function login() {
 
 	console.log("sends");
 	const response = await fetch(request);
-	console.log("responds");
+	console.log(response);
 	const json = await response.json();
 	if (response.ok) {
 		document.querySelector("#error").textContent = json.message;
@@ -129,32 +129,38 @@ async function register() {
 	const formData = new FormData(form);
 	const password:string = formData.get("password");
 
+	console.log("deb4");
 	if (!password) {
 		showError("password can't be empty");
 		return ;
 	}
 
+	console.log("deb3");
 	if (password.length < 8 || password.length > 128) {
 		showError("invalid password");
 		return ;
 	}
 
+	console.log("deb2");
 	const obj:Object = {
 		"username": formData.get("username"),
 		"email": formData.get("email"),
 		"password": formData.get("password")
 	};
 
-	const request = new Request("http://localhost:3000/api/users/register", {
+	console.log("deb1");
+	const request = new Request("https://localhost:8080/api/auth/register", {
 		method: "POST",
 		headers: new Headers({ "Content-Type": "application/json" }),
 		body: JSON.stringify(obj),
 	});
+	console.log("deb5");
 	const response = await fetch(request);
+	console.log(response);
 	const json = await response.json();
 	if (response.ok) {
 		document.querySelector("#error").textContent = json.message;
-		goToNextField("2fa");
+		goToNextField("welcome");
 	}
 	else
 		showError(json.error);
@@ -174,12 +180,12 @@ async function verify()
 	if (userEmail)
 	{
 		const obj:Object = {
-			"email": userEmail,
+			"login": userEmail,
 			"code":  code,
 			"rememberMe": rememberMe
 		};
 
-		const request = new Request("http://localhost:3000/api/users/verify-2fa", {
+		const request = new Request("https://localhost:8080/api/auth/verify-2fa", {
 		method: "POST",
 		headers: new Headers({ "Content-Type": "application/json" }),
 		body: JSON.stringify(obj),
