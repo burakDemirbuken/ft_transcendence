@@ -39,12 +39,13 @@ volumes:
 #      type: none
 #      device: ./backend/aiServer
 #      o: bind
-#  gameServer:
-#    driver: local
-#    driver_opts:
-#      type: none
-#      device: ./backend/gameServer
-#      o: bind
+
+  gameServer:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/gameServer
+      o: bind
   room_src:
     driver: local
     driver_opts:
@@ -124,19 +125,19 @@ services:
      - EMAIL_PORT=3005
      - HOST=0.0.0.0
 
-#  gameserver:
-#    container_name: gameserver
-#    build: ./backend/gameServer
-#    restart: on-failure
-#    networks:
-#      - transcendency
-#    expose:
-#      - 3002
-#    ports:
-#      - "3002:3002"
-#    volumes:
-#      - gameServer:/app
-#      - /app/node_modules
+  gameserver:
+    container_name: gameserver
+    build: ./backend/gameServer
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 3002
+    ports:
+      - "3002:3002"
+    volumes:
+      - gameServer:/app
+      - /app/node_modules
 
   room:
     container_name: room
@@ -144,34 +145,37 @@ services:
     restart: on-failure
     expose:
       - 3004
+    # BURAK: test için portı dışarıya açtım.
+    ports:
+      - "3004:3004"
     volumes:
       - room_src:/app
       - /app/node_modules
     networks:
       - transcendency
 
-  profile:
-    container_name: profile
-    build: ./backend/profile
-    restart: on-failure
-    expose:
-      - 3006
-    volumes:
-      - profile_src:/app
-      - /app/node_modules
-    networks:
-      - transcendency
-  
-  friend:
-    container_name: friend
-    build: ./backend/friend
-    restart: on-failure
-    expose:
-      - 3007
-    volumes:
-      - /app/node_modules
-    networks:
-      - transcendency
+#  profile:
+#    container_name: profile
+#    build: ./backend/profile
+#    restart: on-failure
+#    expose:
+#      - 3006
+#    volumes:
+#      - profile_src:/app
+#      - /app/node_modules
+#    networks:
+#      - transcendency
+#  
+#  friend:
+#    container_name: friend
+#    build: ./backend/friend
+#    restart: on-failure
+#    expose:
+#      - 3007
+#    volumes:
+#      - /app/node_modules
+#    networks:
+#      - transcendency
 
 #  aiserver:
 #    container_name: ai-server

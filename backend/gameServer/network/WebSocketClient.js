@@ -13,11 +13,15 @@ class NetworkManager
 		}
 	}
 
-	connect(params = {})
+	connect(endpoint, params = undefined)
 	{
 		try
 		{
-			let url = `${this.serverAddress}`;
+			let url = `${this.serverAddress}` + "/" + endpoint;
+			if (typeof(params) !== "undefined")
+			{
+				url += "?" + new URLSearchParams(params).toString();
+			}
 			console.log('Connecting to server at', url);
 			this.socket = new WebSocket(url);
 
@@ -35,13 +39,25 @@ class NetworkManager
 			};
 
 			this.socket.onmessage = (event) => {
-				try {
+				try
+				{
 					const data = event.data;
 					const stringData = data.toString();
 					const parsedData = JSON.parse(stringData);
-					onMessage(parsedData);
-				} catch (error) {
-					console.error('❌ Failed to parse WebSocket message:', error);
+
+					try
+					{
+						onMessage(parsedData);
+					}
+					catch (callbackError)
+					{
+						console.error('❌ Error in onMessage callback:', callbackError);
+						console.error('Message data that caused error:', parsedData);
+					}
+				}
+				catch (parseError)
+				{
+					console.error('❌ Failed to parse WebSocket message:', parseError);
 					console.error('Raw message data:', event.data);
 				}
 			};
@@ -82,20 +98,10 @@ class NetworkManager
 		this.callbacks.onError = callback;
 	}
 
-	// Var olan mesajlaşma şekli (type, payload)
 	send(type, payload)
 	{
-		if (this.isConnected())
-			this.socket.send(JSON.stringify({ type, payload }));
-		else
-			throw new Error('Cannot send message: not connected to server');
-	}
-
-	// Ham JSON string gönderimi (AI sunucusu üst seviye alanları bekliyor)
-	sendRaw(messageString)
-	{
-		if (this.isConnected())
-			this.socket.send(messageString);
+		if (this.isConnect())
+			this.socket.send(JSON.stringify({ type: type, payload: payload }));
 		else
 			throw new Error('Cannot send message: not connected to server');
 	}
@@ -106,7 +112,7 @@ class NetworkManager
 			this.socket.close();
 	}
 
-	isConnected()
+	isConnect()
 	{
 		return this.socket && this.socket.readyState === WebSocket.OPEN;
 	}

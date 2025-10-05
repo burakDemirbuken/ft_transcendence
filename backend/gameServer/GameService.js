@@ -1,4 +1,5 @@
 import WebSocketServer from './network/WebSocketServer.js';
+import WebSocketClient from './network/WebSocketClient.js';
 import GameManager from './GameManager.js';
 import Player from './Player.js';
 import RoomManager from './Room/RoomManager.js';
@@ -19,7 +20,7 @@ class GameService
 		this.gameManager = new GameManager();
 		this.websocketServer = new WebSocketServer();
 		this.roomManager = new RoomManager();
-		this.tournamentManager = new TournamentManager();connectionId
+		this.tournamentManager = new TournamentManager();
 		this.connectionId = new Map(); //  playerId -> 
 		this.players = new Map(); // playerId -> Player instance
 
@@ -31,17 +32,6 @@ class GameService
 				console.log(`Total connected players: ${this.players.size}`);
 				this.players.forEach((player) => {
 					console.log(`Player:\nname: ${player.name}\nid: ${player.id}\nconnectionId: ${this.connectionId.get(player.id)}\n`);
-					console.log('');
-				});
-				console.log('-------------------------');
-				console.log('--- Active Rooms ---');
-				this.roomManager.rooms.forEach((room) => {
-					console.log(`Room ${room}:\n\tGame Mode: ${room.gameMode}\n\tHost: ${room.host}\n\tPlayers: ${room.players.length}/${room.maxPlayers}\n\tStatus: ${room.status}`);
-					console.log(`Room Settings: ${JSON.stringify(room.gameSettings, null, 2)}`);
-					console.log('\tPlayer List:');
-					room.players.forEach((p) => {
-						console.log(`\t\t- ${p.name} (id: ${p.id}, status: ${p.isReady ? 'ready' : 'waiting'}, isHost: ${p.isHost})`);
-					});
 					console.log('');
 				});
 				console.log('-------------------------');
@@ -73,6 +63,25 @@ class GameService
 		);
 		this.gameManager.start();
 		this.tournamentManager.start();
+		this.setupRoomEvents();
+	}
+
+	setupRoomEvents()
+	{
+		this.roomSocket.onConnect(() => {
+			console.log('🟢 Connected to Room Service');
+		});
+		this.roomSocket.onError((error) => {
+			console.error('❌ Room Service connection error:', error);
+		});
+		this.roomSocket.onClose(() => {
+			console.warn('⚠️ Room Service connection closed, attempting to reconnect in 5 seconds...');
+		});
+		this.roomSocket.onMessage((message) => {
+			console.log('📨 Message from Room Service:', message);
+		});
+
+		this.roomSocket.connect('ws/server');
 	}
 
 	_getplayerByConnectionId(connectionId)
@@ -300,6 +309,9 @@ class GameService
 				{
 					case 'update':
 						this.sendPlayers(players, { type: 'tournament/update', payload: payload });
+						break;
+					case 'nextRound':
+						this.sendPlayers(players, { type: 'tournament/nextRound', payload: payload });
 						break;
 				}
 			}

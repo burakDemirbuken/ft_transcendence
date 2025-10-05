@@ -8,8 +8,6 @@ class GameCore
 		this.engine = null;
 		this.scene = null;
 		this.camera = null;
-		this.isInitialized = false;
-		this.viewMode = 'single';
 		this.gameConfig = null;
 	}
 
@@ -32,8 +30,6 @@ class GameCore
 		this.camera.lowerRadiusLimit = this.camera.radius;
 		this.camera.upperRadiusLimit = this.camera.radius;
 		this.gameConfig = gameConfig;
-
-		this.isInitialized = true;
 
 		this.engine.runRenderLoop(
 			() =>
@@ -61,7 +57,6 @@ class GameCore
 		this.engine.dispose();
 		this.camera.dispose();
 		this.scene.dispose();
-		this.isInitialized = false;
 	}
 }
 

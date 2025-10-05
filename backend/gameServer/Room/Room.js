@@ -1,4 +1,4 @@
-import EventEmitter from './EventEmitter.js';
+import EventEmitter from '../utils/EventEmitter.js';
 
 export default class Room extends EventEmitter
 {
@@ -11,6 +11,8 @@ export default class Room extends EventEmitter
 		this.maxPlayers = null;
 		this.host = null;
 		this.players = [];
+		//? izleyiciler eklenebilir mi?
+		// spectators: [];
 		this.gameSettings = gameSettings;
 		this.createdAt = Date.now();
 	}
@@ -21,7 +23,10 @@ export default class Room extends EventEmitter
 			throw new Error('Room is full');
 		if (this.players.length === 0)
 			this.host = player.id;
-		this.players.push(player);
+		//! deneme için her zaman ready
+		this.players.push({ ...player, isReady: true });
+		console.log(`BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB`);
+		console.log(this.players);
 	}
 
 	removePlayer(playerId)

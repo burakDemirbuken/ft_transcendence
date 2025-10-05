@@ -14,7 +14,7 @@ class App
 		this.playerId = this._TEST_generateRandomId();
 		this.playerName = this._TEST_generateRandomName();
 		this.gameRenderer = new GameRenderer();
-		this.webSocketClient = new WebSocketClient(window.location.hostname, 3002);
+		this.webSocketClient = new WebSocketClient(window.location.hostname, 3004);
 		this.roomUi = new RoomUi();
 		this.inputManager = new InputManager();
 
@@ -97,7 +97,7 @@ class App
 		{
 		});
 
-		this.webSocketClient.connect({ id: this.playerId, name: this.playerName });
+		this.webSocketClient.connect("ws/client", { userID: this.playerId, userName: this.playerName });
 	}
 
 	createRoom(mode, gameSettings)
@@ -111,12 +111,17 @@ class App
 				gameMode: mode,
 				...gameSettings
 			};
-			this.webSocketClient.send('room/create', data);
+			this.webSocketClient.send('create', data);
 		}
 		catch (error)
 		{
 			console.error('❌ Error creating room:', error);
 		}
+	}
+
+	nextRound()
+	{
+		this.webSocketClient.send('tournament/nextRound');
 	}
 
 	joinRoom(roomId)
@@ -127,7 +132,7 @@ class App
 				throw new Error('Not connected to server');
 			if (!roomId)
 				throw new Error('Room ID is required to join a room');
-			this.webSocketClient.send('room/join', { roomId });
+			this.webSocketClient.send('join', { roomId });
 		}
 		catch (error)
 		{
@@ -137,12 +142,12 @@ class App
 
 	startGame()
 	{
-		this.webSocketClient.send('room/startGame');
+		this.webSocketClient.send('startGame');
 	}
 
 	readyState(readyState)
 	{
-		this.webSocketClient.send('room/setReady', {isReady: readyState });
+		this.webSocketClient.send('setReady', {isReady: readyState });
 	}
 
 	_TEST_generateRandomId()
@@ -229,6 +234,9 @@ class App
 			case 'update':
 				this.gameRenderer.gameState = data;
 				break;
+			case 'nextRound':
+				this.gameRenderer.reset();
+				this.roomUi.showGameUI();
 			default:
 				console.log('Unhandled tournament event:', subEvent, data);
 		}

@@ -1,9 +1,6 @@
 import fp from "fastify-plugin"
 
 export default fp(async function (fastify) {
-
-	const clientConnection = new Map();
-
 	function connectionID() {
 		return `conn-${Math.random().toString(36).substring(2, 15)}`;
 	}
