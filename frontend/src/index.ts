@@ -51,25 +51,29 @@ export function navigateTo(page:string) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-	document.body.addEventListener("click", e => {
-		if (e.target.matches("[data-link]")) {
-			console.log("hey?")
-			e.preventDefault();
-			navigateTo(e.target.getAttribute("href").replace(/^\//, ''));
-			document.querySelector(".selected")?.classList.toggle("selected");
-			e.target.classList.toggle("selected");
-		} else if (e.target.matches("[id='toggle']")) {
-			console.log("hey");
-			document.querySelector("#navbar")?.classList.toggle("collapse");
-			document.querySelector(".selected")?.classList.toggle("selected");
-			e.target.classList.toggle("selected");
-		}
-		else if (e.target.matches("[id='language']")) {
-			e.preventDefault();
-			I18n.nextLanguage("navbar");
-			I18n.nextLanguage(pageState.current);
-		}
-	})
+	const navbar = document.body.querySelectorAll(".sidebar-element");
+	for (const element of navbar) {
+		element.addEventListener("click", e => {
+			if (e.currentTarget.matches("[data-link]")) {
+				console.log("PAGE")
+				e.preventDefault();
+				navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
+				document.querySelector(".selected")?.classList.toggle("selected");
+				e.currentTarget.classList.toggle("selected");
+			} else if (e.currentTarget.matches("[id='toggle']")) {
+				console.log("TOGGLE");
+				document.querySelector("#navbar")?.classList.toggle("collapse");
+				document.querySelector(".selected")?.classList.toggle("selected");
+				e.currentTarget.classList.toggle("selected");
+			}
+			else if (e.currentTarget.matches("[id='language']")) {
+				console.log("LANGUAGE");
+				e.preventDefault();
+				I18n.nextLanguage("navbar");
+				I18n.nextLanguage(pageState.current);
+			}
+		});
+	}
 });
 
 function toggleClassOnResize() {

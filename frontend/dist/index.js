@@ -44,27 +44,31 @@ export function navigateTo(page) {
     router(page);
 }
 document.addEventListener("DOMContentLoaded", () => {
-    document.body.addEventListener("click", e => {
-        var _a, _b, _c;
-        if (e.target.matches("[data-link]")) {
-            console.log("hey?");
-            e.preventDefault();
-            navigateTo(e.target.getAttribute("href").replace(/^\//, ''));
-            (_a = document.querySelector(".selected")) === null || _a === void 0 ? void 0 : _a.classList.toggle("selected");
-            e.target.classList.toggle("selected");
-        }
-        else if (e.target.matches("[id='toggle']")) {
-            console.log("hey");
-            (_b = document.querySelector("#navbar")) === null || _b === void 0 ? void 0 : _b.classList.toggle("collapse");
-            (_c = document.querySelector(".selected")) === null || _c === void 0 ? void 0 : _c.classList.toggle("selected");
-            e.target.classList.toggle("selected");
-        }
-        else if (e.target.matches("[id='language']")) {
-            e.preventDefault();
-            I18n.nextLanguage("navbar");
-            I18n.nextLanguage(pageState.current);
-        }
-    });
+    const navbar = document.body.querySelectorAll(".sidebar-element");
+    for (const element of navbar) {
+        element.addEventListener("click", e => {
+            var _a, _b, _c;
+            if (e.currentTarget.matches("[data-link]")) {
+                console.log("PAGE");
+                e.preventDefault();
+                navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
+                (_a = document.querySelector(".selected")) === null || _a === void 0 ? void 0 : _a.classList.toggle("selected");
+                e.currentTarget.classList.toggle("selected");
+            }
+            else if (e.currentTarget.matches("[id='toggle']")) {
+                console.log("TOGGLE");
+                (_b = document.querySelector("#navbar")) === null || _b === void 0 ? void 0 : _b.classList.toggle("collapse");
+                (_c = document.querySelector(".selected")) === null || _c === void 0 ? void 0 : _c.classList.toggle("selected");
+                e.currentTarget.classList.toggle("selected");
+            }
+            else if (e.currentTarget.matches("[id='language']")) {
+                console.log("LANGUAGE");
+                e.preventDefault();
+                I18n.nextLanguage("navbar");
+                I18n.nextLanguage(pageState.current);
+            }
+        });
+    }
 });
 function toggleClassOnResize() {
     const element = document.querySelector("#navbar");
