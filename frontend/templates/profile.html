@@ -43,16 +43,16 @@
     </header>
     <!-- Navigation -->
     <div class="profile-nav">
-        <button class="tab-btn active" data-tab="overview"><i class="fa-solid fa-grip-vertical"></i> Dashboard <span class="btn-glow"></span></button>
+        <button class="tab-btn" data-tab="overview"><i class="fa-solid fa-grip-vertical"></i> Dashboard <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="performance"><i class="fa-solid fa-chart-line"></i> Performans <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="tournaments"><i class="fa-solid fa-trophy"></i> Turnuva Geçmişi <span class="btn-glow"></span></button>
-        <button class="tab-btn" data-tab="match_history"><i class="fa-solid fa-clock-rotate-left"></i> Maç Geçmişi <span class="btn-glow"></span></button>
+        <button class="tab-btn active" data-tab="match_history"><i class="fa-solid fa-clock-rotate-left"></i> Maç Geçmişi <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="achievements"><i class="fa-solid fa-star"></i> Achievements <span class="btn-glow"></span></button>
     </div>
     <!-- Content Tabs -->
     <main class="profile-content">
         <!-- Overview Tab -->
-        <section id="overview" class="tab-content active">
+        <section id="overview" class="tab-content">
             <div class="stats-grid">
                 <!-- Performance Cards -->
                 <div class="stat-card performance-card">
@@ -192,15 +192,11 @@
                 <h3><i class="fa-solid fa-trophy"></i> Turnuva Geçmişi</h3>
                 <div class="tournaments-filters">
                     <select id="tournament-year-filter">
-                        <option value="all">Tüm Yıllar</option>
-                        <option value="2025" selected>2025</option>
+                        <option value="all" selected>Tüm Yıllar</option>
+                        <option value="2025">2025</option>
                         <option value="2024">2024</option>
-                    </select>
-                    <select id="tournament-type-filter">
-                        <option value="all">Tüm Turnuvalar</option>
-                        <option value="league">Lig Turnuvaları</option>
-                        <option value="knockout">Eleme Turnuvaları</option>
-                        <option value="special">Özel Etkinlikler</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
                     </select>
                 </div>
             </div>
@@ -255,15 +251,10 @@
             </div>
         </section>
         <!-- Matches Tab (Birleştirilmiş Maç Geçmişi ve Analizi) -->
-        <section id="match_history" class="tab-content">
-            <div class="matches-header">
+        <section id="match_history" class="tab-content active">
+            <div class="tournaments-header">
                 <h3><i class="fa-solid fa-clock-rotate-left"></i> Maç Geçmişi ve Analizi</h3>
                 <div class="matches-filters">
-                    <select id="time-filter">
-                        <option value="all">Tüm Zamanlar</option>
-                        <option value="week">Son 7 Gün</option>
-                        <option value="month">Son 30 Gün</option>
-                    </select>
                     <select id="result-filter">
                         <option value="all">Tüm Sonuçlar</option>
                         <option value="win">Sadece Galibiyetler</option>
@@ -271,14 +262,13 @@
                     </select>
                 </div>
             </div>
-            <div class="matches-table">
+            <div class="match-table">
                 <div class="match-row header">
                     <span>Tarih</span>
                     <span>Rakip</span>
                     <span>Skor</span>
                     <span>Süre</span>
                     <span>Sonuç</span>
-                    <span>Analiz</span>
                 </div>
                 <div class="match-row" data-result="win" data-match-id="1">
                     <span>28.06.2025 19:30</span>
@@ -286,9 +276,6 @@
                     <span>11-7</span>
                     <span>4:23</span>
                     <span class="result win">Galibiyet</span>
-                    <span class="match-analysis-btn" data-match-id="1">
-                        <i class="fa-solid fa-chart-line"></i>
-                    </span>
                 </div>
                 <div class="match-row" data-result="win" data-match-id="2">
                     <span>28.07.2025 16:15</span>
@@ -296,9 +283,6 @@
                     <span>11-9</span>
                     <span>6:45</span>
                     <span class="result win">Galibiyet</span>
-                    <span class="match-analysis-btn" data-match-id="2">
-                        <i class="fa-solid fa-chart-line"></i>
-                    </span>
                 </div>
                 <div class="match-row" data-result="win" data-match-id="3">
                     <span>27.06.2025 20:00</span>
@@ -306,9 +290,6 @@
                     <span>11-4</span>
                     <span>3:12</span>
                     <span class="result win">Galibiyet</span>
-                    <span class="match-analysis-btn" data-match-id="3">
-                        <i class="fa-solid fa-chart-line"></i>
-                    </span>
                 </div>
                 <div class="match-row" data-result="loss" data-match-id="4">
                     <span>26.07.2025 18:30</span>
@@ -316,52 +297,17 @@
                     <span>8-11</span>
                     <span>7:28</span>
                     <span class="result loss">Mağlubiyet</span>
-                    <span class="match-analysis-btn" data-match-id="4">
-                        <i class="fa-solid fa-chart-line"></i>
-                    </span>
+                </div>
+            </div>
+            <div id="overlay">
+                <div id="turnuva-wrapper">
+                    <div id="turnuva"></div>
+                    <div id="close-btn">×</div>
                 </div>
             </div>
         </section>
         <!-- Maç Analizi Popup -->
-        <div id="match-analysis-popup" class="popup">
-            <div class="popup-content">
-                <button class="popup-close"><i class="fa-solid fa-times"></i></button>
-                <h2 id="popup-match-title">Maç Analizi</h2>
-                <div class="popup-section">
-                    <h3>Maç Bilgileri</h3>
-                    <p><strong>Rakip:</strong> <span id="popup-opponent-name"></span></p>
-                    <p><strong>Skor:</strong> <span id="popup-your-score"></span> - <span id="popup-opponent-score"></span></p>
-                    <p><strong>Tarih:</strong> <span id="popup-match-date"></span></p>
-                    <p><strong>Süre:</strong> <span id="popup-match-duration"></span></p>
-                    <p><strong>Yer:</strong> <span id="popup-match-location"></span></p>
-                </div>
-                <div class="popup-section">
-                    <h3>İstatistikler</h3>
-                    <div id="stats" class="stats-grid"></div>
-                </div>
-                <div class="popup-section">
-                    <h3>Puan Dağılımı</h3>
-                    <div id="points-bars" class="bar-chart"></div>
-                </div>
-                <div class="popup-section">
-                    <h3>Vuruş Analizi</h3>
-                    <table id="shot-table">
-                        <thead>
-                            <tr>
-                                <th>Vuruş</th>
-                                <th>Siz (%)</th>
-                                <th>Rakip (%)</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <div class="popup-section">
-                    <h3>Oyun Haritası</h3>
-                    <div class="hit-points"></div>
-                </div>
-            </div>
-        </div>
+
         <!-- Achievements Tab -->
         <section id="achievements" class="tab-content">
             <div class="achievements-grid" class="stats-grid">

@@ -57,17 +57,22 @@
 /* Tournament Card */
 
 .tournament-table { margin-top:10px; border-collapse:collapse; width:100%; }
+
 .tournament-row {
-    display:flex; justify-content:space-between; padding:8px;
-    background:#111; margin-bottom:4px; cursor:pointer; border-radius:6px;
+    display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; justify-content:space-between; padding:8px;
+    background:#00000096; margin-bottom:4px; cursor:pointer; border-radius:6px;
 }
-.tournament-row.header { font-weight:bold; background:#222; }
+.tournament-row.header {
+    background: rgba(0, 78, 78, 0.34);
+    font-weight: 700;
+    color: #00ffff;
+}
 
 .tournament-row:not(.header):hover {
     background: transparent;       /* arka plan şeffaf */
-    border: 0.5px solid white;       /* beyaz çerçeve */
+    border: 0.5px solid rgba(255, 255, 255, 0.668);       /* beyaz çerçeve */
     border-radius: 6px;            /* köşeleri yuvarla */
-	box-shadow: 0 0 5px white;
+	box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
 }
 
 #overlay {

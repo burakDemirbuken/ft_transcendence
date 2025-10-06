@@ -747,9 +747,7 @@ export default class extends AView {
         document.addEventListener('click', tabClickHandler);
 
         // Filtreler
-        const timeFilter = document.getElementById('time-filter');
         const resultFilter = document.getElementById('result-filter');
-        timeFilter?.addEventListener('change', timeFilterChangeHandler);
         resultFilter?.addEventListener('change', resultFilterChangeHandler);
 
         // Level progress animasyonu
@@ -822,9 +820,7 @@ export default class extends AView {
 
         document.removeEventListener('click', tabClickHandler);
 
-        const timeFilter = document.getElementById('time-filter');
         const resultFilter = document.getElementById('result-filter');
-        timeFilter?.removeEventListener('change', timeFilterChangeHandler);
         resultFilter?.removeEventListener('change', resultFilterChangeHandler);
 
         // Turnuva ile ilgili eventleri de kaldır

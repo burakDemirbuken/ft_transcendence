@@ -667,9 +667,7 @@ export default class extends AView {
             // Tab tıklamaları
             document.addEventListener('click', tabClickHandler);
             // Filtreler
-            const timeFilter = document.getElementById('time-filter');
             const resultFilter = document.getElementById('result-filter');
-            timeFilter === null || timeFilter === void 0 ? void 0 : timeFilter.addEventListener('change', timeFilterChangeHandler);
             resultFilter === null || resultFilter === void 0 ? void 0 : resultFilter.addEventListener('change', resultFilterChangeHandler);
             // Level progress animasyonu
             profileManager.animateLevelProgress();
@@ -736,9 +734,7 @@ export default class extends AView {
             window.removeEventListener('online', this.onlineHandler);
             window.removeEventListener('offline', this.offlineHandler);
             document.removeEventListener('click', tabClickHandler);
-            const timeFilter = document.getElementById('time-filter');
             const resultFilter = document.getElementById('result-filter');
-            timeFilter === null || timeFilter === void 0 ? void 0 : timeFilter.removeEventListener('change', timeFilterChangeHandler);
             resultFilter === null || resultFilter === void 0 ? void 0 : resultFilter.removeEventListener('change', resultFilterChangeHandler);
             // Turnuva ile ilgili eventleri de kaldır
             (_a = this.table) === null || _a === void 0 ? void 0 : _a.replaceChildren(); // satırları temizle

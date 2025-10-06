@@ -1,0 +1,11 @@
+
+-- ID tekrarı olmaması için ID kısmında autoincrement kullanıldı
+-- Büyük/küçük harf duyarlılığını engellemek için örnek: username TEXT NOT NULL UNIQUE COLLATE NOCASE
+CREATE TABLE user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, -- ID = satır numarası
+    first_name TEXT NOT NULL, -- ulusal karakterler için text kullanıldı
+    last_name TEXT NOT NULL,
+    username TEXT UNIQUE NOT NULL, -- bu sütundaki her değer tabloda tekil olarak var olmalıdır. Büyük küçük harf duyarlı bu haliyle.
+);
+
+
