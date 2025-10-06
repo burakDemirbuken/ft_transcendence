@@ -59,6 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
             (_c = document.querySelector(".selected")) === null || _c === void 0 ? void 0 : _c.classList.toggle("selected");
             e.target.classList.toggle("selected");
         }
+        else if (e.target.matches("[id='language']")) {
+            e.preventDefault();
+            I18n.nextLanguage("navbar");
+            I18n.nextLanguage(pageState.current);
+        }
     });
 });
 function toggleClassOnResize() {

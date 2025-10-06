@@ -64,6 +64,11 @@ document.addEventListener("DOMContentLoaded", () => {
 			document.querySelector(".selected")?.classList.toggle("selected");
 			e.target.classList.toggle("selected");
 		}
+		else if (e.target.matches("[id='language']")) {
+			e.preventDefault();
+			I18n.nextLanguage("navbar");
+			I18n.nextLanguage(pageState.current);
+		}
 	})
 });
 

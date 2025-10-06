@@ -38,15 +38,15 @@ class I18n {
         const translations = await getTranslations(localStorage.getItem("langPref"));
         applyTranslations(translations, section);
     }
-    static async switchLanguage(newLang, section) {
-        localStorage.setItem("langPref", newLang);
-        const translations = await getTranslations(newLang);
-        applyTranslations(translations, section);
-    }
-    static async nextLanguage() {
+    // static async switchLanguage(newLang:string, section:string) {
+    // 	localStorage.setItem("langPref", newLang);
+    // 	const translations = await getTranslations(newLang);
+    // 	applyTranslations(translations, section);
+    // }
+    static async nextLanguage(section) {
         localStorage.setItem("langPref", lang[localStorage.getItem("langPref")].next);
         const translations = await getTranslations(localStorage.getItem("langPref"));
-        applyTranslations(translations, "login");
+        applyTranslations(translations, section);
     }
 }
 export default I18n;
