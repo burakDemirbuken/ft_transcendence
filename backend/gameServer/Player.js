@@ -27,6 +27,13 @@ class Player
 		return this.inputs.get(key);
 	}
 
+	reset()
+	{
+		this.inputs.clear();
+		this.lastActivity = Date.now();
+		this.initialized = false;
+	}
+
 	getState()
 	{
 		return {

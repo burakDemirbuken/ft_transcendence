@@ -238,6 +238,10 @@ class App
 			case 'roundFinish':
 				this.gameRenderer.reset();
 				this.roomUi.showGameUI();
+			case 'finished':
+				this.gameRenderer.reset();
+				this.roomUi.showGameUI();
+				console.log('🏆 Tournament finished:', JSON.stringify(data, null, 2));
 			default:
 				console.log('Unhandled tournament event:', subEvent, data);
 		}

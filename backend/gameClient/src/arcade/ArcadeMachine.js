@@ -297,7 +297,8 @@ class ArcadeMachine
 				mesh =>
 				{
 					if (mesh) mesh.dispose();
-				});
+				}
+			);
     }
 }
 

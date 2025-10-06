@@ -192,6 +192,7 @@ class PingPong extends EventEmitter
 		{
 			this.status = 'finished';
 			this.finishTime = Date.now();
+			this.players.forEach(p => p.reset());
 			this.emit('finished',
 				{
 					players: this.players.map(p => p.id),
@@ -207,10 +208,18 @@ class PingPong extends EventEmitter
 							score: this.team.get(2).score,
 							playersId: this.team.get(2).playersId
 						},
-						winnerTeam: this.getWinnerTeam(),
-						loserTeam: this.getLoserTeam(),
-						winnerPlayers: this.getWinnerPlayers(),
-						loserPlayers: this.getLoserPlayers(),
+						winner:
+						{
+							team: this.getWinnerTeam(),
+							ids: this.getWinnerTeam().playersId,
+							playerInstances: this.players.filter(p => this.getWinnerTeam().playersId.includes(p.id))
+						},
+						loser:
+						{
+							team: this.getLoserTeam(),
+							ids: this.getLoserTeam().playersId,
+							playerInstances: this.players.filter(p => this.getLoserTeam().playersId.includes(p.id))
+						},
 						time:
 						{
 							start: this.startTime,
@@ -396,22 +405,6 @@ class PingPong extends EventEmitter
 		return this.team.get(1).score < this.team.get(2).score ? this.team.get(1) : this.team.get(2);
 	}
 
-	getWinnerPlayers()
-	{
-		if (!this.isFinished())
-			return null;
-		const winningTeam = this.getWinnerTeam();
-		return this.players.filter(p => winningTeam.playersId.includes(p.id));
-	}
-
-	getLoserPlayers()
-	{
-		if (!this.isFinished())
-			return null;
-		const losingTeam = this.getLoserTeam();
-		return this.players.filter(p => losingTeam.playersId.includes(p.id));
-	}
-
 	getScore()
 	{
 		if (this.status !== 'not initialized')
@@ -420,8 +413,8 @@ class PingPong extends EventEmitter
 				right: "-"
 			};
 		return {
-			left: this.team.get(1).score,
-			right: this.team.get(2).score
+			right: this.team.get(1).score,
+			left: this.team.get(2).score
 		};
 	}
 

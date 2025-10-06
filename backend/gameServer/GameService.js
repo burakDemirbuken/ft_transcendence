@@ -181,6 +181,7 @@ class GameService
 		console.log(`Gelen namespace: ${namespace}`);
 		console.log(`Gelen action: ${action}`);
 		console.log(`Gelen payload: ${JSON.stringify(message.payload, null, 2)}`);
+		console.log('-------------------------');
 		switch (namespace)
 		{
 			case 'room':
@@ -209,7 +210,7 @@ class GameService
 		}
 	}
 
-	sendPlayers(players, message)
+		sendPlayers(players, message)
 	{
 		players.forEach(p => {
 			const connId = this.connectionId.get(p.id);
@@ -307,6 +308,12 @@ class GameService
 						break;
 					case 'nextRound':
 						this.sendPlayers(players, { type: 'tournament/initial', payload: payload });
+						break;
+					case 'finished':
+						this.sendPlayers(players, { type: 'tournament/finished', payload: payload });
+						break;
+					default:
+						console.error('❌ Unhandled tournament event type:', type);
 				}
 			}
 		);

@@ -44,7 +44,6 @@ class TournamentManager extends EventEmitter
 		tournament.on('started',
 			({data, players}) =>
 				{
-					console.log(`🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁`, JSON.stringify(data, null ,2));
 					this.emit(`tournament_${tournamentId}`, { type: 'started', payload: data, players: players });
 				}
 		);
