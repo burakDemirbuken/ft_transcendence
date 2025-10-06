@@ -229,6 +229,7 @@
 			"title": "Danger Zone",
 			"prompt": "Delete Account:",
 			"button": "Delete"
-		}
+		},
+		"delacc": "Are you sure about deleting your account? This action is irreversible."
 	}
 }

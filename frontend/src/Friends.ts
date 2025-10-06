@@ -44,8 +44,7 @@ async function createFriends() {
 				<div class="user-menu">
 					<button class="menu-btn">⋮</button>
 					<div class="menu-options">
-						<button id="play" class="option">Play</button>
-						<button id="msg" class="option">Message</button>
+						<button id="prof" class="option">Profile</button>
 						<button id="unfr" class="option">Unfriend</button>
 					</div>
 				</div>

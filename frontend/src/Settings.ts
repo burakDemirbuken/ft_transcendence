@@ -15,7 +15,13 @@ function settingsClick(e) {
 		document.querySelector(".current")?.classList.remove("current");
 		e.target.classList.add("current");
 	}
-	// ADD DELETE ACCOUNT
+	else if (e.target.id === "delete-account")
+	{
+		e.preventDefault();
+		const isConfirmed = confirm("You sure bout that?"); 
+		if (isConfirmed)
+			console.log("DELETE THE FRKN THING!!");
+	}
 }
 
 function settingsInput(e) {

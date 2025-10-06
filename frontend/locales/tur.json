@@ -229,6 +229,8 @@
 			"title": "Tehlikel Bölge",
 			"prompt": "Hesabı Sil:",
 			"button": "Sil"
-		}
+		},
+		"delacc": "Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
 	}
+
 }

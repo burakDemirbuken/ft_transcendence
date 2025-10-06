@@ -229,6 +229,7 @@
 			"title": "Gefahrenzone",
 			"prompt": "Konto Löschen:",
 			"button": "Löschen"
-		}
+		},
+		"delacc": "Möchten Sie Ihr Konto wirklich löschen? Möchten Sie Ihr Konto löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
 	}
 }
