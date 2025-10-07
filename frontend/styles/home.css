@@ -381,7 +381,7 @@ body {
     position: relative;
     transition: all 0.4s ease;
     width: 220px;
-    height: 280px;
+    height: 300px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
