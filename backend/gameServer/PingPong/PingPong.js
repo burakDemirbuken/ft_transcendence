@@ -128,10 +128,11 @@ class PingPong extends EventEmitter
 					}
 					this.emit('goal', border);
 					this.ball.reset();
-					const interval = setInterval(() =>
+					if (this.finishedControls())
+						return;
+					setTimeout(() =>
 					{
 						this.ball.launchBall({x: border == "left" ? -1 : 1, y: Math.random() - 0.5});
-						clearInterval(interval);
 					}, 500);
 				}
 				else if (border === 'top')
@@ -167,7 +168,7 @@ class PingPong extends EventEmitter
 			return;
 
 		if (this.status !== 'playing')
-			return new Error('Game is not currently playing: ' + this.status);
+			return;
 
 		this.gameTime += deltaTime;
 		this.lastUpdateTime = Date.now();
@@ -179,7 +180,6 @@ class PingPong extends EventEmitter
 		this.ball.update(deltaTime);
 		this.checkCollisions();
 
-		this.finishedControls();
 		this.emit('gameStateUpdate', this.getGameState());
 
 	}
@@ -187,7 +187,7 @@ class PingPong extends EventEmitter
 	finishedControls()
 	{
 		if (this.isFinished())
-			return;
+			return true;
 		if (this.team.get(1).score >= this.settings.maxScore || this.team.get(2).score >= this.settings.maxScore)
 		{
 			this.status = 'finished';
@@ -230,9 +230,11 @@ class PingPong extends EventEmitter
 					}
 				}
 			);
-
+			this.finishTime = Date.now();
 			console.log(`🏁 Game finished! Final Score - Left: ${this.team.get(1).score}, Right: ${this.team.get(2).score}`);
+			return true;
 		}
+		return false;
 	}
 
 
@@ -308,10 +310,9 @@ class PingPong extends EventEmitter
 		}
 		console.log('▶️ Starting game...');
 		this.status = 'countdown';
-		const interval = setInterval(() =>
+		setTimeout(() =>
 		{
 			this.status = 'playing';
-			clearInterval(interval);
 		}, 1000);
 	}
 
@@ -407,14 +408,9 @@ class PingPong extends EventEmitter
 
 	getScore()
 	{
-		if (this.status !== 'not initialized')
-			return {
-				left: "-",
-				right: "-"
-			};
 		return {
-			right: this.team.get(1).score,
-			left: this.team.get(2).score
+			right: this.team?.get(1)?.score || 0,
+			left: this.team?.get(2)?.score || 0
 		};
 	}
 

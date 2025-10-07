@@ -20,6 +20,8 @@ class Tournament extends EventEmitter
 		this.spectators = [];
 		this.matches = new Map(); // Round -> Matchs array
 
+		this.winner = null;
+
 		this.startTime = null;
 		this.endTime = null;
 
@@ -27,13 +29,10 @@ class Tournament extends EventEmitter
 		this.currentRound = 0;
 		this.maxRounds = Math.log2(this.maxPlayers);
 		this.finishedMatchesCount = 0;
-		console.log('Tournament max players-------------------------------------:', JSON.stringify(tournamentSettings, null, 2));
-		console.log('Tournament max rounds-------------------------------------:', this.maxRounds);
 		for (let i = 0; i < this.maxRounds; i++)
 		{
 			const matchs = [];
 			const matchCount = Math.pow(2, this.maxRounds - i - 1);
-			console.log('Tournament round', i + 1, 'match count:', matchCount);
 
 			for (let j = 0; j < matchCount; j++)
 			{
@@ -53,10 +52,7 @@ class Tournament extends EventEmitter
 				);
 			}
 
-			this.matches.set(i, {
-					matchs: matchs,
-				}
-			);
+			this.matches.set(i, matchs);
 		}
 		this.status = 'waiting'; // 'waiting', 'running', 'finished', "ready2start"
 	}
@@ -79,7 +75,7 @@ class Tournament extends EventEmitter
 			return arr;
 		}
 		this.players = shuffle(this.players);
-		let matchs = this.matches.get(this.currentRound).matchs;
+		let matchs = this.matches.get(this.currentRound);
 		for (let i = 0; i < this.players.length; i += 2)
 		{
 			const match = matchs[i / 2];
@@ -91,12 +87,12 @@ class Tournament extends EventEmitter
 
 	getMatchmakingInfo()
 	{
-		return {
-			currentRound: this.currentRound,
-			maxRounds: this.maxRounds,
-			matchs: this.matches.forEach((round, index) => ({
-				round: index,
-				matchs: round.matchs.map(match => ({
+		const rounds = [];
+
+		this.matches.forEach((matchsArray, roundIndex) => {
+			rounds.push({
+				round: roundIndex,
+				matchs: matchsArray.map(match => ({
 					matchId: match.matchId,
 					matchNumber: match.matchNumber,
 					matchStatus: match.matchStatus,
@@ -106,7 +102,13 @@ class Tournament extends EventEmitter
 					winner: match.winner,
 					loser: match.loser,
 				}))
-			})),
+			});
+		});
+
+		return {
+			currentRound: this.currentRound,
+			maxRounds: this.maxRounds,
+			rounds: rounds,
 			status: this.status,
 			participants: this.players.map(p => ({ id: p.id, name: p.name })),
 		};
@@ -143,21 +145,10 @@ class Tournament extends EventEmitter
 
 	nextRound()
 	{
-		if (this.currentRound >= this.maxRounds)
-			return this.emit('tournamentFinished',
-				{
-					players: this.players,
-					data:
-					{
-						matchMakingInfo: this.getMatchmakingInfo()
-					}
-				}
-			);
-
 		this.currentRound++;
 		this.currentMatches = [];
-		const prevmatches = this.matches.get(this.currentRound - 1).matchs;
-		const matchs = this.matches.get(this.currentRound).matchs;
+		const prevmatches = this.matches.get(this.currentRound - 1);
+		const matchs = this.matches.get(this.currentRound);
 		for (let i = 0; i < matchs.length; i++)
 		{
 			const match = matchs[i];
@@ -235,16 +226,20 @@ class Tournament extends EventEmitter
 
 		if (this.finishedMatchesCount === this.currentMatches.length)
 		{
-			if (this.currentRound + 1 >= this.maxRounds)
+			if (this.currentRound === this.maxRounds - 1)
 			{
 				this.status = 'finished';
 				this.endTime = Date.now();
+				this.winner = this.currentMatches[0].winner;
+				let currentPlayers = [];
+				this.players.forEach(player => currentPlayers.push(player));
+				this.spectators.forEach(spector => currentPlayers.push(spector));
 				this.emit('finished',
 					{
-						players: this.players,
+						players: currentPlayers,
 						data:
 						{
-							matchMakingInfo: this.getMatchmakingInfo(),
+							finishState: this.getFinishedInfo(),
 							tournamentDuration: this.endTime - this.startTime,
 						}
 					}
@@ -252,7 +247,8 @@ class Tournament extends EventEmitter
 			}
 			else
 				this.nextRound();
-			return
+			this.finishedMatchesCount = 0;
+			return;
 		}
 		this.emit("update", {
 			players: this.players,
@@ -340,9 +336,29 @@ class Tournament extends EventEmitter
 
 	getFinishedInfo()
 	{
+		const rounds = [];
+
+		this.matches.forEach((matchsArray, roundIndex) => {
+			rounds.push({
+				round: roundIndex,
+				matchs: matchsArray.map(match => ({
+					matchId: match.matchId,
+					matchNumber: match.matchNumber,
+					matchStatus: match.matchStatus,
+					player1: match.player1 ? { id: match.player1.id, name: match.player1.name } : null,
+					player2: match.player2 ? { id: match.player2.id, name: match.player2.name } : null,
+					score: match.score,
+					winner: match.winner ? { id: match.winner.id, name: match.winner.name } : null,
+					loser: match.loser ? { id: match.loser.id, name: match.loser.name } : null,
+				}))
+			});
+		});
+
 		return {
-			// finish state
-		}
+			tournamentName: this.tournamentName,
+			winner: this.winner,
+			matches: rounds
+		};
 	}
 
 	destroy()

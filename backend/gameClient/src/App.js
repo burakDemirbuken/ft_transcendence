@@ -9,10 +9,10 @@ import rendererConfig from './json/rendererConfig.js';
 
 class App
 {
-	constructor()
+	constructor(id, name)
 	{
-		this.playerId = this._TEST_generateRandomId();
-		this.playerName = this._TEST_generateRandomName();
+		this.playerId = id;
+		this.playerName = name;
 		this.gameRenderer = new GameRenderer();
 		this.webSocketClient = new WebSocketClient(window.location.hostname, 3002);
 		this.roomUi = new RoomUi();
@@ -148,22 +148,6 @@ class App
 	readyState(readyState)
 	{
 		this.webSocketClient.send('room/setReady', {isReady: readyState });
-	}
-
-	_TEST_generateRandomId()
-	{
-		return Math.random().toString(36).substr(2, 6).toUpperCase();
-	}
-
-	_TEST_generateRandomName()
-	{
-		const names = [
-			'Player', 'Gamer', 'User', 'Tester', 'Demo',
-			'Alpha', 'Beta', 'Gamma', 'Delta', 'Echo'
-		];
-		const randomName = names[Math.floor(Math.random() * names.length)];
-		const randomNumber = Math.floor(Math.random() * 999) + 1;
-		return `${randomName}${randomNumber}`;
 	}
 
 	// ================================

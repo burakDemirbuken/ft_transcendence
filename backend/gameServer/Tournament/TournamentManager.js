@@ -39,7 +39,13 @@ class TournamentManager extends EventEmitter
 			throw new Error(`Tournament Count must be a power of 2: ${tournamentSettings.maxPlayers}`);
 		const tournament = new Tournament(tournamentSettings, gameSettings);
 		tournament.on('update', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'update', payload: data, players: players }));
-		tournament.on('finished', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data, players: players }));
+		tournament.on('finished', ({data, players}) =>
+			{
+				this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data, players: players });
+				this.tournaments.get(tournamentId).destroy();
+				this.tournaments.delete(tournamentId);
+				console.log(`🗑️ Tournament ${tournamentId} deleted after finishing`);
+			});
 		tournament.on('roundFinish', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'roundFinish', payload: data, players: players }));
 		tournament.on('started',
 			({data, players}) =>
@@ -123,13 +129,6 @@ class TournamentManager extends EventEmitter
 			{
 				if (tournament.players.every(p => p.initialized))
 					tournament.start();
-			}
-			if (tournament.isFinished())
-			{
-				console.log(`🏁 Tournament ${tournamentId} finished`);
-				this.emit(`tournament_${tournamentId}`,{type: 'finished', payload: tournament.getFinishedInfo(), players: tournament.participants});
-				this.tournaments.delete(tournamentId);
-				continue;
 			}
 		}
 

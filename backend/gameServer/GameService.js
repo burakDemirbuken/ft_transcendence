@@ -210,7 +210,7 @@ class GameService
 		}
 	}
 
-		sendPlayers(players, message)
+	sendPlayers(players, message)
 	{
 		players.forEach(p => {
 			const connId = this.connectionId.get(p.id);
@@ -310,6 +310,9 @@ class GameService
 						this.sendPlayers(players, { type: 'tournament/initial', payload: payload });
 						break;
 					case 'finished':
+						console.log('Tournament finished, sending results to players');
+						console.log('players: ',JSON.stringify(players, null, 2));
+						console.log('payload: ',JSON.stringify(payload, null, 2));
 						this.sendPlayers(players, { type: 'tournament/finished', payload: payload });
 						break;
 					default:
