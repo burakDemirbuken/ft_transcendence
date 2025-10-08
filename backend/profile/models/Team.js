@@ -1,6 +1,4 @@
-import { Sequelize, DataTypes, Model } from '@sequelize/core';
-
-module.exports = (sequelize) => {
+export default (sequelize, DataTypes, Model) => {
 
 	class Team extends Model {}
 
@@ -12,21 +10,21 @@ module.exports = (sequelize) => {
 		},
 		playerOneId: {
 			type: DataTypes.STRING,
-			allowNull: false,
+			allowNull: true,
 			references: {
-				model: 'Users',
+				model: 'profiles',
 				key: 'id'
 			},
-			onDelete: 'CASCADE'
+			onDelete: 'SET NULL'
 		},
 		playerTwoId: {
 			type: DataTypes.STRING,
-			allowNull: false,
+			allowNull: true,
 			references: {
-				model: 'Users',
+				model: 'profiles',
 				key: 'id'
 			},
-			onDelete: 'CASCADE'
+			onDelete: 'SET NULL'
 		},
 	}, {
 		sequelize,

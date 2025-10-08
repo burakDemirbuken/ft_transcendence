@@ -14,7 +14,7 @@ class App
 		this.playerId = id;
 		this.playerName = name;
 		this.gameRenderer = new GameRenderer();
-		this.webSocketClient = new WebSocketClient(window.location.hostname, 3002);
+		this.webSocketClient = new WebSocketClient(window.location.hostname, 3004);
 		this.roomUi = new RoomUi();
 		this.inputManager = new InputManager();
 
@@ -97,7 +97,7 @@ class App
 		{
 		});
 
-		this.webSocketClient.connect({ id: this.playerId, name: this.playerName });
+		this.webSocketClient.connect("ws/client", { userID: this.playerId, userName: this.playerName });
 	}
 
 	createRoom(mode, gameSettings)
@@ -111,7 +111,7 @@ class App
 				gameMode: mode,
 				...gameSettings
 			};
-			this.webSocketClient.send('room/create', data);
+			this.webSocketClient.send('create', data);
 		}
 		catch (error)
 		{
@@ -132,7 +132,7 @@ class App
 				throw new Error('Not connected to server');
 			if (!roomId)
 				throw new Error('Room ID is required to join a room');
-			this.webSocketClient.send('room/join', { roomId });
+			this.webSocketClient.send('join', { roomId });
 		}
 		catch (error)
 		{
@@ -142,12 +142,12 @@ class App
 
 	startGame()
 	{
-		this.webSocketClient.send('room/startGame');
+		this.webSocketClient.send('startGame');
 	}
 
 	readyState(readyState)
 	{
-		this.webSocketClient.send('room/setReady', {isReady: readyState });
+		this.webSocketClient.send('setReady', {isReady: readyState });
 	}
 
 	// ================================

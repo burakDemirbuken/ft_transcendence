@@ -1,6 +1,4 @@
-import { Sequelize, DataTypes, Model } from '@sequelize/core';
-
-module.exports = (sequelize) => {
+export default (sequelize, DataTypes, Model) => {
 
     class MatchHistory extends Model {}
 
@@ -14,19 +12,19 @@ module.exports = (sequelize) => {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: 'Teams',
+				model: 'teams',
 				key: 'id'
 			},
-			onDelete: 'CASCADE'
+			onDelete: 'SET NULL'
 		},
 		teamTwoID: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: 'Teams',
+				model: 'teams',
 				key: 'id'
 			},
-			onDelete: 'CASCADE'
+			onDelete: 'SET NULL'
 		},
 		teamOneScore: {
 			type: DataTypes.INTEGER,
@@ -40,10 +38,10 @@ module.exports = (sequelize) => {
 			type: DataTypes.INTEGER,
 			defaultValue: null,
 			references: {
-				model: 'Teams',
+				model: 'teams',
 				key: 'id'
 			},
-			onDelete: 'CASCADE'
+			onDelete: 'SET NULL'
 		},
         matchStartDate: {
             type: DataTypes.DATE

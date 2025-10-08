@@ -1,6 +1,4 @@
-import { Sequelize, DataTypes, Model } from '@sequelize/core';
-
-module.exports = (sequelize) => {
+export default (sequelize, DataTypes, Model) => {
 
     class Friend extends Model {}
 
@@ -10,23 +8,13 @@ module.exports = (sequelize) => {
             autoIncrement: true,
             primaryKey: true
         },
-        userid: {
+        userName: {
             type: DataTypes.STRING,
-            allowNull: false,
-            references: {
-                model: 'Users',
-                key: 'id'
-            },
-            onDelete: 'CASCADE'
+            allowNull: false
         },
-        peerid: {
+        peerName: {
             type: DataTypes.STRING,
-            allowNull: false,
-            references: {
-                model: 'Users',
-                key: 'id'
-            },
-            onDelete: 'CASCADE'
+            allowNull: false
         },
         status: {
             type: DataTypes.ENUM('pending', 'accepted', 'blocked'),
@@ -35,7 +23,7 @@ module.exports = (sequelize) => {
         indexes: [
             {
                 unique: true,
-                fields: ['userid', 'peerid']
+                fields: ['userName', 'peerName']
             }
         ],
         sequelize,

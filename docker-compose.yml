@@ -3,35 +3,35 @@ networks:
     driver: bridge
 
 volumes:
-  frontend_src:
+#  frontend_src:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      device: ./frontend
+#      o: bind
+#  gateway_src:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      device: ./backend/gateway
+#      o: bind
+#  authentication_src:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      device: ./backend/authentication
+#      o: bind
+#  email_src:
+#    driver: local
+#    driver_opts:
+#      type: none
+#      device: ./backend/email
+#      o: bind
+  profile_src:
     driver: local
     driver_opts:
       type: none
-      device: ./frontend
-      o: bind
-  gateway_src:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/gateway
-      o: bind
-  authentication_src:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/authentication
-      o: bind
-  email_src:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/email
-      o: bind
-  user_src:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/users
+      device: ./backend/profile
       o: bind
   aiServer_src:
     driver: local
@@ -39,12 +39,21 @@ volumes:
       type: none
       device: ./backend/aiServer
       o: bind
+
   gameServer:
     driver: local
     driver_opts:
       type: none
       device: ./backend/gameServer
       o: bind
+  room_src:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/room
+      o: bind
+
+
 
 services:
 #  frontend:
@@ -111,11 +120,11 @@ services:
 #      - /app/node_modules
 #    environment:
 #      - EMAIL_SERVICE=gmail
-#      - EMAIL_USER=forty2transcendence@gmail.com
+#      - EMAIL_profile=forty2transcendence@gmail.com
 #      - EMAIL_PASS=gfyk pfqi gvpm ahtx
 #      - EMAIL_PORT=3005
 #      - HOST=0.0.0.0
-#
+
   gameserver:
     container_name: gameserver
     build: ./backend/gameServer
@@ -130,17 +139,43 @@ services:
       - gameServer:/app
       - /app/node_modules
 
-  user:
-    container_name: user
-    build: ./backend/users
+  room:
+    container_name: room
+    build: ./backend/room
     restart: on-failure
     expose:
-      - 3006
+      - 3004
+    # BURAK: test için portı dışarıya açtım.
+    ports:
+      - "3004:3004"
     volumes:
-      - user_src:/app
+      - room_src:/app
       - /app/node_modules
     networks:
       - transcendency
+
+#  profile:
+#    container_name: profile
+#    build: ./backend/profile
+#    restart: on-failure
+#    expose:
+#      - 3006
+#    volumes:
+#      - profile_src:/app
+#      - /app/node_modules
+#    networks:
+#      - transcendency
+#
+#  friend:
+#    container_name: friend
+#    build: ./backend/friend
+#    restart: on-failure
+#    expose:
+#      - 3007
+#    volumes:
+#      - /app/node_modules
+#    networks:
+#      - transcendency
 
   aiserver:
     container_name: ai-server

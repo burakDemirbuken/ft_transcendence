@@ -5,9 +5,14 @@ import cookie from '@fastify/cookie'
 import jwt from '@fastify/jwt'
 /* import cors from '@fastify/cors' */
 
-const gateway = Fastify({ logger: true })
+const fastify = Fastify({
+	logger: true,
+	requestTimeout: 30000, // 30 seconds
+	keepAliveTimeout: 65000, // 65 seconds
+	connectionTimeout: 30000, // 30 seconds
+})
 
-/* await gateway.register(cors, {
+/* await fastify.register(cors, {
 	origin: '*',
 	methods: ['GET', 'POST', 'PUT', 'DELETE'],
 	allowedHeaders: ['Content-Type', 'Authorization'],
@@ -15,20 +20,22 @@ const gateway = Fastify({ logger: true })
 	credentials: true
 }); */
 
-await gateway.register(globalsPlugin);
-await gateway.register(jwt, {
-	secret: gateway.secrets.jwtSecret, //?
+await fastify.register(globalsPlugin)
+await fastify.register(jwt, {
+	secret: fastify.secrets.jwtSecret, //?
 });
 
-await gateway.register(cookie);
+await fastify.register(cookie)
 
-allRoutes(gateway);
+allRoutes(fastify)
 
-gateway.listen({ port: 3000, host: '0.0.0.0' }, async (err, address) => {
-	if (err) {
-		gateway.log.error(err);
+await fastify.ready()
+
+fastify.listen({ port: 3000, host: '0.0.0.0' })
+	.then(() => {
+		console.log(`Gateway is running ${fastify.server.address().port}`);
+		console.log(`requests will be forwarded`);
+	}).catch(err => {
+		fastify.log.error(err);
 		process.exit(1);
-	}
-	console.log(`Gateway is running ${address}`);
-	console.log(`requests will be forwarded`);
-});
+	});
