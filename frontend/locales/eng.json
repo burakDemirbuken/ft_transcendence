@@ -221,6 +221,7 @@
 		"account": {
 			"title": "Account",
 			"uname": "User Name",
+			"dname": "Display Name",
 			"email": "Unfriend",
 			"pass": "Password"
 		},

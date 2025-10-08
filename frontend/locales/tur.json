@@ -221,6 +221,7 @@
 		"account": {
 			"title": "Hesap",
 			"uname": "Kullanıcı Adı",
+			"dname": "Görünür Ad",
 			"email": "Email",
 			"pass": "Şifre"
 		},
