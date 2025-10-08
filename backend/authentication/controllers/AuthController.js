@@ -117,6 +117,13 @@ function generateVerificationCode() {
 }
 
 /**
+ * Generate secure refresh token
+ */
+function generateRefreshToken() {
+  return crypto.randomBytes(64).toString('hex');
+}
+
+/**
  * Store verification token in memory (for email verification)
  */
 function storeVerificationToken(email, type = 'email_verification') {
@@ -704,7 +711,7 @@ class AuthController {
 // 2FA VERIFICATION (username OR email)
   async verify2FA(request, reply) {
     try {
-      const { login, code } = request.body;
+      const { login, code, rememberMe = false } = request.body;
     
       if (!login || !code) {
         const html = generateHTML(
@@ -771,23 +778,37 @@ class AuthController {
       // Update last login
       await user.markLogin();
     
-      // Generate JWT token
+      // Generate JWT access token (1 hour)
       const accessToken = await reply.jwtSign(
         {
           userId: user.id,
           username: user.username,
           email: user.email
         },
-        { expiresIn: '24h' }
+        { expiresIn: '1m' } // TEST: 1 minute
       );
+
+      // Generate refresh token
+      const refreshToken = generateRefreshToken();
+      await user.setRefreshToken(refreshToken, rememberMe);
     
-      // Set cookie
+      // Set access token cookie
       reply.setCookie('accessToken', accessToken, {
         httpOnly: true,
         secure: true,
         sameSite: 'strict',
         path: '/',
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        maxAge: 1 * 60 * 1000 // TEST: 1 minute
+      });
+
+      // Set refresh token cookie (TEST: remember me'ye göre 4 dakika veya 10 dakika)
+      const refreshTokenMaxAge = rememberMe ? 10 * 60 * 1000 : 4 * 60 * 1000;
+      reply.setCookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        path: '/',
+        maxAge: refreshTokenMaxAge
       });
     
       // Remove 2FA code from memory
@@ -853,8 +874,23 @@ class AuthController {
   // LOGOUT
   async logout(request, reply) {
     try {
+      // Get refresh token from cookie to identify user
+      const refreshToken = request.cookies.refreshToken;
+
+      if (refreshToken) {
+        // Find user and clear refresh token from database
+        const user = await User.findOne({
+          where: { refresh_token: refreshToken }
+        });
+
+        if (user) {
+          await user.clearRefreshToken();
+        }
+      }
+
       // Clear cookies
       reply.clearCookie('accessToken');
+      reply.clearCookie('refreshToken');
 
       reply.send({
         success: true,
@@ -869,6 +905,8 @@ class AuthController {
       });
     }
   }
+
+  // LOGOUT
 }
 
 export default new AuthController();

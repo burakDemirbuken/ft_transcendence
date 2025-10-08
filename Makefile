@@ -218,7 +218,7 @@ help:
 	@echo "  authentication   - Start authentication service"
 	@echo "  gateway          - Start gateway service"
 	@echo "  sqlite           - Start sqlite service"
-	@echo "  nginx            - Start nginx service"
+	@echo "  nginx            - Start nginx service" 
 	@echo "  gameserver       - Start gameserver service (if uncommented)"
 	@echo "  user             - Start user service (if uncommented)"
 	@echo "  livechat         - Start livechat service (if uncommented)"

@@ -46,6 +46,18 @@ const User = sequelize.define('User', {
   last_login_at: {
     type: DataTypes.DATE,
     allowNull: true
+  },
+  refresh_token: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  refresh_token_expires_at: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  remember_me: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   }
 }, {
   tableName: 'users',
@@ -94,6 +106,27 @@ User.prototype.validatePassword = async function(password) {
 User.prototype.markLogin = async function() {
   this.last_login_at = new Date();
   await this.save();
+};
+
+User.prototype.setRefreshToken = async function(refreshToken, rememberMe = false) {
+  this.refresh_token = refreshToken;
+  this.remember_me = rememberMe; // Remember me durumunu kaydet
+  // TEST: Remember me açıksa 10 dakika, değilse 4 dakika
+  const expiryMinutes = rememberMe ? 10 : 4;
+  this.refresh_token_expires_at = new Date(Date.now() + expiryMinutes * 60 * 1000);
+  await this.save();
+};
+
+User.prototype.clearRefreshToken = async function() {
+  this.refresh_token = null;
+  this.refresh_token_expires_at = null;
+  await this.save();
+};
+
+User.prototype.isRefreshTokenValid = function(refreshToken) {
+  return this.refresh_token === refreshToken && 
+         this.refresh_token_expires_at && 
+         this.refresh_token_expires_at > new Date();
 };
 
 User.prototype.toSafeObject = function() {

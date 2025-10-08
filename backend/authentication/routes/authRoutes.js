@@ -1,17 +1,94 @@
 import authController from '../controllers/AuthController.js';
 
 /**
- * JWT verification middleware
+ * JWT verification middleware with automatic refresh
  */
 async function verifyJWT(request, reply) {
   try {
     await request.jwtVerify();
   } catch (err) {
-    reply.status(401).send({
-      success: false,
-      error: 'Invalid or expired token',
-      code: 'INVALID_TOKEN'
-    });
+    // Access token failed, try refresh
+    const refreshToken = request.cookies.refreshToken;
+    
+    if (!refreshToken) {
+      return reply.status(401).send({
+        success: false,
+        error: 'Authentication required',
+        code: 'NO_REFRESH_TOKEN'
+      });
+    }
+
+    try {
+      // Find user by refresh token
+      const User = (await import('../models/User.js')).default;
+      const user = await User.findOne({
+        where: { refresh_token: refreshToken }
+      });
+
+      if (!user || !user.isRefreshTokenValid(refreshToken)) {
+        if (user) await user.clearRefreshToken();
+        return reply.status(401).send({
+          success: false,
+          error: 'Session expired, please login again',
+          code: 'REFRESH_TOKEN_EXPIRED'
+        });
+      }
+
+      // Generate new tokens
+      const newAccessToken = await reply.jwtSign(
+        {
+          userId: user.id,
+          username: user.username,
+          email: user.email
+        },
+        { expiresIn: '1m' } // TEST: 1 minute
+      );
+
+      // Calculate remaining time for refresh token
+      const now = new Date();
+      const remainingMs = user.refresh_token_expires_at.getTime() - now.getTime();
+      
+      // Generate new refresh token with remaining time (remember me durumuna göre)
+      const crypto = await import('crypto');
+      const newRefreshToken = crypto.randomBytes(64).toString('hex');
+      user.refresh_token = newRefreshToken;
+      // Remember me durumunu koru ve kalan süreyi ona göre ayarla (TEST: dakika cinsinden)
+      const maxMinutes = user.remember_me ? 10 : 4;
+      const maxMs = maxMinutes * 60 * 1000;
+      // Kalan süre ile maksimum sürenin küçüğünü al
+      const newExpiryMs = Math.min(remainingMs, maxMs);
+      user.refresh_token_expires_at = new Date(Date.now() + newExpiryMs);
+      await user.save();
+
+      // Set new cookies
+      reply.setCookie('accessToken', newAccessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        path: '/',
+        maxAge: 1 * 60 * 1000 // TEST: 1 minute
+      });
+
+      reply.setCookie('refreshToken', newRefreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        path: '/',
+        maxAge: newExpiryMs
+      });
+
+      // Verify the new token and continue
+      request.cookies.accessToken = newAccessToken;
+      await request.jwtVerify();
+      
+    } catch (refreshErr) {
+      console.log('Auto-refresh failed:', refreshErr);
+      reply.status(401).send({
+        success: false,
+        error: 'Authentication failed',
+        code: 'AUTO_REFRESH_FAILED'
+      });
+    }
   }
 }
 
@@ -109,7 +186,8 @@ export default async function authRoutes(fastify, options) {
         required: ['login', 'code'],
         properties: {
           login: { type: 'string' },
-          code: { type: 'string', minLength: 6, maxLength: 6 }
+          code: { type: 'string', minLength: 6, maxLength: 6 },
+          rememberMe: { type: 'boolean' }
         }
       }
     }
