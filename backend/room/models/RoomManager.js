@@ -11,13 +11,13 @@ class RoomManager extends EventEmitter
 	{
 		super();
 		this.rooms = new Map();
-		setInterval(() => {
+/* 		setInterval(() => {
 			console.log(`Current rooms: ${this.rooms.size}`);
 			this.rooms.forEach((room, roomId) => {
 				console.log(`Room ID: ${roomId}, Name: ${room.name}, Players: ${room.players.length}/${room.maxPlayers}, Status: ${room.status}`);
 				console.log('Players:', room.players.map(p => ({ id: p.id, name: p.name, isReady: p.isReady })));
 			});
-		}, 1000); // Log every 1 second
+		}, 1000); // Log every 1 second */
 	}
 
 	handleRoomMessage(action, payload, player)
@@ -136,7 +136,7 @@ class RoomManager extends EventEmitter
 		return room;
 	}
 
-	
+
 	updateRoomStatus(roomId, status)
 	{
 		const room = this.getRoom(roomId);

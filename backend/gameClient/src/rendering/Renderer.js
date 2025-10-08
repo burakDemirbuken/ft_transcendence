@@ -45,7 +45,6 @@ class Renderer
 		const ctx = machine.getScreenContext();
 		this.clearScreen(ctx);
 
-		console.log('data', JSON.stringify(gameData, null, 2));
 		if (gameData.players)
 		{
 			gameData.players.forEach(

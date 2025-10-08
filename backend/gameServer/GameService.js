@@ -19,12 +19,16 @@ class GameService
 	{
 		this.gameManager = new GameManager();
 		this.websocketServer = new WebSocketServer();
+		this.roomSocket = new WebSocketClient('ws://room-service:3001');
 		this.roomManager = new RoomManager();
 		this.tournamentManager = new TournamentManager();
-		this.connectionId = new Map(); //  playerId -> 
+		this.connectionId = new Map(); //  playerId ->
 		this.players = new Map(); // playerId -> Player instance
 
-		setInterval(
+		this.gameManager.start();
+		this.tournamentManager.start();
+		this.setupRoomEvents();
+/* 		setInterval(
 			() =>
 			{
 				console.log('--- Connected Players ---');
@@ -60,10 +64,7 @@ class GameService
 				console.log('');
 			},
 			5000
-		);
-		this.gameManager.start();
-		this.tournamentManager.start();
-		this.setupRoomEvents();
+		); */
 	}
 
 	setupRoomEvents()
@@ -190,6 +191,7 @@ class GameService
 		console.log(`Gelen namespace: ${namespace}`);
 		console.log(`Gelen action: ${action}`);
 		console.log(`Gelen payload: ${JSON.stringify(message.payload, null, 2)}`);
+		console.log('-------------------------');
 		switch (namespace)
 		{
 			case 'room':
@@ -243,16 +245,12 @@ class GameService
 					{
 						const {gameMode, gameSettings, players} = payload;
 						const playersInstances = players.map(p => this.players.get(p.id)).filter(p => p);
-						console.log(`Oyun modu: ${gameMode}`);
-						console.log(`Oyun bilgileri: ${JSON.stringify(payload, null, 2)}`);
-						console.log(`Oyuncular: ${JSON.stringify(players, null, 2)}`);
 						try
 						{
 							if (gameMode === 'tournament')
-								this.tournamentMatchCreate(gameSettings, payload.tournamentSettings, playersInstances);
+								this.tournamentMatchCreate(roomId, gameSettings, payload.tournamentSettings, playersInstances);
 							else
-								this.matchCreate(gameMode, gameSettings, playersInstances);
-
+								this.matchCreate(roomId, gameMode, gameSettings, playersInstances);
 						}
 						catch (error)
 						{
@@ -266,6 +264,8 @@ class GameService
 						//? oda kapandığında yapılacak işlemler
 					}
 				);
+
+				this.roomManager.on(`room${roomId}_NextRound`, () => this.tournamentManager.nextRound(roomId));
 				const connId = this.connectionId.get(roomState.host);
 				if (connId)
 					this.websocketServer.send(connId, { type: 'room/created', payload: { roomState: roomState, roomId: roomId } });
@@ -273,34 +273,42 @@ class GameService
 		);
 	}
 
-	matchCreate(gameMode, gameSettings, players)
+	matchCreate(roomId, gameMode, gameSettings, players)
 	{
-		const gameId = this.gameManager.createGame(gameMode, gameSettings);
+		const gameId = this.gameManager.createGame(roomId, gameMode, gameSettings);
 		players.forEach((p) => this.gameManager.addPlayerToGame(gameId, this.players.get(p.id)));
-		this.gameManager.on(`game${gameId}_StateUpdate`,
-			({gameState, players}) => this.sendPlayers(this.getPlayers(players), { type: 'game/stateUpdate', payload: gameState })
-		);
-		this.gameManager.on(`game${gameId}_Ended`,
-			({results, players}) =>
+
+		this.gameManager.on(`game${gameId}`, ({type, payload, players}) =>
 			{
-				this.sendPlayers(this.getPlayers(players), { type: 'game/ended', payload: results });
-				//? XMLHTTPREQUEST
-				/* fetch('http://user:3006/internal/match', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						gameId: gameId,
-						...results
-					})
-				}); */
+				switch (type)
+				{
+					case 'update':
+						this.sendPlayers(players, { type: 'game/update', payload: payload });
+						break;
+					case 'finished':
+						this.sendPlayers(players, { type: 'game/finished', payload: payload });
+						//? XMLHTTPREQUEST
+						/* fetch('http://user:3006/internal/match', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({
+								gameId: gameId,
+								...results
+							})
+						}); */
+						break;
+					default:
+						console.error('❌ Unhandled game event type:', type);
+				}
 			}
 		);
+
 		this.sendPlayers(players, { type: 'game/initial' , payload: { gameMode: gameMode, ...gameSettings }});
 	}
 
-	tournamentMatchCreate(gameSettings, tournamentSettings, players)
+	tournamentMatchCreate(roomId, gameSettings, tournamentSettings, players)
 	{
-		const tournamentId = this.tournamentManager.createTournament(gameSettings, tournamentSettings);
+		const tournamentId = this.tournamentManager.createTournament(roomId, gameSettings, tournamentSettings);
 		players.forEach((p) => this.tournamentManager.joinTournament(tournamentId, this.players.get(p.id)));
 		this.tournamentManager.on(`tournament_${tournamentId}`,
 			({type, payload, players}) =>
@@ -310,9 +318,20 @@ class GameService
 					case 'update':
 						this.sendPlayers(players, { type: 'tournament/update', payload: payload });
 						break;
-					case 'nextRound':
-						this.sendPlayers(players, { type: 'tournament/nextRound', payload: payload });
+					case 'roundFinish':
+						this.sendPlayers(players, { type: 'tournament/roundFinish', payload: payload });
 						break;
+					case 'nextRound':
+						this.sendPlayers(players, { type: 'tournament/initial', payload: payload });
+						break;
+					case 'finished':
+						console.log('Tournament finished, sending results to players');
+						console.log('players: ',JSON.stringify(players, null, 2));
+						console.log('payload: ',JSON.stringify(payload, null, 2));
+						this.sendPlayers(players, { type: 'tournament/finished', payload: payload });
+						break;
+					default:
+						console.error('❌ Unhandled tournament event type:', type);
 				}
 			}
 		);

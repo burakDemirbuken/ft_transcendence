@@ -11,7 +11,6 @@ class Player
 		this.id = id;
 		this.name = name;
 		this.isReady = false;
-		this.lastActivity = Date.now();
 		this.inputs = new Map(); // type -> boolean(true: pressed, false: not pressed)
 		this.initialized = false;
 	}
@@ -19,12 +18,17 @@ class Player
 	inputSet(key, value)
 	{
 		this.inputs.set(key, value);
-		this.lastActivity = Date.now();
 	}
 
 	inputGet(key)
 	{
 		return this.inputs.get(key);
+	}
+
+	reset()
+	{
+		this.inputs.clear();
+		this.initialized = false;
 	}
 
 	getState()
@@ -33,7 +37,6 @@ class Player
 			id: this.id,
 			name: this.name,
 			isReady: this.isReady,
-			lastActivity: this.lastActivity
 		};
 	}
 }

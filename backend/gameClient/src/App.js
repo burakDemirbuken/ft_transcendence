@@ -9,10 +9,10 @@ import rendererConfig from './json/rendererConfig.js';
 
 class App
 {
-	constructor()
+	constructor(id, name)
 	{
-		this.playerId = this._TEST_generateRandomId();
-		this.playerName = this._TEST_generateRandomName();
+		this.playerId = id;
+		this.playerName = name;
 		this.gameRenderer = new GameRenderer();
 		this.webSocketClient = new WebSocketClient(window.location.hostname, 3004);
 		this.roomUi = new RoomUi();
@@ -121,7 +121,7 @@ class App
 
 	nextRound()
 	{
-		this.webSocketClient.send('tournament/nextRound');
+		this.webSocketClient.send('room/nextRound');
 	}
 
 	joinRoom(roomId)
@@ -148,22 +148,6 @@ class App
 	readyState(readyState)
 	{
 		this.webSocketClient.send('setReady', {isReady: readyState });
-	}
-
-	_TEST_generateRandomId()
-	{
-		return Math.random().toString(36).substr(2, 6).toUpperCase();
-	}
-
-	_TEST_generateRandomName()
-	{
-		const names = [
-			'Player', 'Gamer', 'User', 'Tester', 'Demo',
-			'Alpha', 'Beta', 'Gamma', 'Delta', 'Echo'
-		];
-		const randomName = names[Math.floor(Math.random() * names.length)];
-		const randomNumber = Math.floor(Math.random() * 999) + 1;
-		return `${randomName}${randomNumber}`;
 	}
 
 	// ================================
@@ -194,7 +178,7 @@ class App
 				this.roomUi.showGameError(data || 'Unknown error from server');
 				break;
 			default:
-				console.log('Unhandled network event:', eventType, data);
+				console.error('Unhandled network event:', eventType, data);
 		}
 	}
 
@@ -234,11 +218,15 @@ class App
 			case 'update':
 				this.gameRenderer.gameState = data;
 				break;
-			case 'nextRound':
+			case 'roundFinish':
 				this.gameRenderer.reset();
 				this.roomUi.showGameUI();
+			case 'finished':
+				this.gameRenderer.reset();
+				this.roomUi.showGameUI();
+				console.log('🏆 Tournament finished:', JSON.stringify(data, null, 2));
 			default:
-				console.log('Unhandled tournament event:', subEvent, data);
+				console.error('Unhandled tournament event:', subEvent, data);
 		}
 	}
 
@@ -277,11 +265,15 @@ class App
 					}
 				);
 				break;
-			case 'stateUpdate':
+			case 'update':
 				this.gameRenderer.gameState = data.gameData;
 				break;
+			case 'finished':
+				this.gameRenderer.reset();
+				this.roomUi.showGameUI();
+				break;
 			default:
-				console.log('Unhandled game event:', subEvent, data);
+				console.error('Unhandled game event:', subEvent, data);
 		}
 	}
 	// ================================

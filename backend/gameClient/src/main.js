@@ -5,8 +5,26 @@ import tournamentConfig from './json/TournamentConfig.js';
 
 let app;
 
+
+function _TEST_generateRandomId()
+{
+	return Math.random().toString(36).substr(2, 6).toUpperCase();
+}
+
+function _TEST_generateRandomName()
+{
+	const names = [
+		'Player', 'Gamer', 'User', 'Tester', 'Demo',
+		'Alpha', 'Beta', 'Gamma', 'Delta', 'Echo'
+	];
+	const randomName = names[Math.floor(Math.random() * names.length)];
+	const randomNumber = Math.floor(Math.random() * 999) + 1;
+	return `${randomName}${randomNumber}`;
+}
+
 $(document).ready(() => {
-	app = new App();
+	// ulas
+	app = new App(_TEST_generateRandomId(), _TEST_generateRandomName());
 });
 
 

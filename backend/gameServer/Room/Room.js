@@ -25,8 +25,6 @@ export default class Room extends EventEmitter
 			this.host = player.id;
 		//! deneme için her zaman ready
 		this.players.push({ ...player, isReady: true });
-		console.log(`BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB`);
-		console.log(this.players);
 	}
 
 	removePlayer(playerId)

@@ -13,15 +13,15 @@ class NetworkManager
 		}
 	}
 
-	connect(endpoint, params = undefined)
+	connect(endpoint, params)
 	{
 		try
 		{
-			let url = `${this.serverAddress}` + "/" + endpoint;
+			let url = `${this.serverAddress}`;
+			if (typeof(endpoint) !== "undefined")
+				url += "/" + endpoint;
 			if (typeof(params) !== "undefined")
-			{
 				url += "?" + new URLSearchParams(params).toString();
-			}
 			console.log('Connecting to server at', url);
 			this.socket = new WebSocket(url);
 

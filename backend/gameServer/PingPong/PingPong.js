@@ -25,8 +25,6 @@ class PingPong extends EventEmitter
 		};
 		this.maxPlayers = 2;
 
-		console.log(`🎮 PingPong game created with mode: ${JSON.stringify(this.settings, null, 2)}`);
-
 		this.ball = null;
 		this.paddles = new Map(); // playerId -> Paddle instance
 		this.players = []; // Player instances
@@ -61,6 +59,7 @@ class PingPong extends EventEmitter
 					teamInfo.playersId.splice(index, 1);
 					if (teamInfo.playersId.length === 0)
 						this.team.delete(teamNumber);
+
 					break;
 				}
 			}
@@ -105,8 +104,7 @@ class PingPong extends EventEmitter
 		this.team.set(2, { playersId: [], score: 0 });
 		this.ball.launchBall({x: Math.random() < 0.5 ? -1 : 1, y: Math.random() - 0.5});
 		this.eventListeners();
-		if (this.gameMode !== 'ai')
-			this.status = 'waiting';
+		this.status = 'waiting';
 	}
 
 	eventListeners()
@@ -130,10 +128,11 @@ class PingPong extends EventEmitter
 					}
 					this.emit('goal', border);
 					this.ball.reset();
-					const interval = setInterval(() =>
+					if (this.finishedControls())
+						return;
+					setTimeout(() =>
 					{
 						this.ball.launchBall({x: border == "left" ? -1 : 1, y: Math.random() - 0.5});
-						clearInterval(interval);
 					}, 500);
 				}
 				else if (border === 'top')
@@ -169,7 +168,7 @@ class PingPong extends EventEmitter
 			return;
 
 		if (this.status !== 'playing')
-			return new Error('Game is not currently playing: ' + this.status);
+			return;
 
 		this.gameTime += deltaTime;
 		this.lastUpdateTime = Date.now();
@@ -181,48 +180,64 @@ class PingPong extends EventEmitter
 		this.ball.update(deltaTime);
 		this.checkCollisions();
 
-		this.finishedControls();
-		this.emit('gameStateUpdate', this.getGameState());
+		this.emit('update', { gameState: this.getGameState(), players: this.players });
+	}
 
+	finish()
+	{
+		this.status = 'finished';
+		this.finishTime = Date.now();
+		this.players.forEach(p => p.reset());
+		this.emit('finished',
+			{
+				players: this.players,
+				results:
+				{
+					team1:
+					{
+						score: this.team.get(1).score,
+						playersId: this.team.get(1).playersId
+					},
+					team2:
+					{
+						score: this.team.get(2).score,
+						playersId: this.team.get(2).playersId
+					},
+					winner:
+					{
+						team: this.getWinnerTeam(),
+						ids: this.getWinnerTeam().playersId,
+					},
+					loser:
+					{
+						team: this.getLoserTeam(),
+						ids: this.getLoserTeam().playersId,
+					},
+					time:
+					{
+						start: this.startTime,
+						finish: this.finishTime,
+						duration: this.gameTime
+					},
+					matchType: this.gameMode,
+				}
+			}
+		);
+		this.finishTime = Date.now();
+		console.log(`winner: ${this.getWinnerTeam().playersId}, loser: ${this.getLoserTeam().playersId}`);
+		console.log(`🏁 Game finished! Final Score - Left: ${this.team.get(1).score}, Right: ${this.team.get(2).score}`);
 	}
 
 	finishedControls()
 	{
 		if (this.isFinished())
-			return;
+			return true;
 		if (this.team.get(1).score >= this.settings.maxScore || this.team.get(2).score >= this.settings.maxScore)
 		{
-			this.status = 'finished';
-			this.finishTime = Date.now();
-			this.emit('finished',
-				{
-					players: this.players.map(p => p.id),
-					results:
-					{
-						team1:
-						{
-							score: this.team.get(1).score,
-							playersId: this.team.get(1).playersId
-						},
-						team2:
-						{
-							score: this.team.get(2).score,
-							playersId: this.team.get(2).playersId
-						},
-						winner: "team"+this.team.get(1).score > this.team.get(2).score ? 1 : 2,
-						time:
-						{
-							start: this.startTime,
-							finish: this.finishTime,
-							duration: this.gameTime
-						},
-						matchType: this.gameMode,
-					}
-				}
-			);
-
-			console.log(`🏁 Game finished! Final Score - Left: ${this.team.get(1).score}, Right: ${this.team.get(2).score}`);
+			this.finish();
+			return true;
 		}
+		return false;
 	}
 
 
@@ -298,10 +313,9 @@ class PingPong extends EventEmitter
 		}
 		console.log('▶️ Starting game...');
 		this.status = 'countdown';
-		const interval = setInterval(() =>
+		setTimeout(() =>
 		{
 			this.status = 'playing';
-			clearInterval(interval);
 		}, 1000);
 	}
 
@@ -385,26 +399,21 @@ class PingPong extends EventEmitter
 	{
 		if (!this.isFinished())
 			return null;
-		return this.team.get(1).score > this.team.get(2).score ? this.team.get(1).playersId : this.team.get(2).playersId;
+		return this.team.get(1).score > this.team.get(2).score ? this.team.get(1) : this.team.get(2);
 	}
 
 	getLoserTeam()
 	{
 		if (!this.isFinished())
 			return null;
-		return this.team.get(1).score < this.team.get(2).score ? this.team.get(1).playersId : this.team.get(2).playersId;
+		return this.team.get(1).score < this.team.get(2).score ? this.team.get(1) : this.team.get(2);
 	}
 
 	getScore()
 	{
-		if (this.status !== 'not initialized')
-			return {
-				left: "-",
-				right: "-"
-			};
 		return {
-			left: this.team.get(1).score,
-			right: this.team.get(2).score
+			right: this.team?.get(1)?.score || 0,
+			left: this.team?.get(2)?.score || 0
 		};
 	}
 

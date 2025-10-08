@@ -62,9 +62,9 @@ class GameManager extends EventEmitter
 		}
 	}
 
-	createGame(gameMode, properties)
+	createGame(id, gameMode, properties)
 	{
-		const gameId = this.uniqueGameId();
+		const gameId = id;
 		properties.id = gameId;
 		let game;
 		if (gameMode === 'local')
@@ -76,7 +76,8 @@ class GameManager extends EventEmitter
 		else
 			throw new Error(`Unsupported game mode: ${gameMode}`);
 		game.initializeGame();
-		game.on('gameFinished', (results, players) => this.emit(`game${gameId}_Ended`, results, players));
+		game.on('finished', ({results, players}) => this.emit(`game${gameId}`, {type: 'finished', payload: results, players: players}));
+		game.on('update', ({gameState, players}) => this.emit(`game${gameId}`, {type: 'update', payload: gameState, players: players}));
 		this.games.set(gameId, game);
 		return gameId;
 	}
@@ -173,10 +174,7 @@ class GameManager extends EventEmitter
 		for (const [gameId, game] of this.games.entries())
 		{
 			if (game.isRunning())
-			{
 				game.update(deltaTime);
-				this.emit(`game${gameId}_StateUpdate`, {gameState: game.getGameState(), players: game.players.map(p => p.id)});
-			}
 			else if (game.status === 'waiting')
 			{
 				if (game.players.every(p => p.initialized))

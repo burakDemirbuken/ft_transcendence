@@ -217,6 +217,7 @@ class GameRenderer extends EventEmitter
 
 	reset()
 	{
+		this.isRunning = false;
 		this.gameCore.dispose();
 		this.gameState = null;
 		this.currentGameMode = null;

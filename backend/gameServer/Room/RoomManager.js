@@ -87,9 +87,22 @@ class RoomManager extends EventEmitter
 			case 'startGame':
 				this.startGame(player.id);
 				break;
+			case 'nextRound':
+				this.nextRound(player.id);
+				break;
 			default:
 				throw new Error(`Unhandled room message type: ${message.type}`);
 		}
+	}
+
+	nextRound(playerId)
+	{
+		const {room, roomId} = this._getRoomWithPlayer(playerId);
+		if (!room)
+			throw new Error(`Room with player ID ${playerId} does not exist`);
+		if (room.gameMode !== 'tournament')
+			throw new Error('Next round is only applicable for tournament rooms');
+		this.emit(`room${roomId}_NextRound`);
 	}
 
 	createRoom(player, payload)

@@ -17,17 +17,18 @@ class Tournament extends EventEmitter
 		this.tournamentSettings = tournamentSettings;
 		this.gameSettings = gameSettings;
 		this.players = [];
+		this.spectators = [];
 		this.matches = new Map(); // Round -> Matchs array
+
+		this.winner = null;
 
 		this.startTime = null;
 		this.endTime = null;
 
 		this.currentMatches = [];
 		this.currentRound = 0;
-		this.maxRounds = Math.ceil(Math.log2(this.maxPlayers));
-
+		this.maxRounds = Math.log2(this.maxPlayers);
 		this.finishedMatchesCount = 0;
-
 		for (let i = 0; i < this.maxRounds; i++)
 		{
 			const matchs = [];
@@ -51,12 +52,8 @@ class Tournament extends EventEmitter
 				);
 			}
 
-			this.matches.set(i,{
-					matchs: matchs,
-				}
-			);
+			this.matches.set(i, matchs);
 		}
-
 		this.status = 'waiting'; // 'waiting', 'running', 'finished', "ready2start"
 	}
 
@@ -64,7 +61,6 @@ class Tournament extends EventEmitter
 	{
 		if (this.status !== 'waiting')
 			return this.emit('error', new Error(`Tournament is not in waiting state, current status: ${this.status}`));
-	// ? BYE olucak mı
 	//	if (this.players.length < this.properties.playerCount)
 	//		return this.emit('error', new Error(`Not enough players to start matchmaking, current count: ${this.players.length}, required: ${this.properties.playerCount}`));
 
@@ -78,49 +74,25 @@ class Tournament extends EventEmitter
 			}
 			return arr;
 		}
-
 		this.players = shuffle(this.players);
-		let matchs = this.matches.get(this.currentRound).matchs;
+		let matchs = this.matches.get(this.currentRound);
 		for (let i = 0; i < this.players.length; i += 2)
 		{
-			if (i + 1 < this.players.length)
-			{
-				const match = matchs[i / 2];
-				match.matchId = `${this.tournamentName}-match-${Date.now()}`;
-				match.player1 = this.players[i];
-				match.player2 = this.players[i + 1];
-				match.matchStatus = 'not_started';
-				match.winner = null;
-				match.loser = null;
-				match.game = new PingPong({
-					...TOURNAMENT_GAME_PROPERTIES,
-					gameMode: 'tournament',
-				});
-				match.game.initializeGame();
-				match.game.addPlayer(match.player1);
-				match.game.addPlayer(match.player2);
-				match.state = match.game.getGameState();
-				match.game.on('finished', ({ players, results }) =>
-				{
-					this.finishedMatchesCount++;
-					match.winner = results.winner;
-					match.loser = results.loser;
-					match.matchStatus = 'finished';
-					match.game.off('finished');
-				});
-				this.currentMatches.push(match);
-			}
+			const match = matchs[i / 2];
+			console.log('Setting up match:', match.matchNumber, 'with players:', this.players[i]?.id, this.players[i + 1]?.id);
+			this.setupMatch(match, this.players[i], this.players[i + 1]);
+			this.currentMatches.push(match);
 		}
 	}
 
 	getMatchmakingInfo()
 	{
-		return {
-			currentRound: this.currentRound,
-			maxRounds: this.maxRounds,
-			matchs: this.matches.forEach((round, index) => ({
-				round: index,
-				matchs: round.matchs.map(match => ({
+		const rounds = [];
+
+		this.matches.forEach((matchsArray, roundIndex) => {
+			rounds.push({
+				round: roundIndex,
+				matchs: matchsArray.map(match => ({
 					matchId: match.matchId,
 					matchNumber: match.matchNumber,
 					matchStatus: match.matchStatus,
@@ -130,7 +102,13 @@ class Tournament extends EventEmitter
 					winner: match.winner,
 					loser: match.loser,
 				}))
-			})),
+			});
+		});
+
+		return {
+			currentRound: this.currentRound,
+			maxRounds: this.maxRounds,
+			rounds: rounds,
 			status: this.status,
 			participants: this.players.map(p => ({ id: p.id, name: p.name })),
 		};
@@ -139,6 +117,11 @@ class Tournament extends EventEmitter
 	init()
 	{
 		this.matchMaking();
+		return this.initData();
+	}
+
+	initData()
+	{
 		return {
 			tournament:
 			{
@@ -157,64 +140,71 @@ class Tournament extends EventEmitter
 				name: p.name,
 				gameNumber: this.currentMatches.findIndex(m => m.player1?.id === p.id || m.player2?.id === p.id) + 1
 			})),
-
 		}
 	}
 
 	nextRound()
 	{
-		if (this.currentRound >= this.maxRounds)
-			return this.emit('tournamentFinished',
-				{
-					players: this.players,
-					data:
-					{
-						matchMakingInfo: this.getMatchmakingInfo()
-					}
-				}
-			);
-
 		this.currentRound++;
 		this.currentMatches = [];
-		const matchs = this.matches.get(this.currentRound).matchs;
+		const prevmatches = this.matches.get(this.currentRound - 1);
+		const matchs = this.matches.get(this.currentRound);
 		for (let i = 0; i < matchs.length; i++)
 		{
 			const match = matchs[i];
-			if (!match.player1 || !match.player2)
-				continue;
-
-			match.matchId = `${this.tournamentName}-match-${Date.now()}`;
-			match.winner = null;
-			match.loser = null;
-			match.game = new PingPong({
-				...TOURNAMENT_GAME_PROPERTIES,
-				gameMode: 'tournament',
-			});
-			match.game.on('finished', ({ players, results }) =>
-			{
-				this.finishedMatchesCount++;
-				match.winner = results.winner;
-				match.loser = results.loser;
-				match.matchStatus = 'finished';
-				match.game.off('finished');
-			});
-			match.game.initializeGame();
-			match.game.addPlayer(this.matches.get(this.currentRound - 1).matchs[i].winner);
-			match.game.addPlayer(this.matches.get(this.currentRound - 1).matchs[i + 1]?.winner || null);
-			match.state = match.game.getGameState();
+			this.setupMatch(match, prevmatches[i * 2].winner, prevmatches[i * 2 + 1].winner);
 			this.currentMatches.push(match);
+			//? spector
+			this.moveSpector(prevmatches[i * 2].loser);
+			this.moveSpector(prevmatches[i * 2 + 1].loser);
 		}
 
-		this.status = 'ready2start';
-		this.emit('nextRound',
+		this.status = 'waiting';
+
+		let emitPlayers = [];
+		this.players.forEach(player => emitPlayers.push(player));
+		this.spectators.forEach(spector => emitPlayers.push(spector));
+		this.emit('roundFinish', {
+			players: emitPlayers,
+			data:
 			{
-				players: this.players,
-				data:
-				{
-					matchMakingInfo: this.getMatchmakingInfo()
-				}
+				matchMakingInfo: this.getMatchmakingInfo()
 			}
-		);
+		});
+
+	}
+
+	moveSpector(player)
+	{
+		const index = this.players.findIndex(p => p.id === player.id);
+		if (index !== -1)
+			this.players.splice(index, 1);
+		this.spectators.push(player);
+	}
+
+	setupMatch(match, player1, player2)
+	{
+		match.matchId = `${this.tournamentName}-match-${Date.now()}`;
+		match.player1 = player1;
+		match.player2 = player2;
+		match.winner = null;
+		match.loser = null;
+		match.game = new PingPong({
+			...TOURNAMENT_GAME_PROPERTIES,
+			gameMode: 'tournament',
+		});
+		match.game.on('finished', ({ players, results }) =>
+		{
+			this.finishedMatchesCount++;
+			match.winner = players.find(p => p.id === results.winner.ids[0]);
+			match.loser = players.find(p => p.id === results.loser.ids[0]);
+			match.matchStatus = 'finished';
+			match.game.off('finished');
+		});
+		match.game.initializeGame();
+		match.game.addPlayer(player1);
+		match.game.addPlayer(player2);
+		match.state = match.game.getGameState();
 	}
 
 	update(deltaTime)
@@ -236,15 +226,20 @@ class Tournament extends EventEmitter
 
 		if (this.finishedMatchesCount === this.currentMatches.length)
 		{
-			if (this.currentRound + 1 >= this.maxRounds)
+			if (this.currentRound === this.maxRounds - 1)
 			{
 				this.status = 'finished';
 				this.endTime = Date.now();
-				this.emit('finished', {
-						players: this.players,
+				this.winner = this.currentMatches[0].winner;
+				let currentPlayers = [];
+				this.players.forEach(player => currentPlayers.push(player));
+				this.spectators.forEach(spector => currentPlayers.push(spector));
+				this.emit('finished',
+					{
+						players: currentPlayers,
 						data:
 						{
-							matchMakingInfo: this.getMatchmakingInfo(),
+							finishState: this.getFinishedInfo(),
 							tournamentDuration: this.endTime - this.startTime,
 						}
 					}
@@ -252,17 +247,16 @@ class Tournament extends EventEmitter
 			}
 			else
 				this.nextRound();
+			this.finishedMatchesCount = 0;
+			return;
 		}
-		else
-		{
-			this.emit("update", {
-				players: this.players,
-				data:
-				{
-					...this.getState()
-				}
-			});
-		}
+		this.emit("update", {
+			players: this.players,
+			data:
+			{
+				...this.getState()
+			}
+		});
 	}
 
 	addPlayer(player)
@@ -309,15 +303,9 @@ class Tournament extends EventEmitter
 
 	start()
 	{
-		this.startTime = Date.now();
+		if (this.startTime !== null)
+			this.startTime = Date.now();
 		this.status = 'running';
-		this.emit('started', {
-			players: this.players,
-			data:
-			{
-
-			}
-		});
 		this.currentMatches.forEach(
 			(match) =>
 			{
@@ -348,9 +336,29 @@ class Tournament extends EventEmitter
 
 	getFinishedInfo()
 	{
+		const rounds = [];
+
+		this.matches.forEach((matchsArray, roundIndex) => {
+			rounds.push({
+				round: roundIndex,
+				matchs: matchsArray.map(match => ({
+					matchId: match.matchId,
+					matchNumber: match.matchNumber,
+					matchStatus: match.matchStatus,
+					player1: match.player1 ? { id: match.player1.id, name: match.player1.name } : null,
+					player2: match.player2 ? { id: match.player2.id, name: match.player2.name } : null,
+					score: match.score,
+					winner: match.winner ? { id: match.winner.id, name: match.winner.name } : null,
+					loser: match.loser ? { id: match.loser.id, name: match.loser.name } : null,
+				}))
+			});
+		});
+
 		return {
-			// finish state
-		}
+			tournamentName: this.tournamentName,
+			winner: this.winner,
+			matches: rounds
+		};
 	}
 
 	destroy()

@@ -33,12 +33,12 @@ volumes:
       type: none
       device: ./backend/profile
       o: bind
-#  aiServer_src:
-#    driver: local
-#    driver_opts:
-#      type: none
-#      device: ./backend/aiServer
-#      o: bind
+  aiServer_src:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/aiServer
+      o: bind
 
   gameServer:
     driver: local
@@ -165,7 +165,7 @@ services:
 #      - /app/node_modules
 #    networks:
 #      - transcendency
-#  
+#
 #  friend:
 #    container_name: friend
 #    build: ./backend/friend
@@ -177,14 +177,14 @@ services:
 #    networks:
 #      - transcendency
 
-#  aiserver:
-#    container_name: ai-server
-#    build: ./backend/aiServer
-#    restart: on-failure
-#    networks:
-#      - transcendency
-#    expose:
-#      - 3003
-#    volumes:
-#      - aiServer_src:/app
+  aiserver:
+    container_name: ai-server
+    build: ./backend/aiServer
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 3003
+    volumes:
+      - aiServer_src:/app
 
