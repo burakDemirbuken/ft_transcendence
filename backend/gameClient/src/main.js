@@ -23,7 +23,6 @@ function _TEST_generateRandomName()
 }
 
 $(document).ready(() => {
-	// ulas
 	app = new App(_TEST_generateRandomId(), _TEST_generateRandomName());
 });
 

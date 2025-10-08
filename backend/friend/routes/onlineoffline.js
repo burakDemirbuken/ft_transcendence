@@ -1,24 +1,29 @@
 const presence = new Map()
 
 export default async function onlineOfflineRoutes(fastify) {
-    fastify.get("/ws-friend/presence", { websocket: true }, (connection, req) => {
-        const socket = connection.socket
-        const userName = req.query.userName
+    fastify.get("/ws-friend/presence", { websocket: true }, (socket, req) => {
+        const { userName } = req.query
+        console.log('New presence connection:', userName)
 
         if (!userName) {
             socket.close(1008, "Missing parameter: userName")
             return
         }
 
+
         const state = {/*  isAlive: true, */ lastseen: Date.now() }
         presence.set(userName, state)
 
-        const hearbeat = setInterval(() => {
+        const heartbeat = setInterval(() => {
             if (Date.now() - state.lastseen > 60000) {
                 socket.close(1000, "No pong received")
             } else {
-                socket.send(JSON.stringify({type: 'ping'}))
+                if (socket.readyState === 1) { // 1 = OPEN
+                    socket.send(JSON.stringify({type: 'ping'}))
+                }
             }
+
+            fastify.log.info({ userName, situation: 'heartbeat' })
         }, 30000)
 
         socket.on('message', message => {
@@ -33,7 +38,7 @@ export default async function onlineOfflineRoutes(fastify) {
         })
 
         const cleanup = async (situation) => {
-            clearInterval(hearbeat)
+            clearInterval(heartbeat)
             presence.delete(userName)
             fastify.log.info({ userName, situation })
         }

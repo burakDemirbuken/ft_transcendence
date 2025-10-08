@@ -11,7 +11,7 @@ class RoomManager extends EventEmitter
 	{
 		super();
 		this.rooms = new Map();
-/* 		setInterval(() => {
+ /*		setInterval(() => {
 			console.log(`Current rooms: ${this.rooms.size}`);
 			this.rooms.forEach((room, roomId) => {
 				console.log(`Room ID: ${roomId}, Name: ${room.name}, Players: ${room.players.length}/${room.maxPlayers}, Status: ${room.status}`);

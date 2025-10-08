@@ -17,9 +17,32 @@ class App
 		this.webSocketClient = new WebSocketClient(window.location.hostname, 3004);
 		this.roomUi = new RoomUi();
 		this.inputManager = new InputManager();
-
+		this._pingpong(name);
 		this._setupNetworkListeners();
 		this._gameControllerSetup();
+	}
+
+	_pingpong(name) {
+		const socket = new WebSocket(`ws://${window.location.hostname}:3007/ws-friend/presence?` + new URLSearchParams({ userName: name }).toString());
+		socket.onopen = () => {
+			console.log('Connected to presence server');
+		}
+
+		socket.onmessage = (event) => {
+			try {
+				const message = JSON.parse(event.data);
+				if (message.type === 'ping') {
+					socket.send(JSON.stringify({ type: 'pong' }));
+				}
+			} catch (err) {
+				console.error('Error parsing message from presence server:', err);
+			}
+		}
+
+		socket.onerror = (error) => {
+			console.error('Heartbeat WebSocket error:', error);
+		}
+
 	}
 
 	_gameControllerSetup()
@@ -97,7 +120,7 @@ class App
 		{
 		});
 
-		this.webSocketClient.connect("ws/client", { userID: this.playerId, userName: this.playerName });
+		this.webSocketClient.connect("ws-room/client", { userID: this.playerId, userName: this.playerName });
 	}
 
 	createRoom(mode, gameSettings)
