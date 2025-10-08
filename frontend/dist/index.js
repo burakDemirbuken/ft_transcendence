@@ -1,8 +1,9 @@
-import Login from "../dist/Login.js";
-import Settings from "../dist/Settings.js";
+import Home from "../dist/Home.js";
 import Profile from "../dist/Profile.js";
 import Play from "../dist/Play.js";
 import Friends from "../dist/Friends.js";
+import Settings from "../dist/Settings.js";
+import Login from "../dist/Login.js";
 import I18n from './translations.js';
 const pageState = {
     current: "login", // default
@@ -10,7 +11,7 @@ const pageState = {
 const routes = {
     login: { template: "login", view: Login },
     profile: { template: "profile", view: Profile },
-    // home: { template: "home", view: Home },
+    home: { template: "home", view: Home },
     settings: { template: "settings", view: Settings },
     play: { template: "play", view: Play },
     friends: { template: "friends", view: Friends }
