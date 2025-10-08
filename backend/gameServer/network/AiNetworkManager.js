@@ -91,7 +91,6 @@ class AiNetworkManager extends EventEmitter
 	{
 		if (!this.socket.isConnected())
 			throw new Error('AI server is not connected');
-
 		const message = {
 			type: 'game_data',
 			game_id: gameId,

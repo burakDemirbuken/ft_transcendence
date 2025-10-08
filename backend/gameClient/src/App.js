@@ -178,7 +178,7 @@ class App
 				this.roomUi.showGameError(data || 'Unknown error from server');
 				break;
 			default:
-				console.log('Unhandled network event:', eventType, data);
+				console.error('Unhandled network event:', eventType, data);
 		}
 	}
 
@@ -193,7 +193,6 @@ class App
 
 	_handleTournamentEvent(subEvent, data)
 	{
-		console.log('Tournament event:', subEvent, JSON.stringify(data, null, 2));
 		switch (subEvent)
 		{
 			case 'initial':
@@ -227,7 +226,7 @@ class App
 				this.roomUi.showGameUI();
 				console.log('🏆 Tournament finished:', JSON.stringify(data, null, 2));
 			default:
-				console.log('Unhandled tournament event:', subEvent, data);
+				console.error('Unhandled tournament event:', subEvent, data);
 		}
 	}
 
@@ -266,11 +265,15 @@ class App
 					}
 				);
 				break;
-			case 'stateUpdate':
+			case 'update':
 				this.gameRenderer.gameState = data.gameData;
 				break;
+			case 'finished':
+				this.gameRenderer.reset();
+				this.roomUi.showGameUI();
+				break;
 			default:
-				console.log('Unhandled game event:', subEvent, data);
+				console.error('Unhandled game event:', subEvent, data);
 		}
 	}
 	// ================================

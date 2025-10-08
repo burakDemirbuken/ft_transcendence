@@ -18,7 +18,6 @@ class NetworkManager
 		try
 		{
 			let url = `${this.serverAddress}`;
-			console.log('Connecting to server at', url);
 			this.socket = new WebSocket(url);
 
 			const { onConnect, onMessage, onClose, onError } = this.callbacks;

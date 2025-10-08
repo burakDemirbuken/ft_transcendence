@@ -235,9 +235,6 @@ class GameService
 					{
 						const {gameMode, gameSettings, players} = payload;
 						const playersInstances = players.map(p => this.players.get(p.id)).filter(p => p);
-						console.log(`Oyun modu: ${gameMode}`);
-						console.log(`Oyun bilgileri: ${JSON.stringify(payload, null, 2)}`);
-						console.log(`Oyuncular: ${JSON.stringify(players, null, 2)}`);
 						try
 						{
 							if (gameMode === 'tournament')
@@ -270,24 +267,32 @@ class GameService
 	{
 		const gameId = this.gameManager.createGame(roomId, gameMode, gameSettings);
 		players.forEach((p) => this.gameManager.addPlayerToGame(gameId, this.players.get(p.id)));
-		this.gameManager.on(`game${gameId}_StateUpdate`,
-			({gameState, players}) => this.sendPlayers(this.getPlayers(players), { type: 'game/stateUpdate', payload: gameState })
-		);
-		this.gameManager.on(`game${gameId}_Ended`,
-			({results, players}) =>
+
+		this.gameManager.on(`game${gameId}`, ({type, payload, players}) =>
 			{
-				this.sendPlayers(this.getPlayers(players), { type: 'game/ended', payload: results });
-				//? XMLHTTPREQUEST
-				/* fetch('http://user:3006/internal/match', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						gameId: gameId,
-						...results
-					})
-				}); */
+				switch (type)
+				{
+					case 'update':
+						this.sendPlayers(players, { type: 'game/update', payload: payload });
+						break;
+					case 'finished':
+						this.sendPlayers(players, { type: 'game/finished', payload: payload });
+						//? XMLHTTPREQUEST
+						/* fetch('http://user:3006/internal/match', {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({
+								gameId: gameId,
+								...results
+							})
+						}); */
+						break;
+					default:
+						console.error('❌ Unhandled game event type:', type);
+				}
 			}
 		);
+
 		this.sendPlayers(players, { type: 'game/initial' , payload: { gameMode: gameMode, ...gameSettings }});
 	}
 

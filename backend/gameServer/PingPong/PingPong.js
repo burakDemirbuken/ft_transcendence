@@ -59,6 +59,7 @@ class PingPong extends EventEmitter
 					teamInfo.playersId.splice(index, 1);
 					if (teamInfo.playersId.length === 0)
 						this.team.delete(teamNumber);
+
 					break;
 				}
 			}
@@ -103,8 +104,7 @@ class PingPong extends EventEmitter
 		this.team.set(2, { playersId: [], score: 0 });
 		this.ball.launchBall({x: Math.random() < 0.5 ? -1 : 1, y: Math.random() - 0.5});
 		this.eventListeners();
-		if (this.gameMode !== 'ai')
-			this.status = 'waiting';
+		this.status = 'waiting';
 	}
 
 	eventListeners()
@@ -180,8 +180,52 @@ class PingPong extends EventEmitter
 		this.ball.update(deltaTime);
 		this.checkCollisions();
 
-		this.emit('gameStateUpdate', this.getGameState());
+		this.emit('update', { gameState: this.getGameState(), players: this.players });
+	}
 
+	finish()
+	{
+		this.status = 'finished';
+		this.finishTime = Date.now();
+		this.players.forEach(p => p.reset());
+		this.emit('finished',
+			{
+				players: this.players,
+				results:
+				{
+					team1:
+					{
+						score: this.team.get(1).score,
+						playersId: this.team.get(1).playersId
+					},
+					team2:
+					{
+						score: this.team.get(2).score,
+						playersId: this.team.get(2).playersId
+					},
+					winner:
+					{
+						team: this.getWinnerTeam(),
+						ids: this.getWinnerTeam().playersId,
+					},
+					loser:
+					{
+						team: this.getLoserTeam(),
+						ids: this.getLoserTeam().playersId,
+					},
+					time:
+					{
+						start: this.startTime,
+						finish: this.finishTime,
+						duration: this.gameTime
+					},
+					matchType: this.gameMode,
+				}
+			}
+		);
+		this.finishTime = Date.now();
+		console.log(`winner: ${this.getWinnerTeam().playersId}, loser: ${this.getLoserTeam().playersId}`);
+		console.log(`🏁 Game finished! Final Score - Left: ${this.team.get(1).score}, Right: ${this.team.get(2).score}`);
 	}
 
 	finishedControls()
@@ -190,48 +234,7 @@ class PingPong extends EventEmitter
 			return true;
 		if (this.team.get(1).score >= this.settings.maxScore || this.team.get(2).score >= this.settings.maxScore)
 		{
-			this.status = 'finished';
-			this.finishTime = Date.now();
-			this.players.forEach(p => p.reset());
-			this.emit('finished',
-				{
-					players: this.players.map(p => p.id),
-					results:
-					{
-						team1:
-						{
-							score: this.team.get(1).score,
-							playersId: this.team.get(1).playersId
-						},
-						team2:
-						{
-							score: this.team.get(2).score,
-							playersId: this.team.get(2).playersId
-						},
-						winner:
-						{
-							team: this.getWinnerTeam(),
-							ids: this.getWinnerTeam().playersId,
-							playerInstances: this.players.filter(p => this.getWinnerTeam().playersId.includes(p.id))
-						},
-						loser:
-						{
-							team: this.getLoserTeam(),
-							ids: this.getLoserTeam().playersId,
-							playerInstances: this.players.filter(p => this.getLoserTeam().playersId.includes(p.id))
-						},
-						time:
-						{
-							start: this.startTime,
-							finish: this.finishTime,
-							duration: this.gameTime
-						},
-						matchType: this.gameMode,
-					}
-				}
-			);
-			this.finishTime = Date.now();
-			console.log(`🏁 Game finished! Final Score - Left: ${this.team.get(1).score}, Right: ${this.team.get(2).score}`);
+			this.finish();
 			return true;
 		}
 		return false;

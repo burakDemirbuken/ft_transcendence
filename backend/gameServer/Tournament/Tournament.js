@@ -196,8 +196,8 @@ class Tournament extends EventEmitter
 		match.game.on('finished', ({ players, results }) =>
 		{
 			this.finishedMatchesCount++;
-			match.winner = results.winner.playerInstances[0];
-			match.loser = results.loser.playerInstances[0];
+			match.winner = players.find(p => p.id === results.winner.ids[0]);
+			match.loser = players.find(p => p.id === results.loser.ids[0]);
 			match.matchStatus = 'finished';
 			match.game.off('finished');
 		});
