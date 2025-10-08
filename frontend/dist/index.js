@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const navbar = document.body.querySelectorAll(".sidebar-element");
     for (const element of navbar) {
         element.addEventListener("click", e => {
-            var _a, _b, _c;
+            var _a, _b, _c, _d;
             if (e.currentTarget.matches("[data-link]")) {
                 console.log("PAGE");
                 e.preventDefault();
@@ -66,6 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 e.preventDefault();
                 I18n.nextLanguage("navbar");
                 I18n.nextLanguage(pageState.current);
+                (_d = document.querySelector(".selected")) === null || _d === void 0 ? void 0 : _d.classList.toggle("selected");
+                e.currentTarget.classList.toggle("selected");
             }
         });
     }

@@ -48,12 +48,6 @@ class I18n {
 		applyTranslations(translations, section);
 	}
 
-	// static async switchLanguage(newLang:string, section:string) {
-	// 	localStorage.setItem("langPref", newLang);
-	// 	const translations = await getTranslations(newLang);
-	// 	applyTranslations(translations, section);
-	// }
-
 	static async nextLanguage(section:string) {
 		localStorage.setItem("langPref", lang[localStorage.getItem("langPref")].next);
 		const translations = await getTranslations(localStorage.getItem("langPref"));

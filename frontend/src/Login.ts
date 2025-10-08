@@ -262,9 +262,6 @@ function move(e) {
 		enter();
 	else if (e.target.classList.contains("back"))
 		back();
-	else if (e.target.matches("#lang")) {
-		I18n.nextLanguage();
-	}
 	else if (e.target.matches("#rme")) {
 		rememberMe = !rememberMe;
 		e.target.classList.toggle("active");

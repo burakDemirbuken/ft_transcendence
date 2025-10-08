@@ -71,6 +71,8 @@ document.addEventListener("DOMContentLoaded", () => {
 				e.preventDefault();
 				I18n.nextLanguage("navbar");
 				I18n.nextLanguage(pageState.current);
+				document.querySelector(".selected")?.classList.toggle("selected");
+				e.currentTarget.classList.toggle("selected");
 			}
 		});
 	}
