@@ -1,6 +1,5 @@
 import AView from "./AView.js";
 import { navigateTo } from './index.js';
-import I18n from './translations.js';
 
 let currentStep:string = "welcome";
 let userRegistered:boolean;

@@ -41,8 +41,8 @@ async function createFriends() {
 				<div class="user-menu">
 					<button class="menu-btn">⋮</button>
 					<div class="menu-options">
-						<button id="prof" class="option">Profile</button>
-						<button id="unfr" class="option">Unfriend</button>
+						<button class="option prof">Profile</button>
+						<button class="option unfr">Unfriend</button>
 					</div>
 				</div>
 			</div>
@@ -74,7 +74,8 @@ async function createInvites() {
 				<div class="user-menu">
 					<button class="menu-btn">⋮</button>
 					<div class="menu-options">
-						<button id="undo" class="option">Undo</button>
+						<button class="option prof">Profile</button>
+						<button class="option undo">Undo</button>
 					</div>
 				</div>
 			</div>
@@ -106,8 +107,9 @@ async function createRequests() {
 				<div class="user-menu">
 					<button class="menu-btn">⋮</button>
 					<div class="menu-options">
-						<button id="accept" class="option">Accept</button>
-						<button id="decline" class="option">Decline</button>
+						<button class="option prof">Profile</button>
+						<button class="option accept">Accept</button>
+						<button class="option decline">Decline</button>
 					</div>
 				</div>
 			</div>
