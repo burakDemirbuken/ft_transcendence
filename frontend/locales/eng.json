@@ -48,7 +48,7 @@
 		"home": "HOME",
 		"play": "PLAY",
 		"profile": "PROFILE",
-		"chat": "CHAT",
+		"language": "ENGLISH",
 		"friends": "FRIENDS",
 		"collapse": "COLLAPSE",
 		"settings": "SETTINGS",
@@ -221,6 +221,7 @@
 		"account": {
 			"title": "Account",
 			"uname": "User Name",
+			"dname": "Display Name",
 			"email": "Unfriend",
 			"pass": "Password"
 		},
@@ -229,6 +230,7 @@
 			"title": "Danger Zone",
 			"prompt": "Delete Account:",
 			"button": "Delete"
-		}
+		},
+		"delacc": "Are you sure about deleting your account? This action is irreversible."
 	}
 }

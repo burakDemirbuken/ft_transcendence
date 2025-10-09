@@ -57,6 +57,35 @@
   margin-top: auto;  /* <-- en alta iter */
 }
 
+#navbar.logout .nav-bottom {
+	margin: 0;
+}
+
+#navbar.logout .login {
+	display: none;
+}
+
+#navbar.logout #logout svg{
+	rotate: 0deg;
+}
+
+#navbar.logout #in {
+	display: block;
+}
+
+#navbar #in {
+	display: none;
+}
+
+#navbar #out {
+	display: block;
+}
+
+#navbar.logout #out {
+	display: none;
+}
+
+
 /* link/ butonların flex davranışını sınırla, taşmalar daha düzgün olsun */
 #navbar .sidebar-element {
   font-size: 1em;

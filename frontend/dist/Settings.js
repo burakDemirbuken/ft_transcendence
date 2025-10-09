@@ -1,22 +1,11 @@
 import AView from "./AView.js";
-import I18n from './translations.js';
 function settingsClick(e) {
-    var _a;
-    if (!e.target.classList.contains("current") && e.target.classList.contains("lang")) {
-        if (e.target.classList.contains("eng")) {
-            I18n.switchLanguage("eng", "navbar");
-        }
-        else if (e.target.classList.contains("deu")) {
-            I18n.switchLanguage("deu", "navbar");
-        }
-        else if (e.target.classList.contains("tur")) {
-            I18n.switchLanguage("tur", "navbar");
-        }
-        I18n.loadLanguage("settings");
-        (_a = document.querySelector(".current")) === null || _a === void 0 ? void 0 : _a.classList.remove("current");
-        e.target.classList.add("current");
+    if (e.target.id === "delete-account") {
+        e.preventDefault();
+        const isConfirmed = confirm("You sure bout that?");
+        if (isConfirmed)
+            console.log("DELETE THE FRKN THING!!");
     }
-    // ADD DELETE ACCOUNT
 }
 function settingsInput(e) {
     console.log(e);

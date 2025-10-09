@@ -37,16 +37,16 @@ async function createFriends() {
 					${user.avatar_url}
 				</div>
 				<div class="user-info">
-					<span class="uname">${user.username}</span>
+					<span class="dname">${user.dname}</span>
+					<span class="uname">${user.uname}</span>
 				</div>
 			</div>
 			<div class="user-actions">
 				<div class="user-menu">
 					<button class="menu-btn">⋮</button>
 					<div class="menu-options">
-						<button id="play" class="option">Play</button>
-						<button id="msg" class="option">Message</button>
-						<button id="unfr" class="option">Unfriend</button>
+						<button class="option prof">Profile</button>
+						<button class="option unfr">Unfriend</button>
 					</div>
 				</div>
 			</div>
@@ -72,14 +72,16 @@ async function createInvites() {
 					${user.avatar_url}
 				</div>
 				<div class="user-info">
-					<span class="uname">${user.username}</span>
+					<span class="dname">${user.dname}</span>
+					<span class="uname">${user.uname}</span>
 				</div>
 			</div>
 			<div class="user-actions">
 				<div class="user-menu">
 					<button class="menu-btn">⋮</button>
 					<div class="menu-options">
-						<button id="undo" class="option">Undo</button>
+						<button class="option prof">Profile</button>
+						<button class="option undo">Undo</button>
 					</div>
 				</div>
 			</div>
@@ -105,15 +107,17 @@ async function createRequests() {
 					${user.avatar_url}
 				</div>
 				<div class="user-info">
-					<span class="uname">${user.username}</span>
+					<span class="dname">${user.dname}</span>
+					<span class="uname">${user.uname}</span>
 				</div>
 			</div>
 			<div class="user-actions">
 				<div class="user-menu">
 					<button class="menu-btn">⋮</button>
 					<div class="menu-options">
-						<button id="accept" class="option">Accept</button>
-						<button id="decline" class="option">Decline</button>
+						<button class="option prof">Profile</button>
+						<button class="option accept">Accept</button>
+						<button class="option decline">Decline</button>
 					</div>
 				</div>
 			</div>
@@ -125,39 +129,6 @@ async function createRequests() {
 		const ugrid = req?.querySelector(".user-grid");
 		console.log(ugrid);
 		ugrid.appendChild(div);
-	}
-}
-
-async function createBlocked() {
-	const usr = await fetch("mockdata/blockedlist.json");
-	const userList = await usr.json();
-	for (const user of userList) {
-		const div = document.createElement("div");
-		// <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
-		div.innerHTML = `
-			<div class="user-profile">
-				<div class="user-avatar">
-					${user.avatar_url}
-				</div>
-				<div class="user-info">
-					<span class="uname">${user.username}</span>
-				</div>
-			</div>
-			<div class="user-actions">
-				<div class="user-menu">
-					<button class="menu-btn">⋮</button>
-					<div class="menu-options">
-						<button id="unblock" class="option">Unblock</button>
-					</div>
-				</div>
-			</div>
-		`;
-		div.classList.add("friend");
-		div.classList.add("online");
-
-		const friends = document.querySelector(".blocked");
-		console.log(friends);
-		friends.appendChild(div);
 	}
 }
 
@@ -176,7 +147,6 @@ export default class extends AView {
 		createFriends();
 		createInvites();
 		createRequests();
-		createBlocked();
 	}
 
 	async setEventHandlers() {

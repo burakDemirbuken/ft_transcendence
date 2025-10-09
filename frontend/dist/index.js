@@ -1,8 +1,9 @@
-import Login from "../dist/Login.js";
-import Settings from "../dist/Settings.js";
+import Home from "../dist/Home.js";
 import Profile from "../dist/Profile.js";
 import Play from "../dist/Play.js";
 import Friends from "../dist/Friends.js";
+import Settings from "../dist/Settings.js";
+import Login from "../dist/Login.js";
 import I18n from './translations.js';
 const pageState = {
     current: "login", // default
@@ -10,7 +11,7 @@ const pageState = {
 const routes = {
     login: { template: "login", view: Login },
     profile: { template: "profile", view: Profile },
-    // home: { template: "home", view: Home },
+    home: { template: "home", view: Home },
     settings: { template: "settings", view: Settings },
     play: { template: "play", view: Play },
     friends: { template: "friends", view: Friends }
@@ -44,22 +45,33 @@ export function navigateTo(page) {
     router(page);
 }
 document.addEventListener("DOMContentLoaded", () => {
-    document.body.addEventListener("click", e => {
-        var _a, _b, _c;
-        if (e.target.matches("[data-link]")) {
-            console.log("hey?");
-            e.preventDefault();
-            navigateTo(e.target.getAttribute("href").replace(/^\//, ''));
-            (_a = document.querySelector(".selected")) === null || _a === void 0 ? void 0 : _a.classList.toggle("selected");
-            e.target.classList.toggle("selected");
-        }
-        else if (e.target.matches("[id='toggle']")) {
-            console.log("hey");
-            (_b = document.querySelector("#navbar")) === null || _b === void 0 ? void 0 : _b.classList.toggle("collapse");
-            (_c = document.querySelector(".selected")) === null || _c === void 0 ? void 0 : _c.classList.toggle("selected");
-            e.target.classList.toggle("selected");
-        }
-    });
+    const navbar = document.body.querySelectorAll(".sidebar-element");
+    for (const element of navbar) {
+        element.addEventListener("click", e => {
+            var _a, _b, _c, _d;
+            if (e.currentTarget.matches("[data-link]")) {
+                console.log("PAGE");
+                e.preventDefault();
+                navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
+                (_a = document.querySelector(".selected")) === null || _a === void 0 ? void 0 : _a.classList.toggle("selected");
+                e.currentTarget.classList.toggle("selected");
+            }
+            else if (e.currentTarget.matches("[id='toggle']")) {
+                console.log("TOGGLE");
+                (_b = document.querySelector("#navbar")) === null || _b === void 0 ? void 0 : _b.classList.toggle("collapse");
+                (_c = document.querySelector(".selected")) === null || _c === void 0 ? void 0 : _c.classList.toggle("selected");
+                e.currentTarget.classList.toggle("selected");
+            }
+            else if (e.currentTarget.matches("[id='language']")) {
+                console.log("LANGUAGE");
+                e.preventDefault();
+                I18n.nextLanguage("navbar");
+                I18n.nextLanguage(pageState.current);
+                (_d = document.querySelector(".selected")) === null || _d === void 0 ? void 0 : _d.classList.toggle("selected");
+                e.currentTarget.classList.toggle("selected");
+            }
+        });
+    }
 });
 function toggleClassOnResize() {
     const element = document.querySelector("#navbar");

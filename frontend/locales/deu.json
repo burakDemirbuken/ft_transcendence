@@ -48,7 +48,7 @@
 		"home": "HOME",
 		"play": "SPIELEN",
 		"profile": "PROFIL",
-		"chat": "CHAT",
+		"language": "DEUTSCH",
 		"friends": "FREUNDE",
 		"collapse": "STÜRZEN",
 		"settings": "EINSTELLUNGEN",
@@ -221,6 +221,7 @@
 		"account": {
 			"title": "Konto",
 			"uname": "Benutzername",
+			"dname": "Anzeigename",
 			"email": "Email",
 			"pass": "Passwort"
 		},
@@ -229,6 +230,7 @@
 			"title": "Gefahrenzone",
 			"prompt": "Konto Löschen:",
 			"button": "Löschen"
-		}
+		},
+		"delacc": "Möchten Sie Ihr Konto wirklich löschen? Möchten Sie Ihr Konto löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
 	}
 }
