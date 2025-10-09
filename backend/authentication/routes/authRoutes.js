@@ -41,7 +41,7 @@ async function verifyJWT(request, reply) {
           username: user.username,
           email: user.email
         },
-        { expiresIn: '1m' } // TEST: 1 minute
+        { expiresIn: '1h' } // 1 hour
       );
 
       // Calculate remaining time for refresh token
@@ -52,9 +52,9 @@ async function verifyJWT(request, reply) {
       const crypto = await import('crypto');
       const newRefreshToken = crypto.randomBytes(64).toString('hex');
       user.refresh_token = newRefreshToken;
-      // Remember me durumunu koru ve kalan süreyi ona göre ayarla (TEST: dakika cinsinden)
-      const maxMinutes = user.remember_me ? 10 : 4;
-      const maxMs = maxMinutes * 60 * 1000;
+      // Remember me durumunu koru ve kalan süreyi ona göre ayarla
+      const maxDays = user.remember_me ? 30 : 3;
+      const maxMs = maxDays * 24 * 60 * 60 * 1000;
       // Kalan süre ile maksimum sürenin küçüğünü al
       const newExpiryMs = Math.min(remainingMs, maxMs);
       user.refresh_token_expires_at = new Date(Date.now() + newExpiryMs);
@@ -66,7 +66,7 @@ async function verifyJWT(request, reply) {
         secure: true,
         sameSite: 'strict',
         path: '/',
-        maxAge: 1 * 60 * 1000 // TEST: 1 minute
+        maxAge: 1 * 60 * 60 * 1000 // 1 hour
       });
 
       reply.setCookie('refreshToken', newRefreshToken, {

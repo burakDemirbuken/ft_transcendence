@@ -111,9 +111,9 @@ User.prototype.markLogin = async function() {
 User.prototype.setRefreshToken = async function(refreshToken, rememberMe = false) {
   this.refresh_token = refreshToken;
   this.remember_me = rememberMe; // Remember me durumunu kaydet
-  // TEST: Remember me açıksa 10 dakika, değilse 4 dakika
-  const expiryMinutes = rememberMe ? 10 : 4;
-  this.refresh_token_expires_at = new Date(Date.now() + expiryMinutes * 60 * 1000);
+  // Remember me açıksa 30 gün, değilse 3 gün
+  const expiryDays = rememberMe ? 30 : 3;
+  this.refresh_token_expires_at = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000);
   await this.save();
 };
 

@@ -785,7 +785,7 @@ class AuthController {
           username: user.username,
           email: user.email
         },
-        { expiresIn: '1m' } // TEST: 1 minute
+        { expiresIn: '1h' } // 1 hour
       );
 
       // Generate refresh token
@@ -798,11 +798,11 @@ class AuthController {
         secure: true,
         sameSite: 'strict',
         path: '/',
-        maxAge: 1 * 60 * 1000 // TEST: 1 minute
+        maxAge: 1 * 60 * 60 * 1000 // 1 hour
       });
 
-      // Set refresh token cookie (TEST: remember me'ye göre 4 dakika veya 10 dakika)
-      const refreshTokenMaxAge = rememberMe ? 10 * 60 * 1000 : 4 * 60 * 1000;
+      // Set refresh token cookie (remember me'ye göre 3 gün veya 30 gün)
+      const refreshTokenMaxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 3 * 24 * 60 * 60 * 1000;
       reply.setCookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: true,
@@ -827,7 +827,13 @@ class AuthController {
       reply.send({
         success: true,
         message: 'Login successful',
-        user: user.toSafeObject()
+        user: user.toSafeObject(),
+        tokens: {
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          accessTokenExpiresIn: '1h',
+          refreshTokenExpiresIn: rememberMe ? '30d' : '3d'
+        }
       });
     
     } catch (error) {
