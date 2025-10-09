@@ -29,6 +29,18 @@ export default (sequelize, DataTypes, Model) => {
             type: DataTypes.INTEGER,
             defaultValue: 0
         },
+        gameCurrentStreak: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        },
+        gameLongestStreak: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        },
+        gameTotalDuration: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        },
         xp: {
             type: DataTypes.INTEGER,
             defaultValue: 0
