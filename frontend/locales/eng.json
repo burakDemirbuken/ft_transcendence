@@ -52,7 +52,8 @@
 		"friends": "FRIENDS",
 		"collapse": "COLLAPSE",
 		"settings": "SETTINGS",
-		"logout": "LOGOUT"
+		"logout": "LOGOUT",
+		"login": "LOGIN"
 	},
 	"login": {
 		"lang": "ENG",

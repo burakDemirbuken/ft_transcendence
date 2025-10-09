@@ -48,15 +48,23 @@ async function username() {
 		return ;
 	}
 
-	const address = `https://localhost:8080/api/auth/check-username?username=${username}`;
-	const response = await fetch(address);
-	const json = await response.json();
-	if(json.exists) {
-		userRegistered = true;
-		goToNextField("password");
-	} else {
-		userRegistered = false;
-		goToNextField("email");
+	const address = `https://localhost:8080/api/auth/check-username?username=${username}&lang=${localStorage.getItem("langPref")}`;
+	try {
+		const response = await fetch(address);
+		const json = await response.json();
+		if (response.ok) {
+			if(json.exists) {
+				userRegistered = true;
+				goToNextField("password");
+			} else {
+				userRegistered = false;
+				goToNextField("email");
+			}
+		} else {
+			showError(json.error);
+		}
+	} catch {
+		showError("System error");
 	}
 }
 
@@ -104,23 +112,25 @@ async function login() {
 		"password": formData.get("password")
 	};
 
-	const request = new Request("https://localhost:8080/api/auth/login", {
+	const request = new Request(`https://localhost:8080/api/auth/login?lang=${localStorage.getItem("langPref")}`, {
 		method: "POST",
 		headers: new Headers({ "Content-Type": "application/json" }),
 		body: JSON.stringify(user),
 	});
 
-	console.log("sends");
-	const response = await fetch(request);
-	console.log(response);
-	const json = await response.json();
-	if (response.ok) {
-		document.querySelector("#error").textContent = json.message;
-		userEmail = json.email;
-		goToNextField("2fa")
-	}
-	else
+	try {
+		const response = await fetch(request);
+		const json = await response.json();
+		if (response.ok) {
+			document.querySelector("#error").textContent = json.message;
+			userEmail = json.email;
+			goToNextField("2fa")
+		}
+		else
 		showError(json.error);
+	} catch {
+
+	}
 }
 
 async function register() {
@@ -148,7 +158,7 @@ async function register() {
 	};
 
 	console.log("deb1");
-	const request = new Request("https://localhost:8080/api/auth/register", {
+	const request = new Request(`https://localhost:8080/api/auth/register?lang=${localStorage.getItem("langPref")}`, {
 		method: "POST",
 		headers: new Headers({ "Content-Type": "application/json" }),
 		body: JSON.stringify(obj),
@@ -184,7 +194,7 @@ async function verify()
 			"rememberMe": rememberMe
 		};
 
-		const request = new Request("https://localhost:8080/api/auth/verify-2fa", {
+		const request = new Request(`https://localhost:8080/api/auth/verify-2fa?lang=${localStorage.getItem("langPref")}`, {
 		method: "POST",
 		headers: new Headers({ "Content-Type": "application/json" }),
 		body: JSON.stringify(obj),
@@ -192,7 +202,7 @@ async function verify()
 		const response = await fetch(request);
 		const json = await response.json();
 		if (response.ok)
-			navigateTo("profile");
+			navigateTo("home");
 		else
 			showError("Login Fail");
 	}

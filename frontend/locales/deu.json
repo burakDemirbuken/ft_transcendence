@@ -52,7 +52,8 @@
 		"friends": "FREUNDE",
 		"collapse": "STÜRZEN",
 		"settings": "EINSTELLUNGEN",
-		"logout": "AUSLOGGEN"
+		"logout": "AUSLOGGEN",
+		"login": "EINLOGGEN"
 	},
 	"login": {
 		"lang": "DEU",

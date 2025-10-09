@@ -52,7 +52,8 @@
 		"friends": "ARKADAŞLAR",
 		"collapse": "DARALT",
 		"settings": "AYARLAR",
-		"logout": "ÇIKIŞ"
+		"logout": "ÇIKIŞ",
+		"login": "GİRİŞ"
 	},
 	"login": {
 		"lang": "TUR",
