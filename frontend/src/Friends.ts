@@ -37,7 +37,8 @@ async function createFriends() {
 					${user.avatar_url}
 				</div>
 				<div class="user-info">
-					<span class="uname">${user.username}</span>
+					<span class="dname">${user.dname}</span>
+					<span class="uname">${user.uname}</span>
 				</div>
 			</div>
 			<div class="user-actions">
@@ -71,7 +72,8 @@ async function createInvites() {
 					${user.avatar_url}
 				</div>
 				<div class="user-info">
-					<span class="uname">${user.username}</span>
+					<span class="dname">${user.dname}</span>
+					<span class="uname">${user.uname}</span>
 				</div>
 			</div>
 			<div class="user-actions">
@@ -104,7 +106,8 @@ async function createRequests() {
 					${user.avatar_url}
 				</div>
 				<div class="user-info">
-					<span class="uname">${user.username}</span>
+					<span class="dname">${user.dname}</span>
+					<span class="uname">${user.uname}</span>
 				</div>
 			</div>
 			<div class="user-actions">

@@ -206,9 +206,16 @@
 	flex-direction: column;
 }
 
+.user-info .dname {
+	font-family: "Orbitron","monospace";
+	font-weight: bold;
+	text-shadow: 0 0 15px #fff7;
+}
+
 .user-info .uname {
-	font-family: "PixeloidSans";
-	text-shadow: 0 0 15px #0ff;
+	font-family: "PixeloidMono";
+	font-size: .7em;
+	color: #08a;
 }
 
 .user-actions {
