@@ -20,12 +20,13 @@ class RoomManager extends EventEmitter
 		}, 1000); // Log every 1 second */
 	}
 
-	handleRoomMessage(action, payload, player)
+	handleClientRoomMessage(action, payload, player)
 	{
 		switch (action)
 		{
 			case 'create':
-				this.createRoom(player, payload);
+				const roomId = this.createRoom(player, payload);
+				player.clientSocket.send(JSON.stringify({ type: 'created', payload: { roomId } }));
 				break;
 			case 'join':
 				this.joinRoom(payload.roomId, player);
@@ -36,11 +37,34 @@ class RoomManager extends EventEmitter
 			case 'setReady':
 				player.isReady = payload.isReady;
 				break;
-			case 'startGame':
+			case 'matchTournament':
+			case 'start':
 				this.startGame(player.id);
 				break;
 			default:
 				throw new Error(`Unhandled room message type: 11 ${action}`);
+		}
+	}
+
+	handleServerRoomMessage(action, payload)
+	{
+		let room;
+		switch (action)
+		{
+			case 'created':
+				room = this.getRoom(payload.roomId);
+				room.players.forEach(player => {
+					player.clientSocket.send(JSON.stringify({ type: 'started', payload: { roomId: payload.roomId } }));
+				});
+				break;
+			case "matchReady":
+				room = this.getRoom(payload.roomId);
+				room.players.forEach(player => {
+					player.clientSocket.send(JSON.stringify({ type: 'matchReady', payload: payload }));
+				});
+				break;
+			default:
+				throw new Error(`Unhandled room message type: 22 ${action}`);
 		}
 	}
 
@@ -71,6 +95,7 @@ class RoomManager extends EventEmitter
 			throw new Error(`Invalid game mode: ${payload.gameMode}`);
 		room.addPlayer(player);
 		this.rooms.set(roomId, room);
+		return roomId;
 	}
 
 	getRoom(roomId)
@@ -99,6 +124,7 @@ class RoomManager extends EventEmitter
 			throw new Error(`Player with ID ${player.id} is already in room ${roomId}`);
 
 		room.addPlayer(player);
+		console.log(`Player with ID ${player.id} joined room ${roomId}`);
 		//this.notifyRoomUpdate(roomId);
 	}
 
@@ -168,8 +194,8 @@ class RoomManager extends EventEmitter
 		if (!room.allPlayersReady())
 			throw new Error('All players must be ready before starting the game');
 
-		const state = room.startGame(playerId);
-		this.emit(`roomStart`, state);
+		const state = {...room.startGame(playerId), roomId: roomId};
+		this.emit(`create`, state);
 		//room.notifyRoomUpdate(room.id);
 	}
 
@@ -178,7 +204,9 @@ class RoomManager extends EventEmitter
 	{
 		let roomId;
 		do {
-			roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+			//! TEST
+			roomId = "Naber";
+			//roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
 		} while (this.rooms.has(roomId));
 		return roomId;
 	}

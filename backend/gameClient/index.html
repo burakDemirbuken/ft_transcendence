@@ -432,6 +432,7 @@
         </div>
         <button class="btn btn-success" id="startGameBtn">Oyunu Başlat</button>
         <button class="btn btn-success" id="nextRoundBtn">Next Round</button>
+        <button class="btn btn-success" id="matchTournamentBtn">match Tournament</button>
       </div>
     </div>
 
@@ -443,56 +444,10 @@
         <button class="btn btn-warning" id="createTournamentBtn">Create Tournament</button>
         <input type="text" class="input-field" id="customTournamentId" placeholder="Enter Tournament ID">
         <button class="btn btn-success" id="joinTournamentBtn">Join Tournament</button>
-      </div>
+x      </div>
     </div>
   </div>
 
-  <!-- Tournament Room Interface -->
-  <div class="tournament-room" id="tournamentRoom">
-    <button class="close-btn" onclick="closeTournamentRoom()">&times;</button>
-
-    <div class="tournament-header">
-      <div class="tournament-title" id="roomTitle">Tournament Room</div>
-      <div class="tournament-id" id="roomId">ID: TOUR-12345</div>
-    </div>
-
-    <div class="tournament-info">
-      <div class="info-item">
-        <div class="info-label">Status</div>
-        <div class="info-value" id="tournamentStatus">Waiting</div>
-      </div>
-      <div class="info-item">
-        <div class="info-label">Players</div>
-        <div class="info-value" id="playerCount">0/8</div>
-      </div>
-      <div class="info-item">
-        <div class="info-label">Format</div>
-        <div class="info-value" id="tournamentFormat">Single Elimination</div>
-      </div>
-      <div class="info-item">
-        <div class="info-label">Max Players</div>
-        <div class="info-value" id="maxPlayers">8</div>
-      </div>
-    </div>
-
-    <div class="participants-list">
-      <div class="participants-title">👥 Participants</div>
-      <div id="participantsList">
-        <!-- Participants will be populated here -->
-      </div>
-    </div>
-
-    <div class="tournament-actions">
-      <button class="btn btn-primary" id="readyBtn" onclick="toggleReady()">
-        Mark Ready
-      </button>
-      <button class="btn btn-success" id="startTournamentBtn" onclick="startTournament()" style="display: none;">
-        Start Tournament
-      </button>
-      <button class="btn btn-warning" onclick="leaveTournament()">
-        Leave Tournament
-      </button>
-    </div>
   </div>
 <!-- Değer alma: -->
   <canvas id="renderCanvas"></canvas>

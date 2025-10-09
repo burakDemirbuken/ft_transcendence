@@ -30,14 +30,6 @@ class GameManager extends EventEmitter
 		);
 	}
 
-	uniqueGameId()
-	{
-		do {
-			var id = Date.now();
-		} while (this.games.has(id));
-		return id;
-	}
-
 	removePlayerFromGame(playerId)
 	{
 		for (const [gameId, game] of this.games.entries())
@@ -62,7 +54,13 @@ class GameManager extends EventEmitter
 		}
 	}
 
-	createGame(id, gameMode, properties)
+	registerPlayerToGame(gameId, playerId)
+	{
+		const game = this.getGame(gameId);
+		game.addRegisteredPlayer(playerId);
+	}
+
+	async createGame(id, gameMode, properties)
 	{
 		const gameId = id;
 		properties.id = gameId;
@@ -82,42 +80,39 @@ class GameManager extends EventEmitter
 		return gameId;
 	}
 
-	addPlayerToGame(gameId, player)
+	getGame(gameId)
 	{
 		if (!this.games.has(gameId))
 			throw new Error(`Game with ID ${gameId} does not exist`);
-		const game = this.games.get(gameId);
+		return this.games.get(gameId);
+	}
+
+	addPlayerToGame(gameId, player)
+	{
+		const game = this.getGame(gameId);
 		game.addPlayer(player);
 	}
 
 	gameStart(gameId)
 	{
-		const game = this.games.get(gameId);
-		if (!game)
-			throw new Error(`Game with ID ${gameId} does not exist`);
+		const game = this.getGame(gameId);
 		game.start();
 		console.log(`▶️ Game ${gameId} started`);
 	}
 
 	removeGame(gameId)
 	{
-		if (this.games.has(gameId))
-		{
-			const game = this.games.get(gameId);
-			game.stop();
-			this.games.delete(gameId);
-			console.log(`🗑️ Game ${gameId} removed from engine`);
-		}
+		const game = this.getGame(gameId);
+		game.stop();
+		this.games.delete(gameId);
+		console.log(`🗑️ Game ${gameId} removed from engine`);
 	}
 
 	resetGame(gameId)
 	{
-		if (this.games.has(gameId))
-		{
-			const game = this.games.get(gameId);
-			game.resetGame();
-			console.log(`🔄 Game ${gameId} reset`);
-		}
+		const game = this.getGame(gameId);
+		game.resetGame();
+		console.log(`🔄 Game ${gameId} reset`);
 	}
 
 	getPlayerGame(player)
@@ -175,7 +170,7 @@ class GameManager extends EventEmitter
 		{
 			if (game.isRunning())
 				game.update(deltaTime);
-			else if (game.status === 'waiting')
+			else if (game.status === 'ready to start')
 			{
 				if (game.players.every(p => p.initialized))
 					this.gameStart(gameId);

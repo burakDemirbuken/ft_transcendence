@@ -2,7 +2,6 @@ import WebSocketServer from './network/WebSocketServer.js';
 import WebSocketClient from './network/WebSocketClient.js';
 import GameManager from './GameManager.js';
 import Player from './Player.js';
-import RoomManager from './Room/RoomManager.js';
 import TournamentManager from './Tournament/TournamentManager.js';
 /*
 exampleWebSocketMessage=
@@ -19,15 +18,15 @@ class GameService
 	{
 		this.gameManager = new GameManager();
 		this.websocketServer = new WebSocketServer();
-		this.roomSocket = new WebSocketClient('ws://room-service:3001');
-		this.roomManager = new RoomManager();
+		this.roomSocket = new WebSocketClient("room", 3004);
 		this.tournamentManager = new TournamentManager();
 		this.connectionId = new Map(); //  playerId ->
 		this.players = new Map(); // playerId -> Player instance
 
 		this.gameManager.start();
 		this.tournamentManager.start();
-		this.setupRoomEvents();
+		this.setupRoomNetwork();
+
 /* 		setInterval(
 			() =>
 			{
@@ -67,7 +66,7 @@ class GameService
 		); */
 	}
 
-	setupRoomEvents()
+	setupRoomNetwork()
 	{
 		this.roomSocket.onConnect(() => {
 			console.log('🟢 Connected to Room Service');
@@ -79,6 +78,7 @@ class GameService
 			console.warn('⚠️ Room Service connection closed, attempting to reconnect in 5 seconds...');
 		});
 		this.roomSocket.onMessage((message) => {
+			this.roomMessageHandler(message);
 			console.log('📨 Message from Room Service:', message);
 		});
 
@@ -99,22 +99,21 @@ class GameService
 	{
 		try
 		{
-			console.log('Starting Game Server...');
-
 			this.websocketServer.onClientConnect(
 				(connectionId, query) =>
 				{
-					if (!query.id || !query.name)
+					if (!query.userID || !query.userName || !query.gameMode || !query.gameId)
 					{
 						console.error('❌ Missing required parameters in query:', query);
-						this.websocketServer.send(connectionId, {type: 'error', payload: 'Missing required parameters: id and name'});
+						this.websocketServer.send(connectionId, {type: 'error', payload: 'Missing required parameters: userID and userName'});
 						this.websocketServer.disconnectConnection(connectionId);
 						return;
 					}
-					console.log('🟢 New client id:', query.id, 'name:', query.name, 'connectionId:', connectionId);
-					const player = new Player(query.id, query.name);
-					this.players.set(query.id, player);
-					this.connectionId.set(query.id, connectionId);
+					console.log('🟢 New client id:', query.userID, 'name:', query.userName, 'connectionId:', connectionId);
+					const player = new Player(query.userID, query.userName);
+					this.players.set(query.userID, player);
+					this.connectionId.set(query.userID, connectionId);
+					this.addPlayerToGame(query.gameMode, query.gameId, player);
 				}
 			);
 
@@ -152,7 +151,6 @@ class GameService
 						return;
 					}
 					console.log('🔌 Client disconnected:', connectionId, 'Player ID:', player.id);
-					this.roomManager.leaveRoom(player.id);
 					this.gameManager.removePlayerFromGame(player.id);
 					this.tournamentManager.leaveTournament(player.id);
 					this.players.delete(player.id);
@@ -176,8 +174,14 @@ class GameService
 			console.error('❌ Error starting Game Server:', error);
 			throw error;
 		}
-		this.setupRoomEvents();
+	}
 
+	addPlayerToGame(gameId, player)
+	{
+		this.gameManager.addPlayerToGame(gameId, player);
+		const game = this.gameManager.getGame(gameId);
+		if (game.isFull())
+			this.sendPlayers(game.players, { type: 'game/initial', payload: { gameMode: game.gameMode, ...game.settings } });
 	}
 
 	handleWebSocketMessage(message, clientId)
@@ -188,17 +192,17 @@ class GameService
 		if (typeof(player) === "undefined")
 			throw new Error('Player not found for clientId: ' + clientId);
 		const [namespace, action] = message.type.split('/');
+		const payload = message.payload;
+		console.log('--- Incoming Message ---');
+		console.log(`Gelen clientId: ${clientId}`);
 		console.log(`Gelen namespace: ${namespace}`);
 		console.log(`Gelen action: ${action}`);
-		console.log(`Gelen payload: ${JSON.stringify(message.payload, null, 2)}`);
+		console.log(`Gelen payload: ${JSON.stringify(payload, null, 2)}`);
 		console.log('-------------------------');
 		switch (namespace)
 		{
-			case 'room':
-				this.roomManager.handleRoomMessage(action, message.payload, player);
-				break;
 			case 'player':
-				this.handlePlayerMessage(action, message.payload, player);
+				this.handlePlayerMessage(action, payload, player);
 				break;
 			default:
 				throw new Error(`Unhandled message namespace: ${namespace}`);
@@ -231,52 +235,31 @@ class GameService
 		});
 	}
 
-	setupRoomEvents()
+	async roomMessageHandler(message)
 	{
-		this.roomManager.on('room_Created',
-			({roomState, roomId}) =>
-			{
-				this.roomManager.on(`room${roomId}_Update`, ({roomState}) => {
-					this.sendPlayers(roomState.players, { type: 'tour/update', payload: roomState });
-				});
+		const { type, payload } = message;
+		const { roomId, gameMode, gameSettings, players } = payload;
+		console.log('--- Incoming Room Message ---');
+		console.log('Payload:', payload);
 
-				this.roomManager.on(`room${roomId}_Started`,
-					(payload) =>
-					{
-						const {gameMode, gameSettings, players} = payload;
-						const playersInstances = players.map(p => this.players.get(p.id)).filter(p => p);
-						try
-						{
-							if (gameMode === 'tournament')
-								this.tournamentMatchCreate(roomId, gameSettings, payload.tournamentSettings, playersInstances);
-							else
-								this.matchCreate(roomId, gameMode, gameSettings, playersInstances);
-						}
-						catch (error)
-						{
-							console.error('❌ Error starting match:', error);
-						}
-					}
-				);
-				this.roomManager.on(`room${roomId}_Closed`,
-					() =>
-					{
-						//? oda kapandığında yapılacak işlemler
-					}
-				);
-
-				this.roomManager.on(`room${roomId}_NextRound`, () => this.tournamentManager.nextRound(roomId));
-				const connId = this.connectionId.get(roomState.host);
-				if (connId)
-					this.websocketServer.send(connId, { type: 'room/created', payload: { roomState: roomState, roomId: roomId } });
-			}
-		);
+		switch (type) {
+			case 'create':
+				if (gameMode !== 'tournament')
+					await this.matchCreate(roomId, gameMode, gameSettings, players);
+				else
+					this.tournamentMatchCreate(roomId, gameSettings, payload.tournamentSettings, players);
+				this.roomSocket.send('created', { roomId: roomId });
+				break;
+			default:
+				console.error(`❌ Unhandled room message type: ${type}`);
+				break;
+		}
 	}
 
-	matchCreate(roomId, gameMode, gameSettings, players)
+	async matchCreate(roomId, gameMode, gameSettings, players)
 	{
-		const gameId = this.gameManager.createGame(roomId, gameMode, gameSettings);
-		players.forEach((p) => this.gameManager.addPlayerToGame(gameId, this.players.get(p.id)));
+		const gameId = await this.gameManager.createGame(roomId, gameMode, gameSettings);
+		players.forEach((p) => this.gameManager.registerPlayerToGame(gameId, p.id));
 
 		this.gameManager.on(`game${gameId}`, ({type, payload, players}) =>
 			{
@@ -287,6 +270,7 @@ class GameService
 						break;
 					case 'finished':
 						this.sendPlayers(players, { type: 'game/finished', payload: payload });
+						//! kullanıcıları soketten çıkar
 						//? XMLHTTPREQUEST
 						/* fetch('http://user:3006/internal/match', {
 							method: 'POST',
@@ -302,14 +286,12 @@ class GameService
 				}
 			}
 		);
-
-		this.sendPlayers(players, { type: 'game/initial' , payload: { gameMode: gameMode, ...gameSettings }});
 	}
 
 	tournamentMatchCreate(roomId, gameSettings, tournamentSettings, players)
 	{
 		const tournamentId = this.tournamentManager.createTournament(roomId, gameSettings, tournamentSettings);
-		players.forEach((p) => this.tournamentManager.joinTournament(tournamentId, this.players.get(p.id)));
+		players.forEach((p) => this.tournamentManager.registerPlayer(tournamentId, this.players.get(p.id)));
 		this.tournamentManager.on(`tournament_${tournamentId}`,
 			({type, payload, players}) =>
 			{
@@ -336,7 +318,8 @@ class GameService
 			}
 		);
 		const initData = this.tournamentManager.initTournament(tournamentId);
-		this.sendPlayers(players, { type: 'tournament/initial' , payload: { gameMode: 'tournament', ... initData }});
+		this.roomSocket.send('matchReady', { roomId: roomId, gameMode: 'tournament', ...initData });
+		//this.sendPlayers(players, { type: 'tournament/initial' , payload: { gameMode: 'tournament', ... initData }});
 	}
 
 	getPlayer(playerId)

@@ -28,19 +28,47 @@ class PingPong extends EventEmitter
 		this.ball = null;
 		this.paddles = new Map(); // playerId -> Paddle instance
 		this.players = []; // Player instances
+		this.registeredPlayers = new Set(); // playerId set
 
 		this.team = new Map(); // number -> { playersId: [], score: 0 }
 		this.lastGoal = null;
 	}
 
+	addRegisteredPlayer(playerId)
+	{
+		if (this.registeredPlayers.size >= this.maxPlayers)
+		{
+			//* throw olarak yönet
+			console.warn(`⚠️ Player ${playerId} cannot be registered. Max players reached.`);
+			return;
+		}
+		if (this.registeredPlayers.has(playerId))
+		{
+			console.warn(`⚠️ Player ${playerId} is already registered`);
+			return;
+		}
+		this.registeredPlayers.add(playerId);
+		console.log(`👤 Player ${playerId} registered for the game`);
+	}
+
+	removeRegisteredPlayer(playerId)
+	{
+		if (this.registeredPlayers.has(playerId))
+			this.registeredPlayers.delete(playerId);
+		else
+			console.warn(`⚠️ Player ${playerId} is not registered`);
+	}
+
 	addPlayer(player)
 	{
-		if (this.players.length < this.maxPlayers)
+		if (this.registeredPlayers.has(player.id))
 		{
 			this.players.push(player);
 			this.paddles.set(player.id, this.createPaddle(this.players.length));
 			this.team.get(this.players.length % 2 ? 1 : 2).playersId.push(player.id);
 			console.log(`👤 Player ${player.id} added to game`);
+			if (this.players.length === this.maxPlayers)
+				this.status = 'ready to start';
 		}
 	}
 
@@ -239,7 +267,6 @@ class PingPong extends EventEmitter
 		}
 		return false;
 	}
-
 
 	isFinished()
 	{

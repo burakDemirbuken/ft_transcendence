@@ -33,7 +33,7 @@ export default class TournamentRoom extends Room
 		this.status = 'in_game';
 		return {
 			gameSettings: this.gameSettings,
-			players: this.players,
+			players: this.players.map(p => p.getState()),
 			gameMode: this.gameMode,
 			tournamentSettings: this.tournamentSettings
 		};

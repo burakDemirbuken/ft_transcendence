@@ -11,7 +11,7 @@ class Player
 		this.id = id;
 		this.name = name;
 		// testing için her zaman true
-		this.isReady = false;
+		this.isReady = true;
 		this.clientSocket = socket;
 	}
 
@@ -21,7 +21,6 @@ class Player
 			id: this.id,
 			name: this.name,
 			isReady: this.isReady,
-			lastActivity: this.lastActivity
 		};
 	}
 }

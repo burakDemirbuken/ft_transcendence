@@ -14,11 +14,14 @@ class App
 		this.playerId = id;
 		this.playerName = name;
 		this.gameRenderer = new GameRenderer();
-		this.webSocketClient = new WebSocketClient(window.location.hostname, 3004);
+		this.webSocketClient = new WebSocketClient(window.location.hostname, 3002);
 		this.roomUi = new RoomUi();
 		this.inputManager = new InputManager();
+	}
 
-		this._setupNetworkListeners();
+	start(roomId)
+	{
+		this._setupNetworkListeners(roomId);
 		this._gameControllerSetup();
 	}
 
@@ -65,7 +68,7 @@ class App
 		);
 	}
 
-	_setupNetworkListeners()
+	_setupNetworkListeners(roomId)
 	{
 		this.webSocketClient.onConnect(() =>
 		{
@@ -97,7 +100,7 @@ class App
 		{
 		});
 
-		this.webSocketClient.connect("ws/client", { userID: this.playerId, userName: this.playerName });
+		this.webSocketClient.connect("ws", { userID: this.playerId, userName: this.playerName, gameId: roomId });
 	}
 
 	createRoom(mode, gameSettings)
@@ -232,6 +235,7 @@ class App
 
 	loadGame(gameConfig)
 	{
+		console.log('🎮 Loading game with config:', gameConfig);
 		this.gameRenderer.initialize(gameConfig).then(
 			() =>
 			{

@@ -10,7 +10,7 @@ export default async function clientConnectionSocket(fastify) {
 			connection.socket.close(1008, 'userID query parameter is required');
 			return;
 		}
-		const currentPlayer = new Player(req.query.userID, connection.socket, 'Anonymous');
+		const currentPlayer = new Player(req.query.userID, connection.socket, req.query.userName || 'Anonymous');
 /*		console.log('New client connected', {
 			ip: req.ip,
 			protocol: connection.socket.protocol,
@@ -24,11 +24,11 @@ export default async function clientConnectionSocket(fastify) {
 
 			try {
 				data = JSON.parse(message.toString());
-				fastify.roomManager.handleRoomMessage(data.type, data.payload, currentPlayer)
+				fastify.roomManager.handleClientRoomMessage(data.type, data.payload, currentPlayer)
 			} catch (error) {
 				currentPlayer.clientSocket.send(JSON.stringify({ type: 'error', payload: { message: error.message } }));
 			}
-		})
+		});
 
 		connection.socket.on('close', () => {
 

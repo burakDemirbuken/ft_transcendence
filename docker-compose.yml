@@ -138,6 +138,9 @@ services:
     volumes:
       - gameServer:/app
       - /app/node_modules
+    depends_on:
+      - aiserver
+      - room
 
   room:
     container_name: room

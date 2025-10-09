@@ -17,6 +17,7 @@ class Tournament extends EventEmitter
 		this.tournamentSettings = tournamentSettings;
 		this.gameSettings = gameSettings;
 		this.players = [];
+		this.registeredPlayers = new Set();
 		this.spectators = [];
 		this.matches = new Map(); // Round -> Matchs array
 
@@ -61,8 +62,8 @@ class Tournament extends EventEmitter
 	{
 		if (this.status !== 'waiting')
 			return this.emit('error', new Error(`Tournament is not in waiting state, current status: ${this.status}`));
-	//	if (this.players.length < this.properties.playerCount)
-	//		return this.emit('error', new Error(`Not enough players to start matchmaking, current count: ${this.players.length}, required: ${this.properties.playerCount}`));
+	//	if (this.players.length < this.playerCount)
+	//		return this.emit('error', new Error(`Not enough players to start matchmaking, current count: ${this.players.length}, required: ${this.playerCount}`));
 
 		function shuffle(array)
 		{
@@ -79,7 +80,6 @@ class Tournament extends EventEmitter
 		for (let i = 0; i < this.players.length; i += 2)
 		{
 			const match = matchs[i / 2];
-			console.log('Setting up match:', match.matchNumber, 'with players:', this.players[i]?.id, this.players[i + 1]?.id);
 			this.setupMatch(match, this.players[i], this.players[i + 1]);
 			this.currentMatches.push(match);
 		}
@@ -117,7 +117,7 @@ class Tournament extends EventEmitter
 	init()
 	{
 		this.matchMaking();
-		return this.initData();
+		return this.getMatchmakingInfo();
 	}
 
 	initData()
@@ -259,17 +259,22 @@ class Tournament extends EventEmitter
 		});
 	}
 
+	registerPlayer(player)
+	{
+		if (this.isFull())
+			return this.emit('error', new Error(`Cannot register player ${player.id}, tournament is full`));
+		if (this.players.some(p => p.id === player.id))
+			return this.emit('error', new Error(`Player with ID ${player.id} is already registered in the tournament`));
+		this.registeredPlayers.add(player);
+		console.log(`👤 Player ${player} registered for tournament`);
+	}
+
 	addPlayer(player)
 	{
-		if (this.players.length < this.maxPlayers)
-		{
-			if (this.players.some(p => p.id === player.id))
-				return this.emit('error', new Error(`Player with ID ${player.id} is already in the tournament`));
-			this.players.push(player);
-			console.log(`👤 Player ${player.id} added to tournament`);
-		}
-		else
-			this.emit('error', new Error(`Tournament is full, cannot add player ${player.id}`));
+		if (!this.registeredPlayers.has(player.id))
+			return this.emit('error', new Error(`Player with ID ${player.id} is already in the tournament`));
+		this.players.push(player);
+		console.log(`👤 Player ${player.id} added to tournament`);
 	}
 
 	removePlayer(playerId)
@@ -283,7 +288,7 @@ class Tournament extends EventEmitter
 
 	isFull()
 	{
-		return this.players.length === this.properties.maxPlayers;
+		return this.players.length === this.maxPlayers;
 	}
 
 	isFinished()

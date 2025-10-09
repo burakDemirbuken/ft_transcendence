@@ -101,6 +101,15 @@ class TournamentManager extends EventEmitter
 		}
 	}
 
+	registerPlayer(tournamentId, player)
+	{
+		const tournament = this.tournaments.get(tournamentId);
+		if (!tournament)
+			return this.emit('error', new Error(`Tournament with ID ${tournamentId} does not exist`));
+		tournament.registerPlayer(player);
+		console.log(`👤 Player ${player} registered for tournament ${tournamentId}`);
+	}
+
 	// TODOO: throwları ele al hangi throw nereye gidecek vs
 	joinTournament(tournamentId, player)
 	{
