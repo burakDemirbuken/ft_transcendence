@@ -125,11 +125,10 @@ async function login() {
 			document.querySelector("#error").textContent = json.message;
 			userEmail = json.email;
 			goToNextField("2fa")
-		}
-		else
-		showError(json.error);
+		} else
+			showError(json.error);
 	} catch {
-
+		showError("System error");
 	}
 }
 
@@ -157,22 +156,25 @@ async function register() {
 		"password": formData.get("password")
 	};
 
-	console.log("deb1");
 	const request = new Request(`https://localhost:8080/api/auth/register?lang=${localStorage.getItem("langPref")}`, {
 		method: "POST",
 		headers: new Headers({ "Content-Type": "application/json" }),
 		body: JSON.stringify(obj),
 	});
-	console.log("deb5");
-	const response = await fetch(request);
-	console.log(response);
-	const json = await response.json();
-	if (response.ok) {
-		document.querySelector("#error").textContent = json.message;
-		goToNextField("welcome");
+
+	try {
+		const response = await fetch(request);
+		console.log(response);
+		const json = await response.json();
+		if (response.ok) {
+			document.querySelector("#error").textContent = json.message;
+			goToNextField("welcome");
+		}
+		else
+			showError(json.error);
+	} catch {
+		showError("System error");
 	}
-	else
-		showError(json.error);
 }
 
 async function verify()
@@ -199,12 +201,16 @@ async function verify()
 		headers: new Headers({ "Content-Type": "application/json" }),
 		body: JSON.stringify(obj),
 		});
-		const response = await fetch(request);
-		const json = await response.json();
-		if (response.ok)
-			navigateTo("home");
-		else
-			showError("Login Fail");
+		try {
+			const response = await fetch(request);
+			const json = await response.json();
+			if (response.ok)
+				navigateTo("home");
+			else
+				showError(json.error);
+		} catch {
+			showError("System error");
+		}
 	}
 	else
 		goToNextField("password");

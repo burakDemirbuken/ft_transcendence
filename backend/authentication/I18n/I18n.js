@@ -35,6 +35,7 @@ export function getTranslations(lang) {
 				"empty": "Required fields: Email/username, password.",
 				"invalid": "Email/username or Password wrong.",
 				"notverified": "Please check your inbox for verification.",
+				"verify": "Please enter the 6-digit code from your email for verification.",
 				"system": "Login failed. Please try again later.",
 				"success": "Login successful."
 			},
@@ -86,6 +87,7 @@ export function getTranslations(lang) {
 				"empty": "Erforderliche Felder: E-Mail/Benutzername, Passwort.",
 				"invalid": "E-Mail/Benutzername oder Passwort falsch.",
 				"notverified": "Bitte überprüfen Sie Ihren Posteingang auf die Verifizierungs-E-Mail.",
+				"verify": "Bitte geben Sie den 6-stelligen Code aus Ihrer E-Mail für Verifizerung ein.",
 				"system": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es später erneut.",
 				"success": "Anmeldung erfolgreich."
 			},
@@ -137,6 +139,7 @@ export function getTranslations(lang) {
 				"empty": "Gerekli alanlar: E-posta/kullanıcı adı, şifre.",
 				"invalid": "E-posta/kullanıcı adı veya şifre hatalı.",
 				"notverified": "Doğrulama için lütfen gelen kutunuzu kontrol edin.",
+				"verify": "Doğrulama için lütfen e-postanızdaki 6 haneli kodu girin.",
 				"system": "Giriş başarısız. Lütfen daha sonra tekrar deneyin.",
 				"success": "Giriş başarılı."
 			},

@@ -50,7 +50,6 @@ async function createFriends() {
         div.classList.add("friend");
         div.classList.add("online");
         const friends = document.querySelector(".friends");
-        console.log(friends);
         friends.appendChild(div);
     }
 }
@@ -83,7 +82,6 @@ async function createInvites() {
         div.classList.add("friend");
         div.classList.add("online");
         const friends = document.querySelector(".invites");
-        console.log(friends);
         friends.appendChild(div);
     }
 }
@@ -118,7 +116,6 @@ async function createRequests() {
         div.classList.add("online");
         const req = document.querySelector(".requests");
         const ugrid = req === null || req === void 0 ? void 0 : req.querySelector(".user-grid");
-        console.log(ugrid);
         ugrid.appendChild(div);
     }
 }

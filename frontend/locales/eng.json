@@ -55,6 +55,11 @@
 		"logout": "LOGOUT",
 		"login": "LOGIN"
 	},
+	"home": {
+		"team": "TEAM MEMBERS",
+		"thanks": "Thanks to 42 Kocaeli and our friends",
+		"click": "Click"
+	},
 	"login": {
 		"lang": "ENG",
 		"welcome": {

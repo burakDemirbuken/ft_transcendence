@@ -350,7 +350,7 @@ async register(request, reply) {
 		// Basic validation
 		if (!username || !email || !password)
 			return reply.status(400).send({ success: false, error: trlt.register.empty });
-
+		console.log("HEEEEYYEYEYEYE");
 		// Check if user exists
 		const existingUser = await User.findByEmail(email) || await User.findByUsername(username);
 		if (existingUser)
@@ -571,7 +571,7 @@ async register(request, reply) {
 				console.log('2FA email send failed:', emailError);
 			}
 
-			reply.send({ success: true, message: trlt.login.notverified, next_step: '2fa_verification', email: user.email });
+			reply.send({ success: true, message: trlt.login.verify , next_step: '2fa_verification', email: user.email });
 
 		} catch (error) {
 			console.log('Login error:', error);
@@ -579,7 +579,6 @@ async register(request, reply) {
 		}
 	}
 
-	// 2FA VERIFICATION
 // 2FA VERIFICATION (username OR email)
 	async verify2FA(request, reply) {
 		let trlt = getTranslations("eng");
@@ -690,7 +689,7 @@ async register(request, reply) {
 
 		try {
 			// Clear cookies
-			reply.clearCookie('accessToken');
+			reply.clearCookie();
 
 			reply.send({ success: true, message: trlt.logout.success });
 

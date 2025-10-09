@@ -47,19 +47,38 @@ export function navigateTo(page) {
 document.addEventListener("DOMContentLoaded", () => {
     const navbar = document.body.querySelectorAll(".sidebar-element");
     for (const element of navbar) {
-        element.addEventListener("click", e => {
-            var _a, _b, _c, _d;
+        element.addEventListener("click", async (e) => {
+            var _a, _b, _c, _d, _e;
             if (e.currentTarget.matches("[data-link]")) {
                 console.log("PAGE");
                 e.preventDefault();
                 navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
                 (_a = document.querySelector(".selected")) === null || _a === void 0 ? void 0 : _a.classList.toggle("selected");
                 e.currentTarget.classList.toggle("selected");
+                if (e.currentTarget.matches("[id='logout']")) {
+                    const request = new Request(`https://localhost:8080/api/auth/logout?lang=${localStorage.getItem("langPref")}`, {
+                        method: "POST"
+                    });
+                    try {
+                        const response = await fetch(request);
+                        const json = await response.json();
+                        if (response.ok) {
+                            (_b = document.querySelector("#navbar")) === null || _b === void 0 ? void 0 : _b.classList.toggle("logout");
+                            console.log("LOGSOUT!");
+                        }
+                        else {
+                            alert(`${json.error}`);
+                        }
+                    }
+                    catch (_f) {
+                        alert(`System Error`);
+                    }
+                }
             }
             else if (e.currentTarget.matches("[id='toggle']")) {
                 console.log("TOGGLE");
-                (_b = document.querySelector("#navbar")) === null || _b === void 0 ? void 0 : _b.classList.toggle("collapse");
-                (_c = document.querySelector(".selected")) === null || _c === void 0 ? void 0 : _c.classList.toggle("selected");
+                (_c = document.querySelector("#navbar")) === null || _c === void 0 ? void 0 : _c.classList.toggle("collapse");
+                (_d = document.querySelector(".selected")) === null || _d === void 0 ? void 0 : _d.classList.toggle("selected");
                 e.currentTarget.classList.toggle("selected");
             }
             else if (e.currentTarget.matches("[id='language']")) {
@@ -67,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 e.preventDefault();
                 I18n.nextLanguage("navbar");
                 I18n.nextLanguage(pageState.current);
-                (_d = document.querySelector(".selected")) === null || _d === void 0 ? void 0 : _d.classList.toggle("selected");
+                (_e = document.querySelector(".selected")) === null || _e === void 0 ? void 0 : _e.classList.toggle("selected");
                 e.currentTarget.classList.toggle("selected");
             }
         });

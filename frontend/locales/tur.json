@@ -55,6 +55,11 @@
 		"logout": "ÇIKIŞ",
 		"login": "GİRİŞ"
 	},
+	"home": {
+		"team": "EKİP ÜYELERİ",
+		"thanks": "42 Kocaeli'ye ve arkadaşlarımıza teşekkürler",
+		"click": "Tıkla"
+	},
 	"login": {
 		"lang": "TUR",
 		"welcome": {
