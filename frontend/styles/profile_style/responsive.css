@@ -1,79 +1,3 @@
-
-/* Responsive Design */
-/* @media (max-width: 768px) {
-    .profile-container {
-        padding: 10px;
-    }
-
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 20px;
-    }
-
-    .header-stats {
-        justify-content: center;
-    }
-
-    .username {
-        font-size: 2rem;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .chart-card {
-        grid-column: span 1;
-    }
-
-    .match-row {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        text-align: center;
-    }
-
-    .match-row.header {
-        display: none;
-    }
-
-    .matches-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .matches-filters {
-        justify-content: center;
-    }
-}
-
-@media (max-width: 480px) {
-    .user-avatar {
-        width: 80px;
-        height: 80px;
-    }
-
-    .avatar-image {
-        font-size: 2rem;
-    }
-
-    .username {
-        font-size: 1.5rem;
-    }
-
-    .stat-value {
-        font-size: 1.5rem;
-    }
-
-    .streak-number {
-        font-size: 3rem;
-    }
-
-    .profile-nav {
-        flex-direction: column;
-    }
-} */
-
 @media (max-width: 1080px) {
     /* Header */
     .header-stats {
@@ -92,11 +16,6 @@
     .header-content {
         gap: .8rem;
     }
-
-    /* General */
-    .profile-container {
-        padding: 10px;
-    }
 }
 
 @media (max-width: 420px) {
@@ -111,7 +30,7 @@
         gap: 10px;
     }
 
-    #monthlyChart {
-        aspect-ratio: 2/3;
+    .profile-nav {
+        flex-direction: column;
     }
 }

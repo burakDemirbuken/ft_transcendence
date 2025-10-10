@@ -70,6 +70,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     justify-content: space-between;
+    padding: 8px;
     gap: 8px;
     background: #00000096;
     margin-bottom: 4px;
