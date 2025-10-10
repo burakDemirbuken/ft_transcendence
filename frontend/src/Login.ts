@@ -1,13 +1,14 @@
 import AView from "./AView.js";
 import { navigateTo } from './index.js';
+import { showNotification } from './notification.js';
+import { getJsTranslations } from './I18n.js';
 
 let currentStep:string = "welcome";
 let userRegistered:boolean;
 let rememberMe:boolean = false;
 let userEmail:string;
 
-function goToNextField(field)
-{
+function goToNextField(field) {
 	let step = document.querySelector(`.field[data-step="${currentStep}"]`);
 	step.classList.remove("active");
 	step?.setAttribute("inert", "");
@@ -17,36 +18,21 @@ function goToNextField(field)
 	step?.removeAttribute("inert");
 }
 
-function showError(message:string)
-{
-	const activeField = document.querySelector(".active");
-	const error = document.querySelector("#error");
-	error.textContent = message;
-	activeField.classList.add('shake')
-	setTimeout(() => {
-		activeField.classList.remove('shake');
-	}, 500);
-}
-
 async function username() {
+	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
+
 	const form = document.querySelector("#loginForm");
 	const formData = new FormData(form);
 	const username:string = formData.get("username");
 
-	if (!username) {
-		showError("uname cant be empty");
-		return ;
-	}
+	if (!username)
+		return showNotification(trlt.login.uname.empty, "error");
 
-	if (username.length < 1 || username.length > 20) {
-		showError("uname has to be 1-20 characters long");
-		return ;
-	}
+	if (username.length < 1 || username.length > 20)
+		return showNotification(trlt.login.uname.length, "error");
 
-	if (!/^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
-		showError("uname has to be valid characters")
-		return ;
-	}
+	if (!/^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username))
+		return showNotification(trlt.login.uname.invalid, "error")
 
 	const address = `https://localhost:8080/api/auth/check-username?username=${username}&lang=${localStorage.getItem("langPref")}`;
 	try {
@@ -61,51 +47,44 @@ async function username() {
 				goToNextField("email");
 			}
 		} else {
-			showError(json.error);
+			showNotification(json.error, "error");
 		}
 	} catch {
-		showError("System error");
+		showNotification(trlt.system, "error");
 	}
 }
 
-async function email()
-{
+async function email() {
+	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
+
 	const form = document.querySelector("#loginForm");
 	const formData = new FormData(form);
 	const email:string = formData.get("email");
 
-	if (!email) {
-		showError("email can't be empty");
-		return ;
-	}
+	if (!email)
+		return showNotification(trlt.login.email.empty, "error");
 
-	if (email.length < 5 || email.length > 254) {
-		showError("invalid email");
-		return ;
-	}
+	if (email.length < 5 || email.length > 254)
+		return showNotification(trlt.login.email.invalid, "error");
 
-	if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/u.test(email)) {
-		showError("invalid email")
-		return ;
-	}
+	if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/u.test(email))
+		return showNotification(trlt.login.email.invalid, "error");
 
 	goToNextField("password");
 }
 
 async function login() {
+	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
+
 	const form = document.querySelector("#loginForm");
 	const formData = new FormData(form);
 	const password:string = formData.get("password");
 
-	if (!password) {
-		showError("password can't be empty");
-		return ;
-	}
+	if (!password)
+		return showNotification(trlt.login.password.empty, "error");
 
-	if (password.length < 8 || password.length > 128) {
-		showError("invalid password");
-		return ;
-	}
+	if (password.length < 8 || password.length > 128)
+		return showNotification(trlt.login.password.length, "error");
 
 	const user:Object = {
 		"login": formData.get("username"),
@@ -122,32 +101,30 @@ async function login() {
 		const response = await fetch(request);
 		const json = await response.json();
 		if (response.ok) {
-			document.querySelector("#error").textContent = json.message;
+			showNotification(json.message, "info");
 			userEmail = json.email;
 			goToNextField("2fa")
 		} else
-			showError(json.error);
+			showNotification(json.error, "error");
 	} catch {
-		showError("System error");
+		showNotification(trlt.system, "error");
 	}
 }
 
 async function register() {
+	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
+
 	const form = document.querySelector("#loginForm");
 	const formData = new FormData(form);
 	const password:string = formData.get("password");
 
 	console.log("deb4");
-	if (!password) {
-		showError("password can't be empty");
-		return ;
-	}
+	if (!password)
+		return showNotification(trlt.login.password.empty, "error");
 
 	console.log("deb3");
-	if (password.length < 8 || password.length > 128) {
-		showError("invalid password");
-		return ;
-	}
+	if (password.length < 8 || password.length > 128)
+		return showNotification(trlt.login.password.length, "error");
 
 	console.log("deb2");
 	const obj:Object = {
@@ -171,22 +148,21 @@ async function register() {
 			goToNextField("welcome");
 		}
 		else
-			showError(json.error);
+			showNotification(json.error, "error");
 	} catch {
-		showError("System error");
+		showNotification(trlt.system, "error");
 	}
 }
 
-async function verify()
-{
+async function verify() {
+	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
+
 	const form = document.querySelector("#loginForm");
 	const formData = new FormData(form);
 	const code:string = formData.get("code");
 
-	if (!code) {
-		showError("code can't be empty");
-		return ;
-	}
+	if (!code)
+		return showNotification(trlt.login.code.empty, "error");
 
 	if (userEmail)
 	{
@@ -207,9 +183,9 @@ async function verify()
 			if (response.ok)
 				navigateTo("home");
 			else
-				showError(json.error);
+				showNotification(json.error, "error");
 		} catch {
-			showError("System error");
+			showNotification(trlt.system, "error");
 		}
 	}
 	else

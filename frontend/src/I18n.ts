@@ -42,6 +42,12 @@ export async function getTranslations(lang:string) {
 	return translations;
 }
 
+export async function getJsTranslations(lang:string) {
+	const response = await fetch(`locales/jsI18n.json`);
+	const translations = await response.json();
+	return translations[lang];
+}
+
 class I18n {
 	static async loadLanguage(section:string) {
 		const translations = await getTranslations(localStorage.getItem("langPref"));

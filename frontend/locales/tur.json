@@ -67,7 +67,7 @@
 			"prompt": "Başlat Düğmesine Basın..."
 		},
 		"username": "Rumuz Girin",
-		"email": "Email Girin",
+		"email": "E-posta Girin",
 		"password": "Şifre Girin",
 		"code": "Kod Girin",
 		"rme": "Beni Hatırla"
@@ -228,7 +228,7 @@
 			"title": "Hesap",
 			"uname": "Kullanıcı Adı",
 			"dname": "Görünür Ad",
-			"email": "Email",
+			"email": "E-posta",
 			"pass": "Şifre"
 		},
 		"dzone": {

@@ -67,7 +67,7 @@
 			"prompt": "Press Start Button..."
 		},
 		"username": "Enter Username",
-		"email": "Enter Email",
+		"email": "Enter E-mail",
 		"password": "Enter Password",
 		"code": "Enter Code",
 		"rme": "Remember Me"
@@ -228,7 +228,7 @@
 			"title": "Account",
 			"uname": "User Name",
 			"dname": "Display Name",
-			"email": "Unfriend",
+			"email": "E-mail",
 			"pass": "Password"
 		},
 		"language": "Language",

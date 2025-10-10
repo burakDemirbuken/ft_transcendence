@@ -4,7 +4,7 @@ import Play from "../dist/Play.js";
 import Friends from "../dist/Friends.js";
 import Settings from "../dist/Settings.js";
 import Login from "../dist/Login.js";
-import I18n from './translations.js';
+import I18n from './I18n.js';
 
 const pageState = {
 	current: "login", // default

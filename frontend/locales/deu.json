@@ -67,7 +67,7 @@
 			"prompt": "Drücke die Starttaste..."
 		},
 		"username": "Nick Eingeben",
-		"email": "Email Eingeben",
+		"email": "E-Mail Eingeben",
 		"password": "Passwort Eingeben",
 		"code": "Schlüssel Eingeben",
 		"rme": "Login Merken"
@@ -228,7 +228,7 @@
 			"title": "Konto",
 			"uname": "Benutzername",
 			"dname": "Anzeigename",
-			"email": "Email",
+			"email": "E-Mail",
 			"pass": "Passwort"
 		},
 		"language": "Sprache",
