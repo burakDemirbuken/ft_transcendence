@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import AView from "./AView.js";
 // ----------------------
 // PARTICLE FUNCTIONS
@@ -215,63 +206,53 @@ export default class extends AView {
         super();
         this.setTitle("Home");
     }
-    getHtml() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const response = yield fetch(`templates/home.html`);
-            return yield response.text();
-        });
+    async getHtml() {
+        const response = await fetch(`templates/home.html`);
+        return await response.text();
     }
-    setEventHandlers() {
-        return __awaiter(this, void 0, void 0, function* () {
-            // Team members
-            const teamMembers = document.querySelectorAll('.team-member');
-            teamMembers.forEach(member => member.addEventListener('click', toggleTeamMember));
-            document.addEventListener('click', closeMembersOnClick);
-            // Click only on home main container
-            const mainContainer = document.getElementById('mainContainer');
-            if (mainContainer)
-                mainContainer.addEventListener('click', mainClickTransition);
-            const teamContent = document.getElementById('teamContent');
-            if (teamContent)
-                teamContent.addEventListener('click', teamContentClick);
-            // Particles
-            initParticles();
-            // Social links
-            const socialLinks = document.querySelectorAll('.social-link');
-            socialLinks.forEach(link => link.addEventListener('click', socialClick));
-            // Cursor
-            cursorIndicatorSetup();
-        });
+    async setEventHandlers() {
+        // Team members
+        const teamMembers = document.querySelectorAll('.team-member');
+        teamMembers.forEach(member => member.addEventListener('click', toggleTeamMember));
+        document.addEventListener('click', closeMembersOnClick);
+        // Click only on home main container
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer)
+            mainContainer.addEventListener('click', mainClickTransition);
+        const teamContent = document.getElementById('teamContent');
+        if (teamContent)
+            teamContent.addEventListener('click', teamContentClick);
+        // Particles
+        initParticles();
+        // Social links
+        const socialLinks = document.querySelectorAll('.social-link');
+        socialLinks.forEach(link => link.addEventListener('click', socialClick));
+        // Cursor
+        cursorIndicatorSetup();
     }
-    unsetEventHandlers() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const teamMembers = document.querySelectorAll('.team-member');
-            teamMembers.forEach(member => member.removeEventListener('click', toggleTeamMember));
-            document.removeEventListener('click', closeMembersOnClick);
-            const mainContainer = document.getElementById('mainContainer');
-            if (mainContainer)
-                mainContainer.removeEventListener('click', mainClickTransition);
-            const teamContent = document.getElementById('teamContent');
-            if (teamContent)
-                teamContent.removeEventListener('click', teamContentClick);
-            const socialLinks = document.querySelectorAll('.social-link');
-            socialLinks.forEach(link => link.removeEventListener('click', socialClick));
-        });
+    async unsetEventHandlers() {
+        const teamMembers = document.querySelectorAll('.team-member');
+        teamMembers.forEach(member => member.removeEventListener('click', toggleTeamMember));
+        document.removeEventListener('click', closeMembersOnClick);
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer)
+            mainContainer.removeEventListener('click', mainClickTransition);
+        const teamContent = document.getElementById('teamContent');
+        if (teamContent)
+            teamContent.removeEventListener('click', teamContentClick);
+        const socialLinks = document.querySelectorAll('.social-link');
+        socialLinks.forEach(link => link.removeEventListener('click', socialClick));
     }
-    setStylesheet() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = "styles/home.css";
-            document.head.appendChild(link);
-        });
+    async setStylesheet() {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "styles/home.css";
+        document.head.appendChild(link);
     }
-    unsetStylesheet() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const link = document.querySelector("link[href='styles/home.css']");
-            if (link)
-                link.remove();
-        });
+    async unsetStylesheet() {
+        const link = document.querySelector("link[href='styles/home.css']");
+        if (link)
+            link.remove();
     }
 }
 //# sourceMappingURL=Home.js.map

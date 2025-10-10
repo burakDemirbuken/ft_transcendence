@@ -1,0 +1,226 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+.settings-container {
+	width: 100%;
+	min-height: 100vh;
+	min-height: 100dvh;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: min(1.4rem, 0.7rem + 1vw);
+}
+
+#settings-box {
+	width: max(16rem, 75% + 5rem);
+
+	background: #111;
+	border-radius: 15px;
+	border: 2px solid #0cc;
+
+	padding: 2em;
+	padding-top: 1em;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1em;
+
+	font-family: "PixeloidSans";
+	color: #fff;
+}
+
+.settings-container .settings-box {
+	width: max(14rem, 82% + 5rem);
+	display: flex;
+	flex-wrap: wrap;
+	gap: max(1em, 2% + .5em);
+}
+
+.settings-container .s1 {
+	flex: 2;
+}
+
+.settings-container .s3 {
+	flex: 0 0 100%;
+}
+
+.settings-container h2 {
+	display: flex;
+	justify-content: center;
+
+	font-family: "RocketClouds";
+	text-shadow: 0 0 10px #fff;
+}
+
+.settings-container h3 {
+	width: 100%;
+	color: #0ff;
+
+	font-family: "Orbitron", monospace;
+	text-shadow: 0 0 10px #0cc;
+	border-bottom: 1px solid #fff;
+	margin-bottom: .8em;
+	padding-bottom: .2em;
+}
+
+.settings-container h3.delete {
+	color: #f20;
+	text-shadow: 0 0 10px #c20;
+}
+
+.settings-container form {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: .3em;
+}
+
+.settings-container .submit {
+	width: 1.8rem;
+	height: 1.8rem;
+	border-radius: 5px;
+
+	border: 2px solid #333;
+	background: #000;
+}
+
+.settings-container .submit svg {
+	fill: #ccc;
+	background: none;
+	padding: .3em;
+}
+
+.settings-container #delete-account {
+	max-width: 150px;
+	position: relative;
+	font-size: .9em;
+	padding: .3em;
+	border-radius: 3px;
+	border: 1px solid #555;
+	background: #111;
+	color: #c20;
+
+	transition: all .1s ease-in-out;
+}
+
+.settings-container #delete-account, .settings-container #delete-account {
+	box-shadow: 0 0 10px #c20;
+	border-color: #910;
+	background-color: #c20;
+	color: #111;
+}
+
+.settings-container .setting-section {
+	background: #222;
+	border-radius: 10px;
+	border: 1px solid #666;
+
+	padding: 1.5em;
+	color: #ccc;
+}
+
+.settings-container .settings-content {
+	display: flex;
+	flex-direction: column;
+	gap: .5em;
+}
+
+.s1 .settings-content label {
+	display: flex;
+	flex-direction: column;
+	color: #ccc;
+}
+
+.settings-container span {
+	padding: .1em;
+}
+
+.settings-container input {
+	border-radius: 4px;
+	padding: .2em .4em;
+	margin: 0 .5em;
+
+	background: #111;
+	border: 2px solid #444;
+	font-size: .8em;
+	color: #fff;
+}
+
+.settings-container input[disabled] {
+    background-color: #1c1c1c;
+	box-shadow: none;
+    color: #aaa;
+}
+
+.settings-container input[disabled]:focus,
+.settings-container input[disabled]:hover {
+	box-shadow: none;
+	border: 2px solid #444;
+}
+
+.settings-container input:focus, .settings-container input:hover {
+	border-color: #c0c;
+	box-shadow: 0 0 10px #c0c, inset 0 0 5px #c0c;
+}
+
+.settings-container .account {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+
+	gap: 1em;
+	flex-wrap: wrap;
+}
+
+.settings-container .avatar {
+	position: relative;
+	aspect-ratio: 1/1;
+	width: clamp(5rem, 4rem + 7vw, 10rem);
+	border-radius: 50%;
+
+	background: #000;
+	border: 2px solid #333;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	flex-shrink: 0;
+}
+
+.settings-container .avatar:hover::before {
+	position: absolute;
+	content: "";
+
+	aspect-ratio: 1/1;
+	width: clamp(4rem, 3rem + 7vw, 9rem);
+	height: clamp(4rem, 3rem + 7vw, 9rem);
+
+	border: 1px solid #444;
+	border-radius: 50%;
+	background-color: #333;
+}
+
+.settings-container .avatar:hover::after {
+	position: absolute;
+	content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3Cpath fill='%23ccc' width='10' height='10' d='M213.1 128.8L202.7 160L128 160C92.7 160 64 188.7 64 224L64 480C64 515.3 92.7 544 128 544L512 544C547.3 544 576 515.3 576 480L576 224C576 188.7 547.3 160 512 160L437.3 160L426.9 128.8C420.4 109.2 402.1 96 381.4 96L258.6 96C237.9 96 219.6 109.2 213.1 128.8zM320 256C373 256 416 299 416 352C416 405 373 448 320 448C267 448 224 405 224 352C224 299 267 256 320 256z'/%3E%3C/svg%3E");
+	aspect-ratio: 1/1;
+	width: clamp(2rem, .6rem + 8vw, 3rem);
+	border-radius: 50%;
+}
+
+.settings-container img {
+	aspect-ratio: 1/1;
+	width: clamp(4rem, 3rem + 7vw, 9rem);
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.account .info {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: .8em;
+}

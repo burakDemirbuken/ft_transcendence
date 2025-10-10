@@ -1,7 +1,10 @@
-import Login from "../dist/Login.js";
-import Settings from "../dist/Settings.js";
-import Profile from "../dist/Profile.js";
 import Home from "../dist/Home.js";
+import Profile from "../dist/Profile.js";
+import Play from "../dist/Play.js";
+import Friends from "../dist/Friends.js";
+import Settings from "../dist/Settings.js";
+import Login from "../dist/Login.js";
+import I18n from './I18n.js';
 
 const pageState = {
 	current: "login", // default
@@ -11,7 +14,9 @@ const routes = {
 	login: { template: "login", view: Login },
 	profile: { template: "profile", view: Profile },
 	home: { template: "home", view: Home },
-	settings: { template: "settings", view: Settings }
+	settings: { template: "settings", view: Settings },
+	play: { template: "play", view: Play },
+	friends: { template: "friends", view: Friends }
 }
 
 let view = null;
@@ -32,6 +37,8 @@ const router = async function(page:string) {
 		view = new route.view();
 		view.setStylesheet();
 		content.innerHTML = await view.getHtml();
+		view.setDynamicContent();
+		I18n.loadLanguage(page);
 		view.setEventHandlers();
 	} else {
 		document.title = "Page Not Found";
@@ -45,13 +52,68 @@ export function navigateTo(page:string) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-	document.body.addEventListener("click", e => {
-		if (e.target.matches("[data-link]")) {
-			e.preventDefault();
-			navigateTo(e.target.getAttribute("href").replace(/^\//, ''));
-		}
-	})
+	const navbar = document.body.querySelectorAll(".sidebar-element");
+	for (const element of navbar) {
+		element.addEventListener("click", async (e) => {
+			if (e.currentTarget.matches("[data-link]")) {
+				console.log("PAGE")
+				e.preventDefault();
+				navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
+				document.querySelector(".selected")?.classList.toggle("selected");
+				e.currentTarget.classList.toggle("selected");
+				if (e.currentTarget.matches("[id='logout']"))
+				{
+					const request = new Request(`https://localhost:8080/api/auth/logout?lang=${localStorage.getItem("langPref")}`, {
+						method: "POST"
+					});
+					try {
+						const response = await fetch(request);
+						const json = await response.json();
+
+						if (response.ok)
+						{
+							document.querySelector("#navbar")?.classList.toggle("logout");
+							console.log("LOGSOUT!");
+						} else {
+							alert(`${json.error}`);
+						}
+					} catch {
+						alert(`System Error`);
+					}
+				}
+			} else if (e.currentTarget.matches("[id='toggle']")) {
+				console.log("TOGGLE");
+				document.querySelector("#navbar")?.classList.toggle("collapse");
+				document.querySelector(".selected")?.classList.toggle("selected");
+				e.currentTarget.classList.toggle("selected");
+			}
+			else if (e.currentTarget.matches("[id='language']")) {
+				console.log("LANGUAGE");
+				e.preventDefault();
+				I18n.nextLanguage("navbar");
+				I18n.nextLanguage(pageState.current);
+				document.querySelector(".selected")?.classList.toggle("selected");
+				e.currentTarget.classList.toggle("selected");
+			}
+		});
+	}
 });
+
+function toggleClassOnResize() {
+	const element = document.querySelector("#navbar");
+	const mediaQuery = window.matchMedia("(max-width: 1080px)");
+
+	if (mediaQuery.matches) {
+		element.classList.add("collapse");
+	}
+	// Open for auto grow
+	// else {
+	// 	element.classList.remove("collapse");
+	// }
+}
+
+window.addEventListener('load', toggleClassOnResize);
+window.addEventListener('resize', toggleClassOnResize);
 
 // Handle browser back/forward
 window.addEventListener("popstate", (event) => {
@@ -63,6 +125,12 @@ window.addEventListener("popstate", (event) => {
 window.addEventListener("load", () => {
 	const urlPage = window.location.pathname.slice(1);
 	const initialPage = urlPage || history.state.page || "login";
+
+	if (!localStorage.getItem("langPref"))
+		localStorage.setItem("langPref", "eng");
+
+	I18n.loadLanguage("navbar");
+
 	router(initialPage);
 	history.replaceState({ page: initialPage }, "", `/${initialPage}`);
 });

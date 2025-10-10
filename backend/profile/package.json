@@ -1,0 +1,23 @@
+{
+  "name": "users-service",
+  "version": "1.0.0",
+  "description": "Users microservice for ft_transcendence",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "fastify": "^4.29.1",
+    "fastify-overview": "^3.0.0",
+    "fastify-overview-ui": "^3.0.0",
+    "fastify-plugin": "^4.5.1",
+    "sequelize": "^6.32.1",
+    "sqlite3": "^5.1.6",
+    "dotenv": "^16.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

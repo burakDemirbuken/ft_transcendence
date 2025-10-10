@@ -1,541 +1,60 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRANSCENDENCE - PLAY</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-            font-family: 'Arial', sans-serif;
-            color: white;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 20px 0;
-        }
-
-        .title {
-            font-size: 3rem;
-            font-weight: bold;
-            background: linear-gradient(45deg, #ff00ff, #00ffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-            text-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: #cccccc;
-            margin-bottom: 20px;
-        }
-
-        .game-modes {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .game-mode-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid transparent;
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .game-mode-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            border-radius: 15px;
-            padding: 2px;
-            background: linear-gradient(45deg, #ff00ff, #00ffff);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask-composite: exclude;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .game-mode-card:hover::before {
-            opacity: 1;
-        }
-
-        .game-mode-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(255, 0, 255, 0.2);
-        }
-
-        .game-mode-card.active {
-            border: 2px solid #ff00ff;
-            box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);
-        }
-
-        .game-mode-card.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .game-mode-card.disabled:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        .mode-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            background: linear-gradient(45deg, #ff00ff, #00ffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .mode-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #ffffff;
-        }
-
-        .mode-description {
-            color: #cccccc;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .coming-soon {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: linear-gradient(45deg, #ff00ff, #00ffff);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-
-        .classic-settings {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 30px;
-            margin-top: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 0, 255, 0.2);
-            display: none;
-        }
-
-        .classic-settings.active {
-            display: block;
-            animation: slideDown 0.3s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .settings-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 25px;
-            text-align: center;
-            background: linear-gradient(45deg, #ff00ff, #00ffff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .setting-group {
-            margin-bottom: 25px;
-        }
-
-        .setting-label {
-            display: block;
-            font-size: 1.1rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #ffffff;
-        }
-
-        .radio-group {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .radio-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            padding: 10px 15px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .radio-option:hover {
-            border-color: #00ffff;
-            background: rgba(0, 255, 255, 0.1);
-        }
-
-        .radio-option input[type="radio"] {
-            display: none;
-        }
-
-        .radio-option input[type="radio"]:checked + .radio-label {
-            color: #ff00ff;
-        }
-
-        .radio-option input[type="radio"]:checked ~ * {
-            border-color: #ff00ff;
-        }
-
-        .radio-option:has(input[type="radio"]:checked) {
-            border-color: #ff00ff;
-            background: rgba(255, 0, 255, 0.1);
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
-        }
-
-        .radio-label {
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .join-room-section {
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(0, 255, 255, 0.05);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            border-radius: 10px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .room-input {
-            flex: 1;
-            min-width: 200px;
-            padding: 12px 15px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .room-input:focus {
-            outline: none;
-            border-color: #00ffff;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-        }
-
-        .room-input::placeholder {
-            color: #888;
-        }
-
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #ff00ff, #00ffff);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(255, 0, 255, 0.4);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #00ffff;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 30px;
-            flex-wrap: wrap;
-        }
-
-        .room-info {
-            background: rgba(255, 0, 255, 0.1);
-            border: 1px solid rgba(255, 0, 255, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            text-align: center;
-            display: none;
-        }
-
-        .room-info.active {
-            display: block;
-        }
-
-        .room-id {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #ff00ff;
-            margin-bottom: 10px;
-        }
-
-        @media (max-width: 768px) {
-            .title {
-                font-size: 2rem;
-            }
-
-            .game-modes {
-                grid-template-columns: 1fr;
-            }
-
-            .radio-group {
-                flex-direction: column;
-            }
-
-            .input-group {
-                flex-direction: column;
-            }
-
-            .room-input {
-                min-width: 100%;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1 class="title">PLAY MODE</h1>
-        </div>
-
-        <div class="game-modes">
-            <div class="game-mode-card" id="classic-mode">
-                <div class="mode-icon">🏓</div>
-                <h3 class="mode-title">Klasik Oyun</h3>
-                <p class="mode-description">Arkadaşlarınla 1v1 veya 2v2 oyna. Oda oluştur veya mevcut odaya katıl.</p>
-            </div>
-
-            <div class="game-mode-card" id="custom-mode">
-                <div class="coming-soon">Yakında</div>
-                <div class="mode-icon">⚙️</div>
-                <h3 class="mode-title">Custom Oyun</h3>
-                <p class="mode-description">Kendi kurallarınla özel oyun modları oluştur.</p>
-            </div>
-
-            <div class="game-mode-card" id="tournament-mode">
-                <div class="coming-soon">Yakında</div>
-                <div class="mode-icon">🏆</div>
-                <h3 class="mode-title">Turnuva</h3>
-                <p class="mode-description">Turnuvalara katıl ve en iyi oyuncu olmak için yarış.</p>
-            </div>
-
-            <div class="game-mode-card disabled" id="ai-mode">
-                <div class="coming-soon">Yakında</div>
-                <div class="mode-icon">🤖</div>
-                <h3 class="mode-title">AI ile Oyun</h3>
-                <p class="mode-description">Yapay zeka ile farklı zorluk seviyelerinde oyna.</p>
-            </div>
-        </div>
-
-        <div class="classic-settings" id="classic-settings">
-            <h2 class="settings-title">Klasik Oyun Ayarları</h2>
-
-            <div class="setting-group">
-                <label class="setting-label">Oyun Tipi</label>
-                <div class="radio-group">
-                    <label class="radio-option">
-                        <input type="radio" name="game-type" value="1v1" checked>
-                        <span class="radio-label">1 vs 1</span>
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="game-type" value="2v2">
-                        <span class="radio-label">2 vs 2</span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="join-room-section">
-                <label class="setting-label">Mevcut Odaya Katıl</label>
-                <div class="input-group">
-                    <input type="text" class="room-input" id="room-code" placeholder="Oda kodunu girin...">
-                    <button class="btn btn-secondary" id="join-room-btn">Odaya Katıl</button>
-                </div>
-            </div>
-
-            <div class="room-info" id="room-info">
-                <div class="room-id">Oda Kodu: <span id="generated-room-id">-</span></div>
-                <p>Bu kodu arkadaşlarınla paylaş!</p>
-            </div>
-
-            <div class="action-buttons">
-                <button class="btn btn-primary" id="create-room-btn">Oda Oluştur</button>
-                <button class="btn btn-primary" id="start-game-btn" style="display: none;">Oyunu Başlat</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // DOM Elements
-        const classicModeCard = document.getElementById('classic-mode');
-        const classicSettings = document.getElementById('classic-settings');
-        const createRoomBtn = document.getElementById('create-room-btn');
-        const joinRoomBtn = document.getElementById('join-room-btn');
-        const startGameBtn = document.getElementById('start-game-btn');
-        const roomCodeInput = document.getElementById('room-code');
-        const roomInfo = document.getElementById('room-info');
-        const generatedRoomId = document.getElementById('generated-room-id');
-
-        // Game mode selection
-        document.querySelectorAll('.game-mode-card').forEach(card => {
-            card.addEventListener('click', function() {
-                if (this.classList.contains('disabled')) return;
-
-                // Remove active class from all cards
-                document.querySelectorAll('.game-mode-card').forEach(c => c.classList.remove('active'));
-
-                // Add active class to clicked card
-                this.classList.add('active');
-
-                // Show/hide settings based on selection
-                if (this.id === 'classic-mode') {
-                    classicSettings.classList.add('active');
-                } else {
-                    classicSettings.classList.remove('active');
-                }
-            });
-        });
-
-        // Create room functionality
-        createRoomBtn.addEventListener('click', function() {
-            const gameType = document.querySelector('input[name="game-type"]:checked').value;
-            const roomId = generateRoomId();
-
-            // Show room info
-            generatedRoomId.textContent = roomId;
-            roomInfo.classList.add('active');
-
-            // Update button
-            this.style.display = 'none';
-            startGameBtn.style.display = 'inline-block';
-
-            console.log(`Oda oluşturuldu: ${roomId}, Tip: ${gameType}`);
-        });
-
-        // Join room functionality
-        joinRoomBtn.addEventListener('click', function() {
-            const roomCode = roomCodeInput.value.trim();
-
-            if (!roomCode) {
-                alert('Lütfen oda kodunu girin!');
-                return;
-            }
-
-            if (roomCode.length !== 6) {
-                alert('Oda kodu 6 karakter olmalıdır!');
-                return;
-            }
-
-            // Simulate joining room
-            console.log(`Odaya katılınıyor: ${roomCode}`);
-            alert(`${roomCode} kodlu odaya katılıyorsunuz...`);
-
-            // Here you would typically make an API call to join the room
-        });
-
-        // Start game functionality
-        startGameBtn.addEventListener('click', function() {
-            const gameType = document.querySelector('input[name="game-type"]:checked').value;
-            const roomId = generatedRoomId.textContent;
-
-            console.log(`Oyun başlatılıyor - Oda: ${roomId}, Tip: ${gameType}`);
-            alert(`${gameType} oyunu başlatılıyor!`);
-
-            // Here you would typically redirect to the game page or start the game
-        });
-
-        // Generate random room ID
-        function generateRoomId() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let result = '';
-            for (let i = 0; i < 6; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return result;
-        }
-
-        // Room code input validation
-        roomCodeInput.addEventListener('input', function() {
-            this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6);
-        });
-
-        // Auto-select classic mode on page load
-        window.addEventListener('load', function() {
-            classicModeCard.click();
-        });
-    </script>
-</body>
-</html>
+<div class="settings-container">
+	<div id="settings-box">
+		<h2 data-i18n="title">Settings</h2>
+		<div class="settings-box">
+			<div class="setting-section s1">
+				<h3 data-i18n="account.title">Account</h3>
+				<div class="settings-content account">
+					<div class="avatar">
+						<img src="https://img.freepik.com/premium-vector/avatar-young-man-minimalist-cartoon-icon-drawing-vector-illustration_608387-13.jpg?w=360" alt="description">
+					</div>
+					<div class="info">
+						<label>
+							<span data-i18n="account.uname">User Name</span>
+							<div>
+								<input type="text" name="uname" value="uname" disabled>
+							</div>
+						</label>
+						<label>
+							<span data-i18n="account.dname">Display Name</span>
+							<form action="">
+								<input type="text" name="dname" value="dname">
+								<button class="submit" type="submit">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M160 96C124.7 96 96 124.7 96 160L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 237.3C544 220.3 537.3 204 525.3 192L448 114.7C436 102.7 419.7 96 402.7 96L160 96zM192 192C192 174.3 206.3 160 224 160L384 160C401.7 160 416 174.3 416 192L416 256C416 273.7 401.7 288 384 288L224 288C206.3 288 192 273.7 192 256L192 192zM320 352C355.3 352 384 380.7 384 416C384 451.3 355.3 480 320 480C284.7 480 256 451.3 256 416C256 380.7 284.7 352 320 352z"/></svg>
+								</button>
+							</form>
+						</label>
+						<label>
+							<span data-i18n="account.email">Email</span>
+							<form action="">
+								<input type="email" name="email" value="krktbtl@gmail.com">
+								<button class="submit" type="submit">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M160 96C124.7 96 96 124.7 96 160L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 237.3C544 220.3 537.3 204 525.3 192L448 114.7C436 102.7 419.7 96 402.7 96L160 96zM192 192C192 174.3 206.3 160 224 160L384 160C401.7 160 416 174.3 416 192L416 256C416 273.7 401.7 288 384 288L224 288C206.3 288 192 273.7 192 256L192 192zM320 352C355.3 352 384 380.7 384 416C384 451.3 355.3 480 320 480C284.7 480 256 451.3 256 416C256 380.7 284.7 352 320 352z"/></svg>
+								</button>
+							</form>
+						</label>
+						<label>
+							<span data-i18n="account.pass">Password</span>
+							<form action="">
+								<input type="password" name="pass" value="pass">
+								<input type="password" name="pass" placeholder="Şifre Tekrar">
+								<button class="submit" type="submit">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M160 96C124.7 96 96 124.7 96 160L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 237.3C544 220.3 537.3 204 525.3 192L448 114.7C436 102.7 419.7 96 402.7 96L160 96zM192 192C192 174.3 206.3 160 224 160L384 160C401.7 160 416 174.3 416 192L416 256C416 273.7 401.7 288 384 288L224 288C206.3 288 192 273.7 192 256L192 192zM320 352C355.3 352 384 380.7 384 416C384 451.3 355.3 480 320 480C284.7 480 256 451.3 256 416C256 380.7 284.7 352 320 352z"/></svg>
+								</button>
+							</form>
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="setting-section s3">
+				<h3 class="delete" data-i18n="dzone.title">Danger Zone</h3>
+				<div class="settings-content">
+					<label>
+						<span data-i18n="dzone.prompt">Delete Account:</span>
+						<button id="delete-account" data-i18n="dzone.button">Delete</button>
+					</label>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
