@@ -92,6 +92,11 @@
     .header-content {
         gap: .8rem;
     }
+
+    /* General */
+    .profile-container {
+        padding: 10px;
+    }
 }
 
 @media (max-width: 420px) {

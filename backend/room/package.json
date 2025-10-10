@@ -1,0 +1,20 @@
+{
+	"name": "room",
+	"version": "1.0.0",
+	"description": "Room microservice for ft_transcendence",
+	"main": "server.js",
+	"type": "module",
+	"scripts": {
+		"start": "node server.js",
+		"dev": "nodemon server.js"
+	},
+	"dependencies": {
+		"fastify": "^4.23.x",
+		"@fastify/websocket": "^7.0.0",
+   	 	"fastify-overview": "^3.0.0",
+		"fastify-plugin": "^4.5.1"
+	},
+	"devDependencies": {
+		"nodemon": "^3.1.10"
+	}
+}

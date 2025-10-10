@@ -1,0 +1,41 @@
+import Fastify from 'fastify'
+import globalsPlugin from './plugins/globalsPlugin.js'
+import allRoutes from './routes/index.js'
+import cookie from '@fastify/cookie'
+import jwt from '@fastify/jwt'
+/* import cors from '@fastify/cors' */
+
+const fastify = Fastify({
+	logger: true,
+	requestTimeout: 30000, // 30 seconds
+	keepAliveTimeout: 65000, // 65 seconds
+	connectionTimeout: 30000, // 30 seconds
+})
+
+/* await fastify.register(cors, {
+	origin: '*',
+	methods: ['GET', 'POST', 'PUT', 'DELETE'],
+	allowedHeaders: ['Content-Type', 'Authorization'],
+	exposedHeaders: ['Authorization'],
+	credentials: true
+}); */
+
+await fastify.register(globalsPlugin)
+await fastify.register(jwt, {
+	secret: fastify.secrets.jwtSecret, //?
+});
+
+await fastify.register(cookie)
+
+allRoutes(fastify)
+
+await fastify.ready()
+
+fastify.listen({ port: 3000, host: '0.0.0.0' })
+	.then(() => {
+		console.log(`Gateway is running ${fastify.server.address().port}`);
+		console.log(`requests will be forwarded`);
+	}).catch(err => {
+		fastify.log.error(err);
+		process.exit(1);
+	});

@@ -1,4 +1,65 @@
 {
+	"dates": {
+		"tago": {
+			"hago": "s önce",
+			"dago": "g önce",
+			"mago": "ay önce",
+			"yago": "y önce"
+		},
+		"sday": {
+			"mon": "Pzt",
+			"tue": "Sal",
+			"wed": "Çrş",
+			"thu": "Prş",
+			"fri": "Cum",
+			"sat": "Cts",
+			"sun": "Paz"
+		},
+		"smonth": {
+			"jan": "Oca",
+			"feb": "Şub",
+			"mar": "Mar",
+			"apr": "Nis",
+			"may": "May",
+			"jun": "Haz",
+			"jul": "Tem",
+			"aug": "Ağu",
+			"sep": "Eyl",
+			"oct": "Eki",
+			"nov": "Kas",
+			"dec": "Ara"
+		},
+		"lmonth": {
+			"jan": "Ocak",
+			"feb": "Şubat",
+			"mar": "Mart",
+			"apr": "Nisan",
+			"may": "Mayıs",
+			"jun": "Haziran",
+			"jul": "Temmuz",
+			"aug": "Auğustos",
+			"sep": "Eylül",
+			"oct": "Ekim",
+			"nov": "Kasım",
+			"dec": "Aralık"
+		}
+	},
+	"navbar": {
+		"home": "BAŞLANGIÇ",
+		"play": "OYNA",
+		"profile": "PROFİL",
+		"language": "TÜRKÇE",
+		"friends": "ARKADAŞLAR",
+		"collapse": "DARALT",
+		"settings": "AYARLAR",
+		"logout": "ÇIKIŞ",
+		"login": "GİRİŞ"
+	},
+	"home": {
+		"team": "EKİP ÜYELERİ",
+		"thanks": "42 Kocaeli'ye ve arkadaşlarımıza teşekkürler",
+		"click": "Tıkla"
+	},
 	"login": {
 		"lang": "TUR",
 		"welcome": {
@@ -6,9 +67,176 @@
 			"prompt": "Başlat Düğmesine Basın..."
 		},
 		"username": "Rumuz Girin",
-		"email": "Email Girin",
+		"email": "E-posta Girin",
 		"password": "Şifre Girin",
 		"code": "Kod Girin",
 		"rme": "Beni Hatırla"
+	},
+	"profile": {
+		"sections": {
+			"dashboard": "Pano",
+			"performance": "Performans",
+			"thishtory": "Turnuva Geçmişi",
+			"mhistory": "Maç Geçmişi",
+			"achievements": "Başarımlar"
+		},
+		"dash": {
+			"psum": {
+				"title": "Performans Özeti",
+				"mwon": "Kazanılan Maçlar",
+				"mlose": "Kaybedilen Maçlar",
+				"mdur": "Ortalama Maç Süresi",
+				"gdur": "Toplam Oyun Süresi"
+			},
+			"streak": {
+				"title": "Gaibiyet Serisi",
+				"curr": "Mevcut Seri",
+				"best": "En İyi Seri"
+			},
+			"mlast": {
+				"title": "Son Maçlar"
+			},
+			"wperf": {
+				"title": "Haftalık Performans",
+				"mwon": "Kazanılan Maçlar"
+			}
+		},
+		"perf": {
+			"winlose": {
+				"title": "Kazanma/KAybetme Oranı",
+				"won": "Kazanılan",
+				"lost": "Kaybedilen"
+			},
+			"skills": {
+				"title": "Beceriler",
+				"speed": "Hız",
+				"accur": "Doğruluk",
+				"defence": "Savunma",
+				"attack": "Saldırı",
+				"strat": "Strateji",
+				"dur": "Dayanıklılık"
+			},
+			"mprog": {
+				"title": "Aylık İlerleme",
+				"mtotal": "Toplam Maç",
+				"mwon": "Kazanılan Maç"
+			},
+			"dstats": {
+				"title": "Detaylı İstatistikler",
+				"tpts": "Toplam Puan",
+				"ascore": "Ortalama Skor Farkı",
+				"mfastest": "En Hızlı Galibiyet",
+				"mlongest": "En Uzun Maç"
+			}
+		},
+		"thistory": {
+			"title": "Turnuva Geçmişi",
+			"opts": {
+				"allyears": "Tüm Yıllar",
+				"alltour": "Tüm Turnuvalar",
+				"ltour": "Lig Turnuvaları",
+				"elimtour": "Eleme Turnuvaları",
+				"special": "Özel Etkinlikler"
+			},
+			"table": {
+				"matches": "Maçlar",
+				"v/d": "G/M",
+				"score": "Puan",
+				"bestper": "En İyi Performans",
+				"showdetail": "Detayları Göster"
+			}
+		},
+		"mhistory": {
+			"title": "Maç Geçmişi ve Analizi",
+			"opts": {
+				"alltimes": "Tüm Zamanlar",
+				"last7": "Son 7 gün",
+				"last30": "Son 30 gün",
+				"allres": "Tüm Sonuçlar",
+				"onlywon": "Sadece Galibiyetler",
+				"onlylost": "Sadece Mağlubiyetler"
+			},
+			"table": {
+				"date": "TARIH",
+				"match": "RAKIP",
+				"score": "SKOR",
+				"time": "SÜRE",
+				"result": "SONUÇ",
+				"analysis": "ANALIZ",
+				"res": {
+					"vic": "Gaibiyet",
+					"def": "Mağlubiyet"
+				}
+			}
+		},
+		"achiev": {
+			"fwin": {
+				"title": "İlk Galibiyet",
+				"active": "İlk maçını kazandın!",
+				"passive": "İlk maçını kazanman gerekiyor"
+			},
+			"smaster": {
+				"title": "Streak Master",
+				"active": "10 maç üst üste kazandın!",
+				"passive": "10 maç üst üste kazanman gerekiyor"
+			},
+			"swin": {
+				"title": "Hızlı Galibiyet",
+				"active": "3 dakikadan kısa sürede kazandın!",
+				"passive": "3 dakikadan kısa sürede kazanman gerekiyor"
+			},
+			"nking": {
+				"title": "Neon Kralı",
+				"active": "100 maç kazandın!",
+				"passive": "100 maç kazanman gerekiyor"
+			},
+			"pserie": {
+				"title": "Mükemmel Seri",
+				"active": "25 maç üst üste kazandın!",
+				"passive": "25 maç üst üste kazanman gerekiyor"
+			},
+			"lplayer": {
+				"title": "Efsane Oyuncu",
+				"active": "500 maç oynadın!",
+				"passive": "500 maç oynaman gerekiyor"
+			}
+		}
+	},
+	"friends": {
+		"friends": {
+			"title": "Arkadaşlar",
+			"play": "Oyna",
+			"unfriend": "Çıkar"
+		},
+		"requests": {
+			"title": "İstekler",
+			"accept": "Kabul et",
+			"decline": "Reddet"
+		},
+		"invites": {
+			"title": "Davetler",
+			"undo": "Geri al"
+		},
+		"blocked": {
+			"title": "Engellenmiş",
+			"unblock": "Engeli Kaldır"
+		}
+	},
+	"settings": {
+		"title": "Ayarlar",
+		"account": {
+			"title": "Hesap",
+			"uname": "Kullanıcı Adı",
+			"dname": "Görünür Ad",
+			"email": "E-posta",
+			"pass": "Şifre"
+		},
+		"dzone": {
+			"title": "Tehlikel Bölge",
+			"prompt": "Hesabı Sil:",
+			"button": "Sil"
+		},
+		"delacc": "Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
 	}
+
 }

@@ -1,7 +1,8 @@
 .login-container {
 	position: relative;
 	width: 100%;
-	height: 100%;
+	height: 100vh;
+	/* height: 100dvh; */
 	background:
 		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
 		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
@@ -88,7 +89,7 @@
 	position: relative;
 	width: 100%;
 	height: 100%;
-	color: #0df;
+	color: #f50;
 
 	display: flex;
 	align-items: center;
@@ -98,28 +99,10 @@
 	z-index: 0;
 }
 
-#lang {
+#rme {
 	position: absolute;
 	top: 1.5em;
 	left: 1.5em;
-	color: white;
-	background: none;
-	border: none;
-	outline: none;
-	font-family: inherit;
-	font-size: inherit;
-}
-
-#lang:focus, #lang:hover {
-	text-shadow:
-		1px 1px 0 #09c,
-		2px 2px 0 #09c;
-}
-
-#rme {
-	position: absolute;
-	bottom: 1.5em;
-	right: 1.5em;
 	color: #bbb;
 	background: none;
 	border: none;
@@ -232,10 +215,7 @@ label {
 	background: transparent;
 	outline: none;
 	border: none;
-	color: #f50;
-	/* text-shadow:
-		3px 3px #0cc,
-		9px 9px #606; */
+	color: #0df;
 	font-family: inherit;
 	font-size: min(3rem, 1rem + 2vw);
 	width: 3ch;
@@ -314,7 +294,7 @@ label {
 
 @keyframes float {
 	0% {
-		top: 100%;
+		top: 98%; /* 100% causes a slidebar glitch cause particles exceed the vh */
 		opacity: 0;
 	}
 	10% {
@@ -324,7 +304,7 @@ label {
 		opacity: 1;
 	}
 	100% {
-		top: -10%;
+		top: 0%;
 		opacity: 0;
 	}
 }
