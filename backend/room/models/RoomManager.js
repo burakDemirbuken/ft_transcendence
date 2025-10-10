@@ -38,6 +38,16 @@ class RoomManager extends EventEmitter
 				player.isReady = payload.isReady;
 				break;
 			case 'matchTournament':
+				const room = this._getRoomWithPlayer(player.id).room;
+				if (!room)
+					throw new Error(`Room with ID ${payload.roomId} does not exist`);
+				if (room.gameMode !== 'tournament')
+					throw new Error(`Room with ID ${payload.roomId} is not a tournament room`);
+				const matchInfo = room.matchMake();
+				room.players.forEach(p => {
+					p.clientSocket.send(JSON.stringify({ type: 'matchReady', payload: matchInfo }));
+				});
+				break;
 			case 'start':
 				this.startGame(player.id);
 				break;
@@ -49,12 +59,14 @@ class RoomManager extends EventEmitter
 	handleServerRoomMessage(action, payload)
 	{
 		let room;
+		console.log(`Handling server room message: ${action}`, payload);
 		switch (action)
 		{
 			case 'created':
 				room = this.getRoom(payload.roomId);
+				const initData = room.initData();
 				room.players.forEach(player => {
-					player.clientSocket.send(JSON.stringify({ type: 'started', payload: { roomId: payload.roomId } }));
+					player.clientSocket.send(JSON.stringify({ type: 'started', payload: { roomId: payload.roomId, ...initData } }));
 				});
 				break;
 			case "matchReady":
@@ -63,8 +75,20 @@ class RoomManager extends EventEmitter
 					player.clientSocket.send(JSON.stringify({ type: 'matchReady', payload: payload }));
 				});
 				break;
+			case 'finished':
+				room = this.getRoom(payload.roomId);
+				if (!room)
+				{
+					console.warn(`Room with ID ${payload.roomId} does not exist`);
+					return;
+				}
+				room.finishRoom(payload.matches);
+				room.players.forEach(player => {
+					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: payload }));
+				});
+				break;
 			default:
-				throw new Error(`Unhandled room message type: 22 ${action}`);
+				console.error(`Unhandled server room message type: ${action}`);
 		}
 	}
 
@@ -206,7 +230,7 @@ class RoomManager extends EventEmitter
 		do {
 			//! TEST
 			roomId = "Naber";
-			//roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+			// roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
 		} while (this.rooms.has(roomId));
 		return roomId;
 	}

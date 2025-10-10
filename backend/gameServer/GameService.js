@@ -176,12 +176,22 @@ class GameService
 		}
 	}
 
-	addPlayerToGame(gameId, player)
+	addPlayerToGame(gameMode, gameId, player)
 	{
-		this.gameManager.addPlayerToGame(gameId, player);
-		const game = this.gameManager.getGame(gameId);
-		if (game.isFull())
-			this.sendPlayers(game.players, { type: 'game/initial', payload: { gameMode: game.gameMode, ...game.settings } });
+		console.log(`Adding player ${player.id} to game/tournament ${gameId} with mode ${gameMode}`);
+		if (gameMode !== 'tournament')
+		{
+			console.log(`👤👤👤👤👤👤👤👤👤👤 Adding player ${player.id} to game ${gameId}`);
+			this.gameManager.addPlayerToGame(gameId, player);
+			const game = this.gameManager.getGame(gameId);
+			if (game.isFull())
+				this.sendPlayers(game.players, { type: 'game/initial', payload: { gameMode: game.gameMode, ...game.settings } });
+		}
+		else
+		{
+			console.log(`👤👤👤👤👤👤👤👤👤 Adding player ${player.id} to tournament ${gameId}`);
+			this.tournamentManager.addPlayerToTournament(gameId, player);
+		}
 	}
 
 	handleWebSocketMessage(message, clientId)
@@ -247,8 +257,7 @@ class GameService
 				if (gameMode !== 'tournament')
 					await this.matchCreate(roomId, gameMode, gameSettings, players);
 				else
-					this.tournamentMatchCreate(roomId, gameSettings, payload.tournamentSettings, players);
-				this.roomSocket.send('created', { roomId: roomId });
+					this.tournamentMatchCreate(roomId, payload);
 				break;
 			default:
 				console.error(`❌ Unhandled room message type: ${type}`);
@@ -288,10 +297,10 @@ class GameService
 		);
 	}
 
-	tournamentMatchCreate(roomId, gameSettings, tournamentSettings, players)
+	async tournamentMatchCreate(roomId, payload)
 	{
-		const tournamentId = this.tournamentManager.createTournament(roomId, gameSettings, tournamentSettings);
-		players.forEach((p) => this.tournamentManager.registerPlayer(tournamentId, this.players.get(p.id)));
+		const {players, maxPlayers, matches} = payload;
+		const tournamentId = await this.tournamentManager.createTournament(roomId, maxPlayers, matches);
 		this.tournamentManager.on(`tournament_${tournamentId}`,
 			({type, payload, players}) =>
 			{
@@ -300,25 +309,18 @@ class GameService
 					case 'update':
 						this.sendPlayers(players, { type: 'tournament/update', payload: payload });
 						break;
-					case 'roundFinish':
-						this.sendPlayers(players, { type: 'tournament/roundFinish', payload: payload });
-						break;
-					case 'nextRound':
-						this.sendPlayers(players, { type: 'tournament/initial', payload: payload });
-						break;
 					case 'finished':
 						console.log('Tournament finished, sending results to players');
 						console.log('players: ',JSON.stringify(players, null, 2));
 						console.log('payload: ',JSON.stringify(payload, null, 2));
-						this.sendPlayers(players, { type: 'tournament/finished', payload: payload });
+						this.roomSocket.send('finished', { roomId: roomId, ...payload });
 						break;
 					default:
 						console.error('❌ Unhandled tournament event type:', type);
 				}
 			}
 		);
-		const initData = this.tournamentManager.initTournament(tournamentId);
-		this.roomSocket.send('matchReady', { roomId: roomId, gameMode: 'tournament', ...initData });
+		this.roomSocket.send('created', { roomId: roomId });
 		//this.sendPlayers(players, { type: 'tournament/initial' , payload: { gameMode: 'tournament', ... initData }});
 	}
 

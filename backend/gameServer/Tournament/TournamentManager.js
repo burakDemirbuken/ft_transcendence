@@ -28,30 +28,19 @@ class TournamentManager extends EventEmitter
 		return `tournament-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 	}
 
-	createTournament(id, gameSettings, tournamentSettings)
+	async createTournament(id, maxPlayers, matches)
 	{
 		const tournamentId = id;
-		if (this.tournaments.has(tournamentId))
-			throw new Error(`Tournament with ID ${tournamentId} already exists`);
-		if (!tournamentSettings.maxPlayers || Math.min(tournamentSettings.maxPlayers) < 2)
-			throw new Error(`Invalid player count: ${tournamentSettings.maxPlayers}`);
-		if (Math.log2(tournamentSettings.maxPlayers) % 1 !== 0)
-			throw new Error(`Tournament Count must be a power of 2: ${tournamentSettings.maxPlayers}`);
-		const tournament = new Tournament(tournamentSettings, gameSettings);
+		const tournament = new Tournament(maxPlayers);
+		tournament.setupMatches(matches);
 		tournament.on('update', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'update', payload: data, players: players }));
-		tournament.on('finished', ({data, players}) =>
+		tournament.on('finished', (data) =>
 			{
-				this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data, players: players });
+				this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data });
 				this.tournaments.get(tournamentId).destroy();
 				this.tournaments.delete(tournamentId);
 				console.log(`🗑️ Tournament ${tournamentId} deleted after finishing`);
-			});
-		tournament.on('roundFinish', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'roundFinish', payload: data, players: players }));
-		tournament.on('started',
-			({data, players}) =>
-				{
-					this.emit(`tournament_${tournamentId}`, { type: 'started', payload: data, players: players });
-				}
+			}
 		);
 		tournament.on('error', (error) => this.emit('error', new Error(`Tournament ${tournamentId} error: ${error.message}`)));
 		this.tournaments.set(tournamentId, tournament);
@@ -110,14 +99,11 @@ class TournamentManager extends EventEmitter
 		console.log(`👤 Player ${player} registered for tournament ${tournamentId}`);
 	}
 
-	// TODOO: throwları ele al hangi throw nereye gidecek vs
-	joinTournament(tournamentId, player)
+	addPlayerToTournament(tournamentId, player)
 	{
-		console.log(`Player ${player.id} joining tournament ${tournamentId}`);
 		const tournament = this.tournaments.get(tournamentId);
 		if (!tournament)
 			return this.emit('error', new Error(`Tournament with ID ${tournamentId} does not exist`));
-
 		tournament.addPlayer(player);
 		console.log(`Player ${player.id} joined tournament ${tournamentId}`);
 	}
@@ -129,17 +115,7 @@ class TournamentManager extends EventEmitter
 		this.lastUpdateTime = currentTime;
 
 		for (const [tournamentId, tournament] of this.tournaments.entries())
-		{
-			if (tournament.isRunning())
-			{
-				tournament.update(deltaTime);
-			}
-			else if (tournament.status === `waiting`)
-			{
-				if (tournament.players.every(p => p.initialized))
-					tournament.start();
-			}
-		}
+			tournament.update(deltaTime);
 
 	}
 }

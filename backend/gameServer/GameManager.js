@@ -172,8 +172,7 @@ class GameManager extends EventEmitter
 				game.update(deltaTime);
 			else if (game.status === 'ready to start')
 			{
-				if (game.players.every(p => p.initialized))
-					this.gameStart(gameId);
+				this.gameStart(gameId);
 			}
 		}
 	}

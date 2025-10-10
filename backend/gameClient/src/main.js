@@ -1,13 +1,16 @@
 import App from './App.js';
+import WebSocketClient from './network/WebSocketClient.js';
 import gameConfig from './json/GameConfig.js';
 import aiConfig from './json/AiConfig.js';
 import tournamentConfig from './json/TournamentConfig.js';
-import WebSocketClient from './network/WebSocketClient.js';
+import RoomUi from './RoomUi.js';
+
 
 const id = _TEST_generateRandomId();
 const name = _TEST_generateRandomName();
 console.log(`Generated ID: ${id}, Name: ${name}`);
 
+const roomUi = new RoomUi();
 const roomSocket = new WebSocketClient(window.location.hostname, 3004);
 
 roomSocket.onConnect(() => {
@@ -17,12 +20,24 @@ roomSocket.onConnect(() => {
 roomSocket.onMessage((message) => {
 	console.log('Received message from room server:', message);
 	switch (message.type) {
+
 		case "started":
-			app.start(message.payload.roomId);
+			roomUi.hideGameUI();
+			app = new App(id, name);
+			app.start(message.payload);
 			break;
 		case "created":
-			alert(`Room: ${message.payload.roomId} created successfully`);
+			// NİSA:
+			console.log(`Room created with ID: ${message.payload.roomId}`);
 			break;
+		case "finished":
+			console.log(`Room finished: `, JSON.stringify(message.payload));
+			app.destroy();
+			app = null;
+			roomUi.showGameUI();
+			break;
+		case "error":
+			roomUi.showGameError(data || 'Unknown error from server');
 		default:
 			console.warn(`Unhandled message type: ${message.type}`);
 	}
@@ -56,12 +71,6 @@ function _TEST_generateRandomName()
 	const randomNumber = Math.floor(Math.random() * 999) + 1;
 	return `${randomName}${randomNumber}`;
 }
-
-$(document).ready(() => {
-	// ulas
-	app = new App(id, name);
-});
-
 
 $('#localGameBtn').on('click', () => {
 	data = {
