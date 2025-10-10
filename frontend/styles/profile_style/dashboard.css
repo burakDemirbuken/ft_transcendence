@@ -131,8 +131,9 @@
 .match-item {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 12px;
+    /* gap: 15px; */
+    padding: .5rem;
+    padding: clamp(.5rem, 1vw + .2rem, .8rem);
     background: var(--bg-overlay-dark);
     border-radius: 8px;
     border-left: 4px solid transparent;
@@ -172,6 +173,7 @@
     display: flex;
     flex-direction: column;
     gap: 3px;
+    padding: 0 .5em;
 }
 
 .opponent {
@@ -194,7 +196,7 @@
     background: var(--bg-secondary);
     border: 2px solid var(--border-light);
     border-radius: 15px;
-    padding: 25px;
+    padding: clamp(.6rem, 2vw + .4rem, 2rem);
     backdrop-filter: blur(10px);
     transition: all 0.2s ease-out;
     transform-style: preserve-3d;
@@ -203,15 +205,15 @@
 }
 
 .stat-card h3 i {
-    font-size: 1.5rem;
+    font-size: clamp(1rem, 1vw + .6rem, 1.3rem);
     color: var(--color-primary);
 }
 
 .stat-card h3 {
     color: var(--color-primary);
     text-shadow: 0 0 10px var(--color-primary);
-    margin-bottom: 20px;
-    font-size: 1.3rem;
+    margin-bottom: clamp(.8rem, 2vw + .4rem, 1.25rem);
+    font-size: clamp(1rem, 1vw + .6rem, 1.3rem);
 }
 
 .glow-btn {

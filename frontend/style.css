@@ -24,7 +24,7 @@ body {
 		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
 		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
 		linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-	margin-left: 60px;
+	margin-left: 50px;
 }
 
 #navbar {
@@ -77,7 +77,7 @@ body {
 
 /* collapse durumunda da scroll koru */
 #navbar.collapse {
-	width: 60px;
+	width: 50px;
 	overflow-y: auto;
 }
 
@@ -89,7 +89,7 @@ body {
 }
 
 #navbar.collapse {
-	width: 60px;
+	width: 50px;
 }
 
 #navbar.collapse #logo {

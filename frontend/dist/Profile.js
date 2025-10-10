@@ -21,11 +21,11 @@ class ManagerProfile {
         };
         this.currentTab = 'overview';
         this.charts = {};
-        // DOM yüklendikten sonra avatar-ring'i seç
+        // DOM yüklendikten sonra avatar'ı seç
         setTimeout(() => {
-            this.avatarStatus = document.querySelector('.avatar-ring');
+            this.avatarStatus = document.querySelector('.avatar');
             if (!this.avatarStatus) {
-                console.error("avatar-ring elemanı bulunamadı!");
+                console.error("avatar elemanı bulunamadı!");
             }
             else {
                 this.initConnectionStatus(); // Bağlantı durumunu başlat

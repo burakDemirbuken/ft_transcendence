@@ -20,11 +20,11 @@ class ManagerProfile {
     constructor() {
         this.currentTab = 'overview';
         this.charts = {};
-	    // DOM yüklendikten sonra avatar-ring'i seç
+	    // DOM yüklendikten sonra avatar'ı seç
         setTimeout(() => {
-            this.avatarStatus = document.querySelector('.avatar-ring') as HTMLElement;
+            this.avatarStatus = document.querySelector('.avatar') as HTMLElement;
             if (!this.avatarStatus) {
-                console.error("avatar-ring elemanı bulunamadı!");
+                console.error("avatar elemanı bulunamadı!");
             } else {
                 this.initConnectionStatus(); // Bağlantı durumunu başlat
             }

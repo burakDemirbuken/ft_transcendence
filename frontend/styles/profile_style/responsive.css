@@ -1,6 +1,6 @@
 
 /* Responsive Design */
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
     .profile-container {
         padding: 10px;
     }
@@ -71,5 +71,38 @@
 
     .profile-nav {
         flex-direction: column;
+    }
+} */
+
+@media (max-width: 1080px) {
+    /* Header */
+    .header-stats {
+        gap: .8rem;
+    }
+    .header-content {
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 720px) {
+    /* Header */
+    .header-stats {
+        gap: .6rem;
+    }
+    .header-content {
+        gap: .8rem;
+    }
+}
+
+@media (max-width: 420px) {
+    /* Header */
+    .header-stats {
+        gap: .4rem;
+    }
+
+    /* Dashboard */
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
     }
 }
