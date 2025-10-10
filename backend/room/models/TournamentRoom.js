@@ -43,6 +43,11 @@ export default class TournamentRoom extends Room
 
 	initData()
 	{
+		let playingPlayers = [];
+		this.currentMatches.forEach(match => {
+			if (match.player1) playingPlayers.push(match.player1);
+			if (match.player2) playingPlayers.push(match.player2);
+		});
 		return {
 			tournament:
 			{
@@ -53,11 +58,11 @@ export default class TournamentRoom extends Room
 			playersCount: this.players.length,
 			games: this.currentMatches.map(match => ({
 				matchNumber: match.matchNumber,
-				players: [match.player1 ? match.player1.id : null, match.player2 ? match.player2.id : null],
+				players: [match.player1?.id, match.player2?.id],
 			})),
 			gameSettings: this.gameSettings,
 			gameMode: this.gameMode,
-			players: this.players.map(p => ({
+			players: playingPlayers.map(p => ({
 				id: p.id,
 				name: p.name,
 				gameNumber: this.currentMatches.findIndex(m => m.player1?.id === p.id || m.player2?.id === p.id) + 1
@@ -97,9 +102,14 @@ export default class TournamentRoom extends Room
 
 		this.status = 'in_game';
 
-		const matches = this.matches.get(this.currentRound);
+		const matches = this.currentMatches;
+		let playingPlayers = [];
+		matches.forEach(match => {
+			if (match.player1) playingPlayers.push(match.player1.id);
+			if (match.player2) playingPlayers.push(match.player2.id);
+		});
 		return {
-			players: this.players.map(p => p.getState()),
+			players: playingPlayers,
 			gameMode: this.gameMode,
 			maxPlayers: this.maxPlayers,
 			matches: matches
@@ -167,28 +177,35 @@ export default class TournamentRoom extends Room
 
 	nextRound(matches)
 	{
-		console.log(`mathches: `, matches);
-		this.currentRound++;
 		this.currentMatches = [];
-		const previousRoundMatches = this.matches.get(this.currentRound - 1);
-		previousRoundMatches.forEach((match, index) => {
-			match.player1Score = matches[index].player1Score;
-			match.player2Score = matches[index].player2Score;
-			match.winner = matches[index].winner;
-			match.loser = matches[index].loser;
-		});
+		const previousRoundMatches = this.matches.get(this.currentRound);
+		previousRoundMatches.forEach(
+			(match, index) =>
+			{
+				if (matches[index]) {
+					match.player1Score = matches[index].score?.left || 0;
+					match.player2Score = matches[index].score?.right || 0;
+					match.winner = matches[index].winner;
+					match.loser = matches[index].loser;
+				}
+			}
+		);
+		this.currentRound++;
 		const nextRoundMatches = this.matches.get(this.currentRound);
-
 		for (let i = 0; i < nextRoundMatches.length; i++)
 		{
 			const match = nextRoundMatches[i];
 			const prevMatch1 = previousRoundMatches[i * 2];
 			const prevMatch2 = previousRoundMatches[i * 2 + 1];
 
-			if (prevMatch1.winner)
-				match.player1 = prevMatch1.winner;
-			if (prevMatch2.winner)
-				match.player2 = prevMatch2.winner;
+			if (prevMatch1.winner) {
+				const player1 = this.players.find(p => p.id === prevMatch1.winner);
+				match.player1 = player1 ? player1.getState() : null;
+			}
+			if (prevMatch2.winner) {
+				const player2 = this.players.find(p => p.id === prevMatch2.winner);
+				match.player2 = player2 ? player2.getState() : null;
+			}
 
 			match.player1Score = 0;
 			match.player2Score = 0;
@@ -197,7 +214,6 @@ export default class TournamentRoom extends Room
 			this.currentMatches.push(match);
 		}
 		this.status = 'waiting';
-		console.log(`currentMatches: `, this.currentMatches);
 	}
 
 	getState()

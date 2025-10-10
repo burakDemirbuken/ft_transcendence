@@ -21,7 +21,9 @@ class App
 	{
 		if (data.gameMode === 'tournament')
 		{
-			const playerArcadeNumber = data.games.find(g => g.players.includes(this.playerId)).matchNumber;
+			let playerArcadeNumber = data.games.find(g => g.players.includes(this.playerId))?.matchNumber;
+			if (playerArcadeNumber === undefined)
+				playerArcadeNumber = 0; // Fallback to 0 if not found (should not happen)
 			this.loadGame(
 				{
 					canvasId: "renderCanvas",
@@ -50,8 +52,8 @@ class App
 						...rendererConfig,
 						paddleSize:
 						{
-							width: data.paddleWidth,
-							height: data.paddleHeight
+							width: data.gameSettings.paddleWidth,
+							height: data.gameSettings.paddleHeight
 						},
 					},
 				}
@@ -246,7 +248,6 @@ class App
 		this.gameRenderer.initialize(gameConfig).then(
 			() =>
 			{
-				this.webSocketClient.send('player/initialized');
 				this.gameRenderer.startRendering();
 			}).catch((error) =>
 			{
@@ -266,7 +267,7 @@ class App
 				console.error('Unhandled game event:', subEvent, data);
 		}
 	}
-	
+
 	destroy()
 	{
 		this.gameRenderer.reset();

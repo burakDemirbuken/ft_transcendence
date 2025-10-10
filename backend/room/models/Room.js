@@ -84,4 +84,12 @@ export default class Room extends EventEmitter
 			createdAt: this.createdAt,
 		};
 	}
+
+	initData()
+	{
+		return {
+			gameMode: this.gameMode,
+			gameSettings: this.gameSettings,
+		}
+	}
 }

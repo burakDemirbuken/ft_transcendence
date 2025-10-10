@@ -20,6 +20,7 @@ class LocalPingPong extends PingPong
 		this.paddles.set(player.id, this.createPaddle(2));
 		this.paddles.set("Player2", this.createPaddle(1));
 		console.log(`👤 Player ${player.id} added to LocalPingPong`);
+		this.status = 'ready to start';
 	}
 
 	paddleControls()

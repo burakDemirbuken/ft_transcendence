@@ -114,12 +114,9 @@ class Tournament extends EventEmitter
 			return this.emit('error', new Error(`Player with ID ${player.id} is already in the tournament`));
 		this.players.push(player);
 		this.currentMatches.forEach((match) => {
-			console.log(`👤👤👤👤👤👤👤👤👤👤 `);
 			if (match.game.registeredPlayers.has(player.id))
 			{
-				console.log(`👤 Player ${player.id} added to match ${match.matchId}`);
 				match.game.addPlayer(player);
-				console.log(`👤 Player ${player.id} added to tournament`);
 				return;
 			}
 		});

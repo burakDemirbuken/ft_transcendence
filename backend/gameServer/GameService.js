@@ -183,9 +183,6 @@ class GameService
 		{
 			console.log(`👤👤👤👤👤👤👤👤👤👤 Adding player ${player.id} to game ${gameId}`);
 			this.gameManager.addPlayerToGame(gameId, player);
-			const game = this.gameManager.getGame(gameId);
-			if (game.isFull())
-				this.sendPlayers(game.players, { type: 'game/initial', payload: { gameMode: game.gameMode, ...game.settings } });
 		}
 		else
 		{
@@ -278,13 +275,15 @@ class GameService
 						this.sendPlayers(players, { type: 'game/update', payload: payload });
 						break;
 					case 'finished':
-						this.sendPlayers(players, { type: 'game/finished', payload: payload });
-						//! kullanıcıları soketten çıkar
-						//? XMLHTTPREQUEST
+						this.roomSocket.send('finished', { roomId: roomId, ...payload });
+
+						// winnerı kaçıncı takımsa ait olduğunu ve idlerini gönder
+						// winner: 1
 						/* fetch('http://user:3006/internal/match', {
 							method: 'POST',
 							headers: { 'Content-Type': 'application/json' },
 							body: JSON.stringify({
+
 								gameId: gameId,
 								...results
 							})
@@ -295,6 +294,7 @@ class GameService
 				}
 			}
 		);
+		this.roomSocket.send('created', { roomId: roomId });
 	}
 
 	async tournamentMatchCreate(roomId, payload)
@@ -310,10 +310,7 @@ class GameService
 						this.sendPlayers(players, { type: 'tournament/update', payload: payload });
 						break;
 					case 'finished':
-						console.log('Tournament finished, sending results to players');
-						console.log('players: ',JSON.stringify(players, null, 2));
-						console.log('payload: ',JSON.stringify(payload, null, 2));
-						this.roomSocket.send('finished', { roomId: roomId, ...payload });
+						this.roomSocket.send('finished', { roomId: roomId, ...payload.payload });
 						break;
 					default:
 						console.error('❌ Unhandled tournament event type:', type);

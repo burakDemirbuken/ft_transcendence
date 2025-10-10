@@ -17,6 +17,35 @@ class PingPong extends EventEmitter
 		this.finishTime = 0;
 		this.gameTime = 0;
 
+	/*
+		toplam vuruş sayısı (tüm maçlardaki)
+		toplam topu kaçırma sayısı (tüm maçlardaki)
+		toplam süre (tüm maçlardaki)
+	*/
+
+
+/*
+		state:
+		{
+			players:
+			[
+				{
+					id: 1,
+					kickBall: 2,
+					missedBall: 1,
+				},
+				{
+					id: 2,
+					kickBall: 3,
+					missedBall: 0,
+				},
+			],
+		}
+*/
+
+
+		this.state = null;
+
 		this.id = null;
 
 		this.settings = {
@@ -65,6 +94,7 @@ class PingPong extends EventEmitter
 		{
 			this.players.push(player);
 			this.paddles.set(player.id, this.createPaddle(this.players.length));
+			this.state.players.push({ id: player.id, kickBall: 0, missedBall: 0 });
 			this.team.get(this.players.length % 2 ? 1 : 2).playersId.push(player.id);
 			console.log(`👤 Player ${player.id} added to game`);
 			if (this.players.length === this.maxPlayers)
@@ -148,11 +178,21 @@ class PingPong extends EventEmitter
 					{
 						this.lastGoal = 'right';
 						this.team.get(1).score++;
+						this.team.get(2).playersId.forEach(playerId => {
+							const playerState = this.state.players.find(p => p.id === playerId);
+							if (playerState)
+								playerState.missedBall += 1;
+						});
 					}
 					else
 					{
 						this.lastGoal = 'left';
 						this.team.get(2).score++;
+						this.team.get(1).playersId.forEach(playerId => {
+							const playerState = this.state.players.find(p => p.id === playerId);
+							if (playerState)
+								playerState.missedBall += 1;
+						});
 					}
 					this.emit('goal', border);
 					this.ball.reset();
@@ -248,7 +288,8 @@ class PingPong extends EventEmitter
 						duration: this.gameTime
 					},
 					matchType: this.gameMode,
-				}
+				},
+				state: this.state
 			}
 		);
 		this.finishTime = Date.now();
@@ -281,10 +322,10 @@ class PingPong extends EventEmitter
 			return;
 		}
 
-
 		this.paddles.forEach(
-			(paddle) =>
+			(playerId, paddle) =>
 			{
+				console.log(`Checking collision for player ${playerId}`);
 				const collisionDetails = Collision2D.trajectoryRectangleToRectangle(this.ball, paddle, true);
 				if (collisionDetails && collisionDetails.colliding)
 				{
@@ -294,6 +335,9 @@ class PingPong extends EventEmitter
 						this.ball.launchBall({x: this.ball.direction.x, y: -this.ball.direction.y});
 					else if (side === "left" || side === "right")
 						this.adjustBallAngle(paddle);
+					const playerState = this.state.players.find(p => p.id === playerId);
+					if (playerState)
+						playerState.kickBall += 1;
 					return collisionDetails.colliding;
 				}
 			}

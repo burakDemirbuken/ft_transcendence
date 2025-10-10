@@ -24,6 +24,7 @@ class AIPingPong extends PingPong
 		this.team.set(2, { playersId: ["AI"], score: 0 });
 		this.paddles.set(player.id, this.createPaddle(2));
 		this.paddles.set("AI", this.createPaddle(1));
+		this.status = 'ready to start';
 	}
 
 	paddleControls()
