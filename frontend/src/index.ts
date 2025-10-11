@@ -4,7 +4,7 @@ import Play from "../dist/Play.js";
 import Friends from "../dist/Friends.js";
 import Settings from "../dist/Settings.js";
 import Login from "../dist/Login.js";
-import I18n from './translations.js';
+import I18n from './I18n.js';
 
 const pageState = {
 	current: "login", // default
@@ -54,13 +54,33 @@ export function navigateTo(page:string) {
 document.addEventListener("DOMContentLoaded", () => {
 	const navbar = document.body.querySelectorAll(".sidebar-element");
 	for (const element of navbar) {
-		element.addEventListener("click", e => {
+		element.addEventListener("click", async (e) => {
 			if (e.currentTarget.matches("[data-link]")) {
 				console.log("PAGE")
 				e.preventDefault();
 				navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
 				document.querySelector(".selected")?.classList.toggle("selected");
 				e.currentTarget.classList.toggle("selected");
+				if (e.currentTarget.matches("[id='logout']"))
+				{
+					const request = new Request(`https://localhost:8080/api/auth/logout?lang=${localStorage.getItem("langPref")}`, {
+						method: "POST"
+					});
+					try {
+						const response = await fetch(request);
+						const json = await response.json();
+
+						if (response.ok)
+						{
+							document.querySelector("#navbar")?.classList.toggle("logout");
+							console.log("LOGSOUT!");
+						} else {
+							alert(`${json.error}`);
+						}
+					} catch {
+						alert(`System Error`);
+					}
+				}
 			} else if (e.currentTarget.matches("[id='toggle']")) {
 				console.log("TOGGLE");
 				document.querySelector("#navbar")?.classList.toggle("collapse");

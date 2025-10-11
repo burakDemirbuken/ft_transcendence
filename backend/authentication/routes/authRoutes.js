@@ -1,96 +1,9 @@
 import authController from '../controllers/AuthController.js';
 
 /**
- * JWT verification middleware with automatic refresh
+ * Auth service artık sadece JWT oluşturma işi yapıyor
+ * JWT verification gateway'de yapılıyor
  */
-async function verifyJWT(request, reply) {
-  try {
-    await request.jwtVerify();
-  } catch (err) {
-    // Access token failed, try refresh
-    const refreshToken = request.cookies.refreshToken;
-    
-    if (!refreshToken) {
-      return reply.status(401).send({
-        success: false,
-        error: 'Authentication required',
-        code: 'NO_REFRESH_TOKEN'
-      });
-    }
-
-    try {
-      // Find user by refresh token
-      const User = (await import('../models/User.js')).default;
-      const user = await User.findOne({
-        where: { refresh_token: refreshToken }
-      });
-
-      if (!user || !user.isRefreshTokenValid(refreshToken)) {
-        if (user) await user.clearRefreshToken();
-        return reply.status(401).send({
-          success: false,
-          error: 'Session expired, please login again',
-          code: 'REFRESH_TOKEN_EXPIRED'
-        });
-      }
-
-      // Generate new tokens
-      const newAccessToken = await reply.jwtSign(
-        {
-          userId: user.id,
-          username: user.username,
-          email: user.email
-        },
-        { expiresIn: '1h' } // 1 hour
-      );
-
-      // Calculate remaining time for refresh token
-      const now = new Date();
-      const remainingMs = user.refresh_token_expires_at.getTime() - now.getTime();
-      
-      // Generate new refresh token with remaining time (remember me durumuna göre)
-      const crypto = await import('crypto');
-      const newRefreshToken = crypto.randomBytes(64).toString('hex');
-      user.refresh_token = newRefreshToken;
-      // Remember me durumunu koru ve kalan süreyi ona göre ayarla
-      const maxDays = user.remember_me ? 30 : 3;
-      const maxMs = maxDays * 24 * 60 * 60 * 1000;
-      // Kalan süre ile maksimum sürenin küçüğünü al
-      const newExpiryMs = Math.min(remainingMs, maxMs);
-      user.refresh_token_expires_at = new Date(Date.now() + newExpiryMs);
-      await user.save();
-
-      // Set new cookies
-      reply.setCookie('accessToken', newAccessToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        path: '/',
-        maxAge: 1 * 60 * 60 * 1000 // 1 hour
-      });
-
-      reply.setCookie('refreshToken', newRefreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'strict',
-        path: '/',
-        maxAge: newExpiryMs
-      });
-
-      // Verify the new token and continue
-      request.cookies.accessToken = newAccessToken;
-      await request.jwtVerify();
-      
-    } catch (refreshErr) {
-      console.log('Auto-refresh failed:', refreshErr);
-      reply.status(401).send({
-        success: false,
-        error: 'Authentication failed',
-        code: 'AUTO_REFRESH_FAILED'
-      });
-    }
-  }
-}
 
 /**
  * Authentication Routes
@@ -98,7 +11,16 @@ async function verifyJWT(request, reply) {
 export default async function authRoutes(fastify, options) {
 
   // Health check endpoint
-  fastify.get('/health', authController.health);
+  fastify.get('/health', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
+      }
+    }
+  }, authController.health);
 
   // Check endpoints
   fastify.get('/check-email', {
@@ -107,7 +29,8 @@ export default async function authRoutes(fastify, options) {
         type: 'object',
         required: ['email'],
         properties: {
-          email: { type: 'string', format: 'email' }
+          email: { type: 'string', format: 'email' },
+          lang: { type: 'string' }
         }
       }
     }
@@ -119,7 +42,8 @@ export default async function authRoutes(fastify, options) {
         type: 'object',
         required: ['username'],
         properties: {
-          username: { type: 'string', minLength: 3, maxLength: 50 }
+          username: { type: 'string', minLength: 3, maxLength: 50 },
+          lang: { type: 'string' }
         }
       }
     }
@@ -136,6 +60,12 @@ export default async function authRoutes(fastify, options) {
           email: { type: 'string', format: 'email' },
           password: { type: 'string', minLength: 8 }
         }
+      },
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
       }
     }
   }, authController.register);
@@ -149,23 +79,31 @@ export default async function authRoutes(fastify, options) {
           login: { type: 'string' }, // email or username
           password: { type: 'string' }
         }
+      },
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
       }
     }
   }, authController.login);
 
-  // Email verification (both GET with token in URL and POST with token in body)
+  // Email verification (GET)
   fastify.get('/verify-email', {
     schema: {
       querystring: {
         type: 'object',
         required: ['token'],
         properties: {
-          token: { type: 'string', minLength: 32, maxLength: 64 }
+          token: { type: 'string', minLength: 32, maxLength: 64 },
+          lang: { type: 'string' }
         }
       }
     }
   }, authController.verifyEmail);
 
+  // Email verification (POST)
   fastify.post('/verify-email', {
     schema: {
       body: {
@@ -173,6 +111,12 @@ export default async function authRoutes(fastify, options) {
         required: ['token'],
         properties: {
           token: { type: 'string', minLength: 32, maxLength: 64 }
+        }
+      },
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
         }
       }
     }
@@ -189,22 +133,60 @@ export default async function authRoutes(fastify, options) {
           code: { type: 'string', minLength: 6, maxLength: 6 },
           rememberMe: { type: 'boolean' }
         }
+      },
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
       }
     }
   }, authController.verify2FA);
 
-  // Simplified authentication - removed other complex routes
+  // User profile endpoints - JWT kontrolü gateway'de yapılıyor
+  fastify.get('/me', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
+      }
+    }
+  }, authController.getProfile);
 
-  // Protected routes - Authentication required
-  fastify.register(async function protectedRoutes(fastify) {
-    // Add JWT verification to all routes in this context
-    fastify.addHook('preHandler', verifyJWT);
+  fastify.get('/profile', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
+      }
+    }
+  }, authController.getProfile);
 
-    // User profile endpoints
-    fastify.get('/me', authController.getProfile);
-    fastify.get('/profile', authController.getProfile);
+  // Logout endpoint
+  fastify.post('/logout', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
+      }
+    }
+  }, authController.logout);
 
-    // Logout
-    fastify.post('/logout', authController.logout);
-  });
+  // Refresh token endpoint
+  fastify.post('/refresh', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
+      }
+    }
+  }, authController.refreshToken);
 }

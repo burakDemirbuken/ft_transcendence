@@ -33,6 +33,11 @@ export async function getTranslations(lang) {
     translationCache.set(lang, translations);
     return translations;
 }
+export async function getJsTranslations(lang) {
+    const response = await fetch(`locales/jsI18n.json`);
+    const translations = await response.json();
+    return translations[lang];
+}
 class I18n {
     static async loadLanguage(section) {
         const translations = await getTranslations(localStorage.getItem("langPref"));
@@ -45,4 +50,4 @@ class I18n {
     }
 }
 export default I18n;
-//# sourceMappingURL=translations.js.map
+//# sourceMappingURL=I18n.js.map
