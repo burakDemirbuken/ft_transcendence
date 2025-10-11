@@ -1,0 +1,55 @@
+{
+	"eng": {
+		"system": "System error.",
+		"login": {
+			"uname": {
+				"empty": "Username can't be empty.",
+				"length": "Username length must be 1-20 characters.",
+				"invalid": "Username has to be of valid characters."
+			},
+			"email": {
+				"empty": "E-mail can't be empty.",
+				"invalid": "Invalid e-mail."
+			},
+			"password": {
+				"length": "Password length must be between 8-128 characters.",
+				"empty": "Password can't be empty."
+			},
+			"code": {
+				"empty": "Code can't be empty."
+			}
+		}
+	},
+	"tur": {
+		"system": "Sistem hatası.",
+		"login": {
+			"email": {
+				"empty": "E-posta boş kalamaz.",
+				"invalid": "Geçersiz e-posta."
+			},
+			"password": {
+				"length": "Şifre uzunluğu 8-128 karakter aralığında olmalıdır.",
+				"empty": "Şifre boş kalamaz."
+			},
+			"code": {
+				"empty": "Kod boş kalamaz."
+			}
+		}
+	},
+	"deu": {
+		"system": "Systemfehler.",
+		"login": {
+			"email": {
+				"empty": "Die E-Mail-Adresse darf nicht leer bleiben.",
+				"invalid": "Ungültige E-Mail-Adresse."
+			},
+			"password": {
+				"length": "Das Passwort muss von 8 bis 128 Ziffern entstehen.",
+				"empty": "Das Passwort darf nicht leer bleiben."
+			},
+			"code": {
+				"empty": "Der Code darf nicht leer bleiben."
+			}
+		}
+	}
+}

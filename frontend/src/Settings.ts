@@ -1,9 +1,19 @@
 import AView from "./AView.js";
 
-let currentlyOpen = null;
+function settingsClick(e) {
+	if (e.target.id === "delete-account")
+	{
+		e.preventDefault();
+		const isConfirmed = confirm("You sure bout that?");
+		if (isConfirmed)
+			console.log("DELETE THE FRKN THING!!");
+	}
+}
 
-// async function toggle(e) {
-// }
+function settingsInput(e) {
+	console.log(e);
+	// ADD USER INFORMATION CHANGE
+}
 
 export default class extends AView {
 	constructor() {
@@ -17,19 +27,13 @@ export default class extends AView {
 	}
 
 	async setEventHandlers() {
-		const detailsElements = document.querySelectorAll('details');
-
-		detailsElements.forEach(details => {
-			details.addEventListener('click', toggle);
-		});
+		document.addEventListener("click", settingsClick);
+		document.addEventListener("input", settingsInput);
 	}
 
 	async unsetEventHandlers() {
-		const detailsElements = document.querySelectorAll('details');
-
-		// detailsElements.forEach(details => {
-		// 	details.removeEventListener('click', toggle);
-		// });
+		document.removeEventListener("click", settingsClick);
+		document.removeEventListener("input", settingsInput);
 	}
 
 	async setStylesheet() {

@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import AView from "./AView.js";
 function getCSSVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -500,66 +491,253 @@ function resultFilterChangeHandler(e) {
     profileManager.filterMatches('result', target.value);
 }
 ;
+function handleTournamentClick(e, USERNAME, overlay, turnuva, wrapper) {
+    const target = e.target;
+    const row = target.closest('.tournament-row:not(.header)');
+    if (!row)
+        return;
+    const players = JSON.parse(row.dataset.players || '[]');
+    const firstRoundCount = players.filter(p => Number(p.etap) === 0).length;
+    const n = Math.max(1, Math.ceil(Math.log2(Math.max(1, firstRoundCount))));
+    overlay.style.display = 'flex';
+    initBracket(players, n, USERNAME, turnuva, wrapper);
+}
+function handleOverlayClick(e, overlay, turnuva) {
+    const target = e.target;
+    if (target.id === 'overlay') {
+        overlay.style.display = 'none';
+        turnuva.innerHTML = '';
+    }
+}
+function initBracket(players, n, currentUser, turnuva, wrapper) {
+    turnuva.innerHTML = '';
+    turnuva.style.transform = 'none';
+    const etapGap = 150;
+    const kutularArray = [];
+    const kutuHeight = 50;
+    const gapInMatch = 40;
+    const gapBetweenMatch = 100;
+    function createKutu(text = '', skor = null, left = 0, top = 0) {
+        const kutu = document.createElement('div');
+        kutu.classList.add('kutu');
+        kutu.style.left = left + 'px';
+        kutu.style.top = top + 'px';
+        if (text) {
+            const isimSpan = document.createElement('span');
+            isimSpan.classList.add('isim');
+            isimSpan.textContent = text;
+            kutu.appendChild(isimSpan);
+        }
+        if (skor !== null) {
+            const ayirici = document.createElement('div');
+            ayirici.classList.add('ayirici');
+            const skorSpan = document.createElement('span');
+            skorSpan.classList.add('skor');
+            skorSpan.textContent = skor.toString();
+            kutu.appendChild(ayirici);
+            kutu.appendChild(skorSpan);
+        }
+        return kutu;
+    }
+    // 1. etap kutuları
+    kutularArray[0] = [];
+    let currentTop = 0;
+    const firstStageCount = Math.pow(2, n);
+    for (let i = 0; i < firstStageCount; i++) {
+        const kutu = createKutu('', null, 0, currentTop);
+        turnuva.appendChild(kutu);
+        kutularArray[0].push(kutu);
+        currentTop += kutuHeight + (i % 2 === 1 ? gapBetweenMatch : gapInMatch);
+    }
+    // Diğer etaplar
+    for (let etap = 1; etap <= n; etap++) {
+        const prevStage = kutularArray[etap - 1];
+        const count = prevStage.length / 2;
+        kutularArray[etap] = [];
+        for (let i = 0; i < count; i++) {
+            const rect1 = prevStage[i * 2].getBoundingClientRect();
+            const rect2 = prevStage[i * 2 + 1].getBoundingClientRect();
+            const turnuvaRect = turnuva.getBoundingClientRect();
+            const middleY = (rect1.top + rect2.bottom) / 2 - turnuvaRect.top;
+            const kutu = createKutu('', null, etap * etapGap, middleY - kutuHeight / 2);
+            turnuva.appendChild(kutu);
+            kutularArray[etap].push(kutu);
+            // çizgiler
+            const vLine = document.createElement('div');
+            vLine.classList.add('line');
+            vLine.style.width = '2px';
+            vLine.style.height = (rect2.top - rect1.bottom) + 'px';
+            vLine.style.left = (rect1.left + rect1.width / 2 - turnuvaRect.left) + 'px';
+            vLine.style.top = (rect1.bottom - turnuvaRect.top) + 'px';
+            turnuva.appendChild(vLine);
+            const hLine = document.createElement('div');
+            hLine.classList.add('line');
+            const vMid = rect1.bottom + (rect2.top - rect1.bottom) / 2;
+            const leftStart = rect1.left + rect1.width / 2;
+            const leftEnd = rect1.left + etapGap;
+            hLine.style.width = (leftEnd - leftStart) + 'px';
+            hLine.style.height = '2px';
+            hLine.style.left = (leftStart - turnuvaRect.left) + 'px';
+            hLine.style.top = (vMid - turnuvaRect.top) + 'px';
+            turnuva.appendChild(hLine);
+            const shortVLine = document.createElement('div');
+            shortVLine.classList.add('line');
+            shortVLine.style.width = '2px';
+            shortVLine.style.height = (middleY - vMid) + 'px';
+            shortVLine.style.left = (leftEnd - turnuvaRect.left) + 'px';
+            shortVLine.style.top = (vMid - turnuvaRect.top) + 'px';
+            turnuva.appendChild(shortVLine);
+        }
+    }
+    const userBoxes = players.filter(p => p.text === currentUser);
+    const lastStage = userBoxes.length ? Math.max(...userBoxes.map(p => p.etap)) : -1;
+    players.forEach(item => {
+        var _a;
+        const box = (_a = kutularArray[item.etap]) === null || _a === void 0 ? void 0 : _a[item.kutu - 1];
+        if (!box)
+            return;
+        const isCurrentUser = item.text === currentUser;
+        const isFinalStage = item.etap === n;
+        if (item.kazanan === null) {
+            box.classList.add('devam');
+            box.innerHTML = `<span class="isim">${item.text}</span>`;
+        }
+        else if (item.kazanan) {
+            box.classList.add('kazanan');
+            box.innerHTML = `<span class="isim">${item.text}</span><div class="ayirici"></div><span class="skor">${item.skor}</span>`;
+        }
+        else {
+            box.classList.add('kaybeden');
+            box.innerHTML = `<span class="isim">${item.text}</span><div class="ayirici"></div><span class="skor">${item.skor}</span>`;
+        }
+        if (isCurrentUser) {
+            if (isFinalStage) {
+                box.classList.add('kazanan-son');
+                box.classList.remove('kendi');
+            }
+            else if (item.etap === lastStage) {
+                box.classList.add('kendi');
+            }
+        }
+    });
+    setTimeout(() => {
+        const wrapperWidth = wrapper.clientWidth;
+        const turnuvaWidth = turnuva.scrollWidth;
+        const scaleX = wrapperWidth / turnuvaWidth;
+        const scale = Math.min(scaleX, 1);
+        const translateX = wrapperWidth / 15 - (turnuvaWidth * scale) / 2;
+        const translateY = 0;
+        turnuva.style.transformOrigin = 'top left';
+        turnuva.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    }, 50);
+}
 export default class extends AView {
     constructor() {
         super();
+        this.USERNAME = null;
         this.onlineHandler = () => profileManager.setAvatarStatus('online');
         this.offlineHandler = () => profileManager.setAvatarStatus('offline');
         this.setTitle("Profile");
+        this.USERNAME = "test_user";
         profileManager = new ManagerProfile();
     }
-    getHtml() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const response = yield fetch(`templates/profile.html`);
-            return yield response.text();
+    async getHtml() {
+        const response = await fetch(`templates/profile.html`);
+        return await response.text();
+    }
+    async setEventHandlers() {
+        document.addEventListener("mousemove", handleCardMouseMove);
+        document.addEventListener("mouseout", resetCardShadow); // fare dışarı çıkınca gölgeyi sıfırlar
+        // İnternet durumu event listener'ları
+        profileManager.initConnectionStatus();
+        window.addEventListener('online', this.onlineHandler);
+        window.addEventListener('offline', this.offlineHandler);
+        // Tab tıklamaları
+        document.addEventListener('click', tabClickHandler);
+        // Filtreler
+        const resultFilter = document.getElementById('result-filter');
+        resultFilter === null || resultFilter === void 0 ? void 0 : resultFilter.addEventListener('change', resultFilterChangeHandler);
+        // Level progress animasyonu
+        profileManager.animateLevelProgress();
+        // ==================== Turnuva elementleri ====================
+        this.overlay = document.getElementById('overlay');
+        this.table = document.getElementById('tournament-table');
+        this.closeBtn = document.getElementById('close-btn');
+        this.wrapper = document.getElementById('turnuva-wrapper');
+        this.turnuva = document.getElementById('turnuva');
+        // Kullanıcıyı fetch et
+        fetch("http://localhost:3000/api/me")
+            .then(res => res.json())
+            .then((user) => {
+            this.USERNAME = user.username;
+            return fetch(`http://localhost:3000/api/user-tournaments/${encodeURIComponent(this.USERNAME)}`);
+        })
+            .then(res => res.json())
+            .then((tournaments) => {
+            tournaments.forEach(tr => {
+                const row = document.createElement('div');
+                row.classList.add('tournament-row');
+                row.innerHTML = `
+                <span>${tr.name}</span>
+                <span>${tr.start_date}</span>
+                <span>${tr.end_date}</span>
+                <span>${tr.total_matches}</span>
+              `;
+                row.dataset.players = JSON.stringify(tr.players);
+                this.table.appendChild(row);
+            });
+        });
+        // Event delegation
+        this.table.addEventListener('click', (e) => {
+            if (!this.USERNAME)
+                return;
+            handleTournamentClick(e, this.USERNAME, this.overlay, this.turnuva, this.wrapper);
+        });
+        this.overlay.addEventListener('click', (e) => handleOverlayClick(e, this.overlay, this.turnuva));
+        this.closeBtn.addEventListener('click', () => {
+            this.closeBtn.classList.add('close');
+            setTimeout(() => {
+                this.overlay.style.display = 'none';
+                this.turnuva.innerHTML = '';
+                this.closeBtn.classList.remove('close');
+            }, 300);
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape" && this.overlay.style.display === 'flex') {
+                this.closeBtn.classList.add('close');
+                setTimeout(() => {
+                    this.overlay.style.display = 'none';
+                    this.turnuva.innerHTML = '';
+                    this.closeBtn.classList.remove('close');
+                }, 300);
+            }
         });
     }
-    setEventHandlers() {
-        return __awaiter(this, void 0, void 0, function* () {
-            document.addEventListener("mousemove", handleCardMouseMove);
-            document.addEventListener("mouseout", resetCardShadow); // fare dışarı çıkınca gölgeyi sıfırlar
-            // İnternet durumu event listener'ları
-            profileManager.initConnectionStatus();
-            window.addEventListener('online', this.onlineHandler);
-            window.addEventListener('offline', this.offlineHandler);
-            // Tab tıklamaları
-            document.addEventListener('click', tabClickHandler);
-            // Filtreler
-            const timeFilter = document.getElementById('time-filter');
-            const resultFilter = document.getElementById('result-filter');
-            timeFilter === null || timeFilter === void 0 ? void 0 : timeFilter.addEventListener('change', timeFilterChangeHandler);
-            resultFilter === null || resultFilter === void 0 ? void 0 : resultFilter.addEventListener('change', resultFilterChangeHandler);
-            // Level progress animasyonu
-            profileManager.animateLevelProgress();
-        });
+    async unsetEventHandlers() {
+        var _a, _b, _c;
+        document.removeEventListener("mousemove", handleCardMouseMove);
+        document.removeEventListener("mouseout", resetCardShadow);
+        window.removeEventListener('online', this.onlineHandler);
+        window.removeEventListener('offline', this.offlineHandler);
+        document.removeEventListener('click', tabClickHandler);
+        const resultFilter = document.getElementById('result-filter');
+        resultFilter === null || resultFilter === void 0 ? void 0 : resultFilter.removeEventListener('change', resultFilterChangeHandler);
+        // Turnuva ile ilgili eventleri de kaldır
+        (_a = this.table) === null || _a === void 0 ? void 0 : _a.replaceChildren(); // satırları temizle
+        (_b = this.overlay) === null || _b === void 0 ? void 0 : _b.removeEventListener('click', (e) => handleOverlayClick(e, this.overlay, this.turnuva));
+        (_c = this.closeBtn) === null || _c === void 0 ? void 0 : _c.removeEventListener('click', () => { });
+        document.removeEventListener('keydown', () => { });
     }
-    unsetEventHandlers() {
-        return __awaiter(this, void 0, void 0, function* () {
-            document.removeEventListener("mousemove", handleCardMouseMove);
-            document.removeEventListener("mouseout", resetCardShadow);
-            window.removeEventListener('online', this.onlineHandler);
-            window.removeEventListener('offline', this.offlineHandler);
-            document.removeEventListener('click', tabClickHandler);
-            const timeFilter = document.getElementById('time-filter');
-            const resultFilter = document.getElementById('result-filter');
-            timeFilter === null || timeFilter === void 0 ? void 0 : timeFilter.removeEventListener('change', timeFilterChangeHandler);
-            resultFilter === null || resultFilter === void 0 ? void 0 : resultFilter.removeEventListener('change', resultFilterChangeHandler);
-        });
+    async setStylesheet() {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "styles/profile.css";
+        document.head.appendChild(link);
     }
-    setStylesheet() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = "styles/profile.css";
-            document.head.appendChild(link);
-        });
-    }
-    unsetStylesheet() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const link = document.querySelector("link[href='styles/profile.css']");
-            if (link)
-                document.head.removeChild(link);
-        });
+    async unsetStylesheet() {
+        const link = document.querySelector("link[href='styles/profile.css']");
+        if (link)
+            document.head.removeChild(link);
     }
 }
 //# sourceMappingURL=Profile.js.map
