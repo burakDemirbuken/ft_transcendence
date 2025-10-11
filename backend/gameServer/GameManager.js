@@ -71,6 +71,12 @@ class GameManager extends EventEmitter
 			game = new PingPong(properties);
 		else if (gameMode === 'ai')
 			game = new AiPingPong(properties);
+		else if (gameMode === 'multiplayer')
+		{
+			game = new PingPong(properties);
+			game.gameMode = 'multiplayer';
+			game.maxPlayers = 4;
+		}
 		else
 			throw new Error(`Unsupported game mode: ${gameMode}`);
 		game.initializeGame();

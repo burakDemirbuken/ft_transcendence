@@ -3,7 +3,6 @@ export default {
 	{
 		paddleWidth: 10,
 		paddleHeight: 100,
-		paddleWidth: 10,
 		paddleSpeed: 700,
 		ballRadius: 7,
 		ballSpeed: 600,

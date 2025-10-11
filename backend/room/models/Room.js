@@ -79,8 +79,7 @@ export default class Room extends EventEmitter
 			gameMode: this.gameMode,
 			status: this.status,
 			maxPlayers: this.maxPlayers,
-			host: this.host,
-			players: this.players,
+			players: this.players.map(p => p.getState()),
 			gameSettings: this.gameSettings,
 			createdAt: this.createdAt,
 		};

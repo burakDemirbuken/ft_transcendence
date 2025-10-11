@@ -78,7 +78,6 @@ class AiNetworkManager extends EventEmitter
 				this.emit('game_initialized', message);
 				break;
 			case "ai_decision":
-				// AI sunucusu target_y döndürüyor
 				this.emit(`aiGame${message.game_id}_target`, message.target_y);
 				break;
 			case "error":

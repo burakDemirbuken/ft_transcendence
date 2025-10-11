@@ -73,6 +73,7 @@ class GameRenderer extends EventEmitter
 		{
 			case 'local':
 			case 'ai':
+			case 'multiplayer':
 			case 'classic':
 				await this.classicInitialize(gameConfig);
 				break;

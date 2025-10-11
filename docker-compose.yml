@@ -188,6 +188,8 @@ services:
       - transcendency
     expose:
       - 3003
+    ports:
+      - "3003:3003"
     volumes:
       - aiServer_src:/app
 
