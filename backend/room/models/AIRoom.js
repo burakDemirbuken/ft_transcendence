@@ -2,6 +2,7 @@ import Room from "./Room.js";
 
 export default class AIRoom extends Room
 {
+
 	constructor(name, gameSettings, aiSettings)
 	{
 		if (!aiSettings)

@@ -20,12 +20,12 @@ function goToNextField(field)
 
 function showError(message:string)
 {
-	const activeField = document.querySelector(".active");
+	const form = document.querySelector("#loginForm");
 	const error = document.querySelector("#error");
 	error.textContent = message;
-	activeField.classList.add('shake')
+	form.classList.add('shake')
 	setTimeout(() => {
-		activeField.classList.remove('shake');
+		form.classList.remove('shake');
 	}, 500);
 }
 
@@ -39,12 +39,13 @@ async function username() {
 		return ;
 	}
 
-	if (username.length < 1 || username.length > 20) {
+	const graphemeLength = [...username].length;
+	if (graphemeLength < 1 || graphemeLength > 20) {
 		showError("uname has to be 1-20 characters long");
 		return ;
 	}
 
-	if (!/^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
+	if (!/^[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
 		showError("uname has to be valid characters")
 		return ;
 	}
@@ -111,9 +112,7 @@ async function login() {
 		body: JSON.stringify(user),
 	});
 
-	console.log("sends");
 	const response = await fetch(request);
-	console.log("responds");
 	const json = await response.json();
 	if (response.ok) {
 		document.querySelector("#error").textContent = json.message;

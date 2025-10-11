@@ -1,6 +1,6 @@
 # Variables
 COMPOSE_FILE = ./docker-compose.yml
-COMPOSE_CMD = docker-compose -f $(COMPOSE_FILE)
+COMPOSE_CMD = docker compose -f $(COMPOSE_FILE)
 
 # Service names
 SERVICES = authentication gateway sqlite nginx
@@ -97,6 +97,10 @@ log-auth:
 log-gateway:
 	@echo "$(GREEN)Showing logs for gateway service$(NC)"
 	@$(COMPOSE_CMD) logs -f gateway
+
+log-gameserver:
+	@echo "$(GREEN)Showing logs for gameserver service$(NC)"
+	@$(COMPOSE_CMD) logs -f gameserver
 
 shell-nginx:
 	@echo "$(GREEN)Entering shell for nginx service$(NC)"

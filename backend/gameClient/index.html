@@ -1,500 +1,4461 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PinPong Test</title>
-  <link rel="icon" href="data:,">
-  <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/babylonjs@latest/babylon.js"></script>
-  <script src="https://unpkg.com/babylonjs-loaders@latest/babylonjs.loaders.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLAY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<script src="https://unpkg.com/babylonjs@latest/babylon.js"></script>
+	<script src="https://unpkg.com/babylonjs-loaders@latest/babylonjs.loaders.js"></script>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    --secondary-gradient: linear-gradient(135deg, #ff00ff 0%, #ff0080 100%);
+    --accent-gradient: linear-gradient(135deg, #00ffff 0%, #0080ff 100%);
+    --dark-bg: #0a0e1a;
+    --card-bg: rgba(0, 0, 0, 0.6);
+    --settings-bg: rgba(0, 0, 0, 0.58);
+    --border-color: rgba(0, 255, 255, 0.401);
+    --text-primary: #ffffff;
+    --text-secondary: #a8b2d1;
+    --hover-shadow: 0 20px 40px rgba(255, 0, 255, 0.2);
+
+    /* Yeni renk değişkenleri */
+    --magenta: #ff00ff;
+    --cyan: #00ffff;
+    --dark-cyan: #008080;
+    --dark-magenta: #800080;
+    --black-overlay: rgba(0, 0, 0, 0.7);
+    --deep-black: #000000;
+}
+
+body {
+    background: var(--dark-bg);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Animated background */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(0, 65, 65, 0.324) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(65, 0, 65, 0.435) 0%, transparent 50%),
+        linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    z-index: -1;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 60px;
+    position: relative;
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 15px;
+    letter-spacing: -2px;
+    position: relative;
+    display: inline-block;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+.title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(90deg, #ff00ff 0%, #00ffff 100%);
+    border-radius: 2px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    margin-top: 25px;
+}
+
+.game-modes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 50px;
+}
+
+.game-mode-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 35px 30px;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.game-mode-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    border-radius: 20px;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.4s ease;
+}
+
+.game-mode-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 100%);
+    border-radius: 20px;
+    z-index: -1;
+}
+
+.game-mode-card:hover {
+    transform: translateY(-8px);
+    box-shadow:
+        0 20px 40px rgba(255, 0, 255, 0.15),
+        0 0 0 1px rgba(0, 255, 255, 0.2),
+        inset 0 0 20px rgba(0, 255, 255, 0.05),
+        0 12px 48px rgba(0, 0, 0, 0.6);
+    border-color: rgba(0, 255, 255, 0.3);
+}
+
+.game-mode-card:hover::before {
+    opacity: 1;
+}
+
+.game-mode-card.active {
+    transform: translateY(-8px);
+    border-color: rgba(0, 0, 0, 0.3);
+    box-shadow:
+        0 20px 40px rgba(255, 0, 255, 0.15),
+        0 0 0 1px rgba(0, 255, 255, 0.2),
+        inset 0 0 20px rgba(0, 255, 255, 0.05),
+        0 12px 48px rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.game-mode-card.active::before {
+    opacity: 1;
+}
+
+.mode-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    background: linear-gradient(45deg, #ff00ff, #00ffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.no-select {
+	-webkit-user-drag: none;
+	user-drag: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.mode-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+}
+
+.game-mode-card.active .mode-title {
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+.mode-description {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+/* Settings Panel */
+.settings-panel {
+    background: var(--settings-bg);
+    border-radius: 24px;
+    padding: 40px;
+    margin-top: 30px;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 255, 255, 0.572);
+    display: none;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.settings-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 24px;
+    z-index: -1;
+}
+
+.settings-panel.active {
+    display: block;
+    animation: fadeInUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.settings-panel::-webkit-scrollbar {
+    width: 10px;
+}
+
+.settings-panel::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.settings-panel::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    border-radius: 10px;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.settings-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 35px;
+    text-align: center;
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.setting-group {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 25px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.setting-group:hover {
+    border-color: rgba(0, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0);
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+.setting-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-bottom: 12px;
+    font-family: 'Inter', sans-serif;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #00ffff;
+    background: rgba(0, 0, 0, 0.6);
+    box-shadow:
+        0 0 0 4px rgba(0, 255, 255, 0.1),
+        0 0 20px rgba(0, 255, 255, 0.2),
+        inset 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.input-field:hover {
+    filter: brightness(1.1);
+    border-color: rgba(0, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.input-field::placeholder {
+    color: var(--text-secondary);
+    font-weight: 400;
+}
+
+.radio-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 12px 20px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.4);
+    position: relative;
+    font-weight: 500;
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.radio-option:hover {
+    border-color: #00ffff;
+    background: rgba(0, 0, 0, 0.6);
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+.radio-option input[type="radio"] {
+    display: none;
+}
+
+.radio-option:has(input[type="radio"]:checked) {
+    border-color: #00ffff;
+    background: rgba(0, 0, 0, 0.8);
+    box-shadow:
+        0 4px 12px rgba(0, 255, 255, 0.2),
+        0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+.radio-option:has(input[type="radio"]:checked)::before {
+    content: '✓';
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    color: #00ffff;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+/* Slider Styles */
+.slider-container {
+	margin: 20px 0;
+}
+
+.slider {
+	width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    border: 2px solid rgba(0, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.5);
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.slider:hover {
+    background: rgba(0, 0, 0, 0.7);
+    filter: brightness(1.1);
+	border-color: rgba(0, 255, 255, 0.4);
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    cursor: pointer;
+    box-shadow:
+        0 2px 8px rgba(0, 255, 255, 0.4),
+        0 4px 16px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow:
+        0 4px 16px rgba(0, 255, 255, 0.6),
+        0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    cursor: pointer;
+    border: none;
+    box-shadow:
+        0 2px 8px rgba(0, 255, 255, 0.4),
+        0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.slider-value {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.current-value {
+    color: #00ffff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 4px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Toggle Switch */
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 12px 0;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 56px;
+    height: 28px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.toggle-switch:hover {
+    filter: brightness(1.1);
+    border-color: rgba(0, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.toggle-switch input {
+    display: none;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    transform: translateX(28px);
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    box-shadow: 0 2px 8px rgba(0, 255, 255, 0.4);
+}
+
+.toggle-switch:has(input:checked) {
+    background: rgba(0, 255, 255, 0.3);
+    box-shadow:
+        0 0 15px rgba(0, 255, 255, 0.3),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* AI Difficulty Tooltips */
+.difficulty-option {
+    position: relative;
+}
+
+.difficulty-tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.95);
+    color: var(--text-primary);
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    font-weight: 500;
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(0, 255, 255, 0.2);
+}
+
+.difficulty-option:hover .difficulty-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Special AI Settings */
+.ai-special-settings {
+    display: none;
+    margin-top: 30px;
+    padding: 30px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 16px;
+    position: relative;
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.ai-special-settings::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    border-radius: 16px;
+    opacity: 0.1;
+    z-index: -1;
+}
+
+.ai-special-settings.active {
+    display: block;
+    animation: fadeInUp 0.5s ease;
+}
+
+.ai-special-settings h3 {
+    color: #00ffff !important;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 40px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 16px 36px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 180px;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+    transition: left 0.3s ease;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    color: white;
+    box-shadow:
+        0 4px 16px rgba(255, 0, 255, 0.3),
+        0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 8px 24px rgba(255, 0, 255, 0.4),
+        0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.8);
+    border-color: #00ffff;
+    transform: translateY(-3px);
+    box-shadow:
+        0 8px 24px rgba(0, 255, 255, 0.2),
+        0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Room Info */
+.room-info {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 16px;
+    padding: 30px;
+    margin-top: 30px;
+    text-align: center;
+    display: none;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.room-info::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+    animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.room-info.active {
+    display: block;
+    animation: fadeInUp 0.5s ease;
+}
+
+.room-id {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 15px;
+    letter-spacing: 3px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+.room-info p {
+    color: var(--text-secondary);
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+}
+
+/* Tournament Settings */
+.tournament-info {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.tournament-info small {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Join Room Section */
+.join-room-section {
+    margin-top: 30px;
+    padding: 30px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.input-group {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: #00ffff;
+    animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Focus visible for accessibility */
+.btn:focus-visible,
+.input-field:focus-visible,
+.radio-option:focus-visible {
+    outline: 2px solid #00ffff;
+    outline-offset: 3px;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+    background: rgba(0, 255, 255, 0.3);
+    color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px 15px;
     }
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    .title {
+        font-size: 2.5rem;
+        letter-spacing: -1px;
     }
 
-    #renderCanvas {
-      width: 100vw;
-      height: 100vh;
-      display: block;
-      touch-action: none;
+    .subtitle {
+        font-size: 1rem;
     }
 
-    /* UI Overlay */
-    .ui-overlay {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      max-width: 350px;
+    .game-modes {
+        grid-template-columns: 1fr;
+        gap: 20px;
     }
 
-    .ui-panel {
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(10px);
-      border-radius: 12px;
-      padding: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: white;
+    .settings-panel {
+        padding: 25px 20px;
     }
 
-    .panel-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 15px;
-      color: #00ff88;
-      text-align: center;
+    .settings-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
     }
 
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .radio-group {
+        flex-direction: column;
+    }
+
+    .radio-option {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    .input-group .btn {
+        width: 100%;
+    }
+
+    .action-buttons {
+        flex-direction: column;
     }
 
     .btn {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+        min-width: 100%;
     }
 
-    .btn-primary {
-      background: linear-gradient(45deg, #667eea, #764ba2);
-      color: white;
+    .room-id {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px 10px;
     }
 
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    .title {
+        font-size: 2rem;
     }
 
-    .btn-success {
-      background: linear-gradient(45deg, #11998e, #38ef7d);
-      color: white;
+    .game-mode-card {
+        padding: 25px 20px;
     }
 
-    .btn-success:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(56, 239, 125, 0.4);
+    .mode-icon {
+        font-size: 2.5rem;
     }
 
-    .btn-warning {
-      background: linear-gradient(45deg, #f093fb, #f5576c);
-      color: white;
+    .mode-title {
+        font-size: 1.2rem;
     }
 
-    .btn-warning:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+    .settings-panel {
+        padding: 20px 15px;
+        margin-top: 20px;
     }
 
-    .btn-ready {
-      background: linear-gradient(45deg, #11998e, #38ef7d);
-      color: white;
+    .settings-title {
+        font-size: 1.6rem;
     }
 
-    .btn-ready:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(56, 239, 125, 0.4);
+    .setting-group {
+        padding: 20px;
     }
 
-    .btn-not-ready {
-      background: linear-gradient(45deg, #ff7b7b, #ff9a44);
-      color: white;
+    .btn {
+        padding: 14px 24px;
+        font-size: 0.9rem;
     }
 
-    .btn-not-ready:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255, 123, 123, 0.4);
+    .room-id {
+        font-size: 1.3rem;
+        letter-spacing: 2px;
+    }
+}
+
+/* Ekstra siyah tonları ve efektler - daha hafif versiyonlar */
+.game-mode-card:hover::after {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.6) 100%);
+}
+
+.setting-group::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 16px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.setting-group:hover::before {
+    opacity: 1;
+}
+
+/* Dark overlay for better contrast - hafifletilmiş */
+.settings-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        linear-gradient(45deg, rgba(0, 0, 0, 0.02) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(0, 0, 0, 0.02) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.02) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.02) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    border-radius: 24px;
+    z-index: -1;
+    opacity: 0.3;
+    pointer-events: none; /* Scroll'u engellemesini önler */
+}
+
+/* Enhanced black shadows for depth - hafifletilmiş */
+.game-mode-card {
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.settings-panel {
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.3),
+        0 8px 32px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Black gradient overlays for inputs - hafifletilmiş */
+.input-field {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.2) 100%),
+        rgba(0, 0, 0, 0.4);
+    box-shadow:
+        inset 0 2px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(0, 0, 0, 0.2),
+        0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.input-field:focus {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 100%),
+        rgba(0, 0, 0, 0.6);
+}
+
+/* Enhanced radio options with black gradients - hafifletilmiş */
+.radio-option {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.2) 100%),
+        rgba(0, 0, 0, 0.4);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.radio-option:hover {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 100%),
+        rgba(0, 0, 0, 0.6);
+}
+
+.radio-option:has(input[type="radio"]:checked) {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%),
+        rgba(0, 0, 0, 0.8);
+}
+
+/* Black tinted sliders - hafifletilmiş */
+.slider {
+    background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 100%),
+        rgba(0, 0, 0, 0.5);
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(0, 0, 0, 0.2),
+        0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Enhanced toggle switch with black background - hafifletilmiş */
+.toggle-switch {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 100%),
+        rgba(0, 0, 0, 0.5);
+    box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(0, 0, 0, 0.2),
+        0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Current value with enhanced black styling - hafifletilmiş */
+.current-value {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.5) 100%),
+        rgba(0, 0, 0, 0.6);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced button styling with black gradients - hafifletilmiş */
+.btn-secondary {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 100%),
+        rgba(0, 0, 0, 0.6);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary:hover {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%),
+        rgba(0, 0, 0, 0.8);
+}
+
+/* Dark pattern overlay for visual interest - hafifletilmiş */
+.container::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.05) 1px, transparent 0);
+    background-size: 20px 20px;
+    z-index: -2;
+    opacity: 0.2;
+}
+
+/* Enhanced tooltips with black styling - hafifletilmiş */
+.difficulty-tooltip {
+    background:
+        linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.9) 100%),
+        rgba(0, 0, 0, 0.95);
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.4),
+        0 0 20px rgba(0, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced scrollbar with black styling - hafifletilmiş */
+.settings-panel::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Text shadows for better readability on dark backgrounds - hafifletilmiş */
+.mode-title,
+.settings-title,
+.setting-label {
+    text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.4),
+        0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Enhanced focus states with black accents - hafifletilmiş */
+.input-field:focus,
+.radio-option:focus-visible,
+.btn:focus-visible {
+    box-shadow:
+        0 0 0 4px rgba(0, 255, 255, 0.1),
+        0 0 20px rgba(0, 255, 255, 0.2),
+        inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Özel ayarlar için magenta/cyan gradient title */
+.settings-title {
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 50%, #ff00ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 200% 100%;
+    animation: gradientShift 3s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* Hafif glow efekti title için */
+.settings-title::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: blur(10px);
+    opacity: 0.3;
+    z-index: -1; 
+}
+
+.game-page {
+    display: block;
+}
+
+.game-page.hidden {
+    display: none;
+}
+
+.game-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    touch-action: none;
+    z-index: 9999;
+}
+
+.game-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
+
+.game-page.hidden .game-container {
+    display: block;
+}
+
+
+.waiting-room {
+    display: none;
+    text-align: center;
+    padding: 50px;
+}
+
+.waiting-room.active {
+    display: block;
+    animation: fadeInUp 0.5s ease;
+}
+
+/* Back Arrow Button */
+.back-arrow {
+	width: 30px;
+    height: 30px;
+    padding: 5px;
+    position: fixed;
+    top: 30px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	background: none;
+}
+
+.back-arrow.active {
+    display: flex;
+    animation: slideInLeft 0.5s ease;
+}
+
+.back-arrow:hover {
+    transform: translateX(-5px) scale(1.05);
+	filter: drop-shadow(0 0 10px #008080) drop-shadow(0 0 20px #008080);
+}
+
+.back-arrow:active {
+    transform: translateX(-5px) scale(0.95);
+}
+
+.back-arrow svg {
+	fill: #00ffff;
+	width: 100%; /* SVG'nin buton boyutuna uyması için %100 */
+    height: 100%; /* SVG'nin buton boyutuna uyması için %100 */
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .back-arrow {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+        top: 15px;
+        left: 15px;
+    }
+}
+
+@keyframes slideOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+}
+
+/* Scrollbar for participants list */
+.participants-list::-webkit-scrollbar {
+	width: 8px;
+}
+
+.participants-list::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.participants-list::-webkit-scrollbar-thumb {
+	background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    border-radius: 4px;
+}
+
+/* Waiting Room Styles */
+.waiting-room {
+    display: none;
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: none;
+}
+
+.waiting-room.active {
+    display: block;
+    animation: fadeInUp 0.5s ease;
+}
+
+.room-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Room Header */
+.room-header {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    backdrop-filter: blur(10px);
+}
+
+.room-header h2 {
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #00ffff, #ff00ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.room-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.room-info-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.room-info-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(0, 255, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 255, 255, 0.2);
+}
+
+.info-label {
+    display: block;
+    font-size: 12px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.info-value {
+    display: block;
+    font-size: 20px;
+    font-weight: bold;
+    color: #00ffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* Participants Section */
+.participants-section {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    backdrop-filter: blur(10px);
+}
+
+.participants-section h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.participants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.participant-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid;
+    border-radius: 12px;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.participant-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.1;
+    z-index: 0;
+}
+
+.participant-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.participant-icon {
+    font-size: 24px;
+    z-index: 1;
+}
+
+.participant-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    z-index: 1;
+}
+
+/* Room Actions */
+.room-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.btn-large {
+    padding: 18px 50px;
+    font-size: 18px;
+    font-weight: bold;
+    min-width: 250px;
+}
+
+/* Scrollbar for participants grid */
+.participants-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.participants-grid::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.participants-grid::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+    border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .room-info-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none !important;
-      box-shadow: none !important;
+    .participants-grid {
+        grid-template-columns: 1fr;
     }
 
-    .input-field {
-      padding: 10px 15px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      font-size: 14px;
-      margin-bottom: 10px;
+    .btn-large {
+        min-width: 100%;
     }
+}
 
-    .input-field::placeholder {
-      color: rgba(255, 255, 255, 0.6);
+@media (max-width: 480px) {
+    .room-info-grid {
+        grid-template-columns: 1fr;
     }
+}
 
-    .input-field:focus {
-      outline: none;
-      border-color: #00ff88;
-      box-shadow: 0 0 0 2px rgba(0, 255, 136, 0.2);
-    }
 
-    select {
-      padding: 8px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      font-size: 14px;
-      cursor: pointer;
-      min-width: 120px;
-    }
-
-    select:focus {
-      outline: none;
-      border-color: #00ff88;
-      box-shadow: 0 0 0 2px rgba(0, 255, 136, 0.2);
-    }
-
-    select:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    select option {
-      background: #333;
-      color: white;
-    }
-
-    /* Tournament Room Interface */
-    .tournament-room {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(0, 0, 0, 0.95);
-      backdrop-filter: blur(15px);
-      border-radius: 15px;
-      padding: 30px;
-      border: 2px solid #00ff88;
-      color: white;
-      min-width: 500px;
-      max-width: 80vw;
-      display: none;
-      z-index: 2000;
-    }
-
-    .tournament-header {
-      text-align: center;
-      margin-bottom: 25px;
-    }
-
-    .tournament-title {
-      font-size: 24px;
-      font-weight: 700;
-      color: #00ff88;
-      margin-bottom: 5px;
-    }
-
-    .tournament-id {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.7);
-      font-family: monospace;
-    }
-
-    .tournament-info {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 25px;
-    }
-
-    .info-item {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 15px;
-      border-radius: 8px;
-      text-align: center;
-    }
-
-    .info-label {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.6);
-      text-transform: uppercase;
-      margin-bottom: 5px;
-    }
-
-    .info-value {
-      font-size: 18px;
-      font-weight: 600;
-      color: #00ff88;
-    }
-
-    .participants-list {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
-    }
-
-    .participants-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 10px;
-      color: #00ff88;
-    }
-
-    .participant-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .participant-item:last-child {
-      border-bottom: none;
-    }
-
-    .participant-name {
-      font-weight: 500;
-    }
-
-    .participant-status {
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .status-ready {
-      background: rgba(56, 239, 125, 0.2);
-      color: #38ef7d;
-    }
-
-    .status-waiting {
-      background: rgba(255, 193, 7, 0.2);
-      color: #ffc107;
-    }
-
-    .tournament-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-    }
-
-    .close-btn {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 20px;
-      cursor: pointer;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .close-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* Status Messages */
-    .status-message {
-      padding: 10px 15px;
-      border-radius: 6px;
-      font-size: 14px;
-      margin-bottom: 10px;
-      text-align: center;
-    }
-
-    .status-success {
-      background: rgba(56, 239, 125, 0.2);
-      color: #38ef7d;
-      border: 1px solid rgba(56, 239, 125, 0.3);
-    }
-
-    .status-error {
-      background: rgba(245, 87, 108, 0.2);
-      color: #f5576c;
-      border: 1px solid rgba(245, 87, 108, 0.3);
-    }
-
-    .status-info {
-      background: rgba(102, 126, 234, 0.2);
-      color: #667eea;
-      border: 1px solid rgba(102, 126, 234, 0.3);
-    }
-
-    /* Toggle Switch Styles */
-    .toggle-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 10px 0;
-    }
-
-    .toggle-switch {
-      position: relative;
-      width: 60px;
-      height: 30px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 15px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .toggle-switch.active {
-      background: linear-gradient(45deg, #11998e, #38ef7d);
-      border-color: #38ef7d;
-    }
-
-    .toggle-slider {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 26px;
-      height: 26px;
-      background: white;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    }
-
-    .toggle-switch.active .toggle-slider {
-      transform: translateX(30px);
-    }
-
-    .toggle-label {
-      color: white;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-  </style>
+    </style>
 </head>
 <body>
-  <!-- UI Overlay -->
-  <div class="ui-overlay">
-    <!-- Local & AI Games Panel -->
-    <div class="ui-panel">
-      <div class="panel-title">🎮 Single Player</div>
-      <div class="button-group">
-        <button class="btn btn-primary" id="localGameBtn">Local Game</button>
-        <button class="btn btn-primary" id="aiGameBtn">AI Game</button>
-      </div>
-    </div>
+	<button class="back-arrow" id="back-arrow" ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576C461.4 576 576 461.4 576 320zM188.7 308.7L292.7 204.7C297.3 200.1 304.2 198.8 310.1 201.2C316 203.6 320 209.5 320 216L320 272L416 272C433.7 272 448 286.3 448 304L448 336C448 353.7 433.7 368 416 368L320 368L320 424C320 430.5 316.1 436.3 310.1 438.8C304.1 441.3 297.2 439.9 292.7 435.3L188.7 331.3C182.5 325.1 182.5 314.9 188.7 308.7z"/></svg></button>
+    <div class="container">
 
-    <!-- Game Panel -->
-    <div class="ui-panel">
-      <div class="panel-title">🏠 Game</div>
-      <div class="button-group">
-        <button class="btn btn-primary" id="createGameBtn">Create Game</button>
-        <input type="text" class="input-field" id="roomId" placeholder="Enter Room ID">
-        <button class="btn btn-success" id="joinRoomBtn">Join Game</button>
-      </div>
-    </div>
+		<!-- Tournament Waiting Room -->
+		<div class="waiting-room" id="waiting-room">
+		    <div class="room-container">
+		        <!-- Room Header -->
+		        <div class="room-header">
+		            <h2>🏆 Tournament Room</h2>
+		            <div class="room-info-grid">
+		                <div class="room-info-card">
+		                    <span class="info-label">ROOM CODE</span>
+		                    <span class="info-value" id="room-code-display">TOUR-XXXXX</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">PLAYERS</span>
+		                    <span class="info-value" id="players-count">0/8</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">FORMAT</span>
+		                    <span class="info-value">Single Elimination</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">STATUS</span>
+		                    <span class="info-value" id="tournament-status-display">Waiting</span>
+		                </div>
+		            </div>
+		        </div>
+			
+		        <!-- Participants Section -->
+		        <div class="participants-section">
+		            <h3>👥 Participants</h3>
+		            <div class="participants-grid" id="participants-grid">
+		                <!-- Participants will be added dynamically -->
+		            </div>
+		        </div>
+			
+		        <!-- Match Pairs Section (Hidden until matching) -->
+		        <div class="participants-section" id="match-pairs-section" style="display: none;">
+		            <h3>⚔️ Match Pairs - Round 1</h3>
+		            <div id="match-pairs-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+		                <!-- Match pairs will be displayed here -->
+		            </div>
+		        </div>
+			
+		        <!-- Action Buttons -->
+		        <div class="room-actions">
+		            <button class="btn btn-secondary btn-large" id="waiting-players-btn" disabled>
+		                ⏳ Oyuncular Bekleniyor...
+		            </button>
+		            <button class="btn btn-primary btn-large" id="match-players-btn" style="display: none;">
+		                🎲 Eşleştirmeleri Yap
+		            </button>
+		            <button class="btn btn-primary btn-large" id="start-tournament-btn" style="display: none;">
+		                🚀 Turnuvayı Başlat
+		            </button>
+		        </div>
+		    </div>
+		</div>
 
-    <!-- Quick Test Panel -->
-    <div class="ui-panel">
-      <div class="panel-title">⚡ Quick Test</div>
-      <div class="button-group">
-        <div class="toggle-container">
-          <span class="toggle-label">Hazır Ol</span>
-          <div class="toggle-switch" id="readyToggle">
-            <div class="toggle-slider"></div>
-          </div>
-        </div>
-        <button class="btn btn-success" id="startGameBtn">Oyunu Başlat</button>
-      </div>
-    </div>
+		<!-- Custom Game Waiting Room -->
+		<div class="waiting-room" id="custom-waiting-room">
+		    <div class="room-container">
+		        <!-- Room Header -->
+		        <div class="room-header">
+		            <h2>🏓 Game Room</h2>
+		            <div class="room-info-grid">
+		                <div class="room-info-card">
+		                    <span class="info-label">ROOM CODE</span>
+		                    <span class="info-value" id="custom-room-code-display">GAME-XXXXX</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">PLAYERS</span>
+		                    <span class="info-value" id="custom-players-count">1/2</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">GAME TYPE</span>
+		                    <span class="info-value" id="custom-game-type-display">1 vs 1</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">STATUS</span>
+		                    <span class="info-value">Waiting</span>
+		                </div>
+		            </div>
+		        </div>
 
-    <!-- Tournament Panel -->
-    <div class="ui-panel">
-      <div class="panel-title">🏆 Tournament</div>
-      <div id="tournamentStatus"></div>
-      <div class="button-group">
-        <button class="btn btn-warning" id="createTournamentBtn">Create Tournament</button>
-        <input type="text" class="input-field" id="customTournamentId" placeholder="Enter Tournament ID">
-        <button class="btn btn-success" id="joinTournamentBtn">Join Tournament</button>
-      </div>
-    </div>
-  </div>
+		        <!-- Participants Section -->
+		        <div class="participants-section">
+		            <h3>👥 Players</h3>
+		            <div class="participants-grid" id="custom-participants-grid">
+		                <!-- Participants will be added dynamically -->
+		            </div>
+		        </div>
 
-  <!-- Tournament Room Interface -->
-  <div class="tournament-room" id="tournamentRoom">
-    <button class="close-btn" onclick="closeTournamentRoom()">&times;</button>
+		        <!-- Game Settings Display -->
+		        <div class="participants-section">
+		            <h3>⚙️ Game Settings</h3>
+		            <div class="room-info-grid">
+		                <div class="room-info-card">
+		                    <span class="info-label">PADDLE HEIGHT</span>
+		                    <span class="info-value" id="custom-paddle-display">100px</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">BALL RADIUS</span>
+		                    <span class="info-value" id="custom-ball-display">10px</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">CORNER BOOST</span>
+		                    <span class="info-value" id="custom-corner-display">1.0x</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">WINNING SCORE</span>
+		                    <span class="info-value" id="custom-score-display">11</span>
+		                </div>
+		            </div>
+		        </div>
 
-    <div class="tournament-header">
-      <div class="tournament-title" id="roomTitle">Tournament Room</div>
-      <div class="tournament-id" id="roomId">ID: TOUR-12345</div>
-    </div>
+		        <!-- Action Buttons -->
+				<div class="room-actions">
+				    <button class="btn btn-secondary btn-large" id="custom-waiting-players-btn" disabled>
+				        ⏳ Kullanıcılar Bekleniyor...
+				    </button>
+				    <button class="btn btn-primary btn-large" id="custom-start-game-btn" style="display: none;">
+				        🚀 Oyunu Başlat
+				    </button>
+				</div>
+		    </div>
+		</div>
 
-    <div class="tournament-info">
-      <div class="info-item">
-        <div class="info-label">Status</div>
-        <div class="info-value" id="tournamentStatus">Waiting</div>
-      </div>
-      <div class="info-item">
-        <div class="info-label">Players</div>
-        <div class="info-value" id="playerCount">0/8</div>
-      </div>
-      <div class="info-item">
-        <div class="info-label">Format</div>
-        <div class="info-value" id="tournamentFormat">Single Elimination</div>
-      </div>
-      <div class="info-item">
-        <div class="info-label">Max Players</div>
-        <div class="info-value" id="maxPlayers">8</div>
-      </div>
-    </div>
+		<!-- AI Game Waiting Room -->
+		<div class="waiting-room" id="ai-waiting-room">
+		    <div class="room-container">
+		        <!-- Room Header -->
+		        <div class="room-header">
+		            <h2>🤖 AI Game Room</h2>
+		            <div class="room-info-grid">
+		                <div class="room-info-card">
+		                    <span class="info-label">GAME MODE</span>
+		                    <span class="info-value">1 vs AI</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">DIFFICULTY</span>
+		                    <span class="info-value" id="ai-difficulty-display">Medium</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">AI TYPE</span>
+		                    <span class="info-value" id="ai-type-display">Standard</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">STATUS</span>
+		                    <span class="info-value">Ready</span>
+		                </div>
+		            </div>
+		        </div>
 
-    <div class="participants-list">
-      <div class="participants-title">👥 Participants</div>
-      <div id="participantsList">
-        <!-- Participants will be populated here -->
-      </div>
-    </div>
+		        <!-- Players Section -->
+		        <div class="participants-section">
+		            <h3>👥 Players</h3>
+		            <div class="participants-grid" id="ai-participants-grid">
+		                <!-- Will Not You vs AI -->
+		            </div>
+		        </div>
 
-    <div class="tournament-actions">
-      <button class="btn btn-primary" id="readyBtn" onclick="toggleReady()">
-        Mark Ready
-      </button>
-      <button class="btn btn-success" id="startTournamentBtn" onclick="startTournament()" style="display: none;">
-        Start Tournament
-      </button>
-      <button class="btn btn-warning" onclick="leaveTournament()">
-        Leave Tournament
-      </button>
-    </div>
-  </div>
-<!-- Değer alma: -->
-  <canvas id="renderCanvas"></canvas>
-  <script type="module" src="src/main.js"></script>
+		        <!-- Game Settings Display -->
+		        <div class="participants-section">
+		            <h3>⚙️ Game Settings</h3>
+		            <div class="room-info-grid">
+		                <div class="room-info-card">
+		                    <span class="info-label">PADDLE HEIGHT</span>
+		                    <span class="info-value" id="ai-paddle-display">100px</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">BALL RADIUS</span>
+		                    <span class="info-value" id="ai-ball-display">10px</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">CORNER BOOST</span>
+		                    <span class="info-value" id="ai-corner-display">1.0x</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">WINNING SCORE</span>
+		                    <span class="info-value" id="ai-score-display">11</span>
+		                </div>
+		            </div>
+		        </div>
+
+		        <!-- AI Special Settings Display (if custom) -->
+		        <div class="participants-section" id="ai-custom-settings-display" style="display: none;">
+		            <h3>🤖 Custom AI Settings</h3>
+		            <div class="room-info-grid">
+		                <div class="room-info-card">
+		                    <span class="info-label">REACTION SPEED</span>
+		                    <span class="info-value" id="ai-reaction-display">5</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">PREDICTION</span>
+		                    <span class="info-value" id="ai-prediction-display">5</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">ACCURACY</span>
+		                    <span class="info-value" id="ai-accuracy-display">5</span>
+		                </div>
+		                <div class="room-info-card">
+		                    <span class="info-label">LEARNING SPEED</span>
+		                    <span class="info-value" id="ai-learning-display">5</span>
+		                </div>
+		            </div>
+		        </div>
+
+		        <!-- Action Buttons -->
+		        <div class="room-actions">
+		            <button class="btn btn-primary btn-large" id="ai-start-game-btn">
+		                🚀 Start AI Game
+		            </button>
+		        </div>
+		    </div>
+		</div>
+
+		<div class="game-page" id="game-page">
+        	<div class="header">
+        	    <h1 class="title">PLAY MODE</h1>
+        	    <p class="subtitle">Oyun Modunu Seçin ve Ayarlarınızı Yapın</p>
+        	</div>
+
+	        <div class="game-modes">
+	            <div class="game-mode-card" id="custom-mode">
+	                <div class="mode-icon no-select">🏓</div>
+	                <h3 class="mode-title">Oyun</h3>
+	                <p class="mode-description">Kendi kurallarınla özel oyun modları oluştur. Tüm ayarları özelleştir.</p>
+	            </div>
+
+	            <div class="game-mode-card" id="tournament-mode">
+	                <div class="mode-icon no-select">🏆</div>
+	                <h3 class="mode-title">Turnuva</h3>
+	                <p class="mode-description">Turnuva oluştur veya katıl. Birden fazla oyuncuyla rekabet et.</p>
+	            </div>
+
+	            <div class="game-mode-card" id="ai-mode">
+	                <div class="mode-icon no-select">🤖</div>
+	                <h3 class="mode-title">AI ile Oyun</h3>
+	                <p class="mode-description">Yapay zeka ile farklı zorluk seviyelerinde oyna. AI'ı özelleştir.</p>
+	            </div>
+	        </div>
+
+	        <!-- Custom Game Settings -->
+	        <div class="settings-panel" id="custom-settings">
+	            <h2 class="settings-title">Oyun Ayarları</h2>
+
+	            <div class="settings-grid">
+	                <div class="setting-group">
+	                    <label class="setting-label">Oyun Tipi</label>
+	                    <div class="radio-group">
+	                        <label class="radio-option">
+	                            <input type="radio" name="custom-game-type" value="1v1" checked>
+	                            <span class="radio-label">1 vs 1</span>
+	                        </label>
+	                        <label class="radio-option">
+	                            <input type="radio" name="custom-game-type" value="2v2">
+	                            <span class="radio-label">2 vs 2</span>
+	                        </label>
+	                        <label class="radio-option">
+	                            <input type="radio" name="custom-game-type" value="co-op">
+	                            <span class="radio-label">co-op</span>
+	                        </label>
+	                    </div>
+	                </div>
+
+	                <div class="setting-group">
+	                    <label class="setting-label">Paddle Yüksekliği</label>
+	                    <div class="slider-container">
+	                        <input type="range" min="50" max="200" value="100" class="slider" id="paddle-height">
+	                        <div class="slider-value">
+	                            <span>Min: 50px</span>
+	                            <span class="current-value" id="paddle-height-value">100px</span>
+	                            <span>Max: 200px</span>
+	                        </div>
+	                    </div>
+	                </div>
+
+	                <div class="setting-group">
+	                    <label class="setting-label">Top Yarı Çapı</label>
+	                    <div class="slider-container">
+	                        <input type="range" min="5" max="25" value="10" class="slider" id="ball-radius">
+	                        <div class="slider-value">
+	                            <span>Min: 5px</span>
+	                            <span class="current-value" id="ball-radius-value">10px</span>
+	                            <span>Max: 25px</span>
+	                        </div>
+	                    </div>
+	                </div>
+
+	                <div class="setting-group">
+	                    <label class="setting-label">Köşe Çarpma Hızlanması</label>
+	                    <div class="slider-container">
+	                        <input type="range" min="0" max="5" value="1" step="0.1" class="slider" id="corner-boost">
+	                        <div class="slider-value">
+	                            <span>Yok</span>
+	                            <span class="current-value" id="corner-boost-value">1.0x</span>
+	                            <span>5x</span>
+	                        </div>
+	                    </div>
+	                </div>
+
+	                <div class="setting-group">
+	                    <label class="setting-label">Bitiş Skoru</label>
+	                    <input type="number" min="1" max="50" value="11" class="input-field" id="winning-score" placeholder="Kazanmak için gereken skor">
+	                </div>
+	            </div>
+
+	            <div class="join-room-section">
+	                <label class="setting-label">Mevcut Odaya Katıl</label>
+	                <div class="input-group">
+	                    <input type="text" class="input-field" id="custom-room-code" placeholder="Oda kodunu girin..." maxlength="6">
+	                    <button class="btn btn-secondary" id="custom-join-btn">Odaya Katıl</button>
+	                </div>
+	            </div>
+
+	            <div class="action-buttons">
+	                <button class="btn btn-primary" id="custom-create-btn">Oda Oluştur</button>
+	            </div>
+	        </div>
+
+	        <!-- Tournament Settings -->
+	        <div class="settings-panel" id="tournament-settings">
+	            <h2 class="settings-title">Turnuva Ayarları</h2>
+
+	            <div class="settings-grid">
+	                <div class="setting-group">
+	                    <label class="setting-label">Turnuva İsmi</label>
+	                    <input type="text" class="input-field" id="tournament-name" placeholder="Turnuva ismini girin..." maxlength="50">
+	                </div>
+
+	                <div class="setting-group">
+	                    <label class="setting-label">Kişi Sayısı</label>
+	                    <div class="radio-group">
+	                        <label class="radio-option">
+	                            <input type="radio" name="tournament-size" value="4" checked>
+	                            <span class="radio-label">4 Kişi                        </span>
+	                        </label>
+	                        <label class="radio-option">
+	                            <input type="radio" name="tournament-size" value="8">
+	                            <span class="radio-label">8 Kişi</span>
+	                        </label>
+	                        <label class="radio-option">
+	                            <input type="radio" name="tournament-size" value="16">
+	                            <span class="radio-label">16 Kişi</span>
+	                        </label>
+	                        <label class="radio-option">
+	                            <input type="radio" name="tournament-size" value="custom">
+	                            <span class="radio-label">Özel</span>
+	                        </label>
+	                    </div>
+	                    <input type="number" min="4" class="input-field" id="custom-tournament-size" placeholder="Özel kişi sayısı" style="display: none;">
+	                </div>
+
+	                <div class="setting-group">
+	                    <label class="setting-label">Oyuncu İsmi</label>
+	                    <input type="text" class="input-field" id="player-name" placeholder="Turnuvada görünecek isminiz..." maxlength="20">
+	                    <div class="tournament-info">
+	                        <small>💡 Turnuva sırasında bu isim diğer oyuncular tarafından görülecektir.</small>
+	                    </div>
+	                </div>
+	            </div>
+
+	            <div class="join-room-section">
+	                <label class="setting-label">Mevcut Turnuvaya Katıl</label>
+	                <div class="input-group">
+	                    <input type="text" class="input-field" id="tournament-code" placeholder="Turnuva kodunu girin..." maxlength="6">
+	                    <button class="btn btn-secondary" id="tournament-join-btn">Turnuvaya Katıl</button>
+	                </div>
+	            </div>
+
+	            <div class="action-buttons">
+	                <button class="btn btn-primary" id="tournament-create-btn">Turnuva Odası Oluştur</button>
+	                <button class="btn btn-primary" id="tournament-start-btn" style="display: none;">Turnuvayı Başlat</button>
+	            </div>
+
+
+			</div>
+	        <!-- AI Game Settings -->
+	        <div class="settings-panel" id="ai-settings">
+	            <h2 class="settings-title">AI ile Oyun Ayarları</h2>
+
+	            <div class="settings-grid">
+	                <!-- Game Type -->
+	                <div class="setting-group">
+	                    <label class="setting-label">Oyun Tipi</label>
+	                    <div class="radio-group">
+	                        <label class="radio-option">
+	                            <input type="radio" name="ai-game-type" value="1v1" checked>
+	                            <span class="radio-label">1 vs AI</span>
+	                        </label>
+	                    </div>
+	                </div>
+
+	                <!-- AI Difficulty -->
+	                <div class="setting-group">
+	                    <label class="setting-label">AI Zorluk Seviyesi</label>
+	                    <div class="radio-group">
+	                        <label class="radio-option difficulty-option">
+	                            <input type="radio" name="ai-difficulty" value="easy" checked>
+	                            <span class="radio-label">Kolay</span>
+	                            <div class="difficulty-tooltip">AI çoğu zaman kaybeder - Rahat Oyun</div>
+	                        </label>
+	                        <label class="radio-option difficulty-option">
+	                            <input type="radio" name="ai-difficulty" value="medium">
+	                            <span class="radio-label">Orta</span>
+	                            <div class="difficulty-tooltip">Dengeli mücadele - Eşit Şans</div>
+	                        </label>
+	                        <label class="radio-option difficulty-option">
+	                            <input type="radio" name="ai-difficulty" value="hard">
+	                            <span class="radio-label">Zor</span>
+	                            <div class="difficulty-tooltip">AI çoğunlukla kazanır - Zorlayıcı</div>
+	                        </label>
+	                        <label class="radio-option difficulty-option">
+	                            <input type="radio" name="ai-difficulty" value="impossible">
+	                            <span class="radio-label">İmkansız</span>
+	                            <div class="difficulty-tooltip">AI neredeyse hep kazanır - İmkansız</div>
+	                        </label>
+	                        <label class="radio-option difficulty-option">
+	                            <input type="radio" name="ai-difficulty" value="custom">
+	                            <span class="radio-label">Özel AI</span>
+	                            <div class="difficulty-tooltip">AI yeteneklerini özelleştirebilirsiniz!</div>
+	                        </label>
+	                    </div>
+	                </div>
+
+	                <!-- Custom Game Settings -->
+	                <div class="setting-group">
+	                    <label class="setting-label">Paddle Yüksekliği</label>
+	                    <div class="slider-container">
+	                        <input type="range" min="50" max="200" value="100" class="slider" id="ai-paddle-height">
+	                        <div class="slider-value">
+	                            <span>Min: 50px</span>
+	                            <span class="current-value" id="ai-paddle-height-value">100px</span>
+	                            <span>Max: 200px</span>
+	                        </div>
+	                    </div>
+	                </div>
+
+	                <div class="setting-group">
+	                    <label class="setting-label">Top Yarı Çapı</label>
+	                    <div class="slider-container">
+	                        <input type="range" min="5" max="25" value="10" class="slider" id="ai-ball-radius">
+	                        <div class="slider-value">
+	                            <span>Min: 5px</span>
+	                            <span class="current-value" id="ai-ball-radius-value">10px</span>
+	                            <span>Max: 25px</span>
+	                        </div>
+	                    </div>
+	                </div>
+
+	                <div class="setting-group">
+	                    <label class="setting-label">Köşe Çarpma Hızlanması</label>
+	                    <div class="slider-container">
+	                        <input type="range" min="0" max="5" value="1" step="0.1" class="slider" id="ai-corner-boost">
+	                        <div class="slider-value">
+	                            <span>Yok</span>
+	                            <span class="current-value" id="ai-corner-boost-value">1.0x</span>
+	                            <span>5x</span>
+	                        </div>
+	                    </div>
+	                </div>
+
+	                <div class="setting-group">
+	                    <label class="setting-label">Bitiş Skoru</label>
+	                    <input type="number" min="1" max="50" value="11" class="input-field" id="ai-winning-score" placeholder="Kazanmak için gereken skor">
+	                </div>
+	            </div>
+
+	            <!-- Custom AI Settings -->
+	            <div class="ai-special-settings" id="ai-custom-settings">
+	                <h3 style="color: #667eea; margin-bottom: 25px; text-align: center; font-size: 1.5rem; font-weight: 700;">🤖 Özel AI Ayarları</h3>
+
+	                <div class="settings-grid">
+	                    <div class="setting-group">
+	                        <label class="setting-label">Reaksiyon Hızı</label>
+	                        <div class="slider-container">
+	                            <input type="range" min="1" max="10" value="5" class="slider" id="ai-reaction-speed">
+	                            <div class="slider-value">
+	                                <span>Çok Yavaş</span>
+	                                <span class="current-value" id="ai-reaction-speed-value">5</span>
+	                                <span>Anında</span>
+	                            </div>
+	                        </div>
+	                    </div>
+
+	                    <div class="setting-group">
+	                        <label class="setting-label">Tahmin Doğruluğu</label>
+	                        <div class="slider-container">
+	                            <input type="range" min="1" max="10" value="5" class="slider" id="ai-prediction-accuracy">
+	                            <div class="slider-value">
+	                                <span>Kötü</span>
+	                                <span class="current-value" id="ai-prediction-accuracy-value">5</span>
+	                                <span>Mükemmel</span>
+	                            </div>
+	                        </div>
+	                    </div>
+
+	                    <div class="setting-group">
+	                        <label class="setting-label">Genel Doğruluk</label>
+	                        <div class="slider-container">
+	                            <input type="range" min="1" max="10" value="5" class="slider" id="ai-general-accuracy">
+	                            <div class="slider-value">
+	                                <span>Düşük</span>
+	                                <span class="current-value" id="ai-general-accuracy-value">5</span>
+	                                <span>Yüksek</span>
+	                            </div>
+	                        </div>
+	                    </div>
+
+	                    <div class="setting-group">
+	                        <label class="setting-label">Öğrenme Hızı</label>
+	                        <div class="slider-container">
+	                            <input type="range" min="1" max="10" value="5" class="slider" id="ai-learning-speed">
+	                            <div class="slider-value">
+	                                <span>Yavaş</span>
+	                                <span class="current-value" id="ai-learning-speed-value">5</span>
+	                                <span>Hızlı</span>
+	                            </div>
+	                        </div>
+	                    </div>
+
+	                    <div class="setting-group">
+	                        <label class="setting-label">Hazırlık Mesafesi</label>
+	                        <div class="slider-container">
+	                            <input type="range" min="1" max="10" value="5" class="slider" id="ai-preparation-distance">
+	                            <div class="slider-value">
+	                                <span>Yakın</span>
+	                                <span class="current-value" id="ai-preparation-distance-value">5</span>
+	                                <span>Uzak</span>
+	                            </div>
+	                        </div>
+	                    </div>
+
+	                    <div class="setting-group">
+	                        <label class="setting-label">Donma Mesafesi</label>
+	                        <div class="slider-container">
+	                            <input type="range" min="1" max="10" value="5" class="slider" id="ai-freeze-distance">
+	                            <div class="slider-value">
+	                                <span>Yakın</span>
+	                                <span class="current-value" id="ai-freeze-distance-value">5</span>
+	                                <span>Uzak</span>
+	                            </div>
+	                        </div>
+	                    </div>
+
+	                    <div class="setting-group">
+	                        <label class="setting-label">Hedef Kazanma Oranı</label>
+	                        <div class="slider-container">
+	                            <input type="range" min="1" max="10" value="5" class="slider" id="ai-target-win-rate">
+	                            <div class="slider-value">
+	                                <span>%10</span>
+	                                <span class="current-value" id="ai-target-win-rate-value">%50</span>
+	                                <span>%100</span>
+	                            </div>
+	                        </div>
+	                    </div>
+
+	                    <div class="setting-group">
+	                        <label class="setting-label">Adalet Seviyesi</label>
+	                        <div class="slider-container">
+	                            <input type="range" min="1" max="10" value="5" class="slider" id="ai-fairness-level">
+	                            <div class="slider-value">
+	                                <span>Acımasız</span>
+	                                <span class="current-value" id="ai-fairness-level-value">5</span>
+	                                <span>Çok Adil</span>
+	                            </div>
+	                        </div>
+	                    </div>
+
+	                    <div class="setting-group">
+	                        <label class="setting-label">Max Üst Üste Kazanma</label>
+	                        <div class="slider-container">
+	                            <input type="range" min="1" max="10" value="3" class="slider" id="ai-max-consecutive-wins">
+	                            <div class="slider-value">
+	                                <span>1</span>
+	                                <span class="current-value" id="ai-max-consecutive-wins-value">3</span>
+	                                <span>10</span>
+	                            </div>
+	                        </div>
+	                    </div>
+
+	                    <!-- AI Special Features -->
+	                    <div class="setting-group">
+	                        <label class="setting-label">Öfke Modu</label>
+	                        <div class="toggle-container">
+	                            <label class="toggle-switch">
+	                                <input type="checkbox" id="ai-rage-mode">
+	                                <span class="toggle-slider"></span>
+	                            </label>
+	                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Ard arda kaybedince öfkelenir ve daha güçlü olur</span>
+	                        </div>
+	                    </div>
+
+	                    <div class="setting-group">
+	                        <label class="setting-label">Yorgunluk Sistemi</label>
+	                        <div class="toggle-container">
+	                            <label class="toggle-switch">
+	                                <input type="checkbox" id="ai-fatigue-system">
+	                                <span class="toggle-slider"></span>
+	                            </label>
+	                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Çok oynayınca yorulur ve performansı düşer</span>
+	                        </div>
+	                    </div>
+
+	                    <div class="setting-group">
+	                        <label class="setting-label">Odaklanma Modu</label>
+	                        <div class="toggle-container">
+	                            <label class="toggle-switch">
+	                                <input type="checkbox" id="ai-focus-mode">
+	                                <span class="toggle-slider"></span>
+	                            </label>
+	                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Bazen süper odaklanır ve mükemmel oynar</span>
+	                        </div>
+	                    </div>
+
+	                    <div class="setting-group">
+	                        <label class="setting-label">Adaptif Zorluk</label>
+	                        <div class="toggle-container">
+	                            <label class="toggle-switch">
+	                                <input type="checkbox" id="ai-adaptive-difficulty">
+	                                <span class="toggle-slider"></span>
+	                            </label>
+	                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Oyuncunun seviyesine göre kendini ayarlar</span>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+
+	            <div class="action-buttons">
+	                <button class="btn btn-primary" id="ai-start-btn">AI ile Oyuna Başla</button>
+	            </div>
+	        </div>
+	    </div>
+		<div class="game-container" id="gameContainer"><canvas id="renderCanvas"></canvas></div>
+	</div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Main Application Script -->
+    <script type="module">
+        // ============================================================================
+        // IMPORTS
+        // ============================================================================
+        import App from './src/App.js';
+        import WebSocketClient from './src/network/WebSocketClient.js';
+        import gameConfig from './src/json/GameConfig.js';
+        import aiConfig from './src/json/AiConfig.js';
+        import tournamentConfig from './src/json/TournamentConfig.js';
+
+        // ============================================================================
+        // GLOBAL VARIABLES
+        // ============================================================================
+        let app = null;
+        let roomSocket = null;
+        let currentUserId = null;
+        let currentUserName = null;
+        let currentRoomId = null;
+        let currentGameMode = null;
+        let isRoomCreator = false;
+
+        // ============================================================================
+        // HELPER FUNCTIONS
+        // ============================================================================
+        
+        // Generate random user ID for testing
+        function generateRandomId() {
+            return 'user_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Generate random user name for testing
+        function generateRandomName() {
+            const names = ['Ali', 'Ayşe', 'Mehmet', 'Fatma', 'Ahmet', 'Zeynep', 'Can', 'Elif', 'Burak', 'Selin'];
+            return names[Math.floor(Math.random() * names.length)];
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            
+            const colors = {
+                success: 'linear-gradient(135deg, #00ff88 0%, #00ffff 100%)',
+                error: 'linear-gradient(135deg, #ff0066 0%, #ff00ff 100%)',
+                info: 'linear-gradient(135deg, #00ffff 0%, #0088ff 100%)',
+                warning: 'linear-gradient(135deg, #ffaa00 0%, #ff6600 100%)'
+            };
+
+            notification.style.cssText = `
+                background: ${colors[type] || colors.info};
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                margin-bottom: 10px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+                font-weight: 600;
+                font-size: 14px;
+                animation: slideInRight 0.3s ease;
+                max-width: 350px;
+                word-wrap: break-word;
+            `;
+            
+            notification.textContent = message;
+            container.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Update participant display
+        function updateParticipants(participants, gridId) {
+            const grid = document.getElementById(gridId);
+            if (!grid) return;
+
+            grid.innerHTML = '';
+            
+            participants.forEach((participant, index) => {
+                const card = document.createElement('div');
+                card.className = 'participant-card';
+                
+                // Color based on index
+                const colors = [
+                    { border: '#00ffff', bg: 'rgba(0, 255, 255, 0.1)' },
+                    { border: '#ff00ff', bg: 'rgba(255, 0, 255, 0.1)' },
+                    { border: '#00ff88', bg: 'rgba(0, 255, 136, 0.1)' },
+                    { border: '#ff8800', bg: 'rgba(255, 136, 0, 0.1)' }
+                ];
+                
+                const color = colors[index % colors.length];
+                card.style.borderColor = color.border;
+                card.style.background = color.bg;
+
+                const icon = document.createElement('div');
+                icon.className = 'participant-icon';
+                icon.textContent = participant.isAI ? '🤖' : '👤';
+
+                const name = document.createElement('div');
+                name.className = 'participant-name';
+                name.textContent = participant.name || participant.userName || 'Player';
+
+                card.appendChild(icon);
+                card.appendChild(name);
+                grid.appendChild(card);
+            });
+        }
+
+        // ============================================================================
+        // WEBSOCKET HANDLERS
+        // ============================================================================
+        
+        function handleWebSocketMessage(message) {
+            console.log('📨 Received message:', message);
+
+            switch (message.type) {
+                case "created":
+                    handleRoomCreated(message.payload);
+                    break;
+
+                case "joined":
+                    handleRoomJoined(message.payload);
+                    break;
+
+                case "update":
+                    handleRoomUpdate(message.payload);
+                    break;
+
+                case "started":
+                    handleGameStarted(message.payload);
+                    break;
+
+                case "finished":
+                    handleGameFinished(message.payload);
+                    break;
+
+                case "error":
+                    handleError(message.payload);
+                    break;
+
+                default:
+                    console.warn('⚠️ Unhandled message type:', message.type);
+            }
+        }
+
+        function handleRoomCreated(payload) {
+            console.log('✅ Room created:', payload);
+            currentRoomId = payload.roomId;
+            isRoomCreator = true;
+            
+            showNotification(`Oda oluşturuldu: ${payload.roomId}`, 'success');
+
+            // Show appropriate waiting room
+            if (currentGameMode === 'tournament') {
+                showTournamentWaitingRoom(payload);
+            } else if (currentGameMode === 'ai') {
+                showAIWaitingRoom(payload);
+            } else {
+                showCustomWaitingRoom(payload);
+            }
+        }
+
+        function handleRoomJoined(payload) {
+            console.log('✅ Joined room:', payload);
+            currentRoomId = payload.roomId;
+            isRoomCreator = false;
+            
+            showNotification(`Odaya katıldınız: ${payload.roomId}`, 'success');
+
+            // Show appropriate waiting room
+            if (payload.gameMode === 'tournament') {
+                showTournamentWaitingRoom(payload);
+            } else {
+                showCustomWaitingRoom(payload);
+            }
+        }
+
+        function handleRoomUpdate(payload) {
+            console.log('🔄 Room update:', payload);
+
+            // Update player count
+            if (payload.players) {
+                const playerCount = payload.players.length;
+                const maxPlayers = payload.maxPlayers || 2;
+
+                if (currentGameMode === 'tournament') {
+                    document.getElementById('players-count').textContent = `${playerCount}/${maxPlayers}`;
+                    updateParticipants(payload.players, 'participants-grid');
+                } else if (currentGameMode === 'ai') {
+                    updateParticipants(payload.players, 'ai-participants-grid');
+                } else {
+                    document.getElementById('custom-players-count').textContent = `${playerCount}/${maxPlayers}`;
+                    updateParticipants(payload.players, 'custom-participants-grid');
+
+                    // Show/hide start button
+                    if (isRoomCreator && playerCount >= maxPlayers) {
+                        document.getElementById('custom-waiting-players-btn').style.display = 'none';
+                        document.getElementById('custom-start-game-btn').style.display = 'block';
+                    }
+                }
+            }
+        }
+
+		function handleGameStarted(payload) {
+		    console.log('🎮 Game started:', payload);
+		    showNotification('Oyun başlıyor!', 'success');
+		
+		    // Hide all waiting rooms
+		    document.getElementById('waiting-room').classList.remove('active');
+		    document.getElementById('custom-waiting-room').classList.remove('active');
+		    document.getElementById('ai-waiting-room').classList.remove('active');
+		    document.getElementById('game-page').classList.add('hidden');
+		
+		    // Hide back arrow
+		    document.getElementById('back-arrow').classList.remove('active');
+		
+		    // Show game container
+		    const gameContainer = document.getElementById('gameContainer');
+		    gameContainer.style.display = 'block';
+		
+		    app = new App(currentUserId, currentUserName);
+		    app.start(payload);
+		}
+
+
+		function handleGameFinished(payload) {
+		    console.log('🏁 Game finished:', payload);
+		    showNotification('Oyun bitti!', 'info');
+		
+		    // Destroy game
+		    if (app) {
+		        app.destroy();
+		        app = null;
+		    }
+		
+		    // Hide game container
+		    const gameContainer = document.getElementById('gameContainer');
+		    gameContainer.style.display = 'none';
+		
+		    document.getElementById('game-page').classList.remove('hidden');
+		
+		    // Reset room state
+		    currentRoomId = null;
+		    currentGameMode = null;
+		    isRoomCreator = false;
+		}
+
+        function handleError(payload) {
+            console.error('❌ Error:', payload);
+            const errorMessage = payload.message || payload.error || 'Bir hata oluştu';
+            showNotification(errorMessage, 'error');
+
+        }
+
+        // ============================================================================
+        // UI FUNCTIONS
+        // ============================================================================
+
+        function showTournamentWaitingRoom(data) {
+            document.getElementById('game-page').classList.add('hidden');
+            document.getElementById('waiting-room').classList.add('active');
+            document.getElementById('back-arrow').classList.add('active');
+
+            // document.getElementById('room-code-display').textContent = data.roomId;
+            document.getElementById('players-count').textContent = `${data.players?.length || 0}/${data.maxPlayers || 8}`;
+
+            if (data.players) {
+                updateParticipants(data.players, 'participants-grid');
+            }
+
+            // Show/hide start button
+            const startBtn = document.getElementById('start-tournament-btn');
+            if (isRoomCreator) {
+                startBtn.style.display = 'block';
+            } else {
+                startBtn.style.display = 'none';
+            }
+        }
+
+        function showCustomWaitingRoom(data) {
+            document.getElementById('game-page').classList.add('hidden');
+            document.getElementById('custom-waiting-room').classList.add('active');
+            document.getElementById('back-arrow').classList.add('active');
+
+            document.getElementById('custom-room-code-display').textContent = data.roomId;
+            
+            const gameTypeMap = {
+                'classic': '1 vs 1',
+                'multiplayer': '2 vs 2',
+                'local': 'Co-op'
+            };
+            document.getElementById('custom-game-type-display').textContent = gameTypeMap[data.gameMode] || '1 vs 1';
+
+            const playerCount = data.players?.length || 1;
+            const maxPlayers = data.maxPlayers || 2;
+            document.getElementById('custom-players-count').textContent = `${playerCount}/${maxPlayers}`;
+
+            // Update game settings display
+            if (data.gameSettings) {
+                document.getElementById('custom-paddle-display').textContent = `${data.gameSettings.paddleHeight}px`;
+                document.getElementById('custom-ball-display').textContent = `${data.gameSettings.ballRadius}px`;
+                document.getElementById('custom-corner-display').textContent = `${data.gameSettings.cornerBoost}x`;
+                document.getElementById('custom-score-display').textContent = data.gameSettings.maxScore;
+            }
+
+            if (data.players) {
+                updateParticipants(data.players, 'custom-participants-grid');
+            }
+
+            // Show/hide buttons
+            if (isRoomCreator) {
+                if (playerCount >= maxPlayers) {
+                    document.getElementById('custom-waiting-players-btn').style.display = 'none';
+                    document.getElementById('custom-start-game-btn').style.display = 'block';
+                } else {
+                    document.getElementById('custom-waiting-players-btn').style.display = 'block';
+                    document.getElementById('custom-start-game-btn').style.display = 'none';
+                }
+            } else {
+                document.getElementById('custom-waiting-players-btn').style.display = 'block';
+                document.getElementById('custom-waiting-players-btn').textContent = '⏳ Oda Sahibi Bekleniyor...';
+                document.getElementById('custom-start-game-btn').style.display = 'none';
+            }
+        }
+
+        function showAIWaitingRoom(data) {
+            document.getElementById('game-page').classList.add('hidden');
+            document.getElementById('ai-waiting-room').classList.add('active');
+            document.getElementById('back-arrow').classList.add('active');
+
+            // Update AI difficulty display
+            const difficultyMap = {
+                'easy': 'Kolay',
+                'medium': 'Orta',
+                'hard': 'Zor',
+                'impossible': 'İmkansız',
+                'custom': 'Özel'
+            };
+            
+            const difficulty = data.aiSettings?.difficulty || 'medium';
+            document.getElementById('ai-difficulty-display').textContent = difficultyMap[difficulty];
+            document.getElementById('ai-type-display').textContent = difficulty === 'custom' ? 'Özelleştirilmiş' : 'Standart';
+
+            // Update game settings display
+            if (data.gameSettings) {
+                document.getElementById('ai-paddle-display').textContent = `${data.gameSettings.paddleHeight}px`;
+                document.getElementById('ai-ball-display').textContent = `${data.gameSettings.ballRadius}px`;
+                document.getElementById('ai-corner-display').textContent = `${data.gameSettings.cornerBoost}x`;
+                document.getElementById('ai-score-display').textContent = data.gameSettings.maxScore;
+            }
+
+            // Show custom AI settings if custom difficulty
+            if (difficulty === 'custom' && data.aiSettings) {
+                const customSettingsDiv = document.getElementById('ai-custom-settings-display');
+                customSettingsDiv.style.display = 'block';
+                
+                document.getElementById('ai-reaction-display').textContent = data.aiSettings.reactionSpeed || 5;
+                document.getElementById('ai-prediction-display').textContent = data.aiSettings.predictionAccuracy || 5;
+                document.getElementById('ai-accuracy-display').textContent = data.aiSettings.generalAccuracy || 5;
+                document.getElementById('ai-learning-display').textContent = data.aiSettings.learningSpeed || 5;
+            }
+
+            // Update participants
+            const players = [
+                { name: currentUserName, isAI: false },
+                { name: 'AI Opponent', isAI: true }
+            ];
+            updateParticipants(players, 'ai-participants-grid');
+        }
+
+        // ============================================================================
+        // EVENT HANDLERS
+        // ============================================================================
+
+        // Game Mode Selection
+        document.getElementById('custom-mode').addEventListener('click', function() {
+            document.querySelectorAll('.game-mode-card').forEach(card => card.classList.remove('active'));
+            this.classList.add('active');
+            
+            document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById('custom-settings').classList.add('active');
+            
+            currentGameMode = 'custom';
+        });
+
+        document.getElementById('tournament-mode').addEventListener('click', function() {
+            document.querySelectorAll('.game-mode-card').forEach(card => card.classList.remove('active'));
+            this.classList.add('active');
+            
+            document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById('tournament-settings').classList.add('active');
+            
+            currentGameMode = 'tournament';
+        });
+
+        document.getElementById('ai-mode').addEventListener('click', function() {
+            document.querySelectorAll('.game-mode-card').forEach(card => card.classList.remove('active'));
+            this.classList.add('active');
+            
+            document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById('ai-settings').classList.add('active');
+            
+            currentGameMode = 'ai';
+        });
+
+        // Custom Game - Create Room
+        document.getElementById('custom-create-btn').addEventListener('click', function() {
+            const gameType = document.querySelector('input[name="custom-game-type"]:checked').value;
+            
+            let gameMode;
+            if (gameType === '1v1') gameMode = 'classic';
+            else if (gameType === '2v2') gameMode = 'multiplayer';
+            else if (gameType === 'co-op') gameMode = 'local';
+
+            const data = {
+                name: `${currentUserName}'s Room`,
+                gameMode: gameMode,
+                gameSettings: {
+					//!!
+					...gameConfig.gameSettings,
+                    paddleHeight: parseInt(document.getElementById('paddle-height').value),
+                    ballRadius: parseInt(document.getElementById('ball-radius').value),
+					// DEĞİŞECEK
+                    ballSpeedIncrease: /* parseFloat(document.getElementById('corner-boost').value) */ 0,
+                    maxScore: parseInt(document.getElementById('winning-score').value)
+                }
+            };
+
+            currentGameMode = 'custom';
+            roomSocket.send("create", data);
+            showNotification('Oda oluşturuluyor...', 'info');
+        });
+
+        // Custom Game - Join Room
+        document.getElementById('custom-join-btn').addEventListener('click', function() {
+            const roomCode = document.getElementById('custom-room-code').value.trim().toUpperCase();
+            
+            if (!roomCode) {
+                showNotification('Lütfen oda kodunu girin!', 'error');
+                return;
+            }
+
+            if (roomCode.length !== 6) {
+                showNotification('Oda kodu 6 karakter olmalıdır!', 'error');
+                return;
+            }
+
+            currentGameMode = 'custom';
+            roomSocket.send("join", { roomId: roomCode });
+            showNotification(`${roomCode} kodlu odaya katılıyorsunuz...`, 'info');
+        });
+
+        // Custom Game - Start Game
+        document.getElementById('custom-start-game-btn').addEventListener('click', function() {
+            roomSocket.send("start", {});
+            showNotification('Oyun başlatılıyor...', 'info');
+        });
+
+		document.getElementById('ai-start-game-btn').addEventListener('click', function() {
+            roomSocket.send("start", {});
+            showNotification('Oyun başlatılıyor...', 'info');
+        });
+
+        // AI Game - Start
+        document.getElementById('ai-start-btn').addEventListener('click', function() {
+            const difficulty = document.querySelector('input[name="ai-difficulty"]:checked').value;
+            
+            const data = {
+                name: `${currentUserName}'s AI Room`,
+                gameMode: "ai",
+                gameSettings: {
+					...gameConfig.gameSettings,
+                    paddleHeight: parseInt(document.getElementById('ai-paddle-height').value),
+                    ballRadius: parseInt(document.getElementById('ai-ball-radius').value),
+                    ballSpeedIncrease: parseFloat(document.getElementById('ai-corner-boost').value),
+                    maxScore: parseInt(document.getElementById('ai-winning-score').value)
+                },
+                aiSettings: {
+                    difficulty: difficulty
+                }
+            };
+
+            // Custom AI settings
+            if (difficulty === 'custom') {
+                data.aiSettings = {
+                    ...data.aiSettings,
+                    reactionSpeed: parseInt(document.getElementById('ai-reaction-speed').value),
+                    predictionAccuracy: parseInt(document.getElementById('ai-prediction-accuracy').value),
+                    generalAccuracy: parseInt(document.getElementById('ai-general-accuracy').value),
+                    learningSpeed: parseInt(document.getElementById('ai-learning-speed').value),
+                    preparationDistance: parseInt(document.getElementById('ai-preparation-distance').value),
+                    freezeDistance: parseInt(document.getElementById('ai-freeze-distance').value),
+                    targetWinRate: parseInt(document.getElementById('ai-target-win-rate').value),
+                    fairnessLevel: parseInt(document.getElementById('ai-fairness-level').value),
+                    maxConsecutiveWins: parseInt(document.getElementById('ai-max-consecutive-wins').value),
+                    rageMode: document.getElementById('ai-rage-mode').checked,
+                    fatigueSystem: document.getElementById('ai-fatigue-system').checked,
+                    focusMode: document.getElementById('ai-focus-mode').checked,
+                    adaptiveDifficulty: document.getElementById('ai-adaptive-difficulty').checked
+                };
+            }
+
+            currentGameMode = 'ai';
+            roomSocket.send("create", data);
+            showNotification('AI oyunu oluşturuluyor...', 'info');
+        });
+
+        // Tournament - Create
+        document.getElementById('tournament-create-btn').addEventListener('click', function() {
+            const tournamentName = document.getElementById('tournament-name').value.trim();
+            const tournamentSize = document.querySelector('input[name="tournament-size"]:checked').value;
+            
+            if (!tournamentName) {
+                showNotification('Lütfen turnuva ismini girin!', 'error');
+                return;
+            }
+
+            let maxPlayers = parseInt(tournamentSize);
+            if (tournamentSize === 'custom') {
+                maxPlayers = parseInt(document.getElementById('custom-tournament-size').value);
+                if (isNaN(maxPlayers) || maxPlayers < 4) {
+                    showNotification('Lütfen 4 veya daha büyük bir sayı girin!', 'error');
+                    return;
+                }
+                // Check if power of 2
+                if ((maxPlayers & (maxPlayers - 1)) !== 0) {
+                    showNotification('Kişi sayısı 2\'nin kuvveti olmalıdır! (4, 8, 16, 32...)', 'error');
+                    return;
+                }
+            }
+
+            const data = {
+                name: tournamentName,
+                gameMode: "tournament",
+                tournamentSettings: {
+                    maxPlayers: maxPlayers
+                }
+            };
+
+            currentGameMode = 'tournament';
+            roomSocket.send("create", data);
+            showNotification('Turnuva oluşturuluyor...', 'info');
+        });
+
+        // Tournament - Join
+        document.getElementById('tournament-join-btn').addEventListener('click', function() {
+            const tournamentCode = document.getElementById('tournament-code').value.trim().toUpperCase();
+            
+            if (!tournamentCode) {
+                showNotification('Lütfen turnuva kodunu girin!', 'error');
+                return;
+            }
+
+            currentGameMode = 'tournament';
+            roomSocket.send("join", { roomId: tournamentCode });
+            showNotification(`${tournamentCode} kodlu turnuvaya katılıyorsunuz...`, 'info');
+        });
+
+        // Tournament - Start
+        document.getElementById('start-tournament-btn').addEventListener('click', function() {
+            roomSocket.send("start", {});
+            showNotification('Turnuva başlatılıyor...', 'info');
+        });
+
+        // Back Arrow
+        document.getElementById('back-arrow').addEventListener('click', function() {
+            // Leave room if in one
+            if (currentRoomId) {
+                roomSocket.send("leave", { roomId: currentRoomId });
+                currentRoomId = null;
+                isRoomCreator = false;
+            }
+
+            // Hide all waiting rooms
+            document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
+            
+            // Show game page
+            document.getElementById('game-page').classList.remove('hidden');
+            
+            // Hide back arrow
+            this.classList.remove('active');
+            
+            showNotification('Odadan ayrıldınız', 'info');
+        });
+
+        // Tournament Size - Custom Option
+        document.querySelectorAll('input[name="tournament-size"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const customInput = document.getElementById('custom-tournament-size');
+                if (this.value === 'custom') {
+                    customInput.style.display = 'block';
+                } else {
+                    customInput.style.display = 'none';
+                }
+            });
+        });
+
+        // AI Difficulty - Custom Option
+        document.querySelectorAll('input[name="ai-difficulty"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const customSettings = document.getElementById('ai-custom-settings');
+                if (this.value === 'custom') {
+                    customSettings.classList.add('active');
+                } else {
+                    customSettings.classList.remove('active');
+                }
+            });
+        });
+
+        // ============================================================================
+        // SLIDER VALUE UPDATES
+        // ============================================================================
+
+        // Custom Game Sliders
+        document.getElementById('paddle-height').addEventListener('input', function() {
+            document.getElementById('paddle-height-value').textContent = this.value + 'px';
+        });
+
+        document.getElementById('ball-radius').addEventListener('input', function() {
+            document.getElementById('ball-radius-value').textContent = this.value + 'px';
+        });
+
+        document.getElementById('corner-boost').addEventListener('input', function() {
+            document.getElementById('corner-boost-value').textContent = parseFloat(this.value).toFixed(1) + 'x';
+        });
+
+        // AI Game Sliders
+        document.getElementById('ai-paddle-height').addEventListener('input', function() {
+            document.getElementById('ai-paddle-height-value').textContent = this.value + 'px';
+        });
+
+        document.getElementById('ai-ball-radius').addEventListener('input', function() {
+            document.getElementById('ai-ball-radius-value').textContent = this.value + 'px';
+        });
+
+        document.getElementById('ai-corner-boost').addEventListener('input', function() {
+            document.getElementById('ai-corner-boost-value').textContent = parseFloat(this.value).toFixed(1) + 'x';
+        });
+
+        // AI Custom Settings Sliders
+        document.getElementById('ai-reaction-speed').addEventListener('input', function() {
+            document.getElementById('ai-reaction-speed-value').textContent = this.value;
+        });
+
+        document.getElementById('ai-prediction-accuracy').addEventListener('input', function() {
+            document.getElementById('ai-prediction-accuracy-value').textContent = this.value;
+        });
+
+        document.getElementById('ai-general-accuracy').addEventListener('input', function() {
+            document.getElementById('ai-general-accuracy-value').textContent = this.value;
+        });
+
+        document.getElementById('ai-learning-speed').addEventListener('input', function() {
+            document.getElementById('ai-learning-speed-value').textContent = this.value;
+        });
+
+        document.getElementById('ai-preparation-distance').addEventListener('input', function() {
+            document.getElementById('ai-preparation-distance-value').textContent = this.value;
+        });
+
+        document.getElementById('ai-freeze-distance').addEventListener('input', function() {
+            document.getElementById('ai-freeze-distance-value').textContent = this.value;
+        });
+
+        document.getElementById('ai-target-win-rate').addEventListener('input', function() {
+            document.getElementById('ai-target-win-rate-value').textContent = '%' + (this.value * 10);
+        });
+
+        document.getElementById('ai-fairness-level').addEventListener('input', function() {
+            document.getElementById('ai-fairness-level-value').textContent = this.value;
+        });
+
+        document.getElementById('ai-max-consecutive-wins').addEventListener('input', function() {
+            document.getElementById('ai-max-consecutive-wins-value').textContent = this.value;
+        });
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+
+        // Generate user credentials
+        currentUserId = generateRandomId();
+        currentUserName = generateRandomName();
+        console.log(`🎮 User initialized - ID: ${currentUserId}, Name: ${currentUserName}`);
+
+        // Initialize WebSocket
+        roomSocket = new WebSocketClient(window.location.hostname, 3004);
+
+        // WebSocket event handlers
+        roomSocket.onConnect(() => {
+            console.log('✅ Connected to room server');
+            showNotification('Sunucuya bağlandı', 'success');
+        });
+
+        roomSocket.onMessage((message) => {
+            handleWebSocketMessage(message);
+        });
+
+        roomSocket.onClose((error) => {
+            console.log(`❌ Disconnected from room server: ${error.code} - ${error.reason}`);
+            showNotification('Sunucu bağlantısı kesildi', 'error');
+        });
+
+        roomSocket.onError((error) => {
+            console.error('❌ Room server connection error:', error);
+            showNotification('Bağlantı hatası', 'error');
+        });
+
+		// Connect to server
+        roomSocket.connect("ws/client", { 
+            userID: currentUserId, 
+            userName: currentUserName 
+        });
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {                    transform: translateX(400px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes slideOutRight {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(400px);
+                    opacity: 0;
+                }
+            }
+
+            .participant-card {
+                background: rgba(0, 0, 0, 0.4);
+                border: 2px solid;
+                border-radius: 12px;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                transition: all 0.3s ease;
+            }
+
+            .participant-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            }
+
+            .participant-icon {
+                font-size: 2.5rem;
+            }
+
+            .participant-name {
+                font-size: 1rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                text-align: center;
+            }
+
+            .participants-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+                margin-top: 20px;
+            }
+
+            .room-container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 40px;
+            }
+
+            .room-header {
+                text-align: center;
+                margin-bottom: 40px;
+            }
+
+            .room-header h2 {
+                font-size: 2.5rem;
+                font-weight: 800;
+                background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                margin-bottom: 30px;
+            }
+
+            .room-info-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+
+            .room-info-card {
+                background: rgba(0, 0, 0, 0.4);
+                border: 2px solid rgba(0, 255, 255, 0.3);
+                border-radius: 12px;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                transition: all 0.3s ease;
+            }
+
+            .room-info-card:hover {
+                border-color: rgba(0, 255, 255, 0.6);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 24px rgba(0, 255, 255, 0.2);
+            }
+
+            .info-label {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: var(--text-secondary);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .info-value {
+                font-size: 1.5rem;
+                font-weight: 800;
+                background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .participants-section {
+                margin-top: 40px;
+                background: rgba(0, 0, 0, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 16px;
+                padding: 30px;
+            }
+
+            .participants-section h3 {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: var(--text-primary);
+                margin-bottom: 20px;
+            }
+
+            .room-actions {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                margin-top: 40px;
+                flex-wrap: wrap;
+            }
+
+            .btn-large {
+                padding: 18px 48px;
+                font-size: 1.1rem;
+                min-width: 250px;
+            }
+
+            .waiting-room {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: var(--dark-bg);
+                z-index: 1000;
+                overflow-y: auto;
+                padding: 40px 20px;
+            }
+
+            .waiting-room.active {
+                display: block;
+                animation: fadeIn 0.3s ease;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+                to {
+                    opacity: 1;
+                }
+            }
+
+            .back-arrow {
+                position: fixed;
+                top: 30px;
+                left: 30px;
+                width: 50px;
+                height: 50px;
+                background: rgba(0, 0, 0, 0.6);
+                border: 2px solid rgba(0, 255, 255, 0.3);
+                border-radius: 50%;
+                cursor: pointer;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                z-index: 2000;
+                padding: 0;
+            }
+
+            .back-arrow.active {
+                display: flex;
+            }
+
+            .back-arrow svg {
+                width: 24px;
+                height: 24px;
+                fill: #00ffff;
+                transition: all 0.3s ease;
+            }
+
+            .back-arrow:hover {
+                background: rgba(0, 0, 0, 0.8);
+                border-color: #00ffff;
+                transform: translateX(-5px);
+                box-shadow: 0 8px 24px rgba(0, 255, 255, 0.3);
+            }
+
+            .back-arrow:hover svg {
+                fill: #ffffff;
+            }
+
+            .game-page.hidden {
+                display: none;
+            }
+
+            @media (max-width: 768px) {
+                .room-container {
+                    padding: 20px;
+                }
+
+                .room-header h2 {
+                    font-size: 2rem;
+                }
+
+                .room-info-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .participants-grid {
+                    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                }
+
+                .btn-large {
+                    min-width: 100%;
+                }
+
+                .back-arrow {
+                    top: 20px;
+                    left: 20px;
+                    width: 45px;
+                    height: 45px;
+                }
+
+                .back-arrow svg {
+                    width: 20px;
+                    height: 20px;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Export for debugging
+        window.roomSocket = roomSocket;
+        window.app = app;
+        
+        console.log('🎮 Application initialized successfully!');
+        showNotification('Hoş geldiniz! ' + currentUserName, 'success');
+
+    </script>
+
+	<script>
+	    // DOM Elements
+	    const gameModeCards = document.querySelectorAll('.game-mode-card');
+	    const settingsPanels = document.querySelectorAll('.settings-panel');
+	    const aiDifficultyRadios = document.querySelectorAll('input[name="ai-difficulty"]');
+	    const aiCustomSettings = document.getElementById('ai-custom-settings');
+
+	    // Game mode selection with smooth transition
+	    gameModeCards.forEach(card => {
+	        card.addEventListener('click', function() {
+	            const mode = this.id.replace('-mode', '');
+
+	            // Remove active class from all cards and panels
+	            gameModeCards.forEach(c => c.classList.remove('active'));
+	            settingsPanels.forEach(p => p.classList.remove('active'));
+
+	            // Add active class to clicked card and corresponding panel
+	            this.classList.add('active');
+	            const targetPanel = document.getElementById(`${mode}-settings`);
+
+                // Smooth scroll to settings panel
+                setTimeout(() => {
+                    targetPanel.classList.add('active');
+                    targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            });
+        });
+
+        // Show/Hide AI custom settings based on selected difficulty
+        aiDifficultyRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    aiCustomSettings.classList.add('active');
+                } else {
+                    aiCustomSettings.classList.remove('active');
+                }
+            });
+        });
+
+        // Initialize all sliders
+        function updateSliderValue(sliderId, valueId, suffix = '') {
+            const slider = document.getElementById(sliderId);
+            const valueDisplay = document.getElementById(valueId);
+
+            if (!slider || !valueDisplay) return;
+
+            slider.addEventListener('input', function() {
+                let value = this.value;
+                if (sliderId.includes('corner-boost')) {
+                    value = parseFloat(value).toFixed(1) + 'x';
+                } else if (sliderId.includes('target-win-rate')) {
+                    value = (parseInt(value) * 10) + '%';
+                } else {
+                    value += suffix;
+                }
+
+                // Animate value change
+                valueDisplay.style.transform = 'scale(1.1)';
+                valueDisplay.textContent = value;
+
+                setTimeout(() => {
+                    valueDisplay.style.transform = 'scale(1)';
+                }, 200);
+            });
+        }
+
+        // Initialize all sliders (paddle-speed ve ball-speed çıkarıldı)
+        const sliders = [
+            ['paddle-height', 'paddle-height-value', 'px'],
+            ['ball-radius', 'ball-radius-value', 'px'],
+            ['corner-boost', 'corner-boost-value'],
+            ['ai-paddle-height', 'ai-paddle-height-value', 'px'],
+            ['ai-ball-radius', 'ai-ball-radius-value', 'px'],
+            ['ai-corner-boost', 'ai-corner-boost-value'],
+            ['ai-reaction-speed', 'ai-reaction-speed-value'],
+            ['ai-prediction-accuracy', 'ai-prediction-accuracy-value'],
+            ['ai-general-accuracy', 'ai-general-accuracy-value'],
+            ['ai-learning-speed', 'ai-learning-speed-value'],
+            ['ai-preparation-distance', 'ai-preparation-distance-value'],
+            ['ai-freeze-distance', 'ai-freeze-distance-value'],
+            ['ai-target-win-rate', 'ai-target-win-rate-value'],
+            ['ai-fairness-level', 'ai-fairness-level-value'],
+            ['ai-max-consecutive-wins', 'ai-max-consecutive-wins-value']
+        ];
+
+        sliders.forEach(([sliderId, valueId, suffix]) => {
+            updateSliderValue(sliderId, valueId, suffix || '');
+        });
+
+		// Enhanced notification system with stacking
+		let notificationCount = 0;
+		const notificationContainer = createNotificationContainer();
+
+		function createNotificationContainer() {
+		    const container = document.createElement('div');
+		    container.id = 'notification-container';
+		    container.style.cssText = `
+		        position: fixed;
+		        top: 20px;
+		        right: 20px;
+		        z-index: 10000;
+		        display: flex;
+		        flex-direction: column;
+		        gap: 12px;
+		        pointer-events: none;
+		    `;
+		    document.body.appendChild(container);
+		    return container;
+		}
+
+		function showNotification(message, type = 'info') {
+		    const notification = document.createElement('div');
+		    const notificationId = `notification-${notificationCount++}`;
+		    notification.id = notificationId;
+
+		    // Icon seçimi
+		    let icon = '';
+		    switch(type) {
+		        case 'success':
+		            icon = '✅';
+		            break;
+		        case 'error':
+		            icon = '❌';
+		            break;
+		        case 'info':
+		            icon = 'ℹ️';
+		            break;
+		        default:
+		            icon = '📢';
+		    }
+
+		    notification.style.cssText = `
+		        padding: 16px 24px;
+		        background: ${type === 'success' ? 'rgba(0, 255, 0, 0.1)' : type === 'error' ? 'rgba(255, 68, 68, 0.1)' : 'rgba(0, 255, 255, 0.1)'};
+		        border: 1px solid ${type === 'success' ? 'rgba(0, 255, 0, 0.3)' : type === 'error' ? 'rgba(255, 68, 68, 0.3)' : 'rgba(0, 255, 255, 0.3)'};
+		        color: white;
+		        border-radius: 12px;
+		        font-weight: 500;
+		        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+		        font-family: 'Inter', sans-serif;
+		        display: flex;
+		        align-items: center;
+		        gap: 10px;
+		        min-width: 250px;
+		        max-width: 400px;
+		        pointer-events: auto;
+		        animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+		        transform-origin: right center;
+		        backdrop-filter: blur(10px);
+		    `;
+
+		    notification.innerHTML = `
+		        <span style="font-size: 20px;">${icon}</span>
+		        <span style="flex: 1;">${message}</span>
+		    `;
+
+		    notificationContainer.appendChild(notification);
+
+		    // Auto remove after 3 seconds with fade out animation
+		    setTimeout(() => {
+		        notification.style.animation = 'slideOutRight 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
+		        setTimeout(() => {
+		            if (notification.parentNode) {
+		                notification.remove();
+		            }
+		        }, 300);
+		    }, 3000);
+
+		    // Click to dismiss
+		    notification.addEventListener('click', function() {
+		        this.style.animation = 'slideOutRight 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
+		        setTimeout(() => {
+		            if (this.parentNode) {
+		                this.remove();
+		            }
+		        }, 300);
+		    });
+
+		    // Hover pause
+		    notification.addEventListener('mouseenter', function() {
+		        this.style.animationPlayState = 'paused';
+		    });
+
+		    notification.addEventListener('mouseleave', function() {
+		        this.style.animationPlayState = 'running';
+		    });
+		}
+
+
+        // Add slide animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Classic Game Functions
+        const classicCreateBtn = document.getElementById('classic-create-btn');
+        const classicJoinBtn = document.getElementById('classic-join-btn');
+        const classicStartBtn = document.getElementById('classic-start-btn');
+
+        if (classicCreateBtn) {
+            classicCreateBtn.addEventListener('click', function() {
+                const gameType = document.querySelector('input[name="classic-game-type"]:checked').value;
+                const roomId = generateId();
+
+                // document.getElementById('classic-generated-room-id').textContent = roomId;
+                document.getElementById('classic-room-info').classList.add('active');
+
+                this.style.display = 'none';
+                classicStartBtn.style.display = 'inline-block';
+
+                showNotification(`Klasik oda oluşturuldu: ${roomId}`, 'success');
+            });
+        }
+
+        if (classicJoinBtn) {
+            classicJoinBtn.addEventListener('click', function() {
+                // const roomCode = document.getElementById('classic-room-code').value.trim();
+
+                if (!roomCode) {
+                    showNotification('Lütfen oda kodunu girin!', 'error');
+                    return;
+                }
+
+                if (roomCode.length !== 6) {
+                    showNotification('Oda kodu 6 karakter olmalıdır!', 'error');
+                    return;
+                }
+
+                showNotification(`${roomCode} kodlu odaya katılıyorsunuz...`, 'success');
+
+                // Simulate joining room
+                setTimeout(() => {
+                    showNotification('Odaya başarıyla katıldınız!', 'success');
+                }, 1500);
+            });
+        }
+
+        if (classicStartBtn) {
+            classicStartBtn.addEventListener('click', function() {
+                const gameType = document.querySelector('input[name="classic-game-type"]:checked').value;
+                // const roomId = document.getElementById('classic-generated-room-id').textContent;
+
+                showNotification(`${gameType} klasik oyunu başlatılıyor!`, 'success');
+
+                // Simulate game start
+                setTimeout(() => {
+                    showNotification('Oyun başladı! İyi şanslar!', 'success');
+                }, 1500);
+            });
+        }
+
+/* 
+        // Custom Game Functions
+        const customCreateBtn = document.getElementById('custom-create-btn');
+        const customJoinBtn = document.getElementById('custom-join-btn');
+        const customStartBtn = document.getElementById('custom-start-btn');
+
+		if (customCreateBtn) {
+		    customCreateBtn.addEventListener('click', function() {
+		        const gameType = document.querySelector('input[name="custom-game-type"]:checked').value;
+		        const roomId = generateId();
+
+		        // Collect all custom settings
+		        customGameSettings = {
+		            gameType: gameType,
+		            paddleHeight: document.getElementById('paddle-height').value,
+		            ballRadius: document.getElementById('ball-radius').value,
+		            cornerBoost: document.getElementById('corner-boost').value,
+		            winningScore: document.getElementById('winning-score').value
+		        };
+
+		        showNotification(`Oda oluşturuluyor: ${roomId}`, 'success');
+
+		        setTimeout(() => {
+		            const gamePage = document.getElementById('game-page');
+		            const customWaitingRoom = document.getElementById('custom-waiting-room');
+		            const backArrow = document.getElementById('back-arrow');
+
+		            gamePage.classList.add('hidden');
+		            customWaitingRoom.classList.add('active');
+		            backArrow.classList.add('active');
+
+		            // Update room info
+		            document.getElementById('custom-room-code-display').textContent = roomId;
+
+		            // Update game type display
+		            let gameTypeText = gameType === '1v1' ? '1 vs 1' :
+		                              gameType === '2v2' ? '2 vs 2' :
+		                              gameType === 'co-op' ? 'co-op' : '1 vs 1';
+		            document.getElementById('custom-game-type-display').textContent = gameTypeText;
+
+		            // Update players count based on game type
+		            if (gameType === '2v2') {
+		                maxPlayersNeeded = 4;
+		                currentPlayers = 1;
+		            } else if (gameType === 'co-op') {
+		                maxPlayersNeeded = 2;
+		                currentPlayers = 2; // AI zaten var, direkt ready
+		            } else {
+		                maxPlayersNeeded = 2;
+		                currentPlayers = 1;
+		            }
+
+		            document.getElementById('custom-players-count').textContent = `${currentPlayers}/${maxPlayersNeeded}`;
+
+		            // Update settings display
+		            document.getElementById('custom-paddle-display').textContent = customGameSettings.paddleHeight + 'px';
+		            document.getElementById('custom-ball-display').textContent = customGameSettings.ballRadius + 'px';
+		            document.getElementById('custom-corner-display').textContent = parseFloat(customGameSettings.cornerBoost).toFixed(1) + 'x';
+		            document.getElementById('custom-score-display').textContent = customGameSettings.winningScore;
+
+		            // Initialize participants
+		            initializeCustomParticipants(gameType);
+
+		            // Update button state
+		            updateCustomGameButtons();
+
+		            // If co-op, immediately set status to ready
+		            if (gameType === 'co-op') {
+		                updateCustomRoomStatus();
+		            }
+
+		            window.scrollTo({ top: 0, behavior: 'smooth' });
+		        }, 1000);
+		    });
+		}
+
+        if (customJoinBtn) {
+            customJoinBtn.addEventListener('click', function() {
+                const roomCode = document.getElementById('custom-room-code').value.trim();
+
+                if (!roomCode) {
+                    showNotification('Lütfen oda kodunu girin!', 'error');
+                    return;
+                }
+
+                if (roomCode.length !== 6) {
+                    showNotification('Oda kodu 6 karakter olmalıdır!', 'error');
+                    return;
+                }
+
+                showNotification(`${roomCode} kodlu custom odaya katılıyorsunuz...`, 'success');
+
+                // Simulate joining room
+                setTimeout(() => {
+                    showNotification('Custom odaya başarıyla katıldınız!', 'success');
+                }, 1500);
+            });
+        }
+
+        if (customStartBtn) {
+            customStartBtn.addEventListener('click', function() {
+                const gameType = document.querySelector('input[name="custom-game-type"]:checked').value;
+                // const roomId = document.getElementById('custom-generated-room-id').textContent;
+
+                showNotification(`${gameType} custom oyunu başlatılıyor!`, 'success');
+
+                // Simulate game start
+                setTimeout(() => {
+                    showNotification('Custom oyun başladı! İyi şanslar!', 'success');
+                }, 1500);
+            });
+        }
+ */
+        // Tournament Functions
+/*         const tournamentCreateBtn = document.getElementById('tournament-create-btn');
+        const tournamentJoinBtn = document.getElementById('tournament-join-btn');
+        const tournamentStartBtn = document.getElementById('tournament-start-btn');
+
+        // Handle custom tournament size input visibility
+        const customTournamentSizeInput = document.getElementById('custom-tournament-size');
+        const tournamentSizeRadios = document.querySelectorAll('input[name="tournament-size"]');
+
+        tournamentSizeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'custom') {
+                    customTournamentSizeInput.style.display = 'block';
+                } else {
+                    customTournamentSizeInput.style.display = 'none';
+                    customTournamentSizeInput.value = '';
+                }
+            });
+        });
+
+		if (tournamentCreateBtn) {
+		    tournamentCreateBtn.addEventListener('click', function() {
+		        const tournamentName = document.getElementById('tournament-name').value.trim();
+		        const playerName = document.getElementById('player-name').value.trim();
+		        const tournamentSize = document.querySelector('input[name="tournament-size"]:checked').value;
+
+		        if (!tournamentName) {
+		            showNotification('Lütfen turnuva ismini girin!', 'error');
+		            return;
+		        }
+
+		        // Check if the user selected "custom" and validate input
+		        let maxPlayers = parseInt(tournamentSize);
+		        if (tournamentSize === 'custom') {
+		            const customSize = parseInt(customTournamentSizeInput.value);
+		            if (isNaN(customSize) || customSize < 4) {
+		                showNotification('Lütfen 4 veya daha büyük bir sayı girin!', 'error');
+		                return;
+		            }
+		            // Check if it's a power of 2
+		            if ((customSize & (customSize - 1)) !== 0) {
+		                showNotification('Kişi sayısı 2\'nin kuvveti olmalıdır! (4, 8, 16, 32...)', 'error');
+		                return;
+		            }
+		            maxPlayers = customSize;
+		        }
+
+		        const roomId = generateId();
+
+		        showNotification(`Turnuva oluşturuluyor: ${tournamentName}`, 'success');
+
+		        setTimeout(() => {
+		            const gamePage = document.getElementById('game-page');
+		            const waitingRoom = document.getElementById('waiting-room');
+		            const backArrow = document.getElementById('back-arrow');
+
+		            gamePage.classList.add('hidden');
+		            waitingRoom.classList.add('active');
+		            backArrow.classList.add('active');
+
+		            // Update room info
+		            // document.getElementById('room-code-display').textContent = roomId;
+
+		            // Initialize with host only
+		            const initialPlayers = [`${playerName} (Host) 👑`];
+
+		            // Add waiting slots
+		            for (let i = 2; i <= maxPlayers; i++) {
+		                initialPlayers.push(`Waiting for Player ${i}...`);
+		            }
+
+		            updateRoomInfo(roomId, 1, maxPlayers, 1);
+		            initializeTournamentParticipants(initialPlayers);
+
+		            window.scrollTo({ top: 0, behavior: 'smooth' });
+		            showNotification(`Turnuva odası hazır! Kod: ${roomId}`, 'success');
+		        }, 1000);
+		    });
+		}
+
+		// Initialize tournament participants (waiting slots dahil)
+		function initializeTournamentParticipants(playerNames) {
+		    const grid = document.getElementById('participants-grid');
+		    if (!grid) return;
+
+		    grid.innerHTML = '';
+
+		    playerNames.forEach((name, index) => {
+		        const card = document.createElement('div');
+		        card.className = 'participant-card';
+
+		        if (name.includes('Waiting')) {
+		            // Waiting slot styling
+		            card.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+		            card.style.opacity = '0.5';
+		        } else {
+		            // Active player styling
+		            const color = generateDynamicColor(index, playerNames.length);
+		            card.style.borderColor = color.border;
+		            card.style.boxShadow = `0 4px 12px ${color.bg}`;
+
+		            const before = document.createElement('div');
+		            before.style.cssText = `
+		                position: absolute;
+		                top: 0;
+		                left: 0;
+		                right: 0;
+		                bottom: 0;
+		                background: ${color.bg};
+		                z-index: 0;
+		            `;
+		            card.appendChild(before);
+		        }
+
+		        const icon = document.createElement('span');
+		        icon.className = 'participant-icon';
+		        icon.style.position = 'relative';
+		        icon.style.zIndex = '1';
+		        icon.textContent = name.includes('Host') ? '👑' :
+		                          name.includes('Waiting') ? '⏳' : '👤';
+
+		        const nameSpan = document.createElement('span');
+		        nameSpan.className = 'participant-name';
+		        nameSpan.style.position = 'relative';
+		        nameSpan.style.zIndex = '1';
+		        nameSpan.textContent = name;
+
+		        card.appendChild(icon);
+		        card.appendChild(nameSpan);
+		        grid.appendChild(card);
+		    });
+		}
+
+
+        if (tournamentJoinBtn) {
+            tournamentJoinBtn.addEventListener('click', function() {
+                const tournamentCode = document.getElementById('tournament-code').value.trim();
+                const playerName = document.getElementById('player-name').value.trim();
+
+                if (!tournamentCode) {
+                    showNotification('Lütfen turnuva kodunu girin!', 'error');
+                    return;
+                }
+
+                if (tournamentCode.length !== 6) {
+                    showNotification('Turnuva kodu 6 karakter olmalıdır!', 'error');
+                    return;
+                }
+
+                showNotification(`${tournamentCode} kodlu turnuvaya katılıyorsunuz...`, 'success');
+
+                // Simulate joining tournament
+                setTimeout(() => {
+                    showNotification(`Turnuvaya başarıyla katıldınız! Hoş geldin ${playerName}!`, 'success');
+                }, 1500);
+            });
+        }
+
+		if (tournamentStartBtn) {
+		    tournamentStartBtn.addEventListener('click', function() {
+		        const roomId = document.getElementById('tournament-generated-id').textContent;
+		        const tournamentName = document.getElementById('tournament-name').value.trim();
+		        const tournamentSize = document.querySelector('input[name="tournament-size"]:checked').value;
+
+		        let maxPlayers = parseInt(tournamentSize);
+		        if (tournamentSize === 'custom') {
+		            maxPlayers = parseInt(document.getElementById('custom-tournament-size').value);
+		        }
+
+		        showNotification(`${tournamentName} turnuvası başlatılıyor...`, 'success');
+
+		        setTimeout(() => {
+		            showNotification('Turnuva başladı! Bol şans!', 'success');
+
+		            const gamePage = document.getElementById('game-page');
+		            const waitingRoom = document.getElementById('waiting-room');
+		            const backArrow = document.getElementById('back-arrow');
+
+		            gamePage.classList.add('hidden');
+		            waitingRoom.classList.add('active');
+		            backArrow.classList.add('active');
+
+		            // Initialize room with sample data
+		            const samplePlayers = [
+		                'You (Host) 👑',
+		                'Player 2',
+		                'Player 3',
+		                'Player 4',
+		                'Player 5',
+		                'Player 6',
+		                'Player 7',
+		                'Player 8',
+		                'Player 9',
+		                'Player 10',
+		                'Player 11',
+		                'Player 12',
+		                'Player 13',
+		                'Player 14',
+		                'Player 15',
+		                'Player 16'
+		            ].slice(0, maxPlayers);
+
+		            // currentRound parametresini ekledik (başlangıçta 1)
+		            updateRoomInfo(roomId, samplePlayers.length, maxPlayers, 1);
+		            initializeParticipants(samplePlayers);
+
+		            window.scrollTo({ top: 0, behavior: 'smooth' });
+		        }, 1500);
+		    });
+		}
+
+ */
+
+/* 
+        // AI Game Functions
+        const aiStartBtn = document.getElementById('ai-start-btn');
+        if (aiStartBtn) {
+            aiStartBtn.addEventListener('click', function() {
+                const gameType = document.querySelector('input[name="ai-game-type"]:checked').value;
+                const difficulty = document.querySelector('input[name="ai-difficulty"]:checked').value;
+
+                // Collect AI settings (paddle-speed ve ball-speed çıkarıldı)
+                const aiSettings = {
+                    gameType: gameType,
+                    difficulty: difficulty,
+                    paddleHeight: document.getElementById('ai-paddle-height').value,
+                    ballRadius: document.getElementById('ai-ball-radius').value,
+                    cornerBoost: document.getElementById('ai-corner-boost').value,
+                    winningScore: document.getElementById('ai-winning-score').value
+                };
+
+                // If custom AI, collect additional settings
+                if (difficulty === 'custom') {
+                    aiSettings.customAI = {
+                        reactionSpeed: document.getElementById('ai-reaction-speed').value,
+                        predictionAccuracy: document.getElementById('ai-prediction-accuracy').value,
+                        generalAccuracy: document.getElementById('ai-general-accuracy').value,
+                        learningSpeed: document.getElementById('ai-learning-speed').value,
+                        preparationDistance: document.getElementById('ai-preparation-distance').value,
+                        freezeDistance: document.getElementById('ai-freeze-distance').value,
+                        targetWinRate: document.getElementById('ai-target-win-rate').value,
+                        fairnessLevel: document.getElementById('ai-fairness-level').value,
+                        maxConsecutiveWins: document.getElementById('ai-max-consecutive-wins').value,
+                        rageMode: document.getElementById('ai-rage-mode').checked,
+                        fatigueSystem: document.getElementById('ai-fatigue-system').checked,
+                        focusMode: document.getElementById('ai-focus-mode').checked,
+                        adaptiveDifficulty: document.getElementById('ai-adaptive-difficulty').checked
+                    };
+                }
+
+                console.log('AI Game Settings:', aiSettings);
+
+                const difficultyText = difficulty === 'easy' ? 'Kolay' :
+                                      difficulty === 'medium' ? 'Orta' :
+                                      difficulty === 'hard' ? 'Zor' :
+                                      difficulty === 'impossible' ? 'İmkansız' : 'Özel';
+
+                showNotification(`AI ile ${gameType} oyunu başlatılıyor (${difficultyText})...`, 'success');
+
+                // Simulate game start
+                setTimeout(() => {
+                    showNotification('AI oyunu başladı! Hazır ol!', 'success');
+                }, 1500);
+            });
+        }
+*/
+
+        // Smooth transitions for all interactive elements
+        document.querySelectorAll('.btn, .input-field, .radio-option').forEach(element => {
+            element.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // ESC to close active panels
+            if (e.key === 'Escape') {
+                gameModeCards.forEach(c => c.classList.remove('active'));
+                settingsPanels.forEach(p => p.classList.remove('active'));
+            }
+        });
+
+        // Initialize tooltips
+        const tooltips = document.querySelectorAll('.difficulty-tooltip');
+        tooltips.forEach(tooltip => {
+            tooltip.style.transition = 'all 0.3s ease';
+        });
+
+        // Add focus trap for accessibility
+        settingsPanels.forEach(panel => {
+            panel.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    const focusableElements = this.querySelectorAll(
+                        'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    const firstElement = focusableElements[0];
+                    const lastElement = focusableElements[focusableElements.length - 1];
+
+                    if (e.shiftKey && document.activeElement === firstElement) {
+                        e.preventDefault();
+                        lastElement.focus();
+                    } else if (!e.shiftKey && document.activeElement === lastElement) {
+                        e.preventDefault();
+                        firstElement.focus();
+                    }
+                }
+            });
+        });
+
+
+// Back Arrow Button Functionality
+const backArrow = document.getElementById('back-arrow');
+if (backArrow) {
+    backArrow.addEventListener('click', function() {
+        const gamePage = document.getElementById('game-page');
+        const waitingRoom = document.getElementById('waiting-room');
+
+        // Animasyon ile gizle
+        this.style.animation = 'slideOutLeft 0.3s ease';
+
+        setTimeout(() => {
+            waitingRoom.classList.remove('active');
+            gamePage.classList.remove('hidden');
+            this.classList.remove('active');
+            this.style.animation = '';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showNotification('Lobiye döndünüz', 'info');
+        }, 300);
+    });
+
+    // Hover efekti için ses eklemek isterseniz (opsiyonel)
+    backArrow.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateX(-5px) scale(1.05)';
+    });
+
+    backArrow.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateX(0) scale(1)';
+    });
+}
+
+// Room Page Functionality
+let participants = [];
+let matchPairs = [];
+
+// Generate dynamic color for match pairs
+function generateDynamicColor(index, total) {
+    const hue = (index * 360) / total;
+    const saturation = 70 + (index % 3) * 10;
+    const lightness = 50 + (index % 2) * 10;
+    return {
+        border: `hsl(${hue}, ${saturation}%, ${lightness}%)`,
+        bg: `hsla(${hue}, ${saturation}%, ${lightness}%, 0.2)`
+    };
+}
+
+// Initialize participants
+function initializeParticipants(playerNames) {
+    participants = playerNames.map((name, index) => ({
+        id: index + 1,
+        name: name,
+        matchPair: null
+    }));
+
+    // Create match pairs (eşleştirme)
+    createMatchPairs();
+    renderParticipants();
+}
+/* 
+// Create match pairs
+function createMatchPairs() {
+    const shuffled = [...participants].sort(() => Math.random() - 0.5);
+    matchPairs = [];
+
+    for (let i = 0; i < shuffled.length; i += 2) {
+        if (i + 1 < shuffled.length) {
+            const pairIndex = Math.floor(i / 2);
+            shuffled[i].matchPair = pairIndex;
+            shuffled[i + 1].matchPair = pairIndex;
+            matchPairs.push([shuffled[i], shuffled[i + 1]]);
+        }
+    }
+}
+ */
+// Render participants
+function renderParticipants() {
+    const grid = document.getElementById('participants-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    participants.forEach(participant => {
+        const color = generateDynamicColor(participant.matchPair, matchPairs.length);
+
+        const card = document.createElement('div');
+        card.className = 'participant-card';
+        card.style.borderColor = color.border;
+        card.style.boxShadow = `0 4px 12px ${color.bg}`;
+
+        const before = document.createElement('div');
+        before.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: ${color.bg};
+            z-index: 0;
+        `;
+        card.appendChild(before);
+
+        const icon = document.createElement('span');
+        icon.className = 'participant-icon';
+        icon.textContent = participant.name.includes('You') ? '👑' : '👤';
+
+        const name = document.createElement('span');
+        name.className = 'participant-name';
+        name.textContent = participant.name;
+
+        card.appendChild(icon);
+        card.appendChild(name);
+        grid.appendChild(card);
+    });
+}
+
+// Update room info
+function updateRoomInfo(roomId, currentPlayers, maxPlayers, currentRound = 1) {
+    // const roomCodeDisplay = document.getElementById('room-code-display');
+    const playersCount = document.getElementById('players-count');
+    const currentRoundDisplay = document.getElementById('current-round-display');
+
+    if (roomCodeDisplay) roomCodeDisplay.textContent = roomId;
+    if (playersCount) playersCount.textContent = `${currentPlayers}/${maxPlayers}`;
+
+    // Round bilgisini hesapla
+    if (currentRoundDisplay) {
+        const totalRounds = Math.log2(maxPlayers);
+        let roundName = '';
+
+        if (currentRound === totalRounds) {
+            roundName = 'Final';
+        } else if (currentRound === totalRounds - 1) {
+            roundName = 'Semi-Final';
+        } else if (currentRound === totalRounds - 2) {
+            roundName = 'Quarter-Final';
+        } else {
+            roundName = `Round ${currentRound}`;
+        }
+
+        currentRoundDisplay.textContent = roundName;
+    }
+}
+
+// Update button state based on player count
+function updateCustomGameButtons() {
+    const waitingBtn = document.getElementById('custom-waiting-players-btn');
+    const startBtn = document.getElementById('custom-start-game-btn');
+
+    if (currentPlayers >= maxPlayersNeeded) {
+        // Tüm oyuncular geldi
+        waitingBtn.style.display = 'none';
+        startBtn.style.display = 'block';
+        startBtn.style.animation = 'slideInRight 0.5s ease';
+    } else {
+        // Hala oyuncu bekleniyor
+        waitingBtn.style.display = 'block';
+        startBtn.style.display = 'none';
+        waitingBtn.disabled = true;
+
+        const remaining = maxPlayersNeeded - currentPlayers;
+        waitingBtn.innerHTML = `⏳ ${remaining} Kullanıcı Bekleniyor...`;
+    }
+}
+
+// Initialize custom game participants
+function initializeCustomParticipants(gameType) {
+    const grid = document.getElementById('custom-participants-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    let players = ['You (Host) 👑'];
+
+    if (gameType === '1v1') {
+        players.push('Waiting for Player 2...');
+    } else if (gameType === '2v2') {
+        players.push('Waiting for Player 2...', 'Waiting for Player 3...', 'Waiting for Player 4...');
+    } else if (gameType === 'co-op') {
+        players.push('Player 2');
+    }
+
+    players.forEach((player, index) => {
+        const card = document.createElement('div');
+        card.className = 'participant-card';
+
+        if (player.includes('Waiting')) {
+            card.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            card.style.opacity = '0.5';
+        } else {
+            const color = generateDynamicColor(index, players.length);
+            card.style.borderColor = color.border;
+            card.style.boxShadow = `0 4px 12px ${color.bg}`;
+
+            const before = document.createElement('div');
+            before.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: ${color.bg};
+                z-index: 0;
+            `;
+            card.appendChild(before);
+        }
+
+        const icon = document.createElement('span');
+        icon.className = 'participant-icon';
+        icon.style.position = 'relative';
+        icon.style.zIndex = '1';
+        icon.textContent = player.includes('You') ? '👑' :
+                          player.includes('Waiting') ? '⏳' :
+                          player.includes('AI') ? '🤖' : '👤';
+
+        const name = document.createElement('span');
+        name.className = 'participant-name';
+        name.style.position = 'relative';
+        name.style.zIndex = '1';
+        name.textContent = player;
+
+        card.appendChild(icon);
+        card.appendChild(name);
+        grid.appendChild(card);
+    });
+
+    // Initialize ready states
+    initializeCustomReadyStates(players.filter(p => !p.includes('Waiting')).length);
+}
+
+/* // ----------------------  TEST  --------------------------------
+
+
+// Simulate player joining (test için)
+function simulatePlayerJoin() {
+    if (currentPlayers < maxPlayersNeeded) {
+        currentPlayers++;
+        document.getElementById('custom-players-count').textContent = `${currentPlayers}/${maxPlayersNeeded}`;
+
+        // Update participant card
+        const grid = document.getElementById('custom-participants-grid');
+        const waitingCards = grid.querySelectorAll('.participant-card');
+
+        waitingCards.forEach((card, index) => {
+            const nameSpan = card.querySelector('.participant-name');
+            if (nameSpan && nameSpan.textContent.includes('Waiting') && index === currentPlayers - 1) {
+                nameSpan.textContent = `Player ${currentPlayers}`;
+                card.querySelector('.participant-icon').textContent = '👤';
+                card.style.opacity = '1';
+                card.style.borderColor = generateDynamicColor(currentPlayers - 1, maxPlayersNeeded).border;
+                card.style.boxShadow = `0 4px 12px ${generateDynamicColor(currentPlayers - 1, maxPlayersNeeded).bg}`;
+
+                const before = document.createElement('div');
+                before.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: ${generateDynamicColor(currentPlayers - 1, maxPlayersNeeded).bg};
+                    z-index: 0;
+                `;
+                card.insertBefore(before, card.firstChild);
+
+                // Z-index fix
+                card.querySelector('.participant-icon').style.position = 'relative';
+                card.querySelector('.participant-icon').style.zIndex = '1';
+                card.querySelector('.participant-name').style.position = 'relative';
+                card.querySelector('.participant-name').style.zIndex = '1';
+
+                // Add to ready states
+                customParticipantReadyStates[currentPlayers] = true;
+            }
+        });
+
+        updateCustomGameButtons();
+        updateCustomRoomStatus();
+
+        if (currentPlayers < maxPlayersNeeded) {
+            showNotification(`Oyuncu ${currentPlayers} katıldı!`, 'success');
+        }
+    }
+}
+
+
+// Start Custom Game Button
+const customStartGameBtn = document.getElementById('custom-start-game-btn');
+if (customStartGameBtn) {
+    customStartGameBtn.addEventListener('click', function() {
+        showNotification('🎮 Oyun başlıyor!', 'success');
+
+        setTimeout(() => {
+            showNotification('🏓 Hazır ol!', 'success');
+            // Here you can navigate to actual game screen
+        }, 1500);
+    });
+}
+
+// Test için: 3 saniyede bir otomatik oyuncu ekle (gerçek uygulamada kaldırın)
+setTimeout(() => {
+    const autoJoinInterval = setInterval(() => {
+        if (currentPlayers < maxPlayersNeeded) {
+            simulatePlayerJoin();
+        } else {
+            clearInterval(autoJoinInterval);
+        }
+    }, 3000);
+}, 2000);
+
+// -----------------------  TEST  ----------------------------
+ */
+// BURAYI TEST KISMI ÇIKTIKTAN SONRA AKTİF ET
+
+// // Start Custom Game Button
+// const customStartGameBtn = document.getElementById('custom-start-game-btn');
+// if (customStartGameBtn) {
+//     customStartGameBtn.addEventListener('click', function() {
+//         showNotification('🎮 Oyun başlıyor!', 'success');
+
+//         setTimeout(() => {
+//             showNotification('🏓 Hazır ol!', 'success');
+//             // Here you can navigate to actual game screen
+//         }, 1500);
+//     });
+// }
+/* 
+// AI Game Waiting Room Functions
+let aiGameSettings = {};
+
+// Update AI Start Button
+const originalAiStartBtn = document.getElementById('ai-start-btn');
+if (originalAiStartBtn) {
+    originalAiStartBtn.onclick = function() {
+        const gameType = document.querySelector('input[name="ai-game-type"]:checked').value;
+        const difficulty = document.querySelector('input[name="ai-difficulty"]:checked').value;
+
+        // Collect AI settings
+        aiGameSettings = {
+            gameType: gameType,
+            difficulty: difficulty,
+            paddleHeight: document.getElementById('ai-paddle-height').value,
+            ballRadius: document.getElementById('ai-ball-radius').value,
+            cornerBoost: document.getElementById('ai-corner-boost').value,
+            winningScore: document.getElementById('ai-winning-score').value
+        };
+
+        // If custom AI, collect additional settings
+        if (difficulty === 'custom') {
+            aiGameSettings.customAI = {
+                reactionSpeed: document.getElementById('ai-reaction-speed').value,
+                predictionAccuracy: document.getElementById('ai-prediction-accuracy').value,
+                generalAccuracy: document.getElementById('ai-general-accuracy').value,
+                learningSpeed: document.getElementById('ai-learning-speed').value,
+                preparationDistance: document.getElementById('ai-preparation-distance').value,
+                freezeDistance: document.getElementById('ai-freeze-distance').value,
+                targetWinRate: document.getElementById('ai-target-win-rate').value,
+                fairnessLevel: document.getElementById('ai-fairness-level').value,
+                maxConsecutiveWins: document.getElementById('ai-max-consecutive-wins').value,
+                rageMode: document.getElementById('ai-rage-mode').checked,
+                fatigueSystem: document.getElementById('ai-fatigue-system').checked,
+                focusMode: document.getElementById('ai-focus-mode').checked,
+                adaptiveDifficulty: document.getElementById('ai-adaptive-difficulty').checked
+            };
+        }
+
+        showNotification('AI oyunu hazırlanıyor...', 'success');
+
+        setTimeout(() => {
+            const gamePage = document.getElementById('game-page');
+            const aiWaitingRoom = document.getElementById('ai-waiting-room');
+            const backArrow = document.getElementById('back-arrow');
+
+            gamePage.classList.add('hidden');
+            aiWaitingRoom.classList.add('active');
+            backArrow.classList.add('active');
+
+            // Update difficulty display
+            const difficultyText = difficulty === 'easy' ? 'Easy' :
+                                  difficulty === 'medium' ? 'Medium' :
+                                  difficulty === 'hard' ? 'Hard' :
+                                  difficulty === 'impossible' ? 'Impossible' : 'Custom';
+            document.getElementById('ai-difficulty-display').textContent = difficultyText;
+
+            // Update AI type display
+            const aiTypeText = difficulty === 'custom' ? 'Custom AI' : 'Standard AI';
+            document.getElementById('ai-type-display').textContent = aiTypeText;
+
+            // Update settings display
+            document.getElementById('ai-paddle-display').textContent = aiGameSettings.paddleHeight + 'px';
+            document.getElementById('ai-ball-display').textContent = aiGameSettings.ballRadius + 'px';
+            document.getElementById('ai-corner-display').textContent = parseFloat(aiGameSettings.cornerBoost).toFixed(1) + 'x';
+            document.getElementById('ai-score-display').textContent = aiGameSettings.winningScore;
+
+            // Show custom AI settings if applicable
+            if (difficulty === 'custom') {
+                const customSettingsDisplay = document.getElementById('ai-custom-settings-display');
+                customSettingsDisplay.style.display = 'block';
+
+                document.getElementById('ai-reaction-display').textContent = aiGameSettings.customAI.reactionSpeed;
+                document.getElementById('ai-prediction-display').textContent = aiGameSettings.customAI.predictionAccuracy;
+                document.getElementById('ai-accuracy-display').textContent = aiGameSettings.customAI.generalAccuracy;
+                document.getElementById('ai-learning-display').textContent = aiGameSettings.customAI.learningSpeed;
+            } else {
+                document.getElementById('ai-custom-settings-display').style.display = 'none';
+            }
+
+            // Initialize AI participants
+            initializeAIParticipants();
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showNotification('AI hazır! Oyuna başlayabilirsin!', 'success');
+        }, 1000);
+    };
+}
+
+// Initialize AI game participants
+function initializeAIParticipants() {
+    const grid = document.getElementById('ai-participants-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    const players = [
+        { name: 'You 👑', isAI: false },
+        { name: 'AI Opponent 🤖', isAI: true }
+    ];
+
+    players.forEach((player, index) => {
+        const card = document.createElement('div');
+        card.className = 'participant-card';
+
+        const color = generateDynamicColor(index, 2);
+        card.style.borderColor = color.border;
+        card.style.boxShadow = `0 4px 12px ${color.bg}`;
+
+        const before = document.createElement('div');
+        before.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: ${color.bg};
+            z-index: 0;
+        `;
+        card.appendChild(before);
+
+        const icon = document.createElement('span');
+        icon.className = 'participant-icon';
+        icon.textContent = player.isAI ? '🤖' : '👑';
+
+        const name = document.createElement('span');
+        name.className = 'participant-name';
+        name.textContent = player.name;
+
+        card.appendChild(icon);
+        card.appendChild(name);
+        grid.appendChild(card);
+    });
+}
+
+// Start AI Game Button
+const aiStartGameBtn = document.getElementById('ai-start-game-btn');
+if (aiStartGameBtn) {
+    aiStartGameBtn.addEventListener('click', function() {
+        showNotification('🤖 AI oyunu başlıyor!', 'success');
+
+        setTimeout(() => {
+            showNotification('🏓 Mücadele başlasın!', 'success');
+            // Here you can navigate to actual game screen
+        }, 1500);
+    });
+}
+ */
+// Update Back Arrow to handle all waiting rooms
+const originalBackArrow = document.getElementById('back-arrow');
+if (originalBackArrow) {
+    originalBackArrow.onclick = function() {
+        const gamePage = document.getElementById('game-page');
+        const tournamentWaitingRoom = document.getElementById('waiting-room');
+        const customWaitingRoom = document.getElementById('custom-waiting-room');
+        const aiWaitingRoom = document.getElementById('ai-waiting-room');
+
+        // Animasyon ile gizle
+        this.style.animation = 'slideOutLeft 0.3s ease';
+
+        setTimeout(() => {
+            tournamentWaitingRoom.classList.remove('active');
+            customWaitingRoom.classList.remove('active');
+            aiWaitingRoom.classList.remove('active');
+            gamePage.classList.remove('hidden');
+            this.classList.remove('active');
+            this.style.animation = '';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 300);
+    };
+}
+
+// Custom Game Ready State Management
+let customParticipantReadyStates = {};
+
+// Initialize custom game ready states
+function initializeCustomReadyStates(playerCount) {
+    customParticipantReadyStates = {};
+    for (let i = 1; i <= playerCount; i++) {
+        customParticipantReadyStates[i] = i === 1; // Host is always ready
+    }
+    updateCustomRoomStatus();
+}
+
+// Update custom room status based on player count
+function updateCustomRoomStatus() {
+    const statusElement = document.querySelector('#custom-waiting-room .room-info-card:nth-child(4) .info-value');
+    if (!statusElement) return;
+
+    const totalPlayers = Object.keys(customParticipantReadyStates).length;
+    const readyCount = Object.values(customParticipantReadyStates).filter(ready => ready === true).length;
+
+    // Store previous status to avoid duplicate notifications
+    const previousStatus = statusElement.textContent;
+
+    // Check if all players are present
+    if (currentPlayers >= maxPlayersNeeded) {
+        statusElement.textContent = 'Ready';
+        statusElement.style.color = '#00ff00';
+        statusElement.style.textShadow = '0 0 10px rgba(0, 255, 0, 0.5)';
+
+        // Only show notification if status changed from Waiting to Ready
+        if (previousStatus !== 'Ready') {
+            showNotification('Tüm oyuncular hazır! Oyunu başlatabilirsiniz!', 'success');
+        }
+    } else {
+        const remaining = maxPlayersNeeded - currentPlayers;
+        statusElement.textContent = `Waiting (${currentPlayers}/${maxPlayersNeeded})`;
+        statusElement.style.color = '#ffa500';
+        statusElement.style.textShadow = '0 0 10px rgba(255, 165, 0, 0.5)';
+    }
+}
+
+
+// Toggle custom participant ready state
+function toggleCustomParticipantReady(participantId) {
+    if (customParticipantReadyStates[participantId] !== undefined) {
+        customParticipantReadyStates[participantId] = !customParticipantReadyStates[participantId];
+        updateCustomParticipantCard(participantId);
+        updateCustomRoomStatus();
+    }
+}
+
+// Update custom participant card visual state
+function updateCustomParticipantCard(participantId) {
+    const grid = document.getElementById('custom-participants-grid');
+    if (!grid) return;
+
+    const cards = grid.querySelectorAll('.participant-card');
+    const card = cards[participantId - 1];
+    if (!card) return;
+
+    const isReady = customParticipantReadyStates[participantId];
+    const nameSpan = card.querySelector('.participant-name');
+
+    if (isReady) {
+        // Add ready indicator
+        if (!nameSpan.textContent.includes('✓')) {
+            nameSpan.textContent += ' ✓';
+        }
+        card.style.borderColor = '#00ff00';
+        card.style.boxShadow = '0 4px 12px rgba(0, 255, 0, 0.3)';
+    } else {
+        // Remove ready indicator
+        nameSpan.textContent = nameSpan.textContent.replace(' ✓', '');
+        const color = generateDynamicColor(participantId - 1, maxPlayersNeeded);
+        card.style.borderColor = color.border;
+        card.style.boxShadow = `0 4px 12px ${color.bg}`;
+    }
+}
+
+// Page load - Default olarak Custom Game modunu aç (animasyonlu)
+window.addEventListener('load', function() {
+    setTimeout(() => {
+        const customModeCard = document.getElementById('custom-mode');
+        const customSettings = document.getElementById('custom-settings');
+
+        if (customModeCard && customSettings) {
+            customModeCard.classList.add('active');
+
+            setTimeout(() => {
+                customSettings.classList.add('active');
+                customSettings.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 300);
+        }
+    }, 500);
+});
+
+// Page load - Default olarak Custom Game modunu aç
+window.addEventListener('load', function() {
+    // Biraz bekle ki tüm event listener'lar yüklensin
+    setTimeout(() => {
+        const customModeCard = document.getElementById('custom-mode');
+        const customSettings = document.getElementById('custom-settings');
+
+        if (customModeCard && customSettings) {
+            // Diğer aktif kartları kapat
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // Diğer aktif ayarları kapat
+            document.querySelectorAll('.game-settings').forEach(settings => {
+                settings.classList.remove('active');
+            });
+
+            // Custom mode'u aç
+            customModeCard.classList.add('active');
+            customSettings.classList.add('active');
+        }
+    }, 100);
+});
+
+// ============================================
+// DEFAULT SEKME AÇMA (EN SONDA)
+// ============================================
+
+// Sayfa yüklendikten sonra Custom Game sekmesini aç
+setTimeout(() => {
+    const customModeCard = document.getElementById('custom-mode');
+    const customSettings = document.getElementById('custom-settings');
+
+    if (customModeCard && customSettings && !customModeCard.classList.contains('active')) {
+        // Önce tüm sekmeleri kapat
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.classList.remove('active');
+        });
+        document.querySelectorAll('.game-settings').forEach(settings => {
+            settings.classList.remove('active');
+        });
+
+        // Custom Game sekmesini aç
+        customModeCard.classList.add('active');
+        customSettings.classList.add('active');
+    }
+}, 200);
+
+
+    </script>
+
 </body>
 </html>

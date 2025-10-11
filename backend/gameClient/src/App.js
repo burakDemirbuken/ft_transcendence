@@ -1,6 +1,5 @@
 import WebSocketClient from './network/WebSocketClient.js';
 import GameRenderer from "./GameRenderer.js";
-import RoomUi from './RoomUi.js';
 
 //!
 import InputManager from './input/InputManager.js';
@@ -9,16 +8,59 @@ import rendererConfig from './json/rendererConfig.js';
 
 class App
 {
-	constructor()
+	constructor(id, name)
 	{
-		this.playerId = this._TEST_generateRandomId();
-		this.playerName = this._TEST_generateRandomName();
+		this.playerId = id;
+		this.playerName = name;
 		this.gameRenderer = new GameRenderer();
 		this.webSocketClient = new WebSocketClient(window.location.hostname, 3002);
-		this.roomUi = new RoomUi();
 		this.inputManager = new InputManager();
+	}
 
-		this._setupNetworkListeners();
+	start(data)
+	{
+		if (data.gameMode === 'tournament')
+		{
+			let playerArcadeNumber = data.games.find(g => g.players.includes(this.playerId))?.matchNumber;
+			if (playerArcadeNumber === undefined)
+				playerArcadeNumber = 0; // Fallback to 0 if not found (should not happen)
+			this.loadGame(
+				{
+					canvasId: "renderCanvas",
+					gameMode: 'tournament',
+					renderConfig:
+					{
+						...rendererConfig,
+						paddleSize:
+						{
+							width: data.gameSettings.paddleWidth,
+							height: data.gameSettings.paddleHeight
+						},
+					},
+					arcadeCount: data.gameCount,
+					arcadeOwnerNumber: playerArcadeNumber,
+				}
+			);
+		}
+		else
+		{
+			this.loadGame({
+					canvasId: "renderCanvas",
+					gameMode: data.gameMode,
+					renderConfig:
+					{
+						...rendererConfig,
+						paddleSize:
+						{
+							width: data.gameSettings.paddleWidth,
+							height: data.gameSettings.paddleHeight
+						},
+					},
+				}
+			);
+		}
+
+		this._setupNetworkListeners(data.roomId, data.gameMode);
 		this._gameControllerSetup();
 	}
 
@@ -65,7 +107,7 @@ class App
 		);
 	}
 
-	_setupNetworkListeners()
+	_setupNetworkListeners(roomId, gameMode)
 	{
 		this.webSocketClient.onConnect(() =>
 		{
@@ -97,7 +139,7 @@ class App
 		{
 		});
 
-		this.webSocketClient.connect({ id: this.playerId, name: this.playerName });
+		this.webSocketClient.connect("ws", { userID: this.playerId, userName: this.playerName, gameId: roomId, gameMode: gameMode });
 	}
 
 	createRoom(mode, gameSettings)
@@ -111,12 +153,17 @@ class App
 				gameMode: mode,
 				...gameSettings
 			};
-			this.webSocketClient.send('room/create', data);
+			this.webSocketClient.send('create', data);
 		}
 		catch (error)
 		{
 			console.error('❌ Error creating room:', error);
 		}
+	}
+
+	nextRound()
+	{
+		this.webSocketClient.send('room/nextRound');
 	}
 
 	joinRoom(roomId)
@@ -127,7 +174,7 @@ class App
 				throw new Error('Not connected to server');
 			if (!roomId)
 				throw new Error('Room ID is required to join a room');
-			this.webSocketClient.send('room/join', { roomId });
+			this.webSocketClient.send('join', { roomId });
 		}
 		catch (error)
 		{
@@ -137,28 +184,12 @@ class App
 
 	startGame()
 	{
-		this.webSocketClient.send('room/startGame');
+		this.webSocketClient.send('startGame');
 	}
 
 	readyState(readyState)
 	{
-		this.webSocketClient.send('room/setReady', {isReady: readyState });
-	}
-
-	_TEST_generateRandomId()
-	{
-		return Math.random().toString(36).substr(2, 6).toUpperCase();
-	}
-
-	_TEST_generateRandomName()
-	{
-		const names = [
-			'Player', 'Gamer', 'User', 'Tester', 'Demo',
-			'Alpha', 'Beta', 'Gamma', 'Delta', 'Echo'
-		];
-		const randomName = names[Math.floor(Math.random() * names.length)];
-		const randomNumber = Math.floor(Math.random() * 999) + 1;
-		return `${randomName}${randomNumber}`;
+		this.webSocketClient.send('setReady', {isReady: readyState });
 	}
 
 	// ================================
@@ -179,17 +210,14 @@ class App
 			case 'game':
 				this._handleGameEvent(subEvent, data);
 				break;
-			case 'error':
-				this.roomUi.showGameError(data || 'Unknown error from server');
-				break;
 			case 'tournament':
 				this._handleTournamentEvent(subEvent, data);
 				break;
 			case 'error':
-				this.roomUi.showGameError(data || 'Unknown error from server');
+				console.error('❌ Server error:', data);
 				break;
 			default:
-				console.log('Unhandled network event:', eventType, data);
+				console.error('Unhandled network event:', eventType, data);
 		}
 	}
 
@@ -206,41 +234,20 @@ class App
 	{
 		switch (subEvent)
 		{
-			case 'initial':
-				const playerArcadeNumber = data.games.find(g => g.players.includes(this.playerId)).matchNumber;
-				this.loadGame(
-					{
-						canvasId: "renderCanvas",
-						gameMode: 'tournament',
-						renderConfig:
-						{
-							...rendererConfig,
-							paddleSize:
-							{
-								width: data.gameSettings.paddleWidth,
-								height: data.gameSettings.paddleHeight
-							},
-						},
-						arcadeCount: data.gameCount,
-						arcadeOwnerNumber: playerArcadeNumber,
-					}
-				);
-				break;
 			case 'update':
 				this.gameRenderer.gameState = data;
 				break;
 			default:
-				console.log('Unhandled tournament event:', subEvent, data);
+				console.error('Unhandled tournament event:', subEvent, data);
 		}
 	}
 
 	loadGame(gameConfig)
 	{
+		console.log('🎮 Loading game with config:', gameConfig);
 		this.gameRenderer.initialize(gameConfig).then(
 			() =>
 			{
-				this.webSocketClient.send('player/initialized');
-				this.roomUi.hideGameUI();
 				this.gameRenderer.startRendering();
 			}).catch((error) =>
 			{
@@ -253,60 +260,25 @@ class App
 	{
 		switch (subEvent)
 		{
-			case 'initial':
-				this.loadGame({
-						canvasId: "renderCanvas",
-						gameMode: data.gameMode,
-						renderConfig:
-						{
-							...rendererConfig,
-							paddleSize:
-							{
-								width: data.paddleWidth,
-								height: data.paddleHeight
-							},
-						},
-					}
-				);
-				break;
-			case 'stateUpdate':
-				this.gameRenderer.gameState = data.gameData;
+			case 'update':
+				this.gameRenderer.gameState = data;
 				break;
 			default:
-				console.log('Unhandled game event:', subEvent, data);
+				console.error('Unhandled game event:', subEvent, data);
 		}
 	}
-	// ================================
-	// SERVER DATA EXAMPLES & DOCS
-	// ================================
 
-	/**
-	 * Example of expected server room data format:
-	 *
-	 * {
-	 *   id: "ROOM-12345",
-	 *   name: "Custom Room",
-	 *   type: "custom", // or "tournament"
-	 *   status: "waiting", // "waiting", "in_game", "completed"
-	 *   maxPlayers: 2,
-	 *   host: "player1",
-	 *   players: [
-	 *     { id: "player1", name: "Host", status: "ready", isHost: true },
-	 *     { id: "player2", name: "Player 2", status: "waiting", isHost: false }
-	 *   ],
-	 *   gameSettings: {
-	 *     paddleWidth: 10,
-	 *     paddleHeight: 100,
-	 *     paddleSpeed: 700,
-	 *     ballRadius: 7,
-	 *     ballSpeed: 600,
-	 *     ballSpeedIncrease: 100,
-	 *     maxPlayers: 2,
-	 *     maxScore: 11
-	 *   },
-	 *   createdAt: 1633036800000
-	 * }
-	 */
+	destroy()
+	{
+		this.gameRenderer.reset();
+		this.webSocketClient.disconnect();
+		if (this.inputManager)
+		{
+			this.inputManager.destroy();
+			this.inputManager = null;
+		}
+		console.log('🧹 App resources cleaned up');
+	}
 }
 
 export default App;

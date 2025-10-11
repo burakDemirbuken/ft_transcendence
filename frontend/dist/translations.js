@@ -10,7 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const lang = {
     eng: { next: "tur" },
     tur: { next: "deu" },
-    deu: { next: "eng" },
+    deu: { next: "jpn" },
+    jpn: { next: "eng" }
 };
 const translationCache = new Map();
 export function loadTranslations(lang) {

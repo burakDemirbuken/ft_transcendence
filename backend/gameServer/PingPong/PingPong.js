@@ -17,6 +17,37 @@ class PingPong extends EventEmitter
 		this.finishTime = 0;
 		this.gameTime = 0;
 
+	/*
+		toplam vuruş sayısı (tüm maçlardaki)
+		toplam topu kaçırma sayısı (tüm maçlardaki)
+		toplam süre (tüm maçlardaki)
+	*/
+
+
+/*
+		state:
+		{
+			players:
+			[
+				{
+					id: 1,
+					kickBall: 2,
+					missedBall: 1,
+				},
+				{
+					id: 2,
+					kickBall: 3,
+					missedBall: 0,
+				},
+			],
+		}
+*/
+
+
+		this.state = {
+			players: [],
+		};
+
 		this.id = null;
 
 		this.settings = {
@@ -25,24 +56,52 @@ class PingPong extends EventEmitter
 		};
 		this.maxPlayers = 2;
 
-		console.log(`🎮 PingPong game created with mode: ${JSON.stringify(this.settings, null, 2)}`);
-
 		this.ball = null;
 		this.paddles = new Map(); // playerId -> Paddle instance
 		this.players = []; // Player instances
+		this.registeredPlayers = new Set(); // playerId set
 
 		this.team = new Map(); // number -> { playersId: [], score: 0 }
 		this.lastGoal = null;
 	}
 
+	addRegisteredPlayer(playerId)
+	{
+		if (this.registeredPlayers.size >= this.maxPlayers)
+		{
+			//* throw olarak yönet
+			console.warn(`⚠️ Player ${playerId} cannot be registered. Max players reached.`);
+			return;
+		}
+		if (this.registeredPlayers.has(playerId))
+		{
+			console.warn(`⚠️ Player ${playerId} is already registered`);
+			return;
+		}
+		this.registeredPlayers.add(playerId);
+		console.log(`👤 Player ${playerId} registered for the game`);
+	}
+
+	removeRegisteredPlayer(playerId)
+	{
+		if (this.registeredPlayers.has(playerId))
+			this.registeredPlayers.delete(playerId);
+		else
+			console.warn(`⚠️ Player ${playerId} is not registered`);
+	}
+
 	addPlayer(player)
 	{
-		if (this.players.length < this.maxPlayers)
+		console.log(`👤 Attempting to add player ${player.id} to game`);
+		if (this.registeredPlayers.has(player.id))
 		{
 			this.players.push(player);
 			this.paddles.set(player.id, this.createPaddle(this.players.length));
+			this.state.players.push({ id: player.id, kickBall: 0, missedBall: 0 });
 			this.team.get(this.players.length % 2 ? 1 : 2).playersId.push(player.id);
 			console.log(`👤 Player ${player.id} added to game`);
+			if (this.players.length === this.maxPlayers)
+				this.status = 'ready to start';
 		}
 	}
 
@@ -53,22 +112,21 @@ class PingPong extends EventEmitter
 		{
 			this.players.splice(playerIndex, 1);
 			this.paddles.delete(playerId);
-			for (const [teamNumber, teamInfo] of this.team.entries())
+			// çıkan takım otomatik mağlup olur
+			if (this.team.get(1).playersId.includes(playerId))
 			{
-				const index = teamInfo.playersId.indexOf(playerId);
-				if (index !== -1)
-				{
-					teamInfo.playersId.splice(index, 1);
-					if (teamInfo.playersId.length === 0)
-						this.team.delete(teamNumber);
-					break;
-				}
+				this.team.get(1).playersId = this.team.get(1).playersId.filter(id => id !== playerId);
+				this.team.get(2).score = this.settings.maxScore; // diğer takım kazanır
 			}
+			else if (this.team.get(2).playersId.includes(playerId))
+			{
+				this.team.get(2).playersId = this.team.get(2).playersId.filter(id => id !== playerId);
+				this.team.get(1).score = this.settings.maxScore; // diğer takım kazanır
+			}
+			this.finishedControls();
 		}
 		else
-		{
 			console.warn(`⚠️ Player ${playerId} not found in game`);
-		}
 	}
 
 	createPaddle(number)
@@ -105,8 +163,7 @@ class PingPong extends EventEmitter
 		this.team.set(2, { playersId: [], score: 0 });
 		this.ball.launchBall({x: Math.random() < 0.5 ? -1 : 1, y: Math.random() - 0.5});
 		this.eventListeners();
-		if (this.gameMode !== 'ai')
-			this.status = 'waiting';
+		this.status = 'waiting';
 	}
 
 	eventListeners()
@@ -122,18 +179,29 @@ class PingPong extends EventEmitter
 					{
 						this.lastGoal = 'right';
 						this.team.get(1).score++;
+						this.team.get(2).playersId.forEach(playerId => {
+							const playerState = this.state.players.find(p => p.id === playerId);
+							if (playerState)
+								playerState.missedBall += 1;
+						});
 					}
 					else
 					{
 						this.lastGoal = 'left';
 						this.team.get(2).score++;
+						this.team.get(1).playersId.forEach(playerId => {
+							const playerState = this.state.players.find(p => p.id === playerId);
+							if (playerState)
+								playerState.missedBall += 1;
+						});
 					}
 					this.emit('goal', border);
 					this.ball.reset();
-					const interval = setInterval(() =>
+					if (this.finishedControls())
+						return;
+					setTimeout(() =>
 					{
 						this.ball.launchBall({x: border == "left" ? -1 : 1, y: Math.random() - 0.5});
-						clearInterval(interval);
 					}, 500);
 				}
 				else if (border === 'top')
@@ -165,11 +233,11 @@ class PingPong extends EventEmitter
 
 	update(deltaTime)
 	{
-		if (this.status === 'paused')
-			return;
+		if (this.status === 'finished')
+			this.emit('update', { gameState: this.getGameState(), players: this.players });
 
 		if (this.status !== 'playing')
-			return new Error('Game is not currently playing: ' + this.status);
+			return;
 
 		this.gameTime += deltaTime;
 		this.lastUpdateTime = Date.now();
@@ -181,50 +249,66 @@ class PingPong extends EventEmitter
 		this.ball.update(deltaTime);
 		this.checkCollisions();
 
-		this.finishedControls();
-		this.emit('gameStateUpdate', this.getGameState());
+		this.emit('update', { gameState: this.getGameState(), players: this.players });
+	}
 
+	finish()
+	{
+		this.status = 'finished';
+		this.finishTime = Date.now();
+		this.players.forEach(p => p.reset());
+		this.emit('finished',
+			{
+				players: this.players,
+				results:
+				{
+					team1:
+					{
+						score: this.team.get(1).score,
+						playersId: this.team.get(1).playersId
+					},
+					team2:
+					{
+						score: this.team.get(2).score,
+						playersId: this.team.get(2).playersId
+					},
+					winner:
+					{
+						team: this.getWinnerTeam(),
+						ids: this.getWinnerTeam().playersId,
+					},
+					loser:
+					{
+						team: this.getLoserTeam(),
+						ids: this.getLoserTeam().playersId,
+					},
+					time:
+					{
+						start: this.startTime,
+						finish: this.finishTime,
+						duration: this.gameTime
+					},
+					matchType: this.gameMode,
+					state: this.state
+				},
+			}
+		);
+		this.finishTime = Date.now();
+		console.log(`winner: ${this.getWinnerTeam().playersId}, loser: ${this.getLoserTeam().playersId}`);
+		console.log(`🏁 Game finished! Final Score - team1: ${this.team.get(1).score}, team2: ${this.team.get(2).score}`);
 	}
 
 	finishedControls()
 	{
 		if (this.isFinished())
-			return;
+			return true;
 		if (this.team.get(1).score >= this.settings.maxScore || this.team.get(2).score >= this.settings.maxScore)
 		{
-			this.status = 'finished';
-			this.finishTime = Date.now();
-			this.emit('gameFinished',
-				{
-					players: this.players.map(p => p.id),
-					results:
-					{
-						team1:
-						{
-							score: this.team.get(1).score,
-							playersId: this.team.get(1).playersId
-						},
-						team2:
-						{
-							score: this.team.get(2).score,
-							playersId: this.team.get(2).playersId
-						},
-						winner: "team"+this.team.get(1).score > this.team.get(2).score ? 1 : 2,
-						time:
-						{
-							start: this.startTime,
-							finish: this.finishTime,
-							duration: this.gameTime
-						},
-						matchType: this.gameMode,
-					}
-				}
-			);
-
-			console.log(`🏁 Game finished! Final Score - Left: ${this.team.get(1).score}, Right: ${this.team.get(2).score}`);
+			this.finish();
+			return true;
 		}
+		return false;
 	}
-
 
 	isFinished()
 	{
@@ -233,29 +317,23 @@ class PingPong extends EventEmitter
 
 	checkCollisions()
 	{
-		if (!this.ball)
+		for (const [playerId, paddle] of this.paddles.entries())
 		{
-			console.warn('⚠️ Ball is null in checkCollisions');
-			return;
-		}
-
-
-		this.paddles.forEach(
-			(paddle) =>
+			const collisionDetails = Collision2D.trajectoryRectangleToRectangle(this.ball, paddle, true);
+			if (collisionDetails && collisionDetails.colliding)
 			{
-				const collisionDetails = Collision2D.trajectoryRectangleToRectangle(this.ball, paddle, true);
-				if (collisionDetails && collisionDetails.colliding)
-				{
-					const side = collisionDetails.side;
-					this.separateBallFromPaddle(this.ball, paddle, side);
-					if (side === "top" || side === "bottom")
-						this.ball.launchBall({x: this.ball.direction.x, y: -this.ball.direction.y});
-					else if (side === "left" || side === "right")
-						this.adjustBallAngle(paddle);
-					return collisionDetails.colliding;
-				}
+				const side = collisionDetails.side;
+				this.separateBallFromPaddle(this.ball, paddle, side);
+				if (side === "top" || side === "bottom")
+					this.ball.launchBall({x: this.ball.direction.x, y: -this.ball.direction.y});
+				else if (side === "left" || side === "right")
+					this.adjustBallAngle(paddle);
+				const playerState = this.state.players.find(p => p.id === playerId);
+				if (playerState)
+					playerState.kickBall += 1;
+				return collisionDetails.colliding;
 			}
-		);
+		}
 		return null;
 	}
 
@@ -298,10 +376,9 @@ class PingPong extends EventEmitter
 		}
 		console.log('▶️ Starting game...');
 		this.status = 'countdown';
-		const interval = setInterval(() =>
+		setTimeout(() =>
 		{
 			this.status = 'playing';
-			clearInterval(interval);
 		}, 1000);
 	}
 
@@ -327,8 +404,8 @@ class PingPong extends EventEmitter
 	{
 		console.log('🔄 Resetting game state...');
 		this.score = {
-			left: 0,
-			right: 0
+			team1: 0,
+			team2: 0
 		};
 		this.status = 'not initialized';
 		this.ball = null;
@@ -349,11 +426,31 @@ class PingPong extends EventEmitter
 		const playerStates = [];
 
 		for (const player of this.players)
+			{
+				playerStates.push({
+					id: player.id,
+					name: player.name,
+					...this.paddles.get(player.id).getState(),
+				});
+			}
+		if (this.status === 'finished')
 		{
-			playerStates.push({
-				name: player.name,
-				...this.paddles.get(player.id).getState(),
-			});
+			const retState = {
+				currentState: this.status,
+				gameData:
+				{
+					players: playerStates,
+					score : {
+						team1: this.team.get(1).score,
+						team2: this.team.get(2).score
+					},
+					winner:
+					{
+						names: playerStates.filter(p => this.getWinnerTeam().playersId.includes(p.id)).map(p => p.name),
+					},
+				}
+			};
+			return retState;
 		}
 		return {
 			currentState: this.status, // 'waiting', 'running', 'finished'
@@ -364,8 +461,8 @@ class PingPong extends EventEmitter
 					...this.ball.getState(),
 				},
 				score: {
-					left: this.team.get(1).score,
-					right: this.team.get(2).score
+					team1: this.team.get(1).score,
+					team2: this.team.get(2).score
 				},
 			}
 		};
@@ -381,29 +478,25 @@ class PingPong extends EventEmitter
 		return this.players.length === this.maxPlayers;
 	}
 
-	getWinner()
+	getWinnerTeam()
 	{
 		if (!this.isFinished())
 			return null;
-
+		return this.team.get(1).score > this.team.get(2).score ? this.team.get(1) : this.team.get(2);
 	}
 
-	getLoser()
+	getLoserTeam()
 	{
 		if (!this.isFinished())
 			return null;
+		return this.team.get(1).score < this.team.get(2).score ? this.team.get(1) : this.team.get(2);
 	}
 
 	getScore()
 	{
-		if (this.status !== 'not initialized')
-			return {
-				left: "-",
-				right: "-"
-			};
 		return {
-			left: this.team.get(1).score,
-			right: this.team.get(2).score
+			team1: this.team?.get(1)?.score || 0,
+			team2: this.team?.get(2)?.score || 0
 		};
 	}
 

@@ -2,7 +2,7 @@
 	position: relative;
 	width: 100%;
 	height: 100vh;
-	/* height: 100dvh; */
+	height: 100dvh;
 	background:
 		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
 		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
@@ -234,6 +234,9 @@ label {
 	outline: none;
 	border: none;
 	color: #0df;
+	/* text-shadow:
+		3px 3px #0cc,
+		9px 9px #606; */
 	font-family: inherit;
 	font-size: min(3rem, 1rem + 2vw);
 	width: 3ch;
@@ -312,7 +315,7 @@ label {
 
 @keyframes float {
 	0% {
-		top: 98%; /* 100% causes a slidebar glitch cause particles exceed the vh */
+		top: 100%;
 		opacity: 0;
 	}
 	10% {
@@ -322,7 +325,7 @@ label {
 		opacity: 1;
 	}
 	100% {
-		top: 0%;
+		top: -10%;
 		opacity: 0;
 	}
 }

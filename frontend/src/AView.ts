@@ -8,7 +8,6 @@ export default class {
 	}
 
 	async getHtml() { return ""; }
-	async setDynamicContent() {}
 
 	async setEventHandlers() {}
 	async unsetEventHandlers() {}

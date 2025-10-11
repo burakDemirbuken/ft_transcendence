@@ -73,6 +73,7 @@ class GameRenderer extends EventEmitter
 		{
 			case 'local':
 			case 'ai':
+			case 'multiplayer':
 			case 'classic':
 				await this.classicInitialize(gameConfig);
 				break;
@@ -145,8 +146,6 @@ class GameRenderer extends EventEmitter
 
 	renderMachine(data, machine)
 	{
-		if (!machine)
-			throw new Error('Arcade machine not found for rendering');
 		this.renderer.renderGame(data, machine);
 	}
 
@@ -154,9 +153,7 @@ class GameRenderer extends EventEmitter
 	{
 		data.matches.forEach((match) => {
 			const machine = this.arcadeMachines.get(match.matchNumber);
-			if (!machine)
-				throw new Error(`Arcade machine not found for match number ${match.matchNumber}`);
-			this.renderer.renderGame(match.gameState.gameData, machine);
+			this.renderer.renderGame(match.gameState, machine);
 		});
 	}
 
@@ -215,10 +212,19 @@ class GameRenderer extends EventEmitter
 	dispose()
 	{
 		this.isRunning = false;
-		if (this.currentGameMode)
-			this.currentGameMode.deactivate();
-		this.networkManager.disconnect();
+		this.currentGameMode = null;
 		this.gameCore.dispose();
+	}
+
+	reset()
+	{
+		this.isRunning = false;
+		this.gameCore.dispose();
+		this.gameState = null;
+		this.currentGameMode = null;
+		this.arcadeMachines.forEach(machine => machine.dispose());
+		this.arcadeMachines.clear();
+		this.playerMachine = null;
 	}
 }
 export default GameRenderer;

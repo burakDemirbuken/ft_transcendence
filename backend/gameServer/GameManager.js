@@ -30,14 +30,6 @@ class GameManager extends EventEmitter
 		);
 	}
 
-	uniqueGameId()
-	{
-		do {
-			var id = Date.now();
-		} while (this.games.has(id));
-		return id;
-	}
-
 	removePlayerFromGame(playerId)
 	{
 		for (const [gameId, game] of this.games.entries())
@@ -62,9 +54,15 @@ class GameManager extends EventEmitter
 		}
 	}
 
-	createGame(gameMode, properties)
+	registerPlayerToGame(gameId, playerId)
 	{
-		const gameId = this.uniqueGameId();
+		const game = this.getGame(gameId);
+		game.addRegisteredPlayer(playerId);
+	}
+
+	async createGame(id, gameMode, properties)
+	{
+		const gameId = id;
 		properties.id = gameId;
 		let game;
 		if (gameMode === 'local')
@@ -73,50 +71,59 @@ class GameManager extends EventEmitter
 			game = new PingPong(properties);
 		else if (gameMode === 'ai')
 			game = new AiPingPong(properties);
+		else if (gameMode === 'multiplayer')
+		{
+			game = new PingPong(properties);
+			game.gameMode = 'multiplayer';
+			game.maxPlayers = 4;
+		}
 		else
 			throw new Error(`Unsupported game mode: ${gameMode}`);
 		game.initializeGame();
-		game.on('gameFinished', (results, players) => this.emit(`game${gameId}_Ended`, results, players));
+		game.on('finished', (
+			{results, players}) =>
+			{
+				setTimeout(() => this.emit(`game${gameId}`, {type: 'finished', payload: results, players: players}), 3000);
+			}
+		);
+		game.on('update', ({gameState, players}) => this.emit(`game${gameId}`, {type: 'update', payload: gameState, players: players}));
 		this.games.set(gameId, game);
 		return gameId;
 	}
 
-	addPlayerToGame(gameId, player)
+	getGame(gameId)
 	{
 		if (!this.games.has(gameId))
 			throw new Error(`Game with ID ${gameId} does not exist`);
-		const game = this.games.get(gameId);
+		return this.games.get(gameId);
+	}
+
+	addPlayerToGame(gameId, player)
+	{
+		const game = this.getGame(gameId);
 		game.addPlayer(player);
 	}
 
 	gameStart(gameId)
 	{
-		const game = this.games.get(gameId);
-		if (!game)
-			throw new Error(`Game with ID ${gameId} does not exist`);
+		const game = this.getGame(gameId);
 		game.start();
 		console.log(`▶️ Game ${gameId} started`);
 	}
 
 	removeGame(gameId)
 	{
-		if (this.games.has(gameId))
-		{
-			const game = this.games.get(gameId);
-			game.stop();
-			this.games.delete(gameId);
-			console.log(`🗑️ Game ${gameId} removed from engine`);
-		}
+		const game = this.getGame(gameId);
+		game.stop();
+		this.games.delete(gameId);
+		console.log(`🗑️ Game ${gameId} removed from engine`);
 	}
 
 	resetGame(gameId)
 	{
-		if (this.games.has(gameId))
-		{
-			const game = this.games.get(gameId);
-			game.resetGame();
-			console.log(`🔄 Game ${gameId} reset`);
-		}
+		const game = this.getGame(gameId);
+		game.resetGame();
+		console.log(`🔄 Game ${gameId} reset`);
 	}
 
 	getPlayerGame(player)
@@ -172,16 +179,9 @@ class GameManager extends EventEmitter
 		this.lastUpdateTime = currentTime;
 		for (const [gameId, game] of this.games.entries())
 		{
-			if (game.isRunning())
-			{
-				game.update(deltaTime);
-				this.emit(`game${gameId}_StateUpdate`, {gameState: game.getGameState(), players: game.players.map(p => p.id)});
-			}
-			else if (game.status === 'waiting')
-			{
-				if (game.players.every(p => p.initialized))
-					this.gameStart(gameId);
-			}
+			game.update(deltaTime);
+			if (game.status === 'ready to start')
+				this.gameStart(gameId);
 		}
 	}
 

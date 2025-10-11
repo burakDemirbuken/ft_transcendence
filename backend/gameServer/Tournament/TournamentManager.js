@@ -28,30 +28,33 @@ class TournamentManager extends EventEmitter
 		return `tournament-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
 	}
 
-	createTournament(gameSettings, tournamentSettings)
+	async createTournament(id, maxPlayers, matches)
 	{
-		const tournamentId = this.createUniqueTournamentId();
-		if (this.tournaments.has(tournamentId))
-			throw new Error(`Tournament with ID ${tournamentId} already exists`);
-		if (!tournamentSettings.maxPlayers || Math.min(tournamentSettings.maxPlayers) < 2)
-			throw new Error(`Invalid player count: ${tournamentSettings.maxPlayers}`);
-		if (Math.log2(tournamentSettings.maxPlayers) % 1 !== 0)
-			throw new Error(`Tournament Count must be a power of 2: ${tournamentSettings.maxPlayers}`);
-		const tournament = new Tournament(tournamentSettings, gameSettings);
+		const tournamentId = id;
+		const tournament = new Tournament(maxPlayers);
+		tournament.setupMatches(matches);
 		tournament.on('update', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'update', payload: data, players: players }));
-		tournament.on('finished', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data, players: players }));
-		tournament.on('matchmaking', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'matchmaking', payload: data, players: players }));
-		tournament.on('nextRound', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'nextRound', payload: data, players: players }));
-		tournament.on('started',
-			({data, players}) =>
-				{
-					console.log(`🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁🏁`, JSON.stringify(data, null ,2));
-					this.emit(`tournament_${tournamentId}`, { type: 'started', payload: data, players: players });
-				}
+		tournament.on('finished', (data) =>
+			{
+				setTimeout(() => {
+					this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data });
+					this.tournaments.get(tournamentId).destroy();
+					this.tournaments.delete(tournamentId);
+					console.log(`🗑️ Tournament ${tournamentId} deleted after finishing`);
+				}, 3000);
+			}
 		);
 		tournament.on('error', (error) => this.emit('error', new Error(`Tournament ${tournamentId} error: ${error.message}`)));
 		this.tournaments.set(tournamentId, tournament);
 		return tournamentId;
+	}
+
+	nextRound(TournamentId)
+	{
+		const tournament = this.tournaments.get(TournamentId);
+		if (!tournament)
+			throw new Error(`Tournament with ID ${TournamentId} does not exist`);
+		this.emit(`tournament_${TournamentId}`, { type: 'nextRound', payload: tournament.initData(), players: tournament.players });
 	}
 
 	initTournament(TournamentId)
@@ -89,14 +92,20 @@ class TournamentManager extends EventEmitter
 		}
 	}
 
-	// TODOO: throwları ele al hangi throw nereye gidecek vs
-	joinTournament(tournamentId, player)
+	registerPlayer(tournamentId, player)
 	{
-		console.log(`Player ${player.id} joining tournament ${tournamentId}`);
 		const tournament = this.tournaments.get(tournamentId);
 		if (!tournament)
 			return this.emit('error', new Error(`Tournament with ID ${tournamentId} does not exist`));
+		tournament.registerPlayer(player);
+		console.log(`👤 Player ${player} registered for tournament ${tournamentId}`);
+	}
 
+	addPlayerToTournament(tournamentId, player)
+	{
+		const tournament = this.tournaments.get(tournamentId);
+		if (!tournament)
+			return this.emit('error', new Error(`Tournament with ID ${tournamentId} does not exist`));
 		tournament.addPlayer(player);
 		console.log(`Player ${player.id} joined tournament ${tournamentId}`);
 	}
@@ -108,24 +117,7 @@ class TournamentManager extends EventEmitter
 		this.lastUpdateTime = currentTime;
 
 		for (const [tournamentId, tournament] of this.tournaments.entries())
-		{
-			if (tournament.isRunning())
-			{
-				tournament.update(deltaTime);
-			}
-			else if (tournament.status === `waiting`)
-			{
-				if (tournament.players.every(p => p.initialized))
-					tournament.start();
-			}
-			if (tournament.isFinished())
-			{
-				console.log(`🏁 Tournament ${tournamentId} finished`);
-				this.emit(`tournament_${tournamentId}`,{type: 'finished', payload: tournament.getFinishedInfo(), players: tournament.participants});
-				this.tournaments.delete(tournamentId);
-				continue;
-			}
-		}
+			tournament.update(deltaTime);
 
 	}
 }

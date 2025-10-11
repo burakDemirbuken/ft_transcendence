@@ -1,30 +1,43 @@
 // for frontend websocket
+import Player from '../models/Player.js';
 
 export default async function clientConnectionSocket(fastify) {
 	fastify.get("/ws/client", {
 		websocket: true
 	},
 	(connection, req) => {
-		const client = connection.socket;
-
-		console.log('New client connected', {
+		if (req.query.userID === undefined) {
+			connection.socket.close(1008, 'userID query parameter is required');
+			return;
+		}
+		const currentPlayer = new Player(req.query.userID, connection.socket, req.query.userName || 'Anonymous');
+/*		console.log('New client connected', {
 			ip: req.ip,
-			protocol: client.protocol,
-			readystate: client.readyState,
-			remote:  client._socket.remoteAddress + ':' + client._socket.remotePort
+			protocol: connection.socket.protocol,
+			readystate: connection.socket.readyState,
+			remote:  connection.socket._socket.remoteAddress + ':' + connection.socket._socket.remotePort
+		});*/
+
+		connection.socket.on('message', (message) => {
+			console.log('Received message from client:', message.toString());
+			let data;
+
+			try {
+				data = JSON.parse(message.toString());
+				fastify.roomManager.handleClientRoomMessage(data.type, data.payload, currentPlayer)
+			} catch (error) {
+				currentPlayer.clientSocket.send(JSON.stringify({ type: 'error', payload: { message: error.message } }));
+			}
 		});
 
-		client.on('message', (message) => {
-			
+		connection.socket.on('close', () => {
+
+			fastify.roomManager.leaveRoom(currentPlayer)
+			fastify.log.error('Client disconnected')
 		});
 
-		client.on('close', () => {
-			
-			console.log('Client disconnected');
-		});
-
-		client.on('error', (error) => {
-			console.error('WebSocket error:', error);
+		connection.socket.on('error', (error) => {
+			fastify.log.error('WebSocket error:', error);
 		});
 	});
 }

@@ -8,8 +8,6 @@ class GameCore
 		this.engine = null;
 		this.scene = null;
 		this.camera = null;
-		this.isInitialized = false;
-		this.viewMode = 'single';
 		this.gameConfig = null;
 	}
 
@@ -32,8 +30,6 @@ class GameCore
 		this.camera.lowerRadiusLimit = this.camera.radius;
 		this.camera.upperRadiusLimit = this.camera.radius;
 		this.gameConfig = gameConfig;
-
-		this.isInitialized = true;
 
 		this.engine.runRenderLoop(
 			() =>
@@ -58,10 +54,8 @@ class GameCore
 
 	dispose()
 	{
-		this.engine.dispose();
-		this.camera.dispose();
+		this.engine.clear(new BABYLON.Color4(255, 255, 255, 1), true, true, true);
 		this.scene.dispose();
-		this.isInitialized = false;
 	}
 }
 

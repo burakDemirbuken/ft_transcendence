@@ -240,6 +240,7 @@ async def handle_game_data(websocket, client_id: str, data: dict):
     try:
         # 1) AI instance'ını bul (önce game_id ile, yoksa client eşleşmesi ile)
         game_id = data.get('game_id')
+        print(f"Handling game data for client {client_id} with game_id {game_id}")
         ai_player = None
 
         if game_id:

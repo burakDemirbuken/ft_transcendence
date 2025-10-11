@@ -1,4 +1,4 @@
-import EventEmitter from '../utils/EventEmitter.js';
+import EventEmitter from './EventEmitter.js';
 
 export default class Room extends EventEmitter
 {
@@ -11,8 +11,6 @@ export default class Room extends EventEmitter
 		this.maxPlayers = null;
 		this.host = null;
 		this.players = [];
-		//? izleyiciler eklenebilir mi?
-		// spectators: [];
 		this.gameSettings = gameSettings;
 		this.createdAt = Date.now();
 	}
@@ -23,10 +21,7 @@ export default class Room extends EventEmitter
 			throw new Error('Room is full');
 		if (this.players.length === 0)
 			this.host = player.id;
-		//! deneme için her zaman ready
-		this.players.push({ ...player, isReady: true });
-		console.log(`BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB`);
-		console.log(this.players);
+		this.players.push(player);
 	}
 
 	removePlayer(playerId)
@@ -61,7 +56,7 @@ export default class Room extends EventEmitter
 		this.status = 'in_game';
 		return {
 			gameSettings: this.gameSettings,
-			players: this.players,
+			players: this.players.map(p => p.getState()),
 			gameMode: this.gameMode,
 		};
 	}
@@ -71,6 +66,12 @@ export default class Room extends EventEmitter
 		return this.players.every(p => p.isReady);
 	}
 
+	finishRoom(payload)
+	{
+		this.status = 'finished';
+		this.emit('finished', { ...payload });
+	}
+
 	getState()
 	{
 		return {
@@ -78,10 +79,17 @@ export default class Room extends EventEmitter
 			gameMode: this.gameMode,
 			status: this.status,
 			maxPlayers: this.maxPlayers,
-			host: this.host,
-			players: this.players,
+			players: this.players.map(p => p.getState()),
 			gameSettings: this.gameSettings,
 			createdAt: this.createdAt,
 		};
+	}
+
+	initData()
+	{
+		return {
+			gameMode: this.gameMode,
+			gameSettings: this.gameSettings,
+		}
 	}
 }

@@ -10,7 +10,8 @@ async function globalsPlugin(fastify, options) {
 //		nginx: "http://nginx:9000",
 		email: "http://email:3005",
 		profile: "http://profile:3006",
-		gameServer: "http://gameserver:3003"
+		gameServer: "http://gameserver:3003",	
+		room: "http://room:3004"
 	};
 
 	const settings = {

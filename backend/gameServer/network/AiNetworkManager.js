@@ -44,7 +44,7 @@ class AiNetworkManager extends EventEmitter
 
 	sendMessage(message)
 	{
-		if (this.socket.isConnected())
+		if (this.socket.isConnect())
 		{
 			this.socket.sendRaw(message);
 		}
@@ -78,7 +78,6 @@ class AiNetworkManager extends EventEmitter
 				this.emit('game_initialized', message);
 				break;
 			case "ai_decision":
-				// AI sunucusu target_y döndürüyor
 				this.emit(`aiGame${message.game_id}_target`, message.target_y);
 				break;
 			case "error":
@@ -89,9 +88,8 @@ class AiNetworkManager extends EventEmitter
 
 	sendData(gameId, gameData)
 	{
-		if (!this.socket.isConnected())
+		if (!this.socket.isConnect())
 			throw new Error('AI server is not connected');
-
 		const message = {
 			type: 'game_data',
 			game_id: gameId,

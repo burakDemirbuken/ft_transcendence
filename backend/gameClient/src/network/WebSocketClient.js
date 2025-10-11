@@ -13,11 +13,15 @@ class NetworkManager
 		}
 	}
 
-	connect(params = {})
+	connect(endpoint, params = undefined)
 	{
 		try
 		{
-			let url = `${this.serverAddress}` + "/ws?" + new URLSearchParams(params).toString();
+			let url = `${this.serverAddress}` + "/" + endpoint;
+			if (typeof(params) !== "undefined")
+			{
+				url += "?" + new URLSearchParams(params).toString();
+			}
 			console.log('Connecting to server at', url);
 			this.socket = new WebSocket(url);
 
@@ -97,7 +101,7 @@ class NetworkManager
 	send(type, payload)
 	{
 		if (this.isConnect())
-			this.socket.send(JSON.stringify({ type, payload }));
+			this.socket.send(JSON.stringify({ type: type, payload: payload }));
 		else
 			throw new Error('Cannot send message: not connected to server');
 	}

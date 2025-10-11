@@ -24,6 +24,7 @@ class AIPingPong extends PingPong
 		this.team.set(2, { playersId: ["AI"], score: 0 });
 		this.paddles.set(player.id, this.createPaddle(2));
 		this.paddles.set("AI", this.createPaddle(1));
+		this.status = 'ready to start';
 	}
 
 	paddleControls()
@@ -82,6 +83,25 @@ class AIPingPong extends PingPong
 			}
 		];
 
+		if (this.status === 'finished')
+		{
+			return {
+				currentState: this.status, // 'waiting', 'running', 'finished'
+				gameData:
+				{
+					players: playerStates,
+					score: {
+						team1: this.team.get(1).score,
+						team2: this.team.get(2).score
+					},
+					winner:
+					{
+						names: this.team.get(1).score > this.team.get(2).score ? [playerStates[0].name] : [playerStates[1].name],
+					},
+				},
+			}
+		}
+
 		return {
 			currentState: this.status, // 'waiting', 'running', 'finished'
 			gameData:
@@ -91,8 +111,8 @@ class AIPingPong extends PingPong
 					...this.ball.getState(),
 				},
 				score: {
-					left: this.team.get(1).score,
-					right: this.team.get(2).score
+					team1: this.team.get(1).score,
+					team2: this.team.get(2).score
 				}
 			},
 		};

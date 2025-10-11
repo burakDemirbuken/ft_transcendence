@@ -114,6 +114,13 @@ class InputManager
 			up: Array.from(this.keyUpCallbacks.keys())
 		};
 	}
+
+	destroy()
+	{
+		this.pressedKeys.clear();
+		this.keyDownCallbacks.clear();
+		this.keyUpCallbacks.clear();
+	}
 }
 
 export default InputManager;

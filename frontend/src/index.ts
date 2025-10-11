@@ -35,7 +35,6 @@ const router = async function(page:string) {
 		view = new route.view();
 		view.setStylesheet();
 		content.innerHTML = await view.getHtml();
-		view.setDynamicContent();
 		view.setEventHandlers();
 	} else {
 		document.title = "Page Not Found";

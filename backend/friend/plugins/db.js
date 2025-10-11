@@ -5,7 +5,7 @@ import Friend from '../models/friend.js'
 export default fp(async (fastify, opts) => {
     const sequelize = new Sequelize({
         dialect: 'sqlite',
-        storage: './friend.sqlite'
+        storage: './database/friend.sqlite'
     })
 
     const FriendModel = Friend(sequelize, DataTypes, Model)
