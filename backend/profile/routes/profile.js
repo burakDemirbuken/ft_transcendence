@@ -103,4 +103,24 @@ export default async function profileRoute(fastify) {
 
 		return reply.send({ profile: userProfile })
 	})
+
+	fastify.get('/internal/friend', async (request, reply) => {
+		const { userName } = request.body ?? {}
+		if (!userName) {
+			return reply.code(400).send({ error: 'Username is required' })
+		}
+
+		const userProfile = await fastify.sequelize.models.Profile.findOne({
+			where: { userName: userName },
+			attributes: ['userName', 'displayName', 'avatarUrl']
+		})
+		if (!userProfile) {
+			return reply.code(404).send({ error: 'User not found' })
+		}
+
+		return reply.send({
+			
+		})
+	})
 }
+

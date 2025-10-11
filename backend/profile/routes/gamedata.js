@@ -105,6 +105,6 @@ export default async function gamedataRoute(fastify) {
 	})
 	
 	fastify.post('/internal/tournament', async (request, reply) => {
-		//burak
+		
 	})
 }
