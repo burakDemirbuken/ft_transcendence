@@ -19,43 +19,48 @@ export default async function allRoutes(fastify) {
 				const serviceName = request.params.serviceName;
 				const restPath = request.params['*'] || '';
 				const servicePath = fastify.services[serviceName];
-				 
+
 				console.log(`Service requested: ${serviceName}, Path: ${restPath}`);
 				console.log(`Service URL: ${servicePath}`);
-				
+
 				if (servicePath === undefined)
 					return reply.code(404).send({ error: 'Service not found' });
 
 				const targetUrl = restPath ? `${servicePath}/${restPath}` : servicePath;
-				
+
 				console.log(`Target URL: ${targetUrl}`);
 
 				const queryString = new URLSearchParams(request.query).toString();
 				const finalUrl = queryString ? `${targetUrl}?${queryString}` : targetUrl;
-				
+
 				console.log(`Forwarding ${request.method} request to: ${finalUrl}`);
 
 				try {
 					// Forward the request to the target service
 					const headers = { ...request.headers };
-					const body = request.method !== 'GET' && request.method !== 'HEAD' ? JSON.stringify(request.body) : undefined;
-					
-					const fetchHeaders = { ...headers };
-					// Only add Content-Type if there's a body
-					if (body) {
-						fetchHeaders['Content-Type'] = 'application/json';
+
+					// Remove problematic headers
+					delete headers['host'];
+					delete headers['content-length'];
+					delete headers['connection'];
+					delete headers['content-type']; // Remove to avoid duplicates
+
+					let body = undefined;
+					if (request.method !== 'GET' && request.method !== 'HEAD' && request.body) {
+						body = JSON.stringify(request.body);
+						headers['Content-Type'] = 'application/json';
 					}
-					
+
 					const response = await fetch(finalUrl, {
 						method: request.method,
-						headers: fetchHeaders,
+						headers: headers,
 						body: body
 					});
 
 					// Get the response data
 					const responseData = await response.text();
 					let parsedData;
-					
+
 					try {
 						parsedData = JSON.parse(responseData);
 					} catch (e) {
@@ -64,7 +69,7 @@ export default async function allRoutes(fastify) {
 
 					// Forward the response status and data
 					reply.code(response.status);
-					
+
 					// Forward response headers
 					response.headers.forEach((value, key) => {
 						if (key !== 'content-length' && key !== 'transfer-encoding') {
@@ -79,9 +84,9 @@ export default async function allRoutes(fastify) {
 					fastify.log.error(`Error message: ${error.message}`);
 					fastify.log.error(`Error code: ${error.code}`);
 					fastify.log.error(`Error cause: ${error.cause}`);
-					
-					return reply.code(500).send({ 
-						error: 'Internal server error', 
+
+					return reply.code(500).send({
+						error: 'Internal server error',
 						message: 'Failed to forward request to service',
 						service: serviceName,
 						details: error.message

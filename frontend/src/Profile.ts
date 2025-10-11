@@ -20,11 +20,11 @@ class ManagerProfile {
     constructor() {
         this.currentTab = 'overview';
         this.charts = {};
-	    // DOM yüklendikten sonra avatar-ring'i seç
+	    // DOM yüklendikten sonra avatar'ı seç
         setTimeout(() => {
-            this.avatarStatus = document.querySelector('.avatar-ring') as HTMLElement;
+            this.avatarStatus = document.querySelector('.avatar') as HTMLElement;
             if (!this.avatarStatus) {
-                console.error("avatar-ring elemanı bulunamadı!");
+                console.error("avatar elemanı bulunamadı!");
             } else {
                 this.initConnectionStatus(); // Bağlantı durumunu başlat
             }
@@ -534,11 +534,195 @@ function resultFilterChangeHandler (e: Event) {
     profileManager.filterMatches('result', target.value);
 };
 
+interface Player {
+  etap: number;
+  kutu: number;
+  kazanan: boolean | null;
+  skor?: number;
+  text: string;
+}
+
+interface Tournament {
+  name: string;
+  start_date: string;
+  end_date: string;
+  total_matches: number;
+  players: Player[];
+}
+
+interface User {
+  username: string;
+}
+
+function handleTournamentClick(e: MouseEvent, USERNAME: string, overlay: HTMLDivElement, turnuva: HTMLDivElement, wrapper: HTMLDivElement) {
+  const target = e.target as HTMLElement;
+  const row = target.closest('.tournament-row:not(.header)') as HTMLDivElement | null;
+  if (!row) return;
+
+  const players: Player[] = JSON.parse(row.dataset.players || '[]');
+  const firstRoundCount = players.filter(p => Number(p.etap) === 0).length;
+  const n = Math.max(1, Math.ceil(Math.log2(Math.max(1, firstRoundCount))));
+
+  overlay.style.display = 'flex';
+  initBracket(players, n, USERNAME, turnuva, wrapper);
+}
+
+function handleOverlayClick(e: MouseEvent, overlay: HTMLDivElement, turnuva: HTMLDivElement) {
+  const target = e.target as HTMLElement;
+  if (target.id === 'overlay') {
+    overlay.style.display = 'none';
+    turnuva.innerHTML = '';
+  }
+}
+
+function initBracket(players: Player[], n: number, currentUser: string, turnuva: HTMLDivElement, wrapper: HTMLDivElement) {
+    turnuva.innerHTML = '';
+    turnuva.style.transform = 'none';
+
+    const etapGap = 150;
+    const kutularArray: HTMLDivElement[][] = [];
+    const kutuHeight = 50;
+    const gapInMatch = 40;
+    const gapBetweenMatch = 100;
+
+    function createKutu(text = '', skor: number | null = null, left = 0, top = 0): HTMLDivElement {
+      const kutu = document.createElement('div');
+      kutu.classList.add('kutu');
+      kutu.style.left = left + 'px';
+      kutu.style.top = top + 'px';
+      if (text) {
+        const isimSpan = document.createElement('span');
+        isimSpan.classList.add('isim');
+        isimSpan.textContent = text;
+        kutu.appendChild(isimSpan);
+      }
+      if (skor !== null) {
+        const ayirici = document.createElement('div');
+        ayirici.classList.add('ayirici');
+        const skorSpan = document.createElement('span');
+        skorSpan.classList.add('skor');
+        skorSpan.textContent = skor.toString();
+        kutu.appendChild(ayirici);
+        kutu.appendChild(skorSpan);
+      }
+      return kutu;
+    }
+
+    // 1. etap kutuları
+    kutularArray[0] = [];
+    let currentTop = 0;
+    const firstStageCount = Math.pow(2, n);
+    for (let i = 0; i < firstStageCount; i++) {
+      const kutu = createKutu('', null, 0, currentTop);
+      turnuva.appendChild(kutu);
+      kutularArray[0].push(kutu);
+      currentTop += kutuHeight + (i % 2 === 1 ? gapBetweenMatch : gapInMatch);
+    }
+
+    // Diğer etaplar
+    for (let etap = 1; etap <= n; etap++) {
+      const prevStage = kutularArray[etap - 1];
+      const count = prevStage.length / 2;
+      kutularArray[etap] = [];
+
+      for (let i = 0; i < count; i++) {
+        const rect1 = prevStage[i * 2].getBoundingClientRect();
+        const rect2 = prevStage[i * 2 + 1].getBoundingClientRect();
+        const turnuvaRect = turnuva.getBoundingClientRect();
+
+        const middleY = (rect1.top + rect2.bottom) / 2 - turnuvaRect.top;
+        const kutu = createKutu('', null, etap * etapGap, middleY - kutuHeight / 2);
+        turnuva.appendChild(kutu);
+        kutularArray[etap].push(kutu);
+
+        // çizgiler
+        const vLine = document.createElement('div');
+        vLine.classList.add('line');
+        vLine.style.width = '2px';
+        vLine.style.height = (rect2.top - rect1.bottom) + 'px';
+        vLine.style.left = (rect1.left + rect1.width / 2 - turnuvaRect.left) + 'px';
+        vLine.style.top = (rect1.bottom - turnuvaRect.top) + 'px';
+        turnuva.appendChild(vLine);
+
+        const hLine = document.createElement('div');
+        hLine.classList.add('line');
+        const vMid = rect1.bottom + (rect2.top - rect1.bottom) / 2;
+        const leftStart = rect1.left + rect1.width / 2;
+        const leftEnd = rect1.left + etapGap;
+        hLine.style.width = (leftEnd - leftStart) + 'px';
+        hLine.style.height = '2px';
+        hLine.style.left = (leftStart - turnuvaRect.left) + 'px';
+        hLine.style.top = (vMid - turnuvaRect.top) + 'px';
+        turnuva.appendChild(hLine);
+
+        const shortVLine = document.createElement('div');
+        shortVLine.classList.add('line');
+        shortVLine.style.width = '2px';
+        shortVLine.style.height = (middleY - vMid) + 'px';
+        shortVLine.style.left = (leftEnd - turnuvaRect.left) + 'px';
+        shortVLine.style.top = (vMid - turnuvaRect.top) + 'px';
+        turnuva.appendChild(shortVLine);
+      }
+    }
+
+    const userBoxes = players.filter(p => p.text === currentUser);
+    const lastStage = userBoxes.length ? Math.max(...userBoxes.map(p => p.etap)) : -1;
+
+    players.forEach(item => {
+      const box = kutularArray[item.etap]?.[item.kutu - 1];
+      if (!box) return;
+
+      const isCurrentUser = item.text === currentUser;
+      const isFinalStage = item.etap === n;
+
+      if (item.kazanan === null) {
+        box.classList.add('devam');
+        box.innerHTML = `<span class="isim">${item.text}</span>`;
+      } else if (item.kazanan) {
+        box.classList.add('kazanan');
+        box.innerHTML = `<span class="isim">${item.text}</span><div class="ayirici"></div><span class="skor">${item.skor}</span>`;
+      } else {
+        box.classList.add('kaybeden');
+        box.innerHTML = `<span class="isim">${item.text}</span><div class="ayirici"></div><span class="skor">${item.skor}</span>`;
+      }
+
+      if (isCurrentUser) {
+        if (isFinalStage) {
+          box.classList.add('kazanan-son');
+          box.classList.remove('kendi');
+        } else if (item.etap === lastStage) {
+          box.classList.add('kendi');
+        }
+      }
+    });
+
+    setTimeout(() => {
+      const wrapperWidth = wrapper.clientWidth;
+      const turnuvaWidth = turnuva.scrollWidth;
+      const scaleX = wrapperWidth / turnuvaWidth;
+      const scale = Math.min(scaleX, 1);
+
+      const translateX = wrapperWidth / 15 - (turnuvaWidth * scale) / 2;
+      const translateY = 0;
+
+      turnuva.style.transformOrigin = 'top left';
+      turnuva.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    }, 50);
+}
+
 export default class extends AView {
+	 private USERNAME: string | null = null;
+    // turnuva ile ilgili DOM referansları
+    private overlay!: HTMLDivElement;
+    private table!: HTMLDivElement;
+    private closeBtn!: HTMLDivElement;
+    private wrapper!: HTMLDivElement;
+    private turnuva!: HTMLDivElement;
 
     constructor() {
 		super();
         this.setTitle("Profile");
+		this.USERNAME = "test_user";
 		profileManager = new ManagerProfile();
     }
 
@@ -563,13 +747,68 @@ export default class extends AView {
         document.addEventListener('click', tabClickHandler);
 
         // Filtreler
-        const timeFilter = document.getElementById('time-filter');
         const resultFilter = document.getElementById('result-filter');
-        timeFilter?.addEventListener('change', timeFilterChangeHandler);
         resultFilter?.addEventListener('change', resultFilterChangeHandler);
 
         // Level progress animasyonu
         profileManager.animateLevelProgress();
+        // ==================== Turnuva elementleri ====================
+        this.overlay = document.getElementById('overlay') as HTMLDivElement;
+        this.table = document.getElementById('tournament-table') as HTMLDivElement;
+        this.closeBtn = document.getElementById('close-btn') as HTMLDivElement;
+        this.wrapper = document.getElementById('turnuva-wrapper') as HTMLDivElement;
+        this.turnuva = document.getElementById('turnuva') as HTMLDivElement;
+
+        // Kullanıcıyı fetch et
+        fetch("http://localhost:3000/api/me")
+          .then(res => res.json())
+          .then((user: User) => {
+            this.USERNAME = user.username;
+            return fetch(`http://localhost:3000/api/user-tournaments/${encodeURIComponent(this.USERNAME)}`);
+          })
+          .then(res => res.json())
+          .then((tournaments: Tournament[]) => {
+            tournaments.forEach(tr => {
+              const row = document.createElement('div');
+              row.classList.add('tournament-row');
+              row.innerHTML = `
+                <span>${tr.name}</span>
+                <span>${tr.start_date}</span>
+                <span>${tr.end_date}</span>
+                <span>${tr.total_matches}</span>
+              `;
+              row.dataset.players = JSON.stringify(tr.players);
+              this.table.appendChild(row);
+            });
+          });
+
+        // Event delegation
+        this.table.addEventListener('click', (e) => {
+          if (!this.USERNAME) return;
+          handleTournamentClick(e, this.USERNAME, this.overlay, this.turnuva, this.wrapper);
+        });
+
+        this.overlay.addEventListener('click', (e) => handleOverlayClick(e, this.overlay, this.turnuva));
+
+        this.closeBtn.addEventListener('click', () => {
+          this.closeBtn.classList.add('close');
+          setTimeout(() => {
+            this.overlay.style.display = 'none';
+            this.turnuva.innerHTML = '';
+            this.closeBtn.classList.remove('close');
+          }, 300);
+        });
+
+        document.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (e.key === "Escape" && this.overlay.style.display === 'flex') {
+            this.closeBtn.classList.add('close');
+            setTimeout(() => {
+              this.overlay.style.display = 'none';
+              this.turnuva.innerHTML = '';
+              this.closeBtn.classList.remove('close');
+            }, 300);
+          }
+        });
     }
 
     async unsetEventHandlers() {
@@ -581,10 +820,14 @@ export default class extends AView {
 
         document.removeEventListener('click', tabClickHandler);
 
-        const timeFilter = document.getElementById('time-filter');
         const resultFilter = document.getElementById('result-filter');
-        timeFilter?.removeEventListener('change', timeFilterChangeHandler);
         resultFilter?.removeEventListener('change', resultFilterChangeHandler);
+
+        // Turnuva ile ilgili eventleri de kaldır
+        this.table?.replaceChildren(); // satırları temizle
+        this.overlay?.removeEventListener('click', (e) => handleOverlayClick(e, this.overlay, this.turnuva));
+        this.closeBtn?.removeEventListener('click', () => {});
+        document.removeEventListener('keydown', () => {});
     }
 
     async setStylesheet() {

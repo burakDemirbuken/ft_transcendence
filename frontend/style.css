@@ -4,6 +4,14 @@
 	box-sizing: border-box;
 }
 
+body {
+	display: flex;
+	justify-content: flex-start; /* merkeze değil sola sabitle */
+	align-items: stretch; /* Yüksekliği tam dolduracak */
+	min-height: 100dvh;
+	overflow-x: hidden;
+}
+
 /* navbar yanında içerik doğru davranışı için birkaç düzenleme */
 #content {
 	padding: 20px;
@@ -57,6 +65,35 @@
   margin-top: auto;  /* <-- en alta iter */
 }
 
+#navbar.logout .nav-bottom {
+	margin: 0;
+}
+
+#navbar.logout .login {
+	display: none;
+}
+
+#navbar.logout #logout svg{
+	rotate: 0deg;
+}
+
+#navbar.logout #in {
+	display: block;
+}
+
+#navbar #in {
+	display: none;
+}
+
+#navbar #out {
+	display: block;
+}
+
+#navbar.logout #out {
+	display: none;
+}
+
+
 /* link/ butonların flex davranışını sınırla, taşmalar daha düzgün olsun */
 #navbar .sidebar-element {
   font-size: 1em;
@@ -66,12 +103,14 @@
   align-items: center;
 }
 
-#navbar.collapse #logo {
-	opacity: 0;
-}
-
+/* collapse durumunda da scroll koru */
 #navbar.collapse {
 	width: 60px;
+	overflow-y: auto;
+}
+
+#navbar.collapse #logo {
+	opacity: 0;
 }
 
 #navbar.collapse svg {

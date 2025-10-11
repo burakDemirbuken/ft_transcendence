@@ -4,29 +4,29 @@ networks:
 
 volumes:
   frontend_src:
-   driver: local
-   driver_opts:
-     type: none
-     device: ./frontend
-     o: bind
+    driver: local
+    driver_opts:
+      type: none
+      device: ./frontend
+      o: bind
   gateway_src:
-   driver: local
-   driver_opts:
-     type: none
-     device: ./backend/gateway
-     o: bind
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/gateway
+      o: bind
   authentication_src:
-   driver: local
-   driver_opts:
-     type: none
-     device: ./backend/authentication
-     o: bind
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/authentication
+      o: bind
   email_src:
-   driver: local
-   driver_opts:
-     type: none
-     device: ./backend/email
-     o: bind
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/email
+      o: bind
   profile_src:
     driver: local
     driver_opts:
@@ -67,6 +67,7 @@ services:
       - 3003
     depends_on:
       - nginx
+<<<<<<< HEAD
 
   nginx:
    container_name: nginx
@@ -126,10 +127,53 @@ services:
   gameserver:
     container_name: gameserver
     build: ./backend/gameServer
+=======
+  nginx:
+    container_name: nginx
+    build: ./backend/nginx
+    restart: on-failure
+    volumes:
+      - frontend_src:/usr/share/nginx/html
+    networks:
+      - transcendency
+    ports:
+      - 3030:3030
+    depends_on:
+      - gateway
+
+  authentication:
+    container_name: authentication
+    build: ./backend/authentication
     restart: on-failure
     networks:
       - transcendency
     expose:
+      - 3001
+    volumes:
+      - authentication_src:/app
+      - /app/node_modules
+
+  gateway:
+    container_name: gateway
+    build: ./backend/gateway
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 3000
+    volumes:
+      - gateway_src:/app
+      - /app/node_modules
+
+  email:
+    container_name: email
+    build: ./backend/email
+>>>>>>> origin/arcadelogin
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+<<<<<<< HEAD
       - 3002
     volumes:
       - gameServer:/app
@@ -169,6 +213,67 @@ services:
       - /app/node_modules
     networks:
       - transcendency
+=======
+      - 3005
+    volumes:
+      - email_src:/app
+      - /app/node_modules
+    environment:
+      - EMAIL_SERVICE=gmail
+      - EMAIL_profile=forty2transcendence@gmail.com
+      - EMAIL_PASS=gfyk pfqi gvpm ahtx
+      - EMAIL_PORT=3005
+      - HOST=0.0.0.0
+
+#  gameserver:
+#    container_name: gameserver
+#    build: ./backend/gameServer
+#    restart: on-failure
+#    networks:
+#      - transcendency
+#    expose:
+#      - 3002
+#    ports:
+#      - "3002:3002"
+#    volumes:
+#      - gameServer:/app
+#      - /app/node_modules
+
+#  room:
+#    container_name: room
+#    build: ./backend/room
+#    restart: on-failure
+#    expose:
+#      - 3004
+#    volumes:
+#      - room_src:/app
+#      - /app/node_modules
+#    networks:
+#      - transcendency
+#
+#  profile:
+#    container_name: profile
+#    build: ./backend/profile
+#    restart: on-failure
+#    expose:
+#      - 3006
+#    volumes:
+#      - profile_src:/app
+#      - /app/node_modules
+#    networks:
+#      - transcendency
+
+#  friend:
+#    container_name: friend
+#    build: ./backend/friend
+#    restart: on-failure
+#    expose:
+#      - 3007
+#    volumes:
+#      - /app/node_modules
+#    networks:
+#      - transcendency
+>>>>>>> origin/arcadelogin
 
   aiserver:
     container_name: ai-server

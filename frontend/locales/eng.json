@@ -44,15 +44,21 @@
 			"dec": "December"
 		}
 	},
-	"sidebar": {
+	"navbar": {
 		"home": "HOME",
 		"play": "PLAY",
 		"profile": "PROFILE",
-		"chat": "CHAT",
+		"language": "ENGLISH",
 		"friends": "FRIENDS",
 		"collapse": "COLLAPSE",
 		"settings": "SETTINGS",
-		"logout": "LOGOUT"
+		"logout": "LOGOUT",
+		"login": "LOGIN"
+	},
+	"home": {
+		"team": "TEAM MEMBERS",
+		"thanks": "Thanks to 42 Kocaeli and our friends",
+		"click": "Click"
 	},
 	"login": {
 		"lang": "ENG",
@@ -61,7 +67,7 @@
 			"prompt": "Press Start Button..."
 		},
 		"username": "Enter Username",
-		"email": "Enter Email",
+		"email": "Enter E-mail",
 		"password": "Enter Password",
 		"code": "Enter Code",
 		"rme": "Remember Me"
@@ -196,7 +202,41 @@
 			}
 		}
 	},
-	"friends": {},
-	"chat": {},
-	"settings": {}
+	"friends": {
+		"friends": {
+			"title": "Friends",
+			"play": "Play",
+			"unfriend": "Unfriend"
+		},
+		"requests": {
+			"title": "Requests",
+			"accept": "Accept",
+			"decline": "Decline"
+		},
+		"invites": {
+			"title": "Invitations",
+			"undo": "Undo"
+		},
+		"blocked": {
+			"title": "Blocked",
+			"unblock": "Unblock"
+		}
+	},
+	"settings": {
+		"title": "Settings",
+		"account": {
+			"title": "Account",
+			"uname": "User Name",
+			"dname": "Display Name",
+			"email": "E-mail",
+			"pass": "Password"
+		},
+		"language": "Language",
+		"dzone": {
+			"title": "Danger Zone",
+			"prompt": "Delete Account:",
+			"button": "Delete"
+		},
+		"delacc": "Are you sure about deleting your account? This action is irreversible."
+	}
 }

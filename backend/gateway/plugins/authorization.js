@@ -19,12 +19,12 @@ export default async function (fastify, opts) {
       reply.code(401).send({ error: 'Unauthorized' })
     }
   })
-  
+
   fastify.decorate("requireAdmin", async (request, reply) => {
     const user = request.user;
     if (!user || user.role !== 'admin') {
-      reply.code(403).send({ 
-        error: 'Access denied. Admin privileges required.' 
+      reply.code(403).send({
+        error: 'Access denied. Admin privileges required.'
       });
     }
   })
