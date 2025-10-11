@@ -36,10 +36,12 @@ class TournamentManager extends EventEmitter
 		tournament.on('update', ({data, players}) => this.emit(`tournament_${tournamentId}`, { type: 'update', payload: data, players: players }));
 		tournament.on('finished', (data) =>
 			{
-				this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data });
-				this.tournaments.get(tournamentId).destroy();
-				this.tournaments.delete(tournamentId);
-				console.log(`🗑️ Tournament ${tournamentId} deleted after finishing`);
+				setTimeout(() => {
+					this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data });
+					this.tournaments.get(tournamentId).destroy();
+					this.tournaments.delete(tournamentId);
+					console.log(`🗑️ Tournament ${tournamentId} deleted after finishing`);
+				}, 3000);
 			}
 		);
 		tournament.on('error', (error) => this.emit('error', new Error(`Tournament ${tournamentId} error: ${error.message}`)));

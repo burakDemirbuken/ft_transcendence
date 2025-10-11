@@ -82,12 +82,7 @@ class RoomManager extends EventEmitter
 					console.warn(`Room with ID ${payload.roomId} does not exist`);
 					return;
 				}
-
-				// data base fetch atılacak yer. Fakat şöyle bir sıkıntı var. Turnuva nextround içinde buraya girdiği için turnuva bitmeden db ye atar
-
-
-
-				room.finishRoom(payload.matches);
+				room.finishRoom(payload);
 				room.players.forEach(player => {
 					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: payload }));
 				});
@@ -123,6 +118,12 @@ class RoomManager extends EventEmitter
 		else
 			throw new Error(`Invalid game mode: ${payload.gameMode}`);
 		room.addPlayer(player);
+
+		room.on('finished', (data) =>
+			{
+				// ulas: data base buradan kayıt edilecek
+			}
+		);
 		this.rooms.set(roomId, room);
 		return roomId;
 	}
@@ -228,14 +229,13 @@ class RoomManager extends EventEmitter
 		//room.notifyRoomUpdate(room.id);
 	}
 
-
 	_generateRoomId()
 	{
 		let roomId;
 		do {
 			//! TEST
 			roomId = "Naber";
-			roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+			// roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
 		} while (this.rooms.has(roomId));
 		return roomId;
 	}

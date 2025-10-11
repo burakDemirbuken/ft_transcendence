@@ -152,7 +152,7 @@ class GameRenderer extends EventEmitter
 	{
 		data.matches.forEach((match) => {
 			const machine = this.arcadeMachines.get(match.matchNumber);
-			this.renderer.renderGame(match.gameState.gameData, machine);
+			this.renderer.renderGame(match.gameState, machine);
 		});
 	}
 

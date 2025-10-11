@@ -5,6 +5,6 @@ export default {
 	tournamentSettings:
 	{
 		name: 'Default Tournament',
-		maxPlayers: 16,
+		maxPlayers: 8,
 	}
 };
