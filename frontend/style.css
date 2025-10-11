@@ -1,3 +1,5 @@
+@import url("profile_style/color.css");
+
 * {
 	margin: 0;
 	padding: 0;
@@ -24,7 +26,7 @@ body {
 		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
 		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
 		linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-	margin-left: 60px;
+	margin-left: var(--sidebar-wide-screen);
 }
 
 #navbar {
@@ -105,7 +107,7 @@ body {
 
 /* collapse durumunda da scroll koru */
 #navbar.collapse {
-	width: 60px;
+	width: var(--sidebar-wide-screen);
 	overflow-y: auto;
 }
 
@@ -207,11 +209,11 @@ body {
 
 @media (max-width: 1080px) {
 	#content {
-		margin-left: 50px;
+		margin-left: var(--sidebar-narrow-screen);
 	}
 
 	#navbar.collapse {
-		width: 50px;
+		width: var(--sidebar-narrow-screen);
 		padding: 2px;
 	}
 

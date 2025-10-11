@@ -44,16 +44,16 @@
     </header>
     <!-- Navigation -->
     <div class="profile-nav">
-        <button class="tab-btn" data-tab="overview"><i class="fa-solid fa-grip-vertical"></i> Dashboard <span class="btn-glow"></span></button>
+        <button class="tab-btn active" data-tab="overview"><i class="fa-solid fa-grip-vertical"></i> Dashboard <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="performance"><i class="fa-solid fa-chart-line"></i> Performans <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="tournaments"><i class="fa-solid fa-trophy"></i> Turnuva Geçmişi <span class="btn-glow"></span></button>
-        <button class="tab-btn active" data-tab="match_history"><i class="fa-solid fa-clock-rotate-left"></i> Maç Geçmişi <span class="btn-glow"></span></button>
+        <button class="tab-btn" data-tab="match_history"><i class="fa-solid fa-clock-rotate-left"></i> Maç Geçmişi <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="achievements"><i class="fa-solid fa-star"></i> Achievements <span class="btn-glow"></span></button>
     </div>
     <!-- Content Tabs -->
     <main class="profile-content">
         <!-- Overview Tab -->
-        <section id="overview" class="tab-content">
+        <section id="overview" class="tab-content active">
             <div class="stats-grid">
                 <!-- Performance Cards -->
                 <div class="stat-card performance-card">
@@ -252,7 +252,7 @@
             </div>
         </section>
         <!-- Matches Tab (Birleştirilmiş Maç Geçmişi ve Analizi) -->
-        <section id="match_history" class="tab-content active">
+        <section id="match_history" class="tab-content">
             <div class="tournaments-header">
                 <h3><i class="fa-solid fa-clock-rotate-left"></i> Maç Geçmişi ve Analizi</h3>
                 <div class="matches-filters">
