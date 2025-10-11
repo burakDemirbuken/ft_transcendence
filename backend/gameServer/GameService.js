@@ -178,17 +178,10 @@ class GameService
 
 	addPlayerToGame(gameMode, gameId, player)
 	{
-		console.log(`Adding player ${player.id} to game/tournament ${gameId} with mode ${gameMode}`);
 		if (gameMode !== 'tournament')
-		{
-			console.log(`👤👤👤👤👤👤👤👤👤👤 Adding player ${player.id} to game ${gameId}`);
 			this.gameManager.addPlayerToGame(gameId, player);
-		}
 		else
-		{
-			console.log(`👤👤👤👤👤👤👤👤👤 Adding player ${player.id} to tournament ${gameId}`);
 			this.tournamentManager.addPlayerToTournament(gameId, player);
-		}
 	}
 
 	handleWebSocketMessage(message, clientId)
@@ -200,12 +193,6 @@ class GameService
 			throw new Error('Player not found for clientId: ' + clientId);
 		const [namespace, action] = message.type.split('/');
 		const payload = message.payload;
-		console.log('--- Incoming Message ---');
-		console.log(`Gelen clientId: ${clientId}`);
-		console.log(`Gelen namespace: ${namespace}`);
-		console.log(`Gelen action: ${action}`);
-		console.log(`Gelen payload: ${JSON.stringify(payload, null, 2)}`);
-		console.log('-------------------------');
 		switch (namespace)
 		{
 			case 'player':

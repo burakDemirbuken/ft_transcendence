@@ -261,7 +261,7 @@ class App
 		switch (subEvent)
 		{
 			case 'update':
-				this.gameRenderer.gameState = data.gameData;
+				this.gameRenderer.gameState = data;
 				break;
 			default:
 				console.error('Unhandled game event:', subEvent, data);

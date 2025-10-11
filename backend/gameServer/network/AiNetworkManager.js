@@ -44,7 +44,7 @@ class AiNetworkManager extends EventEmitter
 
 	sendMessage(message)
 	{
-		if (this.socket.isConnected())
+		if (this.socket.isConnect())
 		{
 			this.socket.sendRaw(message);
 		}
@@ -89,7 +89,7 @@ class AiNetworkManager extends EventEmitter
 
 	sendData(gameId, gameData)
 	{
-		if (!this.socket.isConnected())
+		if (!this.socket.isConnect())
 			throw new Error('AI server is not connected');
 		const message = {
 			type: 'game_data',

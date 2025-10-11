@@ -74,7 +74,12 @@ class GameManager extends EventEmitter
 		else
 			throw new Error(`Unsupported game mode: ${gameMode}`);
 		game.initializeGame();
-		game.on('finished', ({results, players}) => this.emit(`game${gameId}`, {type: 'finished', payload: results, players: players}));
+		game.on('finished', (
+			{results, players}) =>
+			{
+				setTimeout(() => this.emit(`game${gameId}`, {type: 'finished', payload: results, players: players}), 3000);
+			}
+		);
 		game.on('update', ({gameState, players}) => this.emit(`game${gameId}`, {type: 'update', payload: gameState, players: players}));
 		this.games.set(gameId, game);
 		return gameId;
@@ -168,12 +173,9 @@ class GameManager extends EventEmitter
 		this.lastUpdateTime = currentTime;
 		for (const [gameId, game] of this.games.entries())
 		{
-			if (game.isRunning())
-				game.update(deltaTime);
-			else if (game.status === 'ready to start')
-			{
+			game.update(deltaTime);
+			if (game.status === 'ready to start')
 				this.gameStart(gameId);
-			}
 		}
 	}
 

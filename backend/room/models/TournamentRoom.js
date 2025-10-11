@@ -183,8 +183,8 @@ export default class TournamentRoom extends Room
 			(match, index) =>
 			{
 				if (matches[index]) {
-					match.player1Score = matches[index].score?.left || 0;
-					match.player2Score = matches[index].score?.right || 0;
+					match.player1Score = matches[index].score?.team1 || 0;
+					match.player2Score = matches[index].score?.team2 || 0;
 					match.winner = matches[index].winner;
 					match.loser = matches[index].loser;
 				}

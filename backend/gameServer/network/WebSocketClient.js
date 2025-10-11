@@ -106,6 +106,14 @@ class NetworkManager
 			throw new Error('Cannot send message: not connected to server');
 	}
 
+	sendRaw(message)
+	{
+		if (this.isConnect())
+			this.socket.send(message);
+		else
+			throw new Error('Cannot send message: not connected to server');
+	}
+
 	disconnect()
 	{
 		if (this.socket)

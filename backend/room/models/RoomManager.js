@@ -59,7 +59,7 @@ class RoomManager extends EventEmitter
 	handleServerRoomMessage(action, payload)
 	{
 		let room;
-		console.log(`Handling server room message: ${action}`, payload);
+		console.log(`Handling server room message: ${action}`, JSON.stringify(payload, null, 2));
 		switch (action)
 		{
 			case 'created':
@@ -82,6 +82,11 @@ class RoomManager extends EventEmitter
 					console.warn(`Room with ID ${payload.roomId} does not exist`);
 					return;
 				}
+
+				// data base fetch atılacak yer. Fakat şöyle bir sıkıntı var. Turnuva nextround içinde buraya girdiği için turnuva bitmeden db ye atar
+
+
+
 				room.finishRoom(payload.matches);
 				room.players.forEach(player => {
 					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: payload }));
@@ -230,7 +235,7 @@ class RoomManager extends EventEmitter
 		do {
 			//! TEST
 			roomId = "Naber";
-			// roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+			roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
 		} while (this.rooms.has(roomId));
 		return roomId;
 	}

@@ -83,6 +83,25 @@ class AIPingPong extends PingPong
 			}
 		];
 
+		if (this.status === 'finished')
+		{
+			return {
+				currentState: this.status, // 'waiting', 'running', 'finished'
+				gameData:
+				{
+					players: playerStates,
+					score: {
+						team1: this.team.get(1).score,
+						team2: this.team.get(2).score
+					},
+					winner:
+					{
+						names: this.team.get(1).score > this.team.get(2).score ? [playerStates[0].name] : [playerStates[1].name],
+					},
+				},
+			}
+		}
+
 		return {
 			currentState: this.status, // 'waiting', 'running', 'finished'
 			gameData:
@@ -92,8 +111,8 @@ class AIPingPong extends PingPong
 					...this.ball.getState(),
 				},
 				score: {
-					left: this.team.get(1).score,
-					right: this.team.get(2).score
+					team1: this.team.get(1).score,
+					team2: this.team.get(2).score
 				}
 			},
 		};

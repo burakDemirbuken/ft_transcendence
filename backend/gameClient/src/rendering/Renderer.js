@@ -28,15 +28,15 @@ class Renderer
 			this.ballSize = 10;
 	}
 
-	renderGame(gameData, machine)
+	renderGame(data, machine)
 	{
+		const gameData = data.gameData;
 		if (!machine || !gameData)
 		{
 			this.renderWaitingScreen('Waiting for game data...', machine);
 			return;
 		}
-
-		if (gameData.currentState === "finished")
+		if (data.currentState === "finished")
 		{
 			this.finishScreen(gameData, machine);
 			return;
@@ -90,9 +90,9 @@ class Renderer
 		ctx.font = '48px Arial';
 		ctx.textAlign = 'center';
 
-		ctx.fillText(score.right, this.screenSize.width / 4, 60);
+		ctx.fillText(score.team2, this.screenSize.width / 4, 60);
 
-		ctx.fillText(score.left, (this.screenSize.width * 3) / 4, 60);
+		ctx.fillText(score.team1, (this.screenSize.width * 3) / 4, 60);
 	}
 
 	renderCenterLine(ctx)
@@ -127,11 +127,12 @@ class Renderer
 		ctx.fillStyle = this.colors.text;
 		ctx.font = '32px Arial';
 		ctx.textAlign = 'center';
-		ctx.fillText(`${winner.name} kazandı!`, this.screenWidth / 2, this.screenHeight / 2);
+		// winner ya da gameover yazılacak
+		const winnerNames = gameData.winner.names.join(', ');
+		ctx.fillText(`Winner: ${winnerNames}`, this.screenSize.width / 2, this.screenSize.height / 2 - 20);
 
-		ctx.font = '24px Arial';
-		ctx.fillText(`Skor: ${scores[winner.id]}`, this.screenWidth / 2, this.screenHeight / 2 + 40);
-
+		if (gameData.score)
+			ctx.fillText(`Score: ${gameData.score.team1} - ${gameData.score.team2}`, this.screenSize.width / 2, this.screenSize.height / 2 + 20);
 		machine.updateScreen();
 	}
 }

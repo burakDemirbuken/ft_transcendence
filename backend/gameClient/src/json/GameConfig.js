@@ -8,6 +8,6 @@ export default {
 		ballRadius: 7,
 		ballSpeed: 600,
 		ballSpeedIncrease: 100,
-		maxScore: 11
+		maxScore: 5
 	}
 };
