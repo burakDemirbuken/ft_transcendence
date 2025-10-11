@@ -10,7 +10,7 @@ import { sequelize, testConnection } from './models/database.js';
 import User from './models/User.js';
 import authRoutes from './routes/authRoutes.js';
 
-const fastify = Fastify({ 
+const fastify = Fastify({
   logger: {
     level: process.env.LOG_LEVEL || 'info',
   }
@@ -68,7 +68,7 @@ const start = async () => {
 
     // Test database connection
     await testConnection();
-    
+
     // Sync database models
     await sequelize.sync({ force: false });
     console.log('✅ Database models synchronized');

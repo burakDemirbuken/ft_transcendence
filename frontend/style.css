@@ -4,6 +4,14 @@
 	box-sizing: border-box;
 }
 
+body {
+	display: flex;
+	justify-content: flex-start; /* merkeze değil sola sabitle */
+	align-items: stretch; /* Yüksekliği tam dolduracak */
+	min-height: 100dvh;
+	overflow-x: hidden;
+}
+
 /* navbar yanında içerik doğru davranışı için birkaç düzenleme */
 #content {
 	padding: 20px;
@@ -16,7 +24,7 @@
 		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
 		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
 		linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-	margin-left: 60px;
+	margin-left: 50px;
 }
 
 #navbar {
@@ -57,6 +65,35 @@
   margin-top: auto;  /* <-- en alta iter */
 }
 
+#navbar.logout .nav-bottom {
+	margin: 0;
+}
+
+#navbar.logout .login {
+	display: none;
+}
+
+#navbar.logout #logout svg{
+	rotate: 0deg;
+}
+
+#navbar.logout #in {
+	display: block;
+}
+
+#navbar #in {
+	display: none;
+}
+
+#navbar #out {
+	display: block;
+}
+
+#navbar.logout #out {
+	display: none;
+}
+
+
 /* link/ butonların flex davranışını sınırla, taşmalar daha düzgün olsun */
 #navbar .sidebar-element {
   font-size: 1em;
@@ -66,12 +103,14 @@
   align-items: center;
 }
 
-#navbar.collapse #logo {
-	opacity: 0;
+/* collapse durumunda da scroll koru */
+#navbar.collapse {
+	width: 50px;
+	overflow-y: auto;
 }
 
-#navbar.collapse {
-	width: 60px;
+#navbar.collapse #logo {
+	opacity: 0;
 }
 
 #navbar.collapse svg {

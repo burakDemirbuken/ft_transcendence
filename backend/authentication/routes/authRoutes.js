@@ -19,9 +19,18 @@ async function verifyJWT(request, reply) {
  * Authentication Routes
  */
 export default async function authRoutes(fastify, options) {
-  
+
   // Health check endpoint
-  fastify.get('/health', authController.health);
+  fastify.get('/health', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
+      }
+    }
+  }, authController.health);
 
   // Check endpoints
   fastify.get('/check-email', {
@@ -30,7 +39,8 @@ export default async function authRoutes(fastify, options) {
         type: 'object',
         required: ['email'],
         properties: {
-          email: { type: 'string', format: 'email' }
+          email: { type: 'string', format: 'email' },
+          lang: { type: 'string' }
         }
       }
     }
@@ -42,7 +52,8 @@ export default async function authRoutes(fastify, options) {
         type: 'object',
         required: ['username'],
         properties: {
-          username: { type: 'string', minLength: 3, maxLength: 50 }
+          username: { type: 'string', minLength: 3, maxLength: 50 },
+          lang: { type: 'string' }
         }
       }
     }
@@ -59,6 +70,12 @@ export default async function authRoutes(fastify, options) {
           email: { type: 'string', format: 'email' },
           password: { type: 'string', minLength: 8 }
         }
+      },
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
       }
     }
   }, authController.register);
@@ -72,23 +89,31 @@ export default async function authRoutes(fastify, options) {
           login: { type: 'string' }, // email or username
           password: { type: 'string' }
         }
+      },
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
       }
     }
   }, authController.login);
 
-  // Email verification (both GET with token in URL and POST with token in body)
+  // Email verification (GET)
   fastify.get('/verify-email', {
     schema: {
       querystring: {
         type: 'object',
         required: ['token'],
         properties: {
-          token: { type: 'string', minLength: 32, maxLength: 64 }
+          token: { type: 'string', minLength: 32, maxLength: 64 },
+          lang: { type: 'string' }
         }
       }
     }
   }, authController.verifyEmail);
 
+  // Email verification (POST)
   fastify.post('/verify-email', {
     schema: {
       body: {
@@ -96,6 +121,12 @@ export default async function authRoutes(fastify, options) {
         required: ['token'],
         properties: {
           token: { type: 'string', minLength: 32, maxLength: 64 }
+        }
+      },
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
         }
       }
     }
@@ -106,16 +137,20 @@ export default async function authRoutes(fastify, options) {
     schema: {
       body: {
         type: 'object',
-        required: ['email', 'code'],
+        required: ['login', 'code'],
         properties: {
-          email: { type: 'string', format: 'email' },
+          login: { type: 'string' },
           code: { type: 'string', minLength: 6, maxLength: 6 }
+        }
+      },
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
         }
       }
     }
   }, authController.verify2FA);
-
-  // Simplified authentication - removed other complex routes
 
   // Protected routes - Authentication required
   fastify.register(async function protectedRoutes(fastify) {
@@ -123,10 +158,38 @@ export default async function authRoutes(fastify, options) {
     fastify.addHook('preHandler', verifyJWT);
 
     // User profile endpoints
-    fastify.get('/me', authController.getProfile);
-    fastify.get('/profile', authController.getProfile);
+    fastify.get('/me', {
+      schema: {
+        querystring: {
+          type: 'object',
+          properties: {
+            lang: { type: 'string' }
+          }
+        }
+      }
+    }, authController.getProfile);
+
+    fastify.get('/profile', {
+      schema: {
+        querystring: {
+          type: 'object',
+          properties: {
+            lang: { type: 'string' }
+          }
+        }
+      }
+    }, authController.getProfile);
 
     // Logout
-    fastify.post('/logout', authController.logout);
+    fastify.post('/logout', {
+      schema: {
+        querystring: {
+          type: 'object',
+          properties: {
+            lang: { type: 'string' }
+          }
+        }
+      }
+    }, authController.logout);
   });
 }

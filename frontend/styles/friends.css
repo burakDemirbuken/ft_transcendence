@@ -144,14 +144,14 @@
 .search-bar button {
 	width: 2rem;
 	height: 2rem;
-	border-radius: 50%;
+	border-radius: 5px;
 
 	border: 2px solid #333;
 	background: #000;
 }
 
 .search-bar svg {
-	fill: #c0c;
+	fill: #ccc;
 	background: none;
 	padding: .4em;
 }
@@ -206,9 +206,16 @@
 	flex-direction: column;
 }
 
+.user-info .dname {
+	font-family: "Orbitron","monospace";
+	font-weight: bold;
+	text-shadow: 0 0 15px #fff7;
+}
+
 .user-info .uname {
-	font-family: "PixeloidSans";
-	text-shadow: 0 0 15px #0ff;
+	font-family: "PixeloidMono";
+	font-size: .7em;
+	color: #08a;
 }
 
 .user-actions {

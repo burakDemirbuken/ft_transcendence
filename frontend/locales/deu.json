@@ -44,15 +44,21 @@
 			"dec": "Dezember"
 		}
 	},
-	"sidebar": {
+	"navbar": {
 		"home": "HOME",
 		"play": "SPIELEN",
 		"profile": "PROFIL",
-		"chat": "CHAT",
+		"language": "DEUTSCH",
 		"friends": "FREUNDE",
 		"collapse": "STÜRZEN",
 		"settings": "EINSTELLUNGEN",
-		"logout": "AUSLOGGEN"
+		"logout": "AUSLOGGEN",
+		"login": "EINLOGGEN"
+	},
+	"home": {
+		"team": "TEAMMITGLIEDER",
+		"thanks": "Danke an 42 Kocaeli und unsere Freunde",
+		"click": "Klicke"
 	},
 	"login": {
 		"lang": "DEU",
@@ -61,7 +67,7 @@
 			"prompt": "Drücke die Starttaste..."
 		},
 		"username": "Nick Eingeben",
-		"email": "Email Eingeben",
+		"email": "E-Mail Eingeben",
 		"password": "Passwort Eingeben",
 		"code": "Schlüssel Eingeben",
 		"rme": "Login Merken"
@@ -196,7 +202,41 @@
 			}
 		}
 	},
-	"friends": {},
-	"chat": {},
-	"settings": {}
+	"friends": {
+		"friends": {
+			"title": "Freunde",
+			"play": "Spiel",
+			"unfriend": "Auflösen"
+		},
+		"requests": {
+			"title": "Anfrage",
+			"accept": "Akzeptieren",
+			"decline": "Ablehnen"
+		},
+		"invites": {
+			"title": "Einladungen",
+			"undo": "Zurücknehmen"
+		},
+		"blocked": {
+			"title": "Blockierte",
+			"unblock": "Entsperren"
+		}
+	},
+	"settings": {
+		"title": "Einstellungen",
+		"account": {
+			"title": "Konto",
+			"uname": "Benutzername",
+			"dname": "Anzeigename",
+			"email": "E-Mail",
+			"pass": "Passwort"
+		},
+		"language": "Sprache",
+		"dzone": {
+			"title": "Gefahrenzone",
+			"prompt": "Konto Löschen:",
+			"button": "Löschen"
+		},
+		"delacc": "Möchten Sie Ihr Konto wirklich löschen? Möchten Sie Ihr Konto löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
+	}
 }
