@@ -835,6 +835,76 @@ async register(request, reply) {
 			});
 		}
 	}
+
+	async deleteProfile(request, reply)
+	{
+		let trlt = getTranslations("eng");
+		let { lang } = request.query;
+		if(lang)
+			trlt = getTranslations(lang);
+
+		try{
+			const { userId, userEmail } = request.body;
+			
+			if (!userId) {
+				return reply.status(400).send({ 
+					success: false, 
+					error: trlt.delete?.noUserId || 'User ID required',
+					code: 'NO_USER_ID'
+				});
+			}
+
+			const user = await User.findByPk(userId);
+			if (!user) {
+				return reply.status(404).send({ 
+					success: false, 
+					error: trlt.unotFound || 'User not found' 
+				});
+			}
+
+			const deletedUserInfo = {
+				username: user.username,
+				email: user.email
+			};
+
+			await User.destroy({ where: { id: userId } });
+			if (tempStorage.has(deletedUserInfo.email)) {
+				tempStorage.delete(deletedUserInfo.email);
+				console.log(`🧹 Cleaned temp storage for deleted user: ${deletedUserInfo.email}`);
+			}
+
+			// Cookie'leri temizle (token'ları geçersiz kıl)
+			reply.clearCookie('accessToken', {
+				httpOnly: true,
+				secure: true,
+				sameSite: 'strict',
+				path: '/'
+			});
+
+			reply.clearCookie('refreshToken', {
+				httpOnly: true,
+				secure: true,
+				sameSite: 'strict',
+				path: '/'
+			});
+
+			reply.send({ 
+				success: true, 
+				message: trlt.delete?.success || 'Account successfully deleted',
+				deleted_user: {
+					username: deletedUserInfo.username,
+					email: deletedUserInfo.email
+				}
+			});
+
+		} catch (error) {
+			console.log('Delete profile error:', error);
+			reply.status(500).send({ 
+				success: false, 
+				error: trlt.delete?.fail || 'Failed to delete account' 
+			});
+		}
+	}
 }
 
 export default new AuthController();

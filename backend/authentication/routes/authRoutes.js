@@ -189,4 +189,22 @@ export default async function authRoutes(fastify, options) {
       }
     }
   }, authController.refreshToken);
+  
+  fastify.delete('/profile', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['username'],
+        properties: {
+          username: { type: 'string', minLength: 3, maxLength: 50 }
+        }
+      },
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
+      }
+    }
+  }, authController.deleteProfile);
 }

@@ -138,29 +138,29 @@ services:
       - gameServer:/app
       - /app/node_modules
 
-#  room:
-#    container_name: room
-#    build: ./backend/room
-#    restart: on-failure
-#    expose:
-#      - 3004
-#    volumes:
-#      - room_src:/app
-#      - /app/node_modules
-#    networks:
-#      - transcendency
-#
-#  profile:
-#    container_name: profile
-#    build: ./backend/profile
-#    restart: on-failure
-#    expose:
-#      - 3006
-#    volumes:
-#      - profile_src:/app
-#      - /app/node_modules
-#    networks:
-#      - transcendency
+  room:
+    container_name: room
+    build: ./backend/room
+    restart: on-failure
+    expose:
+      - 3004
+    volumes:
+      - room_src:/app
+      - /app/node_modules
+    networks:
+      - transcendency
+
+  profile:
+    container_name: profile
+    build: ./backend/profile
+    restart: on-failure
+    expose:
+      - 3006
+    volumes:
+      - profile_src:/app
+      - /app/node_modules
+    networks:
+      - transcendency
 
   friend:
     container_name: friend

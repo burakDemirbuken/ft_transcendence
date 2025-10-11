@@ -134,5 +134,5 @@ export default fp(async (fastify) => {
 
 }, {
     name: 'checkachievement',
-    dependencies: ['sequelize']
+    fastify: '4.x'
 })
