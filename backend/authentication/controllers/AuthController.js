@@ -665,7 +665,16 @@ async register(request, reply) {
 			trlt = getTranslations(lang);
 
 		try {
-			const userId = request.user.userId;
+			// Gateway'den gelen user bilgilerini al
+			const userId = request.headers['x-user-id'];
+			
+			if (!userId) {
+				return reply.status(401).send({ 
+					success: false, 
+					error: 'User authentication required',
+					code: 'NO_USER_INFO'
+				});
+			}
 
 			const user = await User.findByPk(userId);
 			if (!user) {
@@ -681,13 +690,15 @@ async register(request, reply) {
 	}
 
 	// LOGOUT
-	async logout(request, reply) {
+	async logout(request, reply)
+	{
 		let trlt = getTranslations("eng");
 		let { lang } = request.query;
 		if(lang)
 			trlt = getTranslations(lang);
-
+		
 		try {
+			console.log('🔐 Logout attempt:', request.method, request.url);
 			// Clear cookies
 			reply.clearCookie();
 

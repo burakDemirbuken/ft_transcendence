@@ -33,7 +33,9 @@ async function globalsPlugin(fastify, options) {
 	
 	const protectedPath =
 	[
-		/^\/auth\/me$/
+		/^\/auth\/me$/,
+		/^\/auth\/profile$/,
+		/^\/auth\/logout$/
 	];
 
 	fastify.decorate('services', services);

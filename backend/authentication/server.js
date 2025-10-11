@@ -4,16 +4,14 @@ import jwt from '@fastify/jwt';
 import cors from '@fastify/cors';
 import path from 'path';
 import fs from 'fs';
-
-// Import database and models
 import { sequelize, testConnection } from './models/database.js';
-import User from './models/User.js';
 import authRoutes from './routes/authRoutes.js';
 
 const fastify = Fastify({
-  logger: {
-    level: process.env.LOG_LEVEL || 'info',
-  }
+  logger: true,
+  requestTimeout: 30000, // 30 seconds
+  keepAliveTimeout: 65000, // 65 seconds
+  connectionTimeout: 30000, // 30 seconds
 });
 
 // CORS configuration
