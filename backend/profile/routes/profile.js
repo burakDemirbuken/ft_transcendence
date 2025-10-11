@@ -33,7 +33,7 @@ export default async function profileRoute(fastify) {
 		}
 	})
 
-	fastify.delete('/profile', async (request, reply) => {
+	fastify.delete('/delete', async (request, reply) => {
 		const { UserName } = request.body ?? {}
 
 		if (!UserName) {

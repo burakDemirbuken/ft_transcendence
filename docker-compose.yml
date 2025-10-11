@@ -160,6 +160,8 @@ services:
     restart: on-failure
     expose:
       - 3006
+    ports:
+      - "3006:3006"
     volumes:
       - profile_src:/app
       - /app/node_modules

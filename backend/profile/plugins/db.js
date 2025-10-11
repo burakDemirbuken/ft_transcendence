@@ -34,12 +34,12 @@ export default fp(async (fastify) => {
 		Profile.hasOne(Achievements, { foreignKey: 'userId', onDelete: 'CASCADE', hooks: true })
 		Achievements.belongsTo(Profile, { foreignKey: 'userId', targetKey: 'id', onDelete: 'CASCADE' })
 
-		Team.hasMany(MatchHistory, { foreignKey: 'teamOneID', onDelete: 'CASCADE', hooks: true })
-		Team.hasMany(MatchHistory, { foreignKey: 'teamTwoID', onDelete: 'CASCADE', hooks: true })
-		Team.hasMany(MatchHistory, { foreignKey: 'winnerTeamID', onDelete: 'CASCADE', hooks: true })
-		MatchHistory.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneID', targetKey: 'id', onDelete: 'CASCADE' })
-		MatchHistory.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoID', targetKey: 'id', onDelete: 'CASCADE' })
-		MatchHistory.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamID', targetKey: 'id', onDelete: 'CASCADE' })
+		Team.hasMany(MatchHistory, { foreignKey: 'teamOneId', onDelete: 'CASCADE', hooks: true })
+		Team.hasMany(MatchHistory, { foreignKey: 'teamTwoId', onDelete: 'CASCADE', hooks: true })
+		Team.hasMany(MatchHistory, { foreignKey: 'winnerTeamId', onDelete: 'CASCADE', hooks: true })
+		MatchHistory.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneId', targetKey: 'id', onDelete: 'CASCADE' })
+		MatchHistory.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoId', targetKey: 'id', onDelete: 'CASCADE' })
+		MatchHistory.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamId', targetKey: 'id', onDelete: 'CASCADE' })
 
 		Team.hasMany(Round, { foreignKey: 'teamOneID', onDelete: 'CASCADE', hooks: true })
 		Team.hasMany(Round, { foreignKey: 'teamTwoID', onDelete: 'CASCADE', hooks: true })
