@@ -44,15 +44,21 @@
 			"dec": "Aralık"
 		}
 	},
-	"sidebar": {
+	"navbar": {
 		"home": "BAŞLANGIÇ",
 		"play": "OYNA",
 		"profile": "PROFİL",
-		"chat": "SOHBET",
+		"language": "TÜRKÇE",
 		"friends": "ARKADAŞLAR",
-		"collapse": "YIK",
+		"collapse": "DARALT",
 		"settings": "AYARLAR",
-		"logout": "ÇIKIŞ"
+		"logout": "ÇIKIŞ",
+		"login": "GİRİŞ"
+	},
+	"home": {
+		"team": "EKİP ÜYELERİ",
+		"thanks": "42 Kocaeli'ye ve arkadaşlarımıza teşekkürler",
+		"click": "Tıkla"
 	},
 	"login": {
 		"lang": "TUR",
@@ -61,7 +67,7 @@
 			"prompt": "Başlat Düğmesine Basın..."
 		},
 		"username": "Rumuz Girin",
-		"email": "Email Girin",
+		"email": "E-posta Girin",
 		"password": "Şifre Girin",
 		"code": "Kod Girin",
 		"rme": "Beni Hatırla"
@@ -196,8 +202,41 @@
 			}
 		}
 	},
-	"friends": {},
-	"chat": {},
-	"settings": {}
+	"friends": {
+		"friends": {
+			"title": "Arkadaşlar",
+			"play": "Oyna",
+			"unfriend": "Çıkar"
+		},
+		"requests": {
+			"title": "İstekler",
+			"accept": "Kabul et",
+			"decline": "Reddet"
+		},
+		"invites": {
+			"title": "Davetler",
+			"undo": "Geri al"
+		},
+		"blocked": {
+			"title": "Engellenmiş",
+			"unblock": "Engeli Kaldır"
+		}
+	},
+	"settings": {
+		"title": "Ayarlar",
+		"account": {
+			"title": "Hesap",
+			"uname": "Kullanıcı Adı",
+			"dname": "Görünür Ad",
+			"email": "E-posta",
+			"pass": "Şifre"
+		},
+		"dzone": {
+			"title": "Tehlikel Bölge",
+			"prompt": "Hesabı Sil:",
+			"button": "Sil"
+		},
+		"delacc": "Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+	}
 
 }
