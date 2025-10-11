@@ -176,4 +176,16 @@ export default async function authRoutes(fastify, options) {
       }
     }
   }, authController.logout);
+
+  // Refresh token endpoint
+  fastify.post('/refresh', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
+      }
+    }
+  }, authController.refreshToken);
 }

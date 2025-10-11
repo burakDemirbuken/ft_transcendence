@@ -4,7 +4,7 @@ import jwtMiddleware from './plugins/authorization.js'
 import allRoutes from './routes/index.js'
 import cookie from '@fastify/cookie'
 import jwt from '@fastify/jwt'
-/* import cors from '@fastify/cors' */
+import cors from '@fastify/cors'
 
 const fastify = Fastify({
 	logger: true,
@@ -15,11 +15,22 @@ const fastify = Fastify({
 
 await fastify.register(globalsPlugin)
 
-await fastify.register(jwt, {
-	secret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production'
-});
+// CORS configuration - Gateway seviyesinde merkezi CORS yönetimi
+await fastify.register(cors, {
+	origin: process.env.CORS_ORIGIN || true,
+	credentials: true,
+	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS']
+})
 
 await fastify.register(cookie)
+
+await fastify.register(jwt, {
+	secret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
+	cookie: {
+		cookieName: 'accessToken',
+		signed: false,
+	}
+});
 
 await fastify.register(jwtMiddleware)
 

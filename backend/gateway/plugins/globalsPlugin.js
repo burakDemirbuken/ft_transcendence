@@ -6,7 +6,7 @@ dotenv.config()
 async function globalsPlugin(fastify, options) {
 	const services = {
 		auth: "http://authentication:3001",
-		gateway: "http://gateway:3000",
+		gateway: "http://gateway:3000", 
 		email: "http://email:3005",
 		profile: "http://profile:3006",
 		gameServer: "http://gameserver:3003"
@@ -29,13 +29,7 @@ async function globalsPlugin(fastify, options) {
 		/^\/auth\/verify-2fa$/,
 		/^\/auth\/check-email$/,
 		/^\/auth\/check-username$/,
-	];
-	
-	const protectedPath =
-	[
-		/^\/auth\/me$/,
-		/^\/auth\/profile$/,
-		/^\/auth\/logout$/
+		/^\/auth\/health$/,
 	];
 
 	fastify.decorate('services', services);
@@ -47,11 +41,6 @@ async function globalsPlugin(fastify, options) {
 		return (publicPaths.some((pattern) => pattern.test(path)));
 	});
 
-	fastify.decorate('isProtectedPath', function(path)
-	{
-		return (protectedPath.some((pattern) => pattern.test(path)));
-	});
-
 	fastify.decorate('getServiceUrl', function(serviceName)
 	{
 		return (this.services[serviceName]);
@@ -60,6 +49,6 @@ async function globalsPlugin(fastify, options) {
 }
 
 export default fp(globalsPlugin, {
-	name: 'paths-plugin', //??
+	name: 'globals-plugin',
 	fastify: '4.x'
 });

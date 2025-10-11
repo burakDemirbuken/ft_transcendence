@@ -616,23 +616,41 @@ async register(request, reply) {
 			// Update last login
 			await user.markLogin();
 
-			// Generate JWT token
+			// Generate JWT tokens
 			const accessToken = await reply.jwtSign(
 				{
 					userId: user.id,
 					username: user.username,
-					email: user.email
+					email: user.email,
+					type: 'access'
 				},
-				{ expiresIn: '24h' }
+				{ expiresIn: '15m' } // Access token 15 dakika
 			);
 
-			// Set cookie
+			const refreshToken = await reply.jwtSign(
+				{
+					userId: user.id,
+					username: user.username,
+					type: 'refresh'
+				},
+				{ expiresIn: '7d' } // Refresh token 7 gün
+			);
+
+			// Set cookies
 			reply.setCookie('accessToken', accessToken, {
 				httpOnly: true,
 				secure: true,
 				sameSite: 'strict',
 				path: '/',
-				maxAge: 24 * 60 * 60 * 1000 // 24 hours
+				maxAge: 15 * 60 * 1000 // 15 minutes
+			});
+
+			reply.setCookie('refreshToken', refreshToken, {
+				httpOnly: true,
+				secure: true,
+				sameSite: 'strict',
+				path: '/',
+				maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
 			});
 
 			// Remove 2FA code from memory
@@ -698,15 +716,116 @@ async register(request, reply) {
 			trlt = getTranslations(lang);
 		
 		try {
-			console.log('🔐 Logout attempt:', request.method, request.url);
-			// Clear cookies
-			reply.clearCookie();
+			console.log('🔐 Logout attempt for user:', request.headers['x-user-username']);
+			
+			// Clear both tokens
+			reply.clearCookie('accessToken', {
+				httpOnly: true,
+				secure: true,
+				sameSite: 'strict',
+				path: '/'
+			});
 
-			reply.send({ success: true, message: trlt.logout.success });
+			reply.clearCookie('refreshToken', {
+				httpOnly: true,
+				secure: true,
+				sameSite: 'strict',
+				path: '/'
+			});
+
+			reply.send({ 
+				success: true, 
+				message: trlt.logout.success,
+				user: request.headers['x-user-username']
+			});
 
 		} catch (error) {
 			console.log('Logout error:', error);
 			reply.status(500).send({ success: false, error: trlt.logout.fail });
+		}
+	}
+
+	// REFRESH TOKEN
+	async refreshToken(request, reply) {
+		let trlt = getTranslations("eng");
+		let { lang } = request.query;
+		if(lang)
+			trlt = getTranslations(lang);
+
+		try {
+			const refreshToken = request.cookies.refreshToken;
+			
+			if (!refreshToken) {
+				return reply.status(401).send({
+					success: false,
+					error: 'No refresh token provided',
+					code: 'NO_REFRESH_TOKEN'
+				});
+			}
+
+			// Verify refresh token
+			let decoded;
+			try {
+				decoded = request.server.jwt.verify(refreshToken);
+			} catch (err) {
+				return reply.status(401).send({
+					success: false,
+					error: 'Invalid refresh token',
+					code: 'INVALID_REFRESH_TOKEN'
+				});
+			}
+
+			// Check if it's actually a refresh token
+			if (decoded.type !== 'refresh') {
+				return reply.status(401).send({
+					success: false,
+					error: 'Invalid token type',
+					code: 'INVALID_TOKEN_TYPE'
+				});
+			}
+
+			// Get user from database to ensure user still exists
+			const user = await User.findByPk(decoded.userId);
+			if (!user) {
+				return reply.status(401).send({
+					success: false,
+					error: 'User not found',
+					code: 'USER_NOT_FOUND'
+				});
+			}
+
+			// Generate new access token
+			const newAccessToken = await reply.jwtSign(
+				{
+					userId: user.id,
+					username: user.username,
+					email: user.email,
+					type: 'access'
+				},
+				{ expiresIn: '15m' }
+			);
+
+			// Set new access token cookie
+			reply.setCookie('accessToken', newAccessToken, {
+				httpOnly: true,
+				secure: true,
+				sameSite: 'strict',
+				path: '/',
+				maxAge: 15 * 60 * 1000 // 15 minutes
+			});
+
+			reply.send({
+				success: true,
+				message: 'Token refreshed successfully',
+				user: user.toSafeObject()
+			});
+
+		} catch (error) {
+			console.log('Refresh token error:', error);
+			reply.status(500).send({ 
+				success: false, 
+				error: 'Internal server error' 
+			});
 		}
 	}
 }

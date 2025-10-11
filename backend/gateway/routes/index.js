@@ -1,12 +1,22 @@
-import  jwtMiddleware  from '../plugins/authorization.js';
-
 export default async function allRoutes(fastify) {
 	fastify.register(async function (fastify) {
 		fastify.addHook('onRequest', async (request, reply) => {
-			await jwtMiddleware(fastify, request, reply);
+			// JWT middleware artık server.js'de plugin olarak kayıtlı
+			// Burada sadece admin kontrol yapıyoruz
+			
+			// Admin path kontrolü (eğer admin path tanımlanmışsa)  
+			if (fastify.isAdminPath && fastify.isAdminPath(request.url)) {
+				if (!request.user || request.user.role !== 'admin') {
+					return reply.code(403).send({
+						success: false,
+						error: 'Admin access required',
+						code: 'ADMIN_ACCESS_REQUIRED'
+					});
+				}
+			}
 		});
 
-		/* fastify.route({
+		fastify.route({
 			method: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
 			url: '/:serviceName/*',
 			handler: async function (request, reply) {
@@ -97,7 +107,7 @@ export default async function allRoutes(fastify) {
 					});
 				}
 			}
-		});*/
+		});
 
 	});
 };
