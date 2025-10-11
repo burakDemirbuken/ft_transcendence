@@ -1,7 +1,14 @@
 const presence = new Map()
 
 export default async function onlineOfflineRoutes(fastify) {
+    fastify.get("/verify", async (request, reply) => {
+        return { status: "ok" }
+    
+    });
     fastify.get("/ws-friend/presence", { websocket: true }, (socket, req) => {
+
+        
+
         const { userName } = req.query
         console.log('New presence connection:', userName)
 

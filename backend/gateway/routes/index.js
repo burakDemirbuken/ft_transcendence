@@ -1,14 +1,15 @@
-import { verifyJWT, checkAdmin } from '../plugins/authorization.js'
-
 export default async function allRoutes(fastify) {
 	fastify.register(async function (fastify) {
 		fastify.addHook('onRequest', async (request, reply) => {
-			// Schema controll can be added here if needed
-			if (fastify.isPublicPath(request.path))
-				return;
-			//await verifyJWT(request, reply);
-			if (fastify.isAdminPath(request.path)) {
-				await checkAdmin(request, reply);
+			console.log(`Incoming request: ${request.method} ${request.url}`); 
+			if (fastify.isAdminPath && fastify.isAdminPath(request.url)) {
+				if (!request.user || request.user.role !== 'admin') {
+					return reply.code(403).send({
+						success: false,
+						error: 'Admin access required',
+						code: 'ADMIN_ACCESS_REQUIRED'
+					});
+				}
 			}
 		});
 
@@ -38,6 +39,16 @@ export default async function allRoutes(fastify) {
 				try {
 					// Forward the request to the target service
 					const headers = { ...request.headers };
+
+					// Add user information to headers if authenticated
+					if (request.user) {
+						headers['x-user-id'] = request.user.userId;
+						headers['x-user-username'] = request.user.username;
+						headers['x-user-email'] = request.user.email;
+						if (request.user.role) {
+							headers['x-user-role'] = request.user.role;
+						}
+					}
 
 					// Remove problematic headers
 					delete headers['host'];
@@ -94,5 +105,6 @@ export default async function allRoutes(fastify) {
 				}
 			}
 		});
+
 	});
 };

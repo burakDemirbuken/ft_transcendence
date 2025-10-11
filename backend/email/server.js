@@ -1,5 +1,4 @@
 import Fastify from 'fastify'
-import cors from '@fastify/cors'
 import emailRoutes from './routes/emailRoutes.js'
 import './config/env.js'
 
@@ -9,11 +8,7 @@ const fastify = Fastify({
   }
 })
 
-// CORS ayarları
-await fastify.register(cors, {
-  origin: process.env.CORS_ORIGIN || true,
-  credentials: true,
-})
+// CORS artık gateway'de yapılıyor
 
 // Routes'ları register et
 await fastify.register(emailRoutes)

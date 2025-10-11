@@ -1,19 +1,9 @@
 import authController from '../controllers/AuthController.js';
 
 /**
- * JWT verification middleware
+ * Auth service artık sadece JWT oluşturma işi yapıyor
+ * JWT verification gateway'de yapılıyor
  */
-async function verifyJWT(request, reply) {
-  try {
-    await request.jwtVerify();
-  } catch (err) {
-    reply.status(401).send({
-      success: false,
-      error: 'Invalid or expired token',
-      code: 'INVALID_TOKEN'
-    });
-  }
-}
 
 /**
  * Authentication Routes
@@ -140,7 +130,8 @@ export default async function authRoutes(fastify, options) {
         required: ['login', 'code'],
         properties: {
           login: { type: 'string' },
-          code: { type: 'string', minLength: 6, maxLength: 6 }
+          code: { type: 'string', minLength: 6, maxLength: 6 },
+          rememberMe: { type: 'boolean' }
         }
       },
       querystring: {
@@ -152,44 +143,68 @@ export default async function authRoutes(fastify, options) {
     }
   }, authController.verify2FA);
 
-  // Protected routes - Authentication required
-  fastify.register(async function protectedRoutes(fastify) {
-    // Add JWT verification to all routes in this context
-    fastify.addHook('preHandler', verifyJWT);
-
-    // User profile endpoints
-    fastify.get('/me', {
-      schema: {
-        querystring: {
-          type: 'object',
-          properties: {
-            lang: { type: 'string' }
-          }
+  // User profile endpoints - JWT kontrolü gateway'de yapılıyor
+  fastify.get('/me', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
         }
       }
-    }, authController.getProfile);
+    }
+  }, authController.getProfile);
 
-    fastify.get('/profile', {
-      schema: {
-        querystring: {
-          type: 'object',
-          properties: {
-            lang: { type: 'string' }
-          }
+  fastify.get('/profile', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
         }
       }
-    }, authController.getProfile);
+    }
+  }, authController.getProfile);
 
-    // Logout
-    fastify.post('/logout', {
-      schema: {
-        querystring: {
-          type: 'object',
-          properties: {
-            lang: { type: 'string' }
-          }
+  // Logout endpoint
+  fastify.post('/logout', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
         }
       }
-    }, authController.logout);
-  });
+    }
+  }, authController.logout);
+
+  // Refresh token endpoint
+  fastify.post('/refresh', {
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
+      }
+    }
+  }, authController.refreshToken);
+  
+  fastify.delete('/profile', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['username'],
+        properties: {
+          username: { type: 'string', minLength: 3, maxLength: 50 }
+        }
+      },
+      querystring: {
+        type: 'object',
+        properties: {
+          lang: { type: 'string' }
+        }
+      }
+    }
+  }, authController.deleteProfile);
 }

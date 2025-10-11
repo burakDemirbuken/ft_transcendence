@@ -1,25 +1,16 @@
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
 import jwt from '@fastify/jwt';
-import cors from '@fastify/cors';
 import path from 'path';
 import fs from 'fs';
-
-// Import database and models
 import { sequelize, testConnection } from './models/database.js';
-import User from './models/User.js';
 import authRoutes from './routes/authRoutes.js';
 
 const fastify = Fastify({
-  logger: {
-    level: process.env.LOG_LEVEL || 'info',
-  }
-});
-
-// CORS configuration
-await fastify.register(cors, {
-  origin: process.env.CORS_ORIGIN || true,
-  credentials: true,
+  logger: true,
+  requestTimeout: 30000, // 30 seconds
+  keepAliveTimeout: 65000, // 65 seconds
+  connectionTimeout: 30000, // 30 seconds
 });
 
 // Cookie support
