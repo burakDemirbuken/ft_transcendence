@@ -1,18 +1,18 @@
 <div class="friends-container">
 	<nav class="friend-nav">
 		<ul>
-			<li><button id="friends" class="pg-switch pg-actv" data-i18n="friends.title">Friends</button></li>
-			<li><button id="requests" class="pg-switch" data-i18n="requests.title">Requests</button></li>
-			<li><button id="invites" class="pg-switch" data-i18n="invites.title">Invites</button></li>
+			<li><button class="pg-switch friends pg-actv" data-i18n="friends.title">Friends</button></li>
+			<li><button class="pg-switch requests" data-i18n="requests.title">Requests</button></li>
+			<li><button class="pg-switch invites" data-i18n="invites.title">Invites</button></li>
 		</ul>
 		<select>
-			<option value="friends" data-i18n="friends.title">Friends</option>
-			<option value="requests" data-i18n="requests.title">Requests</option>
-			<option value="invites" data-i18n="invites.title">Invites</option>
+			<option value="friends" class="pg-switch friends" data-i18n="friends.title">Friends</option>
+			<option value="requests" class="pg-switch requests" data-i18n="requests.title">Requests</option>
+			<option value="invites" class="pg-switch invites" data-i18n="invites.title">Invites</option>
 		</select>
 	</nav>
 	<div class="friend-page-box">
-		<div class="subpage friends user-grid pg-actv">
+		<div id="friends" class="subpage friends user-grid pg-actv">
 			<div class="friend">
 				<div class="user-profile">
 					<div class="user-avatar">
@@ -35,7 +35,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="subpage requests" inert="">
+		<div id="requests" class="subpage requests" inert="">
 			<div class="search-bar">
 				<form action="">
 					<input type="text" placeholder="Search">
@@ -46,7 +46,7 @@
 			</div>
 			<div class="user-grid"></div>
 		</div>
-		<div class="subpage invites user-grid" inert=""></div>
+		<div id="invites" class="subpage invites user-grid" inert=""></div>
 		</div>
 	</div>
 </div>

@@ -47,7 +47,7 @@
 	font-weight: bold;
 	text-shadow: 0 0 10px #c0c;
 	color: #eee;
-	padding: clamp(1em, .8em + 1vw, 1.5em) 0;
+	padding: clamp(1em, .8em + 1vw, 1.2em) 0;
 
 	position: relative;
 }
@@ -86,6 +86,7 @@
 .friend-page-box {
 	position: relative;
 	width: max(80%, 260px);
+	width: max(260px, 75% + 5rem);
 	height: 30px;
 	margin-top: 1rem;
 }
@@ -172,6 +173,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: 1em;
+	min-width: 0;
 }
 
 .user-avatar {
@@ -202,20 +204,32 @@
 }
 
 .user-info {
+	min-width: 0;
+	flex: 1;
 	display: flex;
 	flex-direction: column;
+	gap: .1em;
 }
 
 .user-info .dname {
 	font-family: "Orbitron","monospace";
 	font-weight: bold;
-	text-shadow: 0 0 15px #fff7;
 }
 
 .user-info .uname {
 	font-family: "PixeloidMono";
 	font-size: .7em;
 	color: #08a;
+}
+
+.dname, .uname {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	display: block;
+	width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .user-actions {
