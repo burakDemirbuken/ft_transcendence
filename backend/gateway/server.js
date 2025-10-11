@@ -12,15 +12,8 @@ const fastify = Fastify({
 	connectionTimeout: 30000, // 30 seconds
 })
 
-/* await fastify.register(cors, {
-	origin: '*',
-	methods: ['GET', 'POST', 'PUT', 'DELETE'],
-	allowedHeaders: ['Content-Type', 'Authorization'],
-	exposedHeaders: ['Authorization'],
-	credentials: true
-}); */
-
 await fastify.register(globalsPlugin)
+
 await fastify.register(jwt, {
 	secret: fastify.secrets.jwtSecret, //?
 });

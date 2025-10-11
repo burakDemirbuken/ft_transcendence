@@ -1,32 +1,39 @@
-export async function verifyJWT(req, reply){
-	try {
-		await req.jwtVerify()
-	} catch (err) {
-		reply.code(401).send({ error: 'Unauthorized' })
-	}
+import fp from 'fastify-plugin'
+
+async function jwtMiddleware(fastify, options)
+{
+    fastify.addHook('preHandler', async (request, reply) =>
+    {
+        const requestPath = request.url.split('?')[0];
+        const token = request.cookies.accessToken;
+        if (token)
+        {
+            try
+            {
+                request.user = await request.jwtVerify();
+                return;
+            }
+            catch (err)
+            {
+                if (fastify.isPublicPath(requestPath))
+                    return;
+                else
+                    return ( reply.code(401).send({ success: false, error: 'Invalid authentication token', code: 'INVALID_TOKEN' }) );
+            }
+        }
+        else
+        {
+            if (fastify.isPublicPath(requestPath))
+                return;
+            else
+                return (reply.code(401).send({ success: false, error: 'Authentication required', code: 'NO_TOKEN'}) );
+        }
+    });
+
+    fastify.decorate('getUser', function(request)
+    {
+        return request.user || null;
+    });
 }
 
-export async function checkAdmin(req, reply) {
-	// check user is admin
-}
-
-/* Alternative Fastify plugin approach:
-export default async function (fastify, opts) {
-  fastify.decorate("authenticate", async (request, reply) => {
-    try {
-      await request.jwtVerify()
-    } catch (err) {
-      reply.code(401).send({ error: 'Unauthorized' })
-    }
-  })
-
-  fastify.decorate("requireAdmin", async (request, reply) => {
-    const user = request.user;
-    if (!user || user.role !== 'admin') {
-      reply.code(403).send({
-        error: 'Access denied. Admin privileges required.'
-      });
-    }
-  })
-}
-*/
+export default fp(jwtMiddleware,{ name: 'jwt-middleware', fastify: '4.x', dependencies: ['@fastify/jwt', '@fastify/cookie'] });
