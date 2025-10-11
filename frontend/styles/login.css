@@ -1,13 +1,8 @@
 .login-container {
 	position: relative;
 	width: 100%;
-	height: 100vh;
-	/* height: 100dvh; */
-	background:
-		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
-		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
-		linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-
+	height: calc(100vh - 40px);
+	height: calc(100dvh - 40px);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -101,7 +96,7 @@
 
 #rme {
 	position: absolute;
-	top: 1.5em;
+	top: clamp(.4rem, 2vh + .1rem, 1.5em);
 	left: 1.5em;
 	color: #bbb;
 	background: none;
@@ -133,7 +128,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: 60px;
-	width: 100%;
+	/* width: 100%; */
 }
 
 .enter, .back {
@@ -141,16 +136,22 @@
 	background: #111;
 	color: #ddd;
 	border: 2px solid #ddd;
-	border-image:
-		linear-gradient(45deg, #c0c, #0cc) 1;
+	border-image: linear-gradient(45deg, #c0c, #0cc) 1;
 	font-family: inherit;
-	font-size: 2rem;
-	width: 10%;
+	font-size: clamp(1rem, 2vmin + .8rem, 2rem);
+
+	padding: 0;
+	width: 3em;
+	height: 1.5em;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
 }
 
 .enter:hover::after, .back:hover::after, .enter:focus::after, .back:focus::after {
-	position:absolute;
-	content:  "";
+	position: absolute;
+	content: "";
 	top: -8%;
 	left: -4%;
 	width: 108%;
@@ -163,15 +164,9 @@
 	outline: none;
 }
 
-#error {
-	position: absolute;
-	top: 25%;
-	font-size: min(2rem, 1rem + 1vw);
-}
-
 .field {
 	position: absolute;
-	font-size: clamp(1.8rem, 5vw + 1rem, 5rem);
+	font-size: clamp(1.8rem, 5vmin + .4rem, 5rem);
 	opacity: 0;
 	transition: opacity 0.3s ease-in-out;
 	pointer-events: none;
@@ -180,6 +175,7 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	text-align: center;
 	gap: 30px;
 
 	color: #ddd;
@@ -217,7 +213,7 @@ label {
 	border: none;
 	color: #0df;
 	font-family: inherit;
-	font-size: min(3rem, 1rem + 2vw);
+	font-size: min(3rem, 4vmin + .2rem);
 	width: 3ch;
 	min-width: 1ch;
 	max-width: 20ch;
