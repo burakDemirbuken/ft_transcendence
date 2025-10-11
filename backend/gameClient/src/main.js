@@ -10,10 +10,6 @@ const id = _TEST_generateRandomId();
 const name = _TEST_generateRandomName();
 console.log(`Generated ID: ${id}, Name: ${name}`);
 
-<<<<<<< HEAD
-const roomUi = new RoomUi();
-=======
->>>>>>> origin/naber
 const roomSocket = new WebSocketClient(window.location.hostname, 3004);
 
 roomSocket.onConnect(() => {
@@ -25,10 +21,6 @@ roomSocket.onMessage((message) => {
 	switch (message.type) {
 
 		case "started":
-<<<<<<< HEAD
-			roomUi.hideGameUI();
-=======
->>>>>>> origin/naber
 			app = new App(id, name);
 			app.start(message.payload);
 			break;
@@ -40,15 +32,9 @@ roomSocket.onMessage((message) => {
 			console.log(`Room finished: `, JSON.stringify(message.payload));
 			app.destroy();
 			app = null;
-<<<<<<< HEAD
-			roomUi.showGameUI();
 			break;
 		case "error":
-			roomUi.showGameError(data || 'Unknown error from server');
-=======
-			break;
-		case "error":
->>>>>>> origin/naber
+			console.error(`Error from server: ${message.payload.message}`);
 		default:
 			console.warn(`Unhandled message type: ${message.type}`);
 	}

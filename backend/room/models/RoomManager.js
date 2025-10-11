@@ -25,20 +25,12 @@ class RoomManager extends EventEmitter
 		switch (action)
 		{
 			case 'create':
-<<<<<<< HEAD
-				const roomId = this.createRoom(player, payload);
-				player.clientSocket.send(JSON.stringify({ type: 'created', payload: { roomId } }));
-				break;
-			case 'join':
-				this.joinRoom(payload.roomId, player);
-=======
 				const state = this.createRoom(player, payload);
 				player.clientSocket.send(JSON.stringify({ type: 'created', payload: { ...state } }));
 				break;
 			case 'join':
 				this.joinRoom(payload.roomId, player);
 				player.clientSocket.send(JSON.stringify({ type: 'joined', payload: { roomId: payload.roomId, ...this.getRoom(payload.roomId).getState() } }));
->>>>>>> origin/naber
 				break;
 			case 'leave':
 				this.leaveRoom(payload.roomId, player);
@@ -134,11 +126,7 @@ class RoomManager extends EventEmitter
 			}
 		);
 		this.rooms.set(roomId, room);
-<<<<<<< HEAD
-		return roomId;
-=======
 		return {roomId: roomId, ...room.getState()};
->>>>>>> origin/naber
 	}
 
 	getRoom(roomId)
@@ -168,11 +156,7 @@ class RoomManager extends EventEmitter
 
 		room.addPlayer(player);
 		console.log(`Player with ID ${player.id} joined room ${roomId}`);
-<<<<<<< HEAD
-		//this.notifyRoomUpdate(roomId);
-=======
 		this.notifyRoomUpdate(roomId);
->>>>>>> origin/naber
 	}
 
 	leaveRoom(player)
@@ -243,11 +227,7 @@ class RoomManager extends EventEmitter
 
 		const state = {...room.startGame(playerId), roomId: roomId};
 		this.emit(`create`, state);
-<<<<<<< HEAD
-		//room.notifyRoomUpdate(room.id);
-=======
 		this.notifyRoomUpdate(roomId);
->>>>>>> origin/naber
 	}
 
 	_generateRoomId()
@@ -255,13 +235,8 @@ class RoomManager extends EventEmitter
 		let roomId;
 		do {
 			//! TEST
-<<<<<<< HEAD
-			roomId = "Naber";
-			// roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
-=======
 			//roomId = "Naber";
 			roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
->>>>>>> origin/naber
 		} while (this.rooms.has(roomId));
 		return roomId;
 	}
