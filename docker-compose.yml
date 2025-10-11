@@ -78,7 +78,7 @@ services:
     networks:
       - transcendency
     ports:
-      - 8080:8080
+      - 3030:3030
     depends_on:
       - gateway
 
@@ -124,19 +124,19 @@ services:
       - EMAIL_PORT=3005
       - HOST=0.0.0.0
 
-#  gameserver:
-#    container_name: gameserver
-#    build: ./backend/gameServer
-#    restart: on-failure
-#    networks:
-#      - transcendency
-#    expose:
-#      - 3002
-#    ports:
-#      - "3002:3002"
-#    volumes:
-#      - gameServer:/app
-#      - /app/node_modules
+  gameserver:
+    container_name: gameserver
+    build: ./backend/gameServer
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 3002
+    ports:
+      - "3002:3002"
+    volumes:
+      - gameServer:/app
+      - /app/node_modules
 
 #  room:
 #    container_name: room
@@ -162,16 +162,16 @@ services:
 #    networks:
 #      - transcendency
 
-#  friend:
-#    container_name: friend
-#    build: ./backend/friend
-#    restart: on-failure
-#    expose:
-#      - 3007
-#    volumes:
-#      - /app/node_modules
-#    networks:
-#      - transcendency
+  friend:
+    container_name: friend
+    build: ./backend/friend
+    restart: on-failure
+    expose:
+      - 3007
+    volumes:
+      - /app/node_modules
+    networks:
+      - transcendency
 
   aiserver:
     container_name: ai-server
