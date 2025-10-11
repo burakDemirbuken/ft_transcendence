@@ -1,23 +1,36 @@
 export default async function profileRoute(fastify) {
 
 	fastify.get('/profile', async (request, reply) => { 
-		const { UserName } = request.body ?? {}
+		const { userName } = request.body ?? {}
 
-		if (!UserName) {
+		if (!userName) {
 			return reply.code(400).send({ error: 'Username is required' })
 		}
+		
+		try {
+			const userProfile = await fastify.sequelize.models.Profile.findOne({
+				where: { userName: userName }
+			})
+			if (!userProfile) {
+				return reply.code(404).send({ error: 'User not found' })
+			}
 
-		const userProfile = await fastify.sequelize.models.Profile.findOne({
-			where: { userName: UserName },
-			include: fastify.sequelize.models.Stats,
-			include: fastify.sequelize.models.Achievements
-		})
+			const [ userAchievementsProgress, userStats ] = await Promise.all([
+				fastify.getAchievementProgress(userProfile),
+				fastify.statCalculate(userProfile)
+			])
 
-		if (!userProfile) {
-			return reply.code(404).send({ error: 'User not found' })
+			fastify.statCalculate(userProfile)
+
+			return reply.send({
+				profile: userProfile,
+				achievements: userAchievementsProgress,
+				stats: userStats
+			})
+		} catch (error) {
+			fastify.log.error('Error retrieving user profile:', error)
+			return reply.code(500).send({ error: 'Internal Server Error' })
 		}
-
-		return userProfile
 	})
 
 	fastify.delete('/profile', async (request, reply) => {

@@ -36,8 +36,11 @@ export default (sequelize, DataTypes, Model) => {
         twentyFiveTenStreak: {
             type: DataTypes.DATE,
             allowNull: true
+        },
+        lessThanThreeMin: {
+            type: DataTypes.DATE,
+            allowNull: true
         }
-
     }, {
         sequelize,
         modelName: 'Achievement',

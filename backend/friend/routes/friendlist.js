@@ -12,7 +12,7 @@ export default async function friendListRoutes(fastify) {
                 status: 'accepted'
             }
         })
-        //return reply.code(200).send(friends.map(friend => friend.userid === id ? friend.peerid : friend.userid))
+
         return reply.code(200).send(friends)
     })
 
