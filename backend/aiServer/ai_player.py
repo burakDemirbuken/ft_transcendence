@@ -29,6 +29,11 @@ class PingPongAI:
         self.tired_counter = 0
         self.super_focus = False
         self.focus_counter = 0
+        
+		# Yeni -  Oyun alanı bilgileri
+        self.screen_width = 800
+        self.screen_height = 600
+        self.paddle_x = 780  # AI paddle X konumu
 
     def setup_difficulty(self):
         """Zorluk seviyesine göre parametreleri ayarla"""
@@ -44,7 +49,7 @@ class PingPongAI:
             self.lose_probability = (10 - self.custom_settings['fairness']) / 20.0  # 0.5-0.0
             self.max_consecutive_wins = max(1, self.custom_settings['max_consecutive_wins'])
 
-            # Yeni özellikler
+            # özellikler
             self.rage_enabled = self.custom_settings['rage_mode']
             self.fatigue_enabled = self.custom_settings['fatigue_system']
             self.focus_enabled = self.custom_settings['focus_mode']
@@ -184,15 +189,18 @@ class PingPongAI:
 
     def predict_ball_y(self, ball_x, ball_y, ball_speed_x, ball_speed_y, paddle_x, screen_height):
         """Topun paddle_x konumuna geldiğinde Y pozisyonunu tahmin eder"""
-        if abs(ball_speed_x) < 0.1:
+		# Hız çok düşükse mevcut Y konumunu döndür
+        if abs(ball_speed_x) < 0:
             return ball_y
 
+        # Topun paddle_x konumuna ulaşması için gereken süre
         time_to_reach = (paddle_x - ball_x) / ball_speed_x
         if time_to_reach <= 0:
             return ball_y
 
         predicted_y = ball_y + ball_speed_y * time_to_reach
 
+        # Yansımaları hesaba kat
         bounces = 0
         while (predicted_y < 0 or predicted_y > screen_height) and bounces < 10:
             if predicted_y < 0:
@@ -269,7 +277,7 @@ class PingPongAI:
                     self.locked_target = predicted_y + noise
                     self.target_locked = True
 
-                target_y = self.locked_target
+                target_y = self.locked_target    
             else:
                 predicted_y = self.predict_ball_y(ball_x, ball_y, ball_speed_x, ball_speed_y, 780, screen_height)
                 noise_range = 30 * (1 - current_accuracy)
@@ -281,6 +289,12 @@ class PingPongAI:
 
         # Hedef Y konumunu sınırlar içinde tut
         target_y = max(paddle_height/2, min(screen_height - paddle_height/2, target_y))
+        
+		# DEBUG LOG
+        print(f"🤖 AI Hesaplama:")
+        print(f"  Top: ({ball_x:.1f}, {ball_y:.1f}) | Hız: ({ball_speed_x:.1f}, {ball_speed_y:.1f})")
+        print(f"  Paddle Y: {my_paddle_y:.1f} | Hedef: {target_y:.1f}")
+        print(f"  Mod: Frozen={self.is_frozen}, Locked={self.target_locked}, Lose={self.should_lose_next}")
 
         return target_y - paddle_height/2  # Paddle'ın üst kenarının Y konumunu döndür
 

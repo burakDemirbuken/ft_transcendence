@@ -309,7 +309,7 @@ async def handle_game_data(websocket, client_id: str, data: dict):
 
         # 3) Log
         import time
-        print(f"[{time.strftime('%H:%M:%S')}] Oyun {game_id} - AI karar verdi: Hedef Y = {target_y:.2f}")
+        print(f"[{time.strftime('%H:%M:%S')}] Oyun {game_id} - AI karar verdi<: Hedef Y = {target_y:.2f}")
         if can_compute:
             print(f"  Top: ({bx:.1f}, {by:.1f}), Hız: ({bvx:.1f}, {bvy:.1f})")
             print(f"  Raket: Y = {ai_y:.1f}")
