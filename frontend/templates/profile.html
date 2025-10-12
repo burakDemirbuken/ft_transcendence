@@ -139,7 +139,9 @@
                 </div>
                 <!-- Performance Chart -->
                 <div class="stat-card chart-card">
-                    <h3><i class="fa-solid fa-cubes"></i> <span data-i18n="profile.dash.wperf.title">Haftalık Performans</span></h3>
+                    <h3>
+                        <i class="fa-solid fa-cubes"></i>
+                        <span data-i18n="profile.dash.wperf.title">Haftalık Performans</span></h3>
                     <canvas id="performanceChart" data-labels='["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]' data-values='[4, 6, 3, 9, 7, 5, 8]'></canvas>
                 </div>
             </div>
@@ -204,7 +206,10 @@
             </div>
             <div class="tournament-table" id="tournament-table">
                 <div class="tournament-row header">
-                    <span data-i18n="profile.thistory.header.tname">Turnuva Adı</span><span data-i18n="profile.thistory.header.tstart">Başlangıç</span><span data-i18n="profile.thishtory.header.tend">Bitiş</span><span data-i18n="profile.thishtory.header.total">Toplam Maç</span>
+                    <span data-i18n="profile.thistory.header.tname">Turnuva Adı</span>
+                    <span data-i18n="profile.thistory.header.tstart">Başlangıç</span>
+                    <span data-i18n="profile.thistory.header.tend">Bitiş</span>
+                    <span data-i18n="profile.thistory.header.total">Toplam Maç</span>
                 </div>
 				<!-- Burası database eklendikten sonra silinecek (BAŞLANGIÇ) -->
                 <div class="tournament-row"
@@ -316,38 +321,43 @@
                 <div class="achievement-card unlocked">
                     <div class="achievement-icon">🏆</div>
                     <h4 data-i18n="profile.achiev.fwin.title">İlk Galibiyet</h4>
-                    <p>İlk maçını kazandın!</p>
-                    <p>İlk maçını kazandınman gerekiyor</p>
-                    <div class="achievement-date">TARİHHH</div>
+                    <p class="passive" data-i18n="profile.achiev.fwin.passive">Win your first match</p>
+                    <p class="active" data-i18n="profile.achiev.fwin.active">You won your first match!</p>
+                    <div class="achievement-date"></div>
                 </div>
                 <div class="achievement-card unlocked">
                     <div class="achievement-icon">🔥</div>
                     <h4 data-i18n="profile.achiev.smaster.title">Streak Master</h4>
-                    <p>10 maç üst üste kazandın!</p>
+                    <p class="passive" data-i18n="profile.achiev.smaster.passive">Win 10 matches in a row</p>
+                    <p class="active" data-i18n="profile.achiev.smaster.active">You won 10 matches in a row!</p>
                     <div class="achievement-date">22.07.2025</div>
                 </div>
                 <div class="achievement-card unlocked">
                     <div class="achievement-icon">⚡</div>
                     <h4 data-i18n="profile.achiev.swin.title">Hızlı Galibiyet</h4>
-                    <p>3 dakikadan kısa sürede kazandın!</p>
+                    <p class="passive" data-i18n="profile.achiev.swin.passive">Win in less than 3 minutes</p>
+                    <p class="active" data-i18n="profile.achiev.swin.active">You won in less than 3 minutes!</p>
                     <div class="achievement-date">25.07.2025</div>
                 </div>
                 <div class="achievement-card locked">
                     <div class="achievement-icon">👑</div>
                     <h4 data-i18n="profile.achiev.nking.title">Neon Kralı</h4>
-                    <p>100 maç kazanman gerekiyor</p>
+                    <p class="passive" data-i18n="profile.achiev.nking.passive">Win 100 matches</p>
+                    <p class="active" data-i18n="profile.achiev.nking.active">You won 100 matches!</p>
                     <div class="achievement-progress">171/100 ✓</div>
                 </div>
                 <div class="achievement-card locked">
                     <div class="achievement-icon">🎯</div>
                     <h4 data-i18n="profile.achiev.pserie.title">Mükemmel Seri</h4>
-                    <p>25 maç üst üste kazanman gerekiyor</p>
+                    <p class="passive" data-i18n="profile.achiev.pserie.passive">Win 25 matches in a row</p>
+                    <p class="active" data-i18n="profile.achiev.pserie.active">You won 25 matches in a row!</p>
                     <div class="achievement-progress">15/25</div>
                 </div>
                 <div class="achievement-card locked">
                     <div class="achievement-icon">💎</div>
                     <h4 data-i18n="profile.achiev.lplayer.title">Efsane Oyuncu</h4>
-                    <p>500 maç oynaman gerekiyor</p>
+                    <p class="passive" data-i18n="profile.achiev.lplayer.passive">Play 500 matches</p>
+                    <p class="active" data-i18n="profile.achiev.lplayer.active">You played 500 matches!</p>
                     <div class="achievement-progress">234/500</div>
                 </div>
             </div>

@@ -5,6 +5,7 @@ function getCSSVar(name) {
 class ManagerProfile {
     constructor() {
         this.showcharts = {};
+        // const matches = loa
         this.chartData = {
             labelName: 'Kazanılan Maçlar',
             labels: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],

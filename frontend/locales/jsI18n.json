@@ -18,6 +18,15 @@
 			"code": {
 				"empty": "Code can't be empty."
 			}
+		},
+		"profile": {
+			"mwon": "Matches Won",
+			"mtotal": "Total Matches",
+			"days": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+			"spoint": "Skill Points",
+			"skills": ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"],
+			"victory": "Victory",
+			"defeat": "Defeat"
 		}
 	},
 	"tur": {

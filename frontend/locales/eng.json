@@ -104,8 +104,7 @@
 				"lose": "L"
 			},
 			"wperf": {
-				"title": "Weekly Performance",
-				"mwon": "Matches Won"
+				"title": "Weekly Performance"
 			}
 		},
 		"perf": {
@@ -115,18 +114,10 @@
 				"lost": "Lost"
 			},
 			"skills": {
-				"title": "Skills",
-				"speed": "Speed",
-				"accur": "Accuracy",
-				"defence": "Defence",
-				"attack": "Attack",
-				"strat": "Strategy",
-				"dur": "Durability"
+				"title": "Skills"
 			},
 			"mprog": {
-				"title": "Monthly Progress",
-				"mtotal": "Total Matches",
-				"mwon": "Matches Won"
+				"title": "Monthly Progress"
 			},
 			"dstats": {
 				"title": "Detailed Statistics",
@@ -168,11 +159,7 @@
 				"match": "Match",
 				"score": "Score",
 				"time": "Duration",
-				"result": "Result",
-				"res": {
-					"vic": "Victory",
-					"def": "Defeat"
-				}
+				"result": "Result"
 			}
 		},
 		"achiev": {

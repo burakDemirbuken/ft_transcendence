@@ -11,6 +11,7 @@ class ManagerProfile {
     private charts: Record<string, any>;
     private avatarStatus: HTMLElement;
     private showcharts: { performance?: Chart } = {};
+    // const matches = loa
     private chartData: { labelName: string, labels: string[], data: number[] } = {
         labelName: 'Kazanılan Maçlar',
         labels: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
