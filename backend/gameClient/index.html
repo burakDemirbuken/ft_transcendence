@@ -1503,6 +1503,131 @@ html {
     }
 }
 
+/* Fast Game Mode Card - Meteor Theme */
+.fast-game-mode-card {
+    background: linear-gradient(135deg, #d10101d7 0%, #f97800d2 100%);
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(255, 8, 68, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    min-height: 160px;
+    max-width: 180px;
+}
+
+.fast-game-mode-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 16px 32px rgba(255, 8, 68, 0.6);
+    background: linear-gradient(135deg, #ff0844 0%, #ff6b6b 50%, #ff9999 100%);
+}
+
+.fast-game-mode-card:active {
+    transform: translateY(-4px) scale(0.98);
+}
+
+/* Fast Label (hidden but kept for structure) */
+.fast-label {
+    display: none;
+}
+
+/* Fast Mode Icon */
+.fast-mode-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #b52424 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(255, 8, 68, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Pulsing Glow Ring */
+.fast-mode-icon::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 107, 107, 0.6);
+}
+
+.fast-game-mode-card:hover .fast-mode-icon::after {
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.fast-mode-icon svg {
+    width: 48px;
+    height: 48px;
+    fill: #ffffff;
+    filter: drop-shadow(0 4px 8px rgba(255, 8, 8, 0.5));
+    transition: all 0.3s ease;
+}
+
+/* Fast Mode Title */
+.fast-mode-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(255, 0, 0, 0.6);
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .fast-game-mode-card {
+        padding: 20px;
+        min-height: 160px;
+    }
+
+    .fast-mode-icon {
+        width: 64px;
+        height: 64px;
+    }
+
+    .fast-mode-icon svg {
+        width: 40px;
+        height: 40px;
+    }
+
+    .fast-mode-title {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fast-game-mode-card {
+        padding: 16px;
+        min-height: 140px;
+        gap: 12px;
+    }
+
+    .fast-mode-icon {
+        width: 56px;
+        height: 56px;
+    }
+
+    .fast-mode-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    .fast-mode-title {
+        font-size: 18px;
+    }
+}
 
     </style>
 </head>
@@ -1814,8 +1939,13 @@ html {
 	                    <label class="setting-label">Bitiş Skoru</label>
 	                    <input type="number" min="1" max="50" value="11" class="input-field" id="winning-score" placeholder="Kazanmak için gereken skor">
 	                </div>
-	            </div>
-
+					
+					<div class="setting-group fast-game-mode-card">
+						<label class="fast-label"></label>
+						<div class="fast-mode-icon no-select"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M557.7 64.9L363.5 139.6L365.8 110.3C366.8 97.5 353 88.8 341.8 95.2L165.3 197.4C102.6 233.7 64 300.6 64 373C64 485.1 154.9 576 267 576C339.4 576 406.3 537.4 442.6 474.7L544.8 298.3C551.3 287.2 542.6 273.3 529.7 274.3L500.4 276.6L575.1 82.4C575.7 80.9 576 79.2 576 77.6C576 70.1 570 64.1 562.5 64.1C560.8 64.1 559.2 64.4 557.7 65zM256 256C326.7 256 384 313.3 384 384C384 454.7 326.7 512 256 512C185.3 512 128 454.7 128 384C128 313.3 185.3 256 256 256zM256 352C256 334.3 241.7 320 224 320C206.3 320 192 334.3 192 352C192 369.7 206.3 384 224 384C241.7 384 256 369.7 256 352zM272 448C280.8 448 288 440.8 288 432C288 423.2 280.8 416 272 416C263.2 416 256 423.2 256 432C256 440.8 263.2 448 272 448z"/></svg></div>
+						<span class="fast-mode-title">Hızlı Oyun</span>
+					</div>
+				</div>
 	            <div class="join-room-section">
 	                <label class="setting-label">Mevcut Odaya Katıl</label>
 	                <div class="input-group">
@@ -1875,7 +2005,7 @@ html {
 	                <label class="setting-label">Mevcut Turnuvaya Katıl</label>
 	                <div class="input-group">
 	                    <input type="text" class="input-field" id="tournament-code" placeholder="Turnuva kodunu girin..." maxlength="6">
-	                    <button class="btn btn-secondary" id="tournament-join-btn">Turnuvaya Katıl</button>
+	                    <button class="btn btn-secondary" id="tournament-join-btn">Odaya Katıl</button>
 	                </div>
 	            </div>
 
