@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PLAY</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
 	<script src="https://unpkg.com/babylonjs@latest/babylon.js"></script>
 	<script src="https://unpkg.com/babylonjs-loaders@latest/babylonjs.loaders.js"></script>
     <style>
@@ -1285,17 +1288,6 @@ html {
     }
 }
 
-@keyframes slideOutLeft {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(-50px);
-    }
-}
-
 /* Scrollbar for participants list */
 .participants-list::-webkit-scrollbar {
 	width: 8px;
@@ -1392,8 +1384,8 @@ html {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
-    padding: 30px;
-    margin-bottom: 30px;
+    padding: 10px;
+    margin-bottom: 10px;
     backdrop-filter: blur(10px);
 }
 
@@ -1406,9 +1398,10 @@ html {
 .participants-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 15px;
+    gap: 5px;
     max-height: 400px;
     overflow-y: auto;
+	overflow-x: auto;
     padding-right: 10px;
 }
 
@@ -1420,7 +1413,6 @@ html {
     display: flex;
     align-items: center;
     gap: 12px;
-    transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
 }
@@ -1433,17 +1425,16 @@ html {
     right: 0;
     bottom: 0;
     opacity: 0.1;
-    z-index: 0;
 }
 
 .participant-card:hover {
-    transform: translateY(-3px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-.participant-icon {
-    font-size: 24px;
-    z-index: 1;
+.participant-icon svg {
+    display: block;
+    margin: 0 auto;
+    filter: drop-shadow(0 0 4px rgba(0, 255, 255, 0.5));
 }
 
 .participant-name {
@@ -1503,8 +1494,488 @@ html {
     }
 }
 
+.fast-game-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px 0;
+}
 
-    </style>
+/* Fast Game Mode Card - Meteor Theme */
+.fast-game-mode-card {
+    background: linear-gradient(135deg, #d10101d7 0%, #f97800d2 100%);
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(255, 8, 68, 0.4);
+	margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    min-height: 160px;
+    max-width: 180px;
+}
+
+.fast-game-mode-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 16px 32px rgba(255, 8, 68, 0.6);
+    background: linear-gradient(135deg, #ff0844 0%, #ff6b6b 50%, #ff9999 100%);
+}
+
+.fast-game-mode-card:active {
+    transform: translateY(-4px) scale(0.98);
+}
+
+/* Fast Label (hidden but kept for structure) */
+.fast-label {
+    display: none;
+}
+
+/* Fast Mode Icon */
+.fast-mode-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #b52424 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(255, 8, 68, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Pulsing Glow Ring */
+.fast-mode-icon::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 107, 107, 0.6);
+}
+
+.fast-game-mode-card:hover .fast-mode-icon::after {
+    border-color: rgba(255, 255, 255, 0.8);
+}
+
+.fast-mode-icon svg {
+    width: 48px;
+    height: 48px;
+    fill: #ffffff;
+    filter: drop-shadow(0 4px 8px rgba(255, 8, 8, 0.5));
+    transition: all 0.3s ease;
+}
+
+/* Fast Mode Title */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+.fast-mode-title {
+	font-family: "Audiowide", sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(255, 0, 0, 0.6);
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+/* Loading Screen */
+.loading-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: var(--dark-bg);
+}
+
+.loading-screen::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(0, 65, 65, 0.324) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(65, 0, 65, 0.435) 0%, transparent 50%),
+        linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    z-index: -1;
+}
+
+.loading-screen.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.loading-spinner {
+    width: 120px;
+    height: 120px;
+    position: relative;
+}
+
+.loading-spinner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #ff08a0;
+    border-right-color: #6bfff5;
+    animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    box-shadow:
+        0 0 20px rgba(255, 8, 201, 0.3),
+        inset 0 0 20px rgba(8, 239, 255, 0.1);
+}
+
+.loading-spinner::after {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.05);
+    border-bottom-color: #00ffff;
+    border-left-color: #00ffff;
+    animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite reverse;
+}
+
+.loading-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #00fbffa6 0%, #a5027a 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+        0 4px 12px rgba(255, 0, 0, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-icon svg {
+    width: 30px;
+    height: 30px;
+    fill: #ffffff;
+    filter: drop-shadow(0 2px 4px rgba(169, 0, 0, 0.5));
+}
+
+.loading-text {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #00f7ffd7 0%, #ff00c8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(255, 8, 68, 0.3);
+    animation: textPulse 2s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow:
+            0 4px 12px rgba(255, 8, 68, 0.4),
+            inset 0 2px 4px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.1);
+        box-shadow:
+            0 6px 20px rgba(255, 8, 68, 0.6),
+            inset 0 2px 6px rgba(255, 255, 255, 0.4);
+    }
+}
+
+@keyframes textPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Back Arrow in Loading Screen */
+.loading-screen .back-arrow {
+    position: fixed;
+    top: 30px;
+    left: 30px;
+    display: flex;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .fast-game-mode-card {
+        padding: 14px;
+        min-height: 120px;
+        max-width: 140px;
+    }
+
+    .fast-mode-icon {
+        width: 52px;
+        height: 52px;
+    }
+
+    .fast-mode-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    .fast-mode-title {
+        font-size: 16px;
+    }
+
+    .loading-spinner {
+        width: 100px;
+        height: 100px;
+    }
+
+    .loading-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .loading-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .loading-text {
+        font-size: 20px;
+    }
+
+    .loading-subtext {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .fast-game-mode-card {
+        padding: 12px;
+        min-height: 110px;
+        gap: 10px;
+        max-width: 130px;
+    }
+
+    .fast-mode-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .fast-mode-icon svg {
+        width: 28px;
+        height: 28px;
+    }
+
+    .fast-mode-title {
+        font-size: 15px;
+    }
+
+    .loading-spinner {
+        width: 80px;
+        height: 80px;
+    }
+
+    .loading-icon {
+        width: 35px;
+        height: 35px;
+    }
+
+    .loading-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .loading-text {
+        font-size: 18px;
+    }
+
+    .loading-screen .back-arrow {
+        top: 20px;
+        left: 20px;
+        width: 45px;
+        height: 45px;
+    }
+}
+
+/* Match Pairs Grid */
+.match-pairs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* Match Pair Card */
+.match-pair-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid;
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.match-pair-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.1;
+    z-index: 0;
+}
+
+.match-pair-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Match Header */
+.match-header {
+    text-align: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 1;
+}
+
+.match-number {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+}
+
+/* Match Players */
+.match-players {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.match-player {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.match-player:hover {
+    background: rgba(0, 0, 0, 0.5);
+    transform: translateX(5px);
+}
+
+.match-player-icon {
+    font-size: 20px;
+}
+
+.match-player-icon svg {
+    width: 24px;
+    height: 24px;
+    filter: drop-shadow(0 0 4px currentColor);
+}
+
+.match-player-name {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+}
+
+/* VS Divider */
+.vs-divider {
+    text-align: center;
+    margin: 5px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.vs-text {
+    display: inline-block;
+    padding: 5px 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Matched State Animation */
+@keyframes matchedPulse {
+    0%, 100% {
+        box-shadow: 0 0 20px currentColor;
+    }
+    50% {
+        box-shadow: 0 0 40px currentColor;
+    }
+}
+
+.match-pair-card.matched {
+    animation: matchedPulse 2s ease-in-out infinite;
+}
+
+/* Participant card matched state */
+.participant-card.matched {
+    animation: matchedPulse 2s ease-in-out infinite;
+}
+
+</style>
 </head>
 <body>
 	<button class="back-arrow" id="back-arrow" ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576C461.4 576 576 461.4 576 320zM188.7 308.7L292.7 204.7C297.3 200.1 304.2 198.8 310.1 201.2C316 203.6 320 209.5 320 216L320 272L416 272C433.7 272 448 286.3 448 304L448 336C448 353.7 433.7 368 416 368L320 368L320 424C320 430.5 316.1 436.3 310.1 438.8C304.1 441.3 297.2 439.9 292.7 435.3L188.7 331.3C182.5 325.1 182.5 314.9 188.7 308.7z"/></svg></button>
@@ -1566,6 +2037,7 @@ html {
 		        </div>
 		    </div>
 		</div>
+
 
 		<!-- Custom Game Waiting Room -->
 		<div class="waiting-room" id="custom-waiting-room">
@@ -1725,8 +2197,25 @@ html {
 		    </div>
 		</div>
 
+		<!-- Loading Screen -->
+		<div class="loading-screen" id="loading-screen">
+		    <button class="back-arrow" id="loading-back-arrow">
+		        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576C461.4 576 576 461.4 576 320zM188.7 308.7L292.7 204.7C297.3 200.1 304.2 198.8 310.1 201.2C316 203.6 320 209.5 320 216L320 272L416 272C433.7 272 448 286.3 448 304L448 336C448 353.7 433.7 368 416 368L320 368L320 424C320 430.5 316.1 436.3 310.1 438.8C304.1 441.3 297.2 439.9 292.7 435.3L188.7 331.3C182.5 325.1 182.5 314.9 188.7 308.7z"/></svg>
+		    </button>
+		    <div class="loading-content">
+		        <div class="loading-spinner">
+		            <div class="loading-icon">
+		                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+		                    <path d="M557.7 64.9L363.5 139.6L365.8 110.3C366.8 97.5 353 88.8 341.8 95.2L165.3 197.4C102.6 233.7 64 300.6 64 373C64 485.1 154.9 576 267 576C339.4 576 406.3 537.4 442.6 474.7L544.8 298.3C551.3 287.2 542.6 273.3 529.7 274.3L500.4 276.6L575.1 82.4C575.7 80.9 576 79.2 576 77.6C576 70.1 570 64.1 562.5 64.1C560.8 64.1 559.2 64.4 557.7 65zM256 256C326.7 256 384 313.3 384 384C384 454.7 326.7 512 256 512C185.3 512 128 454.7 128 384C128 313.3 185.3 256 256 256zM256 352C256 334.3 241.7 320 224 320C206.3 320 192 334.3 192 352C192 369.7 206.3 384 224 384C241.7 384 256 369.7 256 352zM272 448C280.8 448 288 440.8 288 432C288 423.2 280.8 416 272 416C263.2 416 256 423.2 256 432C256 440.8 263.2 448 272 448z"/>
+		                </svg>
+		            </div>
+		        </div>
+		        <div class="loading-text">Loading...</div>
+		    </div>
+		</div>
+
 		<div class="game-page" id="game-page">
-        	<div class="header">
+	        <div class="header">
         	    <h1 class="title">PLAY MODE</h1>
         	    <p class="subtitle">Oyun Modunu Seçin ve Ayarlarınızı Yapın</p>
         	</div>
@@ -1814,8 +2303,13 @@ html {
 	                    <label class="setting-label">Bitiş Skoru</label>
 	                    <input type="number" min="1" max="50" value="11" class="input-field" id="winning-score" placeholder="Kazanmak için gereken skor">
 	                </div>
-	            </div>
 
+					<div class="setting-group fast-game-mode-card" id="fast-game-mode">
+						<label class="fast-label"></label>
+						<div class="fast-mode-icon no-select"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M557.7 64.9L363.5 139.6L365.8 110.3C366.8 97.5 353 88.8 341.8 95.2L165.3 197.4C102.6 233.7 64 300.6 64 373C64 485.1 154.9 576 267 576C339.4 576 406.3 537.4 442.6 474.7L544.8 298.3C551.3 287.2 542.6 273.3 529.7 274.3L500.4 276.6L575.1 82.4C575.7 80.9 576 79.2 576 77.6C576 70.1 570 64.1 562.5 64.1C560.8 64.1 559.2 64.4 557.7 65zM256 256C326.7 256 384 313.3 384 384C384 454.7 326.7 512 256 512C185.3 512 128 454.7 128 384C128 313.3 185.3 256 256 256zM256 352C256 334.3 241.7 320 224 320C206.3 320 192 334.3 192 352C192 369.7 206.3 384 224 384C241.7 384 256 369.7 256 352zM272 448C280.8 448 288 440.8 288 432C288 423.2 280.8 416 272 416C263.2 416 256 423.2 256 432C256 440.8 263.2 448 272 448z"/></svg></div>
+						<span class="fast-mode-title">Hızlı Oyun</span>
+					</div>
+				</div>
 	            <div class="join-room-section">
 	                <label class="setting-label">Mevcut Odaya Katıl</label>
 	                <div class="input-group">
@@ -1875,7 +2369,7 @@ html {
 	                <label class="setting-label">Mevcut Turnuvaya Katıl</label>
 	                <div class="input-group">
 	                    <input type="text" class="input-field" id="tournament-code" placeholder="Turnuva kodunu girin..." maxlength="6">
-	                    <button class="btn btn-secondary" id="tournament-join-btn">Turnuvaya Katıl</button>
+	                    <button class="btn btn-secondary" id="tournament-join-btn">Odaya Katıl</button>
 	                </div>
 	            </div>
 
@@ -1886,6 +2380,7 @@ html {
 
 
 			</div>
+
 	        <!-- AI Game Settings -->
 	        <div class="settings-panel" id="ai-settings">
 	            <h2 class="settings-title">AI ile Oyun Ayarları</h2>
@@ -2145,29 +2640,27 @@ html {
 		<div class="game-container" id="gameContainer"><canvas id="renderCanvas"></canvas></div>
 	</div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="module">
+// ============================================================================
+// IMPORTS
+// ============================================================================
+import App from './src/App.js';
+import WebSocketClient from './src/network/WebSocketClient.js';
+import gameConfig from './src/json/GameConfig.js';
+import aiConfig from './src/json/AiConfig.js';
+import tournamentConfig from './src/json/TournamentConfig.js';
 
-    <!-- Main Application Script -->
-    <script type="module">
-        // ============================================================================
-        // IMPORTS
-        // ============================================================================
-        import App from './src/App.js';
-        import WebSocketClient from './src/network/WebSocketClient.js';
-        import gameConfig from './src/json/GameConfig.js';
-        import aiConfig from './src/json/AiConfig.js';
-        import tournamentConfig from './src/json/TournamentConfig.js';
-
-        // ============================================================================
-        // GLOBAL VARIABLES
-        // ============================================================================
-        let app = null;
-        let roomSocket = null;
-        let currentUserId = null;
-        let currentUserName = null;
-        let currentRoomId = null;
-        let currentGameMode = null;
-        let isRoomCreator = false;
+// ============================================================================
+// GLOBAL VARIABLES
+// ============================================================================
+let app = null;
+let roomSocket = null;
+let currentUserId = null;
+let currentUserName = null;
+let currentRoomId = null;
+let currentGameMode = null;
+let isRoomCreator = false;
 
         // ============================================================================
         // HELPER FUNCTIONS
@@ -2177,12 +2670,20 @@ html {
         function generateRandomId() {
             return 'user_' + Math.random().toString(36).substr(2, 9);
         }
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
 
-        // Generate random user name for testing
-        function generateRandomName() {
-            const names = ['Ali', 'Ayşe', 'Mehmet', 'Fatma', 'Ahmet', 'Zeynep', 'Can', 'Elif', 'Burak', 'Selin'];
-            return names[Math.floor(Math.random() * names.length)];
-        }
+// Generate random user ID for testing
+function generateRandomId() {
+    return Math.random().toString(36).substr(2, 9);
+}
+
+// Generate random user name for testing
+function generateRandomName() {
+    const names = ['Ali', 'Ayşe', 'Mehmet', 'Fatma', 'Ahmet', 'Zeynep', 'Can', 'Elif', 'Burak', 'Selin'];
+    return names[Math.floor(Math.random() * names.length)];
+}
 
         // Show notification
         function showNotification(message, type = 'info') {
@@ -2212,17 +2713,106 @@ html {
 
             notification.textContent = message;
             container.appendChild(notification);
+// Enhanced notification system with stacking
+let notificationCount = 0;
+const notificationContainer = createNotificationContainer();
 
-            setTimeout(() => {
-                notification.style.animation = 'slideOutRight 0.3s ease';
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
+function createNotificationContainer() {
+    const container = document.createElement('div');
+    container.id = 'notification-container';
+    container.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        pointer-events: none;
+    `;
+    document.body.appendChild(container);
+    return container;
+}
 
-        // Update participant display
-        function updateParticipants(participants, gridId) {
-            const grid = document.getElementById(gridId);
-            if (!grid) return;
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    const notificationId = `notification-${notificationCount++}`;
+    notification.id = notificationId;
+    // Icon seçimi
+    let icon = '';
+    switch(type) {
+        case 'success':
+            icon = '✅';
+            break;
+        case 'error':
+            icon = '❌';
+            break;
+        case 'info':
+            icon = 'ℹ️';
+            break;
+        default:
+            icon = '📢';
+	}
+    notification.style.cssText = `
+        padding: 16px 24px;
+        background: ${type === 'success' ? 'rgba(0, 255, 0, 0.1)' : type === 'error' ? 'rgba(255, 68, 68, 0.1)' : 'rgba(0, 255, 255, 0.1)'};
+        border: 1px solid ${type === 'success' ? 'rgba(0, 255, 0, 0.3)' : type === 'error' ? 'rgba(255, 68, 68, 0.3)' : 'rgba(0, 255, 255, 0.3)'};
+        color: white;
+        border-radius: 12px;
+        font-weight: 500;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        font-family: 'Inter', sans-serif;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 250px;
+        max-width: 400px;
+        pointer-events: auto;
+        animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform-origin: right center;
+        backdrop-filter: blur(10px);
+    `;
+
+    notification.innerHTML = `
+        <span style="font-size: 20px;">${icon}</span>
+        <span style="flex: 1;">${message}</span>
+    `;
+
+    notificationContainer.appendChild(notification);
+
+    // Auto remove after 3 seconds with fade out animation
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 300);
+    }, 3000);
+
+    // Click to dismiss
+    notification.addEventListener('click', function() {
+        this.style.animation = 'slideOutRight 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045)';
+        setTimeout(() => {
+            if (this.parentNode) {
+                this.remove();
+            }
+        }, 300);
+    });
+
+    // Hover pause
+    notification.addEventListener('mouseenter', function() {
+        this.style.animationPlayState = 'paused';
+    });
+    notification.addEventListener('mouseleave', function() {
+        this.style.animationPlayState = 'running';
+    });
+}
+
+// Update participant display
+function updateParticipants(participants, gridId) {
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
 
             grid.innerHTML = '';
 
@@ -2241,20 +2831,52 @@ html {
                 const color = colors[index % colors.length];
                 card.style.borderColor = color.border;
                 card.style.background = color.bg;
+    grid.innerHTML = '';
 
-                const icon = document.createElement('div');
-                icon.className = 'participant-icon';
-                icon.textContent = participant.isAI ? '🤖' : '👤';
+    // --- Katılımcıları oluştur ---
+    participants.forEach((participant, index) => {
+        const card = document.createElement('div');
+        card.className = 'participant-card';
 
-                const name = document.createElement('div');
-                name.className = 'participant-name';
-                name.textContent = participant.name || participant.userName || 'Player';
+        const colors = [
+            { border: '#00ffff', bg: 'rgba(0, 255, 255, 0.1)' },
+            { border: '#ff00ff', bg: 'rgba(255, 0, 255, 0.1)' },
+            { border: '#00ff88', bg: 'rgba(0, 255, 136, 0.1)' },
+            { border: '#ff8800', bg: 'rgba(255, 136, 0, 0.1)' }
+        ];
+        const color = colors[index % colors.length];
+        card.style.borderColor = color.border;
+        card.style.background = color.bg;
 
-                card.appendChild(icon);
-                card.appendChild(name);
-                grid.appendChild(card);
-            });
+        // --- Katılımcı ikonu ---
+        const icon = document.createElement('div');
+        icon.className = 'participant-icon';
+
+		if (participant.isAI) {
+            icon.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+                     width="26" height="26" fill="${color.border}">
+                    <path d="M352 64C352 46.3 337.7 32 320 32C302.3 32 288 46.3 288 64L288 128L192 128C139 128 96 171 96 224L96 448C96 501 139 544 192 544L448 544C501 544 544 501 544 448L544 224C544 171 501 128 448 128L352 128L352 64zM160 432C160 418.7 170.7 408 184 408L216 408C229.3 408 240 418.7 240 432C240 445.3 229.3 456 216 456L184 456C170.7 456 160 445.3 160 432zM280 432C280 418.7 290.7 408 304 408L336 408C349.3 408 360 418.7 360 432C360 445.3 349.3 456 336 456L304 456C290.7 456 280 445.3 280 432zM400 432C400 418.7 410.7 408 424 408L456 408C469.3 408 480 418.7 480 432C480 445.3 469.3 456 456 456L424 456C410.7 456 400 445.3 400 432zM224 240C250.5 240 272 261.5 272 288C272 314.5 250.5 336 224 336C197.5 336 176 314.5 176 288C176 261.5 197.5 240 224 240zM368 288C368 261.5 389.5 240 416 240C442.5 240 464 261.5 464 288C464 314.5 442.5 336 416 336C389.5 336 368 314.5 368 288zM64 288C64 270.3 49.7 256 32 256C14.3 256 0 270.3 0 288L0 384C0 401.7 14.3 416 32 416C49.7 416 64 401.7 64 384L64 288zM608 256C590.3 256 576 270.3 576 288L576 384C576 401.7 590.3 416 608 416C625.7 416 640 401.7 640 384L640 288C640 270.3 625.7 256 608 256z"/>
+                </svg>
+            `;
+        } else {
+            icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="26" height="26" fill="${color.border}"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM171.7 396.1C166 382 177.4 368 192.6 368L447.5 368C462.7 368 474.1 382 468.4 396.1C444.6 454.7 387.2 496 320.1 496C253 496 195.5 454.7 171.8 396.1zM186.7 207.3C191.2 200.5 200 198.1 207.3 201.8L286.9 241.8C292.3 244.5 295.7 250 295.7 256.1C295.7 262.2 292.3 267.7 286.9 270.4L207.3 310.4C200 314 191.2 311.7 186.7 304.9C182.2 298.1 183.6 289 189.8 283.8L223 256L189.8 228.3C183.6 223.1 182.2 214 186.7 207.2zM450.3 228.4L417 256L450.2 283.7C456.4 288.9 457.8 298 453.3 304.8C448.8 311.6 440 314 432.7 310.3L353.1 270.3C347.7 267.6 344.3 262.1 344.3 256C344.3 249.9 347.7 244.4 353.1 241.7L432.7 201.7C440 198.1 448.8 200.4 453.3 207.2C457.8 214 456.4 223.1 450.2 228.3z"/></svg>`;
         }
+
+        // --- Katılımcı ismi ---
+        const name = document.createElement('div');
+        name.className = 'participant-name';
+        name.textContent = participant.name || participant.userName || 'Player';
+/*
+		if (participant.isHost == true)
+		const hostBadge = document.createElement('div'); */
+        card.appendChild(icon);
+        card.appendChild(name);
+        grid.appendChild(card);
+    });
+}
+
+
 
         // ============================================================================
         // WEBSOCKET HANDLERS
@@ -2262,36 +2884,42 @@ html {
 
         function handleWebSocketMessage(message) {
             console.log('📨 Received message:', message);
+// ============================================================================
+// WEBSOCKET HANDLERS
+// ============================================================================
 
-            switch (message.type) {
-                case "created":
-                    handleRoomCreated(message.payload);
-                    break;
+function handleWebSocketMessage(message) {
+    console.log('📨 Received message:', message);
 
-                case "joined":
-                    handleRoomJoined(message.payload);
-                    break;
+    switch (message.type) {
+        case "created":
+            handleRoomCreated(message.payload);
+            break;
 
-                case "update":
-                    handleRoomUpdate(message.payload);
-                    break;
+        case "joined":
+            handleRoomJoined(message.payload);
+            break;
 
-                case "started":
-                    handleGameStarted(message.payload);
-                    break;
+        case "update":
+            handleRoomUpdate(message.payload);
+            break;
 
-                case "finished":
-                    handleGameFinished(message.payload);
-                    break;
+        case "started":
+            handleGameStarted(message.payload);
+            break;
 
-                case "error":
-                    handleError(message.payload);
-                    break;
+        case "finished":
+            handleGameFinished(message.payload);
+            break;
 
-                default:
-                    console.warn('⚠️ Unhandled message type:', message.type);
-            }
-        }
+        case "error":
+            handleError(message.payload);
+            break;
+
+        default:
+            console.warn('⚠️ Unhandled message type:', message.type);
+    }
+}
 
         function handleRoomCreated(payload) {
             console.log('✅ Room created:', payload);
@@ -2299,16 +2927,22 @@ html {
             isRoomCreator = true;
 
             showNotification(`Oda oluşturuldu: ${payload.roomId}`, 'success');
+function handleRoomCreated(payload) {
+    console.log('✅ Room created:', payload);
+    currentRoomId = payload.roomId;
+    isRoomCreator = true;
 
-            // Show appropriate waiting room
-            if (currentGameMode === 'tournament') {
-                showTournamentWaitingRoom(payload);
-            } else if (currentGameMode === 'ai') {
-                showAIWaitingRoom(payload);
-            } else {
-                showCustomWaitingRoom(payload);
-            }
-        }
+    showNotification(`Oda oluşturuldu: ${payload.roomId}`, 'success');
+
+    // Show appropriate waiting room
+    if (currentGameMode === 'tournament') {
+        showTournamentWaitingRoom(payload);
+    } else if (currentGameMode === 'ai') {
+        showAIWaitingRoom(payload);
+    } else {
+        showCustomWaitingRoom(payload);
+    }
+}
 
         function handleRoomJoined(payload) {
             console.log('✅ Joined room:', payload);
@@ -2316,40 +2950,46 @@ html {
             isRoomCreator = false;
 
             showNotification(`Odaya katıldınız: ${payload.roomId}`, 'success');
+function handleRoomJoined(payload) {
+    console.log('✅ Joined room:', payload);
+    currentRoomId = payload.roomId;
+    isRoomCreator = false;
 
-            // Show appropriate waiting room
-            if (payload.gameMode === 'tournament') {
-                showTournamentWaitingRoom(payload);
-            } else {
-                showCustomWaitingRoom(payload);
+    showNotification(`Odaya katıldınız: ${payload.roomId}`, 'success');
+
+    // Show appropriate waiting room
+    if (payload.gameMode === 'tournament') {
+        showTournamentWaitingRoom(payload);
+    } else {
+        showCustomWaitingRoom(payload);
+    }
+}
+
+function handleRoomUpdate(payload) {
+    console.log('🔄 Room update:', payload);
+
+    // Update player count
+    if (payload.players) {
+        const playerCount = payload.players.length;
+        const maxPlayers = payload.maxPlayers || 2;
+
+        if (currentGameMode === 'tournament') {
+            document.getElementById('players-count').textContent = `${playerCount}/${maxPlayers}`;
+            updateParticipants(payload.players, 'participants-grid');
+        } else if (currentGameMode === 'ai') {
+            updateParticipants(payload.players, 'ai-participants-grid');
+        } else {
+            document.getElementById('custom-players-count').textContent = `${playerCount}/${maxPlayers}`;
+            updateParticipants(payload.players, 'custom-participants-grid');
+
+            // Show/hide start button
+            if (isRoomCreator && playerCount >= maxPlayers) {
+                document.getElementById('custom-waiting-players-btn').style.display = 'none';
+                document.getElementById('custom-start-game-btn').style.display = 'block';
             }
         }
-
-        function handleRoomUpdate(payload) {
-            console.log('🔄 Room update:', payload);
-
-            // Update player count
-            if (payload.players) {
-                const playerCount = payload.players.length;
-                const maxPlayers = payload.maxPlayers || 2;
-
-                if (currentGameMode === 'tournament') {
-                    document.getElementById('players-count').textContent = `${playerCount}/${maxPlayers}`;
-                    updateParticipants(payload.players, 'participants-grid');
-                } else if (currentGameMode === 'ai') {
-                    updateParticipants(payload.players, 'ai-participants-grid');
-                } else {
-                    document.getElementById('custom-players-count').textContent = `${playerCount}/${maxPlayers}`;
-                    updateParticipants(payload.players, 'custom-participants-grid');
-
-                    // Show/hide start button
-                    if (isRoomCreator && playerCount >= maxPlayers) {
-                        document.getElementById('custom-waiting-players-btn').style.display = 'none';
-                        document.getElementById('custom-start-game-btn').style.display = 'block';
-                    }
-                }
-            }
-        }
+    }
+}
 
 		function handleGameStarted(payload) {
 		    console.log('🎮 Game started:', payload);
@@ -2371,6 +3011,26 @@ html {
 		    app = new App(currentUserId, currentUserName);
 		    app.start(payload);
 		}
+function handleGameStarted(payload) {
+    console.log('🎮 Game started:', payload);
+    showNotification('Oyun başlıyor!', 'success');
+
+    // Hide all waiting rooms
+    document.getElementById('waiting-room').classList.remove('active');
+    document.getElementById('custom-waiting-room').classList.remove('active');
+    document.getElementById('ai-waiting-room').classList.remove('active');
+    document.getElementById('game-page').classList.add('hidden');
+
+    // Hide back arrow
+    document.getElementById('back-arrow').classList.remove('active');
+
+    // Show game container
+    const gameContainer = document.getElementById('gameContainer');
+    gameContainer.style.display = 'block';
+
+    app = new App(currentUserId, currentUserName);
+    app.start(payload);
+}
 
 
 		function handleGameFinished(payload) {
@@ -2394,43 +3054,62 @@ html {
 		    currentGameMode = null;
 		    isRoomCreator = false;
 		}
+function handleGameFinished(payload) {
+    console.log('🏁 Game finished:', payload);
+    showNotification('Oyun bitti!', 'info');
 
-        function handleError(payload) {
-            console.error('❌ Error:', payload);
-            const errorMessage = payload.message || payload.error || 'Bir hata oluştu';
-            showNotification(errorMessage, 'error');
+    // Destroy game
+    if (app) {
+        app.destroy();
+        app = null;
+    }
 
-        }
+    // Hide game container
+    const gameContainer = document.getElementById('gameContainer');
+    gameContainer.style.display = 'none';
 
-        // ============================================================================
-        // UI FUNCTIONS
-        // ============================================================================
+    document.getElementById('game-page').classList.remove('hidden');
 
-        function showTournamentWaitingRoom(data) {
-            document.getElementById('game-page').classList.add('hidden');
-            document.getElementById('waiting-room').classList.add('active');
-            document.getElementById('back-arrow').classList.add('active');
+    // Reset room state
+    currentRoomId = null;
+    currentGameMode = null;
+    isRoomCreator = false;
+}
 
-            // document.getElementById('room-code-display').textContent = data.roomId;
-            document.getElementById('players-count').textContent = `${data.players?.length || 0}/${data.maxPlayers || 8}`;
+function handleError(payload) {
+    console.error('❌ Error:', payload);
+    const errorMessage = payload.message || payload.error || 'Bir hata oluştu';
+    showNotification(errorMessage, 'error');
+}
 
-            if (data.players) {
-                updateParticipants(data.players, 'participants-grid');
-            }
+// ============================================================================
+// UI FUNCTIONS
+// ============================================================================
 
-            // Show/hide start button
-            const startBtn = document.getElementById('start-tournament-btn');
-            if (isRoomCreator) {
-                startBtn.style.display = 'block';
-            } else {
-                startBtn.style.display = 'none';
-            }
-        }
+function showTournamentWaitingRoom(data) {
+    document.getElementById('game-page').classList.add('hidden');
+    document.getElementById('waiting-room').classList.add('active');
+    document.getElementById('back-arrow').classList.add('active');
 
-        function showCustomWaitingRoom(data) {
-            document.getElementById('game-page').classList.add('hidden');
-            document.getElementById('custom-waiting-room').classList.add('active');
-            document.getElementById('back-arrow').classList.add('active');
+    // document.getElementById('room-code-display').textContent = data.roomId;
+    document.getElementById('players-count').textContent = `${data.players?.length || 0}/${data.maxPlayers || 8}`;
+    if (data.players) {
+        updateParticipants(data.players, 'participants-grid');
+    }
+
+    // Show/hide start button
+    const startBtn = document.getElementById('start-tournament-btn');
+    if (isRoomCreator) {
+        startBtn.style.display = 'block';
+    } else {
+        startBtn.style.display = 'none';
+    }
+}
+
+function showCustomWaitingRoom(data) {
+    document.getElementById('game-page').classList.add('hidden');
+    document.getElementById('custom-waiting-room').classList.add('active');
+    document.getElementById('back-arrow').classList.add('active');
 
             document.getElementById('custom-room-code-display').textContent = data.roomId;
 
@@ -2440,43 +3119,55 @@ html {
                 'local': 'Co-op'
             };
             document.getElementById('custom-game-type-display').textContent = gameTypeMap[data.gameMode] || '1 vs 1';
+    document.getElementById('custom-room-code-display').textContent = data.roomId;
 
-            const playerCount = data.players?.length || 1;
-            const maxPlayers = data.maxPlayers || 2;
-            document.getElementById('custom-players-count').textContent = `${playerCount}/${maxPlayers}`;
+    const gameTypeMap = {
+        'classic': '1 vs 1',
+        'multiplayer': '2 vs 2',
+        'local': 'co-op'
+    };
+    document.getElementById('custom-game-type-display').textContent = gameTypeMap[data.gameMode] || '1 vs 1';
 
-            // Update game settings display
-            if (data.gameSettings) {
-                document.getElementById('custom-paddle-display').textContent = `${data.gameSettings.paddleHeight}px`;
-                document.getElementById('custom-ball-display').textContent = `${data.gameSettings.ballRadius}px`;
-                document.getElementById('custom-corner-display').textContent = `${data.gameSettings.cornerBoost}x`;
-                document.getElementById('custom-score-display').textContent = data.gameSettings.maxScore;
-            }
+    const playerCount = data.players?.length || 1;
+    const maxPlayers = data.maxPlayers || 2;
+    document.getElementById('custom-players-count').textContent = `${playerCount}/${maxPlayers}`;
 
-            if (data.players) {
-                updateParticipants(data.players, 'custom-participants-grid');
-            }
+    // Update game settings display
+    if (data.gameSettings) {
+        document.getElementById('custom-paddle-display').textContent = `${data.gameSettings.paddleHeight}px`;
+        document.getElementById('custom-ball-display').textContent = `${data.gameSettings.ballRadius}px`;
 
-            // Show/hide buttons
-            if (isRoomCreator) {
-                if (playerCount >= maxPlayers) {
-                    document.getElementById('custom-waiting-players-btn').style.display = 'none';
-                    document.getElementById('custom-start-game-btn').style.display = 'block';
-                } else {
-                    document.getElementById('custom-waiting-players-btn').style.display = 'block';
-                    document.getElementById('custom-start-game-btn').style.display = 'none';
-                }
-            } else {
-                document.getElementById('custom-waiting-players-btn').style.display = 'block';
-                document.getElementById('custom-waiting-players-btn').textContent = '⏳ Oda Sahibi Bekleniyor...';
-                document.getElementById('custom-start-game-btn').style.display = 'none';
-            }
+        // DÜZELTME: cornerBoost veya ballSpeedIncrease değerini kontrol et
+        const cornerBoost = data.gameSettings.cornerBoost || data.gameSettings.ballSpeedIncrease || 1.0;
+        document.getElementById('custom-corner-display').textContent = `${parseFloat(cornerBoost).toFixed(1)}x`;
+
+        document.getElementById('custom-score-display').textContent = data.gameSettings.maxScore;
+    }
+
+    if (data.players) {
+        updateParticipants(data.players, 'custom-participants-grid');
+    }
+
+    // Show/hide buttons
+    if (isRoomCreator) {
+        if (playerCount >= maxPlayers) {
+            document.getElementById('custom-waiting-players-btn').style.display = 'none';
+            document.getElementById('custom-start-game-btn').style.display = 'block';
+        } else {
+            document.getElementById('custom-waiting-players-btn').style.display = 'block';
+            document.getElementById('custom-start-game-btn').style.display = 'none';
         }
+    } else {
+        document.getElementById('custom-waiting-players-btn').style.display = 'block';
+        document.getElementById('custom-waiting-players-btn').textContent = '⏳ Oda Sahibi Bekleniyor...';
+        document.getElementById('custom-start-game-btn').style.display = 'none';
+    }
+}
 
-        function showAIWaitingRoom(data) {
-            document.getElementById('game-page').classList.add('hidden');
-            document.getElementById('ai-waiting-room').classList.add('active');
-            document.getElementById('back-arrow').classList.add('active');
+function showAIWaitingRoom(data) {
+    document.getElementById('game-page').classList.add('hidden');
+    document.getElementById('ai-waiting-room').classList.add('active');
+    document.getElementById('back-arrow').classList.add('active');
 
             // Update AI difficulty display
             const difficultyMap = {
@@ -2490,14 +3181,30 @@ html {
             const difficulty = data.aiSettings?.difficulty || 'medium';
             document.getElementById('ai-difficulty-display').textContent = difficultyMap[difficulty];
             document.getElementById('ai-type-display').textContent = difficulty === 'custom' ? 'Özelleştirilmiş' : 'Standart';
+    // Update AI difficulty display
+    const difficultyMap = {
+        'easy': 'Kolay',
+        'medium': 'Orta',
+        'hard': 'Zor',
+        'impossible': 'İmkansız',
+        'custom': 'Özel'
+    };
 
-            // Update game settings display
-            if (data.gameSettings) {
-                document.getElementById('ai-paddle-display').textContent = `${data.gameSettings.paddleHeight}px`;
-                document.getElementById('ai-ball-display').textContent = `${data.gameSettings.ballRadius}px`;
-                document.getElementById('ai-corner-display').textContent = `${data.gameSettings.cornerBoost}x`;
-                document.getElementById('ai-score-display').textContent = data.gameSettings.maxScore;
-            }
+    const difficulty = data.aiSettings?.difficulty || 'medium';
+    document.getElementById('ai-difficulty-display').textContent = difficultyMap[difficulty];
+    document.getElementById('ai-type-display').textContent = difficulty === 'custom' ? 'Özelleştirilmiş' : 'Standart';
+
+    // Update game settings display
+    if (data.gameSettings) {
+        document.getElementById('ai-paddle-display').textContent = `${data.gameSettings.paddleHeight}px`;
+        document.getElementById('ai-ball-display').textContent = `${data.gameSettings.ballRadius}px`;
+
+        // DÜZELTME: cornerBoost veya ballSpeedIncrease değerini kontrol et
+        const cornerBoost = data.gameSettings.cornerBoost || data.gameSettings.ballSpeedIncrease || 1.0;
+        document.getElementById('ai-corner-display').textContent = `${parseFloat(cornerBoost).toFixed(1)}x`;
+
+        document.getElementById('ai-score-display').textContent = data.gameSettings.maxScore;
+    }
 
             // Show custom AI settings if custom difficulty
             if (difficulty === 'custom' && data.aiSettings) {
@@ -2509,18 +3216,28 @@ html {
                 document.getElementById('ai-accuracy-display').textContent = data.aiSettings.generalAccuracy || 5;
                 document.getElementById('ai-learning-display').textContent = data.aiSettings.learningSpeed || 5;
             }
+    // Show custom AI settings if custom difficulty
+    if (difficulty === 'custom' && data.aiSettings) {
+        const customSettingsDiv = document.getElementById('ai-custom-settings-display');
+        customSettingsDiv.style.display = 'block';
 
-            // Update participants
-            const players = [
-                { name: currentUserName, isAI: false },
-                { name: 'AI Opponent', isAI: true }
-            ];
-            updateParticipants(players, 'ai-participants-grid');
-        }
+        document.getElementById('ai-reaction-display').textContent = data.aiSettings.reactionSpeed || 5;
+        document.getElementById('ai-prediction-display').textContent = data.aiSettings.predictionAccuracy || 5;
+        document.getElementById('ai-accuracy-display').textContent = data.aiSettings.generalAccuracy || 5;
+        document.getElementById('ai-learning-display').textContent = data.aiSettings.learningSpeed || 5;
+    }
 
-        // ============================================================================
-        // EVENT HANDLERS
-        // ============================================================================
+    // Update participants
+    const players = [
+        { name: currentUserName, isAI: false },
+        { name: 'AI Opponent', isAI: true }
+    ];
+    updateParticipants(players, 'ai-participants-grid');
+}
+
+// ============================================================================
+// EVENT HANDLERS
+// ============================================================================
 
         // Game Mode Selection
         document.getElementById('custom-mode').addEventListener('click', function() {
@@ -2532,6 +3249,16 @@ html {
 
             currentGameMode = 'custom';
         });
+// Game Mode Selection
+document.getElementById('custom-mode').addEventListener('click', function() {
+    document.querySelectorAll('.game-mode-card').forEach(card => card.classList.remove('active'));
+    this.classList.add('active');
+
+    document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
+    document.getElementById('custom-settings').classList.add('active');
+
+    currentGameMode = 'custom';
+});
 
         document.getElementById('tournament-mode').addEventListener('click', function() {
             document.querySelectorAll('.game-mode-card').forEach(card => card.classList.remove('active'));
@@ -2542,6 +3269,15 @@ html {
 
             currentGameMode = 'tournament';
         });
+document.getElementById('tournament-mode').addEventListener('click', function() {
+    document.querySelectorAll('.game-mode-card').forEach(card => card.classList.remove('active'));
+    this.classList.add('active');
+
+    document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
+    document.getElementById('tournament-settings').classList.add('active');
+
+    currentGameMode = 'tournament';
+});
 
         document.getElementById('ai-mode').addEventListener('click', function() {
             document.querySelectorAll('.game-mode-card').forEach(card => card.classList.remove('active'));
@@ -2552,6 +3288,15 @@ html {
 
             currentGameMode = 'ai';
         });
+document.getElementById('ai-mode').addEventListener('click', function() {
+    document.querySelectorAll('.game-mode-card').forEach(card => card.classList.remove('active'));
+    this.classList.add('active');
+
+    document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
+    document.getElementById('ai-settings').classList.add('active');
+
+    currentGameMode = 'ai';
+});
 
         // Custom Game - Create Room
         document.getElementById('custom-create-btn').addEventListener('click', function() {
@@ -2561,25 +3306,33 @@ html {
             if (gameType === '1v1') gameMode = 'classic';
             else if (gameType === '2v2') gameMode = 'multiplayer';
             else if (gameType === 'co-op') gameMode = 'local';
+// Custom Game - Create Room
+document.getElementById('custom-create-btn').addEventListener('click', function() {
+    const gameType = document.querySelector('input[name="custom-game-type"]:checked').value;
 
-            const data = {
-                name: `${currentUserName}'s Room`,
-                gameMode: gameMode,
-                gameSettings: {
-					//!!
-					...gameConfig.gameSettings,
-                    paddleHeight: parseInt(document.getElementById('paddle-height').value),
-                    ballRadius: parseInt(document.getElementById('ball-radius').value),
-					// DEĞİŞECEK
-                    ballSpeedIncrease: /* parseFloat(document.getElementById('corner-boost').value) */ 0,
-                    maxScore: parseInt(document.getElementById('winning-score').value)
-                }
-            };
+    let gameMode;
+    if (gameType === '1v1') gameMode = 'classic';
+    else if (gameType === '2v2') gameMode = 'multiplayer';
+    else if (gameType === 'co-op') gameMode = 'local';
 
-            currentGameMode = 'custom';
-            roomSocket.send("create", data);
-            showNotification('Oda oluşturuluyor...', 'info');
-        });
+    const data = {
+        name: `${currentUserName}'s Room`,
+        gameMode: gameMode,
+        gameSettings: {
+			//!!
+			...gameConfig.gameSettings,
+            paddleHeight: parseInt(document.getElementById('paddle-height').value),
+            ballRadius: parseInt(document.getElementById('ball-radius').value),
+			// DEĞİŞECEK
+            ballSpeedIncrease: parseFloat(document.getElementById('corner-boost').value),
+            maxScore: parseInt(document.getElementById('winning-score').value)
+        }
+    };
+
+    currentGameMode = 'custom';
+    roomSocket.send("create", data);
+    showNotification('Oda oluşturuluyor...', 'info');
+});
 
         // Custom Game - Join Room
         document.getElementById('custom-join-btn').addEventListener('click', function() {
@@ -2589,27 +3342,35 @@ html {
                 showNotification('Lütfen oda kodunu girin!', 'error');
                 return;
             }
+// Custom Game - Join Room
+document.getElementById('custom-join-btn').addEventListener('click', function() {
+    const roomCode = document.getElementById('custom-room-code').value.trim().toUpperCase();
 
-            if (roomCode.length !== 6) {
-                showNotification('Oda kodu 6 karakter olmalıdır!', 'error');
-                return;
-            }
+    if (!roomCode) {
+        showNotification('Lütfen oda kodunu girin!', 'error');
+        return;
+    }
 
-            currentGameMode = 'custom';
-            roomSocket.send("join", { roomId: roomCode });
-            showNotification(`${roomCode} kodlu odaya katılıyorsunuz...`, 'info');
-        });
+    if (roomCode.length !== 6) {
+        showNotification('Oda kodu 6 karakter olmalıdır!', 'error');
+        return;
+    }
 
-        // Custom Game - Start Game
-        document.getElementById('custom-start-game-btn').addEventListener('click', function() {
-            roomSocket.send("start", {});
-            showNotification('Oyun başlatılıyor...', 'info');
-        });
+    currentGameMode = 'custom';
+    roomSocket.send("join", { roomId: roomCode });
+    showNotification(`${roomCode} kodlu odaya katılıyorsunuz...`, 'info');
+});
 
-		document.getElementById('ai-start-game-btn').addEventListener('click', function() {
-            roomSocket.send("start", {});
-            showNotification('Oyun başlatılıyor...', 'info');
-        });
+// Custom Game - Start Game
+document.getElementById('custom-start-game-btn').addEventListener('click', function() {
+    roomSocket.send("start", {});
+    showNotification('Oyun başlatılıyor...', 'info');
+});
+
+document.getElementById('ai-start-game-btn').addEventListener('click', function() {
+    roomSocket.send("start", {});
+    showNotification('Oyun başlatılıyor...', 'info');
+});
 
         // AI Game - Start
         document.getElementById('ai-start-btn').addEventListener('click', function() {
@@ -2629,31 +3390,49 @@ html {
                     difficulty: difficulty
                 }
             };
+// AI Game - Start
+document.getElementById('ai-start-btn').addEventListener('click', function() {
+    const difficulty = document.querySelector('input[name="ai-difficulty"]:checked').value;
 
-            // Custom AI settings
-            if (difficulty === 'custom') {
-                data.aiSettings = {
-                    ...data.aiSettings,
-                    reactionSpeed: parseInt(document.getElementById('ai-reaction-speed').value),
-                    predictionAccuracy: parseInt(document.getElementById('ai-prediction-accuracy').value),
-                    generalAccuracy: parseInt(document.getElementById('ai-general-accuracy').value),
-                    learningSpeed: parseInt(document.getElementById('ai-learning-speed').value),
-                    preparationDistance: parseInt(document.getElementById('ai-preparation-distance').value),
-                    freezeDistance: parseInt(document.getElementById('ai-freeze-distance').value),
-                    targetWinRate: parseInt(document.getElementById('ai-target-win-rate').value),
-                    fairnessLevel: parseInt(document.getElementById('ai-fairness-level').value),
-                    maxConsecutiveWins: parseInt(document.getElementById('ai-max-consecutive-wins').value),
-                    rageMode: document.getElementById('ai-rage-mode').checked,
-                    fatigueSystem: document.getElementById('ai-fatigue-system').checked,
-                    focusMode: document.getElementById('ai-focus-mode').checked,
-                    adaptiveDifficulty: document.getElementById('ai-adaptive-difficulty').checked
-                };
-            }
+    const data = {
+        name: `${currentUserName}'s AI Room`,
+        gameMode: "ai",
+        gameSettings: {
+			...gameConfig.gameSettings,
+            paddleHeight: parseInt(document.getElementById('ai-paddle-height').value),
+            ballRadius: parseInt(document.getElementById('ai-ball-radius').value),
+            ballSpeedIncrease: parseFloat(document.getElementById('ai-corner-boost').value),
+            maxScore: parseInt(document.getElementById('ai-winning-score').value)
+        },
+        aiSettings: {
+            difficulty: difficulty
+        }
+    };
 
-            currentGameMode = 'ai';
-            roomSocket.send("create", data);
-            showNotification('AI oyunu oluşturuluyor...', 'info');
-        });
+    // Custom AI settings
+    if (difficulty === 'custom') {
+        data.aiSettings = {
+            ...data.aiSettings,
+            reactionSpeed: parseInt(document.getElementById('ai-reaction-speed').value),
+            predictionAccuracy: parseInt(document.getElementById('ai-prediction-accuracy').value),
+            generalAccuracy: parseInt(document.getElementById('ai-general-accuracy').value),
+            learningSpeed: parseInt(document.getElementById('ai-learning-speed').value),
+            preparationDistance: parseInt(document.getElementById('ai-preparation-distance').value),
+            freezeDistance: parseInt(document.getElementById('ai-freeze-distance').value),
+            targetWinRate: parseInt(document.getElementById('ai-target-win-rate').value),
+            fairnessLevel: parseInt(document.getElementById('ai-fairness-level').value),
+            maxConsecutiveWins: parseInt(document.getElementById('ai-max-consecutive-wins').value),
+            rageMode: document.getElementById('ai-rage-mode').checked,
+            fatigueSystem: document.getElementById('ai-fatigue-system').checked,
+            focusMode: document.getElementById('ai-focus-mode').checked,
+            adaptiveDifficulty: document.getElementById('ai-adaptive-difficulty').checked
+        };
+    }
+
+    currentGameMode = 'ai';
+    roomSocket.send("create", data);
+    showNotification('AI oyunu oluşturuluyor...', 'info');
+});
 
         // Tournament - Create
         document.getElementById('tournament-create-btn').addEventListener('click', function() {
@@ -2664,33 +3443,42 @@ html {
                 showNotification('Lütfen turnuva ismini girin!', 'error');
                 return;
             }
+// Tournament - Create
+document.getElementById('tournament-create-btn').addEventListener('click', function() {
+    const tournamentName = document.getElementById('tournament-name').value.trim();
+    const tournamentSize = document.querySelector('input[name="tournament-size"]:checked').value;
 
-            let maxPlayers = parseInt(tournamentSize);
-            if (tournamentSize === 'custom') {
-                maxPlayers = parseInt(document.getElementById('custom-tournament-size').value);
-                if (isNaN(maxPlayers) || maxPlayers < 4) {
-                    showNotification('Lütfen 4 veya daha büyük bir sayı girin!', 'error');
-                    return;
-                }
-                // Check if power of 2
-                if ((maxPlayers & (maxPlayers - 1)) !== 0) {
-                    showNotification('Kişi sayısı 2\'nin kuvveti olmalıdır! (4, 8, 16, 32...)', 'error');
-                    return;
-                }
-            }
+    if (!tournamentName) {
+        showNotification('Lütfen turnuva ismini girin!', 'error');
+        return;
+    }
 
-            const data = {
-                name: tournamentName,
-                gameMode: "tournament",
-                tournamentSettings: {
-                    maxPlayers: maxPlayers
-                }
-            };
+    let maxPlayers = parseInt(tournamentSize);
+    if (tournamentSize === 'custom') {
+        maxPlayers = parseInt(document.getElementById('custom-tournament-size').value);
+        if (isNaN(maxPlayers) || maxPlayers < 4) {
+            showNotification('Lütfen 4 veya daha büyük bir sayı girin!', 'error');
+            return;
+        }
+        // Check if power of 2
+        if ((maxPlayers & (maxPlayers - 1)) !== 0) {
+            showNotification('Kişi sayısı 2\'nin kuvveti olmalıdır! (4, 8, 16, 32...)', 'error');
+            return;
+        }
+    }
 
-            currentGameMode = 'tournament';
-            roomSocket.send("create", data);
-            showNotification('Turnuva oluşturuluyor...', 'info');
-        });
+    const data = {
+        name: tournamentName,
+        gameMode: "tournament",
+        tournamentSettings: {
+            maxPlayers: maxPlayers
+        }
+    };
+
+    currentGameMode = 'tournament';
+    roomSocket.send("create", data);
+    showNotification('Turnuva oluşturuluyor...', 'info');
+});
 
         // Tournament - Join
         document.getElementById('tournament-join-btn').addEventListener('click', function() {
@@ -2705,21 +3493,33 @@ html {
             roomSocket.send("join", { roomId: tournamentCode });
             showNotification(`${tournamentCode} kodlu turnuvaya katılıyorsunuz...`, 'info');
         });
+// Tournament - Join
+document.getElementById('tournament-join-btn').addEventListener('click', function() {
+    const tournamentCode = document.getElementById('tournament-code').value.trim().toUpperCase();
 
-        // Tournament - Start
-        document.getElementById('start-tournament-btn').addEventListener('click', function() {
-            roomSocket.send("start", {});
-            showNotification('Turnuva başlatılıyor...', 'info');
-        });
+    if (!tournamentCode) {
+        showNotification('Lütfen turnuva kodunu girin!', 'error');
+        return;
+	}
+    currentGameMode = 'tournament';
+    roomSocket.send("join", { roomId: tournamentCode });
+    showNotification(`${tournamentCode} kodlu turnuvaya katılıyorsunuz...`, 'info');
+});
 
-        // Back Arrow
-        document.getElementById('back-arrow').addEventListener('click', function() {
-            // Leave room if in one
-            if (currentRoomId) {
-                roomSocket.send("leave", { roomId: currentRoomId });
-                currentRoomId = null;
-                isRoomCreator = false;
-            }
+// Tournament - Start
+document.getElementById('start-tournament-btn').addEventListener('click', function() {
+    roomSocket.send("start", {});
+    showNotification('Turnuva başlatılıyor...', 'info');
+});
+
+// Back Arrow
+document.getElementById('back-arrow').addEventListener('click', function() {
+    // Leave room if in one
+    if (currentRoomId) {
+        roomSocket.send("leave", { roomId: currentRoomId });
+        currentRoomId = null;
+        isRoomCreator = false;
+    }
 
             // Hide all waiting rooms
             document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
@@ -2732,129 +3532,140 @@ html {
 
             showNotification('Odadan ayrıldınız', 'info');
         });
+    // Hide all waiting rooms
+    document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
 
-        // Tournament Size - Custom Option
-        document.querySelectorAll('input[name="tournament-size"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                const customInput = document.getElementById('custom-tournament-size');
-                if (this.value === 'custom') {
-                    customInput.style.display = 'block';
-                } else {
-                    customInput.style.display = 'none';
-                }
-            });
-        });
+    // Show game page
+    document.getElementById('game-page').classList.remove('hidden');
 
-        // AI Difficulty - Custom Option
-        document.querySelectorAll('input[name="ai-difficulty"]').forEach(radio => {
-            radio.addEventListener('change', function() {
-                const customSettings = document.getElementById('ai-custom-settings');
-                if (this.value === 'custom') {
-                    customSettings.classList.add('active');
-                } else {
-                    customSettings.classList.remove('active');
-                }
-            });
-        });
+    // Hide back arrow
+    this.classList.remove('active');
 
-        // ============================================================================
-        // SLIDER VALUE UPDATES
-        // ============================================================================
+    showNotification('Odadan ayrıldınız', 'info');
+});
 
-        // Custom Game Sliders
-        document.getElementById('paddle-height').addEventListener('input', function() {
-            document.getElementById('paddle-height-value').textContent = this.value + 'px';
-        });
+// Tournament Size - Custom Option
+document.querySelectorAll('input[name="tournament-size"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const customInput = document.getElementById('custom-tournament-size');
+        if (this.value === 'custom') {
+            customInput.style.display = 'block';
+        } else {
+            customInput.style.display = 'none';
+        }
+    });
+});
 
-        document.getElementById('ball-radius').addEventListener('input', function() {
-            document.getElementById('ball-radius-value').textContent = this.value + 'px';
-        });
+// AI Difficulty - Custom Option
+document.querySelectorAll('input[name="ai-difficulty"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const customSettings = document.getElementById('ai-custom-settings');
+        if (this.value === 'custom') {
+            customSettings.classList.add('active');
+        } else {
+            customSettings.classList.remove('active');
+        }
+    });
+});
 
-        document.getElementById('corner-boost').addEventListener('input', function() {
-            document.getElementById('corner-boost-value').textContent = parseFloat(this.value).toFixed(1) + 'x';
-        });
+// ============================================================================
+// SLIDER VALUE UPDATES
+// ============================================================================
 
-        // AI Game Sliders
-        document.getElementById('ai-paddle-height').addEventListener('input', function() {
-            document.getElementById('ai-paddle-height-value').textContent = this.value + 'px';
-        });
+// Custom Game Sliders
+document.getElementById('paddle-height').addEventListener('input', function() {
+    document.getElementById('paddle-height-value').textContent = this.value + 'px';
+});
 
-        document.getElementById('ai-ball-radius').addEventListener('input', function() {
-            document.getElementById('ai-ball-radius-value').textContent = this.value + 'px';
-        });
+document.getElementById('ball-radius').addEventListener('input', function() {
+    document.getElementById('ball-radius-value').textContent = this.value + 'px';
+});
 
-        document.getElementById('ai-corner-boost').addEventListener('input', function() {
-            document.getElementById('ai-corner-boost-value').textContent = parseFloat(this.value).toFixed(1) + 'x';
-        });
+document.getElementById('corner-boost').addEventListener('input', function() {
+    document.getElementById('corner-boost-value').textContent = parseFloat(this.value).toFixed(1) + 'x';
+});
 
-        // AI Custom Settings Sliders
-        document.getElementById('ai-reaction-speed').addEventListener('input', function() {
-            document.getElementById('ai-reaction-speed-value').textContent = this.value;
-        });
+// AI Game Sliders
+document.getElementById('ai-paddle-height').addEventListener('input', function() {
+    document.getElementById('ai-paddle-height-value').textContent = this.value + 'px';
+});
 
-        document.getElementById('ai-prediction-accuracy').addEventListener('input', function() {
-            document.getElementById('ai-prediction-accuracy-value').textContent = this.value;
-        });
+document.getElementById('ai-ball-radius').addEventListener('input', function() {
+    document.getElementById('ai-ball-radius-value').textContent = this.value + 'px';
+});
 
-        document.getElementById('ai-general-accuracy').addEventListener('input', function() {
-            document.getElementById('ai-general-accuracy-value').textContent = this.value;
-        });
+document.getElementById('ai-corner-boost').addEventListener('input', function() {
+    document.getElementById('ai-corner-boost-value').textContent = parseFloat(this.value).toFixed(1) + 'x';
+});
 
-        document.getElementById('ai-learning-speed').addEventListener('input', function() {
-            document.getElementById('ai-learning-speed-value').textContent = this.value;
-        });
+// AI Custom Settings Sliders
+document.getElementById('ai-reaction-speed').addEventListener('input', function() {
+    document.getElementById('ai-reaction-speed-value').textContent = this.value;
+});
 
-        document.getElementById('ai-preparation-distance').addEventListener('input', function() {
-            document.getElementById('ai-preparation-distance-value').textContent = this.value;
-        });
+document.getElementById('ai-prediction-accuracy').addEventListener('input', function() {
+    document.getElementById('ai-prediction-accuracy-value').textContent = this.value;
+});
 
-        document.getElementById('ai-freeze-distance').addEventListener('input', function() {
-            document.getElementById('ai-freeze-distance-value').textContent = this.value;
-        });
+document.getElementById('ai-general-accuracy').addEventListener('input', function() {
+    document.getElementById('ai-general-accuracy-value').textContent = this.value;
+});
 
-        document.getElementById('ai-target-win-rate').addEventListener('input', function() {
-            document.getElementById('ai-target-win-rate-value').textContent = '%' + (this.value * 10);
-        });
+document.getElementById('ai-learning-speed').addEventListener('input', function() {
+    document.getElementById('ai-learning-speed-value').textContent = this.value;
+});
 
-        document.getElementById('ai-fairness-level').addEventListener('input', function() {
-            document.getElementById('ai-fairness-level-value').textContent = this.value;
-        });
+document.getElementById('ai-preparation-distance').addEventListener('input', function() {
+    document.getElementById('ai-preparation-distance-value').textContent = this.value;
+});
 
-        document.getElementById('ai-max-consecutive-wins').addEventListener('input', function() {
-            document.getElementById('ai-max-consecutive-wins-value').textContent = this.value;
-        });
+document.getElementById('ai-freeze-distance').addEventListener('input', function() {
+    document.getElementById('ai-freeze-distance-value').textContent = this.value;
+});
 
-        // ============================================================================
-        // INITIALIZATION
-        // ============================================================================
+document.getElementById('ai-target-win-rate').addEventListener('input', function() {
+    document.getElementById('ai-target-win-rate-value').textContent = '%' + (this.value * 10);
+});
 
-        // Generate user credentials
-        currentUserId = generateRandomId();
-        currentUserName = generateRandomName();
-        console.log(`🎮 User initialized - ID: ${currentUserId}, Name: ${currentUserName}`);
+document.getElementById('ai-fairness-level').addEventListener('input', function() {
+    document.getElementById('ai-fairness-level-value').textContent = this.value;
+});
 
-        // Initialize WebSocket
-        roomSocket = new WebSocketClient(window.location.hostname, 3004);
+document.getElementById('ai-max-consecutive-wins').addEventListener('input', function() {
+    document.getElementById('ai-max-consecutive-wins-value').textContent = this.value;
+});
 
-        // WebSocket event handlers
-        roomSocket.onConnect(() => {
-            console.log('✅ Connected to room server');
-            showNotification('Sunucuya bağlandı', 'success');
-        });
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
 
-        roomSocket.onMessage((message) => {
-            handleWebSocketMessage(message);
-        });
+// Generate user credentials
+currentUserId = generateRandomId();
+currentUserName = generateRandomName();
+console.log(`🎮 User initialized - ID: ${currentUserId}, Name: ${currentUserName}`);
 
-        roomSocket.onClose((error) => {
-            console.log(`❌ Disconnected from room server: ${error.code} - ${error.reason}`);
-            showNotification('Sunucu bağlantısı kesildi', 'error');
-        });
+// Initialize WebSocket
+roomSocket = new WebSocketClient(window.location.hostname, 3004);
 
-        roomSocket.onError((error) => {
-            console.error('❌ Room server connection error:', error);
-            showNotification('Bağlantı hatası', 'error');
-        });
+// WebSocket event handlers
+roomSocket.onConnect(() => {
+    console.log('✅ Connected to room server');
+    showNotification('Sunucuya bağlandı', 'success');
+});
+
+roomSocket.onMessage((message) => {
+    handleWebSocketMessage(message);
+});
+
+roomSocket.onClose((error) => {
+    console.log(`❌ Disconnected from room server: ${error.code} - ${error.reason}`);
+    showNotification('Sunucu bağlantısı kesildi', 'error');
+});
+
+roomSocket.onError((error) => {
+    console.error('❌ Room server connection error:', error);
+    showNotification('Bağlantı hatası', 'error');
+});
 
 		// Connect to server
         roomSocket.connect("ws/client", {
@@ -3119,6 +3930,11 @@ html {
             }
         `;
         document.head.appendChild(style);
+// Connect to server
+roomSocket.connect("ws/client", {
+    userID: currentUserId,
+    userName: currentUserName
+});
 
         // Export for debugging
         window.roomSocket = roomSocket;
@@ -3126,93 +3942,94 @@ html {
 
         console.log('🎮 Application initialized successfully!');
         showNotification('Hoş geldiniz! ' + currentUserName, 'success');
+// Export for debugging
+window.roomSocket = roomSocket;
+window.app = app;
 
-    </script>
+console.log('🎮 Application initialized successfully!');
+showNotification('Hoş geldiniz! ' + currentUserName, 'success');
 
-	<script>
-	    // DOM Elements
-	    const gameModeCards = document.querySelectorAll('.game-mode-card');
-	    const settingsPanels = document.querySelectorAll('.settings-panel');
-	    const aiDifficultyRadios = document.querySelectorAll('input[name="ai-difficulty"]');
-	    const aiCustomSettings = document.getElementById('ai-custom-settings');
+// Fast Game Event Handler - YENİ
+document.getElementById('fast-game-mode').addEventListener('click', function() {
+    showNotification('Hızlı oyun başlatılıyor...', 'success');
 
-	    // Game mode selection with smooth transition
-	    gameModeCards.forEach(card => {
-	        card.addEventListener('click', function() {
-	            const mode = this.id.replace('-mode', '');
+    // Show loading screen
+    const loadingScreen = document.getElementById('loading-screen');
+    const gamePage = document.getElementById('game-page');
 
-	            // Remove active class from all cards and panels
-	            gameModeCards.forEach(c => c.classList.remove('active'));
-	            settingsPanels.forEach(p => p.classList.remove('active'));
+    gamePage.classList.add('hidden');
+    loadingScreen.classList.add('active');
 
-	            // Add active class to clicked card and corresponding panel
-	            this.classList.add('active');
-	            const targetPanel = document.getElementById(`${mode}-settings`);
+    // Simulate loading (gerçek uygulamada burada oyun başlatılır)
+    setTimeout(() => {
+        showNotification('Oyun hazır!', 'success');
+        // Burada oyunu başlayacak
+        // handleGameStarted({ ... });
+    }, 2000);
+});
 
-                // Smooth scroll to settings panel
-                setTimeout(() => {
-                    targetPanel.classList.add('active');
-                    targetPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 100);
-            });
-        });
+// Loading Back Arrow
+document.getElementById('loading-back-arrow').addEventListener('click', function() {
+    const loadingScreen = document.getElementById('loading-screen');
+    const gamePage = document.getElementById('game-page');
 
-        // Show/Hide AI custom settings based on selected difficulty
-        aiDifficultyRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                if (this.value === 'custom') {
-                    aiCustomSettings.classList.add('active');
-                } else {
-                    aiCustomSettings.classList.remove('active');
-                }
-            });
-        });
+    loadingScreen.classList.remove('active');
+    gamePage.classList.remove('hidden');
 
-        // Initialize all sliders
-        function updateSliderValue(sliderId, valueId, suffix = '') {
-            const slider = document.getElementById(sliderId);
-            const valueDisplay = document.getElementById(valueId);
+    showNotification('Hızlı oyun iptal edildi', 'info');
+});
 
-            if (!slider || !valueDisplay) return;
+// DOM Elements
+const gameModeCards = document.querySelectorAll('.game-mode-card');
+const settingsPanels = document.querySelectorAll('.settings-panel');
+const aiDifficultyRadios = document.querySelectorAll('input[name="ai-difficulty"]');
+const aiCustomSettings = document.getElementById('ai-custom-settings');
 
-            slider.addEventListener('input', function() {
-                let value = this.value;
-                if (sliderId.includes('corner-boost')) {
-                    value = parseFloat(value).toFixed(1) + 'x';
-                } else if (sliderId.includes('target-win-rate')) {
-                    value = (parseInt(value) * 10) + '%';
-                } else {
-                    value += suffix;
-                }
+// Initialize all sliders
+function updateSliderValue(sliderId, valueId, suffix = '') {
+    const slider = document.getElementById(sliderId);
+    const valueDisplay = document.getElementById(valueId);
 
-                // Animate value change
-                valueDisplay.style.transform = 'scale(1.1)';
-                valueDisplay.textContent = value;
+    if (!slider || !valueDisplay) return;
 
-                setTimeout(() => {
-                    valueDisplay.style.transform = 'scale(1)';
-                }, 200);
-            });
+    slider.addEventListener('input', function() {
+        let value = this.value;
+        if (sliderId.includes('corner-boost')) {
+            value = parseFloat(value).toFixed(1) + 'x';
+        } else if (sliderId.includes('target-win-rate')) {
+            value = (parseInt(value) * 10) + '%';
+        } else {
+            value += suffix;
         }
 
-        // Initialize all sliders (paddle-speed ve ball-speed çıkarıldı)
-        const sliders = [
-            ['paddle-height', 'paddle-height-value', 'px'],
-            ['ball-radius', 'ball-radius-value', 'px'],
-            ['corner-boost', 'corner-boost-value'],
-            ['ai-paddle-height', 'ai-paddle-height-value', 'px'],
-            ['ai-ball-radius', 'ai-ball-radius-value', 'px'],
-            ['ai-corner-boost', 'ai-corner-boost-value'],
-            ['ai-reaction-speed', 'ai-reaction-speed-value'],
-            ['ai-prediction-accuracy', 'ai-prediction-accuracy-value'],
-            ['ai-general-accuracy', 'ai-general-accuracy-value'],
-            ['ai-learning-speed', 'ai-learning-speed-value'],
-            ['ai-preparation-distance', 'ai-preparation-distance-value'],
-            ['ai-freeze-distance', 'ai-freeze-distance-value'],
-            ['ai-target-win-rate', 'ai-target-win-rate-value'],
-            ['ai-fairness-level', 'ai-fairness-level-value'],
-            ['ai-max-consecutive-wins', 'ai-max-consecutive-wins-value']
-        ];
+        // Animate value change
+        valueDisplay.style.transform = 'scale(1.1)';
+        valueDisplay.textContent = value;
+
+        setTimeout(() => {
+            valueDisplay.style.transform = 'scale(1)';
+        }, 200);
+    });
+}
+
+// Initialize all sliders (paddle-speed ve ball-speed çıkarıldı)
+const sliders = [
+    ['paddle-height', 'paddle-height-value', 'px'],
+    ['ball-radius', 'ball-radius-value', 'px'],
+    ['corner-boost', 'corner-boost-value'],
+    ['ai-paddle-height', 'ai-paddle-height-value', 'px'],
+    ['ai-ball-radius', 'ai-ball-radius-value', 'px'],
+    ['ai-corner-boost', 'ai-corner-boost-value'],
+    ['ai-reaction-speed', 'ai-reaction-speed-value'],
+    ['ai-prediction-accuracy', 'ai-prediction-accuracy-value'],
+    ['ai-general-accuracy', 'ai-general-accuracy-value'],
+    ['ai-learning-speed', 'ai-learning-speed-value'],
+    ['ai-preparation-distance', 'ai-preparation-distance-value'],
+    ['ai-freeze-distance', 'ai-freeze-distance-value'],
+    ['ai-target-win-rate', 'ai-target-win-rate-value'],
+    ['ai-fairness-level', 'ai-fairness-level-value'],
+    ['ai-max-consecutive-wins', 'ai-max-consecutive-wins-value']
+];
 
         sliders.forEach(([sliderId, valueId, suffix]) => {
             updateSliderValue(sliderId, valueId, suffix || '');
@@ -3768,47 +4585,49 @@ html {
             });
         }
 */
+sliders.forEach(([sliderId, valueId, suffix]) => {
+    updateSliderValue(sliderId, valueId, suffix || '');
+});
 
-        // Smooth transitions for all interactive elements
-        document.querySelectorAll('.btn, .input-field, .radio-option').forEach(element => {
-            element.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-        });
+// Smooth transitions for all interactive elements
+document.querySelectorAll('.btn, .input-field, .radio-option').forEach(element => {
+    element.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+});
 
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // ESC to close active panels
-            if (e.key === 'Escape') {
-                gameModeCards.forEach(c => c.classList.remove('active'));
-                settingsPanels.forEach(p => p.classList.remove('active'));
+// Add keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // ESC to close active panels
+    if (e.key === 'Escape') {
+        gameModeCards.forEach(c => c.classList.remove('active'));
+        settingsPanels.forEach(p => p.classList.remove('active'));
+    }
+});
+
+// Initialize tooltips
+const tooltips = document.querySelectorAll('.difficulty-tooltip');
+tooltips.forEach(tooltip => {
+    tooltip.style.transition = 'all 0.3s ease';
+});
+
+// Add focus trap for accessibility
+settingsPanels.forEach(panel => {
+    panel.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+            const focusableElements = this.querySelectorAll(
+                'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+            if (e.shiftKey && document.activeElement === firstElement) {
+                e.preventDefault();
+                lastElement.focus();
+            } else if (!e.shiftKey && document.activeElement === lastElement) {
+                e.preventDefault();
+                firstElement.focus();
             }
-        });
-
-        // Initialize tooltips
-        const tooltips = document.querySelectorAll('.difficulty-tooltip');
-        tooltips.forEach(tooltip => {
-            tooltip.style.transition = 'all 0.3s ease';
-        });
-
-        // Add focus trap for accessibility
-        settingsPanels.forEach(panel => {
-            panel.addEventListener('keydown', function(e) {
-                if (e.key === 'Tab') {
-                    const focusableElements = this.querySelectorAll(
-                        'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
-                    );
-                    const firstElement = focusableElements[0];
-                    const lastElement = focusableElements[focusableElements.length - 1];
-
-                    if (e.shiftKey && document.activeElement === firstElement) {
-                        e.preventDefault();
-                        lastElement.focus();
-                    } else if (!e.shiftKey && document.activeElement === lastElement) {
-                        e.preventDefault();
-                        firstElement.focus();
-                    }
-                }
-            });
-        });
+        }
+    });
+});
 
 
 // Back Arrow Button Functionality
@@ -4435,26 +5254,23 @@ window.addEventListener('load', function() {
 // ============================================
 
 // Sayfa yüklendikten sonra Custom Game sekmesini aç
-setTimeout(() => {
-    const customModeCard = document.getElementById('custom-mode');
-    const customSettings = document.getElementById('custom-settings');
+const customModeCard = document.getElementById('custom-mode');
+const customSettings = document.getElementById('custom-settings');
 
-    if (customModeCard && customSettings && !customModeCard.classList.contains('active')) {
-        // Önce tüm sekmeleri kapat
-        document.querySelectorAll('.mode-card').forEach(card => {
-            card.classList.remove('active');
-        });
-        document.querySelectorAll('.game-settings').forEach(settings => {
-            settings.classList.remove('active');
-        });
+if (customModeCard && customSettings && !customModeCard.classList.contains('active')) {
+    // Önce tüm sekmeleri kapat
+    document.querySelectorAll('.mode-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    document.querySelectorAll('.game-settings').forEach(settings => {
+        settings.classList.remove('active');
+    });
 
-        // Custom Game sekmesini aç
-        customModeCard.classList.add('active');
-        customSettings.classList.add('active');
-    }
-}, 200);
+    // Custom Game sekmesini aç
+    customModeCard.classList.add('active');
+    customSettings.classList.add('active');
+}
 
-
-    </script>
+</script>
 </body>
 </html>

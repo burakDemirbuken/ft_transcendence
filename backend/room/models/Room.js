@@ -56,7 +56,7 @@ export default class Room extends EventEmitter
 		this.status = 'in_game';
 		return {
 			gameSettings: this.gameSettings,
-			players: this.players.map(p => p.getState()),
+			players: this.players.map(p => p.getState(this.host)),
 			gameMode: this.gameMode,
 		};
 	}
@@ -79,7 +79,7 @@ export default class Room extends EventEmitter
 			gameMode: this.gameMode,
 			status: this.status,
 			maxPlayers: this.maxPlayers,
-			players: this.players.map(p => p.getState()),
+			players: this.players.map(p => p.getState(this.host)),
 			gameSettings: this.gameSettings,
 			createdAt: this.createdAt,
 		};

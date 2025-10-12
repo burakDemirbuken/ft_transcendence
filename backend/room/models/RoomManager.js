@@ -179,7 +179,7 @@ class RoomManager extends EventEmitter
 		else {
 			this.emit(`room${roomId}_Deleted`);
 		}
-
+		
 		return room;
 	}
 

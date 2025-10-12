@@ -13,6 +13,9 @@ class AIPingPong extends PingPong
 		this._aiSendInterval = null;
 		this._lastTargetY = null;
 		this._aiDir = 0; // -1 up, 1 down, 0 none
+
+		// DEBUG: ID'yi kontrol et
+		console.log('🎮 AIPingPong created with ID:', this.id);
 	}
 
 	addPlayer(player)
@@ -31,10 +34,10 @@ class AIPingPong extends PingPong
 	{
 		const player = this.players[0];
 		const localPaddle = this.paddles.get(this.players[0].id);
-
+	
 		localPaddle.up = player.inputGet('ArrowUp') || player.inputGet('w');
 		localPaddle.down = player.inputGet('ArrowDown') || player.inputGet('s');
-
+	
 		const aiPaddle = this.paddles.get("AI");
 		if (aiPaddle)
 		{
@@ -44,29 +47,35 @@ class AIPingPong extends PingPong
 				: (aiPaddle.pos.y + aiPaddle.height / 2);
 			const paddleCenterY = aiPaddle.pos.y + aiPaddle.height / 2;
 			const diff = targetCenterY - paddleCenterY;
-			const enterThreshold = 10; // yön değiştirmek için daha geniş eşik
-			const exitThreshold = 4;   // hareketi bırakmak için dar eşik
-
-			let nextDir = this._aiDir;
-			if (this._aiDir === 0)
+			
+			// Daha hassas threshold'lar
+			const threshold = 4; // Tek bir eşik değeri
+		
+			// Basit ve net mantık
+			if (diff > threshold)
 			{
-				if (diff > enterThreshold) nextDir = 1;
-				else if (diff < -enterThreshold) nextDir = -1;
+				// Hedef aşağıda -> aşağı git
+				aiPaddle.up = false;
+				aiPaddle.down = true;
+				this._aiDir = 1;
 			}
-			else if (this._aiDir === 1)
+			else if (diff < -threshold)
 			{
-				if (diff <= exitThreshold) nextDir = 0;
+				// Hedef yukarıda -> yukarı git
+				aiPaddle.up = true;
+				aiPaddle.down = false;
+				this._aiDir = -1;
 			}
-			else if (this._aiDir === -1)
+			else
 			{
-				if (diff >= -exitThreshold) nextDir = 0;
+				// Hedefe ulaştık -> dur
+				aiPaddle.up = false;
+				aiPaddle.down = false;
+				this._aiDir = 0;
 			}
-
-			this._aiDir = nextDir;
-			aiPaddle.up = this._aiDir === -1;
-			aiPaddle.down = this._aiDir === 1;
 		}
 	}
+
 
 	getGameState()
 	{
@@ -121,10 +130,21 @@ class AIPingPong extends PingPong
 	start()
 	{
 		this.startTime = Date.now();
+		
+		// ✅ ID kontrolü ekle
+		if (!this.id)
+		{
+			console.error('❌ Game ID is not defined! Cannot initialize AI.');
+			return;
+		}
+
+		console.log('🎮 Starting AI game with ID:', this.id); // DEBUG
+
 		// AI sunucusunda bu oyun için AI instance'ını başlat
 		try
 		{
 			const difficulty = this.aiSettings?.difficulty || 'medium';
+			console.log('📤 Calling AiNetwork.initGame with:', { difficulty, gameId: this.id }); // DEBUG
 			AiNetwork.initGame(difficulty, this.id, this.aiSettings?.custom_settings || {});
 		}
 		catch (e)
@@ -144,33 +164,35 @@ class AIPingPong extends PingPong
 							return;
 						if (!this.team.get(1) || !this.team.get(2))
 							return;
-						AiNetwork.sendData(this.id,
+
+						const dataToSend = {
+							ball:
 							{
-								ball:
-								{
-									x: this.ball.pos.x,
-									y: this.ball.pos.y,
-									speed_x: this.ball.direction.x * this.ball.speed,
-									speed_y: this.ball.direction.y * this.ball.speed,
-								},
-								paddle:
-								{
-									ai_y: this.paddles.get("AI").pos.y,
-								},
-								game_area:
-								{
-									width: this.settings.canvasWidth,
-									height: this.settings.canvasHeight,
-								},
-								score:
-								{
-									ai_score: this.team.get(1).score,
-									human_score: this.team.get(2).score,
-									ai_scored: this.lastGoal === 'left',
-									human_scored: this.lastGoal === 'right',
-								},
-							}
-						);
+								x: this.ball.pos.x,
+								y: this.ball.pos.y,
+								speed_x: this.ball.direction.x * this.ball.speed,
+								speed_y: this.ball.direction.y * this.ball.speed,
+							},
+							paddle:
+							{
+								ai_y: this.paddles.get("AI").pos.y,
+							},
+							game_area:
+							{
+								width: this.settings.canvasWidth,
+								height: this.settings.canvasHeight,
+							},
+							score:
+							{
+								ai_score: this.team.get(1).score,
+								human_score: this.team.get(2).score,
+								ai_scored: this.lastGoal === 'left',
+								human_scored: this.lastGoal === 'right',
+							},
+						};
+
+						console.log('📤 AI\'ya gönderilen veri:', dataToSend);
+						AiNetwork.sendData(this.id, dataToSend);
 					}, 1000);
 			}, 1000
 		);
@@ -178,6 +200,7 @@ class AIPingPong extends PingPong
 		// AI kararlarını dinle ve hedef Y'yi kaydet
 		AiNetwork.on(`aiGame${this.id}_target`, (targetY) =>
 		{
+			console.log('🎯 AI target received for game', this.id, ':', targetY); // DEBUG
 			if (typeof targetY === 'number')
 				this._lastTargetY = targetY;
 		});
