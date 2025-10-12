@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+@import url("profile_style/color.css");
 
 .friends-container {
 	min-height: 100%;
@@ -302,10 +303,9 @@
 }
 
 .overlay {
-	/* display: none; */
 	position: fixed;
 	top: 0;
-	left: var(--sidebar-wide-screen);
+	left: 60px;
 	bottom: 0;
 	right: 0;
 	display: flex;
@@ -315,9 +315,13 @@
 	background: #0007;
 }
 
+.overlay.hide-away {
+	display: none;
+}
+
 @media (max-width: 1080px) {
 	.overlay {
-		left: var(--sidebar-narrow-screen);
+		left: 50px;
 	}
 }
 
@@ -348,8 +352,7 @@
 	transition: all 0.3s ease;
 }
 
-#card-exit:hover svg,
-#card-exit.close svg {
+#card-exit:hover svg {
 	rotate: 90deg;
 	filter: drop-shadow(0 0 10px rgb(193, 1, 1)); /* üzerine gelince kırmızı gölge */
 	fill: #e30;

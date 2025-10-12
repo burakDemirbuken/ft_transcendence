@@ -38,9 +38,6 @@
     --border-glow: rgba(0, 255, 255, 0.5);
     --shadow-glow: rgba(0, 255, 255, 0.3);
     --box-shadow: rgba(0, 0, 0, 0.3);
-
-    --sidebar-wide-screen: 60px;
-    --sidebar-narrow-screen: 50px;
 }
 
 .btn {

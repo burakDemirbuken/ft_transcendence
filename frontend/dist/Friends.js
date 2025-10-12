@@ -1,4 +1,5 @@
 import AView from "./AView.js";
+import Profile from "./Profile.js";
 import { showNotification } from "./notification.js";
 let currentFrPage = "friends";
 function handle_clicks(e) {
@@ -24,7 +25,17 @@ function handle_clicks(e) {
     else if (e.target.classList.contains("prof")) {
         // Add overlay
         // Add profile to overlay
+        document.querySelector(".overlay").classList.remove("hide-away");
     }
+    else if (e.currentTarget.id === "card-exit") {
+        // clear friend information?
+        document.querySelector(".overlay").classList.add("hide-away");
+    }
+}
+function esc(e) {
+    const ol = document.querySelector(".overlay");
+    if (e.key === "Escape" && !ol.classList.contains("hide-away"))
+        ol.classList.add("hide-away");
 }
 async function createFriends() {
     const usr = await fetch("mockdata/friendslist.json");
@@ -133,6 +144,14 @@ async function createOverlay() {
         link.rel = "stylesheet";
         link.href = "styles/profile.css";
         document.head.appendChild(link);
+        const profileInstance = new Profile();
+        profileInstance.setEventHandlers();
+        let rows = document.querySelectorAll(".tournament-row");
+        for (const row of rows)
+            row.setAttribute("inert", "");
+        rows = document.querySelectorAll(".match-row");
+        for (const row of rows)
+            row.setAttribute("inert", "");
     }
     catch (_a) {
         showNotification("System error, Please try again later.");
@@ -155,9 +174,13 @@ export default class extends AView {
     }
     async setEventHandlers() {
         document.addEventListener("click", handle_clicks);
+        document.querySelector("#card-exit").addEventListener("click", handle_clicks);
+        document.addEventListener("keydown", esc);
     }
     async unsetEventHandlers() {
+        console.log("Unsetting Friends Event Handlers");
         document.removeEventListener("click", handle_clicks);
+        document.removeEventListener("keydown", esc);
     }
     async setStylesheet() {
         const link = document.createElement("link");
@@ -166,7 +189,10 @@ export default class extends AView {
         document.head.appendChild(link);
     }
     async unsetStylesheet() {
-        const link = document.querySelector("link[href='styles/friends.css']");
+        console.log("Unsetting Friends Style Sheets");
+        let link = document.querySelector("link[href='styles/friends.css']");
+        document.head.removeChild(link);
+        link = document.querySelector("link[href='styles/profile.css']");
         document.head.removeChild(link);
     }
 }
