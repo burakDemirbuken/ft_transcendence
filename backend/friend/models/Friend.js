@@ -17,7 +17,7 @@ export default (sequelize, DataTypes, Model) => {
             allowNull: false
         },
         status: {
-            type: DataTypes.ENUM('pending', 'accepted', 'blocked'),
+            type: DataTypes.ENUM('pending', 'accepted'),
         }
     }, {
         indexes: [

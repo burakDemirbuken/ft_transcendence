@@ -56,74 +56,73 @@ volumes:
 
 
 services:
-#  frontend:
-#    container_name: frontend
-#    build: ./frontend
-#    restart: on-failure
-#    volumes:
-#      - frontend_src:/app
-#      - /app/node_modules
-#    networks:
-#      - transcendency
-#    expose:
-#      - 3003
-#    depends_on:
-#      - nginx
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    restart: on-failure
+    volumes:
+      - frontend_src:/app
+      - /app/node_modules
+    networks:
+      - transcendency
+    expose:
+      - 3003
+    depends_on:
+      - nginx
+  nginx:
+    container_name: nginx
+    build: ./backend/nginx
+    restart: on-failure
+    volumes:
+      - frontend_src:/usr/share/nginx/html
+    networks:
+      - transcendency
+    ports:
+      - 3030:3030
+    depends_on:
+      - gateway
 
-#  nginx:
-#    container_name: nginx
-#    build: ./backend/nginx
-#    restart: on-failure
-#    volumes:
-#      - frontend_src:/usr/share/nginx/html
-#    networks:
-#      - transcendency
-#    ports:
-#      - 8080:8080
-#    depends_on:
-#      - gateway
+  authentication:
+    container_name: authentication
+    build: ./backend/authentication
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 3001
+    volumes:
+      - authentication_src:/app
+      - /app/node_modules
 
-#  authentication:
-#    container_name: authentication
-#    build: ./backend/authentication
-#    restart: on-failure
-#    networks:
-#      - transcendency
-#    expose:
-#      - 3001
-#    volumes:
-#      - authentication_src:/app
-#      - /app/node_modules
+  gateway:
+    container_name: gateway
+    build: ./backend/gateway
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 3000
+    volumes:
+      - gateway_src:/app
+      - /app/node_modules
 
-#  gateway:
-#    container_name: gateway
-#    build: ./backend/gateway
-#    restart: on-failure
-#    networks:
-#      - transcendency
-#    expose:
-#      - 3000
-#    volumes:
-#      - gateway_src:/app
-#      - /app/node_modules
-
-#  email:
-#    container_name: email
-#    build: ./backend/email
-#    restart: on-failure
-#    networks:
-#      - transcendency
-#    expose:
-#      - 3005
-#    volumes:
-#      - email_src:/app
-#      - /app/node_modules
-#    environment:
-#      - EMAIL_SERVICE=gmail
-#      - EMAIL_profile=forty2transcendence@gmail.com
-#      - EMAIL_PASS=gfyk pfqi gvpm ahtx
-#      - EMAIL_PORT=3005
-#      - HOST=0.0.0.0
+  email:
+    container_name: email
+    build: ./backend/email
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 3005
+    volumes:
+      - email_src:/app
+      - /app/node_modules
+    environment:
+      - EMAIL_SERVICE=gmail
+      - EMAIL_profile=forty2transcendence@gmail.com
+      - EMAIL_PASS=gfyk pfqi gvpm ahtx
+      - EMAIL_PORT=3005
+      - HOST=0.0.0.0
 
   gameserver:
     container_name: gameserver
@@ -148,37 +147,34 @@ services:
     restart: on-failure
     expose:
       - 3004
-    # BURAK: test için portı dışarıya açtım.
-    ports:
-      - "3004:3004"
     volumes:
       - room_src:/app
       - /app/node_modules
     networks:
       - transcendency
 
-#  profile:
-#    container_name: profile
-#    build: ./backend/profile
-#    restart: on-failure
-#    expose:
-#      - 3006
-#    volumes:
-#      - profile_src:/app
-#      - /app/node_modules
-#    networks:
-#      - transcendency
-#
-#  friend:
-#    container_name: friend
-#    build: ./backend/friend
-#    restart: on-failure
-#    expose:
-#      - 3007
-#    volumes:
-#      - /app/node_modules
-#    networks:
-#      - transcendency
+  profile:
+    container_name: profile
+    build: ./backend/profile
+    restart: on-failure
+    expose:
+      - 3006
+    volumes:
+      - profile_src:/app
+      - /app/node_modules
+    networks:
+      - transcendency
+
+  friend:
+    container_name: friend
+    build: ./backend/friend
+    restart: on-failure
+    expose:
+      - 3007
+    volumes:
+      - /app/node_modules
+    networks:
+      - transcendency
 
   aiserver:
     container_name: ai-server
@@ -192,4 +188,3 @@ services:
       - "3003:3003"
     volumes:
       - aiServer_src:/app
-

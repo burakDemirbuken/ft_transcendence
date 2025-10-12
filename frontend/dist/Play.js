@@ -1,43 +1,24 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import AView from "./AView.js";
 export default class extends AView {
     constructor() {
         super();
         this.setTitle("Play");
     }
-    getHtml() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const response = yield fetch(`templates/play.html`);
-            return yield response.text();
-        });
+    async getHtml() {
+        const response = await fetch(`templates/play.html`);
+        return await response.text();
     }
-    setEventHandlers() {
-        return __awaiter(this, void 0, void 0, function* () { });
+    async setEventHandlers() { }
+    async unsetEventHandlers() { }
+    async setStylesheet() {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "styles/play.css";
+        document.head.appendChild(link);
     }
-    unsetEventHandlers() {
-        return __awaiter(this, void 0, void 0, function* () { });
-    }
-    setStylesheet() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = "styles/play.css";
-            document.head.appendChild(link);
-        });
-    }
-    unsetStylesheet() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const link = document.querySelector("link[href='styles/play.css']");
-            document.head.removeChild(link);
-        });
+    async unsetStylesheet() {
+        const link = document.querySelector("link[href='styles/play.css']");
+        document.head.removeChild(link);
     }
 }
 //# sourceMappingURL=Play.js.map

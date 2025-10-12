@@ -37,7 +37,6 @@
 /* Tab Settings */
 .tab-content {
     display: none;
-    padding: 10px;
     border: none;
     margin-top: 10px;
 }
@@ -55,7 +54,7 @@
     border-radius: 10px;
     color: var(--color-muted);
     font-family: var(--font-family);
-    font-size: 1.0rem;
+    font-size: clamp(.8rem, 1vw + .6rem, 1.2rem);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;

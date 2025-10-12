@@ -1,7 +1,7 @@
 // for gameserver websocket
 
 export default async function gameServerConnectionSocket(fastify) {
-	fastify.get("/ws/server", {
+	fastify.get("/ws/server", { // "ws-room/server" olabilir
 		websocket: true
 	},
 	(connection, req) => {

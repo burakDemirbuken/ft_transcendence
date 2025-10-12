@@ -1,72 +1,33 @@
-
-/* Responsive Design */
-@media (max-width: 768px) {
-    .profile-container {
-        padding: 10px;
-    }
-
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-        gap: 20px;
-    }
-
+@media (max-width: 1080px) {
+    /* Header */
     .header-stats {
-        justify-content: center;
+        gap: .8rem;
     }
-
-    .username {
-        font-size: 2rem;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .chart-card {
-        grid-column: span 1;
-    }
-
-    .match-row {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        text-align: center;
-    }
-
-    .match-row.header {
-        display: none;
-    }
-
-    .matches-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .matches-filters {
-        justify-content: center;
+    .header-content {
+        gap: 1rem;
     }
 }
 
-@media (max-width: 480px) {
-    .user-avatar {
-        width: 80px;
-        height: 80px;
+@media (max-width: 720px) {
+    /* Header */
+    .header-stats {
+        gap: .6rem;
+    }
+    .header-content {
+        gap: .8rem;
+    }
+}
+
+@media (max-width: 420px) {
+    /* Header */
+    .header-stats {
+        gap: .4rem;
     }
 
-    .avatar-image {
-        font-size: 2rem;
-    }
-
-    .username {
-        font-size: 1.5rem;
-    }
-
-    .stat-value {
-        font-size: 1.5rem;
-    }
-
-    .streak-number {
-        font-size: 3rem;
+    /* Dashboard */
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
     }
 
     .profile-nav {

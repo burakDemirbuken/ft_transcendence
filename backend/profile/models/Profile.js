@@ -22,6 +22,7 @@ export default (sequelize, DataTypes, Model) => {
         },
         bio: {
             type: DataTypes.TEXT
+
         },
 	}, {
         sequelize,

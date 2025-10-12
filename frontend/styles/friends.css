@@ -1,6 +1,5 @@
 .friends-container {
-	min-height: 100vh;
-	min-height: 100dvh;
+	min-height: 100%;
 	width: 100%;
 	color: #eee;
 
@@ -36,7 +35,7 @@
 	height: auto;
 	font-family: "PixeloidSansBold";
 	color: #eee;
-	padding: 1.5em;
+	padding: clamp(1em, .8em + 1vw, 1.2em) 0;
 
 	position: relative;
 }
@@ -52,15 +51,48 @@
 }
 
 .friend-page-box {
-	width: 80%;
+	position: relative;
+	width: max(80%, 260px);
+	width: max(260px, 75% + 5rem);
+	height: 30px;
 	margin-top: 1rem;
 
 	display: flex;
 	justify-content: flex-start;
 }
 
-.friend-page-box .friend {
-	min-width: 400px;
+.search-bar input {
+	background: #111;
+
+	height: 2rem;
+	width: 250px;
+	border: 2px solid #333;
+	border-radius: 3px;
+
+	color: #c0c;
+	padding-left: .4em;
+}
+
+.search-bar input::placeholder {
+	padding-left: .4em;
+}
+
+.search-bar button {
+	width: 2rem;
+	height: 2rem;
+	border-radius: 5px;
+
+	border: 2px solid #333;
+	background: #000;
+}
+
+.search-bar svg {
+	fill: #ccc;
+	background: none;
+	padding: .4em;
+}
+
+.subpage .friend {
 	background: #111;
 	border-radius: 10px;
 	border: 2px solid #333;
@@ -76,6 +108,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: 1em;
+	min-width: 0;
 }
 
 .friend-avatar {
@@ -105,14 +138,33 @@
 	object-fit: cover;
 }
 
-.friend-info {
+.user-info {
+	min-width: 0;
+	flex: 1;
 	display: flex;
 	flex-direction: column;
+	gap: .1em;
 }
 
-.friend-info .uname {
-	font-family: "PixeloidSans";
-	text-shadow: 0 0 5px #fff;
+.user-info .dname {
+	font-family: "Orbitron","monospace";
+	font-weight: bold;
+}
+
+.user-info .uname {
+	font-family: "PixeloidMono";
+	font-size: .7em;
+	color: #08a;
+}
+
+.dname, .uname {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	display: block;
+	width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .friend-action {

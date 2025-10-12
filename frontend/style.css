@@ -6,10 +6,13 @@
 
 body {
 	display: flex;
-	justify-content: center;
-	align-items: start;
+	justify-content: flex-start; /* merkeze değil sola sabitle */
+	align-items: stretch; /* Yüksekliği tam dolduracak */
+	min-height: 100dvh;
+	overflow-x: hidden;
 }
 
+/* navbar yanında içerik doğru davranışı için birkaç düzenleme */
 #content {
 	width: 100%;
 	min-height: 100vh;
@@ -37,10 +40,66 @@ body {
 	left: 0;
 
 	transition: width .3s ease;
+	z-index: 10; /* içerik üzerine gelmesini sağlamak için */
 }
 
+/* üst kısım normal akışta */
+.nav-top {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* alt kısım en alta sabitleniyor */
+.nav-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: auto;  /* <-- en alta iter */
+}
+
+#navbar.logout .nav-bottom {
+	margin: 0;
+}
+
+#navbar.logout .login {
+	display: none;
+}
+
+#navbar.logout #logout svg{
+	rotate: 0deg;
+}
+
+#navbar.logout #in {
+	display: block;
+}
+
+#navbar #in {
+	display: none;
+}
+
+#navbar #out {
+	display: block;
+}
+
+#navbar.logout #out {
+	display: none;
+}
+
+
+/* link/ butonların flex davranışını sınırla, taşmalar daha düzgün olsun */
+#navbar .sidebar-element {
+  font-size: 1em;
+  padding: 0.45em 0.85em;
+  gap: 0.8em;
+  display: flex;
+  align-items: center;
+}
+
+/* collapse durumunda da scroll koru */
 #navbar.collapse {
 	width: 60px;
+	overflow-y: auto;
 }
 
 #navbar.collapse #logo {
