@@ -32,7 +32,7 @@ const router = async function (page) {
         view.setStylesheet();
         content.innerHTML = await view.getHtml();
         view.setDynamicContent();
-        I18n.loadLanguage(page);
+        I18n.loadLanguage();
         view.setEventHandlers();
     }
     else {
@@ -84,8 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
             else if (e.currentTarget.matches("[id='language']")) {
                 console.log("LANGUAGE");
                 e.preventDefault();
-                I18n.nextLanguage("navbar");
-                I18n.nextLanguage(pageState.current);
+                I18n.nextLanguage();
                 (_e = document.querySelector(".selected")) === null || _e === void 0 ? void 0 : _e.classList.toggle("selected");
                 e.currentTarget.classList.toggle("selected");
             }
@@ -116,7 +115,7 @@ window.addEventListener("load", () => {
     const initialPage = urlPage || history.state.page || "login";
     if (!localStorage.getItem("langPref"))
         localStorage.setItem("langPref", "eng");
-    I18n.loadLanguage("navbar");
+    I18n.loadLanguage();
     router(initialPage);
     history.replaceState({ page: initialPage }, "", `/${initialPage}`);
 });

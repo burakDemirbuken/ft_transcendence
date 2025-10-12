@@ -38,7 +38,7 @@ const router = async function(page:string) {
 		view.setStylesheet();
 		content.innerHTML = await view.getHtml();
 		view.setDynamicContent();
-		I18n.loadLanguage(page);
+		I18n.loadLanguage();
 		view.setEventHandlers();
 	} else {
 		document.title = "Page Not Found";
@@ -90,8 +90,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			else if (e.currentTarget.matches("[id='language']")) {
 				console.log("LANGUAGE");
 				e.preventDefault();
-				I18n.nextLanguage("navbar");
-				I18n.nextLanguage(pageState.current);
+				I18n.nextLanguage();
 				document.querySelector(".selected")?.classList.toggle("selected");
 				e.currentTarget.classList.toggle("selected");
 			}
@@ -129,7 +128,7 @@ window.addEventListener("load", () => {
 	if (!localStorage.getItem("langPref"))
 		localStorage.setItem("langPref", "eng");
 
-	I18n.loadLanguage("navbar");
+	I18n.loadLanguage();
 
 	router(initialPage);
 	history.replaceState({ page: initialPage }, "", `/${initialPage}`);
