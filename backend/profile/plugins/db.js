@@ -51,7 +51,7 @@ export default fp(async (fastify) => {
 		Round.hasMany(TournamentHistory, { foreignKey: 'roundID', onDelete: 'CASCADE', hooks: true })
 		TournamentHistory.belongsTo(Round, { foreignKey: 'roundID', targetKey: 'id', onDelete: 'CASCADE' })
 
-		await sequelize.sync({ alter: true })
+		await sequelize.sync({ force: false })
 
 		fastify.decorate('sequelize', sequelize)
 

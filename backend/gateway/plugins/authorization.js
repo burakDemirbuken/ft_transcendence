@@ -51,9 +51,37 @@ async function jwtMiddleware(fastify, options) {
         const token = request.cookies.accessToken;
         
         if (token) {
-            // Token var, verify et
+            // Token var, blacklist kontrolü yap
             try {
-                // 2. JWT verify et - cookie'den token'ı manual verify
+                // 2. Önce auth service'e blacklist kontrolü
+                console.log('🔍 Checking token blacklist status...');
+                const blacklistResponse = await fetch('http://authentication:3001/check-token-blacklist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ token: token })
+                });
+                
+                if (blacklistResponse.ok) {
+                    const blacklistResult = await blacklistResponse.json();
+                    if (blacklistResult.isBlacklisted) {
+                        console.log('🚫 Token is blacklisted, denying access');
+                        return reply.code(401).send({ 
+                            success: false, 
+                            error: 'Token has been invalidated', 
+                            code: 'BLACKLISTED_TOKEN' 
+                        });
+                    }
+                }
+            } catch (blacklistError) {
+                console.log('❌ Blacklist check failed:', blacklistError.message);
+                // Blacklist check başarısız olsa da devam et (fallback)
+            }
+            
+            // Token var ve blacklisted değil, verify et
+            try {
+                // 3. JWT verify et - cookie'den token'ı manual verify
                 console.log('🔍 Attempting JWT verify for token:', token.substring(0, 20) + '...');
                 const decoded = fastify.jwt.verify(token);
                 request.user = decoded;

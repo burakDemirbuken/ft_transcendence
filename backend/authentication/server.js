@@ -8,9 +8,9 @@ import authRoutes from './routes/authRoutes.js';
 
 const fastify = Fastify({
   logger: true,
-  requestTimeout: 30000, // 30 seconds
-  keepAliveTimeout: 65000, // 65 seconds
-  connectionTimeout: 30000, // 30 seconds
+  requestTimeout: 30000,
+  keepAliveTimeout: 65000,
+  connectionTimeout: 30000,
 });
 
 // Cookie support

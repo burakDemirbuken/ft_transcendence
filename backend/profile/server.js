@@ -6,7 +6,18 @@ import dbPlugin from './plugins/db.js'
 import overview from 'fastify-overview'
 
 const fastify = Fastify({
-  logger: true
+  logger: false,
+})
+
+// JSON content type desteği ekle
+fastify.addContentTypeParser('application/json', { parseAs: 'string' }, function (req, body, done) {
+  try {
+    const json = JSON.parse(body)
+    done(null, json)
+  } catch (err) {
+    err.statusCode = 400
+    done(err, undefined)
+  }
 })
 
 fastify.register(overview)

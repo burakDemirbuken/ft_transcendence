@@ -4,13 +4,26 @@ export default (sequelize, DataTypes, Model) => {
 
     Profile.init({
         id: {
-            type: DataTypes.STRING,
-            primaryKey: true
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
+        },
+        userId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            unique: true
         },
         userName: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true
+        },
+        email: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            validate: {
+                isEmail: true
+            }
         },
         displayName: {
             type: DataTypes.STRING,
@@ -22,7 +35,6 @@ export default (sequelize, DataTypes, Model) => {
         },
         bio: {
             type: DataTypes.TEXT
-
         },
 	}, {
         sequelize,
