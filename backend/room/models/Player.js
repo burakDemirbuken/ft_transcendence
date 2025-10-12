@@ -15,12 +15,12 @@ class Player
 		this.clientSocket = socket;
 	}
 
-	getState()
+	getState(hostId)
 	{
 		return {
 			id: this.id,
 			name: this.name,
-			isReady: this.isReady,
+			isHost: this.id === hostId
 		};
 	}
 }

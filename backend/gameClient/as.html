@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Test - Multi User Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 0, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            border-color: #00ffff;
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff0844 0%, #ff6b6b 100%);
+            color: white;
+        }
+
+        .input-field {
+            padding: 12px 18px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #00ffff;
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .user-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .user-card.connected {
+            border-color: rgba(0, 255, 0, 0.5);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+        }
+
+        .user-card.in-room {
+            border-color: rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #00ffff;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-connected {
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+
+        .status-disconnected {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+        }
+
+        .status-in-room {
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .user-info {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .user-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .log-container {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .log-container h3 {
+            margin-bottom: 15px;
+            color: #00ffff;
+        }
+
+        .log-entry {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            border-left: 3px solid;
+        }
+
+        .log-info {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #00ffff;
+            color: #00ffff;
+        }
+
+        .log-success {
+            background: rgba(0, 255, 0, 0.1);
+            border-color: #00ff00;
+            color: #00ff00;
+        }
+
+        .log-error {
+            background: rgba(255, 0, 0, 0.1);
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+
+        .log-warning {
+            background: rgba(255, 165, 0, 0.1);
+            border-color: #ffa500;
+            color: #ffa500;
+        }
+
+        .log-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .log-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .log-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+            border-radius: 4px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff00ff 0%, #00ffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 Tournament Test Simulator</h1>
+            <p>Birden fazla kullanıcıyı simüle ederek turnuva sistemini test edin</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-users">0</div>
+                <div class="stat-label">Toplam Kullanıcı</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="connected-users">0</div>
+                <div class="stat-label">Bağlı Kullanıcı</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="users-in-room">0</div>
+                <div class="stat-label">Odadaki Kullanıcı</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="current-room">-</div>
+                <div class="stat-label">Aktif Oda</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="number" id="user-count" class="input-field" placeholder="Kullanıcı sayısı" value="8" min="4" max="16">
+            <button class="btn btn-primary" id="create-users-btn">Kullanıcıları Oluştur</button>
+            <button class="btn btn-secondary" id="connect-all-btn" disabled>Hepsini Bağla</button>
+            <button class="btn btn-primary" id="create-tournament-btn" disabled>Turnuva Oluştur</button>
+            <button class="btn btn-secondary" id="join-all-btn" disabled>Hepsini Odaya Al</button>
+            <button class="btn btn-primary" id="match-players-btn" disabled>Eşleştir</button>
+            <button class="btn btn-primary" id="start-tournament-btn" disabled>Başlat</button>
+            <button class="btn btn-danger" id="disconnect-all-btn" disabled>Hepsini Kes</button>
+            <button class="btn btn-danger" id="clear-all-btn">Temizle</button>
+        </div>
+
+        <div class="users-grid" id="users-grid">
+            <!-- User cards will be added here -->
+        </div>
+
+        <div class="log-container">
+            <h3>📋 Event Log</h3>
+            <div id="log-entries"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import WebSocketClient from './src/network/WebSocketClient.js';
+
+        // ============================================================================
+        // GLOBAL STATE
+        // ============================================================================
+        let users = [];
+        let currentRoomId = null;
+        let creatorUserId = null;
+
+        // ============================================================================
+        // UTILITY FUNCTIONS
+        // ============================================================================
+        function generateRandomId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
+        function generateRandomName() {
+            const names = ['Ali', 'Ayşe', 'Mehmet', 'Fatma', 'Ahmet', 'Zeynep', 'Can', 'Elif', 'Burak', 'Selin', 'Emre', 'Deniz', 'Cem', 'Seda', 'Murat', 'Gizem'];
+            return names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 100);
+        }
+
+        function addLog(message, type = 'info') {
+            const logEntries = document.getElementById('log-entries');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logEntries.insertBefore(entry, logEntries.firstChild);
+
+            // Keep only last 50 entries
+            while (logEntries.children.length > 50) {
+                logEntries.removeChild(logEntries.lastChild);
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('total-users').textContent = users.length;
+            document.getElementById('connected-users').textContent = users.filter(u => u.connected).length;
+            document.getElementById('users-in-room').textContent = users.filter(u => u.inRoom).length;
+            document.getElementById('current-room').textContent = currentRoomId || '-';
+        }
+
+        function updateUserCard(user) {
+            const card = document.getElementById(`user-card-${user.id}`);
+            if (!card) return;
+
+            card.className = 'user-card';
+            if (user.connected) card.classList.add('connected');
+            if (user.inRoom) card.classList.add('in-room');
+
+            const statusBadge = card.querySelector('.status-badge');
+            statusBadge.className = 'status-badge';
+            if (user.connected && user.inRoom) {
+                statusBadge.textContent = 'In Room';
+                statusBadge.classList.add('status-in-room');
+            } else if (user.connected) {
+                statusBadge.textContent = 'Connected';
+                statusBadge.classList.add('status-connected');
+            } else {
+                statusBadge.textContent = 'Disconnected';
+                statusBadge.classList.add('status-disconnected');
+            }
+
+            const roomInfo = card.querySelector('.room-info');
+            roomInfo.textContent = user.inRoom ? `Room: ${currentRoomId}` : 'Not in room';
+        }
+
+        function updateButtons() {
+            const hasUsers = users.length > 0;
+            const allConnected = users.every(u => u.connected);
+            const allInRoom = users.every(u => u.inRoom);
+            const hasRoom = currentRoomId !== null;
+
+            document.getElementById('connect-all-btn').disabled = !hasUsers;
+            document.getElementById('create-tournament-btn').disabled = !allConnected || hasRoom;
+            document.getElementById('join-all-btn').disabled = !hasRoom || allInRoom;
+            document.getElementById('match-players-btn').disabled = !allInRoom;
+            document.getElementById('start-tournament-btn').disabled = !allInRoom;
+            document.getElementById('disconnect-all-btn').disabled = !hasUsers;
+        }
+
+        // ============================================================================
+        // USER MANAGEMENT
+        // ============================================================================
+        function createUser(userId, userName) {
+            const socket = new WebSocketClient(window.location.hostname, 3004);
+            
+            const user = {
+                id: userId,
+                name: userName,
+                socket: socket,
+                connected: false,
+                inRoom: false
+            };
+
+            // WebSocket event handlers
+            socket.onConnect(() => {
+                user.connected = true;
+                updateUserCard(user);
+                updateStats();
+                updateButtons();
+                addLog(`✅ ${userName} connected`, 'success');
+            });
+
+            socket.onMessage((message) => {
+                handleUserMessage(user, message);
+            });
+
+            socket.onClose((error) => {
+                user.connected = false;
+                user.inRoom = false;
+                updateUserCard(user);
+                updateStats();
+                updateButtons();
+                addLog(`❌ ${userName} disconnected`, 'error');
+            });
+
+            socket.onError((error) => {
+                addLog(`⚠️ ${userName} error: ${error}`, 'error');
+            });
+
+            users.push(user);
+            createUserCard(user);
+            updateStats();
+            updateButtons();
+
+            return user;
+        }
+
+        function createUserCard(user) {
+            const grid = document.getElementById('users-grid');
+            const card = document.createElement('div');
+            card.id = `user-card-${user.id}`;
+            card.className = 'user-card';
+
+            card.innerHTML = `
+                <div class="user-header">
+                    <div class="user-name">${user.name}</div>
+                    <div class="status-badge status-disconnected">Disconnected</div>
+                </div>
+                <div class="user-info">ID: ${user.id}</div>
+                <div class="user-info room-info">Not in room</div>
+                <div class="user-actions">
+                    <button class="btn btn-secondary btn-sm" onclick="window.connectUser('${user.id}')">Connect</button>
+                    <button class="btn btn-secondary btn-sm" onclick="window.disconnectUser('${user.id}')">Disconnect</button>
+                </div>
+            `;
+
+            grid.appendChild(card);
+        }
+
+        function handleUserMessage(user, message) {
+            addLog(`📨 ${user.name} received: ${message.type}`, 'info');
+
+            switch (message.type) {
+                case 'created':
+                    currentRoomId = message.payload.roomId;
+                    creatorUserId = user.id;
+                    user.inRoom = true;
+                    updateUserCard(user);
+                    updateStats();
+                    updateButtons();
+                    addLog(`🏆 ${user.name} created tournament: ${currentRoomId}`, 'success');
+                    break;
+
+                case 'joined':
+                    user.inRoom = true;
+                    updateUserCard(user);
+                    updateStats();
+                    updateButtons();
+                    addLog(`✅ ${user.name} joined tournament`, 'success');
+                    break;
+
+                case 'update':
+                    addLog(`🔄 Room update - Players: ${message.payload.players?.length || 0}`, 'info');
+                    break;
+
+                case 'matchReady':
+                    addLog(`⚔️ Match pairs ready!`, 'success');
+                    if (message.payload.matchPairs) {
+                        message.payload.matchPairs.forEach(pair => {
+                            addLog(`  Match ${pair.matchNumber}: ${pair.player1.name} vs ${pair.player2.name}`, 'info');
+                        });
+                    }
+                    break;
+
+                case 'started':
+                    addLog(`🎮 ${user.name} - Game started!`, 'success');
+                    break;
+
+                case 'finished':
+                    addLog(`🏁 ${user.name} - Game finished!`, 'info');
+                    break;
+
+                case 'error':
+                    addLog(`❌ ${user.name} error: ${message.payload.message}`, 'error');
+                    break;
+            }
+        }
+
+        // ============================================================================
+        // BUTTON HANDLERS
+        // ============================================================================
+        document.getElementById('create-users-btn').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('user-count').value);
+            
+            if (count < 4 || count > 16) {
+                addLog('❌ Kullanıcı sayısı 4-16 arasında olmalıdır', 'error');
+                return;
+            }
+
+            // Check if power of 2
+            if ((count & (count - 1)) !== 0) {
+                addLog('❌ Kullanıcı sayısı 2\'nin kuvveti olmalıdır (4, 8, 16)', 'error');
+                return;
+            }
+
+            // Clear existing users
+            users.forEach(u => {
+                if (u.connected) {
+                    u.socket.disconnect();
+                }
+            });
+            users = [];
+            document.getElementById('users-grid').innerHTML = '';
+            currentRoomId = null;
+            creatorUserId = null;
+
+            // Create new users
+            for (let i = 0; i < count; i++) {
+                const userId = generateRandomId();
+                const userName = generateRandomName();
+                createUser(userId, userName);
+            }
+
+            addLog(`✅ ${count} kullanıcı oluşturuldu`, 'success');
+            updateStats();
+            updateButtons();
+        });
+
+        document.getElementById('connect-all-btn').addEventListener('click', () => {
+            users.forEach(user => {
+                if (!user.connected) {
+                    user.socket.connect("ws/client", {
+                        userID: user.id,
+                        userName: user.name
+                    });
+                }
+            });
+            addLog('🔌 Tüm kullanıcılar bağlanıyor...', 'info');
+        });
+
+        document.getElementById('create-tournament-btn').addEventListener('click', () => {
+            if (users.length === 0) return;
+
+            const creator = users[0];
+            const data = {
+                name: `Test Tournament ${Date.now()}`,
+                gameMode: "tournament",
+                tournamentSettings: {
+                    maxPlayers: users.length
+                }
+            };
+
+            creator.socket.send("create", data);
+            addLog(`🏆 ${creator.name} creating tournament...`, 'info');
+        });
+
+        document.getElementById('join-all-btn').addEventListener('click', () => {
+            if (!currentRoomId) return;
+
+            // Skip creator (already in room)
+            users.slice(1).forEach(user => {
+                if (user.connected && !user.inRoom) {
+                    user.socket.send("join", { roomId: currentRoomId });
+                }
+            });
+
+            addLog(`👥 Tüm kullanıcılar odaya katılıyor...`, 'info');
+        });
+
+        document.getElementById('match-players-btn').addEventListener('click', () => {
+            if (!currentRoomId || !creatorUserId) return;
+
+            const creator = users.find(u => u.id === creatorUserId);
+            if (creator && creator.connected) {
+                creator.socket.send("matchTournament", { roomId: currentRoomId });
+                addLog(`🎲 ${creator.name} matching players...`, 'info');
+            }
+        });
+
+        document.getElementById('start-tournament-btn').addEventListener('click', () => {
+            if (!currentRoomId || !creatorUserId) return;
+
+            const creator = users.find(u => u.id === creatorUserId);
+            if (creator && creator.connected) {
+                creator.socket.send("start", {});
+                addLog(`🚀 ${creator.name} starting tournament...`, 'info');
+            }
+        });
+
+        document.getElementById('disconnect-all-btn').addEventListener('click', () => {
+            users.forEach(user => {
+                if (user.connected) {
+                    user.socket.disconnect();
+                }
+            });
+            addLog('❌ Tüm kullanıcılar bağlantıyı kesiyor...', 'warning');
+        });
+
+        document.getElementById('clear-all-btn').addEventListener('click', () => {
+            users.forEach(u => {
+                if (u.connected) {
+                    u.socket.disconnect();
+                }
+            });
+            users = [];
+            document.getElementById('users-grid').innerHTML = '';
+            currentRoomId = null;
+            creatorUserId = null;
+            document.getElementById('log-entries').innerHTML = '';
+            updateStats();
+            updateButtons();
+            addLog('🗑️ Tüm veriler temizlendi', 'warning');
+        });
+
+        // ============================================================================
+        // GLOBAL FUNCTIONS
+        // ============================================================================
+        window.connectUser = (userId) => {
+            const user = users.find(u => u.id === userId);
+            if (user && !user.connected) {
+                user.socket.connect("ws/client", {
+                    userID: user.id,
+                    userName: user.name
+                });
+                addLog(`🔌 ${user.name} connecting...`, 'info');
+            }
+        };
+
+        window.disconnectUser = (userId) => {
+            const user = users.find(u => u.id === userId);
+            if (user && user.connected) {
+                user.socket.disconnect();
+                addLog(`❌ ${user.name} disconnecting...`, 'warning');
+            }
+        };
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+        addLog('🎮 Tournament Test Simulator initialized', 'success');
+        updateStats();
+        updateButtons();
+    </script>
+</body>
+</html>

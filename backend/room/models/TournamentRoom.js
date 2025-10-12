@@ -140,8 +140,8 @@ export default class TournamentRoom extends Room
 		for (let i = 0; i < this.players.length; i += 2)
 		{
 			const match = matchs[i / 2];
-			match.player1 = this.players[i].getState();
-			match.player2 = this.players[i + 1].getState();
+			match.player1 = this.players[i].getState(this.host);
+			match.player2 = this.players[i + 1].getState(this.host);
 			match.player1Score = 0;
 			match.player2Score = 0;
 			match.winner = null;
@@ -202,11 +202,11 @@ export default class TournamentRoom extends Room
 
 			if (prevMatch1.winner) {
 				const player1 = this.players.find(p => p.id === prevMatch1.winner);
-				match.player1 = player1 ? player1.getState() : null;
+				match.player1 = player1 ? player1.getState(this.host) : null;
 			}
 			if (prevMatch2.winner) {
 				const player2 = this.players.find(p => p.id === prevMatch2.winner);
-				match.player2 = player2 ? player2.getState() : null;
+				match.player2 = player2 ? player2.getState(this.host) : null;
 			}
 
 			match.player1Score = 0;
@@ -226,7 +226,7 @@ export default class TournamentRoom extends Room
 			status: this.status,
 			maxPlayers: this.maxPlayers,
 			host: this.host,
-			players: this.players,
+			players: this.players.map(p => p.getState(this.host)),
 			gameSettings: this.gameSettings,
 			// Additional tournament-specific state can be added here
 		};
