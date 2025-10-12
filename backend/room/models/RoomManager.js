@@ -10,6 +10,7 @@ class RoomManager extends EventEmitter
 	constructor()
 	{
 		super();
+		this.waitingPlayers = [];
 		this.rooms = new Map();
 /* 		setInterval(() => {
 			console.log(`Current rooms: ${this.rooms.size}`);
@@ -52,9 +53,33 @@ class RoomManager extends EventEmitter
 			case 'start':
 				this.startGame(player.id);
 				break;
+			case 'quickMatch':
+				this.quickMatch(player);
+				break;
+			case 'cancelQuickMatch':
+				this.removePlayerFromWaitingList(player);
+				break;
 			default:
 				throw new Error(`Unhandled room message type: 11 ${action}`);
 		}
+	}
+
+	quickMatch(player)
+	{
+		this.waitingPlayers.push(player);
+		if (this.waitingPlayers.length >= 2)
+		{
+			const [player1, player2] = this.waitingPlayers.splice(0, 2);
+			const roomState = this.createRoom(player1, { gameMode: 'classic' });
+			const room = this.getRoom(roomState.roomId);
+			room.addPlayer(player2);
+			this.startGame(player1.id);
+		}
+	}
+
+	removePlayerFromWaitingList(player)
+	{
+		this.waitingPlayers = this.waitingPlayers.filter(p => p.id !== player.id);
 	}
 
 	handleServerRoomMessage(action, payload)
@@ -179,7 +204,7 @@ class RoomManager extends EventEmitter
 		else {
 			this.emit(`room${roomId}_Deleted`);
 		}
-		
+
 		return room;
 	}
 

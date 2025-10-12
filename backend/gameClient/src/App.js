@@ -5,6 +5,13 @@ import GameRenderer from "./GameRenderer.js";
 import InputManager from './input/InputManager.js';
 import rendererConfig from './json/rendererConfig.js';
 
+/*
+const gl = canvas.getContext("webgl");
+if (!gl) {
+  alert("WebGL not supported");
+  throw new Error("WebGL not supported");
+}
+*/
 
 class App
 {
