@@ -1,7 +1,7 @@
 export default (sequelize, DataTypes, Model) => {
 
 	class Round extends Model {}
-	
+
 	Round.init({
 		id: {
 			type: DataTypes.INTEGER,
@@ -10,47 +10,18 @@ export default (sequelize, DataTypes, Model) => {
 		},
 		roundNumber: {
 			type: DataTypes.INTEGER,
-			foreignKey: true, 
+			foreignKey: true,
 			allowNull: false
 		},
-		teamOneID: {
+		tournamentId: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: 'teams',
+				model: 'TournamentHistory',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
-		},
-		teamTwoID: {
-			type: DataTypes.INTEGER,
-			allowNull: false,
-			references: {
-				model: 'teams',
-				key: 'id'
-			},
-			onDelete: 'SET NULL'
-		},
-		teamOneScore: {
-			type: DataTypes.INTEGER,
-			defaultValue: 0
-		},
-		teamTwoScore: {
-			type: DataTypes.INTEGER,
-			defaultValue: 0
-		},
-		winnerTeamID: {
-			type: DataTypes.INTEGER,
-			defaultValue: null,
-			references: {
-				model: 'teams',
-				key: 'id'
-			},
-			onDelete: 'SET NULL'
-		},
-		matchDate: {
-			type: DataTypes.DATE,
-		},
+		}
 	}, {
 		sequelize,
 		modelName: 'Round',

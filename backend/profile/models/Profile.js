@@ -14,7 +14,7 @@ export default (sequelize, DataTypes, Model) => {
         },
         displayName: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
         },
         avatarUrl: {
             type: DataTypes.STRING
@@ -22,7 +22,6 @@ export default (sequelize, DataTypes, Model) => {
         },
         bio: {
             type: DataTypes.TEXT
-
         },
 	}, {
         sequelize,

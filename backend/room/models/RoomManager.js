@@ -147,6 +147,7 @@ class RoomManager extends EventEmitter
 
 		room.on('finished', (data) =>
 			{
+				// state ve time ver
 				// ulas: data base buradan kayıt edilecek
 			}
 		);

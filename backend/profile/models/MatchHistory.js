@@ -12,7 +12,7 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: 'teams',
+				model: 'Team',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
@@ -21,7 +21,7 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: 'teams',
+				model: 'Team',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
@@ -38,7 +38,7 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.INTEGER,
 			defaultValue: null,
 			references: {
-				model: 'teams',
+				model: 'Team',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
@@ -52,7 +52,7 @@ export default (sequelize, DataTypes, Model) => {
         matchType: {
             type: DataTypes.STRING,
             allowNull: false
-        },
+        }
 	}, {
         sequelize,
         modelName: 'MatchHistory',

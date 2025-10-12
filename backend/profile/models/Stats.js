@@ -12,7 +12,7 @@ export default (sequelize, DataTypes, Model) => {
             type: DataTypes.STRING,
             allowNull: false,
             references: {
-                model: 'profiles',
+                model: 'Profile',
                 key: 'id'
             },
             onDelete: 'CASCADE'

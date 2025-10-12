@@ -12,7 +12,7 @@ export default (sequelize, DataTypes, Model) => {
             type: DataTypes.STRING,
             allowNull: false,
             references: {
-                model: 'profiles',
+                model: 'Profile',
                 key: 'id'
             },
             onDelete: 'CASCADE'
@@ -31,7 +31,7 @@ export default (sequelize, DataTypes, Model) => {
         },
         firstTenStreak: {
             type: DataTypes.DATE,
-            allowNull: true        
+            allowNull: true
         },
         twentyFiveTenStreak: {
             type: DataTypes.DATE,
