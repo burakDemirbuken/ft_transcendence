@@ -73,6 +73,11 @@
 		"rme": "Remember Me"
 	},
 	"profile": {
+		"header": {
+			"level": "Level",
+			"tgames": "Total Games",
+			"winrate": "Win Rate"
+		},
 		"sections": {
 			"dashboard": "Dashboard",
 			"performance": "Performance",
@@ -94,7 +99,9 @@
 				"best": "Best Streak"
 			},
 			"mlast": {
-				"title": "Last Matches"
+				"title": "Last Matches",
+				"win": "W",
+				"lose": "L"
 			},
 			"wperf": {
 				"title": "Weekly Performance",
@@ -131,12 +138,12 @@
 		},
 		"thistory": {
 			"title": "Tournament History",
-			"opts": {
-				"allyears": "All Years",
-				"alltour": "All Tournaments",
-				"ltour": "Leauge Tournemants",
-				"elimtour": "Elimination Tournaments",
-				"special": "Special Events"
+			"allyears": "All Years",
+			"header": {
+				"tname": "Tournament Name",
+				"tstart": "Start",
+				"tend": "End",
+				"total": "Total Matches"
 			},
 			"table": {
 				"matches": "Matches",
@@ -157,12 +164,11 @@
 				"onlylost": "Only Losses"
 			},
 			"table": {
-				"date": "DATE",
-				"match": "MATCH",
-				"score": "SCORE",
-				"time": "DURATION",
-				"result": "RESULT",
-				"analysis": "ANALYSIS",
+				"date": "Date",
+				"match": "Match",
+				"score": "Score",
+				"time": "Duration",
+				"result": "Result",
 				"res": {
 					"vic": "Victory",
 					"def": "Defeat"

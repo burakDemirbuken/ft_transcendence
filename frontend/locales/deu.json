@@ -73,6 +73,11 @@
 		"rme": "Login Merken"
 	},
 	"profile": {
+		"header": {
+			"level": "Stufe",
+			"tgames": "Gesamtspiele",
+			"winrate": "Gewinnrate"
+		},
 		"sections": {
 			"dashboard": "Dashboard",
 			"performance": "Leistungsanalyse",
@@ -94,7 +99,9 @@
 				"best": "Beste Serie"
 			},
 			"mlast": {
-				"title": "Letzte Spiele"
+				"title": "Letzte Spiele",
+				"win": "S",
+				"lose": "V"
 			},
 			"wperf": {
 				"title": "Wöchentliche Leistung",
@@ -131,12 +138,12 @@
 		},
 		"thistory": {
 			"title": "Turnierverlauf",
-			"opts": {
-				"allyears": "Alle Jahre",
-				"alltour": "Alle Turniere",
-				"ltour": "Ligaturniere",
-				"elimtour": "Ausscheidungsturniere",
-				"special": "Sonderveranstaltungen"
+			"allyears": "Alle Jahre",
+			"header": {
+				"tname": "Turniername",
+				"tstart": "Anfang",
+				"tend": "Ende",
+				"total": "Gesamtspiele"
 			},
 			"table": {
 				"matches": "Spiele",
@@ -157,12 +164,12 @@
 				"onlylost": "Nur Verluste"
 			},
 			"table": {
-				"date": "DATUM",
-				"match": "SPIEL",
-				"score": "PUNKTZAHL",
-				"time": "DAUER",
-				"result": "ERGEBNIS",
-				"analysis": "ANALYSE",
+				"date": "Datum",
+				"match": "Spiel",
+				"score": "Punktzahl",
+				"time": "Dauer",
+				"result": "Ergebnis",
+				"analysis": "Analyse",
 				"res": {
 					"vic": "Sieg",
 					"def": "Verlust"

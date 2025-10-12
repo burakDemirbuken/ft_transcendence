@@ -73,6 +73,11 @@
 		"rme": "Beni Hatırla"
 	},
 	"profile": {
+		"header": {
+			"level": "Seviye",
+			"tgames": "Toplam Oyun",
+			"winrate": "Kazanma Oranı"
+		},
 		"sections": {
 			"dashboard": "Pano",
 			"performance": "Performans",
@@ -94,7 +99,9 @@
 				"best": "En İyi Seri"
 			},
 			"mlast": {
-				"title": "Son Maçlar"
+				"title": "Son Maçlar",
+				"win": "G",
+				"lose": "M"
 			},
 			"wperf": {
 				"title": "Haftalık Performans",
@@ -131,12 +138,12 @@
 		},
 		"thistory": {
 			"title": "Turnuva Geçmişi",
-			"opts": {
-				"allyears": "Tüm Yıllar",
-				"alltour": "Tüm Turnuvalar",
-				"ltour": "Lig Turnuvaları",
-				"elimtour": "Eleme Turnuvaları",
-				"special": "Özel Etkinlikler"
+			"allyears": "Tüm Yıllar",
+			"header": {
+				"tname": "Turnuva Adı",
+				"tstart": "Başlangıç",
+				"tend": "Bitiş",
+				"total": "Toplam Maç"
 			},
 			"table": {
 				"matches": "Maçlar",
@@ -157,14 +164,14 @@
 				"onlylost": "Sadece Mağlubiyetler"
 			},
 			"table": {
-				"date": "TARIH",
-				"match": "RAKIP",
-				"score": "SKOR",
-				"time": "SÜRE",
-				"result": "SONUÇ",
-				"analysis": "ANALIZ",
+				"date": "Tarih",
+				"match": "Rakip",
+				"score": "Skor",
+				"time": "Süre",
+				"result": "Sonuç",
+				"analysis": "Analiz",
 				"res": {
-					"vic": "Gaibiyet",
+					"vic": "Galibiyet",
 					"def": "Mağlubiyet"
 				}
 			}
