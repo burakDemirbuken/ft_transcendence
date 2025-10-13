@@ -417,19 +417,36 @@ class ManagerProfile {
     }
 
     public filterMatches(filterType: string, value: string): void {
-        const matchRows = document.querySelectorAll('.match-row:not(.header)');
+        if (filterType === 'result')
+        {
+            const matchRows = document.querySelectorAll('.match-row:not(.header)');
 
-        matchRows.forEach(row => {
-            const rowElement = row as HTMLElement;
-            let show = true;
+            matchRows.forEach(row => {
+                const rowElement = row as HTMLElement;
+                let show = true;
 
-            if (filterType === 'result' && value !== 'all') {
-                const result = rowElement.dataset.result;
-                show = result === value;
-            }
+                if (filterType === 'result' && value !== 'all') {
+                    const result = rowElement.dataset.result;
+                    show = result === value;
+                }
 
-            rowElement.style.display = show ? 'grid' : 'none';
-        });
+                rowElement.style.display = show ? 'grid' : 'none';
+            });
+        } else if (filterType === 'tournamentYear') {
+            const tourRows = document.querySelectorAll('.tournament-row:not(.header)');
+
+            tourRows.forEach(row => {
+                const rowElement = row as HTMLElement;
+                let show = true;
+
+                if (filterType === 'tournamentYear' && value !== 'all') {
+                    const year = rowElement.dataset.start;
+                    show = year.split('-')[0] === value;
+                }
+
+                rowElement.style.display = show ? 'grid' : 'none';
+            });
+        }
     }
 
     public animateLevelProgress(): void {
@@ -577,6 +594,11 @@ function timeFilterChangeHandler (e: Event) {
 function resultFilterChangeHandler (e: Event) {
     const target = e.target as HTMLSelectElement;
     profileManager.filterMatches('result', target.value);
+};
+
+function tournamentYearFilterChangeHandler (e: Event) {
+    const target = e.target as HTMLSelectElement;
+    profileManager.filterMatches('tournamentYear', target.value);
 };
 
 interface Player {
@@ -795,6 +817,9 @@ export default class extends AView {
         const resultFilter = document.getElementById('result-filter');
         resultFilter?.addEventListener('change', resultFilterChangeHandler);
 
+        const tournamentYearFilter = document.getElementById('tournament-year-filter');
+        tournamentYearFilter?.addEventListener('change', tournamentYearFilterChangeHandler);
+
         // Level progress animasyonu
         profileManager.animateLevelProgress();
         // ==================== Turnuva elementleri ====================
@@ -867,6 +892,9 @@ export default class extends AView {
 
         const resultFilter = document.getElementById('result-filter');
         resultFilter?.removeEventListener('change', resultFilterChangeHandler);
+
+        const tournamentYearFilter = document.getElementById('tournament-year-filter');
+        tournamentYearFilter?.removeEventListener('change', tournamentYearFilterChangeHandler);
 
         // Turnuva ile ilgili eventleri de kaldır
         this.table?.replaceChildren(); // satırları temizle
