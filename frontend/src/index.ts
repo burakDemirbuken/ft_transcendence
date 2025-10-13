@@ -26,7 +26,7 @@ const router = async function(page:string) {
 	const content = document.querySelector("#content");
 
 	if (view) {
-		content?.innerHTML = "";
+		content.innerHTML = "";
 		view.unsetEventHandlers();
 		view.unsetStylesheet();
 		view = null;
@@ -57,7 +57,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	for (const element of navbar) {
 		element.addEventListener("click", async (e) => {
 			if (e.currentTarget.matches("[data-link]")) {
-				console.log("PAGE")
 				e.preventDefault();
 				navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
 				document.querySelector(".selected")?.classList.toggle("selected");
@@ -71,10 +70,8 @@ document.addEventListener("DOMContentLoaded", () => {
 						const response = await fetch(request);
 						const json = await response.json();
 
-						if (response.ok)
-						{
-							document.querySelector("#navbar")?.classList.toggle("logout");
-							console.log("LOGSOUT!");
+						if (response.ok) {
+							document.querySelector("#navbar")?.classList.add("logout");
 						} else {
 							alert(`${json.error}`);
 						}
@@ -83,13 +80,11 @@ document.addEventListener("DOMContentLoaded", () => {
 					}
 				}
 			} else if (e.currentTarget.matches("[id='toggle']")) {
-				console.log("TOGGLE");
 				document.querySelector("#navbar")?.classList.toggle("collapse");
 				document.querySelector(".selected")?.classList.toggle("selected");
 				e.currentTarget.classList.toggle("selected");
 			}
 			else if (e.currentTarget.matches("[id='language']")) {
-				console.log("LANGUAGE");
 				e.preventDefault();
 				I18n.nextLanguage();
 				updateChartLanguage();

@@ -21,7 +21,7 @@ let view = null;
 const router = async function (page) {
     const content = document.querySelector("#content");
     if (view) {
-        content === null || content === void 0 ? void 0 : content.innerHTML = "";
+        content.innerHTML = "";
         view.unsetEventHandlers();
         view.unsetStylesheet();
         view = null;
@@ -51,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
         element.addEventListener("click", async (e) => {
             var _a, _b, _c, _d, _e;
             if (e.currentTarget.matches("[data-link]")) {
-                console.log("PAGE");
                 e.preventDefault();
                 navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
                 (_a = document.querySelector(".selected")) === null || _a === void 0 ? void 0 : _a.classList.toggle("selected");
@@ -64,8 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         const response = await fetch(request);
                         const json = await response.json();
                         if (response.ok) {
-                            (_b = document.querySelector("#navbar")) === null || _b === void 0 ? void 0 : _b.classList.toggle("logout");
-                            console.log("LOGSOUT!");
+                            (_b = document.querySelector("#navbar")) === null || _b === void 0 ? void 0 : _b.classList.add("logout");
                         }
                         else {
                             alert(`${json.error}`);
@@ -77,13 +75,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
             else if (e.currentTarget.matches("[id='toggle']")) {
-                console.log("TOGGLE");
                 (_c = document.querySelector("#navbar")) === null || _c === void 0 ? void 0 : _c.classList.toggle("collapse");
                 (_d = document.querySelector(".selected")) === null || _d === void 0 ? void 0 : _d.classList.toggle("selected");
                 e.currentTarget.classList.toggle("selected");
             }
             else if (e.currentTarget.matches("[id='language']")) {
-                console.log("LANGUAGE");
                 e.preventDefault();
                 I18n.nextLanguage();
                 updateChartLanguage();
