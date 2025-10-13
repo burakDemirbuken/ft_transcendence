@@ -36,6 +36,13 @@ class Renderer
 			this.renderWaitingScreen('Waiting for game data...', machine);
 			return;
 		}
+
+		if (data.currentState === "canceled")
+		{
+			this.renderWaitingScreen('Game Canceled', machine);
+			return;
+		}
+
 		if (data.currentState === "finished")
 		{
 			this.finishScreen(gameData, machine);

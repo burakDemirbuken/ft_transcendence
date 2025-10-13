@@ -5,7 +5,6 @@ export default class {
         document.title = title;
     }
     async getHtml() { return ""; }
-    async setDynamicContent() { }
     async setEventHandlers() { }
     async unsetEventHandlers() { }
     async setStylesheet() { }

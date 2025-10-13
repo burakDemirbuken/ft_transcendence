@@ -2,7 +2,7 @@
 import Player from '../models/Player.js';
 
 export default async function clientConnectionSocket(fastify) {
-	fastify.get("/ws-room/client", {
+	fastify.get("/ws/client", {
 		websocket: true
 	},
 	(connection, req) => {

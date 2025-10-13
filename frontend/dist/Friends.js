@@ -129,7 +129,7 @@ export default class extends AView {
         this.setTitle("Friends");
     }
     async getHtml() {
-        const response = await fetch("templates/friends.html");
+        const response = await fetch(`templates/friends.html`);
         return await response.text();
     }
     async setDynamicContent() {

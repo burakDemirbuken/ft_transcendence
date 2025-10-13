@@ -2,6 +2,7 @@ import Room from './Room.js';
 
 export default class TournamentRoom extends Room
 {
+
 	constructor(name, gameSettings, tournamentSettings)
 	{
 		super(name, gameSettings);
@@ -55,29 +56,19 @@ export default class TournamentRoom extends Room
 				maxPlayers: this.maxPlayers,
 			},
 			gameCount: this.currentMatches.length,
-			playersCount: this.players.length,
 			games: this.currentMatches.map(match => ({
 				matchNumber: match.matchNumber,
-				players: [match.player1?.id, match.player2?.id],
+				players: [match.player1, match.player2],
 			})),
 			gameSettings: this.gameSettings,
 			gameMode: this.gameMode,
 			players: playingPlayers.map(p => ({
 				id: p.id,
 				name: p.name,
-				gameNumber: this.currentMatches.findIndex(m => m.player1?.id === p.id || m.player2?.id === p.id) + 1
+				gameNumber: this.currentMatches.findIndex(m => m.player1 === p || m.player2 === p) + 1
 			})),
 		}
 	}
-
-
-
-
-
-	// ---------------------------------------------------------------------
-
-
-
 
 	finishRoom(payload)
 	{
@@ -99,19 +90,18 @@ export default class TournamentRoom extends Room
 			throw new Error('Only the host can start the game');
 		if (this.allPlayersReady() === false)
 			throw new Error('Cannot start game, not all players are ready or room is not full');
-		if (this.players.length < 2)
-			throw new Error('At least 2 players are required to start a tournament');
 
 		this.status = 'in_game';
 
 		const matches = this.currentMatches;
 		let playingPlayers = [];
 		matches.forEach(match => {
-			if (match.player1) playingPlayers.push(match.player1.id);
-			if (match.player2) playingPlayers.push(match.player2.id);
+			if (match.player1) playingPlayers.push(match.player1);
+			else playingPlayers.push("bye-" + match.matchNumber + "-" + Date.now());
+			if (match.player2) playingPlayers.push(match.player2);
+			else playingPlayers.push("bye2-" + match.matchNumber + "-" + Date.now());
 		});
 		return {
-			players: playingPlayers,
 			gameMode: this.gameMode,
 			maxPlayers: this.maxPlayers,
 			matches: matches
@@ -140,8 +130,8 @@ export default class TournamentRoom extends Room
 		for (let i = 0; i < this.players.length; i += 2)
 		{
 			const match = matchs[i / 2];
-			match.player1 = this.players[i].getState(this.host);
-			match.player2 = this.players[i + 1].getState(this.host);
+			match.player1 = this.players[i].id;
+			match.player2 = this.players[i + 1].id;
 			match.player1Score = 0;
 			match.player2Score = 0;
 			match.winner = null;
@@ -200,19 +190,48 @@ export default class TournamentRoom extends Room
 			const prevMatch1 = previousRoundMatches[i * 2];
 			const prevMatch2 = previousRoundMatches[i * 2 + 1];
 
-			if (prevMatch1.winner) {
-				const player1 = this.players.find(p => p.id === prevMatch1.winner);
-				match.player1 = player1 ? player1.getState(this.host) : null;
+			let winner1 = null;
+			let winner2 = null;
+
+			if (prevMatch1.winner !== null)
+				winner1 = prevMatch1.winner;
+			else if (prevMatch1.player1 && !prevMatch1.player2)
+				winner1 = prevMatch1.player1.id;
+			else if (!prevMatch1.player1 && prevMatch1.player2)
+				winner1 = prevMatch1.player2.id;
+
+			if (prevMatch2.winner !== null)
+				winner2 = prevMatch2.winner;
+			else if (prevMatch2.player1 && !prevMatch2.player2)
+				winner2 = prevMatch2.player1.id;
+			else if (!prevMatch2.player1 && prevMatch2.player2)
+				winner2 = prevMatch2.player2.id;
+
+			match.player1 = winner1;
+			match.player2 = winner2;
+
+			if (match.player1 && !match.player2)
+			{
+				match.winner = match.player1.id;
+				match.loser = null;
+				match.player1Score = 0;
+				match.player2Score = 0;
 			}
-			if (prevMatch2.winner) {
-				const player2 = this.players.find(p => p.id === prevMatch2.winner);
-				match.player2 = player2 ? player2.getState(this.host) : null;
+			else if (!match.player1 && match.player2)
+			{
+				match.winner = match.player2.id;
+				match.loser = null;
+				match.player1Score = 0;
+				match.player2Score = 0;
+			}
+			else
+			{
+				match.player1Score = 0;
+				match.player2Score = 0;
+				match.winner = null;
+				match.loser = null;
 			}
 
-			match.player1Score = 0;
-			match.player2Score = 0;
-			match.winner = null;
-			match.loser = null;
 			this.currentMatches.push(match);
 		}
 		this.status = 'waiting';

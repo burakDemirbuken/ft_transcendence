@@ -33,11 +33,12 @@ class Tournament extends EventEmitter
 			game.on('finished', ({ players, results }) =>
 			{
 				this.finishedMatchesCount++;
-				match.winner = results.winner.ids[0];
-				match.loser = results.loser.ids[0];
+				console.log(`🏁 Match ${match.matchNumber} finished. Winner: ${results.winner?.ids[0]}, Loser: ${results.loser?.ids[0]}`);
+				match.winner = results.winner?.ids[0] || null;
+				match.loser = results.loser?.ids[0] || null;
 			});
-			game.addRegisteredPlayer(match.player1.id);
-			game.addRegisteredPlayer(match.player2.id);
+			game.addRegisteredPlayer(match.player1);
+			game.addRegisteredPlayer(match.player2);
 			game.initializeGame();
 			match.game = game;
 			match.state = game.getGameState();
@@ -56,11 +57,8 @@ class Tournament extends EventEmitter
 			this.currentMatches.forEach(
 				(match) =>
 				{
-					if (match.game?.status === 'ready to start')
-					{
-						console.log('Tournament match is ready to start:', match);
+					if (match.game?.status === 'ready to start' || match.game?.status === 'canceled' || match.game?.status === 'finished')
 						counter++;
-					}
 				}
 			);
 			if (counter === this.currentMatches.length)

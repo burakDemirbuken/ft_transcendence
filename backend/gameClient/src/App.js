@@ -26,11 +26,12 @@ class App
 
 	start(data)
 	{
+		console.log('🚀 Starting app with data:', JSON.stringify(data, null, 2));
 		if (data.gameMode === 'tournament')
 		{
 			let playerArcadeNumber = data.games.find(g => g.players.includes(this.playerId))?.matchNumber;
 			if (playerArcadeNumber === undefined)
-				playerArcadeNumber = 0; // Fallback to 0 if not found (should not happen)
+				playerArcadeNumber = 0;
 			this.loadGame(
 				{
 					canvasId: "renderCanvas",
@@ -67,7 +68,8 @@ class App
 			);
 		}
 
-		this._pingpong(this.playerName);
+		// ulas :
+		// this._pingpong(this.playerName);
 		this._setupNetworkListeners(data.roomId, data.gameMode);
 		this._gameControllerSetup();
 	}
