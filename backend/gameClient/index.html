@@ -1180,7 +1180,7 @@ html {
     background-clip: text;
     filter: blur(10px);
     opacity: 0.3;
-    z-index: -1; 
+    z-index: -1;
 }
 
 .game-page {
@@ -1644,7 +1644,7 @@ html {
     border-top-color: #ff08a0;
     border-right-color: #6bfff5;
     animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-    box-shadow: 
+    box-shadow:
         0 0 20px rgba(255, 8, 201, 0.3),
         inset 0 0 20px rgba(8, 239, 255, 0.1);
 }
@@ -1675,7 +1675,7 @@ html {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 
+    box-shadow:
         0 4px 12px rgba(255, 0, 0, 0.4),
         inset 0 2px 4px rgba(255, 255, 255, 0.3);
     animation: pulse 2s ease-in-out infinite;
@@ -1706,13 +1706,13 @@ html {
 @keyframes pulse {
     0%, 100% {
         transform: translate(-50%, -50%) scale(1);
-        box-shadow: 
+        box-shadow:
             0 4px 12px rgba(255, 8, 68, 0.4),
             inset 0 2px 4px rgba(255, 255, 255, 0.3);
     }
     50% {
         transform: translate(-50%, -50%) scale(1.1);
-        box-shadow: 
+        box-shadow:
             0 6px 20px rgba(255, 8, 68, 0.6),
             inset 0 2px 6px rgba(255, 255, 255, 0.4);
     }
@@ -2006,7 +2006,7 @@ html {
 		                </div>
 		            </div>
 		        </div>
-			
+
 		        <!-- Participants Section -->
 		        <div class="participants-section">
 		            <h3>👥 Participants</h3>
@@ -2014,7 +2014,7 @@ html {
 		                <!-- Participants will be added dynamically -->
 		            </div>
 		        </div>
-			
+
 		        <!-- Match Pairs Section (Hidden until matching) -->
 		        <div class="participants-section" id="match-pairs-section" style="display: none;">
 		            <h3>⚔️ Match Pairs - Round 1</h3>
@@ -2022,7 +2022,7 @@ html {
 		                <!-- Match pairs will be displayed here -->
 		            </div>
 		        </div>
-			
+
 		        <!-- Action Buttons -->
 		        <div class="room-actions">
 		            <button class="btn btn-secondary btn-large" id="waiting-players-btn" disabled>
@@ -2302,7 +2302,7 @@ html {
 	                    <label class="setting-label">Bitiş Skoru</label>
 	                    <input type="number" min="1" max="50" value="11" class="input-field" id="winning-score" placeholder="Kazanmak için gereken skor">
 	                </div>
-					
+
 					<div class="setting-group fast-game-mode-card" id="fast-game-mode">
 						<label class="fast-label"></label>
 						<div class="fast-mode-icon no-select"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M557.7 64.9L363.5 139.6L365.8 110.3C366.8 97.5 353 88.8 341.8 95.2L165.3 197.4C102.6 233.7 64 300.6 64 373C64 485.1 154.9 576 267 576C339.4 576 406.3 537.4 442.6 474.7L544.8 298.3C551.3 287.2 542.6 273.3 529.7 274.3L500.4 276.6L575.1 82.4C575.7 80.9 576 79.2 576 77.6C576 70.1 570 64.1 562.5 64.1C560.8 64.1 559.2 64.4 557.7 65zM256 256C326.7 256 384 313.3 384 384C384 454.7 326.7 512 256 512C185.3 512 128 454.7 128 384C128 313.3 185.3 256 256 256zM256 352C256 334.3 241.7 320 224 320C206.3 320 192 334.3 192 352C192 369.7 206.3 384 224 384C241.7 384 256 369.7 256 352zM272 448C280.8 448 288 440.8 288 432C288 423.2 280.8 416 272 416C263.2 416 256 423.2 256 432C256 440.8 263.2 448 272 448z"/></svg></div>
@@ -2664,7 +2664,7 @@ let isRoomCreator = false;
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
-        
+
 // Generate random user ID for testing
 function generateRandomId() {
     return Math.random().toString(36).substr(2, 9);
@@ -2912,7 +2912,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
 
         if (participant.isAI) {
             icon.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" 
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
                      width="26" height="26" fill="${color.border}">
                     <path d="M352 64C352 46.3 337.7 32 320 32C302.3 32 288 46.3 288 64L288 128L192 128C139 128 96 171 96 224L96 448C96 501 139 544 192 544L448 544C501 544 544 501 544 448L544 224C544 171 501 128 448 128L352 128L352 64zM160 432C160 418.7 170.7 408 184 408L216 408C229.3 408 240 418.7 240 432C240 445.3 229.3 456 216 456L184 456C170.7 456 160 445.3 160 432zM280 432C280 418.7 290.7 408 304 408L336 408C349.3 408 360 418.7 360 432C360 445.3 349.3 456 336 456L304 456C290.7 456 280 445.3 280 432zM400 432C400 418.7 410.7 408 424 408L456 408C469.3 408 480 418.7 480 432C480 445.3 469.3 456 456 456L424 456C410.7 456 400 445.3 400 432zM224 240C250.5 240 272 261.5 272 288C272 314.5 250.5 336 224 336C197.5 336 176 314.5 176 288C176 261.5 197.5 240 224 240zM368 288C368 261.5 389.5 240 416 240C442.5 240 464 261.5 464 288C464 314.5 442.5 336 416 336C389.5 336 368 314.5 368 288zM64 288C64 270.3 49.7 256 32 256C14.3 256 0 270.3 0 288L0 384C0 401.7 14.3 416 32 416C49.7 416 64 401.7 64 384L64 288zM608 256C590.3 256 576 270.3 576 288L576 384C576 401.7 590.3 416 608 416C625.7 416 640 401.7 640 384L640 288C640 270.3 625.7 256 608 256z"/>
                 </svg>
@@ -2988,7 +2988,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
 // ============================================================================
 // WEBSOCKET HANDLERS
 // ============================================================================
-        
+
 function handleWebSocketMessage(message) {
     console.log('📨 Received message:', message);
 
@@ -3116,7 +3116,7 @@ function handleRoomCreated(payload) {
     console.log('✅ Room created:', payload);
     currentRoomId = payload.roomId;
     isRoomCreator = true;
-            
+
     showNotification(`Oda oluşturuldu: ${payload.roomId}`, 'success');
 
     // Show appropriate waiting room
@@ -3133,7 +3133,7 @@ function handleRoomJoined(payload) {
     console.log('✅ Joined room:', payload);
     currentRoomId = payload.roomId;
     isRoomCreator = false;
-            
+
     showNotification(`Odaya katıldınız: ${payload.roomId}`, 'success');
 
     // Show appropriate waiting room
@@ -3217,20 +3217,20 @@ function handleRoomUpdate(payload) {
 function handleGameStarted(payload) {
     console.log('🎮 Game started:', payload);
     showNotification('Oyun başlıyor!', 'success');
-		
+
     // Hide all waiting rooms
     document.getElementById('waiting-room').classList.remove('active');
     document.getElementById('custom-waiting-room').classList.remove('active');
     document.getElementById('ai-waiting-room').classList.remove('active');
     document.getElementById('game-page').classList.add('hidden');
-		
+
     // Hide back arrow
     document.getElementById('back-arrow').classList.remove('active');
-		
+
     // Show game container
     const gameContainer = document.getElementById('gameContainer');
     gameContainer.style.display = 'block';
-		
+
     app = new App(currentUserId, currentUserName);
     app.start(payload);
 }
@@ -3245,13 +3245,13 @@ function handleGameFinished(payload) {
         app.destroy();
         app = null;
     }
-		
+
     // Hide game container
     const gameContainer = document.getElementById('gameContainer');
     gameContainer.style.display = 'none';
-		
+
     document.getElementById('game-page').classList.remove('hidden');
-		
+
     // Reset room state
     currentRoomId = null;
     currentGameMode = null;
@@ -3353,11 +3353,11 @@ function showCustomWaitingRoom(data) {
     if (data.gameSettings) {
         document.getElementById('custom-paddle-display').textContent = `${data.gameSettings.paddleHeight}px`;
         document.getElementById('custom-ball-display').textContent = `${data.gameSettings.ballRadius}px`;
-        
+
         // DÜZELTME: cornerBoost veya ballSpeedIncrease değerini kontrol et
         const cornerBoost = data.gameSettings.cornerBoost || data.gameSettings.ballSpeedIncrease || 1.0;
         document.getElementById('custom-corner-display').textContent = `${parseFloat(cornerBoost).toFixed(1)}x`;
-        
+
         document.getElementById('custom-score-display').textContent = data.gameSettings.maxScore;
     }
 
@@ -3394,7 +3394,7 @@ function showAIWaitingRoom(data) {
         'impossible': 'İmkansız',
         'custom': 'Özel'
     };
-            
+
     const difficulty = data.aiSettings?.difficulty || 'medium';
     document.getElementById('ai-difficulty-display').textContent = difficultyMap[difficulty];
     document.getElementById('ai-type-display').textContent = difficulty === 'custom' ? 'Özelleştirilmiş' : 'Standart';
@@ -3403,11 +3403,11 @@ function showAIWaitingRoom(data) {
     if (data.gameSettings) {
         document.getElementById('ai-paddle-display').textContent = `${data.gameSettings.paddleHeight}px`;
         document.getElementById('ai-ball-display').textContent = `${data.gameSettings.ballRadius}px`;
-        
+
         // DÜZELTME: cornerBoost veya ballSpeedIncrease değerini kontrol et
         const cornerBoost = data.gameSettings.cornerBoost || data.gameSettings.ballSpeedIncrease || 1.0;
         document.getElementById('ai-corner-display').textContent = `${parseFloat(cornerBoost).toFixed(1)}x`;
-        
+
         document.getElementById('ai-score-display').textContent = data.gameSettings.maxScore;
     }
 
@@ -3415,7 +3415,7 @@ function showAIWaitingRoom(data) {
     if (difficulty === 'custom' && data.aiSettings) {
         const customSettingsDiv = document.getElementById('ai-custom-settings-display');
         customSettingsDiv.style.display = 'block';
-                
+
         document.getElementById('ai-reaction-display').textContent = data.aiSettings.reactionSpeed || 5;
         document.getElementById('ai-prediction-display').textContent = data.aiSettings.predictionAccuracy || 5;
         document.getElementById('ai-accuracy-display').textContent = data.aiSettings.generalAccuracy || 5;
@@ -3438,37 +3438,37 @@ function showAIWaitingRoom(data) {
 document.getElementById('custom-mode').addEventListener('click', function() {
     document.querySelectorAll('.game-mode-card').forEach(card => card.classList.remove('active'));
     this.classList.add('active');
-    
+
     document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
     document.getElementById('custom-settings').classList.add('active');
-    
+
     currentGameMode = 'custom';
 });
 
 document.getElementById('tournament-mode').addEventListener('click', function() {
     document.querySelectorAll('.game-mode-card').forEach(card => card.classList.remove('active'));
     this.classList.add('active');
-    
+
     document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
     document.getElementById('tournament-settings').classList.add('active');
-    
+
     currentGameMode = 'tournament';
 });
 
 document.getElementById('ai-mode').addEventListener('click', function() {
     document.querySelectorAll('.game-mode-card').forEach(card => card.classList.remove('active'));
     this.classList.add('active');
-            
+
     document.querySelectorAll('.settings-panel').forEach(panel => panel.classList.remove('active'));
     document.getElementById('ai-settings').classList.add('active');
-            
+
     currentGameMode = 'ai';
 });
 
 // Custom Game - Create Room
 document.getElementById('custom-create-btn').addEventListener('click', function() {
     const gameType = document.querySelector('input[name="custom-game-type"]:checked').value;
-            
+
     let gameMode;
     if (gameType === '1v1') gameMode = 'classic';
     else if (gameType === '2v2') gameMode = 'multiplayer';
@@ -3496,7 +3496,7 @@ document.getElementById('custom-create-btn').addEventListener('click', function(
 // Custom Game - Join Room
 document.getElementById('custom-join-btn').addEventListener('click', function() {
     const roomCode = document.getElementById('custom-room-code').value.trim().toUpperCase();
-            
+
     if (!roomCode) {
         showNotification('Lütfen oda kodunu girin!', 'error');
         return;
@@ -3526,7 +3526,7 @@ document.getElementById('ai-start-game-btn').addEventListener('click', function(
 // AI Game - Start
 document.getElementById('ai-start-btn').addEventListener('click', function() {
     const difficulty = document.querySelector('input[name="ai-difficulty"]:checked').value;
-            
+
     const data = {
         name: `${currentUserName}'s AI Room`,
         gameMode: "ai",
@@ -3571,7 +3571,7 @@ document.getElementById('ai-start-btn').addEventListener('click', function() {
 document.getElementById('tournament-create-btn').addEventListener('click', function() {
     const tournamentName = document.getElementById('tournament-name').value.trim();
     const tournamentSize = document.querySelector('input[name="tournament-size"]:checked').value;
-            
+
     if (!tournamentName) {
         showNotification('Lütfen turnuva ismini girin!', 'error');
         return;
@@ -3608,7 +3608,7 @@ document.getElementById('tournament-create-btn').addEventListener('click', funct
 // Tournament - Join
 document.getElementById('tournament-join-btn').addEventListener('click', function() {
     const tournamentCode = document.getElementById('tournament-code').value.trim().toUpperCase();
-    
+
     if (!tournamentCode) {
         showNotification('Lütfen turnuva kodunu girin!', 'error');
         return;
@@ -3659,13 +3659,13 @@ document.getElementById('back-arrow').addEventListener('click', function() {
 
     // Hide all waiting rooms
     document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
-            
+
     // Show game page
     document.getElementById('game-page').classList.remove('hidden');
-            
+
     // Hide back arrow
     this.classList.remove('active');
-            
+
     showNotification('Odadan ayrıldınız', 'info');
 });
 
@@ -3809,45 +3809,40 @@ roomSocket.onError((error) => {
 });
 
 // Connect to server
-roomSocket.connect("ws/client", { 
-    userID: currentUserId, 
-    userName: currentUserName 
+roomSocket.connect("ws/client", {
+    userID: currentUserId,
+    userName: currentUserName
 });
 
 // Export for debugging
 window.roomSocket = roomSocket;
 window.app = app;
-        
+
 console.log('🎮 Application initialized successfully!');
 showNotification('Hoş geldiniz! ' + currentUserName, 'success');
 
 // Fast Game Event Handler - YENİ
 document.getElementById('fast-game-mode').addEventListener('click', function() {
     showNotification('Hızlı oyun başlatılıyor...', 'success');
-            
+
     // Show loading screen
     const loadingScreen = document.getElementById('loading-screen');
     const gamePage = document.getElementById('game-page');
-            
+
     gamePage.classList.add('hidden');
     loadingScreen.classList.add('active');
 
-    // Simulate loading (gerçek uygulamada burada oyun başlatılır)
-    setTimeout(() => {
-        showNotification('Oyun hazır!', 'success');
-        // Burada oyunu başlayacak
-        // handleGameStarted({ ... });
-    }, 2000);
+    roomSocket.send("quickMatch");
 });
 
 // Loading Back Arrow
 document.getElementById('loading-back-arrow').addEventListener('click', function() {
     const loadingScreen = document.getElementById('loading-screen');
     const gamePage = document.getElementById('game-page');
-            
+
     loadingScreen.classList.remove('active');
     gamePage.classList.remove('hidden');
-            
+
     showNotification('Hızlı oyun iptal edildi', 'info');
 });
 

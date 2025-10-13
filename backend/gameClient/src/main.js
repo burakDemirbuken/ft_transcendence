@@ -3,6 +3,7 @@ import WebSocketClient from './network/WebSocketClient.js';
 import gameConfig from './json/GameConfig.js';
 import aiConfig from './json/AiConfig.js';
 import tournamentConfig from './json/TournamentConfig.js';
+import RoomUi from './RoomUi.js';
 
 
 const id = _TEST_generateRandomId();
@@ -33,6 +34,7 @@ roomSocket.onMessage((message) => {
 			app = null;
 			break;
 		case "error":
+			console.error(`Error from server: ${message.payload.message}`);
 		default:
 			console.warn(`Unhandled message type: ${message.type}`);
 	}

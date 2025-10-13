@@ -10,3 +10,4 @@ export default class MultiplayerRoom extends Room
 		this.createdAt = Date.now();
 	}
 }
+

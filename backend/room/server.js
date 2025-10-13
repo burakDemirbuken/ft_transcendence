@@ -6,7 +6,7 @@ import overview from 'fastify-overview'
 import RoomManager  from './models/RoomManager.js'
 
 const fastify = Fastify({
-	logger: true
+	logger: false
 })
 
 //fastify.register(overview)

@@ -63,7 +63,6 @@ class GameManager extends EventEmitter
 	async createGame(id, gameMode, properties)
 	{
 		const gameId = id;
-		properties.id = gameId;
 		let game;
 		if (gameMode === 'local')
 			game = new LocalPingPong(properties);
