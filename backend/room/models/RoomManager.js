@@ -83,9 +83,9 @@ class RoomManager extends EventEmitter
 					console.warn(`Room with ID ${payload.roomId} does not exist`);
 					return;
 				}
-				room.finishRoom(payload);
+				const state = room.finishRoom(payload);
 				room.players.forEach(player => {
-					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: payload }));
+					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: state }));
 				});
 				break;
 			default:

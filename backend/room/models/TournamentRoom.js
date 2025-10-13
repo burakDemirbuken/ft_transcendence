@@ -88,9 +88,8 @@ export default class TournamentRoom extends Room
 			this.emit('finished', { matches: this.matches });
 		}
 		else
-		{
 			this.nextRound(matches);
-		}
+		return this.getMatchmakingInfo();
 	}
 
 	startGame(playerId)
