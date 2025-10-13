@@ -17,9 +17,9 @@ class ManagerProfile {
 		labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
         data: []
     };
-    private monthChartData: { label1: string, label2: string, labels: string[], data1: number[], data2: number[] } = {
-		label1: "Total Matches",
-		label2: "Matches Won",
+    private monthChartData: { label0: string, label1: string, labels: string[], data1: number[], data2: number[] } = {
+		label0: "Total Matches",
+		label1: "Matches Won",
 		labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
         data1: [],
         data2: []
@@ -67,8 +67,8 @@ class ManagerProfile {
         const perfCtx = document.getElementById('performanceChart') as HTMLCanvasElement;
         const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
-        this.perfChartData.labelName = translations?.profile?.label1 ?? this.perfChartData.labelName;
-        this.perfChartData.labels = translations?.profile?.labels ?? this.perfChartData.labels;
+        this.perfChartData.labelName = translations?.profile?.weekly?.label ?? this.perfChartData.labelName;
+        this.perfChartData.labels = translations?.profile?.weekly?.labels ?? this.perfChartData.labels;
         if (perfCtx) {
             this.showcharts.performance = new Chart(perfCtx, {
                 type: 'line',
@@ -129,7 +129,7 @@ class ManagerProfile {
         }
     }
 
-    private createWinLossChart(): void {
+    private async createWinLossChart(): Promise<void> {
         const winLossCtx = document.getElementById('winLossChart') as HTMLCanvasElement | null;
 
         if (!winLossCtx) return;
@@ -137,16 +137,19 @@ class ManagerProfile {
         const wins = parseInt(winLossCtx.dataset.wins || '0', 10);
         const losses = parseInt(winLossCtx.dataset.losses || '0', 10);
 
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+        let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost']; // default fallback
+        
+        // BU NE İÇİN ??
         // JSON string olan labels'ı diziye çevir
-        let labels: string[] = ['Kazanılan', 'Kaybedilen']; // default fallback
-        if (winLossCtx.dataset.labels) {
-            labels = JSON.parse(winLossCtx.dataset.labels);
-        }
+		// if (winLossCtx.dataset.labels) {
+        //     labels = JSON.parse(winLossCtx.dataset.labels);
+        // }
 
         this.charts.winLoss = new Chart(winLossCtx, {
             type: 'doughnut',
             data: {
-                labels: labels,
+                labels: labels ?? ['Won', 'Lost'],
                 datasets: [{
                     data: [wins, losses],
                     backgroundColor: [
@@ -176,7 +179,7 @@ class ManagerProfile {
         });
     }
 
-    private createSkillRadarChart(): void {
+    private async createSkillRadarChart(): Promise<void> {
         const skillCtx = document.getElementById('skillRadar') as HTMLCanvasElement | null;
         if (!skillCtx) return;
 
@@ -190,6 +193,10 @@ class ManagerProfile {
             return val ? parseFloat(val) : 0;
         };
 
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+        const skills = translations?.profile?.skills.labels ?? ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"];
+        const label = translations?.profile?.skills.label ?? 'Skills';
+
         const skillValues = {
             hiz: parseSkill('hiz'),
             dogruluk: parseSkill('dogruluk'),
@@ -202,9 +209,9 @@ class ManagerProfile {
         this.charts.skill = new Chart(skillCtx, {
             type: 'radar',
             data: {
-                labels: ['Hız', 'Doğruluk', 'Savunma', 'Saldırı', 'Strateji', 'Dayanıklılık'],
+                labels: skills,
                 datasets: [{
-                    label: 'Beceri Puanı',
+                    label: label,
                     data: [
                         skillValues.hiz,
                         skillValues.dogruluk,
@@ -275,9 +282,9 @@ class ManagerProfile {
 		if (!monthlyCtx) return;
         const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
-        this.monthChartData.label1 = translations?.profile?.label1 ?? this.monthChartData.label1;
-        this.monthChartData.label2 = translations?.profile?.label2 ?? this.monthChartData.label2;
-        this.monthChartData.labels = translations?.profile?.labels ?? this.monthChartData.labels;
+        this.monthChartData.label0 = translations?.profile?.monthly?.label0 ?? this.monthChartData.label0;
+        this.monthChartData.label1 = translations?.profile?.monthly?.label1 ?? this.monthChartData.label1;
+        this.monthChartData.labels = translations?.profile?.monthly?.labels ?? this.monthChartData.labels;
 
 		this.charts.monthly = new Chart(monthlyCtx, {
 			type: 'bar',
@@ -285,14 +292,14 @@ class ManagerProfile {
 				labels: this.monthChartData.labels,
 				datasets: [
 					{
-						label: this.monthChartData.label1,
+						label: this.monthChartData.label0,
 						data: [15, 22, 18, 35, 28, 42, 38],
 						backgroundColor: 'rgba(0, 255, 255, 0.6)',
 						borderColor: '#00ffff',
 						borderWidth: 2,
 					},
 					{
-						label: this.monthChartData.label2,
+						label: this.monthChartData.label1,
 						data: [12, 16, 14, 28, 21, 32, 28],
 						backgroundColor: 'rgba(0, 255, 0, 0.6)',
 						borderColor: '#00ff00',
@@ -354,23 +361,37 @@ class ManagerProfile {
     public async updateChartLanguage(): Promise<void> {
         const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
-        let perfChart = this.showcharts.performance;
-        this.perfChartData.labelName = translations?.profile?.label1 ?? this.perfChartData.labelName;
-        this.perfChartData.labels = translations?.profile?.labels ?? this.perfChartData.labels;
+        let chart = this.showcharts.performance;
+        this.perfChartData.labelName = translations?.profile?.weekly?.label ?? this.perfChartData.labelName;
+        this.perfChartData.labels = translations?.profile?.weekly?.labels ?? this.perfChartData.labels;
 
-        perfChart.data.labels = this.perfChartData.labels;
-        perfChart.data.datasets[0].label = this.perfChartData.labelName;
-        perfChart.update();
 
-        perfChart = this.charts.monthly;
-        this.monthChartData.label1 = translations?.profile?.label1 ?? this.monthChartData.label1;
-        this.monthChartData.label2 = translations?.profile?.label2 ?? this.monthChartData.label2;
-        this.monthChartData.labels = translations?.profile?.labels ?? this.monthChartData.labels;
+        chart.data.labels = this.perfChartData.labels;
+        chart.data.datasets[0].label = this.perfChartData.labelName;
+        chart.update();
 
-        perfChart.data.labels = this.monthChartData.labels;
-        perfChart.data.datasets[0].label = this.monthChartData.label1;
-        perfChart.data.datasets[1].label = this.monthChartData.label2;
-        perfChart.update();
+        chart = this.charts.monthly;
+        this.monthChartData.label0 = translations?.profile?.monthly?.label0 ?? this.monthChartData.label0;
+        this.monthChartData.label1 = translations?.profile?.monthly?.label1 ?? this.monthChartData.label1;
+        this.monthChartData.labels = translations?.profile?.monthly?.labels ?? this.monthChartData.labels;
+
+        chart.data.labels = this.monthChartData.labels;
+        chart.data.datasets[0].label = this.monthChartData.label0;
+        chart.data.datasets[1].label = this.monthChartData.label1;
+        chart.update();
+
+		chart = this.charts.winLoss;
+		let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost'];
+		chart.data.labels = labels;
+		console.log(labels);
+		chart.update();
+
+		chart = this.charts.skill;
+        const skills = translations?.profile?.skills.labels ?? ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"];
+        const label = translations?.profile?.skills.label ?? 'Skills';
+		chart.data.labels = skills;
+		chart.data.datasets[0].label = label;
+		chart.update();
     }
 
     public switchTab(tabName: string): void {

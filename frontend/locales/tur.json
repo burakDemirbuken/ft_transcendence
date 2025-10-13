@@ -76,7 +76,7 @@
 		},
 		"perf": {
 			"winlose": {
-				"title": "Kazanma/KAybetme Oranı",
+				"title": "Kazanma/Kaybetme Oranı",
 				"won": "Kazanılan",
 				"lost": "Kaybedilen"
 			},
