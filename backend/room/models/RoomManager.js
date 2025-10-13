@@ -109,8 +109,15 @@ class RoomManager extends EventEmitter
 					return;
 				}
 				const state = room.finishRoom(payload);
+				if (room.status === 'tournament')
+				{
+					state.losePlayers.forEach(p => {
+						this.leaveRoom(p);
+					});
+				}
 				room.players.forEach(player => {
-					this.leaveRoom(player);
+					if (room.status === 'finished')
+						this.leaveRoom(player);
 					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: state }));
 				});
 				break;
@@ -199,12 +206,8 @@ class RoomManager extends EventEmitter
 		else if (room.host === player.id)
 			room.host = room.players[0].id; // Assign new host
 
-		if (room.players.length > 0) {
-			//this.notifyRoomUpdate(room.id);
-		}
-		else {
-			this.emit(`room${roomId}_Deleted`);
-		}
+		if (room.players.length > 0) 
+			this.notifyRoomUpdate(roomId);
 
 		return room;
 	}
