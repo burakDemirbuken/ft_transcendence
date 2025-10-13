@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const tempStorage = new Map();
+export const tempStorage = new Map();
 const tokenBlacklist = new Set();
 
 
@@ -10,7 +10,7 @@ export function blacklistToken(token)
     {
 		const base64Payload = token.split('.')[1];
 		const payload = JSON.parse(Buffer.from(base64Payload, 'base64').toString());
-		
+
 		if (payload.jti)
 			tokenBlacklist.add(payload.jti);
 		else if (payload.userId && payload.iat)

@@ -7,6 +7,9 @@ import
 	sendVerificationEmail,
 	send2FAEmail,
 	sendLoginNotification,
+	storeVerificationToken,
+	storeVerificationCode,
+	tempStorage
 }	from './utils.js';
 
 
@@ -55,7 +58,7 @@ class AuthController {
 			const user = await User.findByEmail(email);
 			return (reply.send({ exists: !!user, message: user ? trlt.email.taken : trlt.email.availible }));
 
-		} 
+		}
 		catch (error)
 		{
 			return (reply.status(500).send({ success: false, error: trlt.email.fail }));
@@ -89,11 +92,11 @@ class AuthController {
 			try
 			{
 				await sendVerificationEmail(email, username, verificationToken);
-				return (reply.status(201).send({ 
-					success: true, 
-					message: trlt.register.success, 
-					user: newUser.toSafeObject(), 
-					next_step: 'email_verification' 
+				return (reply.status(201).send({
+					success: true,
+					message: trlt.register.success,
+					user: newUser.toSafeObject(),
+					next_step: 'email_verification'
 				}));
 			}
 			catch (emailError)
@@ -124,14 +127,14 @@ class AuthController {
 
 			for (const [emailKey, data] of tempStorage.entries())
 			{
-				if (data.token === token && data.type === 'email_verification') 
+				if (data.token === token && data.type === 'email_verification')
 				{
 					storedData = data;
 					userEmail = emailKey;
 					break;
 				}
 			}
-			
+
 
 			if (!storedData)
 				return (reply.status(400).send({ success: false, error: trlt.token.expired }));
@@ -171,12 +174,12 @@ class AuthController {
 						<meta charset="UTF-8">
 						<title>Email Doğrulandı - Transcendence</title>
 						<style>
-							body { font-family: Arial, sans-serif; text-align: center; padding: 50px; 
+							body { font-family: Arial, sans-serif; text-align: center; padding: 50px;
 								   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
-							.container { background: white; padding: 30px; border-radius: 10px; 
+							.container { background: white; padding: 30px; border-radius: 10px;
 										max-width: 400px; margin: 0 auto; }
 							h1 { color: #2e7d32; }
-							.btn { background: #1976d2; color: white; padding: 10px 20px; 
+							.btn { background: #1976d2; color: white; padding: 10px 20px;
 								  text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 20px; }
 						</style>
 					</head>
@@ -282,9 +285,9 @@ class AuthController {
 			const refreshMaxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
 
 			const refreshToken = await reply.jwtSign(
-				{ 
-					userId: user.id, 
-					username: user.username, 
+				{
+					userId: user.id,
+					username: user.username,
 					type: 'refresh',
 					rememberMe: !!rememberMe,
 					issuedAt: Math.floor(Date.now() / 1000)
@@ -323,10 +326,10 @@ class AuthController {
 
 		try {
 			const userId = request.headers['x-user-id'];
-			
+
 			if (!userId) {
-				return (reply.status(401).send({ 
-					success: false, 
+				return (reply.status(401).send({
+					success: false,
 					error: 'User authentication required',
 					code: 'NO_USER_INFO'
 				}));
@@ -348,7 +351,7 @@ class AuthController {
 	// LOGOUT
 	async logout(request, reply) {
 		const trlt = getTranslations(request.query.lang || "eng");
-		
+
 		try
 		{
 			reply.clearCookie('accessToken',
@@ -361,8 +364,8 @@ class AuthController {
 				httpOnly: true, secure: true, sameSite: 'strict', path: '/'
 			});
 
-			reply.send({ 
-				success: true, 
+			reply.send({
+				success: true,
 				message: trlt.logout.success,
 				user: request.headers['x-user-username']
 			});
@@ -376,7 +379,7 @@ class AuthController {
 	async refreshToken(request, reply) {
 		try {
 			const oldRefreshToken = request.cookies.refreshToken;
-			
+
 			if (!oldRefreshToken) {
 				return (reply.status(401).send({
 					success: false,
@@ -426,19 +429,19 @@ class AuthController {
 			const now = Math.floor(Date.now() / 1000);
 			const remainingTime = decoded.exp - now;
 			const remainingDays = Math.max(1, Math.ceil(remainingTime / (24 * 60 * 60))); // En az 1 gün
-			
+
 			// Remember me durumunu koru
 			const isRememberMe = decoded.rememberMe || false;
 			const maxAllowedDays = isRememberMe ? 30 : 7;
-			
+
 			// Kalan süre kadar yeni refresh token oluştur (ama max limit aşmasın)
 			const newRefreshExpiry = Math.min(remainingDays, maxAllowedDays);
 			const newRefreshMaxAge = newRefreshExpiry * 24 * 60 * 60 * 1000;
 
 			const newRefreshToken = await reply.jwtSign(
-				{ 
-					userId: user.id, 
-					username: user.username, 
+				{
+					userId: user.id,
+					username: user.username,
 					type: 'refresh',
 					rememberMe: isRememberMe,
 					issuedAt: now
@@ -468,9 +471,9 @@ class AuthController {
 
 		} catch (error) {
 			console.log('Refresh token error:', error);
-			reply.status(500).send({ 
-				success: false, 
-				error: 'Internal server error' 
+			reply.status(500).send({
+				success: false,
+				error: 'Internal server error'
 			});
 		}
 	}
@@ -481,9 +484,9 @@ class AuthController {
 		try {
 			const tokenUserId = request.headers['x-user-id'];
 			const { userId, userEmail, username } = request.body || {};
-			
+
 			let user;
-			
+
 			if (tokenUserId) {
 				user = await User.findByPk(parseInt(tokenUserId));
 			} else if (userId) {
@@ -493,17 +496,17 @@ class AuthController {
 			} else if (userEmail) {
 				user = await User.findByEmail(userEmail);
 			} else {
-				return (reply.status(400).send({ 
-					success: false, 
+				return (reply.status(400).send({
+					success: false,
 					error: 'Authentication required or user identifier missing',
 					code: 'NO_IDENTIFIER'
 				}));
 			}
 
 			if (!user) {
-				return (reply.status(404).send({ 
-					success: false, 
-					error: trlt.unotFound || 'User not found' 
+				return (reply.status(404).send({
+					success: false,
+					error: trlt.unotFound || 'User not found'
 				}));
 			}
 
@@ -534,14 +537,14 @@ class AuthController {
 			];
 
 			Promise.all(serviceNotifications);
-			
+
 			if (tempStorage.has(deletedUserInfo.email)) {
 				tempStorage.delete(deletedUserInfo.email);
 			}
 
 			const accessToken = request.cookies?.accessToken;
 			const refreshToken = request.cookies?.refreshToken;
-			
+
 			if (accessToken) blacklistToken(accessToken);
 			if (refreshToken) blacklistToken(refreshToken);
 
@@ -553,17 +556,17 @@ class AuthController {
 				httpOnly: true, secure: true, sameSite: 'strict', path: '/'
 			});
 
-			reply.send({ 
-				success: true, 
+			reply.send({
+				success: true,
 				message: trlt.delete?.success || 'Account successfully deleted',
 				deleted_user: deletedUserInfo
 			});
 
 		} catch (error) {
 			console.log('Delete profile error:', error);
-			reply.status(500).send({ 
-				success: false, 
-				error: trlt.delete?.fail || 'Failed to delete account' 
+			reply.status(500).send({
+				success: false,
+				error: trlt.delete?.fail || 'Failed to delete account'
 			});
 		}
 	}
@@ -572,7 +575,7 @@ class AuthController {
 		try {
 			const { token } = request.body;
 			const blacklisted = isTokenBlacklisted(token);
-			
+
 			return (reply.send({
 				success: true,
 				isBlacklisted: blacklisted
@@ -648,17 +651,17 @@ class AuthController {
 		try {
 			const { accessToken, refreshToken } = request.body;
 			let blacklistedCount = 0;
-			
+
 			if (accessToken) {
 				blacklistToken(accessToken);
 				blacklistedCount++;
 			}
-			
+
 			if (refreshToken) {
 				blacklistToken(refreshToken);
 				blacklistedCount++;
 			}
-			
+
 			return (reply.send({
 				success: true,
 				message: `${blacklistedCount} tokens blacklisted`,
