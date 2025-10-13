@@ -72,15 +72,14 @@ export default class TournamentRoom extends Room
 
 	finishRoom(payload)
 	{
-		const matches = payload.matches;
 		if (this.currentRound === this.maxRounds - 1)
 		{
 			this.status = 'finished';
-			this.emit('finished', { matches: this.matches });
+			this.emit('finished', { ...this.getMatchmakingInfo() });
 		}
 		else
 		{
-			this.nextRound(matches);
+			this.nextRound(payload.matches);
 		}
 	}
 
