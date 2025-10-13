@@ -1,22 +1,30 @@
 import AView from "./AView.js";
+import { getJsTranslations } from './I18n.js';
 function getCSSVar(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 class ManagerProfile {
     constructor() {
         this.showcharts = {};
-        this.chartData = {
-            labelName: 'Kazanılan Maçlar',
-            labels: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
-            data: [3, 5, 2, 8, 6, 4, 7]
+        this.perfChartData = {
+            labelName: "Matches Won",
+            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            data: []
+        };
+        this.monthChartData = {
+            label1: "Total Matches",
+            label2: "Matches Won",
+            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            data1: [],
+            data2: []
         };
         this.currentTab = 'overview';
         this.charts = {};
-        // DOM yüklendikten sonra avatar-ring'i seç
+        // DOM yüklendikten sonra avatar'ı seç
         setTimeout(() => {
-            this.avatarStatus = document.querySelector('.avatar-ring');
+            this.avatarStatus = document.querySelector('.avatar');
             if (!this.avatarStatus) {
-                console.error("avatar-ring elemanı bulunamadı!");
+                console.error("avatar elemanı bulunamadı!");
             }
             else {
                 this.initConnectionStatus(); // Bağlantı durumunu başlat
@@ -44,16 +52,20 @@ class ManagerProfile {
     initConnectionStatus() {
         this.setAvatarStatus(navigator.onLine ? 'online' : 'offline');
     }
-    createPerformanceChart() {
+    async createPerformanceChart() {
+        var _a, _b, _c, _d;
         const perfCtx = document.getElementById('performanceChart');
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+        this.perfChartData.labelName = (_b = (_a = translations === null || translations === void 0 ? void 0 : translations.profile) === null || _a === void 0 ? void 0 : _a.label1) !== null && _b !== void 0 ? _b : this.perfChartData.labelName;
+        this.perfChartData.labels = (_d = (_c = translations === null || translations === void 0 ? void 0 : translations.profile) === null || _c === void 0 ? void 0 : _c.labels) !== null && _d !== void 0 ? _d : this.perfChartData.labels;
         if (perfCtx) {
             this.showcharts.performance = new Chart(perfCtx, {
                 type: 'line',
                 data: {
-                    labels: this.chartData.labels, // Haftalık günler
+                    labels: this.perfChartData.labels, // Haftalık günler
                     datasets: [{
-                            label: this.chartData.labelName,
-                            data: this.chartData.data, // Haftalık kazanılan maç sayıları
+                            label: this.perfChartData.labelName,
+                            data: this.perfChartData.data, // Haftalık kazanılan maç sayıları
                             borderColor: getCSSVar('--color-primary'),
                             backgroundColor: 'rgba(75, 192, 192, 0.2)',
                             borderWidth: 3,
@@ -239,24 +251,29 @@ class ManagerProfile {
             }
         });
     }
-    createMonthlyChart() {
+    async createMonthlyChart() {
+        var _a, _b, _c, _d, _e, _f;
         const monthlyCtx = document.getElementById('monthlyChart');
         if (!monthlyCtx)
             return;
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+        this.monthChartData.label1 = (_b = (_a = translations === null || translations === void 0 ? void 0 : translations.profile) === null || _a === void 0 ? void 0 : _a.label1) !== null && _b !== void 0 ? _b : this.monthChartData.label1;
+        this.monthChartData.label2 = (_d = (_c = translations === null || translations === void 0 ? void 0 : translations.profile) === null || _c === void 0 ? void 0 : _c.label2) !== null && _d !== void 0 ? _d : this.monthChartData.label2;
+        this.monthChartData.labels = (_f = (_e = translations === null || translations === void 0 ? void 0 : translations.profile) === null || _e === void 0 ? void 0 : _e.labels) !== null && _f !== void 0 ? _f : this.monthChartData.labels;
         this.charts.monthly = new Chart(monthlyCtx, {
             type: 'bar',
             data: {
-                labels: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem'],
+                labels: this.monthChartData.labels,
                 datasets: [
                     {
-                        label: 'Toplam Maç',
+                        label: this.monthChartData.label1,
                         data: [15, 22, 18, 35, 28, 42, 38],
                         backgroundColor: 'rgba(0, 255, 255, 0.6)',
                         borderColor: '#00ffff',
                         borderWidth: 2,
                     },
                     {
-                        label: 'Kazanılan Maç',
+                        label: this.monthChartData.label2,
                         data: [12, 16, 14, 28, 21, 32, 28],
                         backgroundColor: 'rgba(0, 255, 0, 0.6)',
                         borderColor: '#00ff00',
@@ -313,6 +330,24 @@ class ManagerProfile {
             chart.update();
         }
     }
+    async updateChartLanguage() {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+        let perfChart = this.showcharts.performance;
+        this.perfChartData.labelName = (_b = (_a = translations === null || translations === void 0 ? void 0 : translations.profile) === null || _a === void 0 ? void 0 : _a.label1) !== null && _b !== void 0 ? _b : this.perfChartData.labelName;
+        this.perfChartData.labels = (_d = (_c = translations === null || translations === void 0 ? void 0 : translations.profile) === null || _c === void 0 ? void 0 : _c.labels) !== null && _d !== void 0 ? _d : this.perfChartData.labels;
+        perfChart.data.labels = this.perfChartData.labels;
+        perfChart.data.datasets[0].label = this.perfChartData.labelName;
+        perfChart.update();
+        perfChart = this.charts.monthly;
+        this.monthChartData.label1 = (_f = (_e = translations === null || translations === void 0 ? void 0 : translations.profile) === null || _e === void 0 ? void 0 : _e.label1) !== null && _f !== void 0 ? _f : this.monthChartData.label1;
+        this.monthChartData.label2 = (_h = (_g = translations === null || translations === void 0 ? void 0 : translations.profile) === null || _g === void 0 ? void 0 : _g.label2) !== null && _h !== void 0 ? _h : this.monthChartData.label2;
+        this.monthChartData.labels = (_k = (_j = translations === null || translations === void 0 ? void 0 : translations.profile) === null || _j === void 0 ? void 0 : _j.labels) !== null && _k !== void 0 ? _k : this.monthChartData.labels;
+        perfChart.data.labels = this.monthChartData.labels;
+        perfChart.data.datasets[0].label = this.monthChartData.label1;
+        perfChart.data.datasets[1].label = this.monthChartData.label2;
+        perfChart.update();
+    }
     switchTab(tabName) {
         console.log('Switching to tab:', tabName); // Debug için
         // Mevcut aktif sekmeyi kaldır - tab-btn class'ını kullan
@@ -352,16 +387,30 @@ class ManagerProfile {
         }
     }
     filterMatches(filterType, value) {
-        const matchRows = document.querySelectorAll('.match-row:not(.header)');
-        matchRows.forEach(row => {
-            const rowElement = row;
-            let show = true;
-            if (filterType === 'result' && value !== 'all') {
-                const result = rowElement.dataset.result;
-                show = result === value;
-            }
-            rowElement.style.display = show ? 'grid' : 'none';
-        });
+        if (filterType === 'result') {
+            const matchRows = document.querySelectorAll('.match-row:not(.header)');
+            matchRows.forEach(row => {
+                const rowElement = row;
+                let show = true;
+                if (filterType === 'result' && value !== 'all') {
+                    const result = rowElement.dataset.result;
+                    show = result === value;
+                }
+                rowElement.style.display = show ? 'grid' : 'none';
+            });
+        }
+        else if (filterType === 'tournamentYear') {
+            const tourRows = document.querySelectorAll('.tournament-row:not(.header)');
+            tourRows.forEach(row => {
+                const rowElement = row;
+                let show = true;
+                if (filterType === 'tournamentYear' && value !== 'all') {
+                    const year = rowElement.dataset.start;
+                    show = year.split('-')[0] === value;
+                }
+                rowElement.style.display = show ? 'grid' : 'none';
+            });
+        }
     }
     animateLevelProgress() {
         var _a;
@@ -452,6 +501,10 @@ class ManagerProfile {
     }
 }
 let profileManager;
+export function updateChartLanguage() {
+    if (profileManager)
+        profileManager.updateChartLanguage();
+}
 function handleCardMouseMove(e) {
     const cards = document.querySelectorAll('.stat-card');
     const windowCenterX = window.innerWidth / 2;
@@ -489,6 +542,11 @@ function timeFilterChangeHandler(e) {
 function resultFilterChangeHandler(e) {
     const target = e.target;
     profileManager.filterMatches('result', target.value);
+}
+;
+function tournamentYearFilterChangeHandler(e) {
+    const target = e.target;
+    profileManager.filterMatches('tournamentYear', target.value);
 }
 ;
 function handleTournamentClick(e, USERNAME, overlay, turnuva, wrapper) {
@@ -657,6 +715,8 @@ export default class extends AView {
         // Filtreler
         const resultFilter = document.getElementById('result-filter');
         resultFilter === null || resultFilter === void 0 ? void 0 : resultFilter.addEventListener('change', resultFilterChangeHandler);
+        const tournamentYearFilter = document.getElementById('tournament-year-filter');
+        tournamentYearFilter === null || tournamentYearFilter === void 0 ? void 0 : tournamentYearFilter.addEventListener('change', tournamentYearFilterChangeHandler);
         // Level progress animasyonu
         profileManager.animateLevelProgress();
         // ==================== Turnuva elementleri ====================
@@ -722,6 +782,8 @@ export default class extends AView {
         document.removeEventListener('click', tabClickHandler);
         const resultFilter = document.getElementById('result-filter');
         resultFilter === null || resultFilter === void 0 ? void 0 : resultFilter.removeEventListener('change', resultFilterChangeHandler);
+        const tournamentYearFilter = document.getElementById('tournament-year-filter');
+        tournamentYearFilter === null || tournamentYearFilter === void 0 ? void 0 : tournamentYearFilter.removeEventListener('change', tournamentYearFilterChangeHandler);
         // Turnuva ile ilgili eventleri de kaldır
         (_a = this.table) === null || _a === void 0 ? void 0 : _a.replaceChildren(); // satırları temizle
         (_b = this.overlay) === null || _b === void 0 ? void 0 : _b.removeEventListener('click', (e) => handleOverlayClick(e, this.overlay, this.turnuva));

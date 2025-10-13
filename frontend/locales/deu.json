@@ -1,11 +1,5 @@
 {
 	"dates": {
-		"tago": {
-			"hago": "Stunden",
-			"dago": "Tagen",
-			"mago": "Monaten",
-			"yago": "Jahren"
-		},
 		"sday": {
 			"mon": "Mon",
 			"tue": "Die",
@@ -14,34 +8,6 @@
 			"fri": "Fre",
 			"sat": "Sam",
 			"sun": "Son"
-		},
-		"smonth": {
-			"jan": "Jan",
-			"feb": "Feb",
-			"mar": "Mär",
-			"apr": "Apr",
-			"may": "Mai",
-			"jun": "Jun",
-			"jul": "Jul",
-			"aug": "Aug",
-			"sep": "Sep",
-			"oct": "Okt",
-			"nov": "Nov",
-			"dec": "Dez"
-		},
-		"lmonth": {
-			"jan": "Januar",
-			"feb": "Februar",
-			"mar": "März",
-			"apr": "April",
-			"may": "Mai",
-			"jun": "Juni",
-			"jul": "Juli",
-			"aug": "August",
-			"sep": "September",
-			"oct": "Oktober",
-			"nov": "November",
-			"dec": "Dezember"
 		}
 	},
 	"navbar": {
@@ -56,7 +22,7 @@
 		"login": "EINLOGGEN"
 	},
 	"home": {
-		"team": "TEAMMITGLIEDER",
+		"team": "Teammitglieder",
 		"thanks": "Danke an 42 Kocaeli und unsere Freunde",
 		"click": "Klicke"
 	},
@@ -73,6 +39,11 @@
 		"rme": "Login Merken"
 	},
 	"profile": {
+		"header": {
+			"level": "Stufe",
+			"tgames": "Gesamtspiele",
+			"winrate": "Gewinnrate"
+		},
 		"sections": {
 			"dashboard": "Dashboard",
 			"performance": "Leistungsanalyse",
@@ -94,7 +65,9 @@
 				"best": "Beste Serie"
 			},
 			"mlast": {
-				"title": "Letzte Spiele"
+				"title": "Letzte Spiele",
+				"win": "S",
+				"lose": "V"
 			},
 			"wperf": {
 				"title": "Wöchentliche Leistung",
@@ -131,12 +104,12 @@
 		},
 		"thistory": {
 			"title": "Turnierverlauf",
-			"opts": {
-				"allyears": "Alle Jahre",
-				"alltour": "Alle Turniere",
-				"ltour": "Ligaturniere",
-				"elimtour": "Ausscheidungsturniere",
-				"special": "Sonderveranstaltungen"
+			"allyears": "Alle Jahre",
+			"header": {
+				"tname": "Turniername",
+				"tstart": "Anfang",
+				"tend": "Ende",
+				"total": "Gesamtspiele"
 			},
 			"table": {
 				"matches": "Spiele",
@@ -157,12 +130,12 @@
 				"onlylost": "Nur Verluste"
 			},
 			"table": {
-				"date": "DATUM",
-				"match": "SPIEL",
-				"score": "PUNKTZAHL",
-				"time": "DAUER",
-				"result": "ERGEBNIS",
-				"analysis": "ANALYSE",
+				"date": "Datum",
+				"match": "Spiel",
+				"score": "Punktzahl",
+				"time": "Dauer",
+				"result": "Ergebnis",
+				"analysis": "Analyse",
 				"res": {
 					"vic": "Sieg",
 					"def": "Verlust"

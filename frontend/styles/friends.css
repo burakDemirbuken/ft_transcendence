@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+@import url("profile_style/color.css");
 
 .friends-container {
-	min-height: 100vh;
-	min-height: 100dvh;
+	min-height: 100%;
 	width: 100%;
 	color: #eee;
 
@@ -47,7 +47,7 @@
 	font-weight: bold;
 	text-shadow: 0 0 10px #c0c;
 	color: #eee;
-	padding: clamp(1em, .8em + 1vw, 1.5em) 0;
+	padding: clamp(1em, .8em + 1vw, 1.2em) 0;
 
 	position: relative;
 }
@@ -86,6 +86,7 @@
 .friend-page-box {
 	position: relative;
 	width: max(80%, 260px);
+	width: max(260px, 75% + 5rem);
 	height: 30px;
 	margin-top: 1rem;
 }
@@ -172,9 +173,10 @@
 	align-items: center;
 	justify-content: center;
 	gap: 1em;
+	min-width: 0;
 }
 
-.user-avatar {
+.friend-user-avatar {
 	aspect-ratio: 1/1;
 	width: 3.5rem;
 	border-radius: 50%;
@@ -189,7 +191,7 @@
 	flex-shrink: 0;
 }
 
-.user.online .user-avatar {
+.friend-user-avatar.online {
 	border-color: #0f0;
 	box-shadow: 0 0 5px #0c0;
 }
@@ -201,21 +203,33 @@
 	object-fit: cover;
 }
 
-.user-info {
+.friends-user-info {
+	min-width: 0;
+	flex: 1;
 	display: flex;
 	flex-direction: column;
+	gap: .1em;
 }
 
-.user-info .dname {
+.friends-user-info .dname {
 	font-family: "Orbitron","monospace";
 	font-weight: bold;
-	text-shadow: 0 0 15px #fff7;
 }
 
-.user-info .uname {
+.friends-user-info .uname {
 	font-family: "PixeloidMono";
 	font-size: .7em;
 	color: #08a;
+}
+
+.dname, .uname {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	display: block;
+	width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .user-actions {
@@ -286,4 +300,60 @@
 	.user-grid {
 		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 	}
+}
+
+.overlay {
+	position: fixed;
+	top: 0;
+	left: 60px;
+	bottom: 0;
+	right: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	backdrop-filter: blur(10px) saturate(150%);
+	background: #0007;
+}
+
+.overlay.hide-away {
+	display: none;
+}
+
+@media (max-width: 1080px) {
+	.overlay {
+		left: 50px;
+	}
+}
+
+.card {
+	width: clamp(270px, 70% + 80px, 2400px);
+	height: 90%;
+	border: 2px solid #5557;
+	border-radius: 10px;
+	padding: clamp(2px, 3% + 1px,20px);
+	overflow-y: auto;
+	background:
+		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.145) 0%, transparent 50%),
+		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.161) 0%, transparent 50%),
+		linear-gradient(135deg, #0a0a0a91 0%, #2525348e 50%, #2b324498 100%);
+}
+
+#card-exit {
+	position: absolute;
+	top: calc(5% + 5px);
+	right: calc(15% - 30px);
+	cursor: pointer;
+}
+
+#card-exit svg {
+	width: 25px;
+	aspect-ratio: 1/1;
+	fill: #ddd;
+	transition: all 0.3s ease;
+}
+
+#card-exit:hover svg {
+	rotate: 90deg;
+	filter: drop-shadow(0 0 10px rgb(193, 1, 1)); /* üzerine gelince kırmızı gölge */
+	fill: #e30;
 }

@@ -3,7 +3,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    gap: .5em;
+    flex-wrap: wrap;
+    margin-bottom: clamp(.8rem, 2vw + .4rem, 1.25rem);
     padding: 10px;
     background: var(--bg-secondary);
     border-radius: 10px;
@@ -16,7 +18,7 @@
     align-items: center;
     gap: 10px;
     color: var(--color-primary);
-    font-size: 1.5rem;
+    font-size: clamp(1rem, 1.5vw + .8rem, 1.8rem);
     text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
@@ -56,12 +58,26 @@
 
 /* Tournament Card */
 
-.tournament-table { margin-top:10px; border-collapse:collapse; width:100%; }
+.tournament-table {
+    margin-top: 10px;
+    border-collapse: collapse;
+    width: 100%;
+    overflow-x: auto;
+}
 
 .tournament-row {
-    display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; justify-content:space-between; padding:8px;
-    background:#00000096; margin-bottom:4px; cursor:pointer; border-radius:6px;
+    min-width: 500px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    justify-content: space-between;
+    padding: 8px;
+    gap: 8px;
+    background: #00000096;
+    margin-bottom: 4px;
+    cursor: pointer;
+    border-radius: 6px;
 }
+
 .tournament-row.header {
     background: rgba(0, 78, 78, 0.34);
     font-weight: 700;

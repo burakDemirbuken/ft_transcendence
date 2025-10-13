@@ -22,3 +22,8 @@ body {
     overflow-x: hidden;
     overflow-y: scroll;
 }
+
+#content {
+	padding: clamp(.5rem, 1vw + .2rem, 1.25rem);
+    font-size: clamp(.8rem, 1vw + .6rem, 1.2rem);
+}

@@ -47,12 +47,25 @@
     box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
 }
 
-.match-table { margin-top:10px; border-collapse:collapse;}
+.match-table {
+    margin-top: 10px;
+    border-collapse: collapse;
+    overflow-x: auto;
+}
 
 .match-row {
-    display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; justify-content:space-between; padding:8px;
-    background:#00000096; margin-bottom:4px; cursor:pointer; border-radius:6px;
+    min-width: 500px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    justify-content: space-between;
+    padding: 8px;
+    gap: 8px;
+    background: #00000096;
+    margin-bottom: 4px;
+    cursor: pointer;
+    border-radius: 6px;
 }
+
 .match-row.header {
     background: rgba(0, 78, 78, 0.34);
     font-weight: 700;
