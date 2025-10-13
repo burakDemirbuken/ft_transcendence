@@ -1,11 +1,5 @@
 {
 	"dates": {
-		"tago": {
-			"hago": "h ago",
-			"dago": "d ago",
-			"mago": "m ago",
-			"yago": "y ago"
-		},
 		"sday": {
 			"mon": "Mon",
 			"tue": "Tue",
@@ -14,34 +8,6 @@
 			"fri": "Fri",
 			"sat": "Sat",
 			"sun": "Sun"
-		},
-		"smonth": {
-			"jan": "Jan",
-			"feb": "Feb",
-			"mar": "Mar",
-			"apr": "Apr",
-			"may": "May",
-			"jun": "Jun",
-			"jul": "Jul",
-			"aug": "Aug",
-			"sep": "Sep",
-			"oct": "Oct",
-			"nov": "Nov",
-			"dec": "Dec"
-		},
-		"lmonth": {
-			"jan": "January",
-			"feb": "February",
-			"mar": "March",
-			"apr": "April",
-			"may": "May",
-			"jun": "June",
-			"jul": "July",
-			"aug": "August",
-			"sep": "September",
-			"oct": "October",
-			"nov": "November",
-			"dec": "December"
 		}
 	},
 	"navbar": {
@@ -56,7 +22,7 @@
 		"login": "LOGIN"
 	},
 	"home": {
-		"team": "TEAM MEMBERS",
+		"team": "Team Members",
 		"thanks": "Thanks to 42 Kocaeli and our friends",
 		"click": "Click"
 	},

@@ -1,11 +1,5 @@
 {
 	"dates": {
-		"tago": {
-			"hago": "s önce",
-			"dago": "g önce",
-			"mago": "ay önce",
-			"yago": "y önce"
-		},
 		"sday": {
 			"mon": "Pzt",
 			"tue": "Sal",
@@ -14,34 +8,6 @@
 			"fri": "Cum",
 			"sat": "Cts",
 			"sun": "Paz"
-		},
-		"smonth": {
-			"jan": "Oca",
-			"feb": "Şub",
-			"mar": "Mar",
-			"apr": "Nis",
-			"may": "May",
-			"jun": "Haz",
-			"jul": "Tem",
-			"aug": "Ağu",
-			"sep": "Eyl",
-			"oct": "Eki",
-			"nov": "Kas",
-			"dec": "Ara"
-		},
-		"lmonth": {
-			"jan": "Ocak",
-			"feb": "Şubat",
-			"mar": "Mart",
-			"apr": "Nisan",
-			"may": "Mayıs",
-			"jun": "Haziran",
-			"jul": "Temmuz",
-			"aug": "Auğustos",
-			"sep": "Eylül",
-			"oct": "Ekim",
-			"nov": "Kasım",
-			"dec": "Aralık"
 		}
 	},
 	"navbar": {
@@ -56,7 +22,7 @@
 		"login": "GİRİŞ"
 	},
 	"home": {
-		"team": "EKİP ÜYELERİ",
+		"team": "Ekip Üyeleri",
 		"thanks": "42 Kocaeli'ye ve arkadaşlarımıza teşekkürler",
 		"click": "Tıkla"
 	},

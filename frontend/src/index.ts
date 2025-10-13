@@ -1,5 +1,6 @@
 import Home from "../dist/Home.js";
 import Profile from "../dist/Profile.js";
+import { updateChartLanguage } from "./Profile.js";
 import Play from "../dist/Play.js";
 import Friends from "../dist/Friends.js";
 import Settings from "../dist/Settings.js";
@@ -91,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				console.log("LANGUAGE");
 				e.preventDefault();
 				I18n.nextLanguage();
+				updateChartLanguage();
 				document.querySelector(".selected")?.classList.toggle("selected");
 				e.currentTarget.classList.toggle("selected");
 			}
@@ -102,13 +104,8 @@ function toggleClassOnResize() {
 	const element = document.querySelector("#navbar");
 	const mediaQuery = window.matchMedia("(max-width: 1080px)");
 
-	if (mediaQuery.matches) {
+	if (mediaQuery.matches)
 		element.classList.add("collapse");
-	}
-	// Open for auto grow
-	// else {
-	// 	element.classList.remove("collapse");
-	// }
 }
 
 window.addEventListener('load', toggleClassOnResize);

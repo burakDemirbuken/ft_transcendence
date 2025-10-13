@@ -1,4 +1,5 @@
 import AView from "./AView.js";
+import { getJsTranslations } from './I18n.js';
 
 declare const Chart: any; // Global Chart.js nesnesini tanımlar
 
@@ -11,11 +12,17 @@ class ManagerProfile {
     private charts: Record<string, any>;
     private avatarStatus: HTMLElement;
     private showcharts: { performance?: Chart } = {};
-    // const matches = loa
-    private chartData: { labelName: string, labels: string[], data: number[] } = {
-        labelName: 'Kazanılan Maçlar',
-        labels: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
-        data: [3, 5, 2, 8, 6, 4, 7]
+    private perfChartData: { labelName: string, labels: string[], data: number[] } = {
+		labelName: "Matches Won",
+		labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        data: []
+    };
+    private monthChartData: { label1: string, label2: string, labels: string[], data1: number[], data2: number[] } = {
+		label1: "Total Matches",
+		label2: "Matches Won",
+		labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        data1: [],
+        data2: []
     };
 
     constructor() {
@@ -56,16 +63,20 @@ class ManagerProfile {
         this.setAvatarStatus(navigator.onLine ? 'online' : 'offline');
     }
 
-    private createPerformanceChart(): void {
+    private async createPerformanceChart(): Promise<void> {
         const perfCtx = document.getElementById('performanceChart') as HTMLCanvasElement;
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+
+        this.perfChartData.labelName = translations?.profile?.label1 ?? this.perfChartData.labelName;
+        this.perfChartData.labels = translations?.profile?.labels ?? this.perfChartData.labels;
         if (perfCtx) {
             this.showcharts.performance = new Chart(perfCtx, {
                 type: 'line',
                 data: {
-                    labels: this.chartData.labels, // Haftalık günler
+                    labels: this.perfChartData.labels, // Haftalık günler
                     datasets: [{
-                        label: this.chartData.labelName,
-                        data: this.chartData.data, // Haftalık kazanılan maç sayıları
+                        label: this.perfChartData.labelName,
+                        data: this.perfChartData.data, // Haftalık kazanılan maç sayıları
                         borderColor: getCSSVar('--color-primary'),
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderWidth: 3,
@@ -259,24 +270,29 @@ class ManagerProfile {
         });
     }
 
-	private createMonthlyChart(): void {
+	private async createMonthlyChart(): Promise<void> {
 		const monthlyCtx = document.getElementById('monthlyChart') as HTMLCanvasElement | null;
 		if (!monthlyCtx) return;
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+
+        this.monthChartData.label1 = translations?.profile?.label1 ?? this.monthChartData.label1;
+        this.monthChartData.label2 = translations?.profile?.label2 ?? this.monthChartData.label2;
+        this.monthChartData.labels = translations?.profile?.labels ?? this.monthChartData.labels;
 
 		this.charts.monthly = new Chart(monthlyCtx, {
 			type: 'bar',
 			data: {
-				labels: ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem'],
+				labels: this.monthChartData.labels,
 				datasets: [
 					{
-						label: 'Toplam Maç',
+						label: this.monthChartData.label1,
 						data: [15, 22, 18, 35, 28, 42, 38],
 						backgroundColor: 'rgba(0, 255, 255, 0.6)',
 						borderColor: '#00ffff',
 						borderWidth: 2,
 					},
 					{
-						label: 'Kazanılan Maç',
+						label: this.monthChartData.label2,
 						data: [12, 16, 14, 28, 21, 32, 28],
 						backgroundColor: 'rgba(0, 255, 0, 0.6)',
 						borderColor: '#00ff00',
@@ -333,6 +349,28 @@ class ManagerProfile {
             }
             chart.update();
         }
+    }
+
+    public async updateChartLanguage(): Promise<void> {
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+
+        let perfChart = this.showcharts.performance;
+        this.perfChartData.labelName = translations?.profile?.label1 ?? this.perfChartData.labelName;
+        this.perfChartData.labels = translations?.profile?.labels ?? this.perfChartData.labels;
+
+        perfChart.data.labels = this.perfChartData.labels;
+        perfChart.data.datasets[0].label = this.perfChartData.labelName;
+        perfChart.update();
+
+        perfChart = this.charts.monthly;
+        this.monthChartData.label1 = translations?.profile?.label1 ?? this.monthChartData.label1;
+        this.monthChartData.label2 = translations?.profile?.label2 ?? this.monthChartData.label2;
+        this.monthChartData.labels = translations?.profile?.labels ?? this.monthChartData.labels;
+
+        perfChart.data.labels = this.monthChartData.labels;
+        perfChart.data.datasets[0].label = this.monthChartData.label1;
+        perfChart.data.datasets[1].label = this.monthChartData.label2;
+        perfChart.update();
     }
 
     public switchTab(tabName: string): void {
@@ -491,7 +529,13 @@ class ManagerProfile {
     }
 }
 
+
 let profileManager: ManagerProfile;
+
+export function updateChartLanguage() {
+    if (profileManager)
+        profileManager.updateChartLanguage();
+}
 
 function handleCardMouseMove(e: MouseEvent) {
     const cards = document.querySelectorAll<HTMLElement>('.stat-card');
