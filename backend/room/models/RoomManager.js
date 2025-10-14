@@ -34,7 +34,7 @@ class RoomManager extends EventEmitter
 				player.clientSocket.send(JSON.stringify({ type: 'joined', payload: { roomId: payload.roomId, ...this.getRoom(payload.roomId).getState() } }));
 				break;
 			case 'leave':
-				this.leaveRoom(payload.roomId, player);
+				this.leaveRoom(player);
 				break;
 			case 'setReady':
 				player.isReady = payload.isReady;
@@ -108,9 +108,18 @@ class RoomManager extends EventEmitter
 					console.warn(`Room with ID ${payload.roomId} does not exist`);
 					return;
 				}
-				room.finishRoom(payload);
+				const state = room.finishRoom(payload);
+				if (room.status === 'tournament')
+				{
+					state.losePlayers.forEach(p => {
+						console.log(`Removing player ${p} from tournament room ${room.id}`);
+						this.leaveRoom(p);
+					});
+				}
 				room.players.forEach(player => {
-					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: payload }));
+					if (room.status === 'finished')
+						this.leaveRoom(player);
+					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: state }));
 				});
 				break;
 			default:
@@ -191,7 +200,7 @@ class RoomManager extends EventEmitter
 	{
 		const {room, roomId} = this._getRoomWithPlayer(player.id);
 		if (!room)
-		{
+		{ 
 			console.log(`Player with ID ${player.id} is not in any room`);
 			return null;
 		}
@@ -201,12 +210,8 @@ class RoomManager extends EventEmitter
 		else if (room.host === player.id)
 			room.host = room.players[0].id; // Assign new host
 
-		if (room.players.length > 0) {
-			//this.notifyRoomUpdate(room.id);
-		}
-		else {
-			this.emit(`room${roomId}_Deleted`);
-		}
+		if (room.players.length > 0) 
+			this.notifyRoomUpdate(roomId);
 
 		return room;
 	}

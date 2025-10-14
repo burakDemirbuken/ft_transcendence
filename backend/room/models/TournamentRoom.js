@@ -72,15 +72,16 @@ export default class TournamentRoom extends Room
 
 	finishRoom(payload)
 	{
+		let losePlayers;
+		const matches = payload.matches;
 		if (this.currentRound === this.maxRounds - 1)
 		{
 			this.status = 'finished';
 			this.emit('finished', { ...this.getMatchmakingInfo() });
 		}
 		else
-		{
-			this.nextRound(payload.matches);
-		}
+			losePlayers = this.nextRound(matches);
+		return { ...this.getMatchmakingInfo(), losePlayers };
 	}
 
 	startGame(playerId)
@@ -137,7 +138,7 @@ export default class TournamentRoom extends Room
 			match.loser = null;
 			this.currentMatches.push(match);
 		}
-		return this.getMatchmakingInfo();
+		return { ...this.getMatchmakingInfo()};
 	}
 
 	getMatchmakingInfo()
@@ -168,6 +169,7 @@ export default class TournamentRoom extends Room
 
 	nextRound(matches)
 	{
+		let losePlayers = [];
 		this.currentMatches = [];
 		const previousRoundMatches = this.matches.get(this.currentRound);
 		previousRoundMatches.forEach(
@@ -178,6 +180,10 @@ export default class TournamentRoom extends Room
 					match.player2Score = matches[index].score?.team2 || 0;
 					match.winner = matches[index].winner;
 					match.loser = matches[index].loser;
+					if (match.loser) {
+						const loserPlayer = this.players.find(p => p.id === match.loser);
+						if (loserPlayer) losePlayers.push(loserPlayer);
+					}
 				}
 			}
 		);
