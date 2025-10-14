@@ -57,10 +57,7 @@ class Tournament extends EventEmitter
 				(match) =>
 				{
 					if (match.game?.status === 'ready to start')
-					{
-						console.log('Tournament match is ready to start:', match);
 						counter++;
-					}
 				}
 			);
 			if (counter === this.currentMatches.length)

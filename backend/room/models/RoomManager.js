@@ -34,7 +34,7 @@ class RoomManager extends EventEmitter
 				player.clientSocket.send(JSON.stringify({ type: 'joined', payload: { roomId: payload.roomId, ...this.getRoom(payload.roomId).getState() } }));
 				break;
 			case 'leave':
-				this.leaveRoom(payload.roomId, player);
+				this.leaveRoom(player);
 				break;
 			case 'setReady':
 				player.isReady = payload.isReady;
@@ -112,6 +112,7 @@ class RoomManager extends EventEmitter
 				if (room.status === 'tournament')
 				{
 					state.losePlayers.forEach(p => {
+						console.log(`Removing player ${p} from tournament room ${room.id}`);
 						this.leaveRoom(p);
 					});
 				}
