@@ -211,5 +211,107 @@
 			"button": "Löschen"
 		},
 		"delacc": "Möchten Sie Ihr Konto wirklich löschen? Möchten Sie Ihr Konto löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
+	},
+	"play": {
+		"game": {
+			"title": "Spiel",
+			"descript": "Create custom game modes with your own rules. Customize all settings."
+		},
+		"tourn": {
+			"title": "Turnier",
+			"descript": "Create and join tournaments, compete with more than one player."
+		},
+		"aigame": {
+			"title": "Spiele mit KI",
+			"descript": "Spiele gegen KI mit verschiedenen Schwierigkeitsgraden. Personalisiere deinen KI-Gegner.",
+			"settings": {
+				"title": "KI Spiel Einstellungen",
+				"gametypes": {
+					"title": "Spieltyp",
+					"onevai": "1 gegen KI"
+				},
+				"diffclty": {
+					"title": "KI Schwierigkeitsgrad",
+					"easy": "Einfach",
+					"ehover": "Anfänger-KI - Einfaches Spiel",
+					"medium": "Mittel",
+					"mhover": "Ausgewogene KI - Fairer Spiel",
+					"hard": "Schwer",
+					"hhover": "Herausfordernde KI - Schwieriges Spiel",
+					"imposs": "Unmöglich",
+					"ihover": "Unschlagbare KI - Viel Glück!",
+					"custom": "Frankenstein",
+					"chover": "Personalisiere deinen KI-Gegner"
+				},
+				"custom": {
+					"paddle": "Schlägerhöhe",
+					"ball": "Ballradius",
+					"corner": "Ecken-Kollisionsbeschleunigung",
+					"fscore": "Endpunktzahl"
+				},
+				"frankenstein": {
+					"rspeed": {
+						"title": "Reaktionsgeschwindigkeit",
+						"slow": "Sehr langsam",
+						"instant": "Sofort"
+					},
+					"paccur": {
+						"title": "Vorhersagegenauigkeit",
+						"bad": "Schlecht",
+						"perfect": "Perfekt"
+					},
+					"gaccur": {
+						"title": "Allgemeine Genauigkeit",
+						"low": "Gering",
+						"high": "Hoch"
+					},
+					"lspeed": {
+						"title": "Lerngeschwindigkeit",
+						"slow": "Langsam",
+						"fast": "Schnell"
+					},
+					"prepdist": {
+						"title": "Vorbereitungsdistanz",
+						"close": "Nah",
+						"far": "Fern"
+					},
+					"frdist": {
+						"title": "Einfrier Distanz",
+						"close": "Nah",
+						"far": "Fern"
+					},
+					"twinrate": {
+						"title": "Ziel Gewinnrate"
+					},
+					"equity": {
+						"title": "Gerechtigkeitsniveau",
+						"cruel": "Grausam",
+						"kind": "Freundlich"
+					},
+					"winstrk": {
+						"title": "Max Gewinnserie"
+					}
+				},
+				"special": {
+					"rage": {
+						"title": "Wutmodus",
+						"descr": "KI wird wütend und stärker, wenn sie hintereinander verliert"
+					},
+					"fatigue": {
+						"title": "Ermüdungsmodus",
+						"descr": "KI-Leistung sinkt, wenn sie lange spielt"
+					},
+					"focus": {
+						"title": "Fokus-Modus",
+						"descr": "Manchmal wird sie super fokussiert und spielt perfekt"
+					},
+					"adaptive": {
+						"title": "Adaptive Schwierigkeit",
+						"descr": "KI passt sich im Laufe der Zeit an deinen Spielstil an"
+					}
+				}
+			},
+			"start": "Spiel mit KI starten"
+		}
 	}
 }

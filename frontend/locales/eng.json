@@ -275,17 +275,17 @@
 						"kind": "Kind"
 					},
 					"winstrk": {
-						"title": "Max Win Streak"
+						"title": "Consequitive Wins Limit"
 					}
 				},
 				"special": {
 					"rage": {
 						"title": "Rage Mode",
-						"descr": "AI becomes angry and stronger when it loses in a row"
+						"descr": "Becomes angry and stronger when it loses in a row"
 					},
 					"fatigue": {
 						"title": "Fatigue Mode",
-						"descr": "AI performance decreases when it plays for a long time"
+						"descr": "Performance decreases when it plays for a long time"
 					},
 					"focus": {
 						"title": "Focus Mode",
@@ -293,7 +293,7 @@
 					},
 					"adaptive": {
 						"title": "Adaptive Difficulty",
-						"descr": "AI adapts to your play style over time"
+						"descr": "Adapts to your play style over time"
 					}
 				}
 			},
