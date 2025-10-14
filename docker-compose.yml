@@ -78,7 +78,7 @@ services:
     networks:
       - transcendency
     ports:
-      - 3030:3030  # Tek port - HTTPS (wss://)
+      - 3030:3030
     depends_on:
       - gateway
 
@@ -93,6 +93,8 @@ services:
     volumes:
       - authentication_src:/app
       - /app/node_modules
+    environment:
+      - HOST_IP=${HOST_IP}
 
   gateway:
     container_name: gateway

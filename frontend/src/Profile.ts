@@ -1,6 +1,7 @@
-import AView from "./AView.js";
+import { getAuthToken, getAuthHeaders } from './utils/auth.js';
 import { getJsTranslations } from './I18n.js';
-
+import { API_BASE_URL } from './index.js';
+import AView from "./AView.js";
 declare const Chart: any; // Global Chart.js nesnesini tanımlar
 
 function getCSSVar(name: string): string {
@@ -11,15 +12,15 @@ class ManagerProfile {
     private currentTab: string;
     private charts: Record<string, any>;
     private avatarStatus: HTMLElement;
-    private showcharts: { performance?: Chart } = {};
+    private showcharts: { performance?: any } = {};
     private perfChartData: { labelName: string, labels: string[], data: number[] } = {
 		labelName: "Matches Won",
 		labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
         data: []
     };
-    private monthChartData: { label1: string, label2: string, labels: string[], data1: number[], data2: number[] } = {
-		label1: "Total Matches",
-		label2: "Matches Won",
+    private monthChartData: { label0: string, label1: string, labels: string[], data1: number[], data2: number[] } = {
+		label0: "Total Matches",
+		label1: "Matches Won",
 		labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
         data1: [],
         data2: []
@@ -49,6 +50,7 @@ class ManagerProfile {
 			this.createSkillRadarChart();
 			this.createMonthlyChart();
 			this.createWinLossChart();
+			onLoad(); // Profile yüklendiğinde onLoad fonksiyonunu çağır
         }, 100);
     }
 
@@ -67,8 +69,8 @@ class ManagerProfile {
         const perfCtx = document.getElementById('performanceChart') as HTMLCanvasElement;
         const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
-        this.perfChartData.labelName = translations?.profile?.label1 ?? this.perfChartData.labelName;
-        this.perfChartData.labels = translations?.profile?.labels ?? this.perfChartData.labels;
+        this.perfChartData.labelName = translations?.profile?.weekly?.label ?? this.perfChartData.labelName;
+        this.perfChartData.labels = translations?.profile?.weekly?.labels ?? this.perfChartData.labels;
         if (perfCtx) {
             this.showcharts.performance = new Chart(perfCtx, {
                 type: 'line',
@@ -129,7 +131,7 @@ class ManagerProfile {
         }
     }
 
-    private createWinLossChart(): void {
+    private async createWinLossChart(): Promise<void> {
         const winLossCtx = document.getElementById('winLossChart') as HTMLCanvasElement | null;
 
         if (!winLossCtx) return;
@@ -137,16 +139,19 @@ class ManagerProfile {
         const wins = parseInt(winLossCtx.dataset.wins || '0', 10);
         const losses = parseInt(winLossCtx.dataset.losses || '0', 10);
 
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+        let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost']; // default fallback
+        
+        // BU NE İÇİN ??
         // JSON string olan labels'ı diziye çevir
-        let labels: string[] = ['Kazanılan', 'Kaybedilen']; // default fallback
-        if (winLossCtx.dataset.labels) {
-            labels = JSON.parse(winLossCtx.dataset.labels);
-        }
+		// if (winLossCtx.dataset.labels) {
+        //     labels = JSON.parse(winLossCtx.dataset.labels);
+        // }
 
         this.charts.winLoss = new Chart(winLossCtx, {
             type: 'doughnut',
             data: {
-                labels: labels,
+                labels: labels ?? ['Won', 'Lost'],
                 datasets: [{
                     data: [wins, losses],
                     backgroundColor: [
@@ -176,7 +181,7 @@ class ManagerProfile {
         });
     }
 
-    private createSkillRadarChart(): void {
+    private async createSkillRadarChart(): Promise<void> {
         const skillCtx = document.getElementById('skillRadar') as HTMLCanvasElement | null;
         if (!skillCtx) return;
 
@@ -190,6 +195,10 @@ class ManagerProfile {
             return val ? parseFloat(val) : 0;
         };
 
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+        const skills = translations?.profile?.skills.labels ?? ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"];
+        const label = translations?.profile?.skills.label ?? 'Skills';
+
         const skillValues = {
             hiz: parseSkill('hiz'),
             dogruluk: parseSkill('dogruluk'),
@@ -202,9 +211,9 @@ class ManagerProfile {
         this.charts.skill = new Chart(skillCtx, {
             type: 'radar',
             data: {
-                labels: ['Hız', 'Doğruluk', 'Savunma', 'Saldırı', 'Strateji', 'Dayanıklılık'],
+                labels: skills,
                 datasets: [{
-                    label: 'Beceri Puanı',
+                    label: label,
                     data: [
                         skillValues.hiz,
                         skillValues.dogruluk,
@@ -275,9 +284,9 @@ class ManagerProfile {
 		if (!monthlyCtx) return;
         const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
-        this.monthChartData.label1 = translations?.profile?.label1 ?? this.monthChartData.label1;
-        this.monthChartData.label2 = translations?.profile?.label2 ?? this.monthChartData.label2;
-        this.monthChartData.labels = translations?.profile?.labels ?? this.monthChartData.labels;
+        this.monthChartData.label0 = translations?.profile?.monthly?.label0 ?? this.monthChartData.label0;
+        this.monthChartData.label1 = translations?.profile?.monthly?.label1 ?? this.monthChartData.label1;
+        this.monthChartData.labels = translations?.profile?.monthly?.labels ?? this.monthChartData.labels;
 
 		this.charts.monthly = new Chart(monthlyCtx, {
 			type: 'bar',
@@ -285,14 +294,14 @@ class ManagerProfile {
 				labels: this.monthChartData.labels,
 				datasets: [
 					{
-						label: this.monthChartData.label1,
+						label: this.monthChartData.label0,
 						data: [15, 22, 18, 35, 28, 42, 38],
 						backgroundColor: 'rgba(0, 255, 255, 0.6)',
 						borderColor: '#00ffff',
 						borderWidth: 2,
 					},
 					{
-						label: this.monthChartData.label2,
+						label: this.monthChartData.label1,
 						data: [12, 16, 14, 28, 21, 32, 28],
 						backgroundColor: 'rgba(0, 255, 0, 0.6)',
 						borderColor: '#00ff00',
@@ -354,23 +363,37 @@ class ManagerProfile {
     public async updateChartLanguage(): Promise<void> {
         const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
-        let perfChart = this.showcharts.performance;
-        this.perfChartData.labelName = translations?.profile?.label1 ?? this.perfChartData.labelName;
-        this.perfChartData.labels = translations?.profile?.labels ?? this.perfChartData.labels;
+        let chart = this.showcharts.performance;
+        this.perfChartData.labelName = translations?.profile?.weekly?.label ?? this.perfChartData.labelName;
+        this.perfChartData.labels = translations?.profile?.weekly?.labels ?? this.perfChartData.labels;
 
-        perfChart.data.labels = this.perfChartData.labels;
-        perfChart.data.datasets[0].label = this.perfChartData.labelName;
-        perfChart.update();
 
-        perfChart = this.charts.monthly;
-        this.monthChartData.label1 = translations?.profile?.label1 ?? this.monthChartData.label1;
-        this.monthChartData.label2 = translations?.profile?.label2 ?? this.monthChartData.label2;
-        this.monthChartData.labels = translations?.profile?.labels ?? this.monthChartData.labels;
+        chart.data.labels = this.perfChartData.labels;
+        chart.data.datasets[0].label = this.perfChartData.labelName;
+        chart.update();
 
-        perfChart.data.labels = this.monthChartData.labels;
-        perfChart.data.datasets[0].label = this.monthChartData.label1;
-        perfChart.data.datasets[1].label = this.monthChartData.label2;
-        perfChart.update();
+        chart = this.charts.monthly;
+        this.monthChartData.label0 = translations?.profile?.monthly?.label0 ?? this.monthChartData.label0;
+        this.monthChartData.label1 = translations?.profile?.monthly?.label1 ?? this.monthChartData.label1;
+        this.monthChartData.labels = translations?.profile?.monthly?.labels ?? this.monthChartData.labels;
+
+        chart.data.labels = this.monthChartData.labels;
+        chart.data.datasets[0].label = this.monthChartData.label0;
+        chart.data.datasets[1].label = this.monthChartData.label1;
+        chart.update();
+
+		chart = this.charts.winLoss;
+		let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost'];
+		chart.data.labels = labels;
+		console.log(labels);
+		chart.update();
+
+		chart = this.charts.skill;
+        const skills = translations?.profile?.skills.labels ?? ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"];
+        const label = translations?.profile?.skills.label ?? 'Skills';
+		chart.data.labels = skills;
+		chart.data.datasets[0].label = label;
+		chart.update();
     }
 
     public switchTab(tabName: string): void {
@@ -802,6 +825,7 @@ export default class extends AView {
     private offlineHandler = () => profileManager.setAvatarStatus('offline');
 
     async setEventHandlers() {
+        document.addEventListener("onload", onLoad);
         document.addEventListener("mousemove", handleCardMouseMove);
         document.addEventListener("mouseout", resetCardShadow); // fare dışarı çıkınca gölgeyi sıfırlar
 
@@ -830,11 +854,11 @@ export default class extends AView {
         this.turnuva = document.getElementById('turnuva') as HTMLDivElement;
 
         // Kullanıcıyı fetch et
-        fetch("http://localhost:3000/api/me")
+        fetch(`${API_BASE_URL}/auth/me`)
           .then(res => res.json())
           .then((user: User) => {
             this.USERNAME = user.username;
-            return fetch(`http://localhost:3000/api/user-tournaments/${encodeURIComponent(this.USERNAME)}`);
+            return fetch(`${API_BASE_URL}/user-tournaments/${encodeURIComponent(this.USERNAME)}`);
           })
           .then(res => res.json())
           .then((tournaments: Tournament[]) => {
@@ -913,5 +937,73 @@ export default class extends AView {
     async unsetStylesheet() {
         const link = document.querySelector("link[href='styles/profile.css']");
         if (link) document.head.removeChild(link);
+    }
+}
+
+
+// Cookie'leri parse etmek için yardımcı fonksiyon
+function parseCookies(): Record<string, string> {
+    const cookies: Record<string, string> = {};
+    if (document.cookie) {
+        document.cookie.split(';').forEach(cookie => {
+            const [name, value] = cookie.trim().split('=');
+            if (name && value) {
+                cookies[name] = decodeURIComponent(value);
+            }
+        });
+    }
+    return cookies;
+}
+
+
+async function onLoad()
+{
+    const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
+    
+    if (!hasToken)
+        return ( window.location.href = '#login' );
+    
+    try
+    {
+        const getProfileDatas = await fetch(`${API_BASE_URL}/auth/me`,
+        { 
+            credentials: 'include',
+            headers:
+            {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            }
+        });
+        
+        if (getProfileDatas.ok)
+        {   
+            const userData = await getProfileDatas.json();
+            
+            const ProfileUsername = await fetch(`${API_BASE_URL}/profile/profile?userName=${userData.user.username}`,
+            { 
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeaders()
+                }
+            });
+            
+            if (ProfileUsername.ok) 
+            {
+                const user = await ProfileUsername.json();
+                document.querySelector(".user-title").textContent = user.profile.displayName;
+                document.querySelector(".username").textContent = "@" + user.profile.userName;
+            }
+            else
+                console.error("❌ Failed to fetch profile data:", ProfileUsername.statusText);
+        }
+        else
+        {
+            if (getProfileDatas.status === 401)
+                window.location.href = '#login';
+        }
+    } catch (error)
+    {
+        window.location.href = '#login';
     }
 }

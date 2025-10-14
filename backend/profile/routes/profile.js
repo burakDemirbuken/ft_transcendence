@@ -2,9 +2,6 @@ export default async function profileRoute(fastify) {
 
 	fastify.get('/profile', async (request, reply) => { 
 		const { userName } = request.query;
-		console.log('🔍 GET /profile called with userName:', userName);
-		console.log('📋 Full query params:', request.query);
-		
 		if (!userName) {
 			return reply.code(400).send({ error: 'Username is required' })
 		}
@@ -229,7 +226,6 @@ export default async function profileRoute(fastify) {
 		const { userName, email, userId } = request.body ?? {}
 
 		fastify.log.info('Parsed data:', { userName, email, userId })
-		fastify.log.info('=== END DEBUG ===')
 
 		if (!userName) {
 			fastify.log.error('Username missing from request')

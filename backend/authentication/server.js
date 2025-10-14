@@ -22,6 +22,7 @@ await fastify.register(jwt, {
   cookie: {
     cookieName: 'accessToken',
     signed: false,
+    credentials: true,
   }
 });
 
@@ -50,6 +51,7 @@ fastify.setErrorHandler(async (error, request, reply) => {
 
 // Start server
 const start = async () => {
+
   try {
     // Ensure data directory exists
     const dataDir = path.join(process.cwd(), 'data');

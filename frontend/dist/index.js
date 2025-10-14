@@ -6,6 +6,9 @@ import Friends from "../dist/Friends.js";
 import Settings from "../dist/Settings.js";
 import Login from "../dist/Login.js";
 import I18n from './I18n.js';
+import { removeAuthToken } from './utils/auth.js';
+// Dynamic API base URL based on current hostname
+export const API_BASE_URL = `https://${window.location.hostname}:3030/api`;
 const pageState = {
     current: "login", // default
 };
@@ -56,18 +59,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 (_a = document.querySelector(".selected")) === null || _a === void 0 ? void 0 : _a.classList.toggle("selected");
                 e.currentTarget.classList.toggle("selected");
                 if (e.currentTarget.matches("[id='logout']")) {
-                    const request = new Request(`https://localhost:8080/api/auth/logout?lang=${localStorage.getItem("langPref")}`, {
-                        method: "POST"
-                    });
                     try {
-                        const response = await fetch(request);
+                        const response = await fetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref")}`, {
+                            method: "POST",
+                            credentials: "include",
+                        });
                         const json = await response.json();
                         if (response.ok) {
+                            removeAuthToken();
                             (_b = document.querySelector("#navbar")) === null || _b === void 0 ? void 0 : _b.classList.add("logout");
                         }
-                        else {
+                        else
                             alert(`${json.error}`);
-                        }
                     }
                     catch (_f) {
                         alert(`System Error`);
@@ -99,15 +102,17 @@ window.addEventListener('load', toggleClassOnResize);
 window.addEventListener('resize', toggleClassOnResize);
 // Handle browser back/forward
 window.addEventListener("popstate", (event) => {
-    const page = event.state.page || "login";
+    const page = (event.state && event.state.page) || "login";
     router(page);
 });
 // Initial load and page reloads
 window.addEventListener("load", () => {
     const urlPage = window.location.pathname.slice(1);
-    const initialPage = urlPage || history.state.page || "login";
+    const initialPage = urlPage || (history.state && history.state.page) || "login";
     if (!localStorage.getItem("langPref"))
         localStorage.setItem("langPref", "eng");
+    console.log('🌐 Current hostname:', window.location.hostname);
+    console.log('🔗 API Base URL:', API_BASE_URL);
     I18n.loadLanguage();
     router(initialPage);
     history.replaceState({ page: initialPage }, "", `/${initialPage}`);

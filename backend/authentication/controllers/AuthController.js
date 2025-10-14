@@ -16,6 +16,8 @@ import
 
 class AuthController {
 
+	async
+
 	async checkUsername(request, reply)
 	{
 		const trlt = getTranslations(request.query.lang || "eng");
@@ -188,9 +190,9 @@ class AuthController {
 							<h1>🎉 Email Doğrulandı!</h1>
 							<p><strong>${user.username}</strong></p>
 							<p>Email adresiniz doğrulandı. Giriş yapabilirsiniz.</p>
-							<a href="https://localhost:3030/login" class="btn">Giriş Yap</a>
+							<a href="https://${process.env.HOST_IP}:3030/login" class="btn">Giriş Yap</a>
 						</div>
-						<script>setTimeout(() => window.location.href = 'https://localhost:3030/login', 5000);</script>
+						<script>setTimeout(() => window.location.href = 'https://${process.env.HOST_IP}:3030/login', 5000);</script>
 					</body>
 					</html>
 				`));
@@ -295,12 +297,21 @@ class AuthController {
 				{ expiresIn: refreshExpiry }
 			);
 
+			// HttpOnly cookie'ler (güvenlik için)
+			console.log('🍪 Setting accessToken cookie:', accessToken.substring(0, 20) + '...');
 			reply.setCookie('accessToken', accessToken, {
-				httpOnly: true, secure: true, sameSite: 'strict', path: '/', maxAge: 15 * 60 * 1000
+				httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: 24 * 60 * 60 * 1000
 			});
 
+			console.log('🍪 Setting refreshToken cookie');
 			reply.setCookie('refreshToken', refreshToken, {
-				httpOnly: true, secure: true, sameSite: 'strict', path: '/', maxAge: refreshMaxAge
+				httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: refreshMaxAge
+			});
+
+			// JavaScript erişimi için ayrı cookie (daha kısa sürede expire olan)
+			console.log('🍪 Setting authStatus cookie');
+			reply.setCookie('authStatus', 'authenticated', {
+				httpOnly: false, secure: true, sameSite: 'none', path: '/', maxAge: 24 * 60 * 60 * 1000
 			});
 
 			tempStorage.delete(user.email);
@@ -313,7 +324,13 @@ class AuthController {
 				console.log('Login notification error:', emailError);
 			}
 
-			reply.send({ success: true, message: trlt.login.success, user: user.toSafeObject() });
+			// Response'ta da token'ı gönder (frontend için)
+			reply.send({ 
+				success: true, 
+				message: trlt.login.success, 
+				user: user.toSafeObject(),
+				accessToken: accessToken // Frontend'de localStorage'a kaydedebilmek için
+			});
 
 		} catch (error) {
 			console.log('2FA verification error:', error);
@@ -325,9 +342,11 @@ class AuthController {
 		const trlt = getTranslations(request.query.lang || "eng");
 
 		try {
+			
 			const userId = request.headers['x-user-id'];
 
-			if (!userId) {
+			if (!userId)
+			{
 				return (reply.status(401).send({
 					success: false,
 					error: 'User authentication required',
@@ -336,33 +355,42 @@ class AuthController {
 			}
 
 			const user = await User.findByPk(userId);
-			if (!user) {
+			if (!user)
+			{
 				return (reply.status(404).send({ success: false, error: trlt.unotFound }));
 			}
-
 			reply.send({ success: true, user: user.toSafeObject() });
 
-		} catch (error) {
+		}
+		catch (error)
+		{
 			console.log('Get profile error:', error);
 			reply.status(500).send({ success: false, error: trlt.profile.fail });
 		}
 	}
 
-	// LOGOUT
-	async logout(request, reply) {
+	
+	async logout(request, reply) 
+	{
 		const trlt = getTranslations(request.query.lang || "eng");
-
 		try
 		{
-			reply.clearCookie('accessToken',
-			{
-				httpOnly: true, secure: true, sameSite: 'strict', path: '/'
+			console.log('🚪 Logging out user, clearing all cookies');
+			
+			// Tüm auth cookie'lerini temizle
+			reply.clearCookie('accessToken', {
+				httpOnly: true, secure: true, sameSite: 'none', path: '/'
 			});
 
-			reply.clearCookie('refreshToken',
-			{
-				httpOnly: true, secure: true, sameSite: 'strict', path: '/'
+			reply.clearCookie('refreshToken', {
+				httpOnly: true, secure: true, sameSite: 'none', path: '/'
 			});
+
+			reply.clearCookie('authStatus', {
+				httpOnly: false, secure: true, sameSite: 'none', path: '/'
+			});
+
+			console.log('✅ All cookies cleared successfully');
 
 			reply.send({
 				success: true,
@@ -370,17 +398,22 @@ class AuthController {
 				user: request.headers['x-user-username']
 			});
 
-		} catch (error) {
-			console.log('Logout error:', error);
+		}
+		catch (error)
+		{
+			console.error('❌ Logout error:', error);
 			reply.status(500).send({ success: false, error: trlt.logout.fail });
 		}
 	}
 
-	async refreshToken(request, reply) {
-		try {
+	async refreshToken(request, reply)
+	{
+		try
+		{
 			const oldRefreshToken = request.cookies.refreshToken;
 
-			if (!oldRefreshToken) {
+			if (!oldRefreshToken)
+			{
 				return (reply.status(401).send({
 					success: false,
 					error: 'No refresh token provided',
@@ -389,9 +422,12 @@ class AuthController {
 			}
 
 			let decoded;
-			try {
+			try
+			{
 				decoded = request.server.jwt.verify(oldRefreshToken);
-			} catch (err) {
+			}
+			catch (err)
+			{
 				return (reply.status(401).send({
 					success: false,
 					error: 'Invalid refresh token',
@@ -399,7 +435,8 @@ class AuthController {
 				}));
 			}
 
-			if (decoded.type !== 'refresh') {
+			if (decoded.type !== 'refresh')	
+			{
 				return (reply.status(401).send({
 					success: false,
 					error: 'Invalid token type',
@@ -408,7 +445,8 @@ class AuthController {
 			}
 
 			const user = await User.findByPk(decoded.userId);
-			if (!user) {
+			if (!user)
+			{
 				return (reply.status(401).send({
 					success: false,
 					error: 'User not found',
@@ -416,25 +454,27 @@ class AuthController {
 				}));
 			}
 
-			// Yeni access token oluştur
 			const newAccessToken = await reply.jwtSign(
-				{ userId: user.id, username: user.username, email: user.email, type: 'access' },
-				{ expiresIn: '15m' }
+				{
+					userId: user.id,
+					username: user.username,
+					email: user.email,
+					type: 'access'
+				},
+				{ 
+					expiresIn: '15m'
+				}
 			);
 
-			// Eski refresh token'ı blacklist'e ekle (security)
 			blacklistToken(oldRefreshToken);
 
-			// Refresh token'ın kalan süresini hesapla
 			const now = Math.floor(Date.now() / 1000);
 			const remainingTime = decoded.exp - now;
 			const remainingDays = Math.max(1, Math.ceil(remainingTime / (24 * 60 * 60))); // En az 1 gün
 
-			// Remember me durumunu koru
 			const isRememberMe = decoded.rememberMe || false;
 			const maxAllowedDays = isRememberMe ? 30 : 7;
 
-			// Kalan süre kadar yeni refresh token oluştur (ama max limit aşmasın)
 			const newRefreshExpiry = Math.min(remainingDays, maxAllowedDays);
 			const newRefreshMaxAge = newRefreshExpiry * 24 * 60 * 60 * 1000;
 
@@ -449,13 +489,12 @@ class AuthController {
 				{ expiresIn: `${newRefreshExpiry}d` }
 			);
 
-			// Cookie'leri güncelle
 			reply.setCookie('accessToken', newAccessToken, {
-				httpOnly: true, secure: true, sameSite: 'strict', path: '/', maxAge: 15 * 60 * 1000
+				httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: 24 * 60 * 60 * 1000
 			});
 
 			reply.setCookie('refreshToken', newRefreshToken, {
-				httpOnly: true, secure: true, sameSite: 'strict', path: '/', maxAge: newRefreshMaxAge
+				httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: newRefreshMaxAge
 			});
 
 			reply.send({
@@ -469,7 +508,9 @@ class AuthController {
 				}
 			});
 
-		} catch (error) {
+		}
+		catch (error)
+		{
 			console.log('Refresh token error:', error);
 			reply.status(500).send({
 				success: false,
@@ -478,24 +519,27 @@ class AuthController {
 		}
 	}
 
-	async deleteProfile(request, reply) {
+	async deleteProfile(request, reply)
+	{
 		const trlt = getTranslations(request.query.lang || "eng");
 
-		try {
+		try
+		{
 			const tokenUserId = request.headers['x-user-id'];
 			const { userId, userEmail, username } = request.body || {};
 
 			let user;
 
-			if (tokenUserId) {
+			if (tokenUserId)
 				user = await User.findByPk(parseInt(tokenUserId));
-			} else if (userId) {
+			else if (userId)
 				user = await User.findByPk(userId);
-			} else if (username) {
+			else if (username)
 				user = await User.findByUsername(username);
-			} else if (userEmail) {
+			else if (userEmail)
 				user = await User.findByEmail(userEmail);
-			} else {
+			else
+			{
 				return (reply.status(400).send({
 					success: false,
 					error: 'Authentication required or user identifier missing',
@@ -503,14 +547,16 @@ class AuthController {
 				}));
 			}
 
-			if (!user) {
+			if (!user)
+			{
 				return (reply.status(404).send({
 					success: false,
 					error: trlt.unotFound || 'User not found'
 				}));
 			}
 
-			if (tokenUserId && parseInt(tokenUserId) !== user.id) {
+			if (tokenUserId && parseInt(tokenUserId) !== user.id)
+			{
 				return (reply.status(403).send({
 					success: false,
 					error: 'You can only delete your own account',
@@ -538,32 +584,35 @@ class AuthController {
 
 			Promise.all(serviceNotifications);
 
-			if (tempStorage.has(deletedUserInfo.email)) {
+			if (tempStorage.has(deletedUserInfo.email))
 				tempStorage.delete(deletedUserInfo.email);
-			}
-
+			
 			const accessToken = request.cookies?.accessToken;
 			const refreshToken = request.cookies?.refreshToken;
 
 			if (accessToken) blacklistToken(accessToken);
 			if (refreshToken) blacklistToken(refreshToken);
 
-			reply.clearCookie('accessToken', {
+			reply.clearCookie('accessToken',
+			{
 				httpOnly: true, secure: true, sameSite: 'strict', path: '/'
 			});
 
-			reply.clearCookie('refreshToken', {
+			reply.clearCookie('refreshToken',
+			{
 				httpOnly: true, secure: true, sameSite: 'strict', path: '/'
 			});
 
-			reply.send({
+			reply.send(
+			{
 				success: true,
 				message: trlt.delete?.success || 'Account successfully deleted',
 				deleted_user: deletedUserInfo
 			});
 
-		} catch (error) {
-			console.log('Delete profile error:', error);
+		}
+		catch (error)
+		{
 			reply.status(500).send({
 				success: false,
 				error: trlt.delete?.fail || 'Failed to delete account'
@@ -572,74 +621,83 @@ class AuthController {
 	}
 
 	async checkTokenBlacklist(request, reply) {
-		try {
+		try 
+		{
 			const { token } = request.body;
 			const blacklisted = isTokenBlacklisted(token);
 
-			return (reply.send({
+			return (reply.send
+			({
 				success: true,
 				isBlacklisted: blacklisted
 			}));
-		} catch (error) {
+		}
+		catch (error)
+		{
 			console.log('Token blacklist check error:', error);
-			return (reply.status(500).send({
+			return (reply.status(500).send
+			({
 				success: false,
 				error: 'Failed to check token status'
 			}));
 		}
 	}
 
-	async autoRefreshToken(request, reply) {
-		try {
+	async autoRefreshToken(request, reply)
+	{
+		try
+		{
 			const accessToken = request.cookies.accessToken;
 			const refreshToken = request.cookies.refreshToken;
 
-			// Access token yoksa veya geçersizse refresh et
 			let needsRefresh = false;
 			let currentUser = null;
 
-			if (!accessToken) {
+			if (!accessToken)
 				needsRefresh = true;
-			} else {
-				try {
+			else
+			{
+				try
+				{
 					const decoded = request.server.jwt.verify(accessToken);
-					if (decoded.type === 'access') {
+					if (decoded.type === 'access')
+					{
 						currentUser = await User.findByPk(decoded.userId);
-						// Token geçerli, refresh gerekmez
 						return (reply.send({
 							success: true,
 							action: 'no_refresh_needed',
 							user: currentUser?.toSafeObject()
 						}));
 					}
-				} catch (err) {
-					// Access token expired veya invalid
+				}
+				catch (err)
+				{
 					needsRefresh = true;
 				}
 			}
 
-			// Refresh token ile yeni access token al
-			if (needsRefresh && refreshToken) {
-				try {
+			if (needsRefresh && refreshToken)
+			{
+				try
+				{
 					const decoded = request.server.jwt.verify(refreshToken);
-					if (decoded.type === 'refresh' && !isTokenBlacklisted(refreshToken)) {
-						// refreshToken method'unu çağır
+					if (decoded.type === 'refresh' && !isTokenBlacklisted(refreshToken))
 						return (await this.refreshToken(request, reply));
-					}
-				} catch (err) {
-					// Refresh token da geçersiz
+				}
+				catch (err)
+				{
 				}
 			}
 
-			// Her iki token da geçersiz
 			return (reply.status(401).send({
 				success: false,
 				action: 'login_required',
 				error: 'Authentication required'
 			}));
 
-		} catch (error) {
-			console.log('Auto refresh error:', error);
+		}
+		catch (error)
+		{
 			return (reply.status(500).send({
 				success: false,
 				error: 'Token refresh failed'
@@ -647,17 +705,21 @@ class AuthController {
 		}
 	}
 
-	async blacklistTokens(request, reply) {
-		try {
+	async blacklistTokens(request, reply)
+	{
+		try
+		{
 			const { accessToken, refreshToken } = request.body;
 			let blacklistedCount = 0;
 
-			if (accessToken) {
+			if (accessToken)
+			{
 				blacklistToken(accessToken);
 				blacklistedCount++;
 			}
 
-			if (refreshToken) {
+			if (refreshToken)
+			{
 				blacklistToken(refreshToken);
 				blacklistedCount++;
 			}
@@ -667,8 +729,9 @@ class AuthController {
 				message: `${blacklistedCount} tokens blacklisted`,
 				blacklistedCount: blacklistedCount
 			}));
-		} catch (error) {
-			console.log('Token blacklist error:', error);
+		}
+		catch (error)
+		{
 			return (reply.status(500).send({
 				success: false,
 				error: 'Failed to blacklist tokens'

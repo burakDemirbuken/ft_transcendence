@@ -4,8 +4,8 @@ import { getRoutes }from './getRoutes.js';
 
 export default async function authRoutes(fastify, options)
 {
-	await postRoutes(fastify, options);
-	await getRoutes(fastify, options);
+	await postRoutes (fastify, options);
+	await getRoutes  (fastify, options);
 
 	fastify.delete('/profile',
 	{
