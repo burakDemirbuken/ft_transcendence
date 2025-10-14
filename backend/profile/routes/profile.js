@@ -1,26 +1,87 @@
 export default async function profileRoute(fastify) {
 
 	fastify.get('/profile', async (request, reply) => { 
-		const { userName } = request.body ?? {}
-
+		const { userName } = request.query;
+		console.log('🔍 GET /profile called with userName:', userName);
+		console.log('📋 Full query params:', request.query);
+		
 		if (!userName) {
 			return reply.code(400).send({ error: 'Username is required' })
 		}
 		
 		try {
+			// Veritabanındaki tüm kullanıcıları listele (debug için)
+			const allUsers = await fastify.sequelize.models.Profile.findAll({
+				attributes: ['userName', 'id'],
+				limit: 10
+			});
+			console.log('📊 Database users:', allUsers.map(u => u.userName));
+			console.log('🔎 Searching for userName:', userName);
+			
 			const userProfile = await fastify.sequelize.models.Profile.findOne({
 				where: { userName: userName }
 			})
+			
 			if (!userProfile) {
-				return reply.code(404).send({ error: 'User not found' })
+				console.log('❌ User not found in database');
+				return reply.code(404).send({ 
+					error: 'User not found',
+					searchedFor: userName,
+					availableUsers: allUsers.map(u => u.userName)
+				})
+			}
+			
+			console.log('✅ User found:', userProfile.userName);
+
+			// Stats ve Achievement kayıtlarının varlığını kontrol et, yoksa oluştur
+			const { Stats, Achievement } = fastify.sequelize.models;
+			
+			let [userStatsRecord, userAchievementRecord] = await Promise.all([
+				Stats.findOne({ where: { userId: userProfile.id } }),
+				Achievement.findOne({ where: { userId: userProfile.id } })
+			]);
+
+			// Stats yoksa oluştur
+			if (!userStatsRecord) {
+				console.log('⚠️ Stats record not found, creating...');
+				userStatsRecord = await Stats.create({
+					userId: userProfile.id,
+					gamesPlayed: 0,
+					gamesWon: 0,
+					gamesLost: 0,
+					xp: 0,
+					gameCurrentStreak: 0,
+					gameLongestStreak: 0,
+					gameTotalDuration: 0,
+					gameMinDuration: 999999999,
+					ballHitCount: 0,
+					ballMissCount: 0
+				});
+				console.log('✅ Stats record created');
 			}
 
-			const [ userAchievementsProgress, userStats ] = await Promise.all([
-				fastify.getAchievementProgress(userProfile),
-				fastify.statCalculate(userProfile)
-			])
+			// Achievement yoksa oluştur
+			if (!userAchievementRecord) {
+				console.log('⚠️ Achievement record not found, creating...');
+				userAchievementRecord = await Achievement.create({
+					userId: userProfile.id,
+					firstWin: null,
+					hundredWins: null,
+					fiveHundredWins: null,
+					firstTenStreak: null,
+					twentyFiveTenStreak: null,
+					lessThanThreeMin: null
+				});
+				console.log('✅ Achievement record created');
+			}
 
-			fastify.statCalculate(userProfile)
+			console.log('🔧 Calling getAchievementProgress...');
+			const userAchievementsProgress = await fastify.getAchievementProgress(userProfile);
+			console.log('✅ Achievement progress retrieved');
+			
+			console.log('🔧 Calling statCalculate...');
+			const userStats = await fastify.statCalculate(userProfile);
+			console.log('✅ Stats calculated');
 
 			return reply.send({
 				profile: userProfile,
@@ -28,8 +89,15 @@ export default async function profileRoute(fastify) {
 				stats: userStats
 			})
 		} catch (error) {
+			console.error('❌ FULL ERROR:', error);
+			console.error('❌ ERROR STACK:', error.stack);
+			console.error('❌ ERROR MESSAGE:', error.message);
 			fastify.log.error('Error retrieving user profile:', error)
-			return reply.code(500).send({ error: 'Internal Server Error' })
+			return reply.code(500).send({ 
+				error: 'Internal Server Error',
+				message: error.message,
+				details: error.toString()
+			})
 		}
 	})
 
@@ -178,18 +246,56 @@ export default async function profileRoute(fastify) {
 				return reply.code(409).send({ error: 'Profile already exists' })
 			}
 
-			const userProfile = await fastify.sequelize.models.Profile.create({ 
-				userName: userName,
-				email: email,
-				userId: userId,
-				displayName: userName // Default olarak username kullan
-			})
+			// Transaction kullanarak profile, stats ve achievements'ı birlikte oluştur
+			const t = await fastify.sequelize.transaction();
 			
-			return reply.code(201).send({ 
-				success: true, 
-				message: 'Profile created successfully',
-				profile: userProfile 
-			})
+			try {
+				const userProfile = await fastify.sequelize.models.Profile.create({ 
+					userName: userName,
+					email: email,
+					userId: userId,
+					displayName: userName // Default olarak username kullan
+				}, { transaction: t })
+				
+				// Stats kaydı oluştur
+				await fastify.sequelize.models.Stats.create({
+					userId: userProfile.id,
+					gamesPlayed: 0,
+					gamesWon: 0,
+					gamesLost: 0,
+					xp: 0,
+					gameCurrentStreak: 0,
+					gameLongestStreak: 0,
+					gameTotalDuration: 0,
+					gameMinDuration: 999999999,
+					ballHitCount: 0,
+					ballMissCount: 0
+				}, { transaction: t })
+				
+				// Achievement kaydı oluştur
+				await fastify.sequelize.models.Achievement.create({
+					userId: userProfile.id,
+					firstWin: null,
+					hundredWins: null,
+					fiveHundredWins: null,
+					firstTenStreak: null,
+					twentyFiveTenStreak: null,
+					lessThanThreeMin: null
+				}, { transaction: t })
+				
+				await t.commit()
+				
+				fastify.log.info('✅ Profile, Stats and Achievements created for user:', userName)
+				
+				return reply.code(201).send({ 
+					success: true, 
+					message: 'Profile created successfully',
+					profile: userProfile 
+				})
+			} catch (error) {
+				await t.rollback()
+				throw error
+			}
 		} catch (error) {
 			fastify.log.error('Error creating user profile:', error)
 			return reply.code(500).send({ error: 'Failed to create user profile' })

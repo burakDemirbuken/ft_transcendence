@@ -9,7 +9,6 @@ const fastify = Fastify({
   logger: false,
 })
 
-// JSON content type desteği ekle
 fastify.addContentTypeParser('application/json', { parseAs: 'string' }, function (req, body, done) {
   try {
     const json = JSON.parse(body)
