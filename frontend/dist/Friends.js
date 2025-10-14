@@ -1,4 +1,6 @@
 import AView from "./AView.js";
+import Profile from "./Profile.js";
+import { showNotification } from "./notification.js";
 let currentFrPage = "friends";
 function handle_clicks(e) {
     if (e.target.classList.contains("pg-switch")) {
@@ -23,7 +25,17 @@ function handle_clicks(e) {
     else if (e.target.classList.contains("prof")) {
         // Add overlay
         // Add profile to overlay
+        document.querySelector(".overlay").classList.remove("hide-away");
     }
+    else if (e.currentTarget.id === "card-exit") {
+        // clear friend information?
+        document.querySelector(".overlay").classList.add("hide-away");
+    }
+}
+function esc(e) {
+    const ol = document.querySelector(".overlay");
+    if (e.key === "Escape" && !ol.classList.contains("hide-away"))
+        ol.classList.add("hide-away");
 }
 async function createFriends() {
     const usr = await fetch("mockdata/friendslist.json");
@@ -33,10 +45,10 @@ async function createFriends() {
         // <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
         div.innerHTML = `
 			<div class="user-profile">
-				<div class="user-avatar">
+				<div class="friend-user-avatar">
 					${user.avatar_url}
 				</div>
-				<div class="user-info">
+				<div class="friends-user-info">
 					<span class="dname">${user.dname}</span>
 					<span class="uname">${user.uname}</span>
 				</div>
@@ -65,10 +77,10 @@ async function createInvites() {
         // <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
         div.innerHTML = `
 			<div class="user-profile">
-				<div class="user-avatar">
+				<div class="friend-user-avatar">
 					${user.avatar_url}
 				</div>
-				<div class="user-info">
+				<div class="friends-user-info">
 					<span class="dname">${user.dname}</span>
 					<span class="uname">${user.uname}</span>
 				</div>
@@ -97,10 +109,10 @@ async function createRequests() {
         // <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
         div.innerHTML = `
 			<div class="user-profile">
-				<div class="user-avatar">
+				<div class="friend-user-avatar">
 					${user.avatar_url}
 				</div>
-				<div class="user-info">
+				<div class="friends-user-info">
 					<span class="dname">${user.dname}</span>
 					<span class="uname">${user.uname}</span>
 				</div>
@@ -123,6 +135,28 @@ async function createRequests() {
         ugrid.appendChild(div);
     }
 }
+async function createOverlay() {
+    const card = document.querySelector(".card");
+    try {
+        let response = await fetch(`templates/profile.html`);
+        card.innerHTML += await response.text();
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = "styles/profile.css";
+        document.head.appendChild(link);
+        const profileInstance = new Profile();
+        profileInstance.setEventHandlers();
+        let rows = document.querySelectorAll(".tournament-row");
+        for (const row of rows)
+            row.setAttribute("inert", "");
+        rows = document.querySelectorAll(".match-row");
+        for (const row of rows)
+            row.setAttribute("inert", "");
+    }
+    catch (_a) {
+        showNotification("System error, Please try again later.");
+    }
+}
 export default class extends AView {
     constructor() {
         super();
@@ -136,12 +170,17 @@ export default class extends AView {
         createFriends();
         createInvites();
         createRequests();
+        createOverlay();
     }
     async setEventHandlers() {
         document.addEventListener("click", handle_clicks);
+        document.querySelector("#card-exit").addEventListener("click", handle_clicks);
+        document.addEventListener("keydown", esc);
     }
     async unsetEventHandlers() {
+        console.log("Unsetting Friends Event Handlers");
         document.removeEventListener("click", handle_clicks);
+        document.removeEventListener("keydown", esc);
     }
     async setStylesheet() {
         const link = document.createElement("link");
@@ -150,7 +189,10 @@ export default class extends AView {
         document.head.appendChild(link);
     }
     async unsetStylesheet() {
-        const link = document.querySelector("link[href='styles/friends.css']");
+        console.log("Unsetting Friends Style Sheets");
+        let link = document.querySelector("link[href='styles/friends.css']");
+        document.head.removeChild(link);
+        link = document.querySelector("link[href='styles/profile.css']");
         document.head.removeChild(link);
     }
 }

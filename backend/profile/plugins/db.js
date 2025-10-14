@@ -52,7 +52,7 @@ export default fp(async (fastify) => {
 		Round.hasMany(RoundMatch, { foreignKey: 'roundNumber', sourceKey: 'roundNumber', onDelete: 'SET NULL', hooks: true })
 		RoundMatch.belongsTo(Round, { foreignKey: 'roundNumber', targetKey: 'roundNumber', onDelete: 'SET NULL' })
 
-		await sequelize.sync({ alter: true })
+		await sequelize.sync({ force: false })
 
 		fastify.decorate('sequelize', sequelize)
 

@@ -26,7 +26,7 @@ async function username() {
         return showNotification(trlt.login.uname.length, "error");
     if (!/^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username))
         return showNotification(trlt.login.uname.invalid, "error");
-    const address = `https://localhost:8080/api/auth/check-username?username=${username}&lang=${localStorage.getItem("langPref")}`;
+    const address = `https://localhost:3030/api/auth/check-username?username=${username}&lang=${localStorage.getItem("langPref")}`;
     try {
         const response = await fetch(address);
         const json = await response.json();
@@ -74,7 +74,7 @@ async function login() {
         "login": formData.get("username"),
         "password": formData.get("password")
     };
-    const request = new Request(`https://localhost:8080/api/auth/login?lang=${localStorage.getItem("langPref")}`, {
+    const request = new Request(`https://localhost:3030/api/auth/login?lang=${localStorage.getItem("langPref")}`, {
         method: "POST",
         headers: new Headers({ "Content-Type": "application/json" }),
         body: JSON.stringify(user),
@@ -99,29 +99,25 @@ async function register() {
     const form = document.querySelector("#loginForm");
     const formData = new FormData(form);
     const password = formData.get("password");
-    console.log("deb4");
     if (!password)
         return showNotification(trlt.login.password.empty, "error");
-    console.log("deb3");
     if (password.length < 8 || password.length > 128)
         return showNotification(trlt.login.password.length, "error");
-    console.log("deb2");
     const obj = {
         "username": formData.get("username"),
         "email": formData.get("email"),
         "password": formData.get("password")
     };
-    const request = new Request(`https://localhost:8080/api/auth/register?lang=${localStorage.getItem("langPref")}`, {
+    const request = new Request(`https://localhost:3030/api/auth/register?lang=${localStorage.getItem("langPref")}`, {
         method: "POST",
         headers: new Headers({ "Content-Type": "application/json" }),
         body: JSON.stringify(obj),
     });
     try {
         const response = await fetch(request);
-        console.log(response);
         const json = await response.json();
         if (response.ok) {
-            document.querySelector("#error").textContent = json.message;
+            showNotification(json.message, "info");
             goToNextField("welcome");
         }
         else
@@ -144,7 +140,7 @@ async function verify() {
             "code": code,
             "rememberMe": rememberMe
         };
-        const request = new Request(`https://localhost:8080/api/auth/verify-2fa?lang=${localStorage.getItem("langPref")}`, {
+        const request = new Request(`https://localhost:3030/api/auth/verify-2fa?lang=${localStorage.getItem("langPref")}`, {
             method: "POST",
             headers: new Headers({ "Content-Type": "application/json" }),
             body: JSON.stringify(obj),
@@ -165,8 +161,6 @@ async function verify() {
         goToNextField("password");
 }
 async function enter() {
-    var _a;
-    (_a = document.querySelector("#error")) === null || _a === void 0 ? void 0 : _a.textContent = "";
     switch (currentStep) {
         case "welcome":
             goToNextField("username");
@@ -191,8 +185,6 @@ async function enter() {
     }
 }
 async function back() {
-    var _a;
-    (_a = document.querySelector("#error")) === null || _a === void 0 ? void 0 : _a.textContent = "";
     switch (currentStep) {
         case "welcome":
             break;

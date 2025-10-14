@@ -2,15 +2,22 @@ import fp from 'fastify-plugin'
 
 export default fp(async (fastify) => {
 
+    // Test: sequelize'in yüklendiğini doğrula
+    if (!fastify.sequelize) {
+        throw new Error('❌ Sequelize is not available! Make sure dbPlugin is loaded first.');
+    }
+    console.log('✅ Sequelize is available in checkachievement plugin');
+    console.log('✅ Available models:', Object.keys(fastify.sequelize.models));
+
     async function checkAchievements(user, t) {
-        const { Achievements, Stats } = fastify.sequelize.models
+        const { Achievement, Stats } = fastify.sequelize.models
     
         const [stats, achievements] = await Promise.all([
             Stats.findOne({
                 where: { userId: user.id },
                 transaction: t
             }),
-            Achievements.findOne({
+            Achievement.findOne({
                 where: { userId: user.id },
                 transaction: t
             })
@@ -45,18 +52,27 @@ export default fp(async (fastify) => {
     }
 
     async function getAchievementProgress(user) {
-        const { Achievements, Stats } = fastify.sequelize.models
+        console.log('🔍 getAchievementProgress called for user:', user?.userName, 'id:', user?.id);
+        console.log('🔍 Sequelize available?', !!fastify.sequelize);
+        console.log('🔍 Models available?', !!fastify.sequelize?.models);
+        console.log('🔍 Available models:', Object.keys(fastify.sequelize?.models || {}));
+        
+        const { Achievement, Stats } = fastify.sequelize.models
+        
+        console.log('🔍 Achievement model:', !!Achievement);
+        console.log('🔍 Stats model:', !!Stats);
     
         const [stats, achievements] = await Promise.all([
             Stats.findOne({
                 where: { userId: user.id }
             }),
-            Achievements.findOne({
+            Achievement.findOne({
                 where: { userId: user.id }
             })
         ])
 
         if (!stats || !achievements) {
+            console.log('❌ Stats or Achievements not found. Stats:', !!stats, 'Achievements:', !!achievements);
             throw new Error('Stats or Achievements not found for user')
         }
 
@@ -91,7 +107,7 @@ export default fp(async (fastify) => {
     fastify.decorate('checkAchievements', checkAchievements)
     fastify.decorate('getAchievementProgress', getAchievementProgress)
 
-    async function levelCalculate(xp, baseXP = 100, growthFactor = 1.25) {
+    function levelCalculate(xp, baseXP = 100, growthFactor = 1.25) {
         if (xp < 0)
             return { level: 0, currentXP: 0, xpForNextLevel: baseXP }
 
@@ -110,13 +126,21 @@ export default fp(async (fastify) => {
     }
 
     async function statCalculate(user) {
+        console.log('🔍 statCalculate called for user:', user?.userName, 'id:', user?.id);
+        console.log('🔍 Sequelize available?', !!fastify.sequelize);
+        console.log('🔍 Models available?', !!fastify.sequelize?.models);
+        console.log('🔍 Available models:', Object.keys(fastify.sequelize?.models || {}));
+        
         const { Stats } = fastify.sequelize.models
+        
+        console.log('🔍 Stats model:', !!Stats);
 
         const stats = await Stats.findOne({
             where: { userId: user.id }
         })
 
         if (!stats) {
+            console.log('❌ Stats not found for user');
             throw new Error('Stats not found for user')
         }
 
@@ -134,5 +158,6 @@ export default fp(async (fastify) => {
 
 }, {
     name: 'checkachievement',
+    dependencies: ['myDBPlugin'],
     fastify: '4.x'
 })

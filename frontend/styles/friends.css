@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+@import url("profile_style/color.css");
+
 .friends-container {
 	min-height: 100%;
 	width: 100%;
@@ -111,7 +114,8 @@
 	min-width: 0;
 }
 
-.friend-avatar {
+.friend-user-avatar {
+	aspect-ratio: 1/1;
 	width: 3.5rem;
 	height: 3.5rem;
 	border-radius: 50%;
@@ -126,7 +130,7 @@
 	flex-shrink: 0;
 }
 
-.friend.online .friend-avatar {
+.friend-user-avatar.online {
 	border-color: #0f0;
 	box-shadow: 0 0 5px #0c0;
 }
@@ -138,7 +142,7 @@
 	object-fit: cover;
 }
 
-.user-info {
+.friends-user-info {
 	min-width: 0;
 	flex: 1;
 	display: flex;
@@ -146,12 +150,12 @@
 	gap: .1em;
 }
 
-.user-info .dname {
+.friends-user-info .dname {
 	font-family: "Orbitron","monospace";
 	font-weight: bold;
 }
 
-.user-info .uname {
+.friends-user-info .uname {
 	font-family: "PixeloidMono";
 	font-size: .7em;
 	color: #08a;
@@ -217,5 +221,76 @@
 	padding: 0.5rem 1rem; border: none; background: none;
 }
 
-.option:hover { background: #f0f0f0; }
- */
+.option:hover {
+	background: #181818;
+}
+
+@media (max-width: 520px) {
+	.friend-nav ul {
+		display: none;
+	}
+
+	.friend-nav select {
+		display: block;
+	}
+
+	.user-grid {
+		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	}
+}
+
+.overlay {
+	position: fixed;
+	top: 0;
+	left: 60px;
+	bottom: 0;
+	right: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	backdrop-filter: blur(10px) saturate(150%);
+	background: #0007;
+}
+
+.overlay.hide-away {
+	display: none;
+}
+
+@media (max-width: 1080px) {
+	.overlay {
+		left: 50px;
+	}
+}
+
+.card {
+	width: clamp(270px, 70% + 80px, 2400px);
+	height: 90%;
+	border: 2px solid #5557;
+	border-radius: 10px;
+	padding: clamp(2px, 3% + 1px,20px);
+	overflow-y: auto;
+	background:
+		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.145) 0%, transparent 50%),
+		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.161) 0%, transparent 50%),
+		linear-gradient(135deg, #0a0a0a91 0%, #2525348e 50%, #2b324498 100%);
+}
+
+#card-exit {
+	position: absolute;
+	top: calc(5% + 5px);
+	right: calc(15% - 30px);
+	cursor: pointer;
+}
+
+#card-exit svg {
+	width: 25px;
+	aspect-ratio: 1/1;
+	fill: #ddd;
+	transition: all 0.3s ease;
+}
+
+#card-exit:hover svg {
+	rotate: 90deg;
+	filter: drop-shadow(0 0 10px rgb(193, 1, 1)); /* üzerine gelince kırmızı gölge */
+	fill: #e30;
+}

@@ -34,7 +34,7 @@ export function getTranslations(lang) {
 				"already": "You are already logged in.",
 				"empty": "Required fields: Email/username, password.",
 				"invalid": "Email/username or Password wrong.",
-				"notverified": "Please check your inbox for verification.",
+				"notverified": "Please check your inbox for account verification.",
 				"verify": "Please enter the 6-digit code from your email for verification.",
 				"system": "Login failed. Please try again later.",
 				"success": "Login successful."
@@ -138,7 +138,7 @@ export function getTranslations(lang) {
 				"already": "Zaten giriş yapmış durumdasınız.",
 				"empty": "Gerekli alanlar: E-posta/kullanıcı adı, şifre.",
 				"invalid": "E-posta/kullanıcı adı veya şifre hatalı.",
-				"notverified": "Doğrulama için lütfen gelen kutunuzu kontrol edin.",
+				"notverified": "Hesabınızı doğrulamak için lütfen gelen kutunuzu kontrol edin.",
 				"verify": "Doğrulama için lütfen e-postanızdaki 6 haneli kodu girin.",
 				"system": "Giriş başarısız. Lütfen daha sonra tekrar deneyin.",
 				"success": "Giriş başarılı."

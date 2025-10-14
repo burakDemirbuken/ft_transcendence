@@ -1,5 +1,6 @@
 import Home from "../dist/Home.js";
 import Profile from "../dist/Profile.js";
+import { updateChartLanguage } from "./Profile.js";
 import Play from "../dist/Play.js";
 import Friends from "../dist/Friends.js";
 import Settings from "../dist/Settings.js";
@@ -20,7 +21,7 @@ let view = null;
 const router = async function (page) {
     const content = document.querySelector("#content");
     if (view) {
-        content === null || content === void 0 ? void 0 : content.innerHTML = "";
+        content.innerHTML = "";
         view.unsetEventHandlers();
         view.unsetStylesheet();
         view = null;
@@ -32,7 +33,7 @@ const router = async function (page) {
         view.setStylesheet();
         content.innerHTML = await view.getHtml();
         view.setDynamicContent();
-        I18n.loadLanguage(page);
+        I18n.loadLanguage();
         view.setEventHandlers();
     }
     else {
@@ -50,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
         element.addEventListener("click", async (e) => {
             var _a, _b, _c, _d, _e;
             if (e.currentTarget.matches("[data-link]")) {
-                console.log("PAGE");
                 e.preventDefault();
                 navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
                 (_a = document.querySelector(".selected")) === null || _a === void 0 ? void 0 : _a.classList.toggle("selected");
@@ -63,8 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         const response = await fetch(request);
                         const json = await response.json();
                         if (response.ok) {
-                            (_b = document.querySelector("#navbar")) === null || _b === void 0 ? void 0 : _b.classList.toggle("logout");
-                            console.log("LOGSOUT!");
+                            (_b = document.querySelector("#navbar")) === null || _b === void 0 ? void 0 : _b.classList.add("logout");
                         }
                         else {
                             alert(`${json.error}`);
@@ -76,16 +75,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
             else if (e.currentTarget.matches("[id='toggle']")) {
-                console.log("TOGGLE");
                 (_c = document.querySelector("#navbar")) === null || _c === void 0 ? void 0 : _c.classList.toggle("collapse");
                 (_d = document.querySelector(".selected")) === null || _d === void 0 ? void 0 : _d.classList.toggle("selected");
                 e.currentTarget.classList.toggle("selected");
             }
             else if (e.currentTarget.matches("[id='language']")) {
-                console.log("LANGUAGE");
                 e.preventDefault();
-                I18n.nextLanguage("navbar");
-                I18n.nextLanguage(pageState.current);
+                I18n.nextLanguage();
+                updateChartLanguage();
                 (_e = document.querySelector(".selected")) === null || _e === void 0 ? void 0 : _e.classList.toggle("selected");
                 e.currentTarget.classList.toggle("selected");
             }
@@ -95,13 +92,8 @@ document.addEventListener("DOMContentLoaded", () => {
 function toggleClassOnResize() {
     const element = document.querySelector("#navbar");
     const mediaQuery = window.matchMedia("(max-width: 1080px)");
-    if (mediaQuery.matches) {
+    if (mediaQuery.matches)
         element.classList.add("collapse");
-    }
-    // Open for auto grow
-    // else {
-    // 	element.classList.remove("collapse");
-    // }
 }
 window.addEventListener('load', toggleClassOnResize);
 window.addEventListener('resize', toggleClassOnResize);
@@ -116,7 +108,7 @@ window.addEventListener("load", () => {
     const initialPage = urlPage || history.state.page || "login";
     if (!localStorage.getItem("langPref"))
         localStorage.setItem("langPref", "eng");
-    I18n.loadLanguage("navbar");
+    I18n.loadLanguage();
     router(initialPage);
     history.replaceState({ page: initialPage }, "", `/${initialPage}`);
 });

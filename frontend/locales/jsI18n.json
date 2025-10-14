@@ -18,6 +18,15 @@
 			"code": {
 				"empty": "Code can't be empty."
 			}
+		},
+		"profile": {
+			"spoint": "Skill Points",
+			"skills": ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"],
+			"victory": "Victory",
+			"defeat": "Defeat",
+			"label1": "Total Matches",
+			"label2": "Matches Won",
+			"labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 		}
 	},
 	"tur": {
@@ -34,6 +43,16 @@
 			"code": {
 				"empty": "Kod boş kalamaz."
 			}
+		},
+		"profile": {
+			"mtotal": "Total Matches",
+			"spoint": "Skill Points",
+			"skills": ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"],
+			"victory": "Victory",
+			"defeat": "Defeat",
+			"label1": "Toplam Maçlar",
+			"label2": "Kazanılan Maçlar",
+			"labels": ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
 		}
 	},
 	"deu": {
@@ -50,6 +69,16 @@
 			"code": {
 				"empty": "Der Code darf nicht leer bleiben."
 			}
+		},
+		"profile": {
+			"mtotal": "Total Matches",
+			"spoint": "Skill Points",
+			"skills": ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"],
+			"victory": "Victory",
+			"defeat": "Defeat",
+			"label1": "Gesamtspiele",
+			"label2": "Gewonnene Spiele",
+			"labels": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 		}
 	}
 }

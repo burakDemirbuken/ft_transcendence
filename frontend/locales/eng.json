@@ -1,11 +1,5 @@
 {
 	"dates": {
-		"tago": {
-			"hago": "h ago",
-			"dago": "d ago",
-			"mago": "m ago",
-			"yago": "y ago"
-		},
 		"sday": {
 			"mon": "Mon",
 			"tue": "Tue",
@@ -14,34 +8,6 @@
 			"fri": "Fri",
 			"sat": "Sat",
 			"sun": "Sun"
-		},
-		"smonth": {
-			"jan": "Jan",
-			"feb": "Feb",
-			"mar": "Mar",
-			"apr": "Apr",
-			"may": "May",
-			"jun": "Jun",
-			"jul": "Jul",
-			"aug": "Aug",
-			"sep": "Sep",
-			"oct": "Oct",
-			"nov": "Nov",
-			"dec": "Dec"
-		},
-		"lmonth": {
-			"jan": "January",
-			"feb": "February",
-			"mar": "March",
-			"apr": "April",
-			"may": "May",
-			"jun": "June",
-			"jul": "July",
-			"aug": "August",
-			"sep": "September",
-			"oct": "October",
-			"nov": "November",
-			"dec": "December"
 		}
 	},
 	"navbar": {
@@ -56,7 +22,7 @@
 		"login": "LOGIN"
 	},
 	"home": {
-		"team": "TEAM MEMBERS",
+		"team": "Team Members",
 		"thanks": "Thanks to 42 Kocaeli and our friends",
 		"click": "Click"
 	},
@@ -73,6 +39,11 @@
 		"rme": "Remember Me"
 	},
 	"profile": {
+		"header": {
+			"level": "Level",
+			"tgames": "Total Games",
+			"winrate": "Win Rate"
+		},
 		"sections": {
 			"dashboard": "Dashboard",
 			"performance": "Performance",
@@ -94,11 +65,12 @@
 				"best": "Best Streak"
 			},
 			"mlast": {
-				"title": "Last Matches"
+				"title": "Last Matches",
+				"win": "W",
+				"lose": "L"
 			},
 			"wperf": {
-				"title": "Weekly Performance",
-				"mwon": "Matches Won"
+				"title": "Weekly Performance"
 			}
 		},
 		"perf": {
@@ -108,18 +80,10 @@
 				"lost": "Lost"
 			},
 			"skills": {
-				"title": "Skills",
-				"speed": "Speed",
-				"accur": "Accuracy",
-				"defence": "Defence",
-				"attack": "Attack",
-				"strat": "Strategy",
-				"dur": "Durability"
+				"title": "Skills"
 			},
 			"mprog": {
-				"title": "Monthly Progress",
-				"mtotal": "Total Matches",
-				"mwon": "Matches Won"
+				"title": "Monthly Progress"
 			},
 			"dstats": {
 				"title": "Detailed Statistics",
@@ -131,12 +95,12 @@
 		},
 		"thistory": {
 			"title": "Tournament History",
-			"opts": {
-				"allyears": "All Years",
-				"alltour": "All Tournaments",
-				"ltour": "Leauge Tournemants",
-				"elimtour": "Elimination Tournaments",
-				"special": "Special Events"
+			"allyears": "All Years",
+			"header": {
+				"tname": "Tournament Name",
+				"tstart": "Start",
+				"tend": "End",
+				"total": "Total Matches"
 			},
 			"table": {
 				"matches": "Matches",
@@ -157,16 +121,11 @@
 				"onlylost": "Only Losses"
 			},
 			"table": {
-				"date": "DATE",
-				"match": "MATCH",
-				"score": "SCORE",
-				"time": "DURATION",
-				"result": "RESULT",
-				"analysis": "ANALYSIS",
-				"res": {
-					"vic": "Victory",
-					"def": "Defeat"
-				}
+				"date": "Date",
+				"match": "Match",
+				"score": "Score",
+				"time": "Duration",
+				"result": "Result"
 			}
 		},
 		"achiev": {
