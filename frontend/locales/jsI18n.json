@@ -18,6 +18,24 @@
 			"code": {
 				"empty": "Code can't be empty."
 			}
+		},
+		"profile": {
+			"skills": {
+				"labels": ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"]				,
+				"label": "Skill Points"
+			},
+			"weekly": {
+				"labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+				"label": "Total Matches"
+			},
+			"monthly": {
+				"labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+				"label0": "Total Matches",
+				"label1": "Matches Won"
+			},
+			"winloss": {
+				"labels": ["Won", "Lost"]
+			}
 		}
 	},
 	"tur": {
@@ -34,6 +52,24 @@
 			"code": {
 				"empty": "Kod boş kalamaz."
 			}
+		},
+		"profile": {
+			"skills": {
+				"labels": ["Hız", "Doğruluk", "Savunma", "Saldırı", "Strateji", "Dayanıklılık"],
+				"label": "Beceri Puanı"
+			},
+			"weekly": {
+				"labels": ["Pzt", "Sal", "Çar", "Prş", "Cum", "Cmt", "Paz"],
+				"label": "Toplam Maçlar"
+			},
+			"monthly": {
+				"labels": ["Pzt", "Sal", "Çar", "Prş", "Cum", "Cmt", "Paz"],
+				"label0": "Toplam Maçlar",
+				"label1": "Kazanılan Maçlar"
+			},
+			"winloss": {
+				"labels": ["Kazanılan", "Kaybedilen"]
+			}
 		}
 	},
 	"deu": {
@@ -49,6 +85,24 @@
 			},
 			"code": {
 				"empty": "Der Code darf nicht leer bleiben."
+			}
+		},
+		"profile": {
+			"skills": {
+				"labels": ["Schnelligkeit", "Präzision", "Verteidigung", "Angriff", "Strategie", "Dauerhaftigkeit"]				,
+				"label": "Fähigkeiten"
+			},
+			"weekly": {
+				"labels": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+				"label": "Gesamtzahl der Spiele"
+			},
+			"monthly": {
+				"labels": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+				"label0": "Gesamtzahl der Spiele",
+				"label1": "Gewonnene Spiele"
+			},
+			"winloss": {
+				"labels": ["Sieg", "Verlust"]
 			}
 		}
 	}

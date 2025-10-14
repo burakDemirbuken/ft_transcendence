@@ -1,11 +1,5 @@
 {
 	"dates": {
-		"tago": {
-			"hago": "Stunden",
-			"dago": "Tagen",
-			"mago": "Monaten",
-			"yago": "Jahren"
-		},
 		"sday": {
 			"mon": "Mon",
 			"tue": "Die",
@@ -14,34 +8,6 @@
 			"fri": "Fre",
 			"sat": "Sam",
 			"sun": "Son"
-		},
-		"smonth": {
-			"jan": "Jan",
-			"feb": "Feb",
-			"mar": "Mär",
-			"apr": "Apr",
-			"may": "Mai",
-			"jun": "Jun",
-			"jul": "Jul",
-			"aug": "Aug",
-			"sep": "Sep",
-			"oct": "Okt",
-			"nov": "Nov",
-			"dec": "Dez"
-		},
-		"lmonth": {
-			"jan": "Januar",
-			"feb": "Februar",
-			"mar": "März",
-			"apr": "April",
-			"may": "Mai",
-			"jun": "Juni",
-			"jul": "Juli",
-			"aug": "August",
-			"sep": "September",
-			"oct": "Oktober",
-			"nov": "November",
-			"dec": "Dezember"
 		}
 	},
 	"navbar": {
@@ -56,7 +22,7 @@
 		"login": "EINLOGGEN"
 	},
 	"home": {
-		"team": "TEAMMITGLIEDER",
+		"team": "Teammitglieder",
 		"thanks": "Danke an 42 Kocaeli und unsere Freunde",
 		"click": "Klicke"
 	},
@@ -73,6 +39,11 @@
 		"rme": "Login Merken"
 	},
 	"profile": {
+		"header": {
+			"level": "Stufe",
+			"tgames": "Gesamtspiele",
+			"winrate": "Gewinnrate"
+		},
 		"sections": {
 			"dashboard": "Dashboard",
 			"performance": "Leistungsanalyse",
@@ -94,7 +65,9 @@
 				"best": "Beste Serie"
 			},
 			"mlast": {
-				"title": "Letzte Spiele"
+				"title": "Letzte Spiele",
+				"win": "S",
+				"lose": "V"
 			},
 			"wperf": {
 				"title": "Wöchentliche Leistung",
@@ -131,12 +104,12 @@
 		},
 		"thistory": {
 			"title": "Turnierverlauf",
-			"opts": {
-				"allyears": "Alle Jahre",
-				"alltour": "Alle Turniere",
-				"ltour": "Ligaturniere",
-				"elimtour": "Ausscheidungsturniere",
-				"special": "Sonderveranstaltungen"
+			"allyears": "Alle Jahre",
+			"header": {
+				"tname": "Turniername",
+				"tstart": "Anfang",
+				"tend": "Ende",
+				"total": "Gesamtspiele"
 			},
 			"table": {
 				"matches": "Spiele",
@@ -157,12 +130,12 @@
 				"onlylost": "Nur Verluste"
 			},
 			"table": {
-				"date": "DATUM",
-				"match": "SPIEL",
-				"score": "PUNKTZAHL",
-				"time": "DAUER",
-				"result": "ERGEBNIS",
-				"analysis": "ANALYSE",
+				"date": "Datum",
+				"match": "Spiel",
+				"score": "Punktzahl",
+				"time": "Dauer",
+				"result": "Ergebnis",
+				"analysis": "Analyse",
 				"res": {
 					"vic": "Sieg",
 					"def": "Verlust"
@@ -238,5 +211,149 @@
 			"button": "Löschen"
 		},
 		"delacc": "Möchten Sie Ihr Konto wirklich löschen? Möchten Sie Ihr Konto löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
+	},
+	"play": {
+		"title": "SPIELMODUS",
+		"descr": "Wähle deinen Spielmodus und passe deine Einstellungen an",
+		"game": {
+			"title": "Spiel",
+			"descript": "Erstelle benutzerdefinierte Spielmodi mit deinen eigenen Regeln. Definiere alle deine Einstellungen selber.",
+			"settings": {
+				"title": "Spiel Einstellungen",
+				"gametypes": {
+					"Game Type": "Spieltyp",
+					"1v1": "1v1",
+					"2v2": "2v2",
+					"local": "Lokal"
+				},
+				"custom": {
+					"paddle": "Schlägerhöhe",
+					"ball": "Ballradius",
+					"corner": "Ecken-Kollisionsbeschleunigung",
+					"fscore": "Endpunktzahl"
+				},
+				"fastmatch": {
+					"title": "Schnelles Spiel",
+					"descr": "Tritt dem aktuellen Raum bei",
+					"join": "Raum beitreten"
+				},
+				"create": "Raum Erstellen"
+			}
+		},
+		"tourn": {
+			"title": "Turnier",
+			"descript": "Erstelle und nimm an Turnieren teil, kämpfe gegen mehr als einen Spieler.",
+			"settings": {
+				"title": "Turnier Einstellungen",
+				"tname": "Turniername",
+				"tpeople": {
+					"title": "Anzahl der Personen",
+					"four": "4",
+					"eight": "8",
+					"sixteen": "16",
+					"custom": "Benutzerdefiniert"
+				},
+				"dname": "Anzeigename",
+				"dnmdesc": "💡 Dieser Name wird für die Turniere zur anderen Spieler sichtbar sein.",
+				"tournam": {
+					"descr": "Tritt einem bestehenden Turnier bei",
+					"join": "Raum beitreten"
+				},
+				"create": "Raum für Turnier erstellen",
+				"start": "Turnier starten"
+			}
+		},
+		"aigame": {
+			"title": "Spiele mit KI",
+			"descript": "Spiele gegen KI mit verschiedenen Schwierigkeitsgraden. Personalisiere deinen KI-Gegner.",
+			"settings": {
+				"title": "KI Spiel Einstellungen",
+				"gametypes": {
+					"title": "Spieltyp",
+					"onevai": "1 gegen KI"
+				},
+				"diffclty": {
+					"title": "KI Schwierigkeitsgrad",
+					"easy": "Einfach",
+					"ehover": "Anfänger-KI - Einfaches Spiel",
+					"medium": "Mittel",
+					"mhover": "Ausgewogene KI - Fairer Spiel",
+					"hard": "Schwer",
+					"hhover": "Herausfordernde KI - Schwieriges Spiel",
+					"imposs": "Unmöglich",
+					"ihover": "Unschlagbare KI - Viel Glück!",
+					"custom": "Frankenstein",
+					"chover": "Personalisiere deinen KI-Gegner"
+				},
+				"custom": {
+					"paddle": "Schlägerhöhe",
+					"ball": "Ballradius",
+					"corner": "Ecken-Kollisionsbeschleunigung",
+					"fscore": "Endpunktzahl"
+				},
+				"frankenstein": {
+					"rspeed": {
+						"title": "Reaktionsgeschwindigkeit",
+						"slow": "Sehr langsam",
+						"instant": "Sofort"
+					},
+					"paccur": {
+						"title": "Vorhersagegenauigkeit",
+						"bad": "Schlecht",
+						"perfect": "Perfekt"
+					},
+					"gaccur": {
+						"title": "Allgemeine Genauigkeit",
+						"low": "Gering",
+						"high": "Hoch"
+					},
+					"lspeed": {
+						"title": "Lerngeschwindigkeit",
+						"slow": "Langsam",
+						"fast": "Schnell"
+					},
+					"prepdist": {
+						"title": "Vorbereitungsdistanz",
+						"close": "Nah",
+						"far": "Fern"
+					},
+					"frdist": {
+						"title": "Einfrier Distanz",
+						"close": "Nah",
+						"far": "Fern"
+					},
+					"twinrate": {
+						"title": "Ziel Gewinnrate"
+					},
+					"equity": {
+						"title": "Gerechtigkeitsniveau",
+						"cruel": "Grausam",
+						"kind": "Freundlich"
+					},
+					"winstrk": {
+						"title": "Max Gewinnserie"
+					}
+				},
+				"special": {
+					"rage": {
+						"title": "Wutmodus",
+						"descr": "KI wird wütend und stärker, wenn sie hintereinander verliert"
+					},
+					"fatigue": {
+						"title": "Ermüdungsmodus",
+						"descr": "KI-Leistung sinkt, wenn sie lange spielt"
+					},
+					"focus": {
+						"title": "Fokus-Modus",
+						"descr": "Manchmal wird sie super fokussiert und spielt perfekt"
+					},
+					"adaptive": {
+						"title": "Adaptive Schwierigkeit",
+						"descr": "KI passt sich im Laufe der Zeit an deinen Spielstil an"
+					}
+				}
+			},
+			"start": "Spiel mit KI starten"
+		}
 	}
 }

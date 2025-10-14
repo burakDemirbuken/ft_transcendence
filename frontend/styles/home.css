@@ -340,9 +340,10 @@ body {
 }
 
 .team-title {
-    font-size: clamp(2rem, 5vw, 2.6rem);
     margin-bottom: 50px;
-    font-weight: 600px;
+	font-family: "RocketClouds";
+    font-weight: 600;
+    font-size: clamp(2rem, 5vw, 2.6rem);
     text-align: center;
     background: linear-gradient(45deg, #00ffff, #ff00ff, #00ffff);
     background-size: 200% 200%;

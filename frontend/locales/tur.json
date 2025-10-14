@@ -1,11 +1,5 @@
 {
 	"dates": {
-		"tago": {
-			"hago": "s önce",
-			"dago": "g önce",
-			"mago": "ay önce",
-			"yago": "y önce"
-		},
 		"sday": {
 			"mon": "Pzt",
 			"tue": "Sal",
@@ -14,34 +8,6 @@
 			"fri": "Cum",
 			"sat": "Cts",
 			"sun": "Paz"
-		},
-		"smonth": {
-			"jan": "Oca",
-			"feb": "Şub",
-			"mar": "Mar",
-			"apr": "Nis",
-			"may": "May",
-			"jun": "Haz",
-			"jul": "Tem",
-			"aug": "Ağu",
-			"sep": "Eyl",
-			"oct": "Eki",
-			"nov": "Kas",
-			"dec": "Ara"
-		},
-		"lmonth": {
-			"jan": "Ocak",
-			"feb": "Şubat",
-			"mar": "Mart",
-			"apr": "Nisan",
-			"may": "Mayıs",
-			"jun": "Haziran",
-			"jul": "Temmuz",
-			"aug": "Auğustos",
-			"sep": "Eylül",
-			"oct": "Ekim",
-			"nov": "Kasım",
-			"dec": "Aralık"
 		}
 	},
 	"navbar": {
@@ -56,7 +22,7 @@
 		"login": "GİRİŞ"
 	},
 	"home": {
-		"team": "EKİP ÜYELERİ",
+		"team": "Ekip Üyeleri",
 		"thanks": "42 Kocaeli'ye ve arkadaşlarımıza teşekkürler",
 		"click": "Tıkla"
 	},
@@ -73,6 +39,11 @@
 		"rme": "Beni Hatırla"
 	},
 	"profile": {
+		"header": {
+			"level": "Seviye",
+			"tgames": "Toplam Oyun",
+			"winrate": "Kazanma Oranı"
+		},
 		"sections": {
 			"dashboard": "Pano",
 			"performance": "Performans",
@@ -94,7 +65,9 @@
 				"best": "En İyi Seri"
 			},
 			"mlast": {
-				"title": "Son Maçlar"
+				"title": "Son Maçlar",
+				"win": "G",
+				"lose": "M"
 			},
 			"wperf": {
 				"title": "Haftalık Performans",
@@ -103,7 +76,7 @@
 		},
 		"perf": {
 			"winlose": {
-				"title": "Kazanma/KAybetme Oranı",
+				"title": "Kazanma/Kaybetme Oranı",
 				"won": "Kazanılan",
 				"lost": "Kaybedilen"
 			},
@@ -131,12 +104,12 @@
 		},
 		"thistory": {
 			"title": "Turnuva Geçmişi",
-			"opts": {
-				"allyears": "Tüm Yıllar",
-				"alltour": "Tüm Turnuvalar",
-				"ltour": "Lig Turnuvaları",
-				"elimtour": "Eleme Turnuvaları",
-				"special": "Özel Etkinlikler"
+			"allyears": "Tüm Yıllar",
+			"header": {
+				"tname": "Turnuva Adı",
+				"tstart": "Başlangıç",
+				"tend": "Bitiş",
+				"total": "Toplam Maç"
 			},
 			"table": {
 				"matches": "Maçlar",
@@ -157,14 +130,14 @@
 				"onlylost": "Sadece Mağlubiyetler"
 			},
 			"table": {
-				"date": "TARIH",
-				"match": "RAKIP",
-				"score": "SKOR",
-				"time": "SÜRE",
-				"result": "SONUÇ",
-				"analysis": "ANALIZ",
+				"date": "Tarih",
+				"match": "Rakip",
+				"score": "Skor",
+				"time": "Süre",
+				"result": "Sonuç",
+				"analysis": "Analiz",
 				"res": {
-					"vic": "Gaibiyet",
+					"vic": "Galibiyet",
 					"def": "Mağlubiyet"
 				}
 			}
@@ -237,6 +210,149 @@
 			"button": "Sil"
 		},
 		"delacc": "Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+	},
+	"play": {
+		"title": "OYUN MODU",
+		"descr": "Oyun Modunu Seçin ve Ayarlarınızı Yapın",
+		"game": {
+			"title": "Oyun",
+			"descript": "Kendi kurallarınla özel oyun modları oluştur. Tüm ayarları özelleştir.",
+			"settings": {
+				"title": "Oyun Ayarları",
+				"gametypes": {
+					"Oyun Tipi": "Oyun Tipi",
+					"1v1": "1'e 1",
+					"2v2": "2'ye 2",
+					"local": "Lokal"
+				},
+				"custom": {
+					"paddle": "Paddle Yüksekliği",
+					"ball": "Top Yarı Çapı",
+					"corner": "Köşe Çarpma Hızlanması",
+					"fscore": "Bitiş Skoru"
+				},
+				"fastmatch": {
+					"title": "Hızlı Oyun",
+					"descr": "Mevcut Odaya Katıl",
+					"join": "Odaya Katıl"
+				},
+				"create": "Oda Oluştur"
+			}
+		},
+		"tourn": {
+			"title": "Turnuva",
+			"descript": "Turnuva oluştur veya katıl. Birden fazla oyuncuyla rekabet et.",
+			"settings": {
+				"title": "Turnuva Ayarları",
+				"tname": "Turnuva Adı",
+				"tpeople": {
+					"title": "Kişi Sayısı",
+					"four": "4",
+					"eight": "8",
+					"sixteen": "16",
+					"custom": "Özel"
+				},
+				"dname": "Görünür Ad",
+				"dnmdesc": "💡 Turnuva sırasında bu isim diğer oyuncular tarafından görülecektir.",
+				"tournam": {
+					"descr": "Mevcut Turnuvaya Katıl",
+					"join": "Odaya Katıl"
+				},
+				"create": "Turnuva Odası Oluştur",
+				"start": "Turnuva Başlat"
+			}
+		},
+		"aigame": {
+			"title": "AI ile Oyun",
+			"descript": "Yapay zeka ile farklı zorluk seviyelerinde oyna. AI'ı özelleştir.",
+			"settings": {
+				"title": "AI ile Oyun Ayarları",
+				"gametypes": {
+					"title": "Oyun Tipi",
+					"onevai": "1'e karşı AI"
+				},
+				"diffclty": {
+					"title": "AI Zorluk Seviyesi",
+					"easy": "Kolay",
+					"ehover": "Çaylak AI - Çantada Keklik",
+					"medium": "Orta",
+					"mhover": "Dengeli AI - Adil Oyun",
+					"hard": "Zor",
+					"hhover": "Dişli rakip - Zorlu Oyun",
+					"imposs": "İmkansız",
+					"ihover": "Yenilmez AI - Bol Şans!",
+					"custom": "Frankenstein",
+					"chover": "AI rakibinizi özelleştirin"
+				},
+				"custom": {
+					"paddle": "Paddle Yüksekliği",
+					"ball": "Top Yarı Çapı",
+					"corner": "Köşe Çarpma Hızlanması",
+					"fscore": "Bitiş Skoru"
+				},
+				"frankenstein": {
+					"rspeed": {
+						"title": "Reaksiyon Hızı",
+						"slow": "Çok Yavaş",
+						"instant": "Anında"
+					},
+					"paccur": {
+						"title": "Tahmin Doğruluğu",
+						"bad": "Kötü",
+						"perfect": "Mükemmel"
+					},
+					"gaccur": {
+						"title": "Genel Doğruluk",
+						"low": "Düşük",
+						"high": "Yüksek"
+					},
+					"lspeed": {
+						"title": "Öğrenme Hızı",
+						"slow": "Yavaş",
+						"fast": "Hızlı"
+					},
+					"prepdist": {
+						"title": "Hazırlık Mesafesi",
+						"close": "Yakın",
+						"far": "Uzak"
+					},
+					"frdist": {
+						"title": "Donma Mesafesi",
+						"close": "Yakın",
+						"far": "Uzak"
+					},
+					"twinrate": {
+						"title": "Hedef Kazanma Oranı"
+					},
+					"equity": {
+						"title": "Adalet Seviyesi",
+						"cruel": "Acımasız",
+						"kind": "Merhametli"
+					},
+					"winstrk": {
+						"title": "Ardışık Kazanma Sınırı"
+					}
+				},
+				"special": {
+					"rage": {
+						"title": "Öfke Modu",
+						"descr": "Ard arda kaybedince öfkelenir ve daha güçlü olur"
+					},
+					"fatigue": {
+						"title": "Yorgunluk Modu",
+						"descr": "Çok oynayınca yorulur ve performansı düşer"
+					},
+					"focus": {
+						"title": "Odaklanma Modu",
+						"descr": "Bazen süper odaklanır ve mükemmel oynar"
+					},
+					"adaptive": {
+						"title": "Adaptif Zorluk",
+						"descr": "Oyuncunun seviyesine göre kendini ayarlar"
+					}
+				}
+			},
+			"start": "AI ile Oyuna Başla"
+		}
 	}
-
 }

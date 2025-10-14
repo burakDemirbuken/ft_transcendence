@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
 .settings-container {
 	width: 100%;
 	min-height: 100vh;
@@ -6,6 +8,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	font-size: min(1.4rem, 0.7rem + 1vw);
 }
 
 #settings-box {
@@ -13,7 +16,7 @@
 
 	background: #111;
 	border-radius: 15px;
-	border: 2px solid #666;
+	border: 2px solid #0cc;
 
 	padding: 2em;
 	padding-top: 1em;
@@ -27,7 +30,7 @@
 }
 
 .settings-container .settings-box {
-	width: max(16rem, 82% + 6rem);
+	width: max(14rem, 82% + 5rem);
 	display: flex;
 	flex-wrap: wrap;
 	gap: max(1em, 2% + .5em);
@@ -46,14 +49,15 @@
 	justify-content: center;
 
 	font-family: "RocketClouds";
-	font-size: xx-large;
-	text-shadow: 0 0 5px #fff;
+	text-shadow: 0 0 10px #fff;
 }
 
 .settings-container h3 {
 	width: 100%;
 	color: #0ff;
 
+	font-family: "Orbitron", monospace;
+	text-shadow: 0 0 10px #0cc;
 	border-bottom: 1px solid #fff;
 	margin-bottom: .8em;
 	padding-bottom: .2em;
@@ -93,8 +97,10 @@
 	padding: .3em;
 	border-radius: 3px;
 	border: 1px solid #555;
-	background: #1c1c1c;
+	background: #111;
 	color: #c20;
+
+	transition: all .1s ease-in-out;
 }
 
 .settings-container #delete-account, .settings-container #delete-account {
@@ -119,10 +125,10 @@
 	gap: .5em;
 }
 
-.settings-container label {
+.s1 .settings-content label {
 	display: flex;
 	flex-direction: column;
-	color: #eee;
+	color: #ccc;
 }
 
 .settings-container span {
