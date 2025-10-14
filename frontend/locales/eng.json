@@ -197,5 +197,107 @@
 			"button": "Delete"
 		},
 		"delacc": "Are you sure about deleting your account? This action is irreversible."
+	},
+	"play": {
+		"game": {
+			"title": "Game",
+			"descript": "Create custom game modes with your own rules. Customize all settings."
+		},
+		"tourn": {
+			"title": "Tournament",
+			"descript": "Create and join tournaments, compete with more than one player."
+		},
+		"aigame": {
+			"title": "Play AI",
+			"descript": "Play against AI with different difficulty levels. Personalize your AI opponent.",
+			"settings": {
+				"title": "AI Game Settings",
+				"gametypes": {
+					"title": "Game Type",
+					"onevai": "1 vs AI"
+				},
+				"diffclty": {
+					"title": "AI Difficulty Level",
+					"easy": "Easy",
+					"ehover": "Beginner AI - Eeasy game",
+					"medium": "Medium",
+					"mhover": "Balanced AI - Fair game",
+					"hard": "Hard",
+					"hhover": "Challenging AI - Tough game",
+					"imposs": "Impossible",
+					"ihover": "Unbeatable AI - Good luck!",
+					"custom": "Frankenstein",
+					"chover": "Personalize your AI opponent"
+				},
+				"custom": {
+					"paddle": "Paddle Height",
+					"ball": "Ball Radius",
+					"corner": "Corner Collission Acceleration",
+					"fscore": "Final Score"
+				},
+				"frankenstein": {
+					"rspeed": {
+						"title": "Reaction Speed",
+						"slow": "Very slow",
+						"instant": "Instant"
+					},
+					"paccur": {
+						"title": "Prediction Accuracy",
+						"bad": "Bad",
+						"perfect": "Perfect"
+					},
+					"gaccur": {
+						"title": "General Accuracy",
+						"low": "Low",
+						"high": "High"
+					},
+					"lspeed": {
+						"title": "Learning Speed",
+						"slow": "Slow",
+						"fast": "Fast"
+					},
+					"prepdist": {
+						"title": "Preparation Distance",
+						"close": "Close",
+						"far": "Far"
+					},
+					"frdist": {
+						"title": "Freezing Distance",
+						"close": "Close",
+						"far": "Far"
+					},
+					"twinrate": {
+						"title": "Target Win Rate"
+					},
+					"equity": {
+						"title": "Equity Levels",
+						"cruel": "Cruel",
+						"kind": "Kind"
+					},
+					"winstrk": {
+						"title": "Max Win Streak"
+					}
+				},
+				"special": {
+					"rage": {
+						"title": "Rage Mode",
+						"descr": "AI becomes angry and stronger when it loses in a row"
+					},
+					"fatigue": {
+						"title": "Fatigue Mode",
+						"descr": "AI performance decreases when it plays for a long time"
+					},
+					"focus": {
+						"title": "Focus Mode",
+						"descr": "Sometimes gets super focused and plays perfectly"
+					},
+					"adaptive": {
+						"title": "Adaptive Difficulty",
+						"descr": "AI adapts to your play style over time"
+					}
+				}
+			},
+			"start": "Start Game With AI"
+		}
 	}
 }
