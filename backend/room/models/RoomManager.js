@@ -196,7 +196,7 @@ class RoomManager extends EventEmitter
 	{
 		const {room, roomId} = this._getRoomWithPlayer(player.id);
 		if (!room)
-		{
+		{ 
 			console.log(`Player with ID ${player.id} is not in any room`);
 			return null;
 		}
