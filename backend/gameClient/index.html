@@ -2804,22 +2804,27 @@ function displayMatchPairs(pairs, participants) {
         // Maç başlığı
         const header = document.createElement('div');
         header.className = 'match-header';
-        header.innerHTML = `<div class="match-number">Maç ${index + 1}</div>`;
+        header.innerHTML = `<div class="match-number">Maç ${pair.matchNumber + 1}</div>`;
         
         // Oyuncular
         const players = document.createElement('div');
         players.className = 'match-players';
         
-        // İlk oyuncu
+        // İlk oyuncu - winner/loser durumuna göre stil ekle
         const player1 = document.createElement('div');
         player1.className = 'match-player';
+        if (pair.winner === pair.players[0]) {
+            player1.classList.add('winner');
+            player1.style.borderColor = '#00ff88';
+            player1.style.background = 'rgba(0, 255, 136, 0.2)';
+        } else if (pair.loser === pair.players[0]) {
+            player1.classList.add('loser');
+            player1.style.opacity = '0.7';
+        }
+        
         player1.innerHTML = `
-            <div class="match-player-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="${color.border}">
-                    <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576z"/>
-                </svg>
-            </div>
             <div class="match-player-name">${pair.playerNames[0]}</div>
+            ${pair.winner === pair.players[0] ? '<div class="winner-badge">🏆</div>' : ''}
         `;
         
         // VS yazısı
@@ -2827,16 +2832,21 @@ function displayMatchPairs(pairs, participants) {
         vs.className = 'vs-divider';
         vs.innerHTML = `<span class="vs-text">VS</span>`;
         
-        // İkinci oyuncu
+        // İkinci oyuncu - winner/loser durumuna göre stil ekle
         const player2 = document.createElement('div');
         player2.className = 'match-player';
+        if (pair.winner === pair.players[1]) {
+            player2.classList.add('winner');
+            player2.style.borderColor = '#00ff88';
+            player2.style.background = 'rgba(0, 255, 136, 0.2)';
+        } else if (pair.loser === pair.players[1]) {
+            player2.classList.add('loser');
+            player2.style.opacity = '0.7';
+        }
+        
         player2.innerHTML = `
-            <div class="match-player-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="${color.border}">
-                    <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576z"/>
-                </svg>
-            </div>
             <div class="match-player-name">${pair.playerNames[1]}</div>
+            ${pair.winner === pair.players[1] ? '<div class="winner-badge">🏆</div>' : ''}
         `;
         
         players.appendChild(player1);
@@ -2850,9 +2860,6 @@ function displayMatchPairs(pairs, participants) {
     
     // Katılımcıları eşleşme renklerine göre güncelle
     updateParticipants(participants, 'participants-grid', pairs);
-    
-    // Turnuva durumunu güncelle
-    document.getElementById('tournament-status-display').textContent = 'Eşleşmeler Hazır';
 }
 
 
@@ -3111,7 +3118,6 @@ function transformMatchmakingData(data) {
     };
 }
 
-
 function handleRoomCreated(payload) {
     console.log('✅ Room created:', payload);
     currentRoomId = payload.roomId;
@@ -3235,10 +3241,30 @@ function handleGameStarted(payload) {
     app.start(payload);
 }
 
-
 function handleGameFinished(payload) {
     console.log('🏁 Game finished:', payload);
     showNotification('Oyun bitti!', 'info');
+
+    // Eğer turnuva modundaysak:
+    if (currentGameMode === 'tournament') {
+        const totalPlayers = window.tournamentPlayersCount || 4; // fallback
+        const totalRounds = Math.log2(totalPlayers); // örn: 8 player → 3 round
+        const currentRound = payload.currentRound; // 0-index'ten 1-index'e çevir
+
+        console.log(`Turnuva Round ${currentRound}/${totalRounds}`);
+
+        // Eğer henüz son round değilse, sadece round bittiğini bildirip çık
+        if (currentRound < totalRounds) {
+			console.log(`Round ${currentRound} bitti! Sıradaki round başlıyor...`);
+            showNotification(`Round ${currentRound} bitti!`, 'info');
+            roomSocket.send("start", {});
+            showNotification('Sonraki round başlatılıyor...', 'info');
+            return;
+        }
+
+        // son round'a gelindiyse artık oyun gerçekten bitmiştir:
+        console.log('🏆 Turnuva tamamlandı!');
+    }
 
     // Destroy game
     if (app) {
@@ -3637,7 +3663,6 @@ document.getElementById('start-tournament-btn').addEventListener('click', functi
     }, 10000);
 });
 
-
 // Kişileri eşleştir butonu
 document.getElementById('match-players-btn').addEventListener('click', function() {
     if (!currentRoomId) return;
@@ -3646,7 +3671,6 @@ document.getElementById('match-players-btn').addEventListener('click', function(
     roomSocket.send("matchTournament", { roomId: currentRoomId });
     showNotification('Eşleştirmeler yapılıyor...', 'info');
 });
-
 
 // Back Arrow
 document.getElementById('back-arrow').addEventListener('click', function() {
