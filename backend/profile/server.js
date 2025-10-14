@@ -9,16 +9,6 @@ const fastify = Fastify({
   logger: false,
 })
 
-fastify.addContentTypeParser('application/json', { parseAs: 'string' }, function (req, body, done) {
-  try {
-    const json = JSON.parse(body)
-    done(null, json)
-  } catch (err) {
-    err.statusCode = 400
-    done(err, undefined)
-  }
-})
-
 fastify.register(overview)
 fastify.register(dbPlugin)
 fastify.register(checkachievement)

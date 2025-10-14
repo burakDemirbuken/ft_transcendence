@@ -3,32 +3,6 @@ networks:
     driver: bridge
 
 volumes:
-<<<<<<< HEAD
-#  frontend_src:
-#    driver: local
-#    driver_opts:
-#      type: none
-#      device: ./frontend
-#      o: bind
-#  gateway_src:
-#    driver: local
-#    driver_opts:
-#      type: none
-#      device: ./backend/gateway
-#      o: bind
-#  authentication_src:
-#    driver: local
-#    driver_opts:
-#      type: none
-#      device: ./backend/authentication
-#      o: bind
-#  email_src:
-#    driver: local
-#    driver_opts:
-#      type: none
-#      device: ./backend/email
-#      o: bind
-=======
   frontend_src:
    driver: local
    driver_opts:
@@ -53,7 +27,6 @@ volumes:
      type: none
      device: ./backend/email
      o: bind
->>>>>>> origin/ysarac_microservice
   profile_src:
     driver: local
     driver_opts:
@@ -80,8 +53,6 @@ volumes:
       device: ./backend/room
       o: bind
 
-
-
 services:
   frontend:
     container_name: frontend
@@ -105,7 +76,7 @@ services:
     networks:
       - transcendency
     ports:
-      - 3030:3030  # Tek port - HTTPS (wss://)
+      - 3030:3030
     depends_on:
       - gateway
 

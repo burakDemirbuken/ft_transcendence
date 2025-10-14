@@ -1,15 +1,15 @@
 export default async function friendChangeRoutes(fastify) {
     fastify.post('/send', async (request, reply) => {
-        const { userid, peerid } = request.body
-        await fastify.sequelize.models.Friend.create({ userid, peerid, status: 'pending' })
+        const { userName, peerName } = request.body
+        await fastify.sequelize.models.Friend.create({ userName, peerName, status: 'pending' })
         return reply.status(201).send()
     })
 
     fastify.post('/accept', async (request, reply) => {
-        const { peerid } = request.body
+        const { peerName } = request.body
         const friend = await fastify.sequelize.models.Friend.findOne({
             where: {
-                peerid,
+                peerName: peerName,
                 status: 'pending'
             }
         })
@@ -22,31 +22,12 @@ export default async function friendChangeRoutes(fastify) {
         }
     })
 
-    fastify.post('/block', async (request, reply) => {
-        const { userid, peerid } = request.body
-        let friend = await fastify.sequelize.models.Friend.findOne({
-            where: {
-                userid,
-                peerid
-            }
-        })
-        if (friend) {
-            friend.status = 'blocked'
-            await friend.save()
-            return reply.status(204).send()
-        } else {
-            await sequelize.models.Friend.create({ userid, peerid, status: 'blocked' })
-            return reply.status(201).send()
-        }
-    })
-
     fastify.post('/remove', async (request, reply) => {
-        //unfriend someone
-        const { userid, peerid } = request.body
+        const { userName, peerName } = request.body
         const deletedCount = await fastify.sequelize.models.Friend.destroy({
             where: {
-                userid,
-                peerid
+                userName: userName,
+                peerName: peerName
             }
         })
         if (deletedCount > 0) {

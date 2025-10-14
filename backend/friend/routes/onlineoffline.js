@@ -1,3 +1,4 @@
+import { Op } from "sequelize"
 
 export default async function onlineOfflineRoutes(fastify) {
     const presence = new Map()
@@ -11,15 +12,33 @@ export default async function onlineOfflineRoutes(fastify) {
             return
         }
 
-        const state = {lastseen: Date.now() }
+        const state = { lastseen: Date.now() }
         presence.set(userName, state)
+        const [ Friend ] = fastify.sequelize.models
+
+        const friendships = Friend.findAll({
+            where: { 
+                status: 'accepted',
+                [Op.or]: [
+                    { userName: userName },
+                    { peerName: userName }
+                ]
+            },
+            attributes: ['userName', 'peerName']
+        })
+
+        const friends = friendships.map(friend => friend.userName === userName ? friend.peerName : friend.userName)
+        const onlineFriends = friends.filter(name => presence.has(name))
 
         const heartbeat = setInterval(() => {
             if (Date.now() - state.lastseen > 60000) {
                 socket.close(1000, "No pong received")
             } else {
                 if (socket.readyState === 1) {
-                    socket.send(JSON.stringify({ type: 'ping' }))
+                    socket.send(JSON.stringify({
+                        type: 'ping',
+                        onlineFriends: onlineFriends
+                    }))
                 }
             }
             fastify.log.info({ userName, situation: 'heartbeat' })
