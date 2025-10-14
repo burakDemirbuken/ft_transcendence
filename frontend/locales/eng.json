@@ -199,13 +199,55 @@
 		"delacc": "Are you sure about deleting your account? This action is irreversible."
 	},
 	"play": {
+		"title": "GAME MODE",
+		"descr": "Select your game mode and set your preferences",
 		"game": {
 			"title": "Game",
-			"descript": "Create custom game modes with your own rules. Customize all settings."
+			"descript": "Create custom game modes with your own rules. Customize all settings.",
+			"settings": {
+				"title": "Game Settings",
+				"gametypes": {
+					"Game Type": "Game Type",
+					"1v1": "1v1",
+					"2v2": "2v2",
+					"local": "Local"
+				},
+				"custom": {
+					"paddle": "Paddle Height",
+					"ball": "Ball Radius",
+					"corner": "Corner Collision Acceleration",
+					"fscore": "Final Score"
+				},
+				"fastmatch": {
+					"title": "Fast Match",
+					"descr": "Join the Current Room",
+					"join": "Join Room"
+				},
+				"create": "Create Room"
+			}
 		},
 		"tourn": {
 			"title": "Tournament",
-			"descript": "Create and join tournaments, compete with more than one player."
+			"descript": "Create and join tournaments, compete with more than one player.",
+			"settings": {
+				"title": "Tournament Settings",
+				"tname": "Tournament Name",
+				"tpeople": {
+					"title": "Number of People",
+					"four": "4",
+					"eight": "8",
+					"sixteen": "16",
+					"custom": "Custom"
+				},
+				"dname": "Display Name",
+				"dnmdesc": "💡 This name will be visible to other players during tournaments.",
+				"tournam": {
+					"descr": "Join Existing Tournament",
+					"join": "Join Room"
+				},
+				"create": "Create Tournament Room",
+				"start": "Start Tournament"
+			}
 		},
 		"aigame": {
 			"title": "Play AI",

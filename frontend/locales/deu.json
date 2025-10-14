@@ -213,13 +213,55 @@
 		"delacc": "Möchten Sie Ihr Konto wirklich löschen? Möchten Sie Ihr Konto löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."
 	},
 	"play": {
+		"title": "SPIELMODUS",
+		"descr": "Wähle deinen Spielmodus und passe deine Einstellungen an",
 		"game": {
 			"title": "Spiel",
-			"descript": "Create custom game modes with your own rules. Customize all settings."
+			"descript": "Erstelle benutzerdefinierte Spielmodi mit deinen eigenen Regeln. Definiere alle deine Einstellungen selber.",
+			"settings": {
+				"title": "Spiel Einstellungen",
+				"gametypes": {
+					"Game Type": "Spieltyp",
+					"1v1": "1v1",
+					"2v2": "2v2",
+					"local": "Lokal"
+				},
+				"custom": {
+					"paddle": "Schlägerhöhe",
+					"ball": "Ballradius",
+					"corner": "Ecken-Kollisionsbeschleunigung",
+					"fscore": "Endpunktzahl"
+				},
+				"fastmatch": {
+					"title": "Schnelles Spiel",
+					"descr": "Tritt dem aktuellen Raum bei",
+					"join": "Raum beitreten"
+				},
+				"create": "Raum Erstellen"
+			}
 		},
 		"tourn": {
 			"title": "Turnier",
-			"descript": "Create and join tournaments, compete with more than one player."
+			"descript": "Erstelle und nimm an Turnieren teil, kämpfe gegen mehr als einen Spieler.",
+			"settings": {
+				"title": "Turnier Einstellungen",
+				"tname": "Turniername",
+				"tpeople": {
+					"title": "Anzahl der Personen",
+					"four": "4",
+					"eight": "8",
+					"sixteen": "16",
+					"custom": "Benutzerdefiniert"
+				},
+				"dname": "Anzeigename",
+				"dnmdesc": "💡 Dieser Name wird für die Turniere zur anderen Spieler sichtbar sein.",
+				"tournam": {
+					"descr": "Tritt einem bestehenden Turnier bei",
+					"join": "Raum beitreten"
+				},
+				"create": "Raum für Turnier erstellen",
+				"start": "Turnier starten"
+			}
 		},
 		"aigame": {
 			"title": "Spiele mit KI",

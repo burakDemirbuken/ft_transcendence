@@ -2213,57 +2213,58 @@ html {
 		    </div>
 		</div>
 
+        <!-- Game Page Title -->
 		<div class="game-page" id="game-page">
 	        <div class="header">
-        	    <h1 class="title">PLAY MODE</h1>
-        	    <p class="subtitle">Oyun Modunu Seçin ve Ayarlarınızı Yapın</p>
+        	    <h1 class="title" data-i18n="play.title">PLAY MODE</h1>
+        	    <p class="subtitle" data-i18n="play.descr">Choose game mode and set your preferences</p>
         	</div>
 
 	        <div class="game-modes">
 	            <div class="game-mode-card" id="custom-mode">
 	                <div class="mode-icon no-select">🏓</div>
-	                <h3 class="mode-title" data-i18n="play.game.title">Oyun</h3>
+	                <h3 class="mode-title" data-i18n="play.game.title">Game</h3>
 	                <p class="mode-description" data-i18n="play.game.descript">Create custom game modes with your own rules. Customize all settings.</p>
 	            </div>
 
 	            <div class="game-mode-card" id="tournament-mode">
 	                <div class="mode-icon no-select">🏆</div>
-	                <h3 class="mode-title" data-i18n="play.tourn.title">Turnuva</h3>
-	                <p class="mode-description" data-i18n="play.tourn.descript">Turnuva oluştur veya katıl. Birden fazla oyuncuyla rekabet et.</p>
+	                <h3 class="mode-title" data-i18n="play.tourn.title">Tournament</h3>
+	                <p class="mode-description" data-i18n="play.tourn.descript">Create and join tournaments, compete with more than one player.</p>
 	            </div>
 
 	            <div class="game-mode-card" id="ai-mode">
 	                <div class="mode-icon no-select">🤖</div>
-	                <h3 class="mode-title" data-i18n="play.aigame.title">AI ile Oyun</h3>
-	                <p class="mode-description" data-i18n="play.aigame.descript">Yapay zeka ile farklı zorluk seviyelerinde oyna. AI'ı özelleştir.</p>
+	                <h3 class="mode-title" data-i18n="play.aigame.title">Play AI</h3>
+	                <p class="mode-description" data-i18n="play.aigame.descript">Play against AI with different difficulty levels. Personalize your AI opponent.</p>
 	            </div>
 	        </div>
 
 	        <!-- Custom Game Settings -->
 	        <div class="settings-panel" id="custom-settings">
-	            <h2 class="settings-title">Oyun Ayarları</h2>
+	            <h2 class="settings-title" data-i18n="play.game.settings.title">Game Settings</h2>
 
 	            <div class="settings-grid">
 	                <div class="setting-group">
-	                    <label class="setting-label">Oyun Tipi</label>
+	                    <label class="setting-label" data-i18n="play.game.settings.gametypes.title">Game Type</label>
 	                    <div class="radio-group">
 	                        <label class="radio-option">
 	                            <input type="radio" name="custom-game-type" value="1v1" checked>
-	                            <span class="radio-label">1 vs 1</span>
+	                            <span class="radio-label" data-i18n="play.game.settings.gametypes.1v1">1 vs 1</span>
 	                        </label>
 	                        <label class="radio-option">
-	                            <input type="radio" name="custom-game-type" value="2v2">
-	                            <span class="radio-label">2 vs 2</span>
+	                            <input type="radio" name="custom-game-type" value="2v2" >
+	                            <span class="radio-label" data-i18n="play.game.settings.gametypes.2v2">2 vs 2</span>
 	                        </label>
 	                        <label class="radio-option">
 	                            <input type="radio" name="custom-game-type" value="co-op">
-	                            <span class="radio-label">co-op</span>
+	                            <span class="radio-label" data-i18n="play.game.settings.gametypes.local">Local</span>
 	                        </label>
 	                    </div>
 	                </div>
 
 	                <div class="setting-group">
-	                    <label class="setting-label">Paddle Yüksekliği</label>
+	                    <label class="setting-label" data-i18n="play.game.settings.custom.paddle">Paddle Height</label>
 	                    <div class="slider-container">
 	                        <input type="range" min="50" max="200" value="100" class="slider" id="paddle-height">
 	                        <div class="slider-value">
@@ -2275,7 +2276,7 @@ html {
 	                </div>
 
 	                <div class="setting-group">
-	                    <label class="setting-label">Top Yarı Çapı</label>
+	                    <label class="setting-label" data-i18n="play.game.settings.custom.ball">Ball Radius</label>
 	                    <div class="slider-container">
 	                        <input type="range" min="5" max="25" value="10" class="slider" id="ball-radius">
 	                        <div class="slider-value">
@@ -2287,7 +2288,7 @@ html {
 	                </div>
 
 	                <div class="setting-group">
-	                    <label class="setting-label">Köşe Çarpma Hızlanması</label>
+	                    <label class="setting-label" data-i18n="play.game.settings.custom.corner">Corner Collision Acceleration</label>
 	                    <div class="slider-container">
 	                        <input type="range" min="0" max="5" value="1" step="0.1" class="slider" id="corner-boost">
 	                        <div class="slider-value">
@@ -2299,82 +2300,82 @@ html {
 	                </div>
 
 	                <div class="setting-group">
-	                    <label class="setting-label">Bitiş Skoru</label>
+	                    <label class="setting-label" data-i18n="play.game.settings.custom.fscore">Final Score</label>
 	                    <input type="number" min="1" max="50" value="11" class="input-field" id="winning-score" placeholder="Kazanmak için gereken skor">
 	                </div>
 
 					<div class="setting-group fast-game-mode-card" id="fast-game-mode">
 						<label class="fast-label"></label>
 						<div class="fast-mode-icon no-select"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M557.7 64.9L363.5 139.6L365.8 110.3C366.8 97.5 353 88.8 341.8 95.2L165.3 197.4C102.6 233.7 64 300.6 64 373C64 485.1 154.9 576 267 576C339.4 576 406.3 537.4 442.6 474.7L544.8 298.3C551.3 287.2 542.6 273.3 529.7 274.3L500.4 276.6L575.1 82.4C575.7 80.9 576 79.2 576 77.6C576 70.1 570 64.1 562.5 64.1C560.8 64.1 559.2 64.4 557.7 65zM256 256C326.7 256 384 313.3 384 384C384 454.7 326.7 512 256 512C185.3 512 128 454.7 128 384C128 313.3 185.3 256 256 256zM256 352C256 334.3 241.7 320 224 320C206.3 320 192 334.3 192 352C192 369.7 206.3 384 224 384C241.7 384 256 369.7 256 352zM272 448C280.8 448 288 440.8 288 432C288 423.2 280.8 416 272 416C263.2 416 256 423.2 256 432C256 440.8 263.2 448 272 448z"/></svg></div>
-						<span class="fast-mode-title">Hızlı Oyun</span>
+						<span class="fast-mode-title" data-i18n="play.game.settings.fastmatch.title">Fast Match</span>
 					</div>
 				</div>
 	            <div class="join-room-section">
-	                <label class="setting-label">Mevcut Odaya Katıl</label>
+	                <label class="setting-label" data-i18n="play.game.settings.fastmatch.descr">Join the Current Room</label>
 	                <div class="input-group">
-	                    <input type="text" class="input-field" id="custom-room-code" placeholder="Oda kodunu girin..." maxlength="6">
-	                    <button class="btn btn-secondary" id="custom-join-btn">Odaya Katıl</button>
+	                    <input type="text" class="input-field" id="custom-room-code" placeholder="Enter room code..." maxlength="6">
+	                    <button class="btn btn-secondary" id="custom-join-btn" data-i18n="play.game.settings.fastmatch.join">Join Room</button>
 	                </div>
 	            </div>
 
 	            <div class="action-buttons">
-	                <button class="btn btn-primary" id="custom-create-btn">Oda Oluştur</button>
+	                <button class="btn btn-primary" id="custom-create-btn" data-i18n="play.game.settings.create">Create Room</button>
 	            </div>
 	        </div>
 
 	        <!-- Tournament Settings -->
 	        <div class="settings-panel" id="tournament-settings">
-	            <h2 class="settings-title">Turnuva Ayarları</h2>
+	            <h2 class="settings-title" data-i18n="play.tourn.settings.title">Tournament Settings</h2>
 
 	            <div class="settings-grid">
 	                <div class="setting-group">
-	                    <label class="setting-label">Turnuva İsmi</label>
-	                    <input type="text" class="input-field" id="tournament-name" placeholder="Turnuva ismini girin..." maxlength="50">
+	                    <label class="setting-label" data-i18n="play.tourn.settings.name">Tournament Name</label>
+	                    <input type="text" class="input-field" id="tournament-name" placeholder="Enter tournament name..." maxlength="50">
 	                </div>
 
 	                <div class="setting-group">
-	                    <label class="setting-label">Kişi Sayısı</label>
+	                    <label class="setting-label" data-i18n="play.tourn.settings.tpeople.title">Number of People</label>
 	                    <div class="radio-group">
 	                        <label class="radio-option">
 	                            <input type="radio" name="tournament-size" value="4" checked>
-	                            <span class="radio-label">4 Kişi                        </span>
+	                            <span class="radio-label" data-i18n="play.tourn.settings.tpeople.four">4 Kişi</span>
 	                        </label>
 	                        <label class="radio-option">
 	                            <input type="radio" name="tournament-size" value="8">
-	                            <span class="radio-label">8 Kişi</span>
+	                            <span class="radio-label" data-i18n="play.tourn.settings.tpeople.eight">8 Kişi</span>
 	                        </label>
 	                        <label class="radio-option">
 	                            <input type="radio" name="tournament-size" value="16">
-	                            <span class="radio-label">16 Kişi</span>
+	                            <span class="radio-label" data-i18n="play.tourn.settings.tpeople.sixteen">16 Kişi</span>
 	                        </label>
 	                        <label class="radio-option">
 	                            <input type="radio" name="tournament-size" value="custom">
-	                            <span class="radio-label">Özel</span>
+	                            <span class="radio-label" data-i18n="play.tourn.settings.tpeople.custom">Custom</span>
 	                        </label>
 	                    </div>
 	                    <input type="number" min="4" class="input-field" id="custom-tournament-size" placeholder="Özel kişi sayısı" style="display: none;">
 	                </div>
 
 	                <div class="setting-group">
-	                    <label class="setting-label">Oyuncu İsmi</label>
+	                    <label class="setting-label" data-i18n="play.tourn.settings.dname">Display Name</label>
 	                    <input type="text" class="input-field" id="player-name" placeholder="Turnuvada görünecek isminiz..." maxlength="20">
 	                    <div class="tournament-info">
-	                        <small>💡 Turnuva sırasında bu isim diğer oyuncular tarafından görülecektir.</small>
+	                        <small data-i18n="play.tourn.settings.dnmdesc">💡 This name will be visible to other players during tournaments.</small>
 	                    </div>
 	                </div>
 	            </div>
 
 	            <div class="join-room-section">
-	                <label class="setting-label">Mevcut Turnuvaya Katıl</label>
+	                <label class="setting-label" data-i18n="play.tourn.settings.tournam.descr">Join Existing Tournament</label>
 	                <div class="input-group">
 	                    <input type="text" class="input-field" id="tournament-code" placeholder="Turnuva kodunu girin..." maxlength="6">
-	                    <button class="btn btn-secondary" id="tournament-join-btn">Odaya Katıl</button>
+	                    <button class="btn btn-secondary" id="tournament-join-btn" data-i18n="play.tourn.settings.tournam.join">Join Room</button>
 	                </div>
 	            </div>
 
 	            <div class="action-buttons">
-	                <button class="btn btn-primary" id="tournament-create-btn">Turnuva Odası Oluştur</button>
-	                <button class="btn btn-primary" id="tournament-start-btn" style="display: none;">Turnuvayı Başlat</button>
+	                <button class="btn btn-primary" id="tournament-create-btn" data-i18n="play.tourn.settings.create">Create Tournament Room</button>
+	                <button class="btn btn-primary" id="tournament-start-btn" style="display: none;" data-i18n="play.tourn.settings.start">Start Tournament</button>
 	            </div>
 
 
