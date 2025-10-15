@@ -144,7 +144,7 @@ class RoomManager extends EventEmitter
 		else if (payload.gameMode === 'tournament')
 			room = new TournamentRoom(payload.name, payload.gameSettings, payload.tournamentSettings);
 		else if (payload.gameMode === 'ai')
-			room = new AIRoom(payload.name, payload.gameSettings, payload.aiSettings);
+			room = new AIRoom(payload.name, payload.gameSettings, payload.aiSettings, roomId);
 		else if (payload.gameMode === 'local')
 			room = new LocalRoom(payload.name, payload.gameSettings);
 		else

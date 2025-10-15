@@ -10,6 +10,7 @@ class AIPingPong extends PingPong
 		this.maxPlayers = 1;
 		this.targetPaddlePosition = { x: 0, y: 0 };
 		this.aiSettings = parameters.aiSettings || { difficulty: 'medium' };
+		console.log('🤖 AI Settings:', this.aiSettings); // DEBUG
 		this._aiSendInterval = null;
 		this._lastTargetY = null;
 		this._aiDir = 0; // -1 up, 1 down, 0 none
