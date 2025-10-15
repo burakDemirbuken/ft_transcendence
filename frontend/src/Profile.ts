@@ -139,7 +139,7 @@ class ManagerProfile {
 
         const translations = await getJsTranslations(localStorage.getItem("langPref"));
         let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost']; // default fallback
-        
+
         // BU NE İÇİN ??
         // JSON string olan labels'ı diziye çevir
 		// if (winLossCtx.dataset.labels) {
@@ -663,6 +663,15 @@ function handleOverlayClick(e: MouseEvent, overlay: HTMLDivElement, turnuva: HTM
   }
 }
 
+function handleMatchOverlay(e) {
+    if (e.target.classList.contains("match-row") || e.target.closest(".match-row"))
+        document.querySelector('#match-overlay').classList.remove("hide-away");
+}
+
+function hideMatchOverlay() {
+    document.querySelector('#match-overlay').classList.add("hide-away");
+}
+
 function initBracket(players: Player[], n: number, currentUser: string, turnuva: HTMLDivElement, wrapper: HTMLDivElement) {
     turnuva.innerHTML = '';
     turnuva.style.transform = 'none';
@@ -889,6 +898,9 @@ export default class extends AView {
             this.closeBtn.classList.remove('close');
           }, 300);
         });
+
+        document.querySelector(".match-table")?.addEventListener('click', handleMatchOverlay);
+        document.querySelector("#match-card-exit")?.addEventListener('click', hideMatchOverlay);
 
         document.addEventListener('keydown', (e: KeyboardEvent) => {
           if (e.key === "Escape" && this.overlay.style.display === 'flex') {

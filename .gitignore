@@ -1,5 +1,5 @@
 notes.md
 server/node_modules
 .nf*
-./backend/aiServer/__pycache__/*
+./backend/aiServer/__pycache__/ai_player.cpython-311.pyc
 node_modules
