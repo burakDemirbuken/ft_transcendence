@@ -58,23 +58,17 @@ const start = async () => {
     if (!fs.existsSync(dataDir)) {
       fs.mkdirSync(dataDir, { recursive: true });
     }
-
-    // Test database connection
     await testConnection();
 
-    // Sync database models
     await sequelize.sync({ force: false });
-    console.log('✅ Database models synchronized');
-
-    // Start the server
-    await fastify.listen({
-      port: process.env.PORT || 3001,
-      host: process.env.HOST || '0.0.0.0'
+    
+    await fastify.listen
+    ({
+      port: 3001,
+      host: '0.0.0.0'
     });
 
-    console.log('🚀 Authentication Service started successfully');
-    console.log('📋 Available routes:');
-    fastify.printRoutes();
+//    console.log(fastify.printRoutes());
 
   } catch (error) {
     fastify.log.error('Failed to start server:', error);

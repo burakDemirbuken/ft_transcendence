@@ -1,4 +1,4 @@
-import authController from '../controllers/AuthController.js';
+import postController from '../controllers/AuthController.js';
 
 export async function postRoutes(fastify, options)
 {
@@ -47,7 +47,7 @@ export async function postRoutes(fastify, options)
                 }
             }
         }
-    }, authController.register);
+    }, postController.register);
 
     fastify.post('/login',
     {
@@ -85,7 +85,7 @@ export async function postRoutes(fastify, options)
                 }
             }
         }
-    }, authController.login);
+    }, postController.login);
 
     fastify.post('/verify-email',
     {
@@ -120,7 +120,7 @@ export async function postRoutes(fastify, options)
                 }
             }
         }
-    }, authController.verifyEmail);
+    }, postController.verifyEmail);
 
     fastify.post('/verify-2fa',
     {
@@ -164,7 +164,7 @@ export async function postRoutes(fastify, options)
                 }
             }
       	}
-    }, authController.verify2FA);
+    }, postController.verify2FA);
 
     fastify.post('/logout',
     {
@@ -182,7 +182,7 @@ export async function postRoutes(fastify, options)
     			}
     		}
     	}
-    }, authController.logout);
+    }, postController.logout);
 
     fastify.post('/refresh',
     {
@@ -200,7 +200,7 @@ export async function postRoutes(fastify, options)
 		    	}
 		    }
 		}
-    }, authController.refreshToken);
+    }, postController.refreshToken);
 
     fastify.post('/check-token-blacklist',
     {
@@ -222,7 +222,7 @@ export async function postRoutes(fastify, options)
   				}
   			}
   		}
-    }, authController.checkTokenBlacklist);
+    }, postController.checkTokenBlacklist);
 
     fastify.post('/blacklist-tokens',
     {
@@ -244,7 +244,7 @@ export async function postRoutes(fastify, options)
     			}
     		}
     	}
-    }, authController.blacklistTokens);
+    }, postController.blacklistTokens);
 
     fastify.post('/auto-refresh',
 	{
@@ -262,6 +262,6 @@ export async function postRoutes(fastify, options)
 		  		}
 		  	}
 		}
-	}, authController.autoRefreshToken);
+	}, postController.autoRefreshToken);
   
 }

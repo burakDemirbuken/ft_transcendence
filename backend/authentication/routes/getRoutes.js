@@ -1,4 +1,4 @@
-import authController from '../controllers/AuthController.js';
+import getController from '../controllers/AuthController.js';
 
 export async function getRoutes(fastify, options)
 {
@@ -27,7 +27,7 @@ export async function getRoutes(fastify, options)
                 }
             }
         }
-    }, authController.checkEmail);
+    }, getController.checkEmail);
 
     fastify.get('/check-username',
     {
@@ -55,7 +55,7 @@ export async function getRoutes(fastify, options)
                 }
             }
         }
-    }, authController.checkUsername);
+    }, getController.checkUsername);
 
     fastify.get('/verify-email',
     {
@@ -83,7 +83,7 @@ export async function getRoutes(fastify, options)
                 }
             }
         }
-    }, authController.verifyEmail);
+    }, getController.verifyEmail);
 
     fastify.get('/me',
     {
@@ -101,7 +101,7 @@ export async function getRoutes(fastify, options)
                 }
             }
         }
-    }, authController.getProfile);
+    }, getController.getProfile);
 
     fastify.get('/profile',
     {
@@ -119,5 +119,5 @@ export async function getRoutes(fastify, options)
                 }
             }
         }
-    }, authController.getProfile);
+    }, getController.getProfile);
 }
