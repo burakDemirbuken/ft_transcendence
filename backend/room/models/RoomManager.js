@@ -195,6 +195,11 @@ class RoomManager extends EventEmitter
 
 	leaveRoom(player)
 	{
+		if (this.waitingPlayers.find(p => p.id === player.id))
+		{
+			this.removePlayerFromWaitingList(player);
+			return null;
+		}
 		const {room, roomId} = this._getRoomWithPlayer(player.id);
 		if (!room)
 		{
