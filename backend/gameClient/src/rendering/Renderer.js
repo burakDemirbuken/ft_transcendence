@@ -1,9 +1,17 @@
 import * as constants from '../utils/constants.js';
 
+async function getJsTranslations(lang) {
+	const response = await fetch(`../../locales/game.json`);
+	const translations = await response.json();
+	return translations[lang];
+}
+
 class Renderer
 {
 	constructor()
 	{
+		this.lang = getJsTranslations("en");
+		console.log('🎮 Game Renderer initialized with language:', JSON.stringify(this.lang, null, 2));
 		this.screenSize = constants.SCREEN_SIZE;
 		this.paddleSize = null;
 		this.ballSize = null;
@@ -33,13 +41,13 @@ class Renderer
 		const gameData = data.gameData;
 		if (!machine || !gameData)
 		{
-			this.renderWaitingScreen('Waiting for game data...', machine);
+			this.renderWaitingScreen(this.lang.waiting, machine);
 			return;
 		}
 
 		if (data.currentState === "canceled")
 		{
-			this.renderWaitingScreen('Game Canceled', machine);
+			this.renderWaitingScreen(this.lang.cancel, machine);
 			return;
 		}
 
@@ -121,7 +129,7 @@ class Renderer
 		ctx.fillStyle = this.colors.text;
 		ctx.font = '32px Arial';
 		ctx.textAlign = 'center';
-		ctx.fillText(message || 'Oyuncu Bekleniyor...', this.screenWidth / 2, this.screenHeight / 2);
+		ctx.fillText(message || this.lang.waiting, this.screenWidth / 2, this.screenHeight / 2);
 
 		machine.updateScreen();
 	}
@@ -136,10 +144,10 @@ class Renderer
 		ctx.textAlign = 'center';
 		// winner ya da gameover yazılacak
 		const winnerNames = gameData.winner.names.join(', ');
-		ctx.fillText(`Winner: ${winnerNames}`, this.screenSize.width / 2, this.screenSize.height / 2 - 20);
+		ctx.fillText(`${this.lang.winner}: ${winnerNames}`, this.screenSize.width / 2, this.screenSize.height / 2 - 20);
 
 		if (gameData.score)
-			ctx.fillText(`Score: ${gameData.score.team1} - ${gameData.score.team2}`, this.screenSize.width / 2, this.screenSize.height / 2 + 20);
+			ctx.fillText(`${this.lang.score}: ${gameData.score.team1} - ${gameData.score.team2}`, this.screenSize.width / 2, this.screenSize.height / 2 + 20);
 		machine.updateScreen();
 	}
 }

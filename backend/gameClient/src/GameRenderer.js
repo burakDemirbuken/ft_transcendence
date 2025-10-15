@@ -188,16 +188,6 @@ class GameRenderer extends EventEmitter
 		this.gameCore.setCameraPosition(cameraPosition, lookAtPosition);
 	}
 
-	// Tüm arena görünümüne dön
-	showArenaView()
-	{
-		this.gameCore.setCameraPosition(
-			{ x: 0, y: 20, z: 0 }, // Yukarıdan bakış
-			{ x: 0, y: 0, z: 0 }   // Merkeze bak
-		);
-		console.log('🏟️ Switched to arena view');
-	}
-
 	gameLoop()
 	{
 		if (!this.isRunning)

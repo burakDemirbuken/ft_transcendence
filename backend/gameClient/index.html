@@ -2073,7 +2073,7 @@ html {
                         </div>
                     </div>
                 </div>
-        
+
                 <!-- Winners Section -->
                 <div class="participants-section">
                     <h3>🎉 Round Winners - Advancing to Next Round</h3>
@@ -2081,7 +2081,7 @@ html {
                         <!-- Winners will be added dynamically -->
                     </div>
                 </div>
-        
+
                 <!-- Next Round Match Pairs -->
                 <div class="participants-section" id="next-round-pairs-section" style="display: none;">
                     <h3>⚔️ Next Round Matches</h3>
@@ -2089,7 +2089,7 @@ html {
                         <!-- Next round pairs will be displayed here -->
                     </div>
                 </div>
-        
+
                 <!-- Action Buttons -->
                 <div class="room-actions">
                     <button class="btn btn-secondary btn-large" id="round-waiting-btn" disabled>
@@ -2848,16 +2848,16 @@ function showNotification(message, type = 'info') {
 function displayMatchPairs(pairs, participants) {
     const matchPairsSection = document.getElementById('match-pairs-section');
     const matchPairsContainer = document.getElementById('match-pairs-container');
-    
+
     matchPairsSection.style.display = 'block';
     matchPairsContainer.innerHTML = '';
-    
+
     // Katılımcı bilgilerini ID'ye göre hızlı erişim için map'le
     const participantsMap = {};
     participants.forEach(p => {
         participantsMap[p.userId] = p;
     });
-    
+
     // Her eşleşme için kart oluştur
     pairs.forEach((pair, index) => {
         const colors = [
@@ -2867,21 +2867,21 @@ function displayMatchPairs(pairs, participants) {
             { border: '#ff8800', bg: 'rgba(255, 136, 0, 0.1)' }
         ];
         const color = colors[index % colors.length];
-        
+
         const card = document.createElement('div');
         card.className = 'match-pair-card';
         card.style.borderColor = color.border;
         card.style.background = color.bg;
-        
+
         // Maç başlığı
         const header = document.createElement('div');
         header.className = 'match-header';
         header.innerHTML = `<div class="match-number">Maç ${pair.matchNumber + 1}</div>`;
-        
+
         // Oyuncular
         const players = document.createElement('div');
         players.className = 'match-players';
-        
+
         // İlk oyuncu - winner/loser durumuna göre stil ekle
         const player1 = document.createElement('div');
         player1.className = 'match-player';
@@ -2893,17 +2893,17 @@ function displayMatchPairs(pairs, participants) {
             player1.classList.add('loser');
             player1.style.opacity = '0.7';
         }
-        
+
         player1.innerHTML = `
             <div class="match-player-name">${pair.playerNames[0]}</div>
             ${pair.winner === pair.players[0] ? '<div class="winner-badge">🏆</div>' : ''}
         `;
-        
+
         // VS yazısı
         const vs = document.createElement('div');
         vs.className = 'vs-divider';
         vs.innerHTML = `<span class="vs-text">VS</span>`;
-        
+
         // İkinci oyuncu - winner/loser durumuna göre stil ekle
         const player2 = document.createElement('div');
         player2.className = 'match-player';
@@ -2915,21 +2915,21 @@ function displayMatchPairs(pairs, participants) {
             player2.classList.add('loser');
             player2.style.opacity = '0.7';
         }
-        
+
         player2.innerHTML = `
             <div class="match-player-name">${pair.playerNames[1]}</div>
             ${pair.winner === pair.players[1] ? '<div class="winner-badge">🏆</div>' : ''}
         `;
-        
+
         players.appendChild(player1);
         players.appendChild(vs);
         players.appendChild(player2);
-        
+
         card.appendChild(header);
         card.appendChild(players);
         matchPairsContainer.appendChild(card);
     });
-    
+
     // Katılımcıları eşleşme renklerine göre güncelle
     updateParticipants(participants, 'participants-grid', pairs);
 }
@@ -2945,7 +2945,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
 
     // Eşleştirme yapıldıysa renk eşleştirmelerini oluştur
     const matchColors = {};
-    
+
     if (matchPairs) {
         matchPairs.forEach((pair, index) => {
             const colors = [
@@ -2955,7 +2955,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
                 { border: '#ff8800', bg: 'rgba(255, 136, 0, 0.1)' }
             ];
             const color = colors[index % colors.length];
-            
+
             pair.players.forEach(playerId => {
                 matchColors[playerId] = color;
             });
@@ -2966,7 +2966,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
     participants.forEach((participant, index) => {
         const card = document.createElement('div');
         card.className = 'participant-card';
-        
+
         // Eşleştirme yapıldıysa o rengi kullan, yoksa sırayla renk ver
         let color;
         if (matchPairs && matchColors[participant.userId]) {
@@ -2981,7 +2981,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
             ];
             color = colors[index % colors.length];
         }
-        
+
         card.style.borderColor = color.border;
         card.style.background = color.bg;
 
@@ -3020,7 +3020,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
                 </svg>
             `;
             name.appendChild(hostBadge);
-            
+
             // Add a tooltip for the crown
             const tooltip = document.createElement('span');
             tooltip.className = 'host-tooltip';
@@ -3042,18 +3042,18 @@ function updateParticipants(participants, gridId, matchPairs = null) {
                 z-index: 100;
             `;
             hostBadge.appendChild(tooltip);
-            
+
             // Show tooltip on hover
             hostBadge.addEventListener('mouseenter', () => {
                 tooltip.style.opacity = '1';
                 tooltip.style.visibility = 'visible';
             });
-            
+
             hostBadge.addEventListener('mouseleave', () => {
                 tooltip.style.opacity = '0';
                 tooltip.style.visibility = 'hidden';
             });
-            
+
             // Add a subtle glow effect to the host card
             card.style.boxShadow = `0 0 15px ${color.border}`;
         }
@@ -3113,20 +3113,20 @@ function handleWebSocketMessage(message) {
 
 function handleMatchReady(payload) {
     console.log('🎲 Match pairs ready:', payload);
-    
+
     if (!payload.matchPairs || !Array.isArray(payload.matchPairs) || payload.matchPairs.length === 0) {
         console.error('Invalid match pairs data:', payload);
         showNotification('Eşleştirme verisi geçersiz!', 'error');
         return;
     }
-    
+
     // Eşleştirmeleri göster
     displayMatchPairs(payload.matchPairs, payload.players);
-    
+
     // Turnuva durumunu güncelle
-    document.getElementById('tournament-status-display').textContent = 
+    document.getElementById('tournament-status-display').textContent =
         payload.tournamentStatus || 'Eşleşmeler Hazır';
-    
+
     // Host için turnuvayı başlat butonunu göster
     if (isRoomCreator) {
         document.getElementById('waiting-players-btn').style.display = 'none';
@@ -3138,7 +3138,7 @@ function handleMatchReady(payload) {
         document.getElementById('match-players-btn').style.display = 'none';
         document.getElementById('start-tournament-btn').style.display = 'none';
     }
-    
+
     showNotification('Eşleştirmeler tamamlandı!', 'success');
 }
 
@@ -3149,16 +3149,16 @@ function transformMatchmakingData(data) {
         console.error('Invalid matchmaking data:', data);
         return { matchPairs: [], players: [] };
     }
-    
+
     // Mevcut tur eşleştirmelerini al
     const currentRoundIndex = data.currentRound || 0;
     const currentRound = data.rounds.find(r => r.round === currentRoundIndex) || data.rounds[0];
     const matches = currentRound.matchs || [];
-    
+
     // Tüm oyuncuları topla
     const allPlayers = [];
     const playerMap = new Map();
-    
+
     // Tüm turları ve eşleşmeleri dolaşarak oyuncuları topla
     data.rounds.forEach(round => {
         if (round.matchs) {
@@ -3174,19 +3174,19 @@ function transformMatchmakingData(data) {
             });
         }
     });
-    
+
     // Eşleştirmeleri istemcinin beklediği formata dönüştür
     const matchPairs = matches.map(match => {
         // Eğer oyuncu bilgileri eksikse boş değerler kullan
         const player1 = match.player1 || { id: 'unknown', name: 'Unknown' };
         const player2 = match.player2 || { id: 'unknown', name: 'Unknown' };
-        
+
         return {
             players: [player1.id, player2.id],
             playerNames: [player1.name, player2.name]
         };
     });
-    
+
     return {
         matchPairs: matchPairs,
         players: allPlayers,
@@ -3236,12 +3236,12 @@ function handleRoomUpdate(payload) {
 
         if (currentGameMode === 'tournament') {
             document.getElementById('players-count').textContent = `${playerCount}/${maxPlayers}`;
-            
+
             // Eğer eşleştirmeler yapıldıysa
             if (payload.matchPairs) {
                 displayMatchPairs(payload.matchPairs, payload.players);
                 document.getElementById('tournament-status-display').textContent = payload.tournamentStatus || 'Eşleşmeler Hazır';
-                
+
                 // Host için turnuvayı başlat butonunu göster
                 if (isRoomCreator) {
                     document.getElementById('waiting-players-btn').style.display = 'none';
@@ -3255,11 +3255,11 @@ function handleRoomUpdate(payload) {
                 }
             } else {
                 updateParticipants(payload.players, 'participants-grid');
-                
+
                 // Host için eşleştirme butonunu göster
                 if (isRoomCreator) {
                     const minPlayers = 4; // Minimum oyuncu sayısı
-                    
+
                     if (playerCount >= minPlayers && playerCount % 2 === 0) {
                         document.getElementById('waiting-players-btn').style.display = 'none';
                         document.getElementById('match-players-btn').style.display = 'block';
@@ -3379,7 +3379,7 @@ function startNextRound(totalRounds, currentRound) {
 // handleGameFinished fonksiyonunu güncelle
 function handleGameFinished(payload) {
     console.log('🏁 Game finished:', payload);
-    
+
     // Destroy game
     if (app) {
         app.destroy();
@@ -3396,7 +3396,7 @@ function handleGameFinished(payload) {
         const currentRoundIndex = payload.currentRound || 0;
         const rounds = payload.rounds || [];
         const totalRounds = rounds.length;
-        
+
         // Mevcut round'ın maçlarını al
         const currentRoundData = rounds.find(r => r.round === currentRoundIndex);
         if (!currentRoundData) {
@@ -3404,11 +3404,11 @@ function handleGameFinished(payload) {
             returnToLobby();
             return;
         }
-        
+
         // Kazananları belirle
         const winners = [];
         const winnerIds = new Set();
-        
+
         currentRoundData.matchs.forEach(match => {
             if (match.winner) {
                 const winnerPlayer = match.player1.id === match.winner ? match.player1 : match.player2;
@@ -3416,12 +3416,12 @@ function handleGameFinished(payload) {
                 winnerIds.add(match.winner);
             }
         });
-        
+
         // Bir sonraki round'ın maçlarını al (varsa)
         const nextRoundIndex = currentRoundIndex + 1;
         const nextRoundData = rounds.find(r => r.round === nextRoundIndex);
         let nextMatches = [];
-        
+
         if (nextRoundData && nextRoundData.matchs) {
             nextMatches = nextRoundData.matchs.map((match, index) => ({
                 matchNumber: index,
@@ -3448,7 +3448,7 @@ function handleGameFinished(payload) {
         if (currentRoundIndex + 1 < totalRounds) {
             // Kullanıcı kazananlar arasında mı kontrol et
             const isWinner = winnerIds.has(currentUserId);
-            
+
             if (isWinner) {
                 // Kazanan oyuncular için round arası bekleme odasını göster
                 showRoundWaitingRoom(tournamentData);
@@ -3463,7 +3463,7 @@ function handleGameFinished(payload) {
 
         // Son round'a gelindiyse turnuva bitmiştir
         console.log('🏆 Turnuva tamamlandı!');
-        
+
         // Kazanan mı kaybeden mi kontrol et
         const isWinner = winnerIds.has(currentUserId);
         if (isWinner) {
@@ -3471,7 +3471,7 @@ function handleGameFinished(payload) {
         } else {
             showNotification('🥈 Turnuva tamamlandı! İkinci oldunuz.', 'info');
         }
-        
+
         // Lobiye dön
         returnToLobby();
         return;
@@ -3499,19 +3499,19 @@ function showTournamentWaitingRoom(data) {
 
     document.getElementById('room-code-display').textContent = data.roomId || 'TOUR-XXXXX';
     document.getElementById('players-count').textContent = `${data.players?.length || 0}/${data.maxPlayers || 8}`;
-    
+
     // Turnuva durumunu güncelle
     if (data.tournamentStatus) {
         document.getElementById('tournament-status-display').textContent = data.tournamentStatus;
     } else {
         document.getElementById('tournament-status-display').textContent = 'Oyuncular Bekleniyor';
     }
-    
+
     if (data.players) {
         // Eşleştirme yapıldıysa
         if (data.matchPairs) {
             displayMatchPairs(data.matchPairs, data.players);
-            
+
             // Host için turnuvayı başlat butonunu göster
             if (isRoomCreator) {
                 document.getElementById('waiting-players-btn').style.display = 'none';
@@ -3523,16 +3523,16 @@ function showTournamentWaitingRoom(data) {
                 document.getElementById('match-players-btn').style.display = 'none';
                 document.getElementById('start-tournament-btn').style.display = 'none';
             }
-        } 
+        }
         // Eşleştirme yapılmadıysa
         else {
             updateParticipants(data.players, 'participants-grid');
-            
+
             // Host için eşleştirme butonunu göster
             if (isRoomCreator) {
                 const playerCount = data.players.length;
                 const minPlayers = 4; // Minimum oyuncu sayısı
-                
+
                 if (playerCount >= minPlayers && playerCount % 2 === 0) {
                     document.getElementById('waiting-players-btn').style.display = 'none';
                     document.getElementById('match-players-btn').style.display = 'block';
@@ -3847,11 +3847,11 @@ document.getElementById('start-tournament-btn').addEventListener('click', functi
     // Butonu devre dışı bırak ve yükleniyor göster
     this.disabled = true;
     this.innerHTML = '<div class="loading"></div> Turnuva Başlatılıyor...';
-    
+
     // Turnuva başlatma isteği gönder
     roomSocket.send("start", { roomId: currentRoomId });
     showNotification('Turnuva başlatılıyor...', 'info');
-    
+
     // Eğer sunucudan yanıt gelmezse butonu 10 saniye sonra tekrar etkinleştir
     setTimeout(() => {
         if (this.disabled) {
@@ -3865,13 +3865,13 @@ document.getElementById('start-tournament-btn').addEventListener('click', functi
 document.getElementById('final-round-btn').addEventListener('click', function() {
     this.disabled = true;
     this.innerHTML = '<div class="loading"></div> Starting Final Round...';
-    
-    roomSocket.send("start", { 
+
+    roomSocket.send("start", {
         roomId: currentRoomId
     });
-    
+
     showNotification('🏆 Final round başlatılıyor!', 'success');
-    
+
     setTimeout(() => {
         if (this.disabled) {
             this.disabled = false;
@@ -3883,7 +3883,7 @@ document.getElementById('final-round-btn').addEventListener('click', function() 
 // Kişileri eşleştir butonu
 document.getElementById('match-players-btn').addEventListener('click', function() {
     if (!currentRoomId) return;
-    
+
     // Eşleştirmeleri sunucuya gönder
     roomSocket.send("matchTournament", { roomId: currentRoomId });
     showNotification('Eşleştirmeler yapılıyor...', 'info');
@@ -4029,14 +4029,14 @@ roomSocket.onConnect(() => {
 roomSocket.onMessage((message) => {
     try {
         console.log(`📥 Received WebSocket message:`, message);
-        
+
         // Eğer matchReady mesajı gelirse özel işleme yap
         if (message.type === "matchReady") {
             const transformedData = transformMatchmakingData(message.payload);
             handleMatchReady(transformedData);
             return;
         }
-        
+
         // Diğer mesajlar için normal işleme devam et
         handleWebSocketMessage(message);
     } catch (error) {
@@ -4222,11 +4222,11 @@ function showRoundWaitingRoom(data) {
     // Tüm odaları gizle
     document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
     document.getElementById('game-page').classList.add('hidden');
-    
+
     // Round waiting room'u göster
     const roundWaitingRoom = document.getElementById('round-waiting-room');
     roundWaitingRoom.classList.add('active');
-    
+
     // Back arrow'u göster
     document.getElementById('back-arrow').classList.add('active');
 
@@ -4234,7 +4234,7 @@ function showRoundWaitingRoom(data) {
     document.getElementById('round-current-display').textContent = data.currentRound;
     document.getElementById('round-total-display').textContent = data.totalRounds;
     document.getElementById('round-remaining-players').textContent = data.winners.length;
-    
+
     // Next round bilgisi
     const nextRound = data.currentRound + 1;
     if (nextRound === data.totalRounds) {
@@ -4258,7 +4258,7 @@ function showRoundWaitingRoom(data) {
     // Butonları ayarla
     if (isRoomCreator) {
         document.getElementById('round-waiting-btn').style.display = 'none';
-        
+
         // Final round mu kontrol et
         if (nextRound === data.totalRounds) {
             document.getElementById('next-round-btn').style.display = 'none';
@@ -4310,10 +4310,10 @@ function updateEliminatedParticipants(participants, gridId) {
 function returnToLobby() {
     // Tüm odaları gizle
     document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
-    
+
     // Game page'i göster
     document.getElementById('game-page').classList.remove('hidden');
-    
+
     // Back arrow'u gizle
     document.getElementById('back-arrow').classList.remove('active');
 
@@ -4321,11 +4321,11 @@ function returnToLobby() {
     if (currentRoomId) {
         roomSocket.send("leave", { roomId: currentRoomId });
     }
-    
+
     currentRoomId = null;
     currentGameMode = null;
     isRoomCreator = false;
-    
+
     // Tournament data'yı sıfırla
     tournamentData = {
         currentRound: 0,
@@ -4339,13 +4339,13 @@ function returnToLobby() {
 document.getElementById('next-round-btn').addEventListener('click', function() {
     this.disabled = true;
     this.innerHTML = '<div class="loading"></div> Starting Next Round...';
-    
-    roomSocket.send("start", { 
+
+    roomSocket.send("start", {
         roomId: currentRoomId
     });
-    
+
     showNotification('Sonraki round başlatılıyor...', 'info');
-    
+
     setTimeout(() => {
         if (this.disabled) {
             this.disabled = false;
@@ -4358,15 +4358,15 @@ document.getElementById('next-round-btn').addEventListener('click', function() {
 document.getElementById('final-round-btn').addEventListener('click', function() {
     this.disabled = true;
     this.innerHTML = '<div class="loading"></div> Starting Final Round...';
-    
-    roomSocket.send("start", { 
+
+    roomSocket.send("start", {
         roomId: currentRoomId,
         round: tournamentData.currentRound + 1,
         isFinal: true
     });
-    
+
     showNotification('🏆 Final round başlatılıyor!', 'success');
-    
+
     setTimeout(() => {
         if (this.disabled) {
             this.disabled = false;
@@ -4378,7 +4378,7 @@ document.getElementById('final-round-btn').addEventListener('click', function() 
 // Round bitişini handle et
 function handleRoundFinished(payload) {
     console.log('🏁 Round finished:', payload);
-    
+
     // Destroy game
     if (app) {
         app.destroy();
