@@ -250,7 +250,7 @@ export default async function gamedataRoute(fastify) {
 			return reply.code(404).send({ error: 'User profile not found' })
 		}
 
-		const matchHistory = await fastify.sequelize.models.MatchHistory.findAll({
+		let matchHistory = await fastify.sequelize.models.MatchHistory.findAll({
 			include: [
 				{
 					model: fastify.sequelize.models.Team,
@@ -275,14 +275,15 @@ export default async function gamedataRoute(fastify) {
 					required: false
 				}
 			],
-			limit: 20 //?
 		})
+
+		console.log(matchHistory.toJSON())
 
 		return reply.send({ success: true, matchHistory.toJSON() })
 
-	})
+})
 
-
+//
 	fastify.get('/tournament-history', async (request, reply) => {
 		const { userName } = request.query ?? {}
 		if (!userName) {
@@ -297,10 +298,35 @@ export default async function gamedataRoute(fastify) {
 			return reply.code(404).send({ error: 'User profile not found' })
 		}
 		
-		const tournamentHistory = await fastify.sequelize.models.TournamentHistory.findAll({
-			
+		let RoundMatch = await fastify.sequelize.models.RoundMatch.findAll({
+			include: [
+				{
+					model: fastify.sequelize.models.Round,
+					include: [
+						{
+							model: fastify.sequelize.models.TournamentHistory,
+						}
+					]
+				},
+				{
+					model: fastify.sequelize.models.Profile,
+					as: 'playerOne'
+				},
+				{
+					model: fastify.sequelize.models.Profile,
+					as: 'playerTwo'
+				}
+			],
+			where: {
+				[Op.or]: [
+					{ playerOneID: userProfile.id },
+					{ playerTwoID: userProfile.id }
+				]
+			},			
 		})
 
-		return reply.send({ success: true, tournamentHistory.toJSON() })
+		console.log(RoundMatch.toJSON())
+
+		return reply.send({ success: true, RoundMatch.toJSON() })
 	})
-}
+ }
