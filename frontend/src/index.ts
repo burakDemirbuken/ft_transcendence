@@ -6,6 +6,10 @@ import Friends from "../dist/Friends.js";
 import Settings from "../dist/Settings.js";
 import Login from "../dist/Login.js";
 import I18n from './I18n.js';
+import { removeAuthToken } from './utils/auth.js';
+
+// Dynamic API base URL based on current hostname
+export const API_BASE_URL = `https://${window.location.hostname}:3030/api`;
 
 const pageState = {
 	current: "login", // default
@@ -52,39 +56,52 @@ export function navigateTo(page:string) {
 	router(page);
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () =>
+{
 	const navbar = document.body.querySelectorAll(".sidebar-element");
-	for (const element of navbar) {
-		element.addEventListener("click", async (e) => {
-			if (e.currentTarget.matches("[data-link]")) {
+	for (const element of navbar)
+	{
+		element.addEventListener("click", async (e) =>
+		{
+			if (e.currentTarget.matches("[data-link]"))
+			{
 				e.preventDefault();
 				navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
 				document.querySelector(".selected")?.classList.toggle("selected");
 				e.currentTarget.classList.toggle("selected");
 				if (e.currentTarget.matches("[id='logout']"))
 				{
-					const request = new Request(`https://localhost:8080/api/auth/logout?lang=${localStorage.getItem("langPref")}`, {
-						method: "POST"
-					});
-					try {
-						const response = await fetch(request);
+					try
+					{
+						const response = await fetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref")}`, {
+	  						method: "POST",
+	  						credentials: "include",
+						});
+
 						const json = await response.json();
 
-						if (response.ok) {
+						if (response.ok)
+						{
+							removeAuthToken();
 							document.querySelector("#navbar")?.classList.add("logout");
-						} else {
-							alert(`${json.error}`);
 						}
-					} catch {
+						else
+							alert(`${json.error}`);
+					}
+					catch
+					{
 						alert(`System Error`);
 					}
 				}
-			} else if (e.currentTarget.matches("[id='toggle']")) {
+			}
+			else if (e.currentTarget.matches("[id='toggle']"))
+			{
 				document.querySelector("#navbar")?.classList.toggle("collapse");
 				document.querySelector(".selected")?.classList.toggle("selected");
 				e.currentTarget.classList.toggle("selected");
 			}
-			else if (e.currentTarget.matches("[id='language']")) {
+			else if (e.currentTarget.matches("[id='language']"))
+			{
 				e.preventDefault();
 				I18n.nextLanguage();
 				updateChartLanguage();
@@ -108,17 +125,20 @@ window.addEventListener('resize', toggleClassOnResize);
 
 // Handle browser back/forward
 window.addEventListener("popstate", (event) => {
-	const page = event.state.page || "login";
+	const page = (event.state && event.state.page) || "login";
 	router(page);
 });
 
 // Initial load and page reloads
 window.addEventListener("load", () => {
 	const urlPage = window.location.pathname.slice(1);
-	const initialPage = urlPage || history.state.page || "login";
+	const initialPage = urlPage || (history.state && history.state.page) || "login";
 
 	if (!localStorage.getItem("langPref"))
 		localStorage.setItem("langPref", "eng");
+
+	console.log('🌐 Current hostname:', window.location.hostname);
+	console.log('🔗 API Base URL:', API_BASE_URL);
 
 	I18n.loadLanguage();
 

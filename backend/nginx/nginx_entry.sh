@@ -28,6 +28,9 @@ echo "Starting nginx..."
 
 # Fix file ownership and permissions for nginx html directory
 echo "Setting correct permissions for web files..."
-chmod -R 777 /usr/share/nginx/html
+chmod -R 777 ./* 
+#chown -R nginx:nginx /usr/share/nginx/html
+#find /usr/share/nginx/html -type d -exec chmod 755 {} \;
+#find /usr/share/nginx/html -type f -exec chmod 644 {} \;
 
 exec "$@"

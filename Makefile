@@ -18,6 +18,8 @@ RED = \033[0;31m
 YELLOW = \033[1;33m
 BLUE = \033[0;34m
 NC = \033[0m
+HOST_IP := $(shell hostname -I | awk '{print $$1}')
+export HOST_IP
 
 all: up
 
@@ -64,9 +66,8 @@ check-volumes:
 
 # Build and start containers
 up:
-	@echo "$(GREEN)Starting all services...$(NC)"
+	@echo "$(GREEN)Starting all services (HOST_IP=$(HOST_IP))$(NC)"
 	@$(COMPOSE_CMD) up -d --build
-
 # Stop containers
 down:
 	@echo "$(YELLOW)Stopping all services...$(NC)"
@@ -85,6 +86,10 @@ status:
 # Show logs
 logs:
 	@$(COMPOSE_CMD) logs -f
+
+log-profile:
+	@echo "$(GREEN)Showing logs for profile service$(NC)"
+	@$(COMPOSE_CMD) logs -f profile
 
 log-nginx:
 	@echo "$(GREEN)Showing logs for nginx service$(NC)"
@@ -116,13 +121,25 @@ shell-gateway:
 
 
 
+# Clean databases only
+clean-db:
+	@echo "$(RED)Cleaning databases...$(NC)"
+	# @rm -f ./db_profile.sqlite 2>/dev/null || true
+	@rm -f ./backend/authentication/data/auth.db 2>/dev/null || true
+	@rm -f ./backend/profile/database/database.sqlite 2>/dev/null || true
+	# @rm -f ./backend/friend/database/friends.sqlite 2>/dev/null || true
+	# @rm -f ./backend/room/database/rooms.sqlite 2>/dev/null || true
+	# @rm -f ./backend/gameServer/database/games.sqlite 2>/dev/null || true
+	# @rm -rf ./backend/*/data/ 2>/dev/null || true
+	@echo "$(GREEN)Databases cleaned$(NC)"
+
 # Clean non-persistent data
 clean: stop
 	@echo "$(RED)Cleaning up...$(NC)"
 	@docker system prune -f
 
-# Full cleanup
-fclean: clean-volumes
+# Full cleanup with databases
+fclean: clean-volumes clean-db
 	@echo "$(RED)Performing full cleanup...$(NC)"
 	@$(COMPOSE_CMD) down --remove-orphans --volumes --rmi all 2>/dev/null || true
 	@docker system prune -a --volumes -f
@@ -196,7 +213,8 @@ help:
 	@echo "  status           - Show container status"
 	@echo "  logs             - Show logs (follow mode)"
 	@echo "  clean            - Stop and remove containers and clean non-persistent data"
-	@echo "  fclean           - Full cleanup (containers, images, volumes + volume directories)"
+	@echo "  clean-db         - Clean all SQLite database files"
+	@echo "  fclean           - Full cleanup (containers, images, volumes + databases)"
 	@echo "  re               - Restart everything (fclean + all)"
 	@echo "  health           - Show container health status"
 	@echo "  list-services    - List all available services"
@@ -244,7 +262,7 @@ help:
 	@echo "  make shell-sqlite      # Enter sqlite container"
 	@echo "  make dev-authentication # Development mode for authentication"
 
-.PHONY: all up down stop status logs clean fclean re health list-services help \
+.PHONY: all up down stop status logs clean clean-db fclean re health list-services help \
         volumes create-nginx-volume create-gateway-volume create-sqlite-volume \
         clean-volumes check-volumes \
         $(addprefix up-,$(ALL_SERVICES)) \
