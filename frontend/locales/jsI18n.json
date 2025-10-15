@@ -20,13 +20,22 @@
 			}
 		},
 		"profile": {
-			"spoint": "Skill Points",
-			"skills": ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"],
-			"victory": "Victory",
-			"defeat": "Defeat",
-			"label1": "Total Matches",
-			"label2": "Matches Won",
-			"labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+			"skills": {
+				"labels": ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"]				,
+				"label": "Skill Points"
+			},
+			"weekly": {
+				"labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+				"label": "Total Matches"
+			},
+			"monthly": {
+				"labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+				"label0": "Total Matches",
+				"label1": "Matches Won"
+			},
+			"winloss": {
+				"labels": ["Won", "Lost"]
+			}
 		}
 	},
 	"tur": {
@@ -45,14 +54,22 @@
 			}
 		},
 		"profile": {
-			"mtotal": "Total Matches",
-			"spoint": "Skill Points",
-			"skills": ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"],
-			"victory": "Victory",
-			"defeat": "Defeat",
-			"label1": "Toplam Maçlar",
-			"label2": "Kazanılan Maçlar",
-			"labels": ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
+			"skills": {
+				"labels": ["Hız", "Doğruluk", "Savunma", "Saldırı", "Strateji", "Dayanıklılık"],
+				"label": "Beceri Puanı"
+			},
+			"weekly": {
+				"labels": ["Pzt", "Sal", "Çar", "Prş", "Cum", "Cmt", "Paz"],
+				"label": "Toplam Maçlar"
+			},
+			"monthly": {
+				"labels": ["Pzt", "Sal", "Çar", "Prş", "Cum", "Cmt", "Paz"],
+				"label0": "Toplam Maçlar",
+				"label1": "Kazanılan Maçlar"
+			},
+			"winloss": {
+				"labels": ["Kazanılan", "Kaybedilen"]
+			}
 		}
 	},
 	"deu": {
@@ -71,14 +88,22 @@
 			}
 		},
 		"profile": {
-			"mtotal": "Total Matches",
-			"spoint": "Skill Points",
-			"skills": ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"],
-			"victory": "Victory",
-			"defeat": "Defeat",
-			"label1": "Gesamtspiele",
-			"label2": "Gewonnene Spiele",
-			"labels": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
+			"skills": {
+				"labels": ["Schnelligkeit", "Präzision", "Verteidigung", "Angriff", "Strategie", "Dauerhaftigkeit"]				,
+				"label": "Fähigkeiten"
+			},
+			"weekly": {
+				"labels": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+				"label": "Gesamtzahl der Spiele"
+			},
+			"monthly": {
+				"labels": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+				"label0": "Gesamtzahl der Spiele",
+				"label1": "Gewonnene Spiele"
+			},
+			"winloss": {
+				"labels": ["Sieg", "Verlust"]
+			}
 		}
 	}
 }

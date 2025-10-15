@@ -212,9 +212,6 @@ label {
 	outline: none;
 	border: none;
 	color: #0df;
-	/* text-shadow:
-		3px 3px #0cc,
-		9px 9px #606; */
 	font-family: inherit;
 	font-size: min(3rem, 4vmin + .2rem);
 	width: 3ch;
@@ -293,7 +290,7 @@ label {
 
 @keyframes float {
 	0% {
-		top: 100%;
+		top: 98%; /* 100% causes a slidebar glitch cause particles exceed the vh */
 		opacity: 0;
 	}
 	10% {
@@ -303,7 +300,7 @@ label {
 		opacity: 1;
 	}
 	100% {
-		top: -10%;
+		top: 0%;
 		opacity: 0;
 	}
 }

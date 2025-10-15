@@ -25,7 +25,6 @@ roomSocket.onMessage((message) => {
 			app.start(message.payload);
 			break;
 		case "created":
-			// NİSA:
 			console.log(`Room created with ID: ${message.payload.roomId}`);
 			break;
 		case "finished":

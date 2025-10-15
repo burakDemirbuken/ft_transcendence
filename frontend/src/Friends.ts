@@ -182,7 +182,7 @@ export default class extends AView {
 	}
 
 	async getHtml(): Promise<string> {
-		const response = await fetch(`templates/friends.html`);
+		const response = await fetch("templates/friends.html");
 		return await response.text();
 	}
 
