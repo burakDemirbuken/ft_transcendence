@@ -34,41 +34,35 @@ class AIPingPong extends PingPong
 	{
 		const player = this.players[0];
 		const localPaddle = this.paddles.get(this.players[0].id);
-	
+
 		localPaddle.up = player.inputGet('ArrowUp') || player.inputGet('w');
 		localPaddle.down = player.inputGet('ArrowDown') || player.inputGet('s');
-	
+
 		const aiPaddle = this.paddles.get("AI");
 		if (aiPaddle)
 		{
-			// AI target_y üst kenar olarak geliyor; merkeze çevir
 			const targetCenterY = (this._lastTargetY != null)
 				? (this._lastTargetY + aiPaddle.height / 2)
 				: (aiPaddle.pos.y + aiPaddle.height / 2);
 			const paddleCenterY = aiPaddle.pos.y + aiPaddle.height / 2;
 			const diff = targetCenterY - paddleCenterY;
-			
-			// Daha hassas threshold'lar
-			const threshold = 4; // Tek bir eşik değeri
-		
-			// Basit ve net mantık
+
+			const threshold = 5;
+
 			if (diff > threshold)
 			{
-				// Hedef aşağıda -> aşağı git
 				aiPaddle.up = false;
 				aiPaddle.down = true;
 				this._aiDir = 1;
 			}
 			else if (diff < -threshold)
 			{
-				// Hedef yukarıda -> yukarı git
 				aiPaddle.up = true;
 				aiPaddle.down = false;
 				this._aiDir = -1;
 			}
 			else
 			{
-				// Hedefe ulaştık -> dur
 				aiPaddle.up = false;
 				aiPaddle.down = false;
 				this._aiDir = 0;
@@ -130,7 +124,7 @@ class AIPingPong extends PingPong
 	start()
 	{
 		this.startTime = Date.now();
-		
+
 		// ✅ ID kontrolü ekle
 		if (!this.id)
 		{
@@ -191,7 +185,6 @@ class AIPingPong extends PingPong
 							},
 						};
 
-						console.log('📤 AI\'ya gönderilen veri:', dataToSend);
 						AiNetwork.sendData(this.id, dataToSend);
 					}, 1000);
 			}, 1000

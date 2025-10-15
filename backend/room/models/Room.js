@@ -61,6 +61,7 @@ export default class Room extends EventEmitter
 	{
 		this.status = 'finished';
 		this.emit('finished', { state: payload, players: this.players });
+		return { state: payload, players: this.players };
 	}
 
 	getState()

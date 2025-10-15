@@ -105,9 +105,9 @@ class Renderer
 		ctx.font = '48px Arial';
 		ctx.textAlign = 'center';
 
-		ctx.fillText(score.team2, this.screenSize.width / 4, 60);
+		ctx.fillText(score.team1, this.screenSize.width / 4, 60);
 
-		ctx.fillText(score.team1, (this.screenSize.width * 3) / 4, 60);
+		ctx.fillText(score.team2, (this.screenSize.width * 3) / 4, 60);
 	}
 
 	renderCenterLine(ctx)

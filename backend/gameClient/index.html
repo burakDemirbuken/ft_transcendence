@@ -3100,12 +3100,6 @@ function handleWebSocketMessage(message) {
             handleError(message.payload);
             break;
 
-		case "matchReady":
-			console.log('🎲 Match pairs ready message received:', message.payload);
-            const transformedData = transformMatchmakingData(message.payload);
-            handleMatchReady(transformedData);
-            break;
-
         default:
             console.warn('⚠️ Unhandled message type:', message.type);
     }
@@ -3237,6 +3231,11 @@ function handleRoomUpdate(payload) {
         if (currentGameMode === 'tournament') {
             document.getElementById('players-count').textContent = `${playerCount}/${maxPlayers}`;
 
+            if (payload.status === 'ready2start')
+            {
+                const transformedData = transformMatchmakingData(payload.match);
+                handleMatchReady(transformedData);
+            }
             // Eğer eşleştirmeler yapıldıysa
             if (payload.matchPairs) {
                 displayMatchPairs(payload.matchPairs, payload.players);

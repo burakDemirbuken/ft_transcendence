@@ -153,10 +153,14 @@ class RoomManager extends EventEmitter
 
 		room.on('finished', (data) =>
 			{
-				console.log(`data: `, JSON.stringify(data, null, 2));
-				// ysarac
-				// state ve time ver
-				// ulas: data base buradan kayıt edilecek
+				console.log(`data: `, data);
+				if (data.matchType === 'tournament')
+					//fetch
+					;
+				else if (data.matchType === 'classic')
+					//fetch
+					;
+
 			}
 		);
 		this.rooms.set(roomId, room);
