@@ -3,7 +3,7 @@ export default async function avatarRoutes(fastify) {
         return reply.sendFile(`default.png`)
     })
 
-    fastify.get("/avatar/:fileName", async (request, reply) => { //queryde olabilir ama queryde cache olabilir
+    fastify.get("/avatar/:fileName", async (request, reply) => {
         const { fileName } = request.params
         const path = path.join(fastify.cwd, "uploads", fileName)
 

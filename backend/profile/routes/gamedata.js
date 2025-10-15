@@ -235,4 +235,72 @@ export default async function gamedataRoute(fastify) {
 			return reply.status(500).send({ error: 'Internal Server Error' })
 		}
 	})
+
+	fastify.get('match-history', async (request, reply) => {
+		const { userName } = request.query ?? {}
+		if (!userName) {
+			return reply.code(400).send({ error: 'Username is required' })
+		}
+		
+		const userProfile = await fastify.sequelize.models.Profile.findOne({
+			where: { userName: userName }
+			attributes: ['id']
+		})
+		if (!userProfile) {
+			return reply.code(404).send({ error: 'User profile not found' })
+		}
+
+		const matchHistory = await fastify.sequelize.models.MatchHistory.findAll({
+			include: [
+				{
+					model: fastify.sequelize.models.Team,
+					as: 'teamOne',
+					where: {
+						[Op.or]: [
+							{ playerOneId: userProfile.id },
+							{ playerTwoId: userProfile.id }
+						]
+					},
+					required: false
+				},
+				{
+					model: fastify.sequelize.models.Team,
+					as: 'teamTwo',
+					where: {
+						[Op.or]: [
+							{ playerOneId: userProfile.id },
+							{ playerTwoId: userProfile.id }
+						]
+					},
+					required: false
+				}
+			],
+			limit: 20 //?
+		})
+
+		return reply.send({ success: true, matchHistory.toJSON() })
+
+	})
+
+
+	fastify.get('/tournament-history', async (request, reply) => {
+		const { userName } = request.query ?? {}
+		if (!userName) {
+			return reply.code(400).send({ error: 'Username is required' })
+		}
+		
+		const userProfile = await fastify.sequelize.models.Profile.findOne({
+			where: { userName: userName }
+			attributes: ['id']
+		})
+		if (!userProfile) {
+			return reply.code(404).send({ error: 'User profile not found' })
+		}
+		
+		const tournamentHistory = await fastify.sequelize.models.TournamentHistory.findAll({
+			
+		})
+
+		return reply.send({ success: true, tournamentHistory.toJSON() })
+	})
 }

@@ -1,7 +1,7 @@
 export default async function profileRoute(fastify) {
 
 	fastify.get('/profile', async (request, reply) => { 
-		const { userName } = request.query;
+		const { userName } = request.query ?? {}
 		
 		if (!userName) {
 			return reply.code(400).send({ error: 'Username is required' })
@@ -35,9 +35,9 @@ export default async function profileRoute(fastify) {
 			fastify.statCalculate(userProfile)
 
 			return reply.send({
-				profile: userProfile,
-				achievements: userAchievementsProgress,
-				stats: userStats
+				profile: userProfile.toJSON(),
+				achievements: userAchievementsProgress.toJSON(),
+				stats: userStats.toJSON(),
 			})
 		} catch (error) {
 			fastify.log.error('Error retrieving user profile:', error)
@@ -209,7 +209,7 @@ export default async function profileRoute(fastify) {
 
 		return reply.send({
 			success: true,
-			users: userProfiles
+			users: userProfiles.toJSON()
 		})
 	})
 }
