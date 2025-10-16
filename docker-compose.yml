@@ -177,6 +177,8 @@ services:
       - /app/node_modules
     networks:
       - transcendency
+    depends_on:
+      - aiserver
 
   aiserver:
     container_name: ai-server
