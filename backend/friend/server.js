@@ -1,12 +1,14 @@
 import Fastify from 'fastify'
 import dbPlugin from './plugins/db.js'
 import friendRoutes from './routes/index.js'
+import fastifyWebsocket from '@fastify/websocket'
 
 const fastify = Fastify({
     logger: true
 })
 
 await fastify.register(dbPlugin)
+await fastify.register(fastifyWebsocket)
 await fastify.register(friendRoutes)
 
 await fastify.ready()

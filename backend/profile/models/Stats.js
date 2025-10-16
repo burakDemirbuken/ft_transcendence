@@ -12,7 +12,7 @@ export default (sequelize, DataTypes, Model) => {
             type: DataTypes.STRING,
             allowNull: false,
             references: {
-                model: 'profiles',
+                model: 'Profile',
                 key: 'id'
             },
             onDelete: 'CASCADE'
@@ -29,14 +29,34 @@ export default (sequelize, DataTypes, Model) => {
             type: DataTypes.INTEGER,
             defaultValue: 0
         },
+        gameCurrentStreak: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        },
+        gameLongestStreak: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        },
+        gameTotalDuration: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        },
+        gameMinDuration: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        },
         xp: {
             type: DataTypes.INTEGER,
             defaultValue: 0
         },
-        /*level: {
+        ballHitCount: {
             type: DataTypes.INTEGER,
             defaultValue: 0
-        }*/
+        },
+        ballMissCount: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        }
 	}, {
         sequelize,
         modelName: 'Stats',

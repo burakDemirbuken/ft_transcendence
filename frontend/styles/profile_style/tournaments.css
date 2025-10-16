@@ -3,7 +3,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    gap: .5em;
+    flex-wrap: wrap;
+    margin-bottom: clamp(.8rem, 2vw + .4rem, 1.25rem);
     padding: 10px;
     background: var(--bg-secondary);
     border-radius: 10px;
@@ -16,7 +18,7 @@
     align-items: center;
     gap: 10px;
     color: var(--color-primary);
-    font-size: 1.5rem;
+    font-size: clamp(1rem, 1.5vw + .8rem, 1.8rem);
     text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
@@ -55,219 +57,124 @@
 }
 
 /* Tournament Card */
-.tournament-card {
-    background: var(--bg-secondary);
-    border-radius: 15px;
-    border: 1px solid var(--border-light);
-    overflow: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
 
-.tournament-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 0 15px rgba(0, 255, 255, 0.2);
-    border-color: var(--color-primary);
-}
-
-.tournament-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px;
-    background: linear-gradient(45deg, rgba(0, 0, 0, 0.8), rgba(20, 20, 40, 0.8));
-    border-bottom: 1px solid var(--border-light);
-}
-
-.tournament-badge {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    color: var(--color-text);
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-}
-
-.tournament-badge.elite {
-    background: linear-gradient(45deg, #ffd700, #ff8c00);
-}
-
-.tournament-badge.premium {
-    background: linear-gradient(45deg, #c0c0c0, #a9a9a9);
-}
-
-.tournament-badge.special {
-    background: linear-gradient(45deg, #00ffff, #0088ff);
-}
-
-.tournament-info {
-    flex: 1;
-    padding: 0 15px;
-}
-
-.tournament-name {
-    font-size: 1.2rem;
-    color: var(--color-text);
-    margin-bottom: 5px;
-    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-}
-
-.tournament-date {
-    font-size: 0.9rem;
-    color: var(--color-muted);
-}
-
-.tournament-result {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 5px 10px;
-    border-radius: 10px;
-    font-weight: bold;
-    min-width: 50px;
-}
-
-.tournament-result i {
-    font-size: 1.5rem;
-    margin-bottom: 5px;
-}
-
-.tournament-result.gold {
-    background: linear-gradient(45deg, #ffd700, #ff8c00);
-    color: #000;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-}
-
-.tournament-result.silver {
-    background: linear-gradient(45deg, #c0c0c0, #e0e0e0);
-    color: #000;
-    box-shadow: 0 0 15px rgba(192, 192, 192, 0.5);
-}
-
-.tournament-result.bronze {
-    background: linear-gradient(45deg, #cd7f32, #b87333);
-    color: #000;
-    box-shadow: 0 0 15px rgba(205, 127, 50, 0.5);
-}
-
-.tournament-result.top8 {
-    background: linear-gradient(45deg, #4b0082, #8a2be2);
-    color: #fff;
-    box-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
-}
-
-.tournament-stats {
-    display: flex;
-    justify-content: space-around;
-    padding: 15px;
-    background: rgba(0, 0, 0, 0.3);
-    border-bottom: 1px solid var(--border-light);
-}
-
-.tournament-stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.stat-label {
-    font-size: 0.9rem;
-    color: var(--color-muted);
-    margin-bottom: 5px;
-}
-
-.stat-value {
-    font-size: 1.1rem;
-    color: var(--color-text);
-    font-weight: bold;
-}
-
-.tournament-details {
-    padding: 15px;
-}
-
-.tournament-highlight {
-    margin-bottom: 15px;
-    padding: 10px;
-    background: rgba(0, 255, 255, 0.1);
-    border-radius: 5px;
-    border-left: 3px solid var(--color-primary);
-}
-
-.tournament-highlight span {
-    color: var(--color-primary);
-    font-weight: bold;
-}
-
-.view-details-btn {
+.tournament-table {
+    margin-top: 10px;
+    border-collapse: collapse;
     width: 100%;
-    padding: 10px;
-    background: transparent;
-    border: 1px solid var(--border-light);
-    border-radius: 5px;
-    color: var(--color-text);
-    font-family: var(--font-family);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    overflow-x: auto;
 }
 
-.view-details-btn:hover {
-    background: rgba(0, 255, 255, 0.1);
-    border-color: var(--color-primary);
-}
-
-.tournament-matches-detail {
-    display: none;
-    margin-top: 15px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-}
-
-.tournament-match {
-    display: flex;
+.tournament-row {
+    min-width: 500px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     justify-content: space-between;
     padding: 8px;
-    margin-bottom: 5px;
-    border-radius: 5px;
-    border-left: 3px solid transparent;
+    gap: 8px;
+    background: #00000096;
+    margin-bottom: 4px;
+    cursor: pointer;
+    border-radius: 6px;
 }
 
-.tournament-match.win {
-    background: rgba(0, 255, 0, 0.1);
-    border-left-color: var(--color-success);
+.tournament-row.header {
+    background: rgba(0, 78, 78, 0.34);
+    font-weight: 700;
+    color: #00ffff;
 }
 
-.tournament-match.loss {
-    background: rgba(255, 0, 0, 0.1);
-    border-left-color: var(--color-important);
+.tournament-row:not(.header):hover {
+    background: transparent;       /* arka plan şeffaf */
+    border: 0.5px solid rgba(255, 255, 255, 0.668);       /* beyaz çerçeve */
+    border-radius: 6px;            /* köşeleri yuvarla */
+	box-shadow: 0 0 5px rgba(255, 255, 255, 0.4);
 }
 
-.match-round {
-    font-weight: bold;
-    color: var(--color-primary);
+#overlay {
+	font-family:Arial, sans-serif;
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    backdrop-filter: blur(10px) saturate(150%);
+    background: rgba(0, 0, 0, 0.5); /* Yarı saydam renk */
+    display:none;
+    z-index:9999;
 }
 
-.match-opponent {
-    color: var(--color-text);
+#turnuva-wrapper {
+    position: fixed; /* tam ekran overlay */
+    top:0; left:0; width:100%; height:100%;
+    display:flex;
+    /* align-items:center;    dikey ortala */
+	align-items:flex-start;    /* scroll ile üstten başlasın */
+    justify-content:center; /* yatay ortala */
+    overflow:auto;
+	overflow-y:auto;           /* dikey scroll */
+    overflow-x:auto;           /* yatay scroll da ekleyebiliriz */
 }
 
-.match-score {
-    font-weight: bold;
+#turnuva {
+    position: relative;
+    transform-origin: top left;
 }
 
-.tournament-match.win .match-score {
-    color: var(--color-success);
+.kutu {
+    width:150px; height:50px; background:#141414; display:flex;
+    justify-content:space-between; padding:0 8px; align-items:center;
+    border:2px solid #d4d2d2; color:#d4d2d2; border-radius:10px;
+    position:absolute;
+}
+.kutu span.isim { flex:1; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size: 16px; }
+.kutu .ayirici { width:2px; background-color:currentColor; margin:0 6px; align-self:stretch; margin-right:-2px; }
+.kutu span.skor { margin-left:10px; min-width:17px; text-align:right; }
+
+.kutu.devam { border-color:#00ffff; box-shadow:0 0 12px #037878; }
+.kutu.kaybeden { border-color:#777; color:#777; box-shadow:none; }
+.kutu.kaybeden .ayirici { background-color:#a0a0a0; }
+.kutu.kazanan { border-color:#d201d2; box-shadow:0 0 12px #d201d277; }
+.kutu.kazanan .ayirici { background-color:#d201d2; }
+.kutu.kazanan-son { border-color:gold; box-shadow:0 0 12px gold; color:gold; justify-content: center; align-items: center; }
+.kutu.kazanan-son span.isim { color: gold; width: 100%; text-align: center; font-weight: bold; }
+.line { position:absolute; background-color:rgb(163,161,161); }
+
+#close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 36px;
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.3s, color 0.3s;
+    z-index: 10000;
 }
 
-.tournament-match.loss .match-score {
-    color: var(--color-important);
+#close-btn:hover {
+    transform: rotate(90deg);
+	text-shadow: 0 0 10px rgb(193, 1, 1); /* üzerine gelince kırmızı gölge */
+    color: red;
+}
+
+#close-btn.close {
+	transform: rotate(90deg);
+	text-shadow: 0 0 10px rgb(193, 1, 1); /* üzerine gelince kırmızı gölge */
+    color: red;
+}
+
+@keyframes pulseGreen {
+  0% {
+    box-shadow: 0 0 5px 2px rgba(0, 255, 0, 0.3);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 15px 8px rgba(0, 255, 0, 0.7);
+    transform: scale(1);
+  }
+  100% {
+    box-shadow: 0 0 5px 2px rgba(0, 255, 0, 0.3);
+    transform: scale(1);
+  }
+}
+
+.kutu.kendi {
+  border-color: #06c81a !important;
+  animation: pulseGreen 2s infinite ease-in-out;
 }

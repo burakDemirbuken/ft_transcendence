@@ -1,4 +1,31 @@
 {
+	"dates": {
+		"sday": {
+			"mon": "Mon",
+			"tue": "Tue",
+			"wed": "Wed",
+			"thu": "Thu",
+			"fri": "Fri",
+			"sat": "Sat",
+			"sun": "Sun"
+		}
+	},
+	"navbar": {
+		"home": "HOME",
+		"play": "PLAY",
+		"profile": "PROFILE",
+		"language": "ENGLISH",
+		"friends": "FRIENDS",
+		"collapse": "COLLAPSE",
+		"settings": "SETTINGS",
+		"logout": "LOGOUT",
+		"login": "LOGIN"
+	},
+	"home": {
+		"team": "Team Members",
+		"thanks": "Thanks to 42 Kocaeli and our friends",
+		"click": "Click"
+	},
 	"login": {
 		"lang": "ENG",
 		"welcome": {
@@ -6,9 +33,313 @@
 			"prompt": "Press Start Button..."
 		},
 		"username": "Enter Username",
-		"email": "Enter Email",
+		"email": "Enter E-mail",
 		"password": "Enter Password",
 		"code": "Enter Code",
 		"rme": "Remember Me"
+	},
+	"profile": {
+		"header": {
+			"level": "Level",
+			"tgames": "Total Games",
+			"winrate": "Win Rate"
+		},
+		"sections": {
+			"dashboard": "Dashboard",
+			"performance": "Performance",
+			"thishtory": "Tournament History",
+			"mhistory": "Match History",
+			"achievements": "Achievements"
+		},
+		"dash": {
+			"psum": {
+				"title": "Performance Overview",
+				"mwon": "Matches Won",
+				"mlose": "Matches Lost",
+				"mdur": "Match Duration Average",
+				"gdur": "Total Play Time"
+			},
+			"streak": {
+				"title": "Win Streak",
+				"curr": "Current Streak",
+				"best": "Best Streak"
+			},
+			"mlast": {
+				"title": "Last Matches",
+				"win": "W",
+				"lose": "L"
+			},
+			"wperf": {
+				"title": "Weekly Performance"
+			}
+		},
+		"perf": {
+			"winlose": {
+				"title": "Win/Lose Rate",
+				"won": "Won",
+				"lost": "Lost"
+			},
+			"skills": {
+				"title": "Skills"
+			},
+			"mprog": {
+				"title": "Monthly Progress"
+			},
+			"dstats": {
+				"title": "Detailed Statistics",
+				"tpts": "Total Points",
+				"ascore": "Average Score Difference",
+				"mfastest": "Fastest Win",
+				"mlongest": "Longest Match"
+			}
+		},
+		"thistory": {
+			"title": "Tournament History",
+			"allyears": "All Years",
+			"header": {
+				"tname": "Tournament Name",
+				"tstart": "Start",
+				"tend": "End",
+				"total": "Total Matches"
+			},
+			"table": {
+				"matches": "Matches",
+				"v/d": "V/D",
+				"score": "Score",
+				"bestper": "Best Performance",
+				"showdetail": "Show Details"
+			}
+		},
+		"mhistory": {
+			"title": "Match History and Analysis",
+			"opts": {
+				"alltimes": "All Times",
+				"last7": "Last 7 days",
+				"last30": "Last 30 days",
+				"allres": "All Results",
+				"onlywon": "Only Wins",
+				"onlylost": "Only Losses"
+			},
+			"table": {
+				"date": "Date",
+				"match": "Match",
+				"score": "Score",
+				"time": "Duration",
+				"result": "Result"
+			}
+		},
+		"achiev": {
+			"fwin": {
+				"title": "First Victory",
+				"active": "Win your first match",
+				"passive": "You won your first match!"
+			},
+			"smaster": {
+				"title": "Streak Master",
+				"active": "You won 10 matches in a row!",
+				"passive": "Win 10 matches in a row"
+			},
+			"swin": {
+				"title": "Fast Victory",
+				"active": "You won in less than 3 minutes!",
+				"passive": "Win in less than 3 minutes"
+			},
+			"nking": {
+				"title": "Neon King",
+				"active": "You won 100 matches!",
+				"passive": "Win 100 matches"
+			},
+			"pserie": {
+				"title": "Perfect Series",
+				"active": "You won 25 matches in a row!",
+				"passive": "Win 25 matches in a row"
+			},
+			"lplayer": {
+				"title": "Legendary Player",
+				"active": "You played 500 matches!",
+				"passive": "Play 500 matches"
+			}
+		}
+	},
+	"friends": {
+		"friends": {
+			"title": "Friends",
+			"play": "Play",
+			"unfriend": "Unfriend"
+		},
+		"requests": {
+			"title": "Requests",
+			"accept": "Accept",
+			"decline": "Decline"
+		},
+		"invites": {
+			"title": "Invitations",
+			"undo": "Undo"
+		},
+		"blocked": {
+			"title": "Blocked",
+			"unblock": "Unblock"
+		}
+	},
+	"settings": {
+		"title": "Settings",
+		"account": {
+			"title": "Account",
+			"uname": "User Name",
+			"dname": "Display Name",
+			"email": "E-mail",
+			"pass": "Password"
+		},
+		"language": "Language",
+		"dzone": {
+			"title": "Danger Zone",
+			"prompt": "Delete Account:",
+			"button": "Delete"
+		},
+		"delacc": "Are you sure about deleting your account? This action is irreversible."
+	},
+	"play": {
+		"title": "GAME MODE",
+		"descr": "Select your game mode and set your preferences",
+		"game": {
+			"title": "Game",
+			"descript": "Create custom game modes with your own rules. Customize all settings.",
+			"settings": {
+				"title": "Game Settings",
+				"gametypes": {
+					"Game Type": "Game Type",
+					"1v1": "1v1",
+					"2v2": "2v2",
+					"local": "Local"
+				},
+				"custom": {
+					"paddle": "Paddle Height",
+					"ball": "Ball Radius",
+					"corner": "Corner Collision Acceleration",
+					"fscore": "Final Score"
+				},
+				"fastmatch": {
+					"title": "Fast Match",
+					"descr": "Join the Current Room",
+					"join": "Join Room"
+				},
+				"create": "Create Room"
+			}
+		},
+		"tourn": {
+			"title": "Tournament",
+			"descript": "Create and join tournaments, compete with more than one player.",
+			"settings": {
+				"title": "Tournament Settings",
+				"tname": "Tournament Name",
+				"tpeople": {
+					"title": "Number of People",
+					"four": "4",
+					"eight": "8",
+					"sixteen": "16",
+					"custom": "Custom"
+				},
+				"dname": "Display Name",
+				"dnmdesc": "💡 This name will be visible to other players during tournaments.",
+				"tournam": {
+					"descr": "Join Existing Tournament",
+					"join": "Join Room"
+				},
+				"create": "Create Tournament Room",
+				"start": "Start Tournament"
+			}
+		},
+		"aigame": {
+			"title": "Play AI",
+			"descript": "Play against AI with different difficulty levels. Personalize your AI opponent.",
+			"settings": {
+				"title": "AI Game Settings",
+				"gametypes": {
+					"title": "Game Type",
+					"onevai": "1 vs AI"
+				},
+				"diffclty": {
+					"title": "AI Difficulty Level",
+					"easy": "Easy",
+					"ehover": "Beginner AI - Eeasy game",
+					"medium": "Medium",
+					"mhover": "Balanced AI - Fair game",
+					"hard": "Hard",
+					"hhover": "Challenging AI - Tough game",
+					"imposs": "Impossible",
+					"ihover": "Unbeatable AI - Good luck!",
+					"custom": "Frankenstein",
+					"chover": "Personalize your AI opponent"
+				},
+				"custom": {
+					"paddle": "Paddle Height",
+					"ball": "Ball Radius",
+					"corner": "Corner Collission Acceleration",
+					"fscore": "Final Score"
+				},
+				"frankenstein": {
+					"rspeed": {
+						"title": "Reaction Speed",
+						"slow": "Very slow",
+						"instant": "Instant"
+					},
+					"paccur": {
+						"title": "Prediction Accuracy",
+						"bad": "Bad",
+						"perfect": "Perfect"
+					},
+					"gaccur": {
+						"title": "General Accuracy",
+						"low": "Low",
+						"high": "High"
+					},
+					"lspeed": {
+						"title": "Learning Speed",
+						"slow": "Slow",
+						"fast": "Fast"
+					},
+					"prepdist": {
+						"title": "Preparation Distance",
+						"close": "Close",
+						"far": "Far"
+					},
+					"frdist": {
+						"title": "Freezing Distance",
+						"close": "Close",
+						"far": "Far"
+					},
+					"twinrate": {
+						"title": "Target Win Rate"
+					},
+					"equity": {
+						"title": "Equity Levels",
+						"cruel": "Cruel",
+						"kind": "Kind"
+					},
+					"winstrk": {
+						"title": "Consequitive Wins Limit"
+					}
+				},
+				"special": {
+					"rage": {
+						"title": "Rage Mode",
+						"descr": "Becomes angry and stronger when it loses in a row"
+					},
+					"fatigue": {
+						"title": "Fatigue Mode",
+						"descr": "Performance decreases when it plays for a long time"
+					},
+					"focus": {
+						"title": "Focus Mode",
+						"descr": "Sometimes gets super focused and plays perfectly"
+					},
+					"adaptive": {
+						"title": "Adaptive Difficulty",
+						"descr": "Adapts to your play style over time"
+					}
+				}
+			},
+			"start": "Start Game With AI"
+		}
 	}
 }

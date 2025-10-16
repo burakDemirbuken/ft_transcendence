@@ -24,9 +24,17 @@
     box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
 }
 
+.achievement-card.unlocked .passive {
+    display: none;
+}
+
 .achievement-card.locked {
     opacity: 0.6;
     border-color: #666;
+}
+
+.achievement-card.locked .active {
+    display: none;
 }
 
 .achievement-icon {
@@ -59,3 +67,4 @@
     font-weight: 600;
     text-shadow: 0 0 10px #ffff00;
 }
+

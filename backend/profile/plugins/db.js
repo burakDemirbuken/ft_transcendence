@@ -1,26 +1,33 @@
-import {Sequelize, DataTypes, Model} from 'sequelize';
-import fp from 'fastify-plugin';
-import ProfileModel from '../models/Profile.js';
-import TeamModel from '../models/Team.js';
-import MatchHistoryModel from '../models/MatchHistory.js';
-import TournamentHistoryModel from '../models/TournamentHistory.js';
-import RoundModel from '../models/Round.js';
-import StatsModel from '../models/Stats.js';
+import {Sequelize, DataTypes, Model} from 'sequelize'
+import fp from 'fastify-plugin'
+import ProfileModel from '../models/Profile.js'
+import TeamModel from '../models/Team.js'
+import MatchHistoryModel from '../models/MatchHistory.js'
+import TournamentHistoryModel from '../models/TournamentHistory.js'
+import RoundModel from '../models/Round.js'
+import RoundMatchModel from '../models/RoundMatch.js'
+import StatsModel from '../models/Stats.js'
+import AchievementsModel from '../models/Achievements.js'
 
 export default fp(async (fastify) => {
 		const sequelize = new Sequelize({
 			dialect: 'sqlite',
 			storage: './database/database.sqlite',
-			logging: false,
+			logging: false
 		})
 
-		const Profile = ProfileModel(sequelize, DataTypes, Model);
-		const Team = TeamModel(sequelize, DataTypes, Model);
-		const MatchHistory = MatchHistoryModel(sequelize, DataTypes, Model);
-		const TournamentHistory = TournamentHistoryModel(sequelize, DataTypes, Model);
-		const Round = RoundModel(sequelize, DataTypes, Model);
-		const Stats = StatsModel(sequelize, DataTypes, Model);
+		const Profile = ProfileModel(sequelize, DataTypes, Model)
+		const Team = TeamModel(sequelize, DataTypes, Model)
+		const MatchHistory = MatchHistoryModel(sequelize, DataTypes, Model)
+		const TournamentHistory = TournamentHistoryModel(sequelize, DataTypes, Model)
+		const Round = RoundModel(sequelize, DataTypes, Model)
+		const RoundMatch = RoundMatchModel(sequelize, DataTypes, Model)
+		const Stats = StatsModel(sequelize, DataTypes, Model)
+		const Achievements = AchievementsModel(sequelize, DataTypes, Model)
 
+
+		// hasmnyler hasone olabilr
+		
 		Profile.hasMany(Team, { foreignKey: 'playerOneId', onDelete: 'SET NULL', hooks: true })
 		Profile.hasMany(Team, { foreignKey: 'playerTwoId', onDelete: 'SET NULL', hooks: true })
 		Team.belongsTo(Profile, { as: 'PlayerOne', foreignKey: 'playerOneId', targetKey: 'id', onDelete: 'SET NULL' })
@@ -29,22 +36,21 @@ export default fp(async (fastify) => {
 		Profile.hasOne(Stats, { foreignKey: 'userId', onDelete: 'CASCADE', hooks: true })
 		Stats.belongsTo(Profile, { foreignKey: 'userId', targetKey: 'id', onDelete: 'CASCADE' })
 
-		Team.hasMany(MatchHistory, { foreignKey: 'teamOneID', onDelete: 'CASCADE', hooks: true })
-		Team.hasMany(MatchHistory, { foreignKey: 'teamTwoID', onDelete: 'CASCADE', hooks: true })
-		Team.hasMany(MatchHistory, { foreignKey: 'winnerTeamID', onDelete: 'CASCADE', hooks: true })
-		MatchHistory.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneID', targetKey: 'id', onDelete: 'CASCADE' })
-		MatchHistory.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoID', targetKey: 'id', onDelete: 'CASCADE' })
-		MatchHistory.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamID', targetKey: 'id', onDelete: 'CASCADE' })
+		Profile.hasOne(Achievements, { foreignKey: 'userId', onDelete: 'CASCADE', hooks: true })
+		Achievements.belongsTo(Profile, { foreignKey: 'userId', targetKey: 'id', onDelete: 'CASCADE' })
 
-		Team.hasMany(Round, { foreignKey: 'teamOneID', onDelete: 'CASCADE', hooks: true })
-		Team.hasMany(Round, { foreignKey: 'teamTwoID', onDelete: 'CASCADE', hooks: true })
-		Team.hasMany(Round, { foreignKey: 'winnerTeamID', onDelete: 'CASCADE', hooks: true })
-		Round.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneID', targetKey: 'id', onDelete: 'CASCADE' })
-		Round.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoID', targetKey: 'id', onDelete: 'CASCADE' })
-		Round.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamID', targetKey: 'id', onDelete: 'CASCADE' })
+		Team.hasMany(MatchHistory, { foreignKey: 'teamOneId', onDelete: 'SET NULL', hooks: true })
+		Team.hasMany(MatchHistory, { foreignKey: 'teamTwoId', onDelete: 'SET NULL', hooks: true })
+		Team.hasMany(MatchHistory, { foreignKey: 'winnerTeamId', onDelete: 'SET NULL', hooks: true })
+		MatchHistory.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneId', targetKey: 'id', onDelete: 'SET NULL' })
+		MatchHistory.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoId', targetKey: 'id', onDelete: 'SET NULL' })
+		MatchHistory.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamId', targetKey: 'id', onDelete: 'SET NULL' })
 
-		Round.hasMany(TournamentHistory, { foreignKey: 'roundID', onDelete: 'CASCADE', hooks: true })
-		TournamentHistory.belongsTo(Round, { foreignKey: 'roundID', targetKey: 'id', onDelete: 'CASCADE' })
+		TournamentHistory.hasMany(Round, { foreignKey: 'tournamentId', sourceKey: 'id', onDelete: 'SET NULL', hooks: true })
+		Round.belongsTo(TournamentHistory, { foreignKey: 'tournamentId', targetKey: 'id', onDelete: 'SET NULL' })
+
+		Round.hasMany(RoundMatch, { foreignKey: 'roundNumber', sourceKey: 'roundNumber', onDelete: 'SET NULL', hooks: true })
+		RoundMatch.belongsTo(Round, { foreignKey: 'roundNumber', targetKey: 'roundNumber', onDelete: 'SET NULL' })
 
 		await sequelize.sync({ alter: true })
 

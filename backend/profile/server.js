@@ -1,5 +1,6 @@
 import Fastify from 'fastify'
 import gamedataRoute from './routes/gamedata.js'
+import checkachievement from './plugins/checkachievement.js'
 import profileRoute from './routes/profile.js'
 import dbPlugin from './plugins/db.js'
 import overview from 'fastify-overview'
@@ -10,6 +11,7 @@ const fastify = Fastify({
 
 fastify.register(overview)
 fastify.register(dbPlugin)
+fastify.register(checkachievement)
 
 fastify.addHook('onRequest', async (request) => {
   fastify.log.info(`Incoming request: ${request.method} ${request.url}`)

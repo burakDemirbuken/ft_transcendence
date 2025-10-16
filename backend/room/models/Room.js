@@ -7,10 +7,11 @@ export default class Room extends EventEmitter
 		super();
 		this.name = name;
 		this.gameMode = null;
-		this.status = 'startable'; // "waiting", "in_game", "completed", "startable"
+		this.status = 'waiting'; // "waiting", "in_game", "completed", "startable"
 		this.maxPlayers = null;
 		this.host = null;
 		this.players = [];
+		this.participants = [];
 		this.gameSettings = gameSettings;
 		this.createdAt = Date.now();
 	}
@@ -22,26 +23,16 @@ export default class Room extends EventEmitter
 		if (this.players.length === 0)
 			this.host = player.id;
 		this.players.push(player);
+		this.participants.push(player);
 	}
 
 	removePlayer(playerId)
 	{
 		this.players = this.players.filter(p => p.id !== playerId);
-		if (this.players.length < this.maxPlayers)
-			this.status = 'waiting';
-		if (this.players.length === 0)
-			this.status = 'completed';
-	}
-
-	setPlayerReady(playerId, isReady)
-	{
-		const player = this.players.find(p => p.id === playerId);
-		if (player)
-			player.isReady = isReady;
-		if (this.players.every(p => p.isReady) && this.players.length === this.maxPlayers)
-			this.status = 'startable';
-		else
-			this.status = 'waiting';
+		if (this.status === 'waiting')
+			this.participants = this.participants.filter(p => p.id !== playerId);
+		if (this.host === playerId)
+			this.host = this.players[0]?.id;
 	}
 
 	startGame(playerId)
@@ -56,7 +47,7 @@ export default class Room extends EventEmitter
 		this.status = 'in_game';
 		return {
 			gameSettings: this.gameSettings,
-			players: this.players.map(p => p.getState(this.host)),
+			players: this.players.map(p => p.getState(this.host).id),
 			gameMode: this.gameMode,
 		};
 	}
@@ -69,7 +60,8 @@ export default class Room extends EventEmitter
 	finishRoom(payload)
 	{
 		this.status = 'finished';
-		this.emit('finished', { ...payload });
+		this.emit('finished', { state: payload, players: this.players });
+		return { state: payload, players: this.players };
 	}
 
 	getState()

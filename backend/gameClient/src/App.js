@@ -26,11 +26,12 @@ class App
 
 	start(data)
 	{
+		console.log('🚀 Starting app with data:', JSON.stringify(data, null, 2));
 		if (data.gameMode === 'tournament')
 		{
 			let playerArcadeNumber = data.games.find(g => g.players.includes(this.playerId))?.matchNumber;
 			if (playerArcadeNumber === undefined)
-				playerArcadeNumber = 0; // Fallback to 0 if not found (should not happen)
+				playerArcadeNumber = 0;
 			this.loadGame(
 				{
 					canvasId: "renderCanvas",
@@ -67,8 +68,33 @@ class App
 			);
 		}
 
+		// ulas :
+		// this._pingpong(this.playerName);
 		this._setupNetworkListeners(data.roomId, data.gameMode);
 		this._gameControllerSetup();
+	}
+
+	_pingpong(name) {
+		const socket = new WebSocket(`ws://${window.location.hostname}:3007/ws-friend/presence?` + new URLSearchParams({ userName: name }).toString());
+		socket.onopen = () => {
+			console.log('Connected to presence server');
+		}
+
+		socket.onmessage = (event) => {
+			try {
+				const message = JSON.parse(event.data);
+				if (message.type === 'ping') {
+					socket.send(JSON.stringify({ type: 'pong' }));
+				}
+			} catch (err) {
+				console.error('Error parsing message from presence server:', err);
+			}
+		}
+
+		socket.onerror = (error) => {
+			console.error('Heartbeat WebSocket error:', error);
+		}
+
 	}
 
 	_gameControllerSetup()

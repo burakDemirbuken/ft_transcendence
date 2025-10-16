@@ -60,7 +60,7 @@ class GameManager extends EventEmitter
 		game.addRegisteredPlayer(playerId);
 	}
 
-	async createGame(id, gameMode, properties)
+	async createGame(id, gameMode, properties, players)
 	{
 		const gameId = id;
 		let game;
@@ -80,6 +80,7 @@ class GameManager extends EventEmitter
 			throw new Error(`Unsupported game mode: ${gameMode}`);
 		game.id = gameId;
 		game.initializeGame();
+		players.forEach(player => game.addRegisteredPlayer(player));
 		game.on('finished', (
 			{results, players}) =>
 			{

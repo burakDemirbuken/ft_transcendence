@@ -8,20 +8,20 @@ export default (sequelize, DataTypes, Model) => {
             primaryKey: true,
             autoIncrement: true
         },
-        teamOneID: {
+        teamOneId: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: 'teams',
+				model: 'Team',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
 		},
-		teamTwoID: {
+		teamTwoId: {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: 'teams',
+				model: 'Team',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
@@ -34,11 +34,11 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.INTEGER,
 			defaultValue: 0
 		},
-		winnerTeamID: {
+		winnerTeamId: {
 			type: DataTypes.INTEGER,
 			defaultValue: null,
 			references: {
-				model: 'teams',
+				model: 'Team',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
@@ -49,10 +49,10 @@ export default (sequelize, DataTypes, Model) => {
 		matchEndDate: {
 			type: DataTypes.DATE
 		},
-        matchtype: {
+        matchType: {
             type: DataTypes.STRING,
             allowNull: false
-        },
+        }
 	}, {
         sequelize,
         modelName: 'MatchHistory',

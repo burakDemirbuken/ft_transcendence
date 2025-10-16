@@ -1,0 +1,109 @@
+{
+	"eng": {
+		"system": "System error.",
+		"login": {
+			"uname": {
+				"empty": "Username can't be empty.",
+				"length": "Username length must be 1-20 characters.",
+				"invalid": "Username has to be of valid characters."
+			},
+			"email": {
+				"empty": "E-mail can't be empty.",
+				"invalid": "Invalid e-mail."
+			},
+			"password": {
+				"length": "Password length must be between 8-128 characters.",
+				"empty": "Password can't be empty."
+			},
+			"code": {
+				"empty": "Code can't be empty."
+			}
+		},
+		"profile": {
+			"skills": {
+				"labels": ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"]				,
+				"label": "Skill Points"
+			},
+			"weekly": {
+				"labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+				"label": "Total Matches"
+			},
+			"monthly": {
+				"labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+				"label0": "Total Matches",
+				"label1": "Matches Won"
+			},
+			"winloss": {
+				"labels": ["Won", "Lost"]
+			}
+		}
+	},
+	"tur": {
+		"system": "Sistem hatası.",
+		"login": {
+			"email": {
+				"empty": "E-posta boş kalamaz.",
+				"invalid": "Geçersiz e-posta."
+			},
+			"password": {
+				"length": "Şifre uzunluğu 8-128 karakter aralığında olmalıdır.",
+				"empty": "Şifre boş kalamaz."
+			},
+			"code": {
+				"empty": "Kod boş kalamaz."
+			}
+		},
+		"profile": {
+			"skills": {
+				"labels": ["Hız", "Doğruluk", "Savunma", "Saldırı", "Strateji", "Dayanıklılık"],
+				"label": "Beceri Puanı"
+			},
+			"weekly": {
+				"labels": ["Pzt", "Sal", "Çar", "Prş", "Cum", "Cmt", "Paz"],
+				"label": "Toplam Maçlar"
+			},
+			"monthly": {
+				"labels": ["Pzt", "Sal", "Çar", "Prş", "Cum", "Cmt", "Paz"],
+				"label0": "Toplam Maçlar",
+				"label1": "Kazanılan Maçlar"
+			},
+			"winloss": {
+				"labels": ["Kazanılan", "Kaybedilen"]
+			}
+		}
+	},
+	"deu": {
+		"system": "Systemfehler.",
+		"login": {
+			"email": {
+				"empty": "Die E-Mail-Adresse darf nicht leer bleiben.",
+				"invalid": "Ungültige E-Mail-Adresse."
+			},
+			"password": {
+				"length": "Das Passwort muss von 8 bis 128 Ziffern entstehen.",
+				"empty": "Das Passwort darf nicht leer bleiben."
+			},
+			"code": {
+				"empty": "Der Code darf nicht leer bleiben."
+			}
+		},
+		"profile": {
+			"skills": {
+				"labels": ["Schnelligkeit", "Präzision", "Verteidigung", "Angriff", "Strategie", "Dauerhaftigkeit"]				,
+				"label": "Fähigkeiten"
+			},
+			"weekly": {
+				"labels": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+				"label": "Gesamtzahl der Spiele"
+			},
+			"monthly": {
+				"labels": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+				"label0": "Gesamtzahl der Spiele",
+				"label1": "Gewonnene Spiele"
+			},
+			"winloss": {
+				"labels": ["Sieg", "Verlust"]
+			}
+		}
+	}
+}

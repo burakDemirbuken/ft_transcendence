@@ -8,23 +8,28 @@ export default (sequelize, DataTypes, Model) => {
 			primaryKey: true,
 			autoIncrement: true
 		},
-		roundID: {
+		name: {
+			type: DataTypes.STRING,
+			allowNull: false
+		},
+		winnerPlayer: {
 			type: DataTypes.INTEGER,
-			allowNull: false,
+			allowNull: true,
 			references: {
-				model: 'rounds',
+				model: 'Profile',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
 		},
-		tournementDate: {
+		tournamentDate: {
 			type: DataTypes.DATE,
+			allowNull: false
 		}
 	}, {
 		sequelize,
 		modelName: 'TournamentHistory',
 		tableName: 'tournament_histories'
 	})
-	
+
 	return TournamentHistory
 }

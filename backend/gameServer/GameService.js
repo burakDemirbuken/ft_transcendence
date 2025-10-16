@@ -20,7 +20,7 @@ class GameService
 		this.websocketServer = new WebSocketServer();
 		this.roomSocket = new WebSocketClient("room", 3004);
 		this.tournamentManager = new TournamentManager();
-		this.connectionId = new Map(); //  playerId ->
+		this.connectionId = new Map(); //  playerId -> connectionId
 		this.players = new Map(); // playerId -> Player instance
 
 		this.gameManager.start();
@@ -251,8 +251,7 @@ class GameService
 
 	async matchCreate(roomId, gameMode, gameSettings, players)
 	{
-		const gameId = await this.gameManager.createGame(roomId, gameMode, gameSettings);
-		players.forEach((p) => this.gameManager.registerPlayerToGame(gameId, p.id));
+		const gameId = await this.gameManager.createGame(roomId, gameMode, gameSettings, players);
 
 		this.gameManager.on(`game${gameId}`, ({type, payload, players}) =>
 			{
@@ -286,7 +285,7 @@ class GameService
 
 	async tournamentMatchCreate(roomId, payload)
 	{
-		const {players, maxPlayers, matches} = payload;
+		const {maxPlayers, matches} = payload;
 		const tournamentId = await this.tournamentManager.createTournament(roomId, maxPlayers, matches);
 		this.tournamentManager.on(`tournament_${tournamentId}`,
 			({type, payload, players}) =>

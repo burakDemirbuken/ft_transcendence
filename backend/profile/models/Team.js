@@ -12,7 +12,7 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.STRING,
 			allowNull: true,
 			references: {
-				model: 'profiles',
+				model: 'Profile',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
@@ -21,7 +21,7 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.STRING,
 			allowNull: true,
 			references: {
-				model: 'profiles',
+				model: 'Profile',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
