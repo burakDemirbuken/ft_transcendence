@@ -117,6 +117,8 @@ class RoomManager extends EventEmitter
 				const {state, players} = room.finishRoom(payload);
 				players.forEach(player => {
 					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: state }));
+					if (room.gameMode !== 'tournament')
+						this.leaveRoom(player);
 				});
 				break;
 			default:

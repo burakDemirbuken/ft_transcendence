@@ -291,7 +291,7 @@ export default class TournamentRoom extends Room
 			gameMode: this.gameMode,
 			status: this.status,
 			maxPlayers: this.maxPlayers,
-			spectators: this.spectators.map(s => s.getState()),
+			losers: this.spectators.map(s => s.getState()),
 			players: this.players.map(p => p.getState(this.host)),
 			gameSettings: this.gameSettings,
 			maxRound: this.maxRounds,
