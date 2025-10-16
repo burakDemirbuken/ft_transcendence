@@ -90,7 +90,7 @@ export default class TournamentRoom extends Room
 		}
 		else
 			losePlayers = this.nextRound(matches);
-		return { ...this.getMatchmakingInfo(), losePlayers };
+		return { state: this.getMatchmakingInfo(), losePlayers: losePlayers };
 	}
 
 	startGame(playerId)
@@ -192,7 +192,7 @@ export default class TournamentRoom extends Room
 					match.loser = matches[index].loser;
 					if (match.loser) {
 						const loserPlayer = this.players.find(p => p.id === match.loser);
-						if (loserPlayer) losePlayers.push(loserPlayer);
+						losePlayers.push(loserPlayer);
 					}
 				}
 			}
@@ -221,6 +221,7 @@ export default class TournamentRoom extends Room
 			this.currentMatches.push(match);
 		}
 		this.status = 'waiting';
+		return losePlayers;
 	}
 
 	getState()

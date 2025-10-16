@@ -108,17 +108,17 @@ class RoomManager extends EventEmitter
 					console.warn(`Room with ID ${payload.roomId} does not exist`);
 					return;
 				}
-				const state = room.finishRoom(payload);
-				if (room.status === 'tournament')
+				const { state, losePlayers } = room.finishRoom(payload);
+				if (room.gameMode === 'tournament')
 				{
-					state.losePlayers.forEach(p => {
-						console.log(`Removing player ${p} from tournament room ${room.id}`);
+					losePlayers.forEach(p => {
+						console.log(`Removing player ${p.getState()} from tournament room ${room.id}`);
 						this.leaveRoom(p);
 					});
 				}
 				room.players.forEach(player => {
 					if (room.status === 'finished')
-						this.leaveRoom(player);
+						this.leaveRoom(this.players.find(p => p.id === player.id));
 					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: state }));
 				});
 				break;
@@ -197,7 +197,7 @@ class RoomManager extends EventEmitter
 	{
 		const {room, roomId} = this._getRoomWithPlayer(player.id);
 		if (!room)
-		{ 
+		{
 			console.log(`Player with ID ${player.id} is not in any room`);
 			return null;
 		}
