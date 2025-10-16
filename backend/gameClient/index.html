@@ -2090,13 +2090,6 @@ html {
 		                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M192 384L88.5 384C63.6 384 48.3 356.9 61.1 335.5L114 247.3C122.7 232.8 138.3 224 155.2 224L250.2 224C326.3 95.1 439.8 88.6 515.7 99.7C528.5 101.6 538.5 111.6 540.3 124.3C551.4 200.2 544.9 313.7 416 389.8L416 484.8C416 501.7 407.2 517.3 392.7 526L304.5 578.9C283.2 591.7 256 576.3 256 551.5L256 448C256 412.7 227.3 384 192 384L191.9 384zM464 224C464 197.5 442.5 176 416 176C389.5 176 368 197.5 368 224C368 250.5 389.5 272 416 272C442.5 272 464 250.5 464 224z"/></svg>
 						<span>Turnuvayı Başlat</span>
 		            </button>
-		            <button class="btn btn-primary btn-large" id="next-round-btn" style="display: none;">
-		                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M544 160C544 124.7 515.3 96 480 96L160 96C124.7 96 96 124.7 96 160L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 160zM416 320C416 326.7 413.2 333 408.3 337.6L296.3 441.6C289.3 448.1 279.1 449.8 270.4 446C261.7 442.2 256 433.5 256 424L256 216C256 206.5 261.7 197.8 270.4 194C279.1 190.2 289.3 191.9 296.3 198.4L408.3 302.4C413.2 306.9 416 313.3 416 320z"/></svg>
-						<span>Next Round</span>
-		            </button>
-		            <button class="btn btn-primary btn-large" id="start-tournament-btn" style="display: none;">
-						<span>Turnuvayı Başlat</span>
-		            </button>
 		        </div>
 		    </div>
 		</div>
@@ -2807,7 +2800,11 @@ function generateRandomId() {
 
 // Generate random user name for testing
 function generateRandomName() {
-    const names = ['Ali', 'Ayşe', 'Mehmet', 'Fatma', 'Ahmet', 'Zeynep', 'Can', 'Elif', 'Burak', 'Selin'];
+    const names = ['Ali', 'Ayşe', 'Mehmet', 'Fatma', 'Ahmet', 'Zeynep', 'Can', 'Elif', 'Burak', 'Selin',
+                   'Ali1', 'Ayşe1', 'Mehmet1', 'Fatma1', 'Ahmet1', 'Zeynep1', 'Can1', 'Elif1', 'Burak1', 'Selin1',
+                   'Ali2', 'Ayşe2', 'Mehmet2', 'Fatma2', 'Ahmet2', 'Zeynep2', 'Can2', 'Elif2', 'Burak2', 'Selin2',
+                   'Ali3', 'Ayşe3', 'Mehmet3', 'Fatma3', 'Ahmet3', 'Zeynep3', 'Can3', 'Elif3', 'Burak3', 'Selin3'
+	];
     return names[Math.floor(Math.random() * names.length)];
 }
 
@@ -3547,9 +3544,9 @@ function handleGameFinished(payload) {
             }
             
             // Lobiye dön
-            setTimeout(() => {
-                returnToLobby();
-            }, 3000);
+            // setTimeout(() => {
+            //     returnToLobby();
+            // }, 3000);
             return;
         }
     }
@@ -4453,10 +4450,6 @@ function showRoundWaitingRoom(data) {
         if (currentRound >= totalRounds) {
             console.log('Tournament completed');
             showNotification('🏆 Turnuva tamamlandı!', 'success');
-            
-            setTimeout(() => {
-                returnToLobby();
-            }, 3000);
         } 
         // Final round mu?
         else if (nextRound === totalRounds) {
@@ -4533,7 +4526,7 @@ function handleRoundFinished(payload) {
     if (!payload) {
         console.error('Invalid round data: payload is null');
         showNotification('Round verisi geçersiz!', 'error');
-        returnToLobby();
+        // returnToLobby();
         return;
     }
 
@@ -4584,33 +4577,33 @@ function handleRoundFinished(payload) {
 }
 
 // returnToLobby fonksiyonu ekle
-function returnToLobby() {
-    console.log('🏠 Returning to lobby');
+// function returnToLobby() {
+//     console.log('🏠 Returning to lobby');
     
-    // Tüm odaları gizle
-    document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
+//     // Tüm odaları gizle
+//     document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
     
-    // Game page'i göster
-    document.getElementById('game-page').classList.remove('hidden');
+//     // Game page'i göster
+//     document.getElementById('game-page').classList.remove('hidden');
     
-    // Back arrow'u gizle
-    const backArrow = document.getElementById('back-arrow');
-    if (backArrow) {
-        backArrow.classList.remove('active');
-    }
+//     // Back arrow'u gizle
+//     const backArrow = document.getElementById('back-arrow');
+//     if (backArrow) {
+//         backArrow.classList.remove('active');
+//     }
     
-    // Room state'i sıfırla
-    currentRoomId = null;
-    currentGameMode = null;
+//     // Room state'i sıfırla
+//     currentRoomId = null;
+//     currentGameMode = null;
     
-    // Tournament data'yı sıfırla
-    tournamentData = {
-        currentRound: 0,
-        totalRounds: 0,
-        winners: [],
-        nextMatches: []
-    };
-}
+//     // Tournament data'yı sıfırla
+//     tournamentData = {
+//         currentRound: 0,
+//         totalRounds: 0,
+//         winners: [],
+//         nextMatches: []
+//     };
+// }
 
 // Back arrow'a round waiting room için de destek ekle
 document.getElementById('back-arrow').addEventListener('click', function() {
