@@ -48,7 +48,8 @@ export function isTokenBlacklisted(token)
 export async function sendVerificationEmail(email, username, token)
 {
 	const emailServiceUrl = process.env.EMAIL_SERVICE_URL || 'http://email:3005';
-	const verificationUrl = `https://localhost:3030/api/auth/verify-email?token=${token}`;
+	console.log("EMAIL SERVICE URL: ", emailServiceUrl);""
+	const verificationUrl = `https://${process.env.HOST_IP}:3030/api/auth/verify-email?token=${token}`;
 
 	const response = await fetch(`${emailServiceUrl}/send-verification`,
     {

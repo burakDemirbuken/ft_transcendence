@@ -1,8 +1,8 @@
-import AView from "./AView.js";
-import { navigateTo } from './index.js';
-import { showNotification } from './notification.js';
+import { getAuthToken } from './utils/auth.js';
 import { getJsTranslations } from './I18n.js';
-
+import { navigateTo, API_BASE_URL } from './index.js';
+import { showNotification } from './notification.js';
+import AView from "./AView.js";
 let currentStep:string = "welcome";
 let userRegistered:boolean;
 let rememberMe:boolean = false;
@@ -34,7 +34,7 @@ async function username() {
 	if (!/^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username))
 		return showNotification(trlt.login.uname.invalid, "error")
 
-	const address = `https://localhost:3030/api/auth/check-username?username=${username}&lang=${localStorage.getItem("langPref")}`;
+	const address = `${API_BASE_URL}/auth/check-username?username=${username}&lang=${localStorage.getItem("langPref")}`;
 	try {
 		const response = await fetch(address);
 		const json = await response.json();
@@ -91,7 +91,7 @@ async function login() {
 		"password": formData.get("password")
 	};
 
-	const request = new Request(`https://localhost:3030/api/auth/login?lang=${localStorage.getItem("langPref")}`, {
+	const request = new Request(`${API_BASE_URL}/auth/login?lang=${localStorage.getItem("langPref")}`, {
 		method: "POST",
 		headers: new Headers({ "Content-Type": "application/json" }),
 		body: JSON.stringify(user),
@@ -130,7 +130,7 @@ async function register() {
 		"password": formData.get("password")
 	};
 
-	const request = new Request(`https://localhost:3030/api/auth/register?lang=${localStorage.getItem("langPref")}`, {
+	const request = new Request(`${API_BASE_URL}/auth/register?lang=${localStorage.getItem("langPref")}`, {
 		method: "POST",
 		headers: new Headers({ "Content-Type": "application/json" }),
 		body: JSON.stringify(obj),
@@ -168,18 +168,30 @@ async function verify() {
 			"rememberMe": rememberMe
 		};
 
-		const request = new Request(`https://localhost:3030/api/auth/verify-2fa?lang=${localStorage.getItem("langPref")}`, {
+		const request = new Request(`${API_BASE_URL}/auth/verify-2fa?lang=${localStorage.getItem("langPref")}`, {
 		method: "POST",
 		headers: new Headers({ "Content-Type": "application/json" }),
 		body: JSON.stringify(obj),
+		credentials: "include",
 		});
 		try {
 			const response = await fetch(request);
 			const json = await response.json();
-			if (response.ok)
+			if (response.ok) {
+				console.log("🎉 2FA verification successful!");
+				console.log("🍪 Cookies after login:", document.cookie);
+				
+				// Token'ı response'tan al ve localStorage'a kaydet
+				if (json.accessToken) {
+					console.log("💾 Saving token to localStorage:", json.accessToken);
+					localStorage.setItem('authToken', json.accessToken);
+					console.log("🔑 Auth token after saving:", getAuthToken());
+				}
+				
 				navigateTo("home");
-			else
+			} else {
 				showNotification(json.error, "error");
+			}
 		} catch {
 			showNotification(trlt.system, "error");
 		}

@@ -2,7 +2,7 @@ class TokenManager {
     constructor() {
         this.tokenInfo = {};
         this.refreshPromise = null;
-        this.API_BASE = 'https://localhost:3030/api/auth';
+        this.API_BASE = `https://${window.location.hostname}:3030/api/auth`;
         this.initAutoRefresh();
     }
     static getInstance() {

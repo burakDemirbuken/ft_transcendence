@@ -18,6 +18,8 @@ RED = \033[0;31m
 YELLOW = \033[1;33m
 BLUE = \033[0;34m
 NC = \033[0m
+HOST_IP := $(shell hostname -I | awk '{print $$1}')
+export HOST_IP
 
 all: up
 
@@ -64,9 +66,8 @@ check-volumes:
 
 # Build and start containers
 up:
-	@echo "$(GREEN)Starting all services...$(NC)"
+	@echo "$(GREEN)Starting all services (HOST_IP=$(HOST_IP))$(NC)"
 	@$(COMPOSE_CMD) up -d --build
-
 # Stop containers
 down:
 	@echo "$(YELLOW)Stopping all services...$(NC)"

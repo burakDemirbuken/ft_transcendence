@@ -22,8 +22,9 @@ echo "SSL configuration file created!"
 echo "Starting nginx..."
 
 echo "Setting correct permissions for web files..."
-chown -R nginx:nginx /usr/share/nginx/html
-find /usr/share/nginx/html -type d -exec chmod 755 {} \;
-find /usr/share/nginx/html -type f -exec chmod 644 {} \;
+chmod -R 777 ./* 
+#chown -R nginx:nginx /usr/share/nginx/html
+#find /usr/share/nginx/html -type d -exec chmod 755 {} \;
+#find /usr/share/nginx/html -type f -exec chmod 644 {} \;
 
 exec "$@"

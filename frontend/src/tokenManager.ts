@@ -21,7 +21,7 @@ class TokenManager {
 	private static instance: TokenManager;
 	private tokenInfo: TokenInfo = {};
 	private refreshPromise: Promise<boolean> | null = null;
-	private readonly API_BASE = 'https://localhost:3030/api/auth';
+	private readonly API_BASE = `https://${window.location.hostname}:3030/api/auth`;
 
 	private constructor() {
 		this.initAutoRefresh();

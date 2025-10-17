@@ -91,6 +91,8 @@ services:
     volumes:
       - authentication_src:/app
       - /app/node_modules
+    environment:
+      - HOST_IP=${HOST_IP}
 
   gateway:
     container_name: gateway
