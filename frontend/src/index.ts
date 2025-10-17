@@ -6,7 +6,9 @@ import Friends from "../dist/Friends.js";
 import Settings from "../dist/Settings.js";
 import Login from "../dist/Login.js";
 import I18n from './I18n.js';
+import { getAuthToken } from './utils/auth.js';
 import { removeAuthToken } from './utils/auth.js';
+
 
 // Dynamic API base URL based on current hostname
 export const API_BASE_URL = `https://${window.location.hostname}:3030/api`;
@@ -28,6 +30,17 @@ let view = null;
 
 const router = async function(page:string) {
 	const content = document.querySelector("#content");
+	const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
+
+	if (page === "profile" || page === "settings" || page === "friends" || page === "play") {
+		if (!hasToken)
+			return window.location.replace("/login");
+	}
+	// if (page === "login") {
+	// 	if (pageState.current !== "login" && hasToken) {
+	// 		return window.location.replace("/home");
+	// 	}
+	// }
 
 	if (view) {
 		content.innerHTML = "";
@@ -73,20 +86,25 @@ document.addEventListener("DOMContentLoaded", () =>
 				{
 					try
 					{
-						const response = await fetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref")}`, {
-	  						method: "POST",
-	  						credentials: "include",
-						});
-
-						const json = await response.json();
-
-						if (response.ok)
+						const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
+						if (hasToken)
 						{
-							removeAuthToken();
-							document.querySelector("#navbar")?.classList.add("logout");
+							console.log('User is logging out');
+							const response = await fetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref")}`, {
+								method: "POST",
+								credentials: "include",
+							});
+
+							const json = await response.json();
+
+							if (response.ok)
+							{
+								removeAuthToken();
+								document.querySelector("#navbar")?.classList.add("logout");
+							}
+							else
+								alert(`${json.error}`);
 						}
-						else
-							alert(`${json.error}`);
 					}
 					catch
 					{
@@ -139,6 +157,12 @@ window.addEventListener("load", () => {
 
 	console.log('🌐 Current hostname:', window.location.hostname);
 	console.log('🔗 API Base URL:', API_BASE_URL);
+
+	const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
+	if (!hasToken) {
+		console.log('User is not authenticated');
+		document.querySelector("#navbar")?.classList.add("logout");
+	}
 
 	I18n.loadLanguage();
 
