@@ -19,10 +19,6 @@ fastify.addHook('onRequest', async (request) => {
   fastify.log.info(`Request body: ${JSON.stringify(request.body)}`)
 })
 
-fastify.addHook('onResponse', async (request, reply) => {
-  fastify.log.info(`Response status: ${reply.statusCode} for ${request.method} ${request.url}`)
-})
-
 fastify.register(gamedataRoute)
 fastify.register(profileRoute)
 

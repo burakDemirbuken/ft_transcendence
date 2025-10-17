@@ -1,3 +1,5 @@
+import { Op } from 'sequelize'
+
 export default async function profileRoute(fastify) {
 
 	fastify.get('/profile', async (request, reply) => { 
@@ -16,17 +18,6 @@ export default async function profileRoute(fastify) {
 				return reply.code(404).send({ error: `User not found: ${userName}` })
 			}
 
-			const { Stats, Achievement } = fastify.sequelize.models;
-			
-			let [userStatsRecord, userAchievementRecord] = await Promise.all([
-				Stats.findOne({
-					where: {  userId: userProfile.id } 
-				}),
-				Achievement.findOne({
-					where: { userId: userProfile.id }
-				})
-			])
-
 			const [ userAchievementsProgress, userStats ] = await Promise.all([
 				fastify.getAchievementProgress(userProfile),
 				fastify.statCalculate(userProfile)
@@ -36,8 +27,8 @@ export default async function profileRoute(fastify) {
 
 			return reply.send({
 				profile: userProfile.toJSON(),
-				achievements: userAchievementsProgress.toJSON(),
-				stats: userStats.toJSON(),
+				achievements: userAchievementsProgress,
+				stats: userStats,
 			})
 		} catch (error) {
 			fastify.log.error('Error retrieving user profile:', error)
@@ -203,14 +194,39 @@ export default async function profileRoute(fastify) {
 			},
 			attributes: ['userName', 'displayName', 'avatarUrl']
 		})
-		if (!userProfiles || userProfiles.length === 0) {
+		if (!userProfiles) {
 			return reply.code(404).send({ error: 'Users not found' })
 		}
 
-		return reply.send({
+		return reply.code(200).send({
 			success: true,
 			users: userProfiles.toJSON()
 		})
+	})
+
+	fastify.post('/internal/avatar-update', async (request, reply) => {
+		const {userName, filename, avatarUrlPath } = request.body ?? {}
+
+		if (!userName || !filename || !avatarUrlPath) {
+			return reply.code(400).send({ error: 'userName, filename and avatarUrlPath are required' })
+		}
+
+		const userProfile = await fastify.sequelize.models.Profile.findOne({
+			where: { userName: userName }
+		})
+
+		if (!userProfile) {
+			return reply.code(404).send({ error: 'User not found' })
+		}
+
+		userProfile.avatarUrl = avatarUrlPath
+		await userProfile.save()
+
+		return reply.code(200).send({
+			success: true,
+			message: 'Avatar updated successfully'
+		})
+
 	})
 }
 

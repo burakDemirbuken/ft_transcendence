@@ -18,8 +18,8 @@ export default (sequelize, DataTypes, Model) => {
             allowNull: false,
         },
         avatarUrl: {
-            type: DataTypes.STRING
-            //defaultValue: null
+            type: DataTypes.STRING,
+            defaultValue: '/static/default/'
         },
         bio: {
             type: DataTypes.TEXT

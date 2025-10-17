@@ -1,3 +1,5 @@
+import { Op } from 'sequelize'
+
 export default async function gamedataRoute(fastify) {
 
 	fastify.post('/internal/match', async (request, reply) => {
@@ -32,7 +34,7 @@ export default async function gamedataRoute(fastify) {
 
 			if (winnerTeam) {
 				await Promise.all([
-					winnerTeam.forEach(async (player) => {
+					...winnerTeam.map(async (player) => {
 						const playerState = state.players.find(p => p.id === player.id)
 						player.Stats.increment({
 							gamesPlayed: 1,
@@ -47,7 +49,7 @@ export default async function gamedataRoute(fastify) {
 							gameMinDuration: time.duration < player.Stats.gameMinDuration ? time.duration : player.Stats.gameMinDuration
 						})
 					}),
-					loserTeam.forEach(async (player) => {
+					...loserTeam.map(async (player) => {
 						const playerState = state.players.find(p => p.id === player.id)
 						player.Stats.increment({
 							gamesPlayed: 1,
@@ -77,10 +79,10 @@ export default async function gamedataRoute(fastify) {
 			])
 
 			await Promise.all([
-				teamOnePlayers.forEach(async (player) => {
+				...teamOnePlayers.map(async (player) => {
 					fastify.checkAchievements(player.id, t)
 				}),
-				teamTwoPlayers.forEach(async (player) => {
+				...teamTwoPlayers.map(async (player) => {
 					fastify.checkAchievements(player.id, t)
 				})
 			])
@@ -174,8 +176,6 @@ export default async function gamedataRoute(fastify) {
 						winnerPlayerID: matchData.winner?.id ?? null
 					}, { transaction: t })
 
-
-
 					const [winnerPlayer, loserPlayer] = await Promise.all([
 						Profile.findOne({
 							where: {
@@ -194,7 +194,7 @@ export default async function gamedataRoute(fastify) {
 					])
 
 					Promise.all([
-						() => {
+						async () => {
 							const winnerState = matchData.state.players.find(p => p.id === matchData.winner)
 							winnerPlayer?.Stats.increment({
 								gamesPlayed: 1,
@@ -209,7 +209,7 @@ export default async function gamedataRoute(fastify) {
 								gameMinDuration: matchData.time.duration < winnerPlayer.Stats.gameMinDuration ? matchData.time.duration : winnerPlayer.Stats.gameMinDuration
 							}, { transaction: t })
 						},
-						() => {
+						async () => {
 							const loserState = matchData.state.players.find(p => p.id === matchData.loser)
 							loserPlayer?.Stats.increment({
 								gamesPlayed: 1,
@@ -229,6 +229,8 @@ export default async function gamedataRoute(fastify) {
 				})
 			})
 
+			await t.commit()
+			return reply.status(200).send({ message: 'Tournament data processed successfully' })
 		} catch (error) {
 			await t.rollback()
 			fastify.log.error('Error processing tournament data:', error)
@@ -236,14 +238,14 @@ export default async function gamedataRoute(fastify) {
 		}
 	})
 
-	fastify.get('match-history', async (request, reply) => {
+	fastify.get('/match-history', async (request, reply) => {
 		const { userName } = request.query ?? {}
 		if (!userName) {
 			return reply.code(400).send({ error: 'Username is required' })
 		}
 		
 		const userProfile = await fastify.sequelize.models.Profile.findOne({
-			where: { userName: userName }
+			where: { userName: userName },
 			attributes: ['id']
 		})
 		if (!userProfile) {
@@ -279,11 +281,12 @@ export default async function gamedataRoute(fastify) {
 
 		console.log(matchHistory.toJSON())
 
-		return reply.send({ success: true, matchHistory.toJSON() })
+		return reply.send({
+			success: true,
+			matches: matchHistory.toJSON()
+		})
+	})
 
-})
-
-//
 	fastify.get('/tournament-history', async (request, reply) => {
 		const { userName } = request.query ?? {}
 		if (!userName) {
@@ -291,7 +294,7 @@ export default async function gamedataRoute(fastify) {
 		}
 		
 		const userProfile = await fastify.sequelize.models.Profile.findOne({
-			where: { userName: userName }
+			where: { userName: userName },
 			attributes: ['id']
 		})
 		if (!userProfile) {
@@ -327,6 +330,8 @@ export default async function gamedataRoute(fastify) {
 
 		console.log(RoundMatch.toJSON())
 
-		return reply.send({ success: true, RoundMatch.toJSON() })
+		return reply.send({ success: true, 
+			matches: RoundMatch.toJSON()
+		})
 	})
  }

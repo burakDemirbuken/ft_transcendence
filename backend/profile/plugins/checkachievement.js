@@ -41,6 +41,10 @@ export default fp(async (fastify) => {
         if (!achievements.lessThanThreeMin && stats.gameMinDuration > 0 && stats.gameMinDuration < 180000) {
             updates.lessThanThreeMin = new Date()
         }
+
+        if (Object.keys(updates).length > 0) {
+            await achievements.update(updates)
+        }
     }
 
     async function getAchievementProgress(user) {
@@ -61,27 +65,21 @@ export default fp(async (fastify) => {
 
         return ({
             firstWin: {
-                unlocked: !!achievements.firstWin,
                 unlockedAt: achievements.firstWin || null,
             },
             hundredWins: {
-                unlocked: !!achievements.hundredWins,
                 unlockedAt: achievements.hundredWins || null
             },
             fiveHundredWins: {
-                unlocked: !!achievements.fiveHundredWins,
                 unlockedAt: achievements.fiveHundredWins || null
             },
             firstTenStreak: {
-                unlocked: !!achievements.firstTenStreak,
                 unlockedAt: achievements.firstTenStreak || null
             },
             twentyFiveTenStreak: {
-                unlocked: !!achievements.twentyFiveTenStreak,
                 unlockedAt: achievements.twentyFiveTenStreak || null
             },
             lessThanThreeMin: {
-                unlocked: !!achievements.lessThanThreeMin,
                 unlockedAt: achievements.lessThanThreeMin || null
             }
         })

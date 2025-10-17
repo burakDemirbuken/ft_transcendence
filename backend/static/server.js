@@ -10,12 +10,12 @@ const fastify = Fastify({
 
 fastify.register(fastifyStatic, {
     root: path.join(__dirname, "default"),
-    prefix: "/default/",
+    prefix: "/default/"
 })
 
 fastify.register(fastifyStatic, {
     root: path.join(__dirname, "uploads"),
-    prefix: "/uploads/",
+    prefix: "/uploads/"
 })
 
 fastify.decorate("cwd", process.cwd())
