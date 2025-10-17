@@ -113,13 +113,6 @@ export default class TournamentRoom extends Room
 		this.status = 'in_game';
 
 		const matches = this.currentMatches;
-		let playingPlayers = [];
-		matches.forEach(match => {
-			if (match.player1) playingPlayers.push(match.player1);
-			else playingPlayers.push("bye-" + match.matchNumber + "-" + Date.now());
-			if (match.player2) playingPlayers.push(match.player2);
-			else playingPlayers.push("bye2-" + match.matchNumber + "-" + Date.now());
-		});
 		return {
 			gameMode: this.gameMode,
 			maxPlayers: this.maxPlayers,
@@ -200,6 +193,9 @@ export default class TournamentRoom extends Room
 					match.player2Score = matches[index].score?.team2 || 0;
 					match.winner = matches[index].winner;
 					match.loser = matches[index].loser;
+					if (match.winner === null || match.winner === undefined)
+						match.winner = "bye-" + match.matchNumber + "-" + Date.now();
+
 					if (match.loser)
 					{
 						const loserPlayer = this.players.find(p => p.id === match.loser);
@@ -272,14 +268,13 @@ export default class TournamentRoom extends Room
 	getState()
 	{
 		const rounds = [];
-
 		this.currentMatches.forEach((match) => {
 			rounds.push({
 				matchId: match.matchId,
 				matchNumber: match.matchNumber,
 				matchStatus: match.matchStatus,
-				player1: this.participants.find(p => p.id === match.player1).getState(),
-				player2: this.participants.find(p => p.id === match.player2).getState(),
+				player1: this.participants.find(p => p.id === match.player1)?.getState() || { name: "BYE", id: null },
+				player2: this.participants.find(p => p.id === match.player2)?.getState() || { name: "BYE", id: null },
 				player1Score: match.player1Score,
 				player2Score: match.player2Score,
 				winner: match.winner,

@@ -120,6 +120,7 @@ class RoomManager extends EventEmitter
 					if (room.gameMode !== 'tournament')
 						this.leaveRoom(player);
 				});
+				this.notifyRoomUpdate(payload.roomId);
 				break;
 			default:
 				console.error(`Unhandled server room message type: ${action}`);

@@ -172,9 +172,9 @@ class PingPong extends EventEmitter
 	{
 		let paddlePos = { x: 0, y: this.settings.canvasHeight / 2 - this.settings.paddleHeight / 2 };
 		if (number === 1)
-			paddlePos.x = this.settings.canvasWidth - this.settings.paddleWidth - PADDLE_SPACE;
-		else if (number === 2)
 			paddlePos.x = PADDLE_SPACE;
+		else if (number === 2)
+			paddlePos.x = this.settings.canvasWidth - this.settings.paddleWidth - PADDLE_SPACE;
 		else if (number === 3)
 			paddlePos.x = 200;
 		else if (number === 4)
@@ -270,22 +270,17 @@ class PingPong extends EventEmitter
 
 	update(deltaTime)
 	{
-		if (this.status === 'finished' || this.status === 'canceled')
-			this.emit('update', { gameState: this.getGameState(), players: this.players });
-
-		if (this.status !== 'playing')
-			return;
-
-		this.gameTime += deltaTime;
-		this.lastUpdateTime = Date.now();
-
 		this.paddleControls();
-
 		this.paddles.forEach((paddle) => paddle.update(deltaTime));
 
-		this.ball.update(deltaTime);
-		this.checkCollisions();
+		if (this.status === 'playing')
+		{
+			this.gameTime += deltaTime;
+			this.lastUpdateTime = Date.now();
 
+			this.ball.update(deltaTime);
+			this.checkCollisions();
+		}
 		this.emit('update', { gameState: this.getGameState(), players: this.players });
 	}
 
@@ -455,7 +450,7 @@ class PingPong extends EventEmitter
 		setTimeout(() =>
 		{
 			this.status = 'playing';
-		}, 1000);
+		}, 2000);
 	}
 
 	pause()
@@ -561,14 +556,14 @@ class PingPong extends EventEmitter
 	{
 		if (!this.isFinished())
 			return null;
-		return this.team.get(1).score < this.team.get(2).score ? this.team.get(1) : this.team.get(2);
+		return this.team.get(1).score >= this.settings.maxScore ? this.team.get(1) : this.team.get(2);
 	}
 
 	getLoserTeam()
 	{
 		if (!this.isFinished())
 			return null;
-		return this.team.get(1).score > this.team.get(2).score ? this.team.get(1) : this.team.get(2);
+		return this.team.get(1).score >= this.settings.maxScore ? this.team.get(2) : this.team.get(1);
 	}
 
 	getScore()

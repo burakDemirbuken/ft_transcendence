@@ -30,7 +30,10 @@ export default class Room extends EventEmitter
 	{
 		this.players = this.players.filter(p => p.id !== playerId);
 		if (this.status === 'waiting')
+		{
+			console.log('Removing from participants:', playerId);
 			this.participants = this.participants.filter(p => p.id !== playerId);
+		}
 		if (this.host === playerId)
 			this.host = this.players[0]?.id;
 	}
