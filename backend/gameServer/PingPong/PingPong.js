@@ -561,14 +561,14 @@ class PingPong extends EventEmitter
 	{
 		if (!this.isFinished())
 			return null;
-		return this.team.get(1).score > this.team.get(2).score ? this.team.get(1) : this.team.get(2);
+		return this.team.get(1).score < this.team.get(2).score ? this.team.get(1) : this.team.get(2);
 	}
 
 	getLoserTeam()
 	{
 		if (!this.isFinished())
 			return null;
-		return this.team.get(1).score < this.team.get(2).score ? this.team.get(1) : this.team.get(2);
+		return this.team.get(1).score > this.team.get(2).score ? this.team.get(1) : this.team.get(2);
 	}
 
 	getScore()
