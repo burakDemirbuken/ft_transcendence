@@ -180,14 +180,14 @@ async function verify() {
 			if (response.ok) {
 				console.log("🎉 2FA verification successful!");
 				console.log("🍪 Cookies after login:", document.cookie);
-				
+
 				// Token'ı response'tan al ve localStorage'a kaydet
 				if (json.accessToken) {
 					console.log("💾 Saving token to localStorage:", json.accessToken);
 					localStorage.setItem('authToken', json.accessToken);
 					console.log("🔑 Auth token after saving:", getAuthToken());
 				}
-				
+				document.querySelector("#navbar")?.classList.remove("logout");
 				navigateTo("home");
 			} else {
 				showNotification(json.error, "error");

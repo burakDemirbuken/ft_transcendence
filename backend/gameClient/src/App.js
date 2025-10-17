@@ -20,14 +20,7 @@ class App
 		this.playerId = id;
 		this.playerName = name;
 		this.gameRenderer = new GameRenderer();
-		
-		// WebSocket bağlantısını nginx üzerinden yap
-		// Protocol'ü window.location.protocol'e göre belirle (https -> wss, http -> ws)
-		const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-		const nginxPort = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
-		this.webSocketClient = new WebSocketClient(wsProtocol, window.location.hostname, nginxPort, '/ws-room');
-		
-		this.roomUi = new RoomUi();
+		this.webSocketClient = new WebSocketClient(window.location.hostname, 3002);
 		this.inputManager = new InputManager();
 	}
 
@@ -82,12 +75,9 @@ class App
 	}
 
 	_pingpong(name) {
-		// Nginx üzerinden friend WebSocket bağlantısı
-		const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-		const nginxPort = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
-		const socket = new WebSocket(`${wsProtocol}//${window.location.hostname}:${nginxPort}/ws-friend/presence?` + new URLSearchParams({ userName: name }).toString());
+		const socket = new WebSocket(`ws://${window.location.hostname}:3007/ws-friend/presence?` + new URLSearchParams({ userName: name }).toString());
 		socket.onopen = () => {
-			console.log('Connected to presence server via nginx');
+			console.log('Connected to presence server');
 		}
 
 		socket.onmessage = (event) => {

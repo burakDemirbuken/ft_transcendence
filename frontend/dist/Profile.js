@@ -588,6 +588,13 @@ function handleOverlayClick(e, overlay, turnuva) {
         turnuva.innerHTML = '';
     }
 }
+function handleMatchOverlay(e) {
+    if (e.target.classList.contains("match-row") || e.target.closest(".match-row"))
+        document.querySelector('#match-overlay').classList.remove("hide-away");
+}
+function hideMatchOverlay() {
+    document.querySelector('#match-overlay').classList.add("hide-away");
+}
 function initBracket(players, n, currentUser, turnuva, wrapper) {
     turnuva.innerHTML = '';
     turnuva.style.transform = 'none';
@@ -725,6 +732,7 @@ export default class extends AView {
         return await response.text();
     }
     async setEventHandlers() {
+        var _a, _b;
         document.addEventListener("onload", onLoad);
         document.addEventListener("mousemove", handleCardMouseMove);
         document.addEventListener("mouseout", resetCardShadow); // fare dışarı çıkınca gölgeyi sıfırlar
@@ -784,6 +792,8 @@ export default class extends AView {
                 this.closeBtn.classList.remove('close');
             }, 300);
         });
+        (_a = document.querySelector(".match-table")) === null || _a === void 0 ? void 0 : _a.addEventListener('click', handleMatchOverlay);
+        (_b = document.querySelector("#match-card-exit")) === null || _b === void 0 ? void 0 : _b.addEventListener('click', hideMatchOverlay);
         document.addEventListener('keydown', (e) => {
             if (e.key === "Escape" && this.overlay.style.display === 'flex') {
                 this.closeBtn.classList.add('close');

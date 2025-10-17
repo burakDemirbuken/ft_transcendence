@@ -84,11 +84,9 @@ document.addEventListener("DOMContentLoaded", () =>
 						{
 							removeAuthToken();
 							document.querySelector("#navbar")?.classList.add("logout");
-							
-						} 
+						}
 						else
 							alert(`${json.error}`);
-						
 					}
 					catch
 					{
@@ -96,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () =>
 					}
 				}
 			}
-			else if (e.currentTarget.matches("[id='toggle']")) 
+			else if (e.currentTarget.matches("[id='toggle']"))
 			{
 				document.querySelector("#navbar")?.classList.toggle("collapse");
 				document.querySelector(".selected")?.classList.toggle("selected");

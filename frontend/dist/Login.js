@@ -129,6 +129,7 @@ async function register() {
     }
 }
 async function verify() {
+    var _a;
     let trlt = await getJsTranslations(localStorage.getItem("langPref"));
     const form = document.querySelector("#loginForm");
     const formData = new FormData(form);
@@ -159,13 +160,14 @@ async function verify() {
                     localStorage.setItem('authToken', json.accessToken);
                     console.log("🔑 Auth token after saving:", getAuthToken());
                 }
+                (_a = document.querySelector("#navbar")) === null || _a === void 0 ? void 0 : _a.classList.remove("logout");
                 navigateTo("home");
             }
             else {
                 showNotification(json.error, "error");
             }
         }
-        catch (_a) {
+        catch (_b) {
             showNotification(trlt.system, "error");
         }
     }
