@@ -23,6 +23,17 @@ async function register(request, reply)
         try
         {
             await utils.sendVerificationEmail(email, username, verificationToken);
+
+            fetch('http://profile:3006/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userName: username
+                })
+            }).catch((profileError) => {
+                console.log('Profile service error:', profileError);
+            });
+
             return (reply.status(201).send({
                 success: true,
                 message: trlt.register.success,

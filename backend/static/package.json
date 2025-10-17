@@ -9,8 +9,8 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "@fastify/multipart": "^5.0.0",
-    "fastify-static": "^8.0.0",
+    "@fastify/multipart": "^8.0.0",
+    "@fastify/static": "^7.0.0",
     "fastify": "^5.0.0",
     "fastify-plugin": "^4.5.1"
   },

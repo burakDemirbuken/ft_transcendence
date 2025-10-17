@@ -4,31 +4,6 @@ networks:
 
 volumes:
   frontend_src:
-<<<<<<< HEAD
-    driver: local
-    driver_opts:
-      type: none
-      device: ./frontend
-      o: bind
-  gateway_src:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/gateway
-      o: bind
-  authentication_src:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/authentication
-      o: bind
-  email_src:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./backend/email
-      o: bind
-=======
    driver: local
    driver_opts:
      type: none
@@ -52,7 +27,6 @@ volumes:
      type: none
      device: ./backend/email
      o: bind
->>>>>>> origin/main
   profile_src:
     driver: local
     driver_opts:
@@ -150,8 +124,6 @@ services:
       - EMAIL_PORT=3005
       - HOST=0.0.0.0
 
-<<<<<<< HEAD
-=======
   gameserver:
     container_name: gameserver
     build: ./backend/gameServer
@@ -178,7 +150,6 @@ services:
     networks:
       - transcendency
 
->>>>>>> origin/main
   profile:
     container_name: profile
     build: ./backend/profile
@@ -201,40 +172,6 @@ services:
       - /app/node_modules
     networks:
       - transcendency
-<<<<<<< HEAD
-
-  gameserver:
-    container_name: gameserver
-    build: ./backend/gameServer
-    restart: on-failure
-    networks:
-      - transcendency
-    expose:
-      - 3002
-    ports:
-      - "3002:3002"
-    volumes:
-      - gameServer:/app
-      - /app/node_modules
-    depends_on:
-      - aiserver
-      - room
-
-  room:
-    container_name: room
-    build: ./backend/room
-    restart: on-failure
-    expose:
-      - 3004
-    ports:
-      - "3004:3004"
-    volumes:
-      - room_src:/app
-      - /app/node_modules
-    networks:
-      - transcendency
-=======
->>>>>>> origin/main
 
   aiserver:
     container_name: ai-server
@@ -247,3 +184,13 @@ services:
     volumes:
       - aiServer_src:/app
 
+  static:
+    container_name: static
+    build: ./backend/static
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 3008
+    volumes:
+      - /app/node_modules
