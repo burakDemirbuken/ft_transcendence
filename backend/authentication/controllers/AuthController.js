@@ -92,6 +92,14 @@ class AuthController {
 			try
 			{
 				await sendVerificationEmail(email, username, verificationToken);
+				const profileCreate = fetch('http://profile:3006/create', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						userName: username,
+					})
+				})
+				// istersen kontrol et
 				return (reply.status(201).send({
 					success: true,
 					message: trlt.register.success,
