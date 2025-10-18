@@ -138,6 +138,8 @@ export default async function profileRoute(fastify) {
 	{
 		const { userName } = request.body ?? {}
 
+		console.log('Creating profile for username:', userName)
+
 		if (!userName) {
 			fastify.log.error('Username missing from request')
 			return reply.code(400).send({ error: 'Username is required' })
@@ -153,29 +155,33 @@ export default async function profileRoute(fastify) {
 		const t = await fastify.sequelize.transaction();
 		
 		try {
+			
 			const userProfile = await fastify.sequelize.models.Profile.create({ 
 				userName: userName,
 				displayName: userName
 			}, { transaction: t })
 			
 			await Promise.all([
-				fastify.sequelize.models.Stats.create({
-					userId: userProfile.id,
-				}, { transaction: t }),	
-				fastify.sequelize.models.Achievement.create({
-					userId: userProfile.id,
-				}, { transaction: t })
+				userProfile.createStat({}, {transaction: t}),
+				userProfile.createAchievement({}, {transaction: t})
 			])
-
+			
 			await t.commit()				
 			return reply.code(201).send({ 
 				success: true, 
 				message: 'Profile created successfully',
 				profile: userProfile
-			})
+			}) 
 		} catch (error) {
-			t.rollback();
-			fastify.log.error('Error creating user profile:', error)
+			t.rollback(); 
+			fastify.log.error({
+				msg: 'Error creating user profile',
+				name: error?.name,
+				message: error?.message,
+				errors: error?.errors,
+				parent: error?.parent,
+				sql: error?.sql,
+			})
 			return reply.code(500).send({ error: 'Failed to create user profile' })
 		}
 	})

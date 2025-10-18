@@ -22,7 +22,8 @@ export default (sequelize, DataTypes, Model) => {
             defaultValue: '/static/default/'
         },
         bio: {
-            type: DataTypes.TEXT
+            type: DataTypes.TEXT,
+            defaultValue: 'Hi!'
         },
 	}, {
         sequelize,

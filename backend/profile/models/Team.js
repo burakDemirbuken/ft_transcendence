@@ -9,19 +9,19 @@ export default (sequelize, DataTypes, Model) => {
 			autoIncrement: true
 		},
 		playerOneId: {
-			type: DataTypes.STRING,
+			type: DataTypes.INTEGER,
 			allowNull: true,
 			references: {
-				model: 'Profile',
+				model: 'profiles',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
 		},
 		playerTwoId: {
-			type: DataTypes.STRING,
+			type: DataTypes.INTEGER,
 			allowNull: true,
 			references: {
-				model: 'Profile',
+				model: 'profiles',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'

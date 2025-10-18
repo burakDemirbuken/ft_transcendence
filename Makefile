@@ -6,10 +6,6 @@ COMPOSE_CMD = docker compose -f $(COMPOSE_FILE)
 SERVICES = authentication gateway sqlite nginx
 ALL_SERVICES = authentication gateway gameserver sqlite user livechat nginx frontend
 
-# Volume directories (adjust these paths as needed)
-VOLUME_BASE_DIR = ${HOME}/microservice/volumes
-NGINX_DATA_DIR = $(VOLUME_BASE_DIR)/nginx_data
-GATEWAY_SRC_DIR = $(VOLUME_BASE_DIR)/gateway/srcs
 SQLITE_DATA_DIR = $(VOLUME_BASE_DIR)/databases/data
 
 # Colors for output
@@ -23,30 +19,11 @@ export HOST_IP
 
 all: up
 
-# Create nginx data directory
-$(NGINX_DATA_DIR):
-	@echo "$(YELLOW)Creating nginx data directory...$(NC)"
-	@mkdir -p $(NGINX_DATA_DIR)
-	@chmod 755 $(NGINX_DATA_DIR)
-
-# Create gateway source directory
-$(GATEWAY_SRC_DIR):
-	@echo "$(YELLOW)Creating gateway source directory...$(NC)"
-	@mkdir -p $(GATEWAY_SRC_DIR)
-	@chmod 755 $(GATEWAY_SRC_DIR)
-
 # Create sqlite data directory
 $(SQLITE_DATA_DIR):
 	@echo "$(YELLOW)Creating sqlite data directory...$(NC)"
 	@mkdir -p $(SQLITE_DATA_DIR)
 	@chmod 755 $(SQLITE_DATA_DIR)
-
-# Create individual volume directories
-create-nginx-volume: $(NGINX_DATA_DIR)
-	@echo "$(GREEN)Nginx volume directory created: $(NGINX_DATA_DIR)$(NC)"
-
-create-gateway-volume: $(GATEWAY_SRC_DIR)
-	@echo "$(GREEN)Gateway volume directory created: $(GATEWAY_SRC_DIR)$(NC)"
 
 create-sqlite-volume: $(SQLITE_DATA_DIR)
 	@echo "$(GREEN)SQLite volume directory created: $(SQLITE_DATA_DIR)$(NC)"
@@ -60,30 +37,21 @@ clean-volumes:
 # Check volume directories
 check-volumes:
 	@echo "$(GREEN)Volume directory status:$(NC)"
-	@echo "Nginx data: $(if $(wildcard $(NGINX_DATA_DIR)),$(GREEN)EXISTS$(NC),$(RED)MISSING$(NC)) - $(NGINX_DATA_DIR)"
-	@echo "Gateway src: $(if $(wildcard $(GATEWAY_SRC_DIR)),$(GREEN)EXISTS$(NC),$(RED)MISSING$(NC)) - $(GATEWAY_SRC_DIR)"
 	@echo "SQLite data: $(if $(wildcard $(SQLITE_DATA_DIR)),$(GREEN)EXISTS$(NC),$(RED)MISSING$(NC)) - $(SQLITE_DATA_DIR)"
 
-# Build and start containers
 up:
 	@echo "$(GREEN)Starting all services (HOST_IP=$(HOST_IP))$(NC)"
 	@$(COMPOSE_CMD) up -d --build
-# Stop containers
 down:
 	@echo "$(YELLOW)Stopping all services...$(NC)"
 	@$(COMPOSE_CMD) down
-
-# Stop and remove containers
 stop:
 	@echo "$(YELLOW)Stopping and removing containers...$(NC)"
 	@$(COMPOSE_CMD) down --remove-orphans
-
-# Show container status
 status:
 	@echo "$(GREEN)Container status:$(NC)"
 	@$(COMPOSE_CMD) ps
 
-# Show logs
 logs:
 	@$(COMPOSE_CMD) logs -f
 
@@ -119,9 +87,10 @@ shell-gateway:
 	@echo "$(GREEN)Entering shell for gateway service$(NC)"
 	@$(COMPOSE_CMD) exec -it gateway /bin/sh
 
+shell-profile:
+	@echo "$(GREEN)Entering shell for profile service$(NC)"
+	@$(COMPOSE_CMD) exec -it profile /bin/sh
 
-
-# Clean databases only
 clean-db:
 	@echo "$(RED)Cleaning databases...$(NC)"
 	# @rm -f ./db_profile.sqlite 2>/dev/null || true
@@ -133,12 +102,10 @@ clean-db:
 	# @rm -rf ./backend/*/data/ 2>/dev/null || true
 	@echo "$(GREEN)Databases cleaned$(NC)"
 
-# Clean non-persistent data
 clean: stop
 	@echo "$(RED)Cleaning up...$(NC)"
 	@docker system prune -f
 
-# Full cleanup with databases
 fclean: clean-volumes clean-db
 	@echo "$(RED)Performing full cleanup...$(NC)"
 	@$(COMPOSE_CMD) down --remove-orphans --volumes --rmi all 2>/dev/null || true
@@ -146,7 +113,6 @@ fclean: clean-volumes clean-db
 	@docker volume prune -f
 	@docker network prune -f
 
-# Restart everything
 re: fclean all
 
 # Development helpers - Quick access to individual services
@@ -159,11 +125,6 @@ dev-gateway:
 	@echo "$(BLUE)Development mode for gateway service$(NC)"
 	@$(COMPOSE_CMD) up -d --build gateway
 	@$(COMPOSE_CMD) logs -f gateway
-
-dev-databases:
-	@echo "$(BLUE)Development mode for databases service$(NC)"
-	@$(COMPOSE_CMD) up -d --build databases
-	@$(COMPOSE_CMD) logs -f databases
 
 dev-nginx:
 	@echo "$(BLUE)Development mode for nginx service$(NC)"
@@ -195,12 +156,6 @@ health:
 	@echo "$(GREEN)Health check:$(NC)"
 	@docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
-# List all services
-list-services:
-	@echo "$(GREEN)Available services:$(NC)"
-	@echo "$(YELLOW)Active services:$(NC) $(SERVICES)"
-	@echo "$(YELLOW)All services (including commented):$(NC) $(ALL_SERVICES)"
-
 # Show help
 help:
 	@echo "$(GREEN)Available targets:$(NC)"
@@ -217,12 +172,9 @@ help:
 	@echo "  fclean           - Full cleanup (containers, images, volumes + databases)"
 	@echo "  re               - Restart everything (fclean + all)"
 	@echo "  health           - Show container health status"
-	@echo "  list-services    - List all available services"
 	@echo ""
 	@echo "$(YELLOW)Volume management:$(NC)"
 	@echo "  volumes          - Create all volume directories"
-	@echo "  create-nginx-volume   - Create nginx volume directory"
-	@echo "  create-gateway-volume - Create gateway volume directory"
 	@echo "  create-sqlite-volume  - Create sqlite volume directory"
 	@echo "  clean-volumes    - Remove all volume directories"
 	@echo "  check-volumes    - Check volume directory status"

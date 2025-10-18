@@ -24,21 +24,11 @@ async function register(request, reply)
         {
             await utils.sendVerificationEmail(email, username, verificationToken);
 
-            fetch('http://profile:3006/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userName: username
-                })
-            }).catch((profileError) => {
-                console.log('Profile service error:', profileError);
-            });
-
             return (reply.status(201).send({
                 success: true,
                 message: trlt.register.success,
                 user: newUser.toSafeObject(),
-                next_step: 'email_verification'
+                next_step: 'email_verification' 
             }));
         }
         catch (emailError)
@@ -107,7 +97,7 @@ export async function verifyEmail(request, reply)
                 storedData = data;
                 userEmail = emailKey;
                 break;
-            }
+            } 
         }
         if (!storedData)
             return (reply.status(400).send({ success: false, error: trlt.token.expired }));
@@ -127,9 +117,7 @@ export async function verifyEmail(request, reply)
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userName: user.username,
-                    email: user.email,
-                    userId: user.id
-                })
+                }) 
             });
         } catch (profileError) {
             console.log('Profile service error:', profileError);

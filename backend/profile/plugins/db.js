@@ -13,8 +13,11 @@ export default fp(async (fastify) => {
 		const sequelize = new Sequelize({
 			dialect: 'sqlite',
 			storage: './database/database.sqlite',
-			logging: false
+			logging: true
 		})
+
+		await sequelize.authenticate()
+		await sequelize.query('PRAGMA foreign_keys = ON')
 
 		const Profile = ProfileModel(sequelize, DataTypes, Model)
 		const Team = TeamModel(sequelize, DataTypes, Model)
@@ -24,35 +27,44 @@ export default fp(async (fastify) => {
 		const RoundMatch = RoundMatchModel(sequelize, DataTypes, Model)
 		const Stats = StatsModel(sequelize, DataTypes, Model)
 		const Achievements = AchievementsModel(sequelize, DataTypes, Model)
-
+ 
 
 		// hasmnyler hasone olabilr
 		
 		Profile.hasMany(Team, { foreignKey: 'playerOneId', onDelete: 'SET NULL', hooks: true })
 		Profile.hasMany(Team, { foreignKey: 'playerTwoId', onDelete: 'SET NULL', hooks: true })
-		Team.belongsTo(Profile, { as: 'PlayerOne', foreignKey: 'playerOneId', targetKey: 'id', onDelete: 'SET NULL' })
-		Team.belongsTo(Profile, { as: 'PlayerTwo', foreignKey: 'playerTwoId', targetKey: 'id', onDelete: 'SET NULL' })
+		Team.belongsTo(Profile, { as: 'PlayerOne', foreignKey: 'playerOneId', onDelete: 'SET NULL' })
+		Team.belongsTo(Profile, { as: 'PlayerTwo', foreignKey: 'playerTwoId', onDelete: 'SET NULL' })
 
-		Profile.hasOne(Stats, { foreignKey: 'userId', onDelete: 'CASCADE', hooks: true })
-		Stats.belongsTo(Profile, { foreignKey: 'userId', targetKey: 'id', onDelete: 'CASCADE' })
-
-		Profile.hasOne(Achievements, { foreignKey: 'userId', onDelete: 'CASCADE', hooks: true })
-		Achievements.belongsTo(Profile, { foreignKey: 'userId', targetKey: 'id', onDelete: 'CASCADE' })
+		Profile.hasOne(Stats, { foreignKey: 'userId', hooks: true })
+		Stats.belongsTo(Profile, { foreignKey: 'userId', onDelete: 'CASCADE' })
+		Profile.hasOne(Achievements, { foreignKey: 'userId', hooks: true })
+		Achievements.belongsTo(Profile, { foreignKey: 'userId', onDelete: 'CASCADE' })
 
 		Team.hasMany(MatchHistory, { foreignKey: 'teamOneId', onDelete: 'SET NULL', hooks: true })
 		Team.hasMany(MatchHistory, { foreignKey: 'teamTwoId', onDelete: 'SET NULL', hooks: true })
 		Team.hasMany(MatchHistory, { foreignKey: 'winnerTeamId', onDelete: 'SET NULL', hooks: true })
-		MatchHistory.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneId', targetKey: 'id', onDelete: 'SET NULL' })
-		MatchHistory.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoId', targetKey: 'id', onDelete: 'SET NULL' })
-		MatchHistory.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamId', targetKey: 'id', onDelete: 'SET NULL' })
+		MatchHistory.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneId', onDelete: 'SET NULL' })
+		MatchHistory.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoId', onDelete: 'SET NULL' })
+		MatchHistory.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamId', onDelete: 'SET NULL' })
 
-		TournamentHistory.hasMany(Round, { foreignKey: 'tournamentId', sourceKey: 'id', onDelete: 'SET NULL', hooks: true })
-		Round.belongsTo(TournamentHistory, { foreignKey: 'tournamentId', targetKey: 'id', onDelete: 'SET NULL' })
+		TournamentHistory.hasMany(Round, { foreignKey: 'tournamentId', onDelete: 'CASCADE', hooks: true })
+		Round.belongsTo(TournamentHistory, { foreignKey: 'tournamentId', onDelete: 'CASCADE' })
 
-		Round.hasMany(RoundMatch, { foreignKey: 'roundNumber', sourceKey: 'roundNumber', onDelete: 'SET NULL', hooks: true })
-		RoundMatch.belongsTo(Round, { foreignKey: 'roundNumber', targetKey: 'roundNumber', onDelete: 'SET NULL' })
+		Round.hasMany(RoundMatch, { foreignKey: 'roundId', onDelete: 'CASCADE', hooks: true })
+		RoundMatch.belongsTo(Round, { foreignKey: 'roundId', onDelete: 'CASCADE' })
 
-		await sequelize.sync({ force: false })
+		RoundMatch.belongsTo(Profile, { foreignKey: 'playerOneID', onDelete: 'SET NULL'  })
+		RoundMatch.belongsTo(Profile, { foreignKey: 'playerTwoID', onDelete: 'SET NULL' })
+		RoundMatch.belongsTo(Profile, { foreignKey: 'winnerPlayerID', onDelete: 'SET NULL' })
+
+		TournamentHistory.belongsTo(Profile, { foreignKey: 'winnerPlayer', onDelete: 'SET NULL' })
+
+		Profile.hasMany(RoundMatch, { as: 'playerOne', foreignKey: 'playerOneID' })
+		Profile.hasMany(RoundMatch, { as: 'playerTwo', foreignKey: 'playerTwoID' })
+		Profile.hasMany(RoundMatch, { as: 'winner', foreignKey: 'winnerPlayerID' })
+
+		await sequelize.sync({ alter: true })
 
 		fastify.decorate('sequelize', sequelize)
 

@@ -16,7 +16,7 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.INTEGER,
 			allowNull: true,
 			references: {
-				model: 'Profile',
+				model: 'profiles',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
