@@ -1,4 +1,5 @@
-import getController from '../controllers/AuthController.js';
+import getController from '../controllers/GetController.js';
+import { verifyEmail } from '../controllers/PostController.js';
 
 export async function getRoutes(fastify, options)
 {
@@ -83,7 +84,7 @@ export async function getRoutes(fastify, options)
                 }
             }
         }
-    }, getController.verifyEmail);
+    }, verifyEmail);
 
     fastify.get('/me',
     {

@@ -1,10 +1,10 @@
 import crypto from 'crypto';
 
-export const tempStorage = new Map();
+const tempStorage = new Map();
 const tokenBlacklist = new Set();
 
 
-export function blacklistToken(token)
+function blacklistToken(token)
 {
 	try
     {
@@ -26,7 +26,7 @@ export function blacklistToken(token)
 }
 
 
-export function isTokenBlacklisted(token)
+function isTokenBlacklisted(token)
 {
 	try
     {
@@ -45,7 +45,7 @@ export function isTokenBlacklisted(token)
 	}
 }
 
-export async function sendVerificationEmail(email, username, token)
+async function sendVerificationEmail(email, username, token)
 {
 	const emailServiceUrl = process.env.EMAIL_SERVICE_URL || 'http://email:3005';
 	console.log("EMAIL SERVICE URL: ", emailServiceUrl);""
@@ -69,7 +69,7 @@ export async function sendVerificationEmail(email, username, token)
 	return (response.json());
 }
 
-export async function send2FAEmail(email, username, code, userIP)
+async function send2FAEmail(email, username, code, userIP)
 {
 	const emailServiceUrl = process.env.EMAIL_SERVICE_URL || 'http://email:3005';
 
@@ -94,7 +94,7 @@ export async function send2FAEmail(email, username, code, userIP)
 	return (response.json());
 }
 
-export async function sendLoginNotification(email, username, userIP)
+async function sendLoginNotification(email, username, userIP)
 {
     const emailServiceUrl = process.env.EMAIL_SERVICE_URL || 'http://email:3005';
 
@@ -117,16 +117,16 @@ export async function sendLoginNotification(email, username, userIP)
     return (response.json());
 }
 
-export function generateVerificationToken()
+function generateVerificationToken()
 {
     return (crypto.randomBytes(32).toString('hex'));
 }
 
-export function generateVerificationCode() {
+function generateVerificationCode() {
     return (Math.floor(100000 + Math.random() * 900000).toString());
 }
 
-export function storeVerificationToken(email, type = 'email_verification')
+function storeVerificationToken(email, type = 'email_verification')
 {
     const token = generateVerificationToken();
     const expires = new Date(Date.now() + 30 * 60 * 1000);
@@ -139,7 +139,7 @@ export function storeVerificationToken(email, type = 'email_verification')
     return (token);
 }
 
-export function storeVerificationCode(email, type = '2fa')
+function storeVerificationCode(email, type = '2fa')
 {
     const code = generateVerificationCode();
     const expires = new Date(Date.now() + 5 * 60 * 1000);
@@ -151,3 +151,15 @@ export function storeVerificationCode(email, type = '2fa')
     });
     return (code);
 }
+
+export default
+{
+	blacklistToken,
+	isTokenBlacklisted,
+	sendVerificationEmail,
+	send2FAEmail,
+	sendLoginNotification,
+	storeVerificationToken,
+	storeVerificationCode,
+	tempStorage
+};

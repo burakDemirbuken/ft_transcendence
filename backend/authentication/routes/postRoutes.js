@@ -1,4 +1,4 @@
-import postController from '../controllers/AuthController.js';
+import postController from '../controllers/PostController.js';
 
 export async function postRoutes(fastify, options)
 {
