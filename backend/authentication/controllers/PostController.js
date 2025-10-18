@@ -97,7 +97,7 @@ export async function verifyEmail(request, reply)
                 storedData = data;
                 userEmail = emailKey;
                 break;
-            } 
+            }
         }
         if (!storedData)
             return (reply.status(400).send({ success: false, error: trlt.token.expired }));
@@ -117,7 +117,7 @@ export async function verifyEmail(request, reply)
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userName: user.username,
-                }) 
+                })
             });
         } catch (profileError) {
             console.log('Profile service error:', profileError);
