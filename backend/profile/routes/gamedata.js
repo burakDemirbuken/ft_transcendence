@@ -36,7 +36,7 @@ export default async function gamedataRoute(fastify) {
 				await Promise.all([
 					...winnerTeam.map(async (player) => {
 						const playerState = state.players.find(p => p.id === player.id)
-						player.Stats.increment({
+						player.Stat.increment({
 							gamesPlayed: 1,
 							gamesWon: 1,
 							gameCurrentStreak: 1,
@@ -45,13 +45,13 @@ export default async function gamedataRoute(fastify) {
 							ballMissCount: playerState?.missedBall ?? 0,
 							gameTotalDuration: time.duration
 						}, { transaction: t })
-						player.Stats.update({
+						player.Stat.update({
 							gameMinDuration: time.duration < player.Stats.gameMinDuration ? time.duration : player.Stats.gameMinDuration
 						})
 					}),
 					...loserTeam.map(async (player) => {
 						const playerState = state.players.find(p => p.id === player.id)
-						player.Stats.increment({
+						player.Stat.increment({
 							gamesPlayed: 1,
 							gamesLost: 1,
 							xp: 10,
@@ -59,7 +59,7 @@ export default async function gamedataRoute(fastify) {
 							ballHitCount: playerState?.kickBall ?? 0,
 							ballMissCount: playerState?.missedBall ?? 0
 						}, { transaction: t })
-						player.Stats.update({
+						player.Stat.update({
 							gameCurrentStreak: 0,
 							gameMinDuration: time.duration < player.Stats.gameMinDuration ? time.duration : player.Stats.gameMinDuration
 						}, { transaction: t })
@@ -196,7 +196,7 @@ export default async function gamedataRoute(fastify) {
 					Promise.all([
 						async () => {
 							const winnerState = matchData.state.players.find(p => p.id === matchData.winner)
-							winnerPlayer?.Stats.increment({
+							winnerPlayer?.Stat.increment({
 								gamesPlayed: 1,
 								gamesWon: 1,
 								gameCurrentStreak: 1,
@@ -211,7 +211,7 @@ export default async function gamedataRoute(fastify) {
 						},
 						async () => {
 							const loserState = matchData.state.players.find(p => p.id === matchData.loser)
-							loserPlayer?.Stats.increment({
+							loserPlayer?.Stat.increment({
 								gamesPlayed: 1,
 								gamesLost: 1,
 								gameCurrentStreak: 0,

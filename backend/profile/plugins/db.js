@@ -16,7 +16,6 @@ export default fp(async (fastify) => {
 			logging: true
 		})
 
-		await sequelize.authenticate()
 		await sequelize.query('PRAGMA foreign_keys = ON')
 
 		const Profile = ProfileModel(sequelize, DataTypes, Model)
@@ -64,9 +63,13 @@ export default fp(async (fastify) => {
 		Profile.hasMany(RoundMatch, { as: 'playerTwo', foreignKey: 'playerTwoID' })
 		Profile.hasMany(RoundMatch, { as: 'winner', foreignKey: 'winnerPlayerID' })
 
-		await sequelize.sync({ alter: true })
+		await sequelize.authenticate()
+
+		await sequelize.sync({ alter: true }) 
 
 		fastify.decorate('sequelize', sequelize)
+
+		addFourPeople(sequelize)
 
 		fastify.addHook('onClose', async (instance) => {
 			fastify.log.info('Closing database connection...')
@@ -83,3 +86,28 @@ export default fp(async (fastify) => {
 		fastify: '4.x'
 	}
 )
+
+async function addFourPeople(sequelize) {
+
+	let userProfiles = []
+	
+	for (let i = 0; i < 4; i++) {
+
+		userProfiles[i] = await sequelize.models.Profile.findOrCreate({
+			where: {
+				userName: `test` + i, 
+				displayName: `test_display` + i 
+			},
+			include: [
+				{model: sequelize.models.Stat},
+				{model: sequelize.models.Achievement}
+			]
+
+		})
+	}
+
+	
+	
+
+}
+

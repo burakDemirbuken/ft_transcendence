@@ -23,8 +23,6 @@ export default async function profileRoute(fastify) {
 				fastify.statCalculate(userProfile)
 			])
 
-			fastify.statCalculate(userProfile)
-
 			return reply.send({
 				profile: userProfile.toJSON(),
 				achievements: userAchievementsProgress,
@@ -165,13 +163,13 @@ export default async function profileRoute(fastify) {
 				userProfile.createStat({}, {transaction: t}),
 				userProfile.createAchievement({}, {transaction: t})
 			])
-			
+
 			await t.commit()				
 			return reply.code(201).send({ 
 				success: true, 
 				message: 'Profile created successfully',
 				profile: userProfile
-			}) 
+			})
 		} catch (error) {
 			t.rollback(); 
 			fastify.log.error({

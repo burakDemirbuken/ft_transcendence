@@ -4,7 +4,7 @@ COMPOSE_CMD = docker compose -f $(COMPOSE_FILE)
 
 # Service names
 SERVICES = authentication gateway sqlite nginx
-ALL_SERVICES = authentication gateway gameserver sqlite user livechat nginx frontend
+ALL_SERVICES = authentication gateway gameserver sqlite user livechat nginx frontend friend
 
 SQLITE_DATA_DIR = $(VOLUME_BASE_DIR)/databases/data
 
@@ -70,6 +70,10 @@ log-auth:
 log-gateway:
 	@echo "$(GREEN)Showing logs for gateway service$(NC)"
 	@$(COMPOSE_CMD) logs -f gateway
+
+log-friend:
+	@echo "$(GREEN)Showing logs for friend service$(NC)"
+	@$(COMPOSE_CMD) logs -f friend
 
 log-gameserver:
 	@echo "$(GREEN)Showing logs for gameserver service$(NC)"
