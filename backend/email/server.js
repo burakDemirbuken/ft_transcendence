@@ -8,8 +8,6 @@ const fastify = Fastify({
   }
 })
 
-// CORS artık gateway'de yapılıyor
-
 // Routes'ları register et
 await fastify.register(emailRoutes)
 

@@ -4,8 +4,8 @@ import		path			from	'path';
 const sequelize = new Sequelize(
 {
 	dialect:						'sqlite',
-	storage:						path.join(process.cwd(), 'data', 'auth.db'),
-	logging: 						console.log,
+	storage:						'./data/auth_database.sqlite',
+	logging: 						false,
 
 	pool:
 	{

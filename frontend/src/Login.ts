@@ -91,7 +91,7 @@ async function login() {
 		"password": formData.get("password")
 	};
 
-	const request = new Request(`${API_BASE_URL}/auth/login?lang=${localStorage.getItem("langPref")}`, {
+	const request = new Request(`${API_BASE_URL}/auth/login?lang=${localStorage.getItem("langPref") ?? 'eng'}`, {
 		method: "POST",
 		headers: new Headers({ "Content-Type": "application/json" }),
 		body: JSON.stringify(user),

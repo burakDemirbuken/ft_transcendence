@@ -182,7 +182,6 @@ async function verify2FA(request, reply) {
             { userId: user.id, username: user.username, email: user.email, type: 'access' },
             { expiresIn: '15m' }
         );
-        // Remember me durumuna göre refresh token süresi
         const refreshExpiry = rememberMe ? '30d' : '7d';
         const refreshMaxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
         const refreshToken = await reply.jwtSign(
@@ -195,19 +194,18 @@ async function verify2FA(request, reply) {
             },
             { expiresIn: refreshExpiry }
         );
-        // HttpOnly cookie'ler (güvenlik için)
         console.log('🍪 Setting accessToken cookie:', accessToken.substring(0, 20) + '...');
         reply.setCookie('accessToken', accessToken, {
-            httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: 24 * 60 * 60 * 1000
+            httpOnly: true, secure: true, sameSite: 'Lax', path: '/', maxAge: 24 * 60 * 60 * 1000
         });
         console.log('🍪 Setting refreshToken cookie');
         reply.setCookie('refreshToken', refreshToken, {
-            httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: refreshMaxAge
+            httpOnly: true, secure: true, sameSite: 'Lax', path: '/', maxAge: refreshMaxAge
         });
         // JavaScript erişimi için ayrı cookie (daha kısa sürede expire olan)
         console.log('🍪 Setting authStatus cookie');
         reply.setCookie('authStatus', 'authenticated', {
-            httpOnly: false, secure: true, sameSite: 'none', path: '/', maxAge: 24 * 60 * 60 * 1000
+            httpOnly: false, secure: true, sameSite: 'Lax', path: '/', maxAge: 24 * 60 * 60 * 1000
         });
         utils.tempStorage.delete(user.email);
         const userIP = request.headers['x-forwarded-for'] || request.headers['x-real-ip'] || request.socket.remoteAddress || 'Unknown';
@@ -234,19 +232,18 @@ async function logout(request, reply)
 	const trlt = getTranslations(request.query.lang || "eng");
 	try
 	{
-		console.log('🚪 Logging out user, clearing all cookies');
-
-		// Tüm auth cookie'lerini temizle
-		reply.clearCookie('accessToken', {
-			httpOnly: true, secure: true, sameSite: 'none', path: '/'
+	    reply.clearCookie('accessToken',
+        {
+			httpOnly: true, secure: true, sameSite: 'Lax', path: '/'
 		});
-		reply.clearCookie('refreshToken', {
-			httpOnly: true, secure: true, sameSite: 'none', path: '/'
+		reply.clearCookie('refreshToken',
+        {
+			httpOnly: true, secure: true, sameSite: 'Lax', path: '/'
 		});
-		reply.clearCookie('authStatus', {
-			httpOnly: false, secure: true, sameSite: 'none', path: '/'
+		reply.clearCookie('authStatus',
+        {
+			httpOnly: false, secure: true, sameSite: 'Lax', path: '/'
 		});
-		console.log('✅ All cookies cleared successfully');
 		reply.send({
 			success: true,
 			message: trlt.logout.success,
@@ -255,7 +252,6 @@ async function logout(request, reply)
 	}
 	catch (error)
 	{
-		console.error('❌ Logout error:', error);
 		reply.status(500).send({ success: false, error: trlt.logout.fail });
 	}
 }
@@ -334,10 +330,10 @@ async function refreshToken(request, reply)
             { expiresIn: `${newRefreshExpiry}d` }
         );
         reply.setCookie('accessToken', newAccessToken, {
-            httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: 24 * 60 * 60 * 1000
+            httpOnly: true, secure: true, sameSite: 'Lax', path: '/', maxAge: 24 * 60 * 60 * 1000
         });
         reply.setCookie('refreshToken', newRefreshToken, {
-            httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: newRefreshMaxAge
+            httpOnly: true, secure: true, sameSite: 'Lax', path: '/', maxAge: newRefreshMaxAge
         });
         reply.send({
             success: true,

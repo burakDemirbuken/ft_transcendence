@@ -36,11 +36,12 @@ const router = async function(page:string) {
 		if (!hasToken)
 			return window.location.replace("/login");
 	}
-	// if (page === "login") {
-	// 	if (pageState.current !== "login" && hasToken) {
-	// 		return window.location.replace("/home");
-	// 	}
-	// }
+	
+	if (page === "login") {
+	 	if (hasToken) {
+	 		return window.location.replace("/home");
+	 	}
+	}
 
 	if (view) {
 		content.innerHTML = "";
@@ -89,12 +90,10 @@ document.addEventListener("DOMContentLoaded", () =>
 						const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
 						if (hasToken)
 						{
-							console.log('User is logging out');
-							const response = await fetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref")}`, {
+							const response = await fetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref") ?? 'eng'}`, {
 								method: "POST",
 								credentials: "include",
 							});
-
 							const json = await response.json();
 
 							if (response.ok)
@@ -106,9 +105,9 @@ document.addEventListener("DOMContentLoaded", () =>
 								alert(`${json.error}`);
 						}
 					}
-					catch
+					catch(error)
 					{
-						alert(`System Error`);
+						alert(`System Error: ${error.message}`);
 					}
 				}
 			}
@@ -154,9 +153,6 @@ window.addEventListener("load", () => {
 
 	if (!localStorage.getItem("langPref"))
 		localStorage.setItem("langPref", "eng");
-
-	console.log('🌐 Current hostname:', window.location.hostname);
-	console.log('🔗 API Base URL:', API_BASE_URL);
 
 	const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
 	if (!hasToken) {
