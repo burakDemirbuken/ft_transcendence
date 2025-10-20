@@ -54,8 +54,20 @@ class GameCore
 
 	dispose()
 	{
-		this.engine.clear(new BABYLON.Color4(255, 255, 255, 1), true, true, true);
-		this.scene.dispose();
+		if (this.scene) {
+			this.scene.dispose();
+			this.scene = null;
+		}
+
+		if (this.engine) {
+			// Stop render loop
+			this.engine.stopRenderLoop();
+			// Dispose engine
+			this.engine.dispose();
+			this.engine = null;
+		}
+
+		this.camera = null;
 	}
 }
 

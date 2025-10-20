@@ -134,6 +134,11 @@ class GameRenderer extends EventEmitter
 		this.gameLoop();
 	}
 
+	stopRendering()
+	{
+		this.isRunning = false;
+	}
+
 	render(data)
 	{
 		if (!this.isRunning)
@@ -208,7 +213,7 @@ class GameRenderer extends EventEmitter
 
 	reset()
 	{
-		this.isRunning = false;
+		this.stopRendering();
 		this.gameCore.dispose();
 		this.gameState = null;
 		this.currentGameMode = null;

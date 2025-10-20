@@ -156,7 +156,7 @@ class RoomManager extends EventEmitter
 
 		room.on('finished', (data) =>
 			{
-				console.log(`data: `, data);
+				console.log(`data: `, JSON.stringify(data, null, 2));
 				if (data.matchType === 'tournament')
 					//fetch
 					;

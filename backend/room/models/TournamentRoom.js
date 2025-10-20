@@ -93,13 +93,41 @@ export default class TournamentRoom extends Room
 	{
 		const players = [...this.players, ...this.spectators];
 		const matches = payload.matches;
-		if (this.currentRound === this.maxRounds - 1)
+
+		const previousRoundMatches = this.matches.get(this.currentRound);
+		previousRoundMatches.forEach(
+			(match, index) =>
+			{
+				if (matches[index]) {
+					match.player1Score = matches[index].score?.team1 || 0;
+					match.player2Score = matches[index].score?.team2 || 0;
+					match.winner = matches[index].winner;
+					match.loser = matches[index].loser;
+					if (match.winner === null || match.winner === undefined)
+						match.winner = "bye-" + match.matchNumber + "-" + Date.now();
+
+					if (match.loser)
+					{
+						const loserPlayer = this.players.find(p => p.id === match.loser);
+						if (loserPlayer)
+						{
+							if (loserPlayer.id === this.host)
+								this.host = this.players.find(p => p.id !== match.loser)?.id || null;
+							this.players = this.players.filter(p => p.id !== match.loser);
+							this.spectators.push(loserPlayer);
+						}
+					}
+				}
+			}
+		);
+		this.currentRound++;
+		if (this.currentRound === this.maxRounds)
 		{
 			this.status = 'finished';
 			this.emit('finished', { ...this.getMatchmakingInfo() });
 		}
 		else
-			this.nextRound(matches);
+			this.nextRound();
 		return { state: this.getState(), players: players };
 	}
 
@@ -181,36 +209,10 @@ export default class TournamentRoom extends Room
 		};
 	}
 
-	nextRound(matches)
+	nextRound()
 	{
 		this.currentMatches = [];
-		const previousRoundMatches = this.matches.get(this.currentRound);
-		previousRoundMatches.forEach(
-			(match, index) =>
-			{
-				if (matches[index]) {
-					match.player1Score = matches[index].score?.team1 || 0;
-					match.player2Score = matches[index].score?.team2 || 0;
-					match.winner = matches[index].winner;
-					match.loser = matches[index].loser;
-					if (match.winner === null || match.winner === undefined)
-						match.winner = "bye-" + match.matchNumber + "-" + Date.now();
-
-					if (match.loser)
-					{
-						const loserPlayer = this.players.find(p => p.id === match.loser);
-						if (loserPlayer)
-						{
-							if (loserPlayer.id === this.host)
-								this.host = this.players.find(p => p.id !== match.loser)?.id || null;
-							this.players = this.players.filter(p => p.id !== match.loser);
-							this.spectators.push(loserPlayer);
-						}
-					}
-				}
-			}
-		);
-		this.currentRound++;
+		const previousRoundMatches = this.matches.get(this.currentRound - 1);
 		const nextRoundMatches = this.matches.get(this.currentRound);
 		for (let i = 0; i < nextRoundMatches.length; i++)
 		{
