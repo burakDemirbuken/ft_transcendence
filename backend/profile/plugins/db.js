@@ -65,7 +65,7 @@ export default fp(async (fastify) => {
 
 		await sequelize.authenticate()
 
-		await sequelize.sync({ alter: true }) 
+		await sequelize.sync() 
 
 		fastify.decorate('sequelize', sequelize)
 
@@ -87,27 +87,41 @@ export default fp(async (fastify) => {
 	}
 )
 
+
 async function addFourPeople(sequelize) {
+	// Seed profiles with associated stats and achievements for local development
+	const statsSeed = [
+		{ gamesPlayed: 10, gamesWon: 6, gamesLost: 4, gameCurrentStreak: 2, gameLongestStreak: 4, gameTotalDuration: 360, gameMinDuration: 5, xp: 120, ballHitCount: 250, ballMissCount: 40 },
+		{ gamesPlayed: 25, gamesWon: 18, gamesLost: 7, gameCurrentStreak: 6, gameLongestStreak: 8, gameTotalDuration: 900, gameMinDuration: 4, xp: 420, ballHitCount: 520, ballMissCount: 90 },
+		{ gamesPlayed: 5, gamesWon: 2, gamesLost: 3, gameCurrentStreak: 1, gameLongestStreak: 2, gameTotalDuration: 180, gameMinDuration: 6, xp: 80, ballHitCount: 120, ballMissCount: 55 },
+		{ gamesPlayed: 40, gamesWon: 30, gamesLost: 10, gameCurrentStreak: 9, gameLongestStreak: 12, gameTotalDuration: 1500, gameMinDuration: 3, xp: 780, ballHitCount: 890, ballMissCount: 110 }
+	]
 
-	let userProfiles = []
-	
+	const achievementsSeed = [
+		{ firstWin: new Date(), hundredWins: null, fiveHundredWins: null, firstTenStreak: null, twentyFiveTenStreak: null, lessThanThreeMin: null },
+		{ firstWin: new Date(), hundredWins: new Date(), fiveHundredWins: null, firstTenStreak: new Date(), twentyFiveTenStreak: null, lessThanThreeMin: null },
+		{ firstWin: new Date(), hundredWins: null, fiveHundredWins: null, firstTenStreak: null, twentyFiveTenStreak: null, lessThanThreeMin: null },
+		{ firstWin: new Date(), hundredWins: new Date(), fiveHundredWins: new Date(), firstTenStreak: new Date(), twentyFiveTenStreak: new Date(), lessThanThreeMin: new Date() }
+	]
+
 	for (let i = 0; i < 4; i++) {
-
-		userProfiles[i] = await sequelize.models.Profile.findOrCreate({
+		const [profile] = await sequelize.models.Profile.findOrCreate({
 			where: {
-				userName: `test` + i, 
-				displayName: `test_display` + i 
-			},
-			include: [
-				{model: sequelize.models.Stat},
-				{model: sequelize.models.Achievement}
-			]
+				userName: `test${i}`,
+				displayName: `test_display${i}`
+			}
+		})
 
+		await sequelize.models.Stat.upsert({
+			userId: profile.id,
+			...statsSeed[i]
+		})
+
+		await sequelize.models.Achievement.upsert({
+			userId: profile.id,
+			...achievementsSeed[i]
 		})
 	}
-
-	
-	
-
 }
+
 

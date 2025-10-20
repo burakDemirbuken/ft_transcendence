@@ -24,18 +24,23 @@ export default async function friendListRoutes(fastify) {
 					(f.userName === userName ? f.peerName : f.userName)).filter(Boolean))
 			]
 
+			if (friendIds.length === 0) { 
+				return reply.code(200).send({ friends: [] })
+			}
+ 
 			const friendProfiles = await fetch('http://profile:3006/internal/friend', {
-				method: 'GET',
+				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ friends: friendIds }) //body kullanılımını desteklemeyebilir, querye koymak gerekebilir
 			})
 			if (!friendProfiles.ok) throw new Error('Network response was not ok')
 
 			const data = await friendProfiles.json()
+			const friends = Array.isArray(data?.users) ? data.users : []
 
-			return reply.code(200).send({ friends: data })
+			return reply.code(200).send({ friends })
 		} catch (error) {
-			fastify.log.error('Error fetching friend list:', error)
+			fastify.log.error({ err: error }, 'Error fetching friend list')
 			return reply.status(500).send({ error: 'Internal Server Error' })
 		}
 	})

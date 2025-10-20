@@ -2,10 +2,10 @@ import fp from 'fastify-plugin'
 
 export default fp(async (fastify) => {
     async function checkAchievements(user, t) {
-        const { Achievement, Stats } = fastify.sequelize.models
+        const { Achievement, Stat } = fastify.sequelize.models
     
         const [stats, achievements] = await Promise.all([
-            Stats.findOne({
+            Stat.findOne({
                 where: { userId: user.id },
                 transaction: t
             }),
@@ -48,10 +48,10 @@ export default fp(async (fastify) => {
     }
 
     async function getAchievementProgress(user) {
-        const { Achievement, Stats } = fastify.sequelize.models
+        const { Achievement, Stat } = fastify.sequelize.models
     
         const [stats, achievements] = await Promise.all([
-            Stats.findOne({
+            Stat.findOne({
                 where: { userId: user.id }
             }),
             Achievement.findOne({
@@ -107,9 +107,9 @@ export default fp(async (fastify) => {
     }
 
     async function statCalculate(user) {
-        const { Stats } = fastify.sequelize.models
+        const { Stat } = fastify.sequelize.models
 
-        const stats = await Stats.findOne({
+        const stats = await Stat.findOne({
             where: { userId: user.id }
         })
 

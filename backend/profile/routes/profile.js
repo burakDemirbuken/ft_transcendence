@@ -184,7 +184,7 @@ export default async function profileRoute(fastify) {
 		}
 	})
 
-	fastify.get('/internal/friend', async (request, reply) => {
+	fastify.post('/internal/friend', async (request, reply) => {
 		const { friends } = request.body ?? {}
 		if (!friends || !Array.isArray(friends) || friends.length === 0) {
 			return reply.code(400).send({ error: 'Friends array is required' })
@@ -204,10 +204,10 @@ export default async function profileRoute(fastify) {
 
 		return reply.code(200).send({
 			success: true,
-			users: userProfiles.toJSON()
+			users: userProfiles.map(profile => profile.toJSON())
 		})
 	})
-
+ 
 	fastify.post('/internal/avatar-update', async (request, reply) => {
 		const {userName, filename, avatarUrlPath } = request.body ?? {}
 
