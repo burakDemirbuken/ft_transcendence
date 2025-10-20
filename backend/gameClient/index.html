@@ -2756,6 +2756,7 @@ html {
 	    </div>
 		<div class="game-container" id="gameContainer">
 			<canvas id="renderCanvas"></canvas>
+<<<<<<< HEAD
 
 			<!-- Canvas üzerindeki overlay butonları -->
 			<div class="canvas-overlay">
@@ -2764,6 +2765,8 @@ html {
 					<button class="canvas-btn exit-btn" id="exitGameBtn">❌</button>
 				</div>
 			</div>
+=======
+>>>>>>> origin/naber
 		</div>
 
 	</div>
@@ -3816,7 +3819,7 @@ document.getElementById('custom-join-btn').addEventListener('click', function() 
     }
 
     currentGameMode = 'custom';
-    roomSocket.send("join", { roomId: roomCode });
+    roomSocket.send("join", { roomId: roomCode , gameMode: 'play-page'});
     showNotification(`${roomCode} kodlu odaya katılıyorsunuz...`, 'info');
 });
 
@@ -3922,8 +3925,9 @@ document.getElementById('tournament-join-btn').addEventListener('click', functio
         showNotification('Lütfen turnuva kodunu girin!', 'error');
         return;
 	}
+
     currentGameMode = 'tournament';
-    roomSocket.send("join", { roomId: tournamentCode });
+    roomSocket.send("join", {roomId: tournamentCode, gameMode: 'tournament-page'});
     showNotification(`${tournamentCode} kodlu turnuvaya katılıyorsunuz...`, 'info');
 });
 
