@@ -1,5 +1,16 @@
+type KeyCallback = (event: KeyboardEvent) => void;
+
+interface RegisteredKeys {
+	down: string[];
+	up: string[];
+}
+
 class InputManager
 {
+	private pressedKeys: Set<string>;
+	private keyDownCallbacks: Map<string, KeyCallback>;
+	private keyUpCallbacks: Map<string, KeyCallback>;
+
 	constructor()
 	{
 		this.pressedKeys = new Set();
@@ -9,10 +20,10 @@ class InputManager
 		this.initEventListeners();
 	}
 
-	initEventListeners()
+	initEventListeners(): void
 	{
 		document.addEventListener('keydown',
-			(e) =>
+			(e: KeyboardEvent) =>
 			{
 				if (this.pressedKeys.has(e.key))
 				{
@@ -33,7 +44,7 @@ class InputManager
 		);
 
 		document.addEventListener('keyup',
-			(e) =>
+			(e: KeyboardEvent) =>
 			{
 				this.pressedKeys.delete(e.key);
 				const callback = this.keyUpCallbacks.get(e.key);
@@ -50,64 +61,64 @@ class InputManager
 		);
 	}
 
-	isRegisteredKey(key)
+	isRegisteredKey(key: string): boolean
 	{
 		return this.keyDownCallbacks.has(key) || this.keyUpCallbacks.has(key);
 	}
 
-	onKeyDown(key, callback)
+	onKeyDown(key: string, callback: KeyCallback): void
 	{
 		this.keyDownCallbacks.set(key, callback);
 	}
 
-	onKeyUp(key, callback)
+	onKeyUp(key: string, callback: KeyCallback): void
 	{
 		this.keyUpCallbacks.set(key, callback);
 	}
 
-	onKey(key, onDown, onUp)
+	onKey(key: string, onDown?: KeyCallback, onUp?: KeyCallback): void
 	{
 		if (onDown) this.onKeyDown(key, onDown);
 		if (onUp) this.onKeyUp(key, onUp);
 	}
 
-	isKeyPressed(key)
+	isKeyPressed(key: string): boolean
 	{
 		return this.pressedKeys.has(key);
 	}
 
-	isAnyKeyPressed(keys)
+	isAnyKeyPressed(keys: string[]): boolean
 	{
 		return keys.some(key => this.pressedKeys.has(key));
 	}
 
-	areAllKeysPressed(keys)
+	areAllKeysPressed(keys: string[]): boolean
 	{
 		return keys.every(key => this.pressedKeys.has(key));
 	}
 
-	removeKeyDown(key)
+	removeKeyDown(key: string): void
 	{
 		this.keyDownCallbacks.delete(key);
 	}
 
-	removeKeyUp(key)
+	removeKeyUp(key: string): void
 	{
 		this.keyUpCallbacks.delete(key);
 	}
 
-	clearCallbacks()
+	clearCallbacks(): void
 	{
 		this.keyDownCallbacks.clear();
 		this.keyUpCallbacks.clear();
 	}
 
-	getActiveKeys()
+	getActiveKeys(): string[]
 	{
 		return Array.from(this.pressedKeys);
 	}
 
-	getRegisteredKeys()
+	getRegisteredKeys(): RegisteredKeys
 	{
 		return {
 			down: Array.from(this.keyDownCallbacks.keys()),
@@ -115,7 +126,7 @@ class InputManager
 		};
 	}
 
-	destroy()
+	destroy(): void
 	{
 		this.pressedKeys.clear();
 		this.keyDownCallbacks.clear();

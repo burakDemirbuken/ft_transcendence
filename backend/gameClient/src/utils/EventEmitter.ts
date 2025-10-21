@@ -1,16 +1,20 @@
+type EventCallback = (data?: any) => void;
+
 class EventEmitter
 {
+	private eventCallbacks: Map<string, EventCallback>;
+
 	constructor()
 	{
 		this.eventCallbacks = new Map();
 	}
 
-	on(event, callback)
+	on(event: string, callback: EventCallback): void
 	{
 		this.eventCallbacks.set(event, callback);
 	}
 
-	off(event, callback)
+	off(event: string, callback: EventCallback): void
 	{
 		if (this.eventCallbacks.has(event))
 		{
@@ -20,7 +24,7 @@ class EventEmitter
 		}
 	}
 
-	emit(event, data)
+	emit(event: string, data?: any): void
 	{
 		if (this.eventCallbacks.has(event))
 		{

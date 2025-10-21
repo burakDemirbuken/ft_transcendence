@@ -1,3 +1,5 @@
+/// <reference types="babylonjs" />
+
 /*
 const exampleArcadeSettings =
 {
@@ -27,12 +29,32 @@ const exampleArcadeSettings =
 
 import { SCREEN_SIZE } from "../utils/constants.js";
 
+interface Position {
+	x: number;
+	y: number;
+	z: number;
+}
+
 class ArcadeMachine
 {
-	constructor(scene)
+	private scene: BABYLON.Scene;
+	public position: Position | null;
+	private angle: number;
+	private meshs: BABYLON.AbstractMesh[] | null;
+	private body: BABYLON.Mesh | null;
+	private gameScreen: BABYLON.DynamicTexture | null;
+	private screenMaterial: BABYLON.StandardMaterial | null;
+	private isActive: boolean;
+	private screenSize: { width: number; height: number };
+	private joystick1: BABYLON.Mesh | null;
+	private debugCanvas: HTMLCanvasElement | null;
+	private debugCtx: CanvasRenderingContext2D | null;
+
+	constructor(scene: BABYLON.Scene)
 	{
         this.scene = scene;
         this.position = null;
+        this.angle = 0;
         this.meshs = null;
         this.body = null;
         this.gameScreen = null;
@@ -40,9 +62,11 @@ class ArcadeMachine
         this.isActive = false;
         this.screenSize = SCREEN_SIZE;
 		this.joystick1 = null;
+		this.debugCanvas = null;
+		this.debugCtx = null;
     }
 
-    async load(position, angle)
+    async load(position?: Position, angle?: number): Promise<ArcadeMachine>
 	{
         try
 		{
@@ -255,7 +279,7 @@ class ArcadeMachine
 		document.body.appendChild(debugDiv);
 
 		// Global fonksiyonu da tanımla
-		window.updateDebugCanvas = () => this.updatePreview();
+		(window as any).updateDebugCanvas = () => this.updatePreview();
 	}
 
 	updatePreview()
@@ -264,7 +288,7 @@ class ArcadeMachine
 			return;
 		}
 
-		const sourceCanvas = this.gameScreen.getContext().canvas;
+		const sourceCanvas = this.gameScreen.getContext().canvas as HTMLCanvasElement;
 		this.debugCtx.clearRect(0, 0, this.debugCanvas.width, this.debugCanvas.height);
 		this.debugCtx.drawImage(sourceCanvas, 0, 0, this.debugCanvas.width, this.debugCanvas.height);
 	}
