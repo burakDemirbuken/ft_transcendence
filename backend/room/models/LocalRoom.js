@@ -18,7 +18,7 @@ export default class LocalRoom extends Room
 			status: this.status,
 			maxPlayers: this.maxPlayers,
 			host: this.host,
-			players: [this.players[0]?.getState(this.host) || { id: "Player2", name: "empty" }],
+			players: [this.players[0]?.getState(this.host), { id: "Player2", name: "Player2" }],
 			spectators: this.spectators,
 			gameSettings: this.gameSettings,
 			createdAt: this.createdAt

@@ -3,3 +3,4 @@ server/node_modules
 .nf*
 backend/aiServer/__pycache__/
 node_modules
+backend/gameClient/dist/
