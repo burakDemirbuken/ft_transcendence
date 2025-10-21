@@ -3040,7 +3040,7 @@ function displayMatchPairs(pairs, participants) {
 }
 
 // updateParticipants fonksiyonunu güncelle
-function updateParticipants(participants, gridId, matchPairs = null) {
+function updateParticipants(participants, gridId, matchPairs = null, multiplayerMode = false) {
     const grid = document.getElementById(gridId);
     if (!grid) return;
 
@@ -3065,6 +3065,22 @@ function updateParticipants(participants, gridId, matchPairs = null) {
         });
     }
 
+    if (multiplayerMode) {
+        const team1 = [participants[0], participants[2]];
+        const team2 = [participants[1], participants[3]];
+        const teamColors = [
+            { border: '#00ffff', bg: 'rgba(0, 255, 255, 0.1)' },
+            { border: '#ff00ff', bg: 'rgba(255, 0, 255, 0.1)' }
+        ];
+
+        team1.forEach(p => {
+            matchColors[p?.id] = teamColors[0];
+        });
+        team2.forEach(p => {
+            matchColors[p?.id] = teamColors[1];
+        });
+    }
+
     // --- Katılımcıları oluştur ---
     participants.forEach((participant, index) => {
         const card = document.createElement('div');
@@ -3075,7 +3091,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
 
         // Eşleştirme yapıldıysa o rengi kullan, yoksa sırayla renk ver
         let color;
-        if (matchPairs && matchColors[participantId]) {
+        if (matchColors[participantId]) {
             color = matchColors[participantId];
             card.classList.add('matched');
         } else {
@@ -3450,7 +3466,10 @@ function handleRoomUpdate(payload) {
             updateParticipants(payload.players, 'ai-participants-grid');
         } else {
             document.getElementById('custom-players-count').textContent = `${playerCount}/${maxPlayers}`;
-            updateParticipants(payload.players, 'custom-participants-grid');
+            if (payload.gameMode === 'multiplayer')
+                updateParticipants(payload.players, 'custom-participants-grid', 0, 1);
+            else
+                updateParticipants(payload.players, 'custom-participants-grid');
 
             // DÜZELTME: id kullan, userId değil
             const isHost = payload.players.some(player => player.id === currentUserId && player.isHost);
@@ -3659,7 +3678,10 @@ function showCustomWaitingRoom(data) {
     }
 
     if (data.players) {
-        updateParticipants(data.players, 'custom-participants-grid');
+        if (data.gameMode === "multiplayer")
+            updateParticipants(data.players, 'custom-participants-grid', 0, 1);
+        else
+            updateParticipants(data.players, 'custom-participants-grid');
     }
 
     // DÜZELTME: id kullan, userId değil
