@@ -160,12 +160,19 @@ class RoomManager extends EventEmitter
 			{
 				console.log(`data: `, JSON.stringify(data, null, 2));
 				if (data.matchType === 'tournament')
-					//fetch
-					;
+				{
+					fetch('http://profile:3006/internal/tournament', {
+						method: 'POST',
+						body: JSON.stringify(data)
+					})
+				}
 				else if (data.matchType === 'classic')
-					//fetch
-					;
-
+				{
+					fetch('http://profile:3006/internal/match', {
+						method: 'POST',
+						body: JSON.stringify(data)
+					})
+				}
 			}
 		);
 		this.rooms.set(roomId, room);

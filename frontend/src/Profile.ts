@@ -1,6 +1,7 @@
-import AView from "./AView.js";
+import { getAuthToken, getAuthHeaders } from './utils/auth.js';
 import { getJsTranslations } from './I18n.js';
-
+import { API_BASE_URL } from './index.js';
+import AView from "./AView.js";
 declare const Chart: any; // Global Chart.js nesnesini tanımlar
 
 function getCSSVar(name: string): string {
@@ -11,7 +12,7 @@ class ManagerProfile {
     private currentTab: string;
     private charts: Record<string, any>;
     private avatarStatus: HTMLElement;
-    private showcharts: { performance?: Chart } = {};
+    private showcharts: { performance?: any } = {};
     private perfChartData: { labelName: string, labels: string[], data: number[] } = {
 		labelName: "Matches Won",
 		labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
@@ -49,6 +50,7 @@ class ManagerProfile {
 			this.createSkillRadarChart();
 			this.createMonthlyChart();
 			this.createWinLossChart();
+			onLoad(); // Profile yüklendiğinde onLoad fonksiyonunu çağır
         }, 100);
     }
 
@@ -139,7 +141,7 @@ class ManagerProfile {
 
         const translations = await getJsTranslations(localStorage.getItem("langPref"));
         let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost']; // default fallback
-        
+
         // BU NE İÇİN ??
         // JSON string olan labels'ı diziye çevir
 		// if (winLossCtx.dataset.labels) {
@@ -663,6 +665,15 @@ function handleOverlayClick(e: MouseEvent, overlay: HTMLDivElement, turnuva: HTM
   }
 }
 
+function handleMatchOverlay(e) {
+    if (e.target.classList.contains("match-row") || e.target.closest(".match-row"))
+        document.querySelector('#match-overlay').classList.remove("hide-away");
+}
+
+function hideMatchOverlay() {
+    document.querySelector('#match-overlay').classList.add("hide-away");
+}
+
 function initBracket(players: Player[], n: number, currentUser: string, turnuva: HTMLDivElement, wrapper: HTMLDivElement) {
     turnuva.innerHTML = '';
     turnuva.style.transform = 'none';
@@ -823,6 +834,7 @@ export default class extends AView {
     private offlineHandler = () => profileManager.setAvatarStatus('offline');
 
     async setEventHandlers() {
+        document.addEventListener("onload", onLoad);
         document.addEventListener("mousemove", handleCardMouseMove);
         document.addEventListener("mouseout", resetCardShadow); // fare dışarı çıkınca gölgeyi sıfırlar
 
@@ -851,11 +863,11 @@ export default class extends AView {
         this.turnuva = document.getElementById('turnuva') as HTMLDivElement;
 
         // Kullanıcıyı fetch et
-        fetch("http://localhost:3000/api/me")
+        fetch(`${API_BASE_URL}/auth/me`)
           .then(res => res.json())
           .then((user: User) => {
             this.USERNAME = user.username;
-            return fetch(`http://localhost:3000/api/user-tournaments/${encodeURIComponent(this.USERNAME)}`);
+            return fetch(`${API_BASE_URL}/user-tournaments/${encodeURIComponent(this.USERNAME)}`);
           })
           .then(res => res.json())
           .then((tournaments: Tournament[]) => {
@@ -889,6 +901,9 @@ export default class extends AView {
             this.closeBtn.classList.remove('close');
           }, 300);
         });
+
+        document.querySelector(".match-table")?.addEventListener('click', handleMatchOverlay);
+        document.querySelector("#match-card-exit")?.addEventListener('click', hideMatchOverlay);
 
         document.addEventListener('keydown', (e: KeyboardEvent) => {
           if (e.key === "Escape" && this.overlay.style.display === 'flex') {
@@ -934,5 +949,74 @@ export default class extends AView {
     async unsetStylesheet() {
         const link = document.querySelector("link[href='styles/profile.css']");
         if (link) document.head.removeChild(link);
+    }
+}
+
+
+// Cookie'leri parse etmek için yardımcı fonksiyon
+function parseCookies(): Record<string, string> {
+    const cookies: Record<string, string> = {};
+    if (document.cookie) {
+        document.cookie.split(';').forEach(cookie => {
+            const [name, value] = cookie.trim().split('=');
+            if (name && value) {
+                cookies[name] = decodeURIComponent(value);
+            }
+        });
+    }
+    return cookies;
+}
+
+
+async function onLoad()
+{
+    const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
+
+    if (!hasToken)
+        return ( window.location.href = '#login' );
+
+    try
+    {
+        const getProfileDatas = await fetch(`${API_BASE_URL}/auth/me`,
+        {
+            credentials: 'include',
+            headers:
+            {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            }
+        });
+
+        if (getProfileDatas.ok)
+        {
+            const userData = await getProfileDatas.json();
+
+            const ProfileUsername = await fetch(`${API_BASE_URL}/profile/profile?userName=${userData.user.username}`,
+            {
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeaders()
+                }
+            });
+
+            if (ProfileUsername.ok)
+            {
+                const user = await ProfileUsername.json();
+                console.log(user);
+                document.querySelector(".user-title").textContent = user.profile.displayName;
+                document.querySelector(".username").textContent = "@" + user.profile.userName;
+            }
+            else
+                console.error("❌ Failed to fetch profile data:", ProfileUsername.statusText);
+        }
+        else
+        {
+            if (getProfileDatas.status === 401)
+                window.location.href = '#login';
+        }
+    } catch (error)
+    {
+        window.location.href = '#login';
     }
 }

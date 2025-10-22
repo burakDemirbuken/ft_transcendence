@@ -1,6 +1,7 @@
 notes.md
 server/node_modules
 .nf*
-backend/aiServer/__pycache__/
+./backend/aiServer/__pycache__/*
 node_modules
 backend/gameClient/dist/
+frontend/dist/

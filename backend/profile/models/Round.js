@@ -17,12 +17,18 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: 'TournamentHistory',
+				model: 'tournament_histories',
 				key: 'id'
 			},
-			onDelete: 'SET NULL'
+			onDelete: 'CASCADE'
 		}
 	}, {
+		indexes: [
+  			{
+				unique: true,
+				fields: ['tournamentId', 'roundNumber']
+			},
+		],
 		sequelize,
 		modelName: 'Round',
 		tableName: 'rounds'

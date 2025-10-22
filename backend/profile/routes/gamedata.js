@@ -1,3 +1,5 @@
+import { Op } from 'sequelize'
+
 export default async function gamedataRoute(fastify) {
 
 	fastify.post('/internal/match', async (request, reply) => {
@@ -32,9 +34,9 @@ export default async function gamedataRoute(fastify) {
 
 			if (winnerTeam) {
 				await Promise.all([
-					winnerTeam.forEach(async (player) => {
+					...winnerTeam.map(async (player) => {
 						const playerState = state.players.find(p => p.id === player.id)
-						player.Stats.increment({
+						player.Stat.increment({
 							gamesPlayed: 1,
 							gamesWon: 1,
 							gameCurrentStreak: 1,
@@ -43,13 +45,13 @@ export default async function gamedataRoute(fastify) {
 							ballMissCount: playerState?.missedBall ?? 0,
 							gameTotalDuration: time.duration
 						}, { transaction: t })
-						player.Stats.update({
+						player.Stat.update({
 							gameMinDuration: time.duration < player.Stats.gameMinDuration ? time.duration : player.Stats.gameMinDuration
 						})
 					}),
-					loserTeam.forEach(async (player) => {
+					...loserTeam.map(async (player) => {
 						const playerState = state.players.find(p => p.id === player.id)
-						player.Stats.increment({
+						player.Stat.increment({
 							gamesPlayed: 1,
 							gamesLost: 1,
 							xp: 10,
@@ -57,7 +59,7 @@ export default async function gamedataRoute(fastify) {
 							ballHitCount: playerState?.kickBall ?? 0,
 							ballMissCount: playerState?.missedBall ?? 0
 						}, { transaction: t })
-						player.Stats.update({
+						player.Stat.update({
 							gameCurrentStreak: 0,
 							gameMinDuration: time.duration < player.Stats.gameMinDuration ? time.duration : player.Stats.gameMinDuration
 						}, { transaction: t })
@@ -77,10 +79,10 @@ export default async function gamedataRoute(fastify) {
 			])
 
 			await Promise.all([
-				teamOnePlayers.forEach(async (player) => {
+				...teamOnePlayers.map(async (player) => {
 					fastify.checkAchievements(player.id, t)
 				}),
-				teamTwoPlayers.forEach(async (player) => {
+				...teamTwoPlayers.map(async (player) => {
 					fastify.checkAchievements(player.id, t)
 				})
 			])
@@ -174,8 +176,6 @@ export default async function gamedataRoute(fastify) {
 						winnerPlayerID: matchData.winner?.id ?? null
 					}, { transaction: t })
 
-
-
 					const [winnerPlayer, loserPlayer] = await Promise.all([
 						Profile.findOne({
 							where: {
@@ -194,9 +194,9 @@ export default async function gamedataRoute(fastify) {
 					])
 
 					Promise.all([
-						() => {
+						async () => {
 							const winnerState = matchData.state.players.find(p => p.id === matchData.winner)
-							winnerPlayer?.Stats.increment({
+							winnerPlayer?.Stat.increment({
 								gamesPlayed: 1,
 								gamesWon: 1,
 								gameCurrentStreak: 1,
@@ -209,9 +209,9 @@ export default async function gamedataRoute(fastify) {
 								gameMinDuration: matchData.time.duration < winnerPlayer.Stats.gameMinDuration ? matchData.time.duration : winnerPlayer.Stats.gameMinDuration
 							}, { transaction: t })
 						},
-						() => {
+						async () => {
 							const loserState = matchData.state.players.find(p => p.id === matchData.loser)
-							loserPlayer?.Stats.increment({
+							loserPlayer?.Stat.increment({
 								gamesPlayed: 1,
 								gamesLost: 1,
 								gameCurrentStreak: 0,
@@ -229,10 +229,109 @@ export default async function gamedataRoute(fastify) {
 				})
 			})
 
+			await t.commit()
+			return reply.status(200).send({ message: 'Tournament data processed successfully' })
 		} catch (error) {
 			await t.rollback()
 			fastify.log.error('Error processing tournament data:', error)
 			return reply.status(500).send({ error: 'Internal Server Error' })
 		}
 	})
-}
+
+	fastify.get('/match-history', async (request, reply) => {
+		const { userName } = request.query ?? {}
+		if (!userName) {
+			return reply.code(400).send({ error: 'Username is required' })
+		}
+		
+		const userProfile = await fastify.sequelize.models.Profile.findOne({
+			where: { userName: userName },
+			attributes: ['id']
+		})
+		if (!userProfile) {
+			return reply.code(404).send({ error: 'User profile not found' })
+		}
+
+		let matchHistory = await fastify.sequelize.models.MatchHistory.findAll({
+			include: [
+				{
+					model: fastify.sequelize.models.Team,
+					as: 'teamOne',
+					where: {
+						[Op.or]: [
+							{ playerOneId: userProfile.id },
+							{ playerTwoId: userProfile.id }
+						]
+					},
+					required: false
+				},
+				{
+					model: fastify.sequelize.models.Team,
+					as: 'teamTwo',
+					where: {
+						[Op.or]: [
+							{ playerOneId: userProfile.id },
+							{ playerTwoId: userProfile.id }
+						]
+					},
+					required: false
+				}
+			],
+		})
+
+		console.log(matchHistory.toJSON())
+
+		return reply.send({
+			success: true,
+			matches: matchHistory.toJSON()
+		})
+	})
+
+	fastify.get('/tournament-history', async (request, reply) => {
+		const { userName } = request.query ?? {}
+		if (!userName) {
+			return reply.code(400).send({ error: 'Username is required' })
+		}
+		
+		const userProfile = await fastify.sequelize.models.Profile.findOne({
+			where: { userName: userName },
+			attributes: ['id']
+		})
+		if (!userProfile) {
+			return reply.code(404).send({ error: 'User profile not found' })
+		}
+		
+		let RoundMatch = await fastify.sequelize.models.RoundMatch.findAll({
+			include: [
+				{
+					model: fastify.sequelize.models.Round,
+					include: [
+						{
+							model: fastify.sequelize.models.TournamentHistory,
+						}
+					]
+				},
+				{
+					model: fastify.sequelize.models.Profile,
+					as: 'playerOne'
+				},
+				{
+					model: fastify.sequelize.models.Profile,
+					as: 'playerTwo'
+				}
+			],
+			where: {
+				[Op.or]: [
+					{ playerOneID: userProfile.id },
+					{ playerTwoID: userProfile.id }
+				]
+			},			
+		})
+
+		console.log(RoundMatch.toJSON())
+
+		return reply.send({ success: true, 
+			matches: RoundMatch.toJSON()
+		})
+	})
+ }

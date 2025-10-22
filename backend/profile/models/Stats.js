@@ -9,10 +9,10 @@ export default (sequelize, DataTypes, Model) => {
             autoIncrement: true
         },
         userId: {
-            type: DataTypes.STRING,
+            type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                model: 'Profile',
+                model: 'profiles',
                 key: 'id'
             },
             onDelete: 'CASCADE'
@@ -58,8 +58,14 @@ export default (sequelize, DataTypes, Model) => {
             defaultValue: 0
         }
 	}, {
+        indexes: [
+            {
+                unique: true,
+                fields: ['userId']
+            }
+        ],
         sequelize,
-        modelName: 'Stats',
+        modelName: 'Stat',
         tableName: 'stats'
     })
 

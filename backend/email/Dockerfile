@@ -2,17 +2,13 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
+RUN apk update --no-cache && \
+    apk upgrade --no-cache
+
 COPY package*.json ./
 
-# Install dependencies
 RUN npm install
 
-# Copy source code
 COPY . .
 
-# Expose port
-EXPOSE 3005
-
-# Start the application
 CMD ["npm", "run", "dev"]

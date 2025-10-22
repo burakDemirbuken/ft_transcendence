@@ -1,9 +1,10 @@
 class NetworkManager
 {
-	constructor(ip, port)
+	constructor(protocol, ip, port, basePath = '')
 	{
 		this.socket = null;
-		this.serverAddress = `ws://${ip}:${port}`;
+		// Protocol, ip, port ve basePath'i destekle (nginx için)
+		this.serverAddress = `${protocol}//${ip}:${port}${basePath}`;
 
 		this.callbacks = {
 			onConnect : null,

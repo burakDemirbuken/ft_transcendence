@@ -4,8 +4,9 @@ export default (sequelize, DataTypes, Model) => {
 
     Profile.init({
         id: {
-            type: DataTypes.STRING,
-            primaryKey: true
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true
         },
         userName: {
             type: DataTypes.STRING,
@@ -17,11 +18,12 @@ export default (sequelize, DataTypes, Model) => {
             allowNull: false,
         },
         avatarUrl: {
-            type: DataTypes.STRING
-            //defaultValue: null
+            type: DataTypes.STRING,
+            defaultValue: '/static/default/'
         },
         bio: {
-            type: DataTypes.TEXT
+            type: DataTypes.TEXT,
+            defaultValue: 'Hi!'
         },
 	}, {
         sequelize,

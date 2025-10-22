@@ -9,7 +9,7 @@ export default fp(async (fastify, opts) => {
         logging: false
     })
 
-    const FriendModel = Friend(sequelize, DataTypes, Model)
+    const FriendModel = Friend(sequelize, DataTypes, Model) //?
 
     await sequelize.sync({ alter: true })
 

@@ -1,58 +1,48 @@
 export default async function friendChangeRoutes(fastify) {
     fastify.post('/send', async (request, reply) => {
-        const { userid, peerid } = request.body
-        await fastify.sequelize.models.Friend.create({ userid, peerid, status: 'pending' })
-        return reply.status(201).send()
+        const { userName, peerName } = request.body 
+
+        if (!userName || !peerName) {
+            return reply.status(400).send({ error: "userName and peerName are required." })
+        }
+
+        if (userName === peerName) {
+            return reply.status(400).send({ error: "Cannot send friend request to oneself." })
+        }
+
+        await fastify.sequelize.models.Friend.create({ userName, peerName, status: 'pending' })
+        return reply.status(201).send( { message: "Friend request sent." } )
     })
 
     fastify.post('/accept', async (request, reply) => {
-        const { peerid } = request.body
+        const { peerName } = request.body
         const friend = await fastify.sequelize.models.Friend.findOne({
             where: {
-                peerid,
+                peerName: peerName,
                 status: 'pending'
             }
         })
         if (friend) {
             friend.status = 'accepted'
             await friend.save()
-            return reply.status(204).send()
+            return reply.status(204).send( {message: "Friend request accepted."} )
         } else {
-            return reply.status(404).send()
-        }
-    })
-
-    fastify.post('/block', async (request, reply) => {
-        const { userid, peerid } = request.body
-        let friend = await fastify.sequelize.models.Friend.findOne({
-            where: {
-                userid,
-                peerid
-            }
-        })
-        if (friend) {
-            friend.status = 'blocked'
-            await friend.save()
-            return reply.status(204).send()
-        } else {
-            await sequelize.models.Friend.create({ userid, peerid, status: 'blocked' })
-            return reply.status(201).send()
+            return reply.status(404).send( {message: "Friend request not found."} )
         }
     })
 
     fastify.post('/remove', async (request, reply) => {
-        //unfriend someone
-        const { userid, peerid } = request.body
+        const { userName, peerName } = request.body
         const deletedCount = await fastify.sequelize.models.Friend.destroy({
             where: {
-                userid,
-                peerid
+                userName: userName,
+                peerName: peerName
             }
         })
-        if (deletedCount > 0) {
-            return reply.status(204).send()
+        if (deletedCount) {
+            return reply.status(204).send( {message: "Friend request removed."} )
         } else {
-            return reply.status(404).send()
+            return reply.status(404).send( {message: "Friend request not found."} )
         }
     })
 }

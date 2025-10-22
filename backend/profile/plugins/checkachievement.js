@@ -1,16 +1,15 @@
 import fp from 'fastify-plugin'
 
 export default fp(async (fastify) => {
-
     async function checkAchievements(user, t) {
-        const { Achievements, Stats } = fastify.sequelize.models
-    
+        const { Achievement, Stat } = fastify.sequelize.models
+
         const [stats, achievements] = await Promise.all([
-            Stats.findOne({
+            Stat.findOne({
                 where: { userId: user.id },
                 transaction: t
             }),
-            Achievements.findOne({
+            Achievement.findOne({
                 where: { userId: user.id },
                 transaction: t
             })
@@ -42,16 +41,20 @@ export default fp(async (fastify) => {
         if (!achievements.lessThanThreeMin && stats.gameMinDuration > 0 && stats.gameMinDuration < 180000) {
             updates.lessThanThreeMin = new Date()
         }
+
+        if (Object.keys(updates).length > 0) {
+            await achievements.update(updates)
+        }
     }
 
     async function getAchievementProgress(user) {
-        const { Achievements, Stats } = fastify.sequelize.models
-    
+        const { Achievement, Stat } = fastify.sequelize.models
+
         const [stats, achievements] = await Promise.all([
-            Stats.findOne({
+            Stat.findOne({
                 where: { userId: user.id }
             }),
-            Achievements.findOne({
+            Achievement.findOne({
                 where: { userId: user.id }
             })
         ])
@@ -62,27 +65,21 @@ export default fp(async (fastify) => {
 
         return ({
             firstWin: {
-                unlocked: !!achievements.firstWin,
                 unlockedAt: achievements.firstWin || null,
             },
             hundredWins: {
-                unlocked: !!achievements.hundredWins,
                 unlockedAt: achievements.hundredWins || null
             },
             fiveHundredWins: {
-                unlocked: !!achievements.fiveHundredWins,
                 unlockedAt: achievements.fiveHundredWins || null
             },
             firstTenStreak: {
-                unlocked: !!achievements.firstTenStreak,
                 unlockedAt: achievements.firstTenStreak || null
             },
             twentyFiveTenStreak: {
-                unlocked: !!achievements.twentyFiveTenStreak,
                 unlockedAt: achievements.twentyFiveTenStreak || null
             },
             lessThanThreeMin: {
-                unlocked: !!achievements.lessThanThreeMin,
                 unlockedAt: achievements.lessThanThreeMin || null
             }
         })
@@ -91,7 +88,7 @@ export default fp(async (fastify) => {
     fastify.decorate('checkAchievements', checkAchievements)
     fastify.decorate('getAchievementProgress', getAchievementProgress)
 
-    async function levelCalculate(xp, baseXP = 100, growthFactor = 1.25) {
+    function levelCalculate(xp, baseXP = 100, growthFactor = 1.25) {
         if (xp < 0)
             return { level: 0, currentXP: 0, xpForNextLevel: baseXP }
 
@@ -110,10 +107,20 @@ export default fp(async (fastify) => {
     }
 
     async function statCalculate(user) {
-        const { Stats } = fastify.sequelize.models
+        const { Stat } = fastify.sequelize.models
 
-        const stats = await Stats.findOne({
-            where: { userId: user.id }
+        const stats = await Stat.findOne({
+            where: { userId: user.id },
+            attributes: [
+                'xp',
+                'gamesPlayed',
+                'gamesWon',
+                'gamesLost',
+                'gameTotalDuration',
+                'gameCurrentStreak',
+                'gameLongestStreak',
+                'gameMinDuration'
+            ]
         })
 
         if (!stats) {
@@ -121,6 +128,7 @@ export default fp(async (fastify) => {
         }
 
         return ({
+            ...stats.toJSON(),
             ...levelCalculate(stats.xp),
             winRate: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0,
             speed: (stats.gamesPlayed > 0 && stats.gameTotalDuration > 0) ? (stats.ballHitCount / (stats.gameTotalDuration * stats.gamesPlayed)) * 100 : 0,
