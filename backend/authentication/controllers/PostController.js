@@ -211,14 +211,14 @@ async function verify2FA(request, reply) {
         utils.tempStorage.delete(user.email);
         const userIP = request.headers['x-forwarded-for'] || request.headers['x-real-ip'] || request.socket.remoteAddress || 'Unknown';
         try {
-            await sendLoginNotification(user.email, user.username, userIP);
+            await utils.sendLoginNotification(user.email, user.username, userIP);
         } catch (emailError) {
             console.log('Login notification error:', emailError);
         }
         // Response'ta da token'ı gönder (frontend için)
-        reply.send({ 
-            success: true, 
-            message: trlt.login.success, 
+        reply.send({
+            success: true,
+            message: trlt.login.success,
             user: user.toSafeObject(),
             accessToken: accessToken // Frontend'de localStorage'a kaydedebilmek için
         });
@@ -228,13 +228,13 @@ async function verify2FA(request, reply) {
     }
 }
 
-async function logout(request, reply) 
+async function logout(request, reply)
 {
 	const trlt = getTranslations(request.query.lang || "eng");
 	try
 	{
 		console.log('🚪 Logging out user, clearing all cookies');
-		
+
 		// Tüm auth cookie'lerini temizle
 		reply.clearCookie('accessToken', {
 			httpOnly: true, secure: true, sameSite: 'none', path: '/'
@@ -286,7 +286,7 @@ async function refreshToken(request, reply)
                 code: 'INVALID_REFRESH_TOKEN'
             }));
         }
-        if (decoded.type !== 'refresh')	
+        if (decoded.type !== 'refresh')
         {
             return (reply.status(401).send({
                 success: false,
@@ -310,7 +310,7 @@ async function refreshToken(request, reply)
                 email: user.email,
                 type: 'access'
             },
-            { 
+            {
                 expiresIn: '15m'
             }
         );
@@ -361,7 +361,7 @@ async function refreshToken(request, reply)
 
 
 async function checkTokenBlacklist(request, reply) {
-    try 
+    try
     {
         const { token } = request.body;
         const blacklisted = utils.isTokenBlacklisted(token);
