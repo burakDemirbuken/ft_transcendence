@@ -26,10 +26,10 @@ export default fp(async (fastify) => {
 		const RoundMatch = RoundMatchModel(sequelize, DataTypes, Model)
 		const Stats = StatsModel(sequelize, DataTypes, Model)
 		const Achievements = AchievementsModel(sequelize, DataTypes, Model)
- 
+
 
 		// hasmnyler hasone olabilr
-		
+
 		Profile.hasMany(Team, { foreignKey: 'playerOneId', onDelete: 'SET NULL', hooks: true })
 		Profile.hasMany(Team, { foreignKey: 'playerTwoId', onDelete: 'SET NULL', hooks: true })
 		Team.belongsTo(Profile, { as: 'PlayerOne', foreignKey: 'playerOneId', onDelete: 'SET NULL' })
@@ -65,7 +65,7 @@ export default fp(async (fastify) => {
 
 		await sequelize.authenticate()
 
-		await sequelize.sync() 
+		/* await sequelize.sync()  */
 
 		fastify.decorate('sequelize', sequelize)
 

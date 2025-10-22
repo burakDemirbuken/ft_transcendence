@@ -61,7 +61,7 @@ const start = async () => {
     await testConnection();
 
     await sequelize.sync({ force: false });
-    
+
     await fastify.listen
     ({
       port: 3001,

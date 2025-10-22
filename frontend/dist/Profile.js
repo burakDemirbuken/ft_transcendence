@@ -864,6 +864,7 @@ async function onLoad() {
             });
             if (ProfileUsername.ok) {
                 const user = await ProfileUsername.json();
+                console.log(user);
                 document.querySelector(".user-title").textContent = user.profile.displayName;
                 document.querySelector(".username").textContent = "@" + user.profile.userName;
             }

@@ -2,18 +2,18 @@ import { Op } from 'sequelize'
 
 export default async function profileRoute(fastify) {
 
-	fastify.get('/profile', async (request, reply) => { 
+	fastify.get('/profile', async (request, reply) => {
 		const { userName } = request.query ?? {}
-		
+
 		if (!userName) {
 			return reply.code(400).send({ error: 'Username is required' })
 		}
-		
+
 		try {
 			const userProfile = await fastify.sequelize.models.Profile.findOne({
 				where: { userName: userName }
 			})
-			
+
 			if (!userProfile) {
 				return reply.code(404).send({ error: `User not found: ${userName}` })
 			}
@@ -30,7 +30,7 @@ export default async function profileRoute(fastify) {
 			})
 		} catch (error) {
 			fastify.log.error('Error retrieving user profile:', error)
-			return reply.code(500).send({ 
+			return reply.code(500).send({
 				error: 'Internal Server Error',
 				message: error.message,
 				details: error.toString()
@@ -71,10 +71,10 @@ export default async function profileRoute(fastify) {
 					body: JSON.stringify({ userName: userName })
 				}).catch(err => fastify.log.error('Error deleting from friend service:', err))
 			])
-			
-			return reply.code(200).send({ 
+
+			return reply.code(200).send({
 				success: true,
-				message: 'Profile deleted successfully' 
+				message: 'Profile deleted successfully'
 			})
 		} catch (error) {
 			fastify.log.error('Error deleting profile:', error)
@@ -98,7 +98,7 @@ export default async function profileRoute(fastify) {
 				return reply.code(404).send({ error: 'User not found' })
 			}
 
-			return reply.code(200).send({ 
+			return reply.code(200).send({
 				success: true,
 				message: 'Profile deleted successfully',
 			})
@@ -108,28 +108,30 @@ export default async function profileRoute(fastify) {
 		}
 	})
 
-	fastify.put('/profile', async (request, reply) => {
-		const { userName, displayName, bio, avatarUrl } = request.body ?? {}
-		
+	fastify.post('/displaynameupdate', async (request, reply) => {
+		const { userName , dname } = request.body ?? {}
+
 		if (!userName) {
-			return reply.code(400).send({ error: 'Username is required' })
+			return reply.code(400).send({ error: 'userName is required' })
 		}
 
-		const userProfile = await fastify.sequelize.models.Profile.findOne({
-			where: { userName: userName }
-		})
+		try {
+			const userProfile = await fastify.sequelize.models.Profile.findOne({
+				where: { userName: userName }
+			})
 
-		if (!userProfile) {
-			return reply.code(404).send({ error: 'User not found' })
+			userProfile.displayName = dname ?? userProfile.displayName
+			await userProfile.save()
+
+			return reply.code(200).send({
+				message: 'Display name updated successfully',
+				profile: userProfile.displayName
+			})
+
+		} catch (error) {
+			fastify.log.error('Error updating display name:', error)
+			return reply.code(500).send({ error: 'Failed to update display name' })
 		}
-
-		userProfile.bio = bio ?? userProfile.bio
-		userProfile.avatarUrl = avatarUrl ?? userProfile.avatarUrl
-		userProfile.displayName = displayName ?? userProfile.displayName
-
-		await userProfile.save()
-
-		return reply.code(200).send({ message: 'Profile updated successfully' })
 	})
 
 	fastify.post('/create', async (request, reply) =>
@@ -151,27 +153,27 @@ export default async function profileRoute(fastify) {
 			return reply.code(409).send({ error: 'Profile already exists' })
 		}
 		const t = await fastify.sequelize.transaction();
-		
+
 		try {
-			
-			const userProfile = await fastify.sequelize.models.Profile.create({ 
+
+			const userProfile = await fastify.sequelize.models.Profile.create({
 				userName: userName,
 				displayName: userName
 			}, { transaction: t })
-			
+
 			await Promise.all([
 				userProfile.createStat({}, {transaction: t}),
 				userProfile.createAchievement({}, {transaction: t})
 			])
 
-			await t.commit()				
-			return reply.code(201).send({ 
-				success: true, 
+			await t.commit()
+			return reply.code(201).send({
+				success: true,
 				message: 'Profile created successfully',
 				profile: userProfile
 			})
 		} catch (error) {
-			t.rollback(); 
+			t.rollback();
 			fastify.log.error({
 				msg: 'Error creating user profile',
 				name: error?.name,
@@ -207,7 +209,7 @@ export default async function profileRoute(fastify) {
 			users: userProfiles.map(profile => profile.toJSON())
 		})
 	})
- 
+
 	fastify.post('/internal/avatar-update', async (request, reply) => {
 		const {userName, filename, avatarUrlPath } = request.body ?? {}
 

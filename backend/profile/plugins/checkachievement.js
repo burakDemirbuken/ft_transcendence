@@ -3,7 +3,7 @@ import fp from 'fastify-plugin'
 export default fp(async (fastify) => {
     async function checkAchievements(user, t) {
         const { Achievement, Stat } = fastify.sequelize.models
-    
+
         const [stats, achievements] = await Promise.all([
             Stat.findOne({
                 where: { userId: user.id },
@@ -49,7 +49,7 @@ export default fp(async (fastify) => {
 
     async function getAchievementProgress(user) {
         const { Achievement, Stat } = fastify.sequelize.models
-    
+
         const [stats, achievements] = await Promise.all([
             Stat.findOne({
                 where: { userId: user.id }
@@ -110,7 +110,17 @@ export default fp(async (fastify) => {
         const { Stat } = fastify.sequelize.models
 
         const stats = await Stat.findOne({
-            where: { userId: user.id }
+            where: { userId: user.id },
+            attributes: [
+                'xp',
+                'gamesPlayed',
+                'gamesWon',
+                'gamesLost',
+                'gameTotalDuration',
+                'gameCurrentStreak',
+                'gameLongestStreak',
+                'gameMinDuration'
+            ]
         })
 
         if (!stats) {
@@ -118,6 +128,7 @@ export default fp(async (fastify) => {
         }
 
         return ({
+            ...stats.toJSON(),
             ...levelCalculate(stats.xp),
             winRate: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0,
             speed: (stats.gamesPlayed > 0 && stats.gameTotalDuration > 0) ? (stats.ballHitCount / (stats.gameTotalDuration * stats.gamesPlayed)) * 100 : 0,
