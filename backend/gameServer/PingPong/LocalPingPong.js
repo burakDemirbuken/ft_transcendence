@@ -15,10 +15,10 @@ class LocalPingPong extends PingPong
 		if (this.players.length !== 0)
 			throw new Error("LocalPingPong can only have one player");
 		this.players.push(player);
-		this.team.set(1, { playersId: [player.id], score: 0 });
-		this.team.set(2, { playersId: ["Player2"], score: 0 });
-		this.paddles.set(player.id, this.createPaddle(2));
-		this.paddles.set("Player2", this.createPaddle(1));
+		this.team.set(2, { playersId: [player.id], score: 0 });
+		this.team.set(1, { playersId: ["Player2"], score: 0 });
+		this.paddles.set(player.id, this.createPaddle(1));
+		this.paddles.set("Player2", this.createPaddle(2));
 		console.log(`👤 Player ${player.id} added to LocalPingPong`);
 		this.status = 'ready to start';
 	}
@@ -36,7 +36,6 @@ class LocalPingPong extends PingPong
 		localPlayer.down = player.inputGet('s');
 	}
 
-	// değişicek
 	getGameState()
 	{
 		const playerStates = [

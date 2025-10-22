@@ -20,7 +20,8 @@ class Paddle
 	update(deltaTime)
 	{
 		const deltaTimeInSeconds = deltaTime / 1000;
-
+		this.oldPos.x = this.pos.x;
+		this.oldPos.y = this.pos.y;
 		if (this.down)
 			this.pos.y += this.paddleSpeed * deltaTimeInSeconds;
 		if (this.up && this.pos.y >= 0)

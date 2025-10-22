@@ -9,6 +9,7 @@ class PingPong extends EventEmitter
 	constructor(property)
 	{
 		super();
+		this.isStarted = false;
 		this.status = 'not initialized'; // 'waiting', 'playing', 'paused', 'finished', 'not initialized'
 		this.gameMode = "classic"; // 'local', 'online', 'tournament', 'ai'
 
@@ -272,7 +273,6 @@ class PingPong extends EventEmitter
 	{
 		this.paddleControls();
 		this.paddles.forEach((paddle) => paddle.update(deltaTime));
-
 		if (this.status === 'playing')
 		{
 			this.gameTime += deltaTime;
@@ -281,6 +281,7 @@ class PingPong extends EventEmitter
 			this.ball.update(deltaTime);
 			this.checkCollisions();
 		}
+
 		this.emit('update', { gameState: this.getGameState(), players: this.players });
 	}
 
@@ -327,6 +328,7 @@ class PingPong extends EventEmitter
 				},
 			}
 		);
+		this.isStarted = false;
 		console.log(`winner: ${this.getWinnerTeam().playersId}, loser: ${this.getLoserTeam().playersId}`);
 		console.log(`🏁 Game finished! Final Score - team1: ${this.team.get(1).score}, team2: ${this.team.get(2).score}`);
 	}
@@ -451,6 +453,7 @@ class PingPong extends EventEmitter
 		{
 			this.status = 'playing';
 		}, 2000);
+		this.isStarted = true;
 	}
 
 	pause()
@@ -469,22 +472,6 @@ class PingPong extends EventEmitter
 	{
 		this.status = 'stopped';
 		console.log(`⏸️ Game stopped`);
-	}
-
-	resetGame()
-	{
-		console.log('🔄 Resetting game state...');
-		this.score = {
-			team1: 0,
-			team2: 0
-		};
-		this.status = 'not initialized';
-		this.ball = null;
-		for (const paddle of this.paddles.values())
-			paddle.reset();
-		this.gameTime = 0;
-		this.lastUpdateTime = 0;
-		this.start();
 	}
 
 	isRunning()

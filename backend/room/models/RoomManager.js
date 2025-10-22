@@ -117,10 +117,12 @@ class RoomManager extends EventEmitter
 				const {state, players} = room.finishRoom(payload);
 				players.forEach(player => {
 					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: state }));
+				});
+				this.notifyRoomUpdate(payload.roomId);
+				players.forEach(player => {
 					if (room.gameMode !== 'tournament')
 						this.leaveRoom(player);
 				});
-				this.notifyRoomUpdate(payload.roomId);
 				break;
 			default:
 				console.error(`Unhandled server room message type: ${action}`);
