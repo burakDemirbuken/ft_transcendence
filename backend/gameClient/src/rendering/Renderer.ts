@@ -141,19 +141,14 @@ class Renderer
 
 					if (player.oldPosition)
 					{
-						console.log("player:", player);
 						const deltaY = player.position.y - player.oldPosition.y;
-						const threshold = 1;
+						console.log("playerPosition change:", player.position.y, "oldPosition:", player.oldPosition.y, "deltaY:", deltaY);
 						const joystickNumber = index + 1;
 
-						if (Math.abs(deltaY) > threshold)
-						{
-							if (deltaY < 0) {
-								machine.joystickMove(joystickNumber, 'up');
-							} else if (deltaY > 0) {
-								machine.joystickMove(joystickNumber, 'down');
-							}
-						}
+						if (deltaY < 0)
+							machine.joystickMove(joystickNumber, 'up');
+						else if (deltaY > 0)
+							machine.joystickMove(joystickNumber, 'down');
 						else
 							machine.joystickMove(joystickNumber, 'neutral');
 					}
