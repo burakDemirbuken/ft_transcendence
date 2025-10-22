@@ -3808,7 +3808,7 @@ document.getElementById('custom-join-btn').addEventListener('click', function() 
     }
 
     currentGameMode = 'custom';
-    roomSocket.send("join", { roomId: roomCode , gameMode: 'play-page'});
+    roomSocket.send("join", { roomId: roomCode , gameMode: 'classic'});
     showNotification(`${roomCode} kodlu odaya katılıyorsunuz...`, 'info');
 });
 
@@ -3916,7 +3916,7 @@ document.getElementById('tournament-join-btn').addEventListener('click', functio
 	}
 
     currentGameMode = 'tournament';
-    roomSocket.send("join", {roomId: tournamentCode, gameMode: 'tournament-page'});
+    roomSocket.send("join", {roomId: tournamentCode, gameMode: 'tournament'});
     showNotification(`${tournamentCode} kodlu turnuvaya katılıyorsunuz...`, 'info');
 });
 

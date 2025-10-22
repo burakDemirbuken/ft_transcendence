@@ -39,6 +39,10 @@ class Paddle
 				x: this.pos.x,
 				y: this.pos.y
 			},
+			oldPosition: {
+				x: this.oldPos.x,
+				y: this.oldPos.y
+			},
 			size: {
 				width: this.width,
 				height: this.height

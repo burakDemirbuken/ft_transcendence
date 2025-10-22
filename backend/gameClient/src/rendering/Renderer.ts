@@ -21,6 +21,7 @@ interface Score {
 
 interface Player {
 	position: Position;
+	oldPosition?: Position;
 }
 
 interface GameData {
@@ -62,6 +63,7 @@ interface GameConfig {
 interface ArcadeMachine {
 	getScreenContext(): any;  // BABYLON.ICanvasRenderingContext
 	updateScreen(): void;
+	joystickMove(number: number, direction: string): void;
 }
 
 async function getJsTranslations(lang: string): Promise<Translations> {
@@ -133,9 +135,28 @@ class Renderer
 		if (gameData.players)
 		{
 			gameData.players.forEach(
-				(player) =>
+				(player, index) =>
 				{
 					this.renderPaddle(ctx, player.position);
+
+					if (player.oldPosition)
+					{
+						console.log("player:", player);
+						const deltaY = player.position.y - player.oldPosition.y;
+						const threshold = 1;
+						const joystickNumber = index + 1;
+
+						if (Math.abs(deltaY) > threshold)
+						{
+							if (deltaY < 0) {
+								machine.joystickMove(joystickNumber, 'up');
+							} else if (deltaY > 0) {
+								machine.joystickMove(joystickNumber, 'down');
+							}
+						}
+						else
+							machine.joystickMove(joystickNumber, 'neutral');
+					}
 				}
 			);
 		}
