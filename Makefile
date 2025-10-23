@@ -1,6 +1,6 @@
 # Variables
 COMPOSE_FILE = ./docker-compose.yml
-COMPOSE_CMD = docker-compose -f $(COMPOSE_FILE)
+COMPOSE_CMD = docker compose -f $(COMPOSE_FILE)
 
 # Service names
 SERVICES = authentication gateway sqlite nginx
@@ -78,6 +78,10 @@ log-friend:
 log-gameserver:
 	@echo "$(GREEN)Showing logs for gameserver service$(NC)"
 	@$(COMPOSE_CMD) logs -f gameserver
+
+log-room:
+	@echo "$(GREEN)Showing logs for room service$(NC)"
+	@$(COMPOSE_CMD) logs -f room
 
 shell-nginx:
 	@echo "$(GREEN)Entering shell for nginx service$(NC)"
@@ -196,7 +200,7 @@ help:
 	@echo "  authentication   - Start authentication service"
 	@echo "  gateway          - Start gateway service"
 	@echo "  sqlite           - Start sqlite service"
-	@echo "  nginx            - Start nginx service" 
+	@echo "  nginx            - Start nginx service"
 	@echo "  gameserver       - Start gameserver service (if uncommented)"
 	@echo "  user             - Start user service (if uncommented)"
 	@echo "  livechat         - Start livechat service (if uncommented)"

@@ -1,16 +1,21 @@
 import fp from 'fastify-plugin'
 
 export default fp(async (fastify) => {
-    async function checkAchievements(user, t) {
+    async function checkAchievements(userId, t) {
         const { Achievement, Stat } = fastify.sequelize.models
+
+        if (!userId) {
+            console.warn('⚠️ checkAchievements called with undefined userId');
+            return;
+        }
 
         const [stats, achievements] = await Promise.all([
             Stat.findOne({
-                where: { userId: user.id },
+                where: { userId: userId },
                 transaction: t
             }),
             Achievement.findOne({
-                where: { userId: user.id },
+                where: { userId: userId },
                 transaction: t
             })
         ])
@@ -43,7 +48,7 @@ export default fp(async (fastify) => {
         }
 
         if (Object.keys(updates).length > 0) {
-            await achievements.update(updates)
+            await achievements.update(updates, { transaction: t })
         }
     }
 

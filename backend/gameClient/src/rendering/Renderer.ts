@@ -142,7 +142,6 @@ class Renderer
 					if (player.oldPosition)
 					{
 						const deltaY = player.position.y - player.oldPosition.y;
-						console.log("playerPosition change:", player.position.y, "oldPosition:", player.oldPosition.y, "deltaY:", deltaY);
 						const joystickNumber = index + 1;
 
 						if (deltaY < 0)

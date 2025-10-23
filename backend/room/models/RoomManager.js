@@ -156,22 +156,32 @@ class RoomManager extends EventEmitter
 			throw new Error(`Invalid game mode: ${payload.gameMode}`);
 		room.addPlayer(player);
 
-		room.on('finished', (data) =>
+		room.on('finished', async (data) =>
 			{
-				console.log(`data: `, JSON.stringify(data, null, 2));
-				if (data.matchType === 'tournament')
+				data = data.state;
+				let url = 'http://profile:3006/internal/';
+				try
 				{
-					fetch('http://profile:3006/internal/tournament', {
+					if (data.matchType === 'tournament')
+						url += 'tournament';
+					else
+						url += 'match';
+					const response = await fetch(url, {
 						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
 						body: JSON.stringify(data)
-					})
+					});
+
+					if (!response.ok)
+						console.error('❌ Profile service error:', response.status, await response.text());
+					else
+						console.log('✅ Tournament data sent successfully');
 				}
-				else if (data.matchType === 'classic')
+				catch (error)
 				{
-					fetch('http://profile:3006/internal/match', {
-						method: 'POST',
-						body: JSON.stringify(data)
-					})
+					console.error('❌ Error sending data to profile service:', error);
 				}
 			}
 		);

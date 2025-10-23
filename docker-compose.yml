@@ -137,6 +137,9 @@ services:
     volumes:
       - gameServer:/app
       - /app/node_modules
+    depends_on:
+      - room
+      - aiserver
 
   room:
     container_name: room
@@ -144,11 +147,15 @@ services:
     restart: on-failure
     expose:
       - 3004
+    ports:
+      - "3004:3004"
     volumes:
       - room_src:/app
       - /app/node_modules
     networks:
       - transcendency
+    depends_on:
+      - aiserver
 
   profile:
     container_name: profile
