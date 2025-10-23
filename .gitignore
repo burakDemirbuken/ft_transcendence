@@ -4,3 +4,4 @@ server/node_modules
 backend/aiServer/__pycache__/ai_player.cpython-311.pyc
 node_modules
 frontend/dist/
+*/database/*

@@ -81,19 +81,23 @@ log-gameserver:
 
 shell-nginx:
 	@echo "$(GREEN)Entering shell for nginx service$(NC)"
-	@$(COMPOSE_CMD) exec -it nginx /bin/sh
+	@docker exec -it nginx /bin/sh
 
 shell-auth:
 	@echo "$(GREEN)Entering shell for authentication service$(NC)"
-	@$(COMPOSE_CMD) exec -it authentication /bin/sh
+	@docker exec -it authentication /bin/sh
 
 shell-gateway:
 	@echo "$(GREEN)Entering shell for gateway service$(NC)"
-	@$(COMPOSE_CMD) exec -it gateway /bin/sh
+	@docker exec -it gateway /bin/sh
 
 shell-profile:
 	@echo "$(GREEN)Entering shell for profile service$(NC)"
-	@$(COMPOSE_CMD) exec -it profile /bin/sh
+	@docker exec -it profile /bin/sh
+
+shell-friend:
+	@echo "$(GREEN)Entering shell for friend service$(NC)"
+	@docker exec -it friend /bin/sh
 
 clean-db:
 	@echo "$(RED)Cleaning databases...$(NC)"
@@ -140,15 +144,15 @@ dev-gameserver:
 	@$(COMPOSE_CMD) up -d --build gameserver
 	@$(COMPOSE_CMD) logs -f gameserver
 
-dev-user:
-	@echo "$(BLUE)Development mode for user service$(NC)"
-	@$(COMPOSE_CMD) up -d --build user
-	@$(COMPOSE_CMD) logs -f user
+dev-profile:
+	@echo "$(BLUE)Development mode for profile service$(NC)"
+	@$(COMPOSE_CMD) up -d --build profile
+	@$(COMPOSE_CMD) logs -f profile
 
-dev-livechat:
-	@echo "$(BLUE)Development mode for livechat service$(NC)"
-	@$(COMPOSE_CMD) up -d --build livechat
-	@$(COMPOSE_CMD) logs -f livechat
+dev-friend:
+	@echo "$(BLUE)Development mode for friend service$(NC)"
+	@$(COMPOSE_CMD) up -d --build friend
+	@$(COMPOSE_CMD) logs -f friend
 
 dev-frontend:
 	@echo "$(BLUE)Development mode for frontend service$(NC)"

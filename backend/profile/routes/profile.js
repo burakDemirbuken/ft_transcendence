@@ -29,11 +29,10 @@ export default async function profileRoute(fastify) {
 				stats: userStats,
 			})
 		} catch (error) {
-			fastify.log.error('Error retrieving user profile:', error)
+			fastify.log.error('Error retrieving user profile:', { message: error.message,
+				details: error.toString() })
 			return reply.code(500).send({
-				error: 'Internal Server Error',
-				message: error.message,
-				details: error.toString()
+				error: 'Error retrieving user profile',
 			})
 		}
 	})

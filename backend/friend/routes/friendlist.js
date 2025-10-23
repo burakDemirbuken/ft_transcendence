@@ -40,8 +40,11 @@ export default async function friendListRoutes(fastify) {
 
 			return reply.code(200).send({ friends })
 		} catch (error) {
-			fastify.log.error({ err: error }, 'Error fetching friend list')
-			return reply.status(500).send({ error: 'Internal Server Error' })
+			fastify.log.error('Error retrieving user friends:', { message: error.message,
+				details: error.toString() })
+			return reply.code(500).send({
+				error: 'Error retrieving user friends',
+			})
 		}
 	})
 

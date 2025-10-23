@@ -12,19 +12,19 @@ export default async function gamedataRoute(fastify) {
 			time
 		} = request.body ?? {}
 
-		const { Profile, Stats, MatchHistory, Team } = fastify.sequelize.models
+		const { Profile, Stat, MatchHistory, Team } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
 
 		try {
 			const [teamOnePlayers, teamTwoPlayers] = await Promise.all([
 				Profile.findAll({
 					where: { userName: team1.playersId },
-					include: [{ model: Stats }],
+					include: [{ model: Stat }],
 					transaction: t
 				}),
 				Profile.findAll({
 					where: { userName: team2.playersId },
-					include: [{ model: Stats }],
+					include: [{ model: Stat }],
 					transaction: t
 				})
 			])
@@ -46,7 +46,7 @@ export default async function gamedataRoute(fastify) {
 							gameTotalDuration: time.duration
 						}, { transaction: t })
 						player.Stat.update({
-							gameMinDuration: time.duration < player.Stats.gameMinDuration ? time.duration : player.Stats.gameMinDuration
+							gameMinDuration: time.duration < player.Stat.gameMinDuration ? time.duration : player.Stat.gameMinDuration
 						})
 					}),
 					...loserTeam.map(async (player) => {
@@ -61,7 +61,7 @@ export default async function gamedataRoute(fastify) {
 						}, { transaction: t })
 						player.Stat.update({
 							gameCurrentStreak: 0,
-							gameMinDuration: time.duration < player.Stats.gameMinDuration ? time.duration : player.Stats.gameMinDuration
+							gameMinDuration: time.duration < player.Stat.gameMinDuration ? time.duration : player.Stat.gameMinDuration
 						}, { transaction: t })
 					})
 				])
@@ -148,7 +148,7 @@ export default async function gamedataRoute(fastify) {
 			rounds
 		} = request.body ?? {}
 
-		const { Profile, Stats, RoundMatch, Round, TournamentHistory } = fastify.sequelize.models
+		const { Profile, Stat, RoundMatch, Round, TournamentHistory } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
 
 		try {
@@ -181,14 +181,14 @@ export default async function gamedataRoute(fastify) {
 							where: {
 								userName: matchData.winner ?? null,
 							},
-							include: [{ model: Stats }],
+							include: [{ model: Stat }],
 							transaction: t
 						}),
 						Profile.findOne({
 							where: {
 								userName: matchData.loser ?? null
 							},
-							include: [{ model: Stats }],
+							include: [{ model: Stat }],
 							transaction: t
 						})
 					])
@@ -205,8 +205,8 @@ export default async function gamedataRoute(fastify) {
 								ballMissCount: winnerState?.missedBall ?? 0,
 								gameTotalDuration: matchData.time.duration
 							}, { transaction: t })
-							winnerPlayer?.Stats.update({
-								gameMinDuration: matchData.time.duration < winnerPlayer.Stats.gameMinDuration ? matchData.time.duration : winnerPlayer.Stats.gameMinDuration
+							winnerPlayer?.Stat.update({
+								gameMinDuration: matchData.time.duration < winnerPlayer.Stat.gameMinDuration ? matchData.time.duration : winnerPlayer.Stat.gameMinDuration
 							}, { transaction: t })
 						},
 						async () => {
@@ -220,8 +220,8 @@ export default async function gamedataRoute(fastify) {
 								ballMissCount: loserState?.missedBall ?? 0,
 								gameTotalDuration: matchData.time.duration
 							}, { transaction: t })
-							loserPlayer?.Stats.update({
-								gameMinDuration: matchData.time.duration < loserPlayer.Stats.gameMinDuration ? matchData.time.duration : loserPlayer.Stats.gameMinDuration
+							loserPlayer?.Stat.update({
+								gameMinDuration: matchData.time.duration < loserPlayer.Stat.gameMinDuration ? matchData.time.duration : loserPlayer.Stat.gameMinDuration
 							}, { transaction: t })
 						}
 					])

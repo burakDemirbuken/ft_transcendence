@@ -52,6 +52,12 @@ volumes:
       type: none
       device: ./backend/room
       o: bind
+  friend_src:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/friend
+      o: bind
 
 services:
   frontend:
@@ -169,6 +175,7 @@ services:
     expose:
       - 3007
     volumes:
+      - friend_src:/app
       - /app/node_modules
     networks:
       - transcendency
