@@ -6,3 +6,4 @@ node_modules
 backend/gameClient/dist/
 frontend/dist/
 backend/profile/database/*
+*/database/*

@@ -6,14 +6,14 @@ import MatchHistoryModel from '../models/MatchHistory.js'
 import TournamentHistoryModel from '../models/TournamentHistory.js'
 import RoundModel from '../models/Round.js'
 import RoundMatchModel from '../models/RoundMatch.js'
-import StatsModel from '../models/Stats.js'
+import StatModel from '../models/Stat.js'
 import AchievementsModel from '../models/Achievements.js'
 
 export default fp(async (fastify) => {
 		const sequelize = new Sequelize({
 			dialect: 'sqlite',
 			storage: './database/database.sqlite',
-			logging: true
+			logging: false
 		})
 
 		await sequelize.query('PRAGMA foreign_keys = ON')
@@ -24,7 +24,7 @@ export default fp(async (fastify) => {
 		const TournamentHistory = TournamentHistoryModel(sequelize, DataTypes, Model)
 		const Round = RoundModel(sequelize, DataTypes, Model)
 		const RoundMatch = RoundMatchModel(sequelize, DataTypes, Model)
-		const Stats = StatsModel(sequelize, DataTypes, Model)
+		const Stat = StatModel(sequelize, DataTypes, Model)
 		const Achievements = AchievementsModel(sequelize, DataTypes, Model)
 
 
@@ -35,8 +35,8 @@ export default fp(async (fastify) => {
 		Team.belongsTo(Profile, { as: 'PlayerOne', foreignKey: 'playerOneId', onDelete: 'SET NULL' })
 		Team.belongsTo(Profile, { as: 'PlayerTwo', foreignKey: 'playerTwoId', onDelete: 'SET NULL' })
 
-		Profile.hasOne(Stats, { foreignKey: 'userId', hooks: true })
-		Stats.belongsTo(Profile, { foreignKey: 'userId', onDelete: 'CASCADE' })
+		Profile.hasOne(Stat, { foreignKey: 'userId', hooks: true })
+		Stat.belongsTo(Profile, { foreignKey: 'userId', onDelete: 'CASCADE' })
 		Profile.hasOne(Achievements, { foreignKey: 'userId', hooks: true })
 		Achievements.belongsTo(Profile, { foreignKey: 'userId', onDelete: 'CASCADE' })
 
@@ -65,7 +65,7 @@ export default fp(async (fastify) => {
 
 		await sequelize.authenticate()
 
-		/* await sequelize.sync()  */
+		await sequelize.sync()
 
 		fastify.decorate('sequelize', sequelize)
 

@@ -4,12 +4,7 @@ export default fp(async (fastify) => {
     async function checkAchievements(userId, t) {
         const { Achievement, Stat } = fastify.sequelize.models
 
-        if (!userId) {
-            console.warn('⚠️ checkAchievements called with undefined userId');
-            return;
-        }
-
-        const [stats, achievements] = await Promise.all([
+        const [userStat, userAchievement] = await Promise.all([
             Stat.findOne({
                 where: { userId: userId },
                 transaction: t
@@ -20,35 +15,35 @@ export default fp(async (fastify) => {
             })
         ])
 
-        if (!stats || !achievements) {
-            throw new Error('Stats or Achievements not found for user')
+        if (!userStat || !userAchievement) {
+            throw new Error('userStat or userAchievement not found for user')
         }
 
         const updates = {}
 
-        if (!achievements.fiveHundredWins && stats.gamesWon >= 500) {
+        if (!userAchievement.fiveHundredWins && userStat.gamesWon >= 500) {
             updates.fiveHundredWins = new Date()
         }
-        else if (!achievements.hundredWins && stats.gamesWon >= 100) {
+        else if (!userAchievement.hundredWins && userStat.gamesWon >= 100) {
             updates.hundredWins = new Date()
         }
-        else if (!achievements.firstWin && stats.gamesWon >= 1) {
+        else if (!userAchievement.firstWin && userStat.gamesWon >= 1) {
             updates.firstWin = new Date()
         }
 
-        if (!achievements.twentyFiveTenStreak && stats.gameLongestStreak >= 25) {
+        if (!userAchievement.twentyFiveTenStreak && userStat.gameLongestStreak >= 25) {
             updates.twentyFiveTenStreak = new Date()
         }
-        else if (!achievements.firstTenStreak && stats.gameLongestStreak >= 10) {
+        else if (!userAchievement.firstTenStreak && userStat.gameLongestStreak >= 10) {
             updates.firstTenStreak = new Date()
         }
 
-        if (!achievements.lessThanThreeMin && stats.gameMinDuration > 0 && stats.gameMinDuration < 180000) {
+        if (!userAchievement.lessThanThreeMin && userStat.gameMinDuration > 0 && userStat.gameMinDuration < 180000) {
             updates.lessThanThreeMin = new Date()
         }
 
         if (Object.keys(updates).length > 0) {
-            await achievements.update(updates, { transaction: t })
+            await userAchievement.update(updates)
         }
     }
 
