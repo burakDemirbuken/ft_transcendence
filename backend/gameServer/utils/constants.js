@@ -12,7 +12,7 @@ export const DEFAULT_GAME_PROPERTIES = {
 	ballSpeed: 600,
 	ballSpeedIncrease: 100,
 
-	maxScore: 111
+	maxScore: 1
 };
 
 export const TICK_RATE = 1000 / 60;

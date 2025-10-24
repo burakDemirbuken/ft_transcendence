@@ -10,7 +10,6 @@ export default async function gamedataRoute(fastify) {
 			state,
 			time
 		} = request.body ?? {}
-
 		const { Profile, Stat, MatchHistory, Team } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
 
@@ -112,6 +111,7 @@ export default async function gamedataRoute(fastify) {
 			fastify.log.error('Error processing match data:', error && error.message ? error.message : error)
 			fastify.log.error('Stack:', error && error.stack ? error.stack : 'No stack')
 			fastify.log.error('Request body:', JSON.stringify(request.body, null, 2))
+			fastify.log.error('Error retrieving user profile:', { message: error.message, details: error.toString() })
 			return reply.status(500).send({ error: 'Internal Server Error', details: error && error.message ? error.message : error })
 		}
 	})
@@ -157,7 +157,7 @@ export default async function gamedataRoute(fastify) {
 			name,
 			rounds
 		} = request.body ?? {}
-
+		console.log('🏆 Processing tournament data:', JSON.stringify(request.body, null, 2))
 		const { Profile, Stat, RoundMatch, Round, TournamentHistory } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
 
@@ -244,6 +244,10 @@ export default async function gamedataRoute(fastify) {
 		} catch (error) {
 			await t.rollback()
 			fastify.log.error('Error processing tournament data:', error)
+			fastify.log.error('Error processing match data:', error && error.message ? error.message : error)
+			fastify.log.error('Stack:', error && error.stack ? error.stack : 'No stack')
+			fastify.log.error('Request body:', JSON.stringify(request.body, null, 2))
+			fastify.log.error('Error retrieving user profile:', { message: error.message, details: error.toString() })
 			return reply.status(500).send({ error: 'Internal Server Error' })
 		}
 	})

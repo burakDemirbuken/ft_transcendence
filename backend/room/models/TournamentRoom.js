@@ -205,7 +205,8 @@ export default class TournamentRoom extends Room
 		return {
 			currentRound: this.currentRound,
 			maxRound: this.maxRounds,
-			rounds: rounds
+			rounds: rounds,
+			matchType: 'tournament'
 		};
 	}
 

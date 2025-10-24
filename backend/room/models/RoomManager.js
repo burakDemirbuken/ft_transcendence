@@ -158,8 +158,8 @@ class RoomManager extends EventEmitter
 
 		room.on('finished', async (data) =>
 			{
-				data = data.state;
 				let url = 'http://profile:3006/internal/';
+				console.log('🏆 Sending match/tournament data to profile service:', data);
 				try
 				{
 					if (data.matchType === 'tournament')
