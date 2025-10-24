@@ -1,17 +1,33 @@
 import User from '../models/User.js';
 import { getTranslations } from '../I18n/I18n.js';
-import utils from './utils.js'
-
+import utils from './utils.js';
 
 async function deleteProfile(request, reply)
 {
 	const trlt = getTranslations(request.query.lang || "eng");
 	try
 	{
-		const tokenUserId = request.headers['x-user-id'];
-		const { userId, userEmail, username } = request.body || {};
+		console.log('Delete profile request received');
+		console.log(request.cookies.accessToken.toString());
+		console.log('Verifying JWT token for user authentication');
+		let tokenUserId;
+		let tokenUsername;
+		const cookieToken = request.cookies?.accessToken;
+		if (cookieToken) {
+			try {
+				const decoded = request.server.jwt.verify(cookieToken);
+				tokenUserId = decoded.userId;
+				tokenUsername = decoded.username;
+			} catch (error) {
+				console.log('JWT token decode error:', error);
+			}
+		}
+		
+		const { userId, userEmail, username } = request.body ?? {};
 		let user;
-		if (tokenUserId)
+		if (tokenUsername)
+			user = await User.findByUsername(tokenUsername);
+		else if (tokenUserId)
 			user = await User.findByPk(parseInt(tokenUserId));
 		else if (userId)
 			user = await User.findByPk(userId);
@@ -57,13 +73,12 @@ async function deleteProfile(request, reply)
 			}).catch(err => console.log('Friend service error:', err))
 		];
 		Promise.all(serviceNotifications);
-		if (tempStorage.has(deletedUserInfo.email))
-			tempStorage.delete(deletedUserInfo.email);
-		
+		if (utils.tempStorage.has(deletedUserInfo.email))
+			utils.tempStorage.delete(deletedUserInfo.email);
 		const accessToken = request.cookies?.accessToken;
 		const refreshToken = request.cookies?.refreshToken;
-		if (accessToken) blacklistToken(accessToken);
-		if (refreshToken) blacklistToken(refreshToken);
+		if (accessToken) utils.blacklistToken(accessToken);
+		if (refreshToken) utils.blacklistToken(refreshToken);
 		reply.clearCookie('accessToken',
 		{
 			httpOnly: true, secure: true, sameSite: 'strict', path: '/'
@@ -81,14 +96,12 @@ async function deleteProfile(request, reply)
 	}
 	catch (error)
 	{
-		reply.status(500).send({
+		reply.status(500).send(
+		{
 			success: false,
 			error: trlt.delete?.fail || 'Failed to delete account'
 		});
 	}
 }
 
-export default
-{
-	deleteProfile
-};
+export default	{	deleteProfile	};

@@ -1,4 +1,4 @@
-import postController from '../controllers/PostController.js';
+import	postController	from	'../controllers/PostController.js';
 
 export async function postRoutes(fastify, options)
 {
@@ -262,6 +262,5 @@ export async function postRoutes(fastify, options)
 		  		}
 		  	}
 		}
-	}, postController.autoRefreshToken);
-  
+	}, postController.autoRefreshToken);  
 }

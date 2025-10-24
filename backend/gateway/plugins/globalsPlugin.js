@@ -12,12 +12,14 @@ async function globalsPlugin(fastify, options) {
 		gameServer: "http://gameserver:3003"
 	};
 
-	const settings = {
+	const settings =
+	{
 		port: 3000,
-		host: process.env.HOST || '0.0.0.0', //sadece nginx eklenebilir
+		host: process.env.HOST || '0.0.0.0',
 	};
 
-	const secrets = {
+	const secrets =
+	{
 		jwtSecret: process.env.JWT_SECRET || 'default_secret',
 	};
 

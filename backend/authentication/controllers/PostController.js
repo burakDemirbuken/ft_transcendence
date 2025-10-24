@@ -214,12 +214,11 @@ async function verify2FA(request, reply) {
         } catch (emailError) {
             console.log('Login notification error:', emailError);
         }
-        // Response'ta da token'ı gönder (frontend için)
         reply.send({
             success: true,
             message: trlt.login.success,
             user: user.toSafeObject(),
-            accessToken: accessToken // Frontend'de localStorage'a kaydedebilmek için
+            accessToken: accessToken
         });
     } catch (error) {
         console.log('2FA verification error:', error);
@@ -232,6 +231,19 @@ async function logout(request, reply)
 	const trlt = getTranslations(request.query.lang || "eng");
 	try
 	{
+		let username;
+		
+		// Cookie'den JWT token'ı çek ve decode et
+		const cookieToken = request.cookies?.accessToken;
+		if (cookieToken) {
+			try {
+				const decoded = request.server.jwt.verify(cookieToken);
+				username = decoded.username;
+			} catch (error) {
+				console.log('JWT token decode error:', error);
+			}
+		}
+		
 	    reply.clearCookie('accessToken',
         {
 			httpOnly: true, secure: true, sameSite: 'Lax', path: '/'
@@ -247,7 +259,7 @@ async function logout(request, reply)
 		reply.send({
 			success: true,
 			message: trlt.logout.success,
-			user: request.headers['x-user-username']
+			user: username
 		});
 	}
 	catch (error)
@@ -314,7 +326,7 @@ async function refreshToken(request, reply)
         utils.blacklistToken(oldRefreshToken);
         const now = Math.floor(Date.now() / 1000);
         const remainingTime = decoded.exp - now;
-        const remainingDays = Math.max(1, Math.ceil(remainingTime / (24 * 60 * 60))); // En az 1 gün
+        const remainingDays = Math.max(1, Math.ceil(remainingTime / (24 * 60 * 60)));
         const isRememberMe = decoded.rememberMe || false;
         const maxAllowedDays = isRememberMe ? 30 : 7;
         const newRefreshExpiry = Math.min(remainingDays, maxAllowedDays);

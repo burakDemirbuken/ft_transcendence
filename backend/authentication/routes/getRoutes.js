@@ -1,5 +1,5 @@
-import getController from '../controllers/GetController.js';
-import { verifyEmail } from '../controllers/PostController.js';
+import  getController   from    '../controllers/GetController.js';
+import  { verifyEmail } from    '../controllers/PostController.js';
 
 export async function getRoutes(fastify, options)
 {

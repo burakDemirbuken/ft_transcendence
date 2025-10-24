@@ -44,8 +44,19 @@ async function checkEmail(request, reply)
 async function getProfile(request, reply) {
     const trlt = getTranslations(request.query.lang || "eng");
     try {
+        let userId;
         
-        const userId = request.headers['x-user-id'];
+        // Cookie'den JWT token'ı çek ve decode et
+        const cookieToken = request.cookies.accessToken ?? {};
+        if (cookieToken) {
+            try {
+                const decoded = request.server.jwt.verify(cookieToken);
+                userId = decoded.userId;
+            } catch (error) {
+                console.log('JWT token decode error:', error);
+            }
+        }
+        
         if (!userId)
         {
             return (reply.status(401).send({
