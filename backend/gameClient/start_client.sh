@@ -36,7 +36,7 @@ detect_ip() {
 
 SERVER_IP=$(detect_ip)
 
-PORT=3030
+PORT=3031
 
 # Port meşgulse uygun bir port bul
 find_free_port() {

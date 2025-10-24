@@ -1975,9 +1975,111 @@ html {
     animation: matchedPulse 2s ease-in-out infinite;
 }
 
+/* Canvas Overlay Stilleri */
+.canvas-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.canvas-overlay > * {
+    pointer-events: auto;
+}
+
+/* Canvas Butonları */
+.canvas-btn {
+    background: var(--black-overlay);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    min-width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.canvas-btn:hover {
+    background: var(--primary-gradient);
+    border-color: var(--magenta);
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+}
+
+.exit-btn:hover {
+    background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+}
+
+/* Responsive tasarım */
+@media (max-width: 768px) {
+    .canvas-btn {
+        min-width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+
+/* TEST: Kullanıcı göstergesi */
+#user-indicator {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid var(--cyan);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--cyan);
+    z-index: 9999;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 255, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+#user-indicator:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 30px rgba(0, 255, 255, 0.5);
+}
+
+#user-indicator .user-id {
+    color: var(--magenta);
+    margin-left: 8px;
+}
+
+#user-indicator .hint {
+    display: block;
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    opacity: 0.7;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); color: #ffff00; }
+}
+
 </style>
 </head>
 <body>
+	<!-- TEST: Kullanıcı göstergesi -->
+	<div id="user-indicator">
+		<span>👤 User:</span>
+		<span class="user-id" id="current-user-display">test0</span>
+		<span class="hint">Press 1-4 to switch users</span>
+	</div>
+
 	<button class="back-arrow" id="back-arrow" ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576C461.4 576 576 461.4 576 320zM188.7 308.7L292.7 204.7C297.3 200.1 304.2 198.8 310.1 201.2C316 203.6 320 209.5 320 216L320 272L416 272C433.7 272 448 286.3 448 304L448 336C448 353.7 433.7 368 416 368L320 368L320 424C320 430.5 316.1 436.3 310.1 438.8C304.1 441.3 297.2 439.9 292.7 435.3L188.7 331.3C182.5 325.1 182.5 314.9 188.7 308.7z"/></svg></button>
     <div class="container">
 
@@ -2037,13 +2139,6 @@ html {
 		                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M192 384L88.5 384C63.6 384 48.3 356.9 61.1 335.5L114 247.3C122.7 232.8 138.3 224 155.2 224L250.2 224C326.3 95.1 439.8 88.6 515.7 99.7C528.5 101.6 538.5 111.6 540.3 124.3C551.4 200.2 544.9 313.7 416 389.8L416 484.8C416 501.7 407.2 517.3 392.7 526L304.5 578.9C283.2 591.7 256 576.3 256 551.5L256 448C256 412.7 227.3 384 192 384L191.9 384zM464 224C464 197.5 442.5 176 416 176C389.5 176 368 197.5 368 224C368 250.5 389.5 272 416 272C442.5 272 464 250.5 464 224z"/></svg>
 						<span>Turnuvayı Başlat</span>
 		            </button>
-		            <button class="btn btn-primary btn-large" id="next-round-btn" style="display: none;">
-		                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M544 160C544 124.7 515.3 96 480 96L160 96C124.7 96 96 124.7 96 160L96 480C96 515.3 124.7 544 160 544L480 544C515.3 544 544 515.3 544 480L544 160zM416 320C416 326.7 413.2 333 408.3 337.6L296.3 441.6C289.3 448.1 279.1 449.8 270.4 446C261.7 442.2 256 433.5 256 424L256 216C256 206.5 261.7 197.8 270.4 194C279.1 190.2 289.3 191.9 296.3 198.4L408.3 302.4C413.2 306.9 416 313.3 416 320z"/></svg>
-						<span>Next Round</span>
-		            </button>
-		            <button class="btn btn-primary btn-large" id="start-tournament-btn" style="display: none;">
-						<span>Turnuvayı Başlat</span>
-		            </button>
 		        </div>
 		    </div>
 		</div>
@@ -2073,7 +2168,7 @@ html {
                         </div>
                     </div>
                 </div>
-        
+
                 <!-- Winners Section -->
                 <div class="participants-section">
                     <h3>🎉 Round Winners - Advancing to Next Round</h3>
@@ -2081,7 +2176,7 @@ html {
                         <!-- Winners will be added dynamically -->
                     </div>
                 </div>
-        
+
                 <!-- Next Round Match Pairs -->
                 <div class="participants-section" id="next-round-pairs-section" style="display: none;">
                     <h3>⚔️ Next Round Matches</h3>
@@ -2089,7 +2184,7 @@ html {
                         <!-- Next round pairs will be displayed here -->
                     </div>
                 </div>
-        
+
                 <!-- Action Buttons -->
                 <div class="room-actions">
                     <button class="btn btn-secondary btn-large" id="round-waiting-btn" disabled>
@@ -2330,7 +2425,7 @@ html {
 	                        </label>
 	                        <label class="radio-option">
 	                            <input type="radio" name="custom-game-type" value="co-op">
-	                            <span class="radio-label">co-op</span>
+	                            <span class="radio-label">local</span>
 	                        </label>
 	                    </div>
 	                </div>
@@ -2708,7 +2803,10 @@ html {
 	            </div>
 	        </div>
 	    </div>
-		<div class="game-container" id="gameContainer"><canvas id="renderCanvas"></canvas></div>
+		<div class="game-container" id="gameContainer">
+			<canvas id="renderCanvas"></canvas>
+		</div>
+
 	</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -2716,11 +2814,11 @@ html {
 // ============================================================================
 // IMPORTS
 // ============================================================================
-import App from './src/App.js';
-import WebSocketClient from './src/network/WebSocketClient.js';
-import gameConfig from './src/json/GameConfig.js';
-import aiConfig from './src/json/AiConfig.js';
-import tournamentConfig from './src/json/TournamentConfig.js';
+import App from './dist/App.js';
+import WebSocketClient from './dist/network/WebSocketClient.js';
+import gameConfig from './dist/json/GameConfig.js';
+import aiConfig from './dist/json/AiConfig.js';
+import tournamentConfig from './dist/json/TournamentConfig.js';
 
 // ============================================================================
 // GLOBAL VARIABLES
@@ -2731,7 +2829,6 @@ let currentUserId = null;
 let currentUserName = null;
 let currentRoomId = null;
 let currentGameMode = null;
-let isRoomCreator = false;
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -2744,8 +2841,51 @@ function generateRandomId() {
 
 // Generate random user name for testing
 function generateRandomName() {
-    const names = ['Ali', 'Ayşe', 'Mehmet', 'Fatma', 'Ahmet', 'Zeynep', 'Can', 'Elif', 'Burak', 'Selin'];
+    const names = ['Ali', 'Ayşe', 'Mehmet', 'Fatma', 'Ahmet', 'Zeynep', 'Can', 'Elif', 'Burak', 'Selin',
+                   'Ali1', 'Ayşe1', 'Mehmet1', 'Fatma1', 'Ahmet1', 'Zeynep1', 'Can1', 'Elif1', 'Burak1', 'Selin1',
+                   'Ali2', 'Ayşe2', 'Mehmet2', 'Fatma2', 'Ahmet2', 'Zeynep2', 'Can2', 'Elif2', 'Burak2', 'Selin2',
+                   'Ali3', 'Ayşe3', 'Mehmet3', 'Fatma3', 'Ahmet3', 'Zeynep3', 'Can3', 'Elif3', 'Burak3', 'Selin3'
+	];
     return names[Math.floor(Math.random() * names.length)];
+}
+
+// Fetch and display match history
+async function fetchMatchHistory(userName) {
+    try {
+        console.log(`📊 Fetching match history for ${userName}...`);
+
+        const response = await fetch(`http://${window.location.hostname}:3030/profile/match-history?userName=${userName}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Match history received:', data);
+
+        if (data.success && data.matches && data.matches.length > 0) {
+            showNotification(`📊 ${data.matches.length} maç geçmişi alındı`, 'success');
+
+            // Console'a detaylı yazdır
+            console.table(data.matches.map(match => ({
+                ID: match.id,
+                Type: match.matchType,
+                'Team 1 Score': match.teamOneScore,
+                'Team 2 Score': match.teamTwoScore,
+                'Started': new Date(match.matchStartDate).toLocaleString(),
+                'Ended': new Date(match.matchEndDate).toLocaleString()
+            })));
+        } else {
+            showNotification('Henüz maç geçmişi yok', 'info');
+            console.log('📭 No match history found');
+        }
+
+        return data;
+    } catch (error) {
+        console.error('❌ Error fetching match history:', error);
+        showNotification('Maç geçmişi alınamadı', 'error');
+        return null;
+    }
 }
 
 // Enhanced notification system with stacking
@@ -2844,20 +2984,44 @@ function showNotification(message, type = 'info') {
     });
 }
 
-// Eşleştirmeleri göster
+// displayMatchPairs fonksiyonunu güncelle
 function displayMatchPairs(pairs, participants) {
     const matchPairsSection = document.getElementById('match-pairs-section');
     const matchPairsContainer = document.getElementById('match-pairs-container');
-    
-    matchPairsSection.style.display = 'block';
-    matchPairsContainer.innerHTML = '';
-    
+
+    // Eğer next-round-pairs-container varsa onu kullan
+    const isNextRound = !matchPairsSection;
+    const container = isNextRound ?
+        document.getElementById('next-round-pairs-container') :
+        matchPairsContainer;
+
+    if (!container) {
+        console.error('Match pairs container not found!');
+        return;
+    }
+
+    if (matchPairsSection && !isNextRound) {
+        matchPairsSection.style.display = 'block';
+    }
+
+    container.innerHTML = '';
+
     // Katılımcı bilgilerini ID'ye göre hızlı erişim için map'le
     const participantsMap = {};
-    participants.forEach(p => {
-        participantsMap[p.userId] = p;
-    });
-    
+    console.log('Participants for match pairs:', participants);
+
+    if (participants && Array.isArray(participants)) {
+        participants.forEach(p => {
+            const playerId = p.userId || p.id;
+            if (playerId) {
+                participantsMap[playerId] = p;
+            }
+        });
+    }
+
+    console.log('Participants map:', participantsMap);
+    console.log('Match pairs to display:', pairs);
+
     // Her eşleşme için kart oluştur
     pairs.forEach((pair, index) => {
         const colors = [
@@ -2867,21 +3031,38 @@ function displayMatchPairs(pairs, participants) {
             { border: '#ff8800', bg: 'rgba(255, 136, 0, 0.1)' }
         ];
         const color = colors[index % colors.length];
-        
+
         const card = document.createElement('div');
         card.className = 'match-pair-card';
         card.style.borderColor = color.border;
         card.style.background = color.bg;
-        
+
         // Maç başlığı
         const header = document.createElement('div');
         header.className = 'match-header';
-        header.innerHTML = `<div class="match-number">Maç ${pair.matchNumber + 1}</div>`;
-        
+        const matchNum = pair.matchNumber !== undefined ? pair.matchNumber + 1 : index + 1;
+        header.innerHTML = `<div class="match-number">Maç ${matchNum}</div>`;
+
         // Oyuncular
         const players = document.createElement('div');
         players.className = 'match-players';
-        
+
+        // Player names - önce pair.playerNames'i kontrol et, yoksa participantsMap'ten al
+        let player1Name = 'Unknown';
+        let player2Name = 'Unknown';
+
+        if (pair.playerNames && pair.playerNames.length >= 2) {
+            player1Name = pair.playerNames[0];
+            player2Name = pair.playerNames[1];
+        } else if (pair.players && pair.players.length >= 2) {
+            const p1 = participantsMap[pair.players[0]];
+            const p2 = participantsMap[pair.players[1]];
+            player1Name = p1 ? (p1.name || p1.userName || 'Unknown') : 'Unknown';
+            player2Name = p2 ? (p2.name || p2.userName || 'Unknown') : 'Unknown';
+        }
+
+        console.log(`Match ${matchNum}: ${player1Name} vs ${player2Name}`);
+
         // İlk oyuncu - winner/loser durumuna göre stil ekle
         const player1 = document.createElement('div');
         player1.className = 'match-player';
@@ -2893,17 +3074,22 @@ function displayMatchPairs(pairs, participants) {
             player1.classList.add('loser');
             player1.style.opacity = '0.7';
         }
-        
+
         player1.innerHTML = `
-            <div class="match-player-name">${pair.playerNames[0]}</div>
+            <div class="match-player-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="24" height="24" fill="${color.border}">
+                    <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM171.7 396.1C166 382 177.4 368 192.6 368L447.5 368C462.7 368 474.1 382 468.4 396.1C444.6 454.7 387.2 496 320.1 496C253 496 195.5 454.7 171.8 396.1zM186.7 207.3C191.2 200.5 200 198.1 207.3 201.8L286.9 241.8C292.3 244.5 295.7 250 295.7 256.1C295.7 262.2 292.3 267.7 286.9 270.4L207.3 310.4C200 314 191.2 311.7 186.7 304.9C182.2 298.1 183.6 289 189.8 283.8L223 256L189.8 228.3C183.6 223.1 182.2 214 186.7 207.2zM450.3 228.4L417 256L450.2 283.7C456.4 288.9 457.8 298 453.3 304.8C448.8 311.6 440 314 432.7 310.3L353.1 270.3C347.7 267.6 344.3 262.1 344.3 256C344.3 249.9 347.7 244.4 353.1 241.7L432.7 201.7C440 198.1 448.8 200.4 453.3 207.2C457.8 214 456.4 223.1 450.2 228.3z"/>
+                </svg>
+            </div>
+            <div class="match-player-name">${player1Name}</div>
             ${pair.winner === pair.players[0] ? '<div class="winner-badge">🏆</div>' : ''}
         `;
-        
+
         // VS yazısı
         const vs = document.createElement('div');
         vs.className = 'vs-divider';
         vs.innerHTML = `<span class="vs-text">VS</span>`;
-        
+
         // İkinci oyuncu - winner/loser durumuna göre stil ekle
         const player2 = document.createElement('div');
         player2.className = 'match-player';
@@ -2915,28 +3101,33 @@ function displayMatchPairs(pairs, participants) {
             player2.classList.add('loser');
             player2.style.opacity = '0.7';
         }
-        
+
         player2.innerHTML = `
-            <div class="match-player-name">${pair.playerNames[1]}</div>
+            <div class="match-player-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="24" height="24" fill="${color.border}">
+                    <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM171.7 396.1C166 382 177.4 368 192.6 368L447.5 368C462.7 368 474.1 382 468.4 396.1C444.6 454.7 387.2 496 320.1 496C253 496 195.5 454.7 171.8 396.1zM186.7 207.3C191.2 200.5 200 198.1 207.3 201.8L286.9 241.8C292.3 244.5 295.7 250 295.7 256.1C295.7 262.2 292.3 267.7 286.9 270.4L207.3 310.4C200 314 191.2 311.7 186.7 304.9C182.2 298.1 183.6 289 189.8 283.8L223 256L189.8 228.3C183.6 223.1 182.2 214 186.7 207.2zM450.3 228.4L417 256L450.2 283.7C456.4 288.9 457.8 298 453.3 304.8C448.8 311.6 440 314 432.7 310.3L353.1 270.3C347.7 267.6 344.3 262.1 344.3 256C344.3 249.9 347.7 244.4 353.1 241.7L432.7 201.7C440 198.1 448.8 200.4 453.3 207.2C457.8 214 456.4 223.1 450.2 228.3z"/>
+                </svg>
+            </div>
+            <div class="match-player-name">${player2Name}</div>
             ${pair.winner === pair.players[1] ? '<div class="winner-badge">🏆</div>' : ''}
         `;
-        
+
         players.appendChild(player1);
         players.appendChild(vs);
         players.appendChild(player2);
-        
+
         card.appendChild(header);
         card.appendChild(players);
-        matchPairsContainer.appendChild(card);
+        container.appendChild(card);
     });
-    
-    // Katılımcıları eşleşme renklerine göre güncelle
-    updateParticipants(participants, 'participants-grid', pairs);
+
+    // Katılımcıları eşleşme renklerine göre güncelle (sadece ilk eşleştirmede)
+    if (!isNextRound && participants) {
+        updateParticipants(participants, 'participants-grid', pairs);
+    }
 }
 
-
-
-// Update participant display
+// updateParticipants fonksiyonunu güncelle
 function updateParticipants(participants, gridId, matchPairs = null) {
     const grid = document.getElementById(gridId);
     if (!grid) return;
@@ -2945,7 +3136,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
 
     // Eşleştirme yapıldıysa renk eşleştirmelerini oluştur
     const matchColors = {};
-    
+
     if (matchPairs) {
         matchPairs.forEach((pair, index) => {
             const colors = [
@@ -2955,7 +3146,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
                 { border: '#ff8800', bg: 'rgba(255, 136, 0, 0.1)' }
             ];
             const color = colors[index % colors.length];
-            
+
             pair.players.forEach(playerId => {
                 matchColors[playerId] = color;
             });
@@ -2966,11 +3157,14 @@ function updateParticipants(participants, gridId, matchPairs = null) {
     participants.forEach((participant, index) => {
         const card = document.createElement('div');
         card.className = 'participant-card';
-        
+
+        // DÜZELTME: userId yerine id kullan
+        const participantId = participant.userId || participant.id;
+
         // Eşleştirme yapıldıysa o rengi kullan, yoksa sırayla renk ver
         let color;
-        if (matchPairs && matchColors[participant.userId]) {
-            color = matchColors[participant.userId];
+        if (matchPairs && matchColors[participantId]) {
+            color = matchColors[participantId];
             card.classList.add('matched');
         } else {
             const colors = [
@@ -2981,7 +3175,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
             ];
             color = colors[index % colors.length];
         }
-        
+
         card.style.borderColor = color.border;
         card.style.background = color.bg;
 
@@ -2997,7 +3191,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
                 </svg>
             `;
         } else {
-            icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="26" height="26" fill="${color.border}"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM171.7 396.1C166 382 177.4 368 192.6 368L447.5 368C462.7 368 474.1 382 468.4 396.1C444.6 454.7 387.2 496 320.1 496C253 496 195.5 454.7 171.8 396.1zM186.7 207.3C191.2 200.5 200 198.1 207.3 201.8L286.9 241.8C292.3 244.5 295.7 250 295.7 256.1C295.7 262.2 292.3 267.7 286.9 270.4L207.3 310.4C200 314 191.2 311.7 186.7 304.9C182.2 298.1 183.6 289 189.8 283.8L223 256L189.8 228.3C183.6 223.1 182.2 214 186.7 207.2zM450.3 228.4L417 256L450.2 283.7C456.4 288.9 457.8 298 453.3 304.8C448.8 311.6 440 314 432.7 310.3L353.1 270.3C347.7 267.6 344.3 262.1 344.3 256C344.3 249.9 347.7 244.4 353.1 241.7L432.7 201.7C440 198.1 448.8 200.4 453.3 207.2C457.8 214 456.4 223.1 450.2 228.3z"/></svg>`;
+            icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="26" height="26" fill="${color.border}"><path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM171.7 396.1C166 382 177.4 368 192.6 368L447.5 368C462.7 368 474.1 382 468.4 396.1C444.6 454.7 387.2 496 320.1 496C253 496 195.5 454.7 171.8 396.1zM186.7 207.3C191.2 200.5 200 198.1 207.3 201.8L286.9 241.8C292.3 244.5 295.7 250 295.7 256.1C295.7 262.2 292.3 267.7 286.9 270.4L207.3 310.4C200 314 191.2 311.7 186.7 304.9C182.2 298.1 183.6 289 189.8 283.8L223 256L189.8 228.3C183.6 223.1 182.2 214 186.7 207.2zM450.3 228.4L417 256L450.2 283.7C456.4 288.9 457.8 298 453.3 304.8C448.8 311.6 440 314 432.7 310.3L353.1 270.3C347.7 267.6 344.3 262.1 344.3 256C344.3 249.9 347.7 244.4 353.1 241.7L432.7 201.7C440 198.1 448.8 200.4 453.3 207.2C457.8 214 456.4 223.1 450.2 228.3z"/></svg>`;
         }
 
         // --- Katılımcı ismi ---
@@ -3020,7 +3214,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
                 </svg>
             `;
             name.appendChild(hostBadge);
-            
+
             // Add a tooltip for the crown
             const tooltip = document.createElement('span');
             tooltip.className = 'host-tooltip';
@@ -3042,18 +3236,18 @@ function updateParticipants(participants, gridId, matchPairs = null) {
                 z-index: 100;
             `;
             hostBadge.appendChild(tooltip);
-            
+
             // Show tooltip on hover
             hostBadge.addEventListener('mouseenter', () => {
                 tooltip.style.opacity = '1';
                 tooltip.style.visibility = 'visible';
             });
-            
+
             hostBadge.addEventListener('mouseleave', () => {
                 tooltip.style.opacity = '0';
                 tooltip.style.visibility = 'hidden';
             });
-            
+
             // Add a subtle glow effect to the host card
             card.style.boxShadow = `0 0 15px ${color.border}`;
         }
@@ -3068,6 +3262,7 @@ function updateParticipants(participants, gridId, matchPairs = null) {
 // WEBSOCKET HANDLERS
 // ============================================================================
 
+// handleWebSocketMessage fonksiyonunu güncelle
 function handleWebSocketMessage(message) {
     console.log('📨 Received message:', message);
 
@@ -3089,21 +3284,19 @@ function handleWebSocketMessage(message) {
             break;
 
         case "finished":
+            // Tüm finished mesajları handleGameFinished'e gider
+            // O fonksiyon içinde tournament kontrolü yapılır
             handleGameFinished(message.payload);
             break;
 
-		// case "finished": // YENİ
-        //     handleRoundFinished(message.payload);
-        //     break;
+        case "matchReady":
+            console.log('🎲 Match pairs ready message received');
+            const transformedData = transformMatchmakingData(message.payload);
+            handleMatchReady(transformedData);
+            break;
 
         case "error":
             handleError(message.payload);
-            break;
-
-		case "matchReady":
-			console.log('🎲 Match pairs ready message received:', message.payload);
-            const transformedData = transformMatchmakingData(message.payload);
-            handleMatchReady(transformedData);
             break;
 
         default:
@@ -3111,24 +3304,25 @@ function handleWebSocketMessage(message) {
     }
 }
 
+// handleMatchReady fonksiyonunu güncelle
 function handleMatchReady(payload) {
     console.log('🎲 Match pairs ready:', payload);
-    
+
     if (!payload.matchPairs || !Array.isArray(payload.matchPairs) || payload.matchPairs.length === 0) {
         console.error('Invalid match pairs data:', payload);
         showNotification('Eşleştirme verisi geçersiz!', 'error');
         return;
     }
-    
-    // Eşleştirmeleri göster
+
     displayMatchPairs(payload.matchPairs, payload.players);
-    
-    // Turnuva durumunu güncelle
-    document.getElementById('tournament-status-display').textContent = 
+
+    document.getElementById('tournament-status-display').textContent =
         payload.tournamentStatus || 'Eşleşmeler Hazır';
-    
-    // Host için turnuvayı başlat butonunu göster
-    if (isRoomCreator) {
+
+    // DÜZELTME: id kullan, userId değil
+    const isHost = payload.players && payload.players.some(player => player.id === currentUserId && player.isHost);
+
+    if (isHost) {
         document.getElementById('waiting-players-btn').style.display = 'none';
         document.getElementById('match-players-btn').style.display = 'none';
         document.getElementById('start-tournament-btn').style.display = 'block';
@@ -3138,66 +3332,115 @@ function handleMatchReady(payload) {
         document.getElementById('match-players-btn').style.display = 'none';
         document.getElementById('start-tournament-btn').style.display = 'none';
     }
-    
+
     showNotification('Eşleştirmeler tamamlandı!', 'success');
 }
 
-
+// transformMatchmakingData - DÜZELTİLMİŞ
 function transformMatchmakingData(data) {
-    // Eğer veri yoksa veya geçerli değilse boş bir sonuç döndür
-    if (!data || !data.rounds || !data.rounds.length || !data.rounds[0].matchs) {
-        console.error('Invalid matchmaking data:', data);
+    console.log('🔄 Transforming matchmaking data:', data);
+
+    if (!data) {
+        console.error('No data provided');
         return { matchPairs: [], players: [] };
     }
-    
-    // Mevcut tur eşleştirmelerini al
-    const currentRoundIndex = data.currentRound || 0;
-    const currentRound = data.rounds.find(r => r.round === currentRoundIndex) || data.rounds[0];
-    const matches = currentRound.matchs || [];
-    
+
+    // Match dizisini al
+    let matches = [];
+
+    if (data.match && Array.isArray(data.match)) {
+        matches = data.match;
+        console.log('✅ Found direct match array:', matches);
+    } else if (data.rounds && Array.isArray(data.rounds)) {
+        const currentRoundIndex = data.currentRound || 0;
+        const currentRound = data.rounds.find(r => r.round === currentRoundIndex) || data.rounds[0];
+        matches = currentRound?.matchs || [];
+        console.log('✅ Found matches in rounds:', matches);
+    }
+
+    if (!matches || matches.length === 0) {
+        console.error('No matches found in data');
+        return { matchPairs: [], players: [] };
+    }
+
     // Tüm oyuncuları topla
     const allPlayers = [];
     const playerMap = new Map();
-    
-    // Tüm turları ve eşleşmeleri dolaşarak oyuncuları topla
-    data.rounds.forEach(round => {
-        if (round.matchs) {
-            round.matchs.forEach(match => {
-                if (match.player1 && !playerMap.has(match.player1.id)) {
-                    playerMap.set(match.player1.id, match.player1);
-                    allPlayers.push(match.player1);
-                }
-                if (match.player2 && !playerMap.has(match.player2.id)) {
-                    playerMap.set(match.player2.id, match.player2);
-                    allPlayers.push(match.player2);
-                }
+
+    // Players dizisinden oyuncuları al
+    if (data.players && Array.isArray(data.players)) {
+        data.players.forEach(player => {
+            if (player && player.id && !playerMap.has(player.id)) {
+                playerMap.set(player.id, {
+                    userId: player.id,
+                    name: player.name,
+                    isHost: player.isHost || false
+                });
+                allPlayers.push({
+                    userId: player.id,
+                    name: player.name,
+                    isHost: player.isHost || false
+                });
+            }
+        });
+    }
+
+    // Match'lerden de oyuncuları ekle
+    matches.forEach(match => {
+        if (match.player1 && !playerMap.has(match.player1.id)) {
+            playerMap.set(match.player1.id, {
+                userId: match.player1.id,
+                name: match.player1.name,
+                isHost: match.player1.isHost || false
+            });
+            allPlayers.push({
+                userId: match.player1.id,
+                name: match.player1.name,
+                isHost: match.player1.isHost || false
+            });
+        }
+        if (match.player2 && !playerMap.has(match.player2.id)) {
+            playerMap.set(match.player2.id, {
+                userId: match.player2.id,
+                name: match.player2.name,
+                isHost: match.player2.isHost || false
+            });
+            allPlayers.push({
+                userId: match.player2.id,
+                name: match.player2.name,
+                isHost: match.player2.isHost || false
             });
         }
     });
-    
-    // Eşleştirmeleri istemcinin beklediği formata dönüştür
-    const matchPairs = matches.map(match => {
-        // Eğer oyuncu bilgileri eksikse boş değerler kullan
+
+    console.log('📋 All players collected:', allPlayers);
+
+    // Eşleştirmeleri dönüştür
+    const matchPairs = matches.map((match, index) => {
         const player1 = match.player1 || { id: 'unknown', name: 'Unknown' };
         const player2 = match.player2 || { id: 'unknown', name: 'Unknown' };
-        
+
         return {
+            matchNumber: match.matchNumber !== undefined ? match.matchNumber : index,
             players: [player1.id, player2.id],
-            playerNames: [player1.name, player2.name]
+            playerNames: [player1.name, player2.name],
+            winner: match.winner || null,
+            loser: match.loser || null
         };
     });
-    
+
+    console.log('✅ Match pairs transformed:', matchPairs);
+
     return {
         matchPairs: matchPairs,
         players: allPlayers,
-        tournamentStatus: 'Eşleşmeler Hazır'
+        tournamentStatus: data.status === 'ready2start' ? 'Eşleşmeler Hazır' : 'Hazırlanıyor'
     };
 }
 
 function handleRoomCreated(payload) {
     console.log('✅ Room created:', payload);
     currentRoomId = payload.roomId;
-    isRoomCreator = true;
 
     showNotification(`Oda oluşturuldu: ${payload.roomId}`, 'success');
 
@@ -3214,7 +3457,6 @@ function handleRoomCreated(payload) {
 function handleRoomJoined(payload) {
     console.log('✅ Joined room:', payload);
     currentRoomId = payload.roomId;
-    isRoomCreator = false;
 
     showNotification(`Odaya katıldınız: ${payload.roomId}`, 'success');
 
@@ -3226,57 +3468,68 @@ function handleRoomJoined(payload) {
     }
 }
 
+// handleRoomUpdate fonksiyonunu güncelle
 function handleRoomUpdate(payload) {
     console.log('🔄 Room update:', payload);
 
-    // Update player count
     if (payload.players) {
         const playerCount = payload.players.length;
         const maxPlayers = payload.maxPlayers || 2;
 
         if (currentGameMode === 'tournament') {
             document.getElementById('players-count').textContent = `${playerCount}/${maxPlayers}`;
-            
-            // Eğer eşleştirmeler yapıldıysa
-            if (payload.matchPairs) {
-                displayMatchPairs(payload.matchPairs, payload.players);
-                document.getElementById('tournament-status-display').textContent = payload.tournamentStatus || 'Eşleşmeler Hazır';
-                
-                // Host için turnuvayı başlat butonunu göster
-                if (isRoomCreator) {
+
+            // Status 'ready2start' ise eşleştirmeler hazır
+            if (payload.status === 'ready2start' && payload.match) {
+                console.log('🎲 Matches are ready, transforming data...');
+                const transformedData = transformMatchmakingData(payload);
+
+                displayMatchPairs(transformedData.matchPairs, transformedData.players);
+
+                document.getElementById('tournament-status-display').textContent =
+                    transformedData.tournamentStatus;
+
+                // DÜZELTME: id kullan, userId değil
+                const isHost = payload.players.some(player => player.id === currentUserId && player.isHost);
+
+                if (isHost) {
                     document.getElementById('waiting-players-btn').style.display = 'none';
                     document.getElementById('match-players-btn').style.display = 'none';
                     document.getElementById('start-tournament-btn').style.display = 'block';
                 } else {
                     document.getElementById('waiting-players-btn').style.display = 'block';
-                    document.getElementById('waiting-players-btn').textContent = 'Turnuva Başlatılıyor...';
+                    document.getElementById('waiting-players-btn').textContent = '⏳ Turnuva Başlatılıyor...';
                     document.getElementById('match-players-btn').style.display = 'none';
                     document.getElementById('start-tournament-btn').style.display = 'none';
                 }
+
+                showNotification('Eşleştirmeler tamamlandı!', 'success');
             } else {
+                // Henüz eşleştirme yapılmamış
                 updateParticipants(payload.players, 'participants-grid');
-                
-                // Host için eşleştirme butonunu göster
-                if (isRoomCreator) {
-                    const minPlayers = 4; // Minimum oyuncu sayısı
-                    
+
+                // DÜZELTME: id kullan, userId değil
+                const isHost = payload.players.some(player => player.id === currentUserId && player.isHost);
+
+                if (isHost) {
+                    const minPlayers = 4;
+
                     if (playerCount >= minPlayers && playerCount % 2 === 0) {
                         document.getElementById('waiting-players-btn').style.display = 'none';
                         document.getElementById('match-players-btn').style.display = 'block';
                         document.getElementById('start-tournament-btn').style.display = 'none';
-                        // Durum metnini güncelle
                         document.getElementById('tournament-status-display').textContent = 'Eşleştirme Bekleniyor';
                     } else {
                         document.getElementById('waiting-players-btn').style.display = 'block';
-                        document.getElementById('waiting-players-btn').textContent = `${minPlayers - playerCount > 0 ? `En az ${minPlayers - playerCount} oyuncu daha gerekli` : 'Çift sayıda oyuncu gerekli'}`;
+                        document.getElementById('waiting-players-btn').textContent =
+                            `${minPlayers - playerCount > 0 ? `En az ${minPlayers - playerCount} oyuncu daha gerekli` : 'Çift sayıda oyuncu gerekli'}`;
                         document.getElementById('match-players-btn').style.display = 'none';
                         document.getElementById('start-tournament-btn').style.display = 'none';
-                        // Durum metnini güncelle
                         document.getElementById('tournament-status-display').textContent = 'Oyuncular Bekleniyor';
                     }
                 } else {
                     document.getElementById('waiting-players-btn').style.display = 'block';
-                    document.getElementById('waiting-players-btn').textContent = 'Eşleştirmeler Bekleniyor...';
+                    document.getElementById('waiting-players-btn').textContent = '⏳ Eşleştirmeler Bekleniyor...';
                     document.getElementById('match-players-btn').style.display = 'none';
                     document.getElementById('start-tournament-btn').style.display = 'none';
                 }
@@ -3287,8 +3540,10 @@ function handleRoomUpdate(payload) {
             document.getElementById('custom-players-count').textContent = `${playerCount}/${maxPlayers}`;
             updateParticipants(payload.players, 'custom-participants-grid');
 
-            // Show/hide start button
-            if (isRoomCreator && playerCount >= maxPlayers) {
+            // DÜZELTME: id kullan, userId değil
+            const isHost = payload.players.some(player => player.id === currentUserId && player.isHost);
+
+            if (isHost && playerCount >= maxPlayers) {
                 document.getElementById('custom-waiting-players-btn').style.display = 'none';
                 document.getElementById('custom-start-game-btn').style.display = 'block';
             }
@@ -3317,69 +3572,26 @@ function handleGameStarted(payload) {
     app.start(payload);
 }
 
-function startNextRound(totalRounds, currentRound) {
-	showNotification('Sonraki round başlatılıyor...', 'info');
-	console.log('Sonraki round başlatılıyor...');
+// function startNextRound(totalRounds, currentRound) {
+// 	showNotification('Sonraki round başlatılıyor...', 'info');
+// 	console.log('Sonraki round başlatılıyor...');
 
-    roomSocket.send("start", {});
+//     roomSocket.send("start", {});
 
-	if (totalRounds == currentRound) {
-		console.log('Final round başlatılıyor!' );
-		showNotification('Final round başlatılıyor!', 'success');
-		return;
-	} else {
-		showNotification(`Round ${totalRounds} başlatıldı!`, 'success');
-		console.log(`Round ${totalRounds} başlatıldı!`);
-	}
-}
-
-// function handleGameFinished(payload) {
-//     console.log('🏁 Game finished:', payload);
-//     showNotification('Oyun bitti!', 'info');
-
-//     // Eğer turnuva modundaysak:
-//     if (currentGameMode === 'tournament') {
-//         const totalPlayers = window.tournamentPlayersCount || 4; // fallback
-//         const totalRounds = Math.log2(totalPlayers); // örn: 8 player → 3 round
-//         const currentRound = payload.currentRound; // 0-index'ten 1-index'e çevir
-
-//         console.log(`Turnuva Round ${currentRound}/${totalRounds}`);
-
-//         // Eğer henüz son round değilse, sadece round bittiğini bildirip çık
-//         if (currentRound < totalRounds) {
-// 			console.log(`Round ${currentRound} bitti! Sıradaki round başlıyor...`);
-//             showNotification(`Round ${currentRound} bitti!`, 'info');
-// 			startNextRound(totalRounds, currentRound);
-//             return;
-//         }
-
-//         // son round'a gelindiyse artık oyun gerçekten bitmiştir:
-//         console.log('🏆 Turnuva tamamlandı!');
-//     }
-
-//     // Destroy game
-//     if (app) {
-//         app.destroy();
-//         app = null;
-//     }
-
-//     // Hide game container
-//     const gameContainer = document.getElementById('gameContainer');
-//     gameContainer.style.display = 'none';
-
-//     document.getElementById('game-page').classList.remove('hidden');
-
-//     // Reset room state
-//     currentRoomId = null;
-//     currentGameMode = null;
-//     isRoomCreator = false;
+// 	if (totalRounds == currentRound) {
+// 		console.log('Final round başlatılıyor!' );
+// 		showNotification('Final round başlatılıyor!', 'success');
+// 		return;
+// 	} else {
+// 		showNotification(`Round ${totalRounds} başlatıldı!`, 'success');
+// 		console.log(`Round ${totalRounds} başlatıldı!`);
+// 	}
 // }
 
 // handleGameFinished fonksiyonunu güncelle
-// handleGameFinished fonksiyonunu güncelle
 function handleGameFinished(payload) {
     console.log('🏁 Game finished:', payload);
-    
+
     // Destroy game
     if (app) {
         app.destroy();
@@ -3390,98 +3602,48 @@ function handleGameFinished(payload) {
     const gameContainer = document.getElementById('gameContainer');
     gameContainer.style.display = 'none';
 
-    // Eğer turnuva modundaysak:
+    // Tournament modunda round bitişi kontrolü
     if (currentGameMode === 'tournament') {
-        // Veriyi parse et
-        const currentRoundIndex = payload.currentRound || 0;
-        const rounds = payload.rounds || [];
-        const totalRounds = rounds.length;
-        
-        // Mevcut round'ın maçlarını al
-        const currentRoundData = rounds.find(r => r.round === currentRoundIndex);
-        if (!currentRoundData) {
-            console.error('Current round data not found');
-            returnToLobby();
-            return;
-        }
-        
-        // Kazananları belirle
-        const winners = [];
-        const winnerIds = new Set();
-        
-        currentRoundData.matchs.forEach(match => {
-            if (match.winner) {
-                const winnerPlayer = match.player1.id === match.winner ? match.player1 : match.player2;
-                winners.push(winnerPlayer);
-                winnerIds.add(match.winner);
-            }
-        });
-        
-        // Bir sonraki round'ın maçlarını al (varsa)
-        const nextRoundIndex = currentRoundIndex + 1;
-        const nextRoundData = rounds.find(r => r.round === nextRoundIndex);
-        let nextMatches = [];
-        
-        if (nextRoundData && nextRoundData.matchs) {
-            nextMatches = nextRoundData.matchs.map((match, index) => ({
-                matchNumber: index,
-                players: [match.player1.id, match.player2.id],
-                playerNames: [match.player1.name, match.player2.name],
-                winner: match.winner || null,
-                loser: match.loser || null
-            }));
-        }
-
-        console.log(`Turnuva Round ${currentRoundIndex + 1}/${totalRounds} tamamlandı`);
-        console.log('Winners:', winners);
-        console.log('Next Matches:', nextMatches);
-
-        // Round verilerini sakla
-        tournamentData = {
-            currentRound: currentRoundIndex + 1, // 1-indexed
-            totalRounds: totalRounds,
-            winners: winners,
-            nextMatches: nextMatches
-        };
-
-        // Eğer henüz son round değilse
-        if (currentRoundIndex + 1 < totalRounds) {
-            // Kullanıcı kazananlar arasında mı kontrol et
-            const isWinner = winnerIds.has(currentUserId);
-            
-            if (isWinner) {
-                // Kazanan oyuncular için round arası bekleme odasını göster
-                showRoundWaitingRoom(tournamentData);
-                showNotification(`Round ${currentRoundIndex + 1} tamamlandı! Sonraki round'a geçtiniz.`, 'success');
-            } else {
-                // Kaybeden oyuncular için lobiye dön
-                returnToLobby();
-                showNotification('Maalesef elendınız. Turnuva sona erdi.', 'error');
-            }
+        // Status 'next_round' ise bir sonraki round var demektir
+        if (payload.status === 'next_round') {
+            console.log('🏆 Tournament round finished, showing round waiting room');
+            handleRoundFinished(payload);
             return;
         }
 
-        // Son round'a gelindiyse turnuva bitmiştir
-        console.log('🏆 Turnuva tamamlandı!');
-        
-        // Kazanan mı kaybeden mi kontrol et
-        const isWinner = winnerIds.has(currentUserId);
-        if (isWinner) {
-            showNotification('🏆 Tebrikler! Turnuvayı kazandınız!', 'success');
-        } else {
-            showNotification('🥈 Turnuva tamamlandı! İkinci oldunuz.', 'info');
+        // Status 'finished' ise turnuva bitti demektir
+        if (payload.status === 'finished' || payload.isFinal) {
+            console.log('🏆 Tournament completed!');
+            showNotification('🏆 Turnuva tamamlandı!', 'success');
+
+            // Kazananı göster
+            if (payload.winner) {
+                showNotification(`🎉 Kazanan: ${payload.winner.name}`, 'success');
+            } else if (payload.players && payload.players.length === 1) {
+                showNotification(`🎉 Kazanan: ${payload.players[0].name}`, 'success');
+            }
+
+            // Lobiye dön
+            // setTimeout(() => {
+            //     returnToLobby();
+            // }, 3000);
+            return;
         }
-        
-        // Lobiye dön
-        returnToLobby();
-        return;
     }
 
-    // Diğer oyun modları için lobiye dön
-    returnToLobby();
+    // Normal oyun bitişi
     showNotification('Oyun bitti!', 'info');
-}
 
+    // Maç geçmişini çek ve göster
+    fetchMatchHistory(currentUserName);
+
+    // Reset room state
+    currentRoomId = null;
+    currentGameMode = null;
+
+    // Show game page
+    document.getElementById('game-page').classList.remove('hidden');
+}
 function handleError(payload) {
     console.error('❌ Error:', payload);
     const errorMessage = payload.message || payload.error || 'Bir hata oluştu';
@@ -3492,62 +3654,64 @@ function handleError(payload) {
 // UI FUNCTIONS
 // ============================================================================
 
+// showTournamentWaitingRoom fonksiyonunu güncelle
 function showTournamentWaitingRoom(data) {
+    console.log('🏠 Showing tournament waiting room:', data);
+
     document.getElementById('game-page').classList.add('hidden');
     document.getElementById('waiting-room').classList.add('active');
     document.getElementById('back-arrow').classList.add('active');
 
     document.getElementById('room-code-display').textContent = data.roomId || 'TOUR-XXXXX';
     document.getElementById('players-count').textContent = `${data.players?.length || 0}/${data.maxPlayers || 8}`;
-    
+
     // Turnuva durumunu güncelle
-    if (data.tournamentStatus) {
-        document.getElementById('tournament-status-display').textContent = data.tournamentStatus;
-    } else {
-        document.getElementById('tournament-status-display').textContent = 'Oyuncular Bekleniyor';
-    }
-    
+    const statusText = data.status === 'ready2start' ? 'Eşleşmeler Hazır' : 'Oyuncular Bekleniyor';
+    document.getElementById('tournament-status-display').textContent = statusText;
+
     if (data.players) {
-        // Eşleştirme yapıldıysa
-        if (data.matchPairs) {
-            displayMatchPairs(data.matchPairs, data.players);
-            
+        // DÜZELTME: id kullan, userId değil
+        const isHost = data.players.some(player => player.id === currentUserId && player.isHost);
+
+        // Eğer status 'ready2start' ise ve match varsa eşleştirmeleri göster
+        if (data.status === 'ready2start' && data.match) {
+            console.log('🎲 Showing match pairs...');
+            const transformedData = transformMatchmakingData(data);
+            displayMatchPairs(transformedData.matchPairs, transformedData.players);
+
             // Host için turnuvayı başlat butonunu göster
-            if (isRoomCreator) {
+            if (isHost) {
                 document.getElementById('waiting-players-btn').style.display = 'none';
                 document.getElementById('match-players-btn').style.display = 'none';
                 document.getElementById('start-tournament-btn').style.display = 'block';
             } else {
                 document.getElementById('waiting-players-btn').style.display = 'block';
-                document.getElementById('waiting-players-btn').textContent = 'Turnuva Başlatılıyor...';
+                document.getElementById('waiting-players-btn').textContent = '⏳ Turnuva Başlatılıyor...';
                 document.getElementById('match-players-btn').style.display = 'none';
                 document.getElementById('start-tournament-btn').style.display = 'none';
             }
-        } 
-        // Eşleştirme yapılmadıysa
-        else {
+        } else {
+            // Henüz eşleştirme yapılmamış
             updateParticipants(data.players, 'participants-grid');
-            
-            // Host için eşleştirme butonunu göster
-            if (isRoomCreator) {
+
+            if (isHost) {
                 const playerCount = data.players.length;
-                const minPlayers = 4; // Minimum oyuncu sayısı
-                
+                const minPlayers = 4;
+
                 if (playerCount >= minPlayers && playerCount % 2 === 0) {
                     document.getElementById('waiting-players-btn').style.display = 'none';
                     document.getElementById('match-players-btn').style.display = 'block';
                     document.getElementById('start-tournament-btn').style.display = 'none';
-                    // Durum metnini güncelle
-                    document.getElementById('tournament-status-display').textContent = 'Eşleştirme Bekleniyor';
                 } else {
                     document.getElementById('waiting-players-btn').style.display = 'block';
-                    document.getElementById('waiting-players-btn').textContent = `${minPlayers - playerCount > 0 ? `En az ${minPlayers - playerCount} oyuncu daha gerekli` : 'Çift sayıda oyuncu gerekli'}`;
+                    document.getElementById('waiting-players-btn').textContent =
+                        `${minPlayers - playerCount > 0 ? `En az ${minPlayers - playerCount} oyuncu daha gerekli` : 'Çift sayıda oyuncu gerekli'}`;
                     document.getElementById('match-players-btn').style.display = 'none';
                     document.getElementById('start-tournament-btn').style.display = 'none';
                 }
             } else {
                 document.getElementById('waiting-players-btn').style.display = 'block';
-                document.getElementById('waiting-players-btn').textContent = 'Eşleştirmeler Bekleniyor...';
+                document.getElementById('waiting-players-btn').textContent = '⏳ Eşleştirmeler Bekleniyor...';
                 document.getElementById('match-players-btn').style.display = 'none';
                 document.getElementById('start-tournament-btn').style.display = 'none';
             }
@@ -3555,6 +3719,7 @@ function showTournamentWaitingRoom(data) {
     }
 }
 
+// showCustomWaitingRoom fonksiyonunu güncelle
 function showCustomWaitingRoom(data) {
     document.getElementById('game-page').classList.add('hidden');
     document.getElementById('custom-waiting-room').classList.add('active');
@@ -3578,7 +3743,6 @@ function showCustomWaitingRoom(data) {
         document.getElementById('custom-paddle-display').textContent = `${data.gameSettings.paddleHeight}px`;
         document.getElementById('custom-ball-display').textContent = `${data.gameSettings.ballRadius}px`;
 
-        // DÜZELTME: cornerBoost veya ballSpeedIncrease değerini kontrol et
         const cornerBoost = data.gameSettings.cornerBoost || data.gameSettings.ballSpeedIncrease || 1.0;
         document.getElementById('custom-corner-display').textContent = `${parseFloat(cornerBoost).toFixed(1)}x`;
 
@@ -3589,8 +3753,11 @@ function showCustomWaitingRoom(data) {
         updateParticipants(data.players, 'custom-participants-grid');
     }
 
+    // DÜZELTME: id kullan, userId değil
+    const isHost = data.players && data.players.some(player => player.id === currentUserId && player.isHost);
+
     // Show/hide buttons
-    if (isRoomCreator) {
+    if (isHost) {
         if (playerCount >= maxPlayers) {
             document.getElementById('custom-waiting-players-btn').style.display = 'none';
             document.getElementById('custom-start-game-btn').style.display = 'block';
@@ -3732,7 +3899,7 @@ document.getElementById('custom-join-btn').addEventListener('click', function() 
     }
 
     currentGameMode = 'custom';
-    roomSocket.send("join", { roomId: roomCode });
+    roomSocket.send("join", { roomId: roomCode , gameMode: 'classic'});
     showNotification(`${roomCode} kodlu odaya katılıyorsunuz...`, 'info');
 });
 
@@ -3831,14 +3998,16 @@ document.getElementById('tournament-create-btn').addEventListener('click', funct
 
 // Tournament - Join
 document.getElementById('tournament-join-btn').addEventListener('click', function() {
-    const tournamentCode = document.getElementById('tournament-code').value.trim().toUpperCase();
+    //! TEST
+    const tournamentCode = document.getElementById('tournament-code').value.trim();
 
     if (!tournamentCode) {
         showNotification('Lütfen turnuva kodunu girin!', 'error');
         return;
 	}
+
     currentGameMode = 'tournament';
-    roomSocket.send("join", { roomId: tournamentCode });
+    roomSocket.send("join", {roomId: tournamentCode, gameMode: 'tournament'});
     showNotification(`${tournamentCode} kodlu turnuvaya katılıyorsunuz...`, 'info');
 });
 
@@ -3847,11 +4016,11 @@ document.getElementById('start-tournament-btn').addEventListener('click', functi
     // Butonu devre dışı bırak ve yükleniyor göster
     this.disabled = true;
     this.innerHTML = '<div class="loading"></div> Turnuva Başlatılıyor...';
-    
+
     // Turnuva başlatma isteği gönder
     roomSocket.send("start", { roomId: currentRoomId });
     showNotification('Turnuva başlatılıyor...', 'info');
-    
+
     // Eğer sunucudan yanıt gelmezse butonu 10 saniye sonra tekrar etkinleştir
     setTimeout(() => {
         if (this.disabled) {
@@ -3861,17 +4030,18 @@ document.getElementById('start-tournament-btn').addEventListener('click', functi
     }, 10000);
 });
 
+// BURAK: 2 kere tanımlı olan kısım
 // Final Round butonuna event listener ekle
 document.getElementById('final-round-btn').addEventListener('click', function() {
     this.disabled = true;
     this.innerHTML = '<div class="loading"></div> Starting Final Round...';
-    
-    roomSocket.send("start", { 
+
+    roomSocket.send("start", {
         roomId: currentRoomId
     });
-    
+
     showNotification('🏆 Final round başlatılıyor!', 'success');
-    
+
     setTimeout(() => {
         if (this.disabled) {
             this.disabled = false;
@@ -3883,7 +4053,7 @@ document.getElementById('final-round-btn').addEventListener('click', function() 
 // Kişileri eşleştir butonu
 document.getElementById('match-players-btn').addEventListener('click', function() {
     if (!currentRoomId) return;
-    
+
     // Eşleştirmeleri sunucuya gönder
     roomSocket.send("matchTournament", { roomId: currentRoomId });
     showNotification('Eşleştirmeler yapılıyor...', 'info');
@@ -3895,7 +4065,6 @@ document.getElementById('back-arrow').addEventListener('click', function() {
     if (currentRoomId) {
         roomSocket.send("leave", { roomId: currentRoomId });
         currentRoomId = null;
-        isRoomCreator = false;
     }
 
     // Hide all waiting rooms
@@ -3907,13 +4076,6 @@ document.getElementById('back-arrow').addEventListener('click', function() {
     // Hide back arrow
     this.classList.remove('active');
 
-    showNotification('Odadan ayrıldınız', 'info');
-});
-
-// Back arrow'a round waiting room için de destek ekle
-document.getElementById('back-arrow').addEventListener('click', function() {
-    // Lobiye dön
-    returnToLobby();
     showNotification('Odadan ayrıldınız', 'info');
 });
 
@@ -4013,8 +4175,17 @@ document.getElementById('ai-max-consecutive-wins').addEventListener('input', fun
 // ============================================================================
 
 // Generate user credentials
-currentUserId = generateRandomId();
-currentUserName = generateRandomName();
+// TEST KULLANICILARI: Klavyede 1,2,3,4 tuşlarına basarak test0-test3 arasında geçiş yapabilirsiniz
+const testUsers = [
+    { id: 'test0', name: 'test0' },
+    { id: 'test1', name: 'test1' },
+    { id: 'test2', name: 'test2' },
+    { id: 'test3', name: 'test3' }
+];
+
+// Varsayılan test0 kullanıcısı ile başla
+currentUserId = testUsers[0].id;
+currentUserName = testUsers[0].name;
 console.log(`🎮 User initialized - ID: ${currentUserId}, Name: ${currentUserName}`);
 
 // Initialize WebSocket
@@ -4029,14 +4200,14 @@ roomSocket.onConnect(() => {
 roomSocket.onMessage((message) => {
     try {
         console.log(`📥 Received WebSocket message:`, message);
-        
+
         // Eğer matchReady mesajı gelirse özel işleme yap
         if (message.type === "matchReady") {
             const transformedData = transformMatchmakingData(message.payload);
             handleMatchReady(transformedData);
             return;
         }
-        
+
         // Diğer mesajlar için normal işleme devam et
         handleWebSocketMessage(message);
     } catch (error) {
@@ -4162,6 +4333,40 @@ document.addEventListener('keydown', function(e) {
         gameModeCards.forEach(c => c.classList.remove('active'));
         settingsPanels.forEach(p => p.classList.remove('active'));
     }
+
+    // 1,2,3,4 tuşları ile test kullanıcıları arasında geçiş
+    if (e.key >= '1' && e.key <= '4') {
+        const userIndex = parseInt(e.key) - 1;
+        if (userIndex < testUsers.length) {
+            const oldUser = currentUserName;
+            currentUserId = testUsers[userIndex].id;
+            currentUserName = testUsers[userIndex].name;
+
+            // Kullanıcı göstergesini güncelle
+            const userDisplay = document.getElementById('current-user-display');
+            if (userDisplay) {
+                userDisplay.textContent = currentUserName;
+                userDisplay.style.animation = 'pulse 0.5s ease';
+                setTimeout(() => {
+                    userDisplay.style.animation = '';
+                }, 500);
+            }
+
+            console.log(`🔄 Kullanıcı değiştirildi: ${oldUser} -> ${currentUserName} (ID: ${currentUserId})`);
+            showNotification(`Kullanıcı: ${currentUserName}`, 'info');
+
+            // WebSocket bağlantısını yeniden başlat
+            if (roomSocket && roomSocket.socket && roomSocket.socket.readyState === WebSocket.OPEN) {
+                roomSocket.disconnect();
+                setTimeout(() => {
+                    roomSocket.connect("ws/client", {
+                        userID: currentUserId,
+                        userName: currentUserName
+                    });
+                }, 500);
+            }
+        }
+    }
 });
 
 // Initialize tooltips
@@ -4217,135 +4422,202 @@ let tournamentData = {
     nextMatches: []
 };
 
-// Round arası bekleme odasını göster
+// showRoundWaitingRoom fonksiyonunu güncelle
 function showRoundWaitingRoom(data) {
+    console.log('📋 Showing round waiting room with data:', data);
+
     // Tüm odaları gizle
     document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
     document.getElementById('game-page').classList.add('hidden');
-    
+
     // Round waiting room'u göster
     const roundWaitingRoom = document.getElementById('round-waiting-room');
+    if (!roundWaitingRoom) {
+        console.error('Round waiting room element not found!');
+        return;
+    }
+
     roundWaitingRoom.classList.add('active');
-    
+
     // Back arrow'u göster
-    document.getElementById('back-arrow').classList.add('active');
+    const backArrow = document.getElementById('back-arrow');
+    if (backArrow) {
+        backArrow.classList.add('active');
+    }
 
     // Round bilgilerini güncelle
-    document.getElementById('round-current-display').textContent = data.currentRound;
-    document.getElementById('round-total-display').textContent = data.totalRounds;
-    document.getElementById('round-remaining-players').textContent = data.winners.length;
-    
-    // Next round bilgisi
-    const nextRound = data.currentRound + 1;
-    if (nextRound === data.totalRounds) {
-        document.getElementById('round-next-display').textContent = 'Final';
-    } else {
-        document.getElementById('round-next-display').textContent = `Round ${nextRound}`;
+    const currentRoundDisplay = document.getElementById('round-current-display');
+    const totalRoundsDisplay = document.getElementById('round-total-display');
+    const remainingPlayersDisplay = document.getElementById('round-remaining-players');
+    const nextRoundDisplay = document.getElementById('round-next-display');
+
+    const currentRound = data.currentRound || 1;
+    const totalRounds = data.totalRounds || data.maxRound || 3;
+    const winnersCount = data.winners ? data.winners.length : 0;
+
+    if (currentRoundDisplay) currentRoundDisplay.textContent = currentRound;
+    if (totalRoundsDisplay) totalRoundsDisplay.textContent = totalRounds;
+    if (remainingPlayersDisplay) remainingPlayersDisplay.textContent = winnersCount;
+
+    // Next round bilgisi - DÜZELTİLDİ
+    const nextRound = currentRound + 1;
+    if (nextRoundDisplay) {
+        if (nextRound > totalRounds) {
+            nextRoundDisplay.textContent = 'Completed';
+        } else if (nextRound === totalRounds) {
+            nextRoundDisplay.textContent = 'Final';
+        } else {
+            nextRoundDisplay.textContent = `Round ${nextRound}`;
+        }
     }
+
+    console.log(`Round Info - Current: ${currentRound}, Total: ${totalRounds}, Next: ${nextRound}`);
 
     // Kazananları göster
     console.log('Displaying winners:', data.winners);
-    updateParticipants(data.winners, 'round-winners-grid');
+    if (data.winners && data.winners.length > 0) {
+        updateParticipants(data.winners, 'round-winners-grid');
+    }
 
     // Bir sonraki round eşleştirmelerini göster
+    const nextRoundPairsSection = document.getElementById('next-round-pairs-section');
     if (data.nextMatches && data.nextMatches.length > 0) {
-        document.getElementById('next-round-pairs-section').style.display = 'block';
-        displayMatchPairs(data.nextMatches, data.winners);
-    } else {
-        document.getElementById('next-round-pairs-section').style.display = 'none';
-    }
+        console.log('Displaying next matches:', data.nextMatches);
+        if (nextRoundPairsSection) {
+            nextRoundPairsSection.style.display = 'block';
+        }
 
-    // Butonları ayarla
-    if (isRoomCreator) {
-        document.getElementById('round-waiting-btn').style.display = 'none';
-        
-        // Final round mu kontrol et
-        if (nextRound === data.totalRounds) {
-            document.getElementById('next-round-btn').style.display = 'none';
-            document.getElementById('final-round-btn').style.display = 'block';
-        } else {
-            document.getElementById('next-round-btn').style.display = 'block';
-            document.getElementById('final-round-btn').style.display = 'none';
+        const nextRoundContainer = document.getElementById('next-round-pairs-container');
+        if (nextRoundContainer) {
+            nextRoundContainer.innerHTML = '';
+
+            data.nextMatches.forEach((pair, index) => {
+                const colors = [
+                    { border: '#00ffff', bg: 'rgba(0, 255, 255, 0.1)' },
+                    { border: '#ff00ff', bg: 'rgba(255, 0, 255, 0.1)' },
+                    { border: '#00ff88', bg: 'rgba(0, 255, 136, 0.1)' },
+                    { border: '#ff8800', bg: 'rgba(255, 136, 0, 0.1)' }
+                ];
+                const color = colors[index % colors.length];
+
+                const card = document.createElement('div');
+                card.className = 'match-pair-card';
+                card.style.borderColor = color.border;
+                card.style.background = color.bg;
+
+                const header = document.createElement('div');
+                header.className = 'match-header';
+                const matchNum = pair.matchNumber !== undefined ? pair.matchNumber + 1 : index + 1;
+                header.innerHTML = `<div class="match-number">Maç ${matchNum}</div>`;
+
+                const players = document.createElement('div');
+                players.className = 'match-players';
+
+                const player1Name = pair.playerNames && pair.playerNames[0] ? pair.playerNames[0] : 'Unknown';
+                const player2Name = pair.playerNames && pair.playerNames[1] ? pair.playerNames[1] : 'Unknown';
+
+                const player1 = document.createElement('div');
+                player1.className = 'match-player';
+                player1.innerHTML = `
+                    <div class="match-player-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="24" height="24" fill="${color.border}">
+                            <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM171.7 396.1C166 382 177.4 368 192.6 368L447.5 368C462.7 368 474.1 382 468.4 396.1C444.6 454.7 387.2 496 320.1 496C253 496 195.5 454.7 171.8 396.1zM186.7 207.3C191.2 200.5 200 198.1 207.3 201.8L286.9 241.8C292.3 244.5 295.7 250 295.7 256.1C295.7 262.2 292.3 267.7 286.9 270.4L207.3 310.4C200 314 191.2 311.7 186.7 304.9C182.2 298.1 183.6 289 189.8 283.8L223 256L189.8 228.3C183.6 223.1 182.2 214 186.7 207.2zM450.3 228.4L417 256L450.2 283.7C456.4 288.9 457.8 298 453.3 304.8C448.8 311.6 440 314 432.7 310.3L353.1 270.3C347.7 267.6 344.3 262.1 344.3 256C344.3 249.9 347.7 244.4 353.1 241.7L432.7 201.7C440 198.1 448.8 200.4 453.3 207.2C457.8 214 456.4 223.1 450.2 228.3z"/>
+                        </svg>
+                    </div>
+                    <div class="match-player-name">${player1Name}</div>
+                `;
+
+                const vs = document.createElement('div');
+                vs.className = 'vs-divider';
+                vs.innerHTML = `<span class="vs-text">VS</span>`;
+
+                const player2 = document.createElement('div');
+                player2.className = 'match-player';
+                player2.innerHTML = `
+                    <div class="match-player-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="24" height="24" fill="${color.border}">
+                            <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM171.7 396.1C166 382 177.4 368 192.6 368L447.5 368C462.7 368 474.1 382 468.4 396.1C444.6 454.7 387.2 496 320.1 496C253 496 195.5 454.7 171.8 396.1zM186.7 207.3C191.2 200.5 200 198.1 207.3 201.8L286.9 241.8C292.3 244.5 295.7 250 295.7 256.1C295.7 262.2 292.3 267.7 286.9 270.4L207.3 310.4C200 314 191.2 311.7 186.7 304.9C182.2 298.1 183.6 289 189.8 283.8L223 256L189.8 228.3C183.6 223.1 182.2 214 186.7 207.2zM450.3 228.4L417 256L450.2 283.7C456.4 288.9 457.8 298 453.3 304.8C448.8 311.6 440 314 432.7 310.3L353.1 270.3C347.7 267.6 344.3 262.1 344.3 256C344.3 249.9 347.7 244.4 353.1 241.7L432.7 201.7C440 198.1 448.8 200.4 453.3 207.2C457.8 214 456.4 223.1 450.2 228.3z"/>
+                        </svg>
+                    </div>
+                    <div class="match-player-name">${player2Name}</div>
+                `;
+
+                players.appendChild(player1);
+                players.appendChild(vs);
+                players.appendChild(player2);
+
+                card.appendChild(header);
+                card.appendChild(players);
+                nextRoundContainer.appendChild(card);
+            });
         }
     } else {
-        document.getElementById('round-waiting-btn').style.display = 'block';
-        document.getElementById('next-round-btn').style.display = 'none';
-        document.getElementById('final-round-btn').style.display = 'none';
+        if (nextRoundPairsSection) {
+            nextRoundPairsSection.style.display = 'none';
+        }
     }
-}
-// Elenen oyuncuları göster (kırmızı/gri tema ile)
-function updateEliminatedParticipants(participants, gridId) {
-    const grid = document.getElementById(gridId);
-    if (!grid) return;
 
-    grid.innerHTML = '';
+    // Host kontrolü - DÜZELTME: id kullan, userId değil
+    const isHost = data.winners && data.winners.some(player => player.id === currentUserId && player.isHost);
 
-    participants.forEach((participant, index) => {
-        const card = document.createElement('div');
-        card.className = 'participant-card eliminated';
-        card.style.borderColor = '#ff4444';
-        card.style.background = 'rgba(255, 68, 68, 0.1)';
-        card.style.opacity = '0.7';
+    console.log(`Host check - isHost: ${isHost}, currentUserId: ${currentUserId}`);
 
-        const icon = document.createElement('div');
-        icon.className = 'participant-icon';
-        icon.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="26" height="26" fill="#ff4444">
-                <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM192 256C192 238.3 206.3 224 224 224C241.7 224 256 238.3 256 256C256 273.7 241.7 288 224 288C206.3 288 192 273.7 192 256zM416 288C398.3 288 384 273.7 384 256C384 238.3 398.3 224 416 224C433.7 224 448 238.3 448 256C448 273.7 433.7 288 416 288zM320 384C284.7 384 256 412.7 256 448L384 448C384 412.7 355.3 384 320 384z"/>
-            </svg>
-        `;
+    // Butonları ayarla - DÜZELTİLDİ
+    const roundWaitingBtn = document.getElementById('round-waiting-btn');
+    const nextRoundBtn = document.getElementById('next-round-btn');
+    const finalRoundBtn = document.getElementById('final-round-btn');
 
-        const name = document.createElement('div');
-        name.className = 'participant-name';
-        name.textContent = participant.name || participant.userName || 'Player';
-        name.style.color = '#ff4444';
+    // Önce tüm butonları gizle
+    if (roundWaitingBtn) roundWaitingBtn.style.display = 'none';
+    if (nextRoundBtn) nextRoundBtn.style.display = 'none';
+    if (finalRoundBtn) finalRoundBtn.style.display = 'none';
 
-        card.appendChild(icon);
-        card.appendChild(name);
-        grid.appendChild(card);
-    });
-}
+    if (isHost) {
+        console.log('User is host, showing appropriate button');
 
-// Lobiye dön fonksiyonu
-function returnToLobby() {
-    // Tüm odaları gizle
-    document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
-    
-    // Game page'i göster
-    document.getElementById('game-page').classList.remove('hidden');
-    
-    // Back arrow'u gizle
-    document.getElementById('back-arrow').classList.remove('active');
-
-    // Room state'i sıfırla
-    if (currentRoomId) {
-        roomSocket.send("leave", { roomId: currentRoomId });
+        // Turnuva bitti mi kontrol et
+        if (currentRound >= totalRounds) {
+            console.log('Tournament completed');
+            showNotification('🏆 Turnuva tamamlandı!', 'success');
+        }
+        // Final round mu?
+        else if (nextRound === totalRounds) {
+            console.log('Showing final round button');
+            if (finalRoundBtn) {
+                finalRoundBtn.style.display = 'block';
+                finalRoundBtn.disabled = false;
+            }
+        }
+        // Normal round
+        else {
+            console.log('Showing next round button');
+            if (nextRoundBtn) {
+                nextRoundBtn.style.display = 'block';
+                nextRoundBtn.disabled = false;
+            }
+        }
+    } else {
+        console.log('User is not host, showing waiting button');
+        if (roundWaitingBtn) {
+            roundWaitingBtn.style.display = 'block';
+            roundWaitingBtn.textContent = '⏳ Waiting for Host...';
+        }
     }
-    
-    currentRoomId = null;
-    currentGameMode = null;
-    isRoomCreator = false;
-    
-    // Tournament data'yı sıfırla
-    tournamentData = {
-        currentRound: 0,
-        totalRounds: 0,
-        winners: [],
-        nextMatches: []
-    };
+
+    console.log('✅ Round waiting room displayed successfully');
 }
 
 // Next Round butonuna event listener ekle
 document.getElementById('next-round-btn').addEventListener('click', function() {
     this.disabled = true;
     this.innerHTML = '<div class="loading"></div> Starting Next Round...';
-    
-    roomSocket.send("start", { 
+
+    roomSocket.send("start", {
         roomId: currentRoomId
     });
-    
+
     showNotification('Sonraki round başlatılıyor...', 'info');
-    
+
     setTimeout(() => {
         if (this.disabled) {
             this.disabled = false;
@@ -4354,54 +4626,114 @@ document.getElementById('next-round-btn').addEventListener('click', function() {
     }, 10000);
 });
 
+// BURAK: 2 kere tanımlı olan kısım
 // Final Round butonuna event listener ekle
-document.getElementById('final-round-btn').addEventListener('click', function() {
+/* document.getElementById('final-round-btn').addEventListener('click', function() {
     this.disabled = true;
     this.innerHTML = '<div class="loading"></div> Starting Final Round...';
-    
-    roomSocket.send("start", { 
+
+    roomSocket.send("start", {
         roomId: currentRoomId,
         round: tournamentData.currentRound + 1,
         isFinal: true
     });
-    
+
     showNotification('🏆 Final round başlatılıyor!', 'success');
-    
+
     setTimeout(() => {
         if (this.disabled) {
             this.disabled = false;
             this.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="20" height="20" fill="white" style="margin-right: 8px;"><path d="M400 0L176 0c-26.5 0-48.1 21.8-47.1 48.2c.2 5.3 .4 10.6 .7 15.8L24 64C10.7 64 0 74.7 0 88c0 92.6 33.5 157 78.5 200.7c44.3 43.1 98.3 64.8 138.1 75.8c23.4 6.5 39.4 26 39.4 45.6c0 20.9-17 37.9-37.9 37.9L192 448c-17.7 0-32 14.3-32 32s14.3 32 32 32l192 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-26.1 0C337 448 320 431 320 410.1c0-19.6 15.9-39.2 39.4-45.6c39.9-11 93.9-32.7 138.2-75.8C542.5 245 576 180.6 576 88c0-13.3-10.7-24-24-24L446.4 64c.3-5.2 .5-10.4 .7-15.8C448.1 21.8 426.5 0 400 0zM48.9 112l84.4 0c9.1 90.1 29.2 150.3 51.9 190.6c-24.9-11-50.8-26.5-73.2-48.3c-32-31.1-58-76-63-142.3zM464.1 254.3c-22.4 21.8-48.3 37.3-73.2 48.3c22.7-40.3 42.8-100.5 51.9-190.6l84.4 0c-5.1 66.3-31.1 111.2-63 142.3z"/></svg><span>Start Final Round</span>';
         }
     }, 10000);
-});
+}); */
 
-// Round bitişini handle et
+// handleRoundFinished fonksiyonunu da güncelle
 function handleRoundFinished(payload) {
     console.log('🏁 Round finished:', payload);
-    
-    // Destroy game
-    if (app) {
-        app.destroy();
-        app = null;
+
+    // Payload kontrolü
+    if (!payload) {
+        console.error('Invalid round data: payload is null');
+        showNotification('Round verisi geçersiz!', 'error');
+        // returnToLobby();
+        return;
     }
 
-    // Hide game container
-    const gameContainer = document.getElementById('gameContainer');
-    gameContainer.style.display = 'none';
+    // Round bilgilerini al
+    const currentRound = payload.currentRound || 1;
+    const maxRound = payload.maxRound || payload.totalRounds || 3;
+
+    console.log(`Round finished - Current: ${currentRound}, Max: ${maxRound}`);
+
+    // Kazananları ve bir sonraki eşleştirmeleri hazırla
+    const winners = payload.players || payload.winners || [];
+    const eliminated = payload.spectators || payload.eliminated || [];
+
+    console.log(`Winners: ${winners.length}, Eliminated: ${eliminated.length}`);
+
+    // Bir sonraki round'un eşleştirmelerini hazırla
+    let nextMatches = [];
+    if (payload.match && Array.isArray(payload.match)) {
+        nextMatches = payload.match.map((match, index) => {
+            return {
+                matchNumber: match.matchNumber !== undefined ? match.matchNumber : index,
+                players: [match.player1.id, match.player2.id],
+                playerNames: [match.player1.name, match.player2.name],
+                winner: match.winner || null,
+                loser: match.loser || null
+            };
+        });
+    }
+
+    console.log(`Next matches prepared: ${nextMatches.length}`);
 
     // Round verilerini sakla
     tournamentData = {
-        currentRound: payload.currentRound || 1,
-        totalRounds: payload.totalRounds || 3,
-        winners: payload.winners || [],
-        eliminated: payload.eliminated || [],
-        nextMatches: payload.nextMatches || []
+        currentRound: currentRound,
+        totalRounds: maxRound,
+        maxRound: maxRound,  // Her ikisini de sakla
+        winners: winners,
+        eliminated: eliminated,
+        nextMatches: nextMatches
     };
+
+    console.log('Tournament data updated:', tournamentData);
 
     // Round arası bekleme odasını göster
     showRoundWaitingRoom(tournamentData);
-    showNotification(`Round ${payload.currentRound} tamamlandı!`, 'success');
+
+    showNotification(`Round ${currentRound} tamamlandı!`, 'success');
 }
+
+// returnToLobby fonksiyonu ekle
+// function returnToLobby() {
+//     console.log('🏠 Returning to lobby');
+
+//     // Tüm odaları gizle
+//     document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
+
+//     // Game page'i göster
+//     document.getElementById('game-page').classList.remove('hidden');
+
+//     // Back arrow'u gizle
+//     const backArrow = document.getElementById('back-arrow');
+//     if (backArrow) {
+//         backArrow.classList.remove('active');
+//     }
+
+//     // Room state'i sıfırla
+//     currentRoomId = null;
+//     currentGameMode = null;
+
+//     // Tournament data'yı sıfırla
+//     tournamentData = {
+//         currentRound: 0,
+//         totalRounds: 0,
+//         winners: [],
+//         nextMatches: []
+//     };
+// }
 
 // Back arrow'a round waiting room için de destek ekle
 document.getElementById('back-arrow').addEventListener('click', function() {
@@ -4411,7 +4743,7 @@ document.getElementById('back-arrow').addEventListener('click', function() {
     }
 
     // Lobiye dön
-    returnToLobby();
+    // returnToLobby();
     showNotification('Odadan ayrıldınız', 'info');
 });
 

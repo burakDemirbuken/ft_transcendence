@@ -1,0 +1,23 @@
+{
+  "name": "gameclient",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "babylonjs": "^8.32.2",
+    "babylonjs-gltf2interface": "^8.32.2",
+    "typescript": "^5.9.3",
+    "undici-types": "^7.16.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/babylonjs": "^2.4.5"
+  }
+}

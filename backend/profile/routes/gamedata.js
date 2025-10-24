@@ -1,7 +1,6 @@
 import { Op } from 'sequelize'
 
 export default async function gamedataRoute(fastify) {
-
 	fastify.post('/internal/match', async (request, reply) => {
 		const {
 			team1,
@@ -29,14 +28,18 @@ export default async function gamedataRoute(fastify) {
 				})
 			])
 
-			const winnerTeam = winner === 1 ? teamOnePlayers : winner === 2 ? teamTwoPlayers : null
-			const loserTeam = winner === 1 ? teamTwoPlayers : winner === 2 ? teamOnePlayers : null
+			const winnerTeam = winner?.team ?
+				(winner.team.playersId[0] === team1.playersId[0] ? teamOnePlayers : teamTwoPlayers)
+				: null
+			const loserTeam = winner?.team ?
+				(winner.team.playersId[0] === team1.playersId[0] ? teamTwoPlayers : teamOnePlayers)
+				: null
 
 			if (winnerTeam) {
 				await Promise.all([
 					...winnerTeam.map(async (player) => {
-						const playerState = state.players.find(p => p.id === player.id)
-						player.Stat.increment({
+						const playerState = state.players.find(p => p.id === player.userName)
+						await player.Stat.increment({
 							gamesPlayed: 1,
 							gamesWon: 1,
 							gameCurrentStreak: 1,
@@ -45,13 +48,13 @@ export default async function gamedataRoute(fastify) {
 							ballMissCount: playerState?.missedBall ?? 0,
 							gameTotalDuration: time.duration
 						}, { transaction: t })
-						player.Stat.update({
+						await player.Stat.update({
 							gameMinDuration: time.duration < player.Stat.gameMinDuration ? time.duration : player.Stat.gameMinDuration
-						})
+						}, { transaction: t })
 					}),
 					...loserTeam.map(async (player) => {
-						const playerState = state.players.find(p => p.id === player.id)
-						player.Stat.increment({
+						const playerState = state.players.find(p => p.id === player.userName)
+						await player.Stat.increment({
 							gamesPlayed: 1,
 							gamesLost: 1,
 							xp: 10,
@@ -59,7 +62,7 @@ export default async function gamedataRoute(fastify) {
 							ballHitCount: playerState?.kickBall ?? 0,
 							ballMissCount: playerState?.missedBall ?? 0
 						}, { transaction: t })
-						player.Stat.update({
+						await player.Stat.update({
 							gameCurrentStreak: 0,
 							gameMinDuration: time.duration < player.Stat.gameMinDuration ? time.duration : player.Stat.gameMinDuration
 						}, { transaction: t })
@@ -78,31 +81,38 @@ export default async function gamedataRoute(fastify) {
 				}, { transaction: t })
 			])
 
-			await Promise.all([
-				...teamOnePlayers.map(async (player) => {
-					fastify.checkAchievements(player.id, t)
-				}),
-				...teamTwoPlayers.map(async (player) => {
-					fastify.checkAchievements(player.id, t)
-				})
-			])
-
 			await MatchHistory.create({
 				teamOneId: teamOne.id,
 				teamTwoId: teamTwo.id,
-				winnerTeamId: winner === 1 ? teamOne.id : winner === 2 ? teamTwo.id : null,
+				winnerTeamId: winner?.team ? (winner.team.playersId[0] === team1.playersId[0] ? teamOne.id : teamTwo.id) : null,
 				teamOneScore: team1.score,
 				teamTwoScore: team2.score,
 				matchType: matchType,
-				duration: time.duration
+				matchStartDate: time.start ? new Date(time.start) : null,
+				matchEndDate: time.finish ? new Date(time.finish) : null
 			}, { transaction: t })
+
+			await Promise.all([
+				...teamOnePlayers.map(async (player) => {
+					if (player && player.id) {
+						await fastify.checkAchievements(player.id, t)
+					}
+				}),
+				...teamTwoPlayers.map(async (player) => {
+					if (player && player.id) {
+						await fastify.checkAchievements(player.id, t)
+					}
+				})
+			])
 
 			await t.commit()
 			return reply.status(200).send({ message: 'Match data processed successfully' })
 		} catch (error) {
 			await t.rollback()
-			fastify.log.error('Error processing match data:', error)
-			return reply.status(500).send({ error: 'Internal Server Error' })
+			fastify.log.error('Error processing match data:', error && error.message ? error.message : error)
+			fastify.log.error('Stack:', error && error.stack ? error.stack : 'No stack')
+			fastify.log.error('Request body:', JSON.stringify(request.body, null, 2))
+			return reply.status(500).send({ error: 'Internal Server Error', details: error && error.message ? error.message : error })
 		}
 	})
 
@@ -243,7 +253,7 @@ export default async function gamedataRoute(fastify) {
 		if (!userName) {
 			return reply.code(400).send({ error: 'Username is required' })
 		}
-		
+
 		const userProfile = await fastify.sequelize.models.Profile.findOne({
 			where: { userName: userName },
 			attributes: ['id']
@@ -292,7 +302,7 @@ export default async function gamedataRoute(fastify) {
 		if (!userName) {
 			return reply.code(400).send({ error: 'Username is required' })
 		}
-		
+
 		const userProfile = await fastify.sequelize.models.Profile.findOne({
 			where: { userName: userName },
 			attributes: ['id']
@@ -300,7 +310,7 @@ export default async function gamedataRoute(fastify) {
 		if (!userProfile) {
 			return reply.code(404).send({ error: 'User profile not found' })
 		}
-		
+
 		let RoundMatch = await fastify.sequelize.models.RoundMatch.findAll({
 			include: [
 				{
@@ -325,12 +335,12 @@ export default async function gamedataRoute(fastify) {
 					{ playerOneID: userProfile.id },
 					{ playerTwoID: userProfile.id }
 				]
-			},			
+			},
 		})
 
 		console.log(RoundMatch.toJSON())
 
-		return reply.send({ success: true, 
+		return reply.send({ success: true,
 			matches: RoundMatch.toJSON()
 		})
 	})

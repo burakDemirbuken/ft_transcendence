@@ -21,46 +21,52 @@ class RoomManager extends EventEmitter
 		}, 1000); // Log every 1 second */
 	}
 
-	handleClientRoomMessage(action, payload, player)
+	async handleClientRoomMessage(action, payload, player)
 	{
-		switch (action)
+		try
 		{
-			case 'create':
-				const state = this.createRoom(player, payload);
-				player.clientSocket.send(JSON.stringify({ type: 'created', payload: { ...state } }));
-				break;
-			case 'join':
-				this.joinRoom(payload.roomId, player);
-				player.clientSocket.send(JSON.stringify({ type: 'joined', payload: { roomId: payload.roomId, ...this.getRoom(payload.roomId).getState() } }));
-				break;
-			case 'leave':
-				this.leaveRoom(player);
-				break;
-			case 'setReady':
-				player.isReady = payload.isReady;
-				break;
-			case 'matchTournament':
-				const room = this._getRoomWithPlayer(player.id).room;
-				if (!room)
-					throw new Error(`Room with ID ${payload.roomId} does not exist`);
-				if (room.gameMode !== 'tournament')
-					throw new Error(`Room with ID ${payload.roomId} is not a tournament room`);
-				const matchInfo = room.matchMake();
-				room.players.forEach(p => {
-					p.clientSocket.send(JSON.stringify({ type: 'matchReady', payload: matchInfo }));
-				});
-				break;
-			case 'start':
-				this.startGame(player.id);
-				break;
-			case 'quickMatch':
-				this.quickMatch(player);
-				break;
-			case 'cancelQuickMatch':
-				this.removePlayerFromWaitingList(player);
-				break;
-			default:
-				throw new Error(`Unhandled room message type: 11 ${action}`);
+			switch (action)
+			{
+				case 'create':
+					const state = this.createRoom(player, payload);
+					player.clientSocket.send(JSON.stringify({ type: 'created', payload: { ...state } }));
+					break;
+				case 'join':
+					this.joinRoom(payload.roomId, player);
+					player.clientSocket.send(JSON.stringify({ type: 'joined', payload: { roomId: payload.roomId, ...this.getRoom(payload.roomId).getState() } }));
+					break;
+				case 'leave':
+					this.leaveRoom(player);
+					break;
+				case 'setReady':
+					player.isReady = payload.isReady;
+					break;
+				case 'matchTournament':
+					const room = this._getRoomWithPlayer(player.id).room;
+					if (!room)
+						throw new Error(`Room with ID ${payload.roomId} does not exist`);
+					if (room.gameMode !== 'tournament')
+						throw new Error(`Room with ID ${payload.roomId} is not a tournament room`);
+					room.matchMake();
+					this.notifyRoomUpdate(payload.roomId);
+					break;
+				case 'start':
+					this.startGame(player.id);
+					break;
+				case 'quickMatch':
+					this.quickMatch(player);
+					break;
+				case 'cancelQuickMatch':
+					this.removePlayerFromWaitingList(player);
+					break;
+				default:
+					throw new Error(`Unhandled room message type: 11 ${action}`);
+			}
+		}
+		catch (error)
+		{
+			player.clientSocket.send(JSON.stringify({ type: 'error', payload: { message: error.message } }));
+			console.error(`Error handling client room message: ${action}`, error);
 		}
 	}
 
@@ -108,18 +114,14 @@ class RoomManager extends EventEmitter
 					console.warn(`Room with ID ${payload.roomId} does not exist`);
 					return;
 				}
-				const state = room.finishRoom(payload);
-				if (room.status === 'tournament')
-				{
-					state.losePlayers.forEach(p => {
-						console.log(`Removing player ${p} from tournament room ${room.id}`);
-						this.leaveRoom(p);
-					});
-				}
-				room.players.forEach(player => {
-					if (room.status === 'finished')
-						this.leaveRoom(player);
+				const {state, players} = room.finishRoom(payload);
+				players.forEach(player => {
 					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: state }));
+				});
+				this.notifyRoomUpdate(payload.roomId);
+				players.forEach(player => {
+					if (room.gameMode !== 'tournament')
+						this.leaveRoom(player);
 				});
 				break;
 			default:
@@ -147,19 +149,40 @@ class RoomManager extends EventEmitter
 		else if (payload.gameMode === 'tournament')
 			room = new TournamentRoom(payload.name, payload.gameSettings, payload.tournamentSettings);
 		else if (payload.gameMode === 'ai')
-			room = new AIRoom(payload.name, payload.gameSettings, payload.aiSettings);
+			room = new AIRoom(payload.name, payload.gameSettings, payload.aiSettings, roomId);
 		else if (payload.gameMode === 'local')
 			room = new LocalRoom(payload.name, payload.gameSettings);
 		else
 			throw new Error(`Invalid game mode: ${payload.gameMode}`);
 		room.addPlayer(player);
 
-		room.on('finished', (data) =>
+		room.on('finished', async (data) =>
 			{
-				console.log(`data: `, JSON.stringify(data, null, 2));
-				// ysarac
-				// state ve time ver
-				// ulas: data base buradan kayıt edilecek
+				data = data.state;
+				let url = 'http://profile:3006/internal/';
+				try
+				{
+					if (data.matchType === 'tournament')
+						url += 'tournament';
+					else
+						url += 'match';
+					const response = await fetch(url, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(data)
+					});
+
+					if (!response.ok)
+						console.error('❌ Profile service error:', response.status, await response.text());
+					else
+						console.log('✅ Tournament data sent successfully');
+				}
+				catch (error)
+				{
+					console.error('❌ Error sending data to profile service:', error);
+				}
 			}
 		);
 		this.rooms.set(roomId, room);
@@ -198,45 +221,23 @@ class RoomManager extends EventEmitter
 
 	leaveRoom(player)
 	{
+		if (this.waitingPlayers.find(p => p.id === player.id))
+		{
+			this.removePlayerFromWaitingList(player);
+			return null;
+		}
 		const {room, roomId} = this._getRoomWithPlayer(player.id);
 		if (!room)
-		{ 
+		{
 			console.log(`Player with ID ${player.id} is not in any room`);
 			return null;
 		}
 		room.removePlayer(player.id);
-		if (room.players.length === 0)
+		if (room.players.length === 0 && (room.spectators?.length || 0) === 0)
 			this.deleteRoom(roomId);
-		else if (room.host === player.id)
-			room.host = room.players[0].id; // Assign new host
-
-		if (room.players.length > 0) 
+		if (room.players.length > 0 || (room.spectators?.length || 0) > 0)
 			this.notifyRoomUpdate(roomId);
 
-		return room;
-	}
-
-	updateRoomSettings(roomId, settings)
-	{
-		const room = this.getRoom(roomId);
-		if (!room)
-			throw new Error(`Room with ID ${roomId} does not exist`);
-		room.gameSettings = { ...room.gameSettings, ...settings };
-		//this.notifyRoomUpdate(roomId);
-		return room;
-	}
-
-
-	updateRoomStatus(roomId, status)
-	{
-		const room = this.getRoom(roomId);
-		if (!room)
-			throw new Error(`Room with ID ${roomId} does not exist`);
-		if (!['waiting', 'in_game', 'completed'].includes(status))
-			throw new Error(`Invalid room status: ${status}`);
-
-		room.status = status;
-		this.notifyRoomUpdate(roomId);
 		return room;
 	}
 
@@ -268,8 +269,8 @@ class RoomManager extends EventEmitter
 		let roomId;
 		do {
 			//! TEST
-			roomId = "Naber";
-			//roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+			//roomId = "Naber";
+			roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
 		} while (this.rooms.has(roomId));
 		return roomId;
 	}

@@ -13,9 +13,41 @@ if (!gl) {
 }
 */
 
+interface StartData {
+	gameMode: string;
+	roomId: string;
+	gameCount?: number;
+	games?: Array<{
+		matchNumber?: number;
+		players: number[];
+	}>;
+	gameSettings: {
+		paddleWidth: number;
+		paddleHeight: number;
+	};
+}
+
+interface GameConfig {
+	canvasId: string;
+	gameMode: string;
+	renderConfig: any;
+	arcadeCount?: number;
+	arcadeOwnerNumber?: number;
+}
+
+interface GameSettings {
+	[key: string]: any;
+}
+
 class App
 {
-	constructor(id, name)
+	private playerId: number;
+	private playerName: string;
+	private gameRenderer: GameRenderer;
+	private webSocketClient: WebSocketClient;
+	private inputManager: InputManager | null;
+
+	constructor(id: number, name: string)
 	{
 		this.playerId = id;
 		this.playerName = name;
@@ -24,7 +56,7 @@ class App
 		this.inputManager = new InputManager();
 	}
 
-	start(data)
+	start(data: StartData): void
 	{
 		console.log('🚀 Starting app with data:', JSON.stringify(data, null, 2));
 		if (data.gameMode === 'tournament')
@@ -74,7 +106,7 @@ class App
 		this._gameControllerSetup();
 	}
 
-	_pingpong(name) {
+	_pingpong(name: string): void {
 		const socket = new WebSocket(`ws://${window.location.hostname}:3007/ws-friend/presence?` + new URLSearchParams({ userName: name }).toString());
 		socket.onopen = () => {
 			console.log('Connected to presence server');
@@ -97,9 +129,9 @@ class App
 
 	}
 
-	_gameControllerSetup()
+	_gameControllerSetup(): void
 	{
-		this.inputManager.onKey("w",
+		this.inputManager!.onKey("w",
 			() =>
 			{
 				// this.gameRenderer.joystickMove(1, 'up');
@@ -111,7 +143,7 @@ class App
 				this.webSocketClient.send('player/playerAction', {key: "w", action: false});
 			}
 		);
-		this.inputManager.onKey("s",
+		this.inputManager!.onKey("s",
 			() =>
 			{
 				// this.gameRenderer.joystickMove(1, 'down');
@@ -124,23 +156,23 @@ class App
 			}
 		);
 		// Arrow keys for same player (alternative controls)
-		this.inputManager.onKey("ArrowUp",
+		this.inputManager!.onKey("ArrowUp",
 			() => this.webSocketClient.send('player/playerAction', {key: "ArrowUp", action: true}),
 			() => this.webSocketClient.send('player/playerAction', {key: "ArrowUp", action: false})
 		);
 
-		this.inputManager.onKey("ArrowDown",
+		this.inputManager!.onKey("ArrowDown",
 			() => this.webSocketClient.send('player/playerAction', {key: "ArrowDown", action: true}),
 			() => this.webSocketClient.send('player/playerAction', {key: "ArrowDown", action: false})
 		);
 
-		this.inputManager.onKey("escape",
+		this.inputManager!.onKey("escape",
 			() => this.webSocketClient.send('player/playerAction', {key: "escape", action: true}),
 			() => this.webSocketClient.send('player/playerAction', {key: "escape", action: false})
 		);
 	}
 
-	_setupNetworkListeners(roomId, gameMode)
+	_setupNetworkListeners(roomId: string, gameMode: string): void
 	{
 		this.webSocketClient.onConnect(() =>
 		{
@@ -175,7 +207,7 @@ class App
 		this.webSocketClient.connect("ws", { userID: this.playerId, userName: this.playerName, gameId: roomId, gameMode: gameMode });
 	}
 
-	createRoom(mode, gameSettings)
+	createRoom(mode: string, gameSettings: GameSettings): void
 	{
 		try
 		{
@@ -194,12 +226,12 @@ class App
 		}
 	}
 
-	nextRound()
+	nextRound(): void
 	{
-		this.webSocketClient.send('room/nextRound');
+		this.webSocketClient.send('room/nextRound', {});
 	}
 
-	joinRoom(roomId)
+	joinRoom(roomId: string): void
 	{
 		try
 		{
@@ -215,12 +247,12 @@ class App
 		}
 	}
 
-	startGame()
+	startGame(): void
 	{
-		this.webSocketClient.send('startGame');
+		this.webSocketClient.send('startGame', {});
 	}
 
-	readyState(readyState)
+	readyState(readyState: boolean): void
 	{
 		this.webSocketClient.send('setReady', {isReady: readyState });
 	}
@@ -232,7 +264,7 @@ class App
 	/**
 	 * Handle network events from server
 	 */
-	handleNetworkEvent(eventType, data)
+	handleNetworkEvent(eventType: string, data: any): void
 	{
 		const [event, subEvent] = eventType.split('/');
 		switch (event)
@@ -254,7 +286,7 @@ class App
 		}
 	}
 
-	_handleRoomEvent(subEvent, data)
+	_handleRoomEvent(subEvent: string, data: any): void
 	{
 		switch (subEvent)
 		{
@@ -263,7 +295,7 @@ class App
 		}
 	}
 
-	_handleTournamentEvent(subEvent, data)
+	_handleTournamentEvent(subEvent: string, data: any): void
 	{
 		switch (subEvent)
 		{
@@ -275,7 +307,7 @@ class App
 		}
 	}
 
-	loadGame(gameConfig)
+	loadGame(gameConfig: GameConfig): void
 	{
 		console.log('🎮 Loading game with config:', gameConfig);
 		this.gameRenderer.initialize(gameConfig).then(
@@ -289,7 +321,7 @@ class App
 		);
 	}
 
-	_handleGameEvent(subEvent, data)
+	_handleGameEvent(subEvent: string, data: any): void
 	{
 		switch (subEvent)
 		{
@@ -301,7 +333,7 @@ class App
 		}
 	}
 
-	destroy()
+	destroy(): void
 	{
 		this.gameRenderer.reset();
 		this.webSocketClient.disconnect();

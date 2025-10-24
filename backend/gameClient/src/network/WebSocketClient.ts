@@ -1,10 +1,22 @@
+type Callback = (data?: any) => void;
+
+interface Callbacks {
+	onConnect: Callback | null;
+	onMessage: Callback | null;
+	onClose: Callback | null;
+	onError: Callback | null;
+}
+
 class NetworkManager
 {
-	constructor(protocol, ip, port, basePath = '')
+	private socket: WebSocket | null;
+	private serverAddress: string;
+	private callbacks: Callbacks;
+
+	constructor(ip: string, port: number)
 	{
 		this.socket = null;
-		// Protocol, ip, port ve basePath'i destekle (nginx için)
-		this.serverAddress = `${protocol}//${ip}:${port}${basePath}`;
+		this.serverAddress = `ws://${ip}:${port}`;
 
 		this.callbacks = {
 			onConnect : null,
@@ -14,7 +26,7 @@ class NetworkManager
 		}
 	}
 
-	connect(endpoint, params = undefined)
+	connect(endpoint: string, params: any = undefined): void
 	{
 		try
 		{
@@ -39,7 +51,7 @@ class NetworkManager
 				onConnect();
 			};
 
-			this.socket.onmessage = (event) => {
+			this.socket.onmessage = (event: MessageEvent) => {
 				try
 				{
 					const data = event.data;
@@ -63,12 +75,12 @@ class NetworkManager
 				}
 			};
 
-			this.socket.onclose = (event) => {
+			this.socket.onclose = (event: CloseEvent) => {
 				console.log('🔌 WebSocket connection closed:', event.code, event.reason);
 				onClose({ code: event.code, reason: event.reason });
 			};
 
-			this.socket.onerror = (error) => {
+			this.socket.onerror = (error: Event) => {
 				console.error('❌ WebSocket error:', error);
 				onError(error);
 			};
@@ -79,43 +91,43 @@ class NetworkManager
 		}
 	}
 
-	onConnect(callback)
+	onConnect(callback: Callback): void
 	{
 		this.callbacks.onConnect = callback;
 	}
 
-	onMessage(callback)
+	onMessage(callback: Callback): void
 	{
 		this.callbacks.onMessage = callback;
 	}
 
-	onClose(callback)
+	onClose(callback: Callback): void
 	{
 		this.callbacks.onClose = callback;
 	}
 
-	onError(callback)
+	onError(callback: Callback): void
 	{
 		this.callbacks.onError = callback;
 	}
 
-	send(type, payload)
+	send(type: string, payload: any): void
 	{
 		if (this.isConnect())
-			this.socket.send(JSON.stringify({ type: type, payload: payload }));
+			this.socket!.send(JSON.stringify({ type: type, payload: payload }));
 		else
 			throw new Error('Cannot send message: not connected to server');
 	}
 
-	disconnect()
+	disconnect(): void
 	{
 		if (this.socket)
 			this.socket.close();
 	}
 
-	isConnect()
+	isConnect(): boolean
 	{
-		return this.socket && this.socket.readyState === WebSocket.OPEN;
+		return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
 	}
 }
 

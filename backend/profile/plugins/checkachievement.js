@@ -1,16 +1,16 @@
 import fp from 'fastify-plugin'
 
 export default fp(async (fastify) => {
-    async function checkAchievements(user, t) {
+    async function checkAchievements(userId, t) {
         const { Achievement, Stat } = fastify.sequelize.models
 
         const [userStat, userAchievement] = await Promise.all([
             Stat.findOne({
-                where: { userId: user.id },
+                where: { userId: userId },
                 transaction: t
             }),
             Achievement.findOne({
-                where: { userId: user.id },
+                where: { userId: userId },
                 transaction: t
             })
         ])

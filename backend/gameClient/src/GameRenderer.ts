@@ -1,10 +1,45 @@
+/// <reference types="babylonjs" />
+
 import GameCore from './core/GameCore.js';
 import Renderer from './rendering/Renderer.js';
 import EventEmitter from './utils/EventEmitter.js';
 import ArcadeMachine from './arcade/ArcadeMachine.js';
 
+interface Position {
+	x: number;
+	y: number;
+	z: number;
+}
+
+interface GameConfig {
+	canvasId: string;
+	renderConfig: any;
+	gameMode: string;
+	arcade?: any;
+	arcadeCount?: number;
+	arcadeOwnerNumber?: number;
+}
+
+interface Match {
+	matchNumber: number;
+	gameState: any;
+}
+
+interface TournamentData {
+	matches: Match[];
+}
+
 class GameRenderer extends EventEmitter
 {
+	private canvas: HTMLCanvasElement | null;
+	private gameCore: GameCore;
+	private arcadeMachines: Map<number, ArcadeMachine>;
+	private renderer: Renderer;
+	public gameState: any;
+	private currentGameMode: string | null;
+	private playerMachine: ArcadeMachine | null;
+	private isRunning: boolean;
+
 	constructor()
 	{
 		super();
@@ -57,11 +92,11 @@ class GameRenderer extends EventEmitter
 	*/
 
 // oyun başladığında initialize edilecek sahne yüklenecek oyun oynanmaya hazır hale gelecek
-	async initialize(gameConfig)
+	async initialize(gameConfig: GameConfig): Promise<void>
 	{
 		if (!gameConfig || !gameConfig.canvasId)
 			throw new Error('Game configuration is missing canvasId');
-		this.canvas = document.getElementById(gameConfig.canvasId);
+		this.canvas = document.getElementById(gameConfig.canvasId) as HTMLCanvasElement;
 		if (!this.canvas)
 			throw new Error('Canvas is missing');
 		if (!gameConfig.renderConfig)
@@ -75,17 +110,17 @@ class GameRenderer extends EventEmitter
 			case 'ai':
 			case 'multiplayer':
 			case 'classic':
-				await this.classicInitialize(gameConfig);
+				await this.classicInitialize();
 				break;
 			case 'tournament':
 				await this.tournamentInitialize(gameConfig.arcadeCount, gameConfig.arcadeOwnerNumber);
 				break;
 			default:
-				throw new Error(`Unknown game mode: ${gameConfig.GameMode}`);
+				throw new Error(`Unknown game mode: ${gameConfig.gameMode}`);
 		}
 	}
 
-	async tournamentInitialize(arcadeCount, playerOwnerNumber)
+	async tournamentInitialize(arcadeCount: number = 0, playerOwnerNumber: number = 0): Promise<void>
 	{
 		const radius = 5; // Yuvarlağın yarıçapı
 		const angleStep = (Math.PI * 2) / arcadeCount; // Her oyuncu arası açı
@@ -99,20 +134,20 @@ class GameRenderer extends EventEmitter
 			};
 
        		const rotationAngle = Math.atan2(-position.x, -position.z) + Math.PI;
-			const machine = new ArcadeMachine(this.gameCore.scene);
+			const machine = new ArcadeMachine(this.gameCore.scene!);
 			await machine.load(position, rotationAngle);
 			this.arcadeMachines.set(i, machine);
 		}
 
 		// PlayerMachine'i set et
-		this.playerMachine = this.arcadeMachines.get(playerOwnerNumber);
+		this.playerMachine = this.arcadeMachines.get(playerOwnerNumber) || null;
 
 		this.focusOnPlayer(playerOwnerNumber);
 	}
 
-	async classicInitialize()
+	async classicInitialize(): Promise<void>
 	{
-		this.playerMachine = new ArcadeMachine(this.gameCore.scene);
+		this.playerMachine = new ArcadeMachine(this.gameCore.scene!);
 		await this.playerMachine.load();
 
 		// Pozisyon set et (default 0,0,0)
@@ -128,13 +163,18 @@ class GameRenderer extends EventEmitter
 			{ x: this.playerMachine.position.x, y: this.playerMachine.position.y + 3.75, z: this.playerMachine.position.z });
 	}
 
-	startRendering()
+	startRendering(): void
 	{
 		this.isRunning = true;
 		this.gameLoop();
 	}
 
-	render(data)
+	stopRendering(): void
+	{
+		this.isRunning = false;
+	}
+
+	render(data: any): void
 	{
 		if (!this.isRunning)
 			return;
@@ -144,27 +184,29 @@ class GameRenderer extends EventEmitter
 			this.renderMachine(data, this.playerMachine);
 	}
 
-	renderMachine(data, machine)
+	renderMachine(data: any, machine: ArcadeMachine | null): void
 	{
-		this.renderer.renderGame(data, machine);
+		if (machine)
+			this.renderer.renderGame(data, machine);
 	}
 
-	renderTournament(data)
+	renderTournament(data: TournamentData): void
 	{
 		data.matches.forEach((match) => {
 			const machine = this.arcadeMachines.get(match.matchNumber);
-			this.renderer.renderGame(match.gameState, machine);
+			if (machine)
+				this.renderer.renderGame(match.gameState, machine);
 		});
 	}
 
 	// Player ID'sine göre machine bul
-	getMachineByPlayerId(playerId)
+	getMachineByPlayerId(playerId: number): ArcadeMachine | undefined
 	{
 		return this.arcadeMachines.get(playerId);
 	}
 
 	// Belirli bir machine'e odaklan (kamera hareketi)
-	focusOnPlayer(machineNumber)
+	focusOnPlayer(machineNumber: number): void
 	{
 		const cameraDistance = 3;
 		const cameraHeight = 4.5;
@@ -188,17 +230,7 @@ class GameRenderer extends EventEmitter
 		this.gameCore.setCameraPosition(cameraPosition, lookAtPosition);
 	}
 
-	// Tüm arena görünümüne dön
-	showArenaView()
-	{
-		this.gameCore.setCameraPosition(
-			{ x: 0, y: 20, z: 0 }, // Yukarıdan bakış
-			{ x: 0, y: 0, z: 0 }   // Merkeze bak
-		);
-		console.log('🏟️ Switched to arena view');
-	}
-
-	gameLoop()
+	gameLoop(): void
 	{
 		if (!this.isRunning)
 			return;
@@ -209,16 +241,16 @@ class GameRenderer extends EventEmitter
 		requestAnimationFrame(() => this.gameLoop());
 	}
 
-	dispose()
+	dispose(): void
 	{
 		this.isRunning = false;
 		this.currentGameMode = null;
 		this.gameCore.dispose();
 	}
 
-	reset()
+	reset(): void
 	{
-		this.isRunning = false;
+		this.stopRendering();
 		this.gameCore.dispose();
 		this.gameState = null;
 		this.currentGameMode = null;

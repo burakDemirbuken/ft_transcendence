@@ -79,6 +79,10 @@ log-gameserver:
 	@echo "$(GREEN)Showing logs for gameserver service$(NC)"
 	@$(COMPOSE_CMD) logs -f gameserver
 
+log-room:
+	@echo "$(GREEN)Showing logs for room service$(NC)"
+	@$(COMPOSE_CMD) logs -f room
+
 shell-nginx:
 	@echo "$(GREEN)Entering shell for nginx service$(NC)"
 	@docker exec -it nginx /bin/sh
@@ -200,7 +204,7 @@ help:
 	@echo "  authentication   - Start authentication service"
 	@echo "  gateway          - Start gateway service"
 	@echo "  sqlite           - Start sqlite service"
-	@echo "  nginx            - Start nginx service" 
+	@echo "  nginx            - Start nginx service"
 	@echo "  gameserver       - Start gameserver service (if uncommented)"
 	@echo "  user             - Start user service (if uncommented)"
 	@echo "  livechat         - Start livechat service (if uncommented)"

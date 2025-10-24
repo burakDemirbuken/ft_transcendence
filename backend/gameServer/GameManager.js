@@ -120,13 +120,6 @@ class GameManager extends EventEmitter
 		console.log(`🗑️ Game ${gameId} removed from engine`);
 	}
 
-	resetGame(gameId)
-	{
-		const game = this.getGame(gameId);
-		game.resetGame();
-		console.log(`🔄 Game ${gameId} reset`);
-	}
-
 	getPlayerGame(player)
 	{
 		for (const [gameId, game] of this.games.entries())
@@ -180,9 +173,11 @@ class GameManager extends EventEmitter
 		this.lastUpdateTime = currentTime;
 		for (const [gameId, game] of this.games.entries())
 		{
-			game.update(deltaTime);
 			if (game.status === 'ready to start')
 				this.gameStart(gameId);
+			if (!game.isStarted)
+				continue;
+			game.update(deltaTime);
 		}
 	}
 

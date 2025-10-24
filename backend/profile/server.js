@@ -23,3 +23,25 @@ try {
   fastify.log.error(err)
   process.exit(1)
 }
+
+/*
+  # Aynı network’te misiniz?
+docker network ls
+docker network inspect <network-adı> | grep -A2 profile
+
+# Container dinliyor mu?
+docker compose ps
+docker compose logs profile --tail=100
+docker compose exec profile sh -c 'ss -lntp | grep 3006 || netstat -lntp | grep 3006'
+
+şunları denesene ben bituvalet
+ben 20:15 de kaçacam
+derleyince direkt curl dene kapat o zaman
+pushla ben bakarım
+okke
+kendime pushlarım
+okke sen eve gidene kadar bakarım ben
+okke
+kapatıyom ben livesgare ı
+bb O7
+*/
