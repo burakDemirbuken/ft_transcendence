@@ -1,5 +1,5 @@
 import Fastify from "fastify"
-import fastifyStatic from "fastify-static"
+import fastifyStatic from "@fastify/static"
 import fastifyMultipart from "@fastify/multipart"
 import avatarRoutes from "./routes/avatar.js"
 import path from "path"

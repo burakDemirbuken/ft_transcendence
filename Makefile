@@ -1,6 +1,6 @@
 # Variables
 COMPOSE_FILE = ./docker-compose.yml
-COMPOSE_CMD = docker-compose -f $(COMPOSE_FILE)
+COMPOSE_CMD = docker compose -f $(COMPOSE_FILE)
 
 # Service names
 SERVICES = authentication gateway sqlite nginx

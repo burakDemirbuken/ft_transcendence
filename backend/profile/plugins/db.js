@@ -63,9 +63,12 @@ export default fp(async (fastify) => {
 		Profile.hasMany(RoundMatch, { as: 'playerTwo', foreignKey: 'playerTwoID' })
 		Profile.hasMany(RoundMatch, { as: 'winner', foreignKey: 'winnerPlayerID' })
 
+
 		await sequelize.authenticate()
 
-		/* await sequelize.sync()  */
+		// Ensure all defined models are created/updated in the SQLite database
+		// so subsequent operations (like seeding) don't fail with "no such table".
+		await sequelize.sync()
 
 		fastify.decorate('sequelize', sequelize)
 
