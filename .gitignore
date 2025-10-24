@@ -7,3 +7,6 @@ backend/gameClient/dist/
 frontend/dist/
 backend/profile/database/*
 */database/*
+backend/profile/database
+backend/friend/database
+backend/friend/database/*
