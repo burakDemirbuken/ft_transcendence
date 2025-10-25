@@ -121,6 +121,112 @@ export default async function gamedataRoute(fastify) {
 
 	fastify.post('/internal/tournament', async (request, reply) => {
 		const {
+
+			/*
+			profile  | {
+profile  |   "name": "asdasd",
+profile  |   "winner": "test2",
+profile  |   "rounds": [
+profile  |     {
+profile  |       "round": 0,
+profile  |       "matchs": [
+profile  |         {
+profile  |           "matchNumber": 0,
+profile  |           "player1": "test2",
+profile  |           "player2": "test0",
+profile  |           "player1Score": 1,
+profile  |           "player2Score": 0,
+profile  |           "winner": "test2",
+profile  |           "loser": "test0",
+profile  |           "state": {
+profile  |             "players": [
+profile  |               {
+profile  |                 "id": "test2",
+profile  |                 "kickBall": 0,
+profile  |                 "missedBall": 0
+profile  |               },
+profile  |               {
+profile  |                 "id": "test0",
+profile  |                 "kickBall": 0,
+profile  |                 "missedBall": 1
+profile  |               }
+profile  |             ]
+profile  |           },
+profile  |           "time": {
+profile  |             "start": 1761413543844,
+profile  |             "finish": 1761413547123,
+profile  |             "duration": 1287
+profile  |           }
+profile  |         },
+profile  |         {
+profile  |           "matchNumber": 1,
+profile  |           "player1": "test3",
+profile  |           "player2": "test1",
+profile  |           "player1Score": 1,
+profile  |           "player2Score": 0,
+profile  |           "winner": "test3",
+profile  |           "loser": "test1",
+profile  |           "state": {
+profile  |             "players": [
+profile  |               {
+profile  |                 "id": "test3",
+profile  |                 "kickBall": 0,
+profile  |                 "missedBall": 0
+profile  |               },
+profile  |               {
+profile  |                 "id": "test1",
+profile  |                 "kickBall": 0,
+profile  |                 "missedBall": 1
+profile  |               }
+profile  |             ]
+profile  |           },
+profile  |           "time": {
+profile  |             "start": 1761413543844,
+profile  |             "finish": 1761413547123,
+profile  |             "duration": 1287
+profile  |           }
+profile  |         }
+profile  |       ]
+profile  |     },
+profile  |     {
+profile  |       "round": 1,
+profile  |       "matchs": [
+profile  |         {
+profile  |           "matchNumber": 0,
+profile  |           "player1": "test2",
+profile  |           "player2": "test3",
+profile  |           "player1Score": 1,
+profile  |           "player2Score": 0,
+profile  |           "winner": "test2",
+profile  |           "loser": "test3",
+profile  |           "state": {
+profile  |             "players": [
+profile  |               {
+profile  |                 "id": "test2",
+profile  |                 "kickBall": 0,
+profile  |                 "missedBall": 0
+profile  |               },
+profile  |               {
+profile  |                 "id": "test3",
+profile  |                 "kickBall": 0,
+profile  |                 "missedBall": 1
+profile  |               }
+profile  |             ]
+profile  |           },
+profile  |           "time": {
+profile  |             "start": 1761413553317,
+profile  |             "finish": 1761413556612,
+profile  |             "duration": 1302
+profile  |           }
+profile  |         }
+profile  |       ]
+profile  |     }
+profile  |   ],
+profile  |   "matchType": "tournament"
+profile  | }
+
+
+			*/
 			/*
 				name,
 				rounds[
@@ -163,6 +269,7 @@ export default async function gamedataRoute(fastify) {
 		const { Profile, Stat, RoundMatch, Round, TournamentHistory } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
 
+		console.log(JSON.stringify(request.body, null, 2))
 		try {
 			console.log('Creating tournament record for:', name)
 			const tournament = await TournamentHistory.create({
@@ -176,18 +283,17 @@ export default async function gamedataRoute(fastify) {
 					roundNumber: roundIndex + 1,
 					tournamentId: tournament.id
 				}, { transaction: t })
-				console.log(' Created round record with ID:', round.id, 'for tournament ID:', tournament.id)
+				console.log(' Created round record with ID:', round.id, 'for tournament ID:', tournament.id, 'round number:', roundIndex + 1)
 
 				for (const [matchIndex, matchData] of roundData.matchs.entries()) {
 					const match = await RoundMatch.create({
-						roundId: round.id,
 						roundNumber: matchData.round,
 						matchNumber: matchData.matchNumber,
-						playerOneID: matchData.player1?.id ?? null,
-						playerTwoID: matchData.player2?.id ?? null,
+						playerOneID: ( Profile.findOne({ where: { userName: matchData.player1 } }))?.id ?? null,
+						playerTwoID: ( Profile.findOne({ where: { userName: matchData.player2 } }))?.id ?? null,
 						playerOneScore: matchData.player1Score,
 						playerTwoScore: matchData.player2Score,
-						winnerPlayerID: matchData.winner?.id ?? null
+						winnerPlayerID: ( Profile.findOne({ where: { userName: matchData.winner } }))?.id ?? null
 					}, { transaction: t })
 					console.log('  Created match record with ID:', match.id, 'for round ID:', round.id)
 
@@ -252,7 +358,7 @@ export default async function gamedataRoute(fastify) {
 			return reply.status(200).send({ message: 'Tournament data processed successfully' })
 		} catch (error) {
 			await t.rollback()
-			fastify.log.error('Error saving match data:', { message: error.message,
+			fastify.log.error('Error saving tournament data:', { message: error.message,
 				details: error.toString() })
 			return reply.status(500).send({ error: 'Internal Server Error' })
 		}

@@ -35,6 +35,8 @@ export default class TournamentRoom extends Room
 						player2Score: null,
 						winner: null,
 						loser: null,
+						state: null,
+						time: null,
 					}
 				);
 			}
@@ -99,10 +101,12 @@ export default class TournamentRoom extends Room
 			(match, index) =>
 			{
 				if (matches[index]) {
-					match.player1Score = matches[index].score?.team1 || 0;
-					match.player2Score = matches[index].score?.team2 || 0;
+					match.player1Score = matches[index].player1Score || 0;
+					match.player2Score = matches[index].player2Score || 0;
 					match.winner = matches[index].winner;
 					match.loser = matches[index].loser;
+					match.state = matches[index].state || null;
+					match.time = matches[index].time || null;
 					if (match.winner === null || match.winner === undefined)
 						match.winner = "bye-" + match.matchNumber + "-" + Date.now();
 
@@ -144,9 +148,12 @@ export default class TournamentRoom extends Room
 					matchStatus: match.matchStatus,
 					player1: match.player1,
 					player2: match.player2,
-					score: match.score,
+					player1Score: match.player1Score,
+					player2Score: match.player2Score,
 					winner: match.winner,
 					loser: match.loser,
+					state: match.state,
+					time: match.time,
 				}))
 			});
 		});

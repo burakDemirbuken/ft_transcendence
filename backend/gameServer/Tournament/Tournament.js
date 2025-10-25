@@ -34,15 +34,23 @@ class Tournament extends EventEmitter
 			game.on('finished', ({ players, results }) =>
 			{
 				this.finishedMatchesCount++;
-				console.log(`🏁 Match ${match.matchNumber} finished. Winner: ${results.winner?.ids[0]}, Loser: ${results.loser?.ids[0]}`);
+				console.log(`result:`, results);
 				match.winner = results.winner?.ids[0] || null;
 				match.loser = results.loser?.ids[0] || null;
+				match.playersState = results.state || null;
+				match.time = results.time || null;
+				match.player1Score = results.team1?.score || 0;
+				match.player2Score = results.team2?.score || 0;
 			});
 			game.addRegisteredPlayer(match.player1);
 			game.addRegisteredPlayer(match.player2);
 			game.initializeGame();
 			match.game = game;
 			match.state = game.getGameState();
+			match.time =  null;
+			match.playersState = null;
+			match.player1Score = 0;
+			match.player2Score = 0;
 			match.matchStatus = 'not_started'; // 'not_started', 'in_progress', 'finished'
 			this.currentMatches.push(match);
 		});
@@ -76,9 +84,12 @@ class Tournament extends EventEmitter
 						matches: this.currentMatches.map(match => ({
 							player1: match.player1,
 							player2: match.player2,
-							score: match.score,
+							player1Score: match.player1Score,
+							player2Score: match.player2Score,
 							winner: match.winner,
 							loser: match.loser,
+							state: match.playersState,
+							time: match.time,
 						})),
 					}
 				}
