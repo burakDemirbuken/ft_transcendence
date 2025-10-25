@@ -124,11 +124,39 @@ export default class TournamentRoom extends Room
 		if (this.currentRound === this.maxRounds)
 		{
 			this.status = 'finished';
-			this.emit('finished', { ...this.getMatchmakingInfo() });
+			this.emit('finished', { ...this.finishData() });
 		}
 		else
 			this.nextRound();
 		return { state: this.getState(), players: players };
+	}
+
+	finishData()
+	{
+		const rounds = [];
+
+		this.matches.forEach((matchsArray, roundIndex) => {
+			rounds.push({
+				round: roundIndex,
+				matchs: matchsArray.map(match => ({
+					matchId: match.matchId,
+					matchNumber: match.matchNumber,
+					matchStatus: match.matchStatus,
+					player1: match.player1,
+					player2: match.player2,
+					score: match.score,
+					winner: match.winner,
+					loser: match.loser,
+				}))
+			});
+		});
+
+		return {
+			name: this.name,
+			winner: this.players[0].id,
+			rounds: rounds,
+			matchType: 'tournament'
+		};
 	}
 
 	startGame(playerId)
