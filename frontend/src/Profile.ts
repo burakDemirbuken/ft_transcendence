@@ -668,6 +668,30 @@ function handleOverlayClick(e: MouseEvent, overlay: HTMLDivElement, turnuva: HTM
 function handleMatchOverlay(e) {
     if (e.target.classList.contains("match-row") || e.target.closest(".match-row"))
         document.querySelector('#match-overlay').classList.remove("hide-away");
+
+    const matchdetails = document.querySelector('.match-card');
+    console.log(matchdetails);
+    matchdetails.innerHTML = `
+        <h2 class="match-details-title">Match Details</h2>
+        <div class="match-info">
+            <span class="">Date: 2024-10-05</span>
+            <span class="">Duration: 4.23 mins</span>
+            <span class="">Score: 11</span>
+        </div>
+        <div class="players-comp">
+            <div class="match-player">
+                <h3>You</h3>
+                <span class="player-result">winner</span>
+                <span class="player-score">11</span>
+            </div>
+            <div class="match-player">
+                <h3>Opponent</h3>
+                <span class="player-result">loser</span>
+                <span class="player-score">10</span>
+            </div>
+        </div>
+    `;
+    console.log("Hayyayayayay");
 }
 
 function hideMatchOverlay() {
@@ -972,8 +996,9 @@ async function onLoad()
 {
     const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
 
-    if (!hasToken)
-        return ( window.location.href = '#login' );
+    if (!hasToken) {
+        return window.location.replace('/login');
+    }
 
     try
     {
@@ -1012,11 +1037,11 @@ async function onLoad()
         }
         else
         {
-            if (getProfileDatas.status === 401)
-                window.location.href = '#login';
+            if (getProfileDatas.status === 401) {
+                window.location.replace('/login');
+            }
         }
-    } catch (error)
-    {
-        window.location.href = '#login';
+    } catch (error) {
+        window.location.replace('/login');
     }
 }

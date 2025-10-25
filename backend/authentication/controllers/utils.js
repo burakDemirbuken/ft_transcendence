@@ -47,19 +47,18 @@ function isTokenBlacklisted(token)
 
 async function sendVerificationEmail(email, username, token)
 {
-	const emailServiceUrl = process.env.EMAIL_SERVICE_URL || 'http://email:3005';
-	console.log("EMAIL SERVICE URL: ", emailServiceUrl);""
-	const verificationUrl = `https://${process.env.HOST_IP}:3030/api/auth/verify-email?token=${token}`;
-
-	const response = await fetch(`${emailServiceUrl}/send-verification`,
+	const response = await fetch(`http://email:3005/send-verification`,
     {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
+		headers:
+		{
+			'Content-Type': 'application/json'
+		},
 		body: JSON.stringify
         ({
 			to: email,
 			username: username,
-			verificationUrl: verificationUrl,
+			verificationUrl: `https://${process.env.HOST_IP}:3030/api/auth/verify-email?token=${token}`,
 			token: token
 		})
 	});
@@ -71,12 +70,13 @@ async function sendVerificationEmail(email, username, token)
 
 async function send2FAEmail(email, username, code, userIP)
 {
-	const emailServiceUrl = process.env.EMAIL_SERVICE_URL || 'http://email:3005';
-
-    const response = await fetch(`${emailServiceUrl}/send-2fa`,
+    const response = await fetch(`http://email:3005/send-2fa`,
     {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
+		headers:
+		{
+			'Content-Type': 'application/json'
+		},
 		body: JSON.stringify
         ({
 			email: email,
@@ -96,12 +96,13 @@ async function send2FAEmail(email, username, code, userIP)
 
 async function sendLoginNotification(email, username, userIP)
 {
-    const emailServiceUrl = process.env.EMAIL_SERVICE_URL || 'http://email:3005';
-
-    const response = await fetch(`${emailServiceUrl}/send-login-notification`,
+    const response = await fetch(`http://email:3005/send-login-notification`,
     {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers:
+        {
+            'Content-Type': 'application/json'
+        },
         body: JSON.stringify
         ({
             email: email,
@@ -129,7 +130,7 @@ function generateVerificationCode() {
 function storeVerificationToken(email, type = 'email_verification')
 {
     const token = generateVerificationToken();
-    const expires = new Date(Date.now() + 30 * 60 * 1000);
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     tempStorage.set(email,
     {
         token,

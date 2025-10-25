@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "@fastify/cookie": "^9.0.0",
-    "@fastify/cors": "^9.0.0",
     "@fastify/http-proxy": "^9.0.0",
     "@fastify/jwt": "^8.0.0",
     "ajv": "^8.12.0",
