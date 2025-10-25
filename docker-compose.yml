@@ -39,7 +39,12 @@ volumes:
       type: none
       device: ./backend/aiServer
       o: bind
-
+  gameClient_src:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/gameClient
+      o: bind
   gameServer:
     driver: local
     driver_opts:
@@ -208,3 +213,17 @@ services:
       - 3008
     volumes:
       - /app/node_modules
+
+  gameclientburak:
+    container_name: gameclientburak
+    build: ./backend/gameClient
+    restart: on-failure
+    networks:
+      - transcendency
+    expose:
+      - 4000
+    ports:
+      - "4000:4000"
+    volumes:
+      - /app/node_modules
+      - gameClient_src:/app

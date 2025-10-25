@@ -28,7 +28,7 @@ export default fp(async (fastify) => {
 		const Achievements = AchievementsModel(sequelize, DataTypes, Model)
 
 
-		// hasmnyler hasone olabilr
+		// check a few hasmany can be hasone
 
 		Profile.hasMany(Team, { foreignKey: 'playerOneId', onDelete: 'SET NULL', hooks: true })
 		Profile.hasMany(Team, { foreignKey: 'playerTwoId', onDelete: 'SET NULL', hooks: true })
@@ -40,12 +40,12 @@ export default fp(async (fastify) => {
 		Profile.hasOne(Achievements, { foreignKey: 'userId', hooks: true })
 		Achievements.belongsTo(Profile, { foreignKey: 'userId', onDelete: 'CASCADE' })
 
-		Team.hasMany(MatchHistory, { foreignKey: 'teamOneId', onDelete: 'SET NULL', hooks: true })
-		Team.hasMany(MatchHistory, { foreignKey: 'teamTwoId', onDelete: 'SET NULL', hooks: true })
-		Team.hasMany(MatchHistory, { foreignKey: 'winnerTeamId', onDelete: 'SET NULL', hooks: true })
-		MatchHistory.belongsTo(Team, { as: 'TeamOne', foreignKey: 'teamOneId', onDelete: 'SET NULL' })
-		MatchHistory.belongsTo(Team, { as: 'TeamTwo', foreignKey: 'teamTwoId', onDelete: 'SET NULL' })
-		MatchHistory.belongsTo(Team, { as: 'WinnerTeam', foreignKey: 'winnerTeamId', onDelete: 'SET NULL' })
+		Team.hasMany(MatchHistory, { as: 'teamOneMatches', foreignKey: 'teamOneId', onDelete: 'SET NULL', hooks: true })
+		Team.hasMany(MatchHistory, { as: 'teamTwoMatches', foreignKey: 'teamTwoId', onDelete: 'SET NULL', hooks: true })
+		Team.hasMany(MatchHistory, { as: 'wonMatches', foreignKey: 'winnerTeamId', onDelete: 'SET NULL', hooks: true })
+		MatchHistory.belongsTo(Team, { as: 'teamOne', foreignKey: 'teamOneId', onDelete: 'SET NULL' })
+		MatchHistory.belongsTo(Team, { as: 'teamTwo', foreignKey: 'teamTwoId', onDelete: 'SET NULL' })
+		MatchHistory.belongsTo(Team, { as: 'winnerTeam', foreignKey: 'winnerTeamId', onDelete: 'SET NULL' })
 
 		TournamentHistory.hasMany(Round, { foreignKey: 'tournamentId', onDelete: 'CASCADE', hooks: true })
 		Round.belongsTo(TournamentHistory, { foreignKey: 'tournamentId', onDelete: 'CASCADE' })

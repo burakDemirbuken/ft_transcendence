@@ -20,10 +20,6 @@ export default (sequelize, DataTypes, Model) => {
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
-		},
-		tournamentDate: {
-			type: DataTypes.DATE,
-			allowNull: false
 		}
 	}, {
 		sequelize,
