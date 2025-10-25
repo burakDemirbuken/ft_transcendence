@@ -33,14 +33,15 @@ const router = async function(page:string) {
 	const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
 
 	if (page === "profile" || page === "settings" || page === "friends" || page === "play") {
-		if (!hasToken)
+		if (!hasToken) {
 			return window.location.replace("/login");
+		}
 	}
-	
+
 	if (page === "login") {
-	 	if (hasToken) {
-	 		return window.location.replace("/home");
-	 	}
+		if (hasToken) {
+			return window.location.replace("/home");
+		}
 	}
 
 	if (view) {

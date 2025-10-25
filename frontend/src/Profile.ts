@@ -997,8 +997,7 @@ async function onLoad()
     const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
 
     if (!hasToken) {
-        window.location.href = '/login';
-        return;
+        return window.location.replace('/login');
     }
 
     try
@@ -1038,10 +1037,10 @@ async function onLoad()
         else
         {
             if (getProfileDatas.status === 401) {
-                window.location.href = '/login';
+                window.location.replace('/login');
             }
         }
     } catch (error) {
-        window.location.href = '/login';
+        window.location.replace('/login');
     }
 }
