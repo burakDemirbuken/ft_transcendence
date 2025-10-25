@@ -997,8 +997,7 @@ async function onLoad()
     const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
 
     if (!hasToken) {
-        window.location.href = '/login';
-        return;
+        return window.location.replace('/login');
     }
     try
     {
@@ -1030,6 +1029,7 @@ async function onLoad()
             if (ProfileUsername.ok)
             {
                 const user = await ProfileUsername.json();
+                console.log(user);
                 document.querySelector(".user-title").textContent = user.profile.displayName;
                 document.querySelector(".username").textContent = "@" + user.profile.userName;
             }
@@ -1039,10 +1039,10 @@ async function onLoad()
         else
         {
             if (getProfileDatas.status === 401) {
-                window.location.href = '/login';
+                window.location.replace('/login');
             }
         }
     } catch (error) {
-        window.location.href = '/login';
+        window.location.replace('/login');
     }
 }

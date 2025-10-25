@@ -6,33 +6,12 @@ import dbPlugin from './plugins/db.js'
 import overview from 'fastify-overview'
 
 const fastify = Fastify({
-  logger: false,
-})
-
-fastify.addContentTypeParser('application/json', { parseAs: 'string' }, function (req, body, done) {
-  try {
-    const json = JSON.parse(body)
-    done(null, json)
-  } catch (err) {
-    err.statusCode = 400
-    done(err, undefined)
-  }
+  logger: true,
 })
 
 fastify.register(overview)
 fastify.register(dbPlugin)
 fastify.register(checkachievement)
-
-fastify.addHook('onRequest', async (request) => {
-  fastify.log.info(`Incoming request: ${request.method} ${request.url}`)
-  fastify.log.info(`Request headers: ${JSON.stringify(request.headers)}`)
-  fastify.log.info(`Request body: ${JSON.stringify(request.body)}`)
-})
-
-fastify.addHook('onResponse', async (request, reply) => {
-  fastify.log.info(`Response status: ${reply.statusCode} for ${request.method} ${request.url}`)
-})
-
 fastify.register(gamedataRoute)
 fastify.register(profileRoute)
 
@@ -40,8 +19,29 @@ await fastify.ready()
 
 try {
   const address = await fastify.listen({ port: 3006, host: '0.0.0.0' })
-  fastify.log.info(`Server listening at ${address}`)
 } catch (err) {
   fastify.log.error(err)
   process.exit(1)
 }
+
+/*
+  # Aynı network’te misiniz?
+docker network ls
+docker network inspect <network-adı> | grep -A2 profile
+
+# Container dinliyor mu?
+docker compose ps
+docker compose logs profile --tail=100
+docker compose exec profile sh -c 'ss -lntp | grep 3006 || netstat -lntp | grep 3006'
+
+şunları denesene ben bituvalet
+ben 20:15 de kaçacam
+derleyince direkt curl dene kapat o zaman
+pushla ben bakarım
+okke
+kendime pushlarım
+okke sen eve gidene kadar bakarım ben
+okke
+kapatıyom ben livesgare ı
+bb O7
+*/

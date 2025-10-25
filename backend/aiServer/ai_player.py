@@ -29,7 +29,7 @@ class PingPongAI:
         self.tired_counter = 0
         self.super_focus = False
         self.focus_counter = 0
-        
+
 		# Yeni -  Oyun alanı bilgileri
         self.screen_width = 800
         self.screen_height = 600
@@ -90,14 +90,14 @@ class PingPongAI:
                 self.max_consecutive_wins = 5
             elif self.difficulty == "impossible":
                 self.reaction_speed = 1.0
-                self.prediction_accuracy = 0.98
+                self.prediction_accuracy = 1.0
                 self.prepare_distance = 600
-                self.freeze_distance = 180
-                self.error_rate = 0.01
-                self.learning_rate = 0.03
-                self.target_win_rate = 0.9
-                self.lose_probability = 0.02
-                self.max_consecutive_wins = 10
+                self.freeze_distance = 100
+                self.error_rate = 0.00
+                self.learning_rate = 0.00
+                self.target_win_rate = 1.0
+                self.lose_probability = 0.00
+                self.max_consecutive_wins = 100
 
             # Varsayılan özellikler
             self.rage_enabled = False
@@ -277,7 +277,7 @@ class PingPongAI:
                     self.locked_target = predicted_y + noise
                     self.target_locked = True
 
-                target_y = self.locked_target    
+                target_y = self.locked_target
             else:
                 predicted_y = self.predict_ball_y(ball_x, ball_y, ball_speed_x, ball_speed_y, 780, screen_height)
                 noise_range = 30 * (1 - current_accuracy)
@@ -289,7 +289,7 @@ class PingPongAI:
 
         # Hedef Y konumunu sınırlar içinde tut
         target_y = max(paddle_height/2, min(screen_height - paddle_height/2, target_y))
-        
+
 		# DEBUG LOG
         print(f"🤖 AI Hesaplama:")
         print(f"  Top: ({ball_x:.1f}, {ball_y:.1f}) | Hız: ({ball_speed_x:.1f}, {ball_speed_y:.1f})")

@@ -20,7 +20,7 @@ class GameService
 		this.websocketServer = new WebSocketServer();
 		this.roomSocket = new WebSocketClient("room", 3004);
 		this.tournamentManager = new TournamentManager();
-		this.connectionId = new Map(); //  playerId ->
+		this.connectionId = new Map(); //  playerId -> connectionId
 		this.players = new Map(); // playerId -> Player instance
 
 		this.gameManager.start();

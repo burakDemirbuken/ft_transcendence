@@ -10,8 +10,7 @@ COPY . .
 
 RUN apk add --no-cache sqlite
 
-RUN npm install && \
-	npm cache clean --force
+RUN npm install 
 
 
 CMD ["npm", "run", "dev"]

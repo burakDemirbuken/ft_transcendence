@@ -63,10 +63,10 @@ class AiNetworkManager extends EventEmitter
 			},
 			game_id: gameId  // Game server'dan gelen ID'yi gönder
 		};
-		
+
 		if (difficulty === "custom")
 			data.ai_config.settings = settings;
-			
+
 		console.log('📤 Sending init_game with game_id:', gameId); // Debug için
 		this.sendMessage(JSON.stringify(data));
 	}

@@ -24,6 +24,7 @@ class Tournament extends EventEmitter
 	setupMatches(matches)
 	{
 		this.currentMatches = [];
+		this.registeredPlayers.clear();
 		matches.forEach((match) =>
 		{
 			const game = new PingPong({
@@ -108,14 +109,11 @@ class Tournament extends EventEmitter
 
 	addPlayer(player)
 	{
-		if (this.registeredPlayers.has(player.id))
-			return this.emit('error', new Error(`Player with ID ${player.id} is already in the tournament`));
 		this.players.push(player);
 		this.currentMatches.forEach((match) => {
 			if (match.game.registeredPlayers.has(player.id))
 			{
 				match.game.addPlayer(player);
-				return;
 			}
 		});
 		console.log(`👤 Player ${player.id} added to tournament`);
@@ -180,6 +178,15 @@ class Tournament extends EventEmitter
 				gameState: match.state,
 			})),
 		};
+	}
+
+	reset()
+	{
+		this.finishedMatchesCount = 0;
+		this.currentMatches = [];
+		this.registeredPlayers = new Set();
+		this.players = [];
+		this.spectators = [];
 	}
 
 	destroy()

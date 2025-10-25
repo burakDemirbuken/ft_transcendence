@@ -1,0 +1,143 @@
+/// <reference types="babylonjs" />
+/*
+const exampleArcadeSettings =
+{
+    arcade:
+    {
+        position:
+        {
+            x: 0,
+            y: 0,
+            z: 0
+        },
+        machine:
+        {
+            path: "../models/arcade/classic/",
+            model: "arcade.obj",
+            colors:
+            {
+                body: "#FF0000",
+                sides: "#00FF00",
+                joystick: "#0000FF",
+                buttons: "#FFFF00"
+            }
+        }
+    },
+};
+*/
+import { SCREEN_SIZE } from "../utils/constants.js";
+class ArcadeMachine {
+    constructor(scene) {
+        this.scene = scene;
+        this.position = null;
+        this.angle = 0;
+        this.meshs = null;
+        this.body = null;
+        this.gameScreen = null;
+        this.screenMaterial = null;
+        this.isActive = false;
+        this.screenSize = SCREEN_SIZE;
+        this.joystick1 = null;
+        this.debugCanvas = null;
+        this.debugCtx = null;
+    }
+    async load(position, angle) {
+        try {
+            const result = await BABYLON.SceneLoader.ImportMeshAsync("", "./assets/models/arcade/", "arcade.glb", this.scene);
+            this.meshs = result.meshes;
+            this.position = position || { x: 0, y: 0, z: 0 };
+            this.angle = angle || 0;
+            const parentMesh = this.meshs.find(mesh => mesh.parent === null) || this.meshs[0];
+            if (parentMesh) {
+                parentMesh.position = new BABYLON.Vector3(this.position.x, this.position.y, this.position.z);
+                parentMesh.rotation = new BABYLON.Vector3(0, this.angle, 0);
+            }
+            else
+                console.warn("Parent mesh not found. Using default position and rotation.");
+        }
+        catch (error) {
+            console.error("Error loading arcade machine:", error);
+            return;
+        }
+        const light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(this.position.x, this.position.y + 1, this.position.z), this.scene);
+        light1.intensity = 0.4;
+        this.createGameScreen();
+        this.setActive(true);
+        return this;
+    }
+    createGameScreen() {
+        this.gameScreen = new BABYLON.DynamicTexture(`gameScreen`, this.screenSize, this.scene);
+        this.gameScreen.hasAlpha = false;
+        this.gameScreen.wrapU = BABYLON.Texture.CLAMP_ADDRESSMODE;
+        this.gameScreen.wrapV = BABYLON.Texture.CLAMP_ADDRESSMODE;
+        this.gameScreen.updateSamplingMode(BABYLON.Texture.NEAREST_SAMPLINGMODE);
+        this.screenMaterial = new BABYLON.StandardMaterial(`screenMaterial`, this.scene);
+        this.screenMaterial.diffuseTexture = this.gameScreen;
+        this.screenMaterial.emissiveTexture = this.gameScreen;
+        let screenMesh = this.meshs.find(m => m.name.toLowerCase().includes("screen"));
+        if (screenMesh) {
+            screenMesh.material = this.screenMaterial;
+        }
+        else {
+            console.warn(`Screen mesh not found. Available meshes: ${this.meshs.map(m => m.name).join(', ')}`);
+        }
+    }
+    joystickMove(number, direction) {
+        if (!this.meshs)
+            return;
+        const joystickParts = this.meshs.filter(m => {
+            const name = m.name.toLowerCase();
+            return name.startsWith(`joystick${number}`) &&
+                (name.includes('primitive'));
+        });
+        if (joystickParts.length === 0) {
+            console.warn(`Joystick${number} parts not found. Available meshes:`, this.meshs.map(m => m.name));
+            return;
+        }
+        const tiltAngle = 0.3;
+        let targetRotation = new BABYLON.Vector3(0, 0, 0);
+        if (direction === 'up')
+            targetRotation = new BABYLON.Vector3(-tiltAngle, 0, 0);
+        else if (direction === 'down')
+            targetRotation = new BABYLON.Vector3(tiltAngle, 0, 0);
+        else if (direction === 'left')
+            targetRotation = new BABYLON.Vector3(0, -tiltAngle, 0);
+        else if (direction === 'right')
+            targetRotation = new BABYLON.Vector3(0, tiltAngle, 0);
+        else if (direction === 'reset' || direction === 'neutral')
+            targetRotation = new BABYLON.Vector3(0, 0, 0);
+        joystickParts.forEach(part => {
+            this.smoothRotateJoystick(part, targetRotation);
+        });
+    }
+    smoothRotateJoystick(mesh, targetRotation) {
+        const lerpSpeed = 0.30;
+        mesh.rotation.x = BABYLON.Scalar.Lerp(mesh.rotation.x, targetRotation.x, lerpSpeed);
+        mesh.rotation.y = BABYLON.Scalar.Lerp(mesh.rotation.y, targetRotation.y, lerpSpeed);
+        mesh.rotation.z = BABYLON.Scalar.Lerp(mesh.rotation.z, targetRotation.z, lerpSpeed);
+    }
+    getScreenContext() {
+        return this.gameScreen.getContext();
+    }
+    updateScreen() {
+        this.gameScreen.update();
+    }
+    setActive(active) {
+        this.isActive = active;
+        if (this.screenMaterial)
+            this.screenMaterial.alpha = active ? 1.0 : 0.5;
+    }
+    dispose() {
+        if (this.gameScreen)
+            this.gameScreen.dispose();
+        if (this.screenMaterial)
+            this.screenMaterial.dispose();
+        if (this.meshs)
+            this.meshs.forEach(mesh => {
+                if (mesh)
+                    mesh.dispose();
+            });
+    }
+}
+export default ArcadeMachine;
+//# sourceMappingURL=ArcadeMachine.js.map

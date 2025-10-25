@@ -23,11 +23,12 @@ async function register(request, reply)
         try
         {
             await utils.sendVerificationEmail(email, username, verificationToken);
+
             return (reply.status(201).send({
                 success: true,
                 message: trlt.register.success,
                 user: newUser.toSafeObject(),
-                next_step: 'email_verification'
+                next_step: 'email_verification' 
             }));
         }
         catch (emailError)
@@ -116,8 +117,6 @@ export async function verifyEmail(request, reply)
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userName: user.username,
-                    email: user.email,
-                    userId: user.id
                 })
             });
         } catch (profileError) {

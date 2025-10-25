@@ -1,69 +1,57 @@
 import fp from 'fastify-plugin'
 
 export default fp(async (fastify) => {
+    async function checkAchievements(userId, t) {
+        const { Achievement, Stat } = fastify.sequelize.models
 
-    // Test: sequelize'in yüklendiğini doğrula
-    if (!fastify.sequelize) {
-        throw new Error('❌ Sequelize is not available! Make sure dbPlugin is loaded first.');
-    }
-    console.log('✅ Sequelize is available in checkachievement plugin');
-    console.log('✅ Available models:', Object.keys(fastify.sequelize.models));
-
-    async function checkAchievements(user, t) {
-        const { Achievement, Stats } = fastify.sequelize.models
-    
-        const [stats, achievements] = await Promise.all([
-            Stats.findOne({
-                where: { userId: user.id },
+        const [userStat, userAchievement] = await Promise.all([
+            Stat.findOne({
+                where: { userId: userId },
                 transaction: t
             }),
             Achievement.findOne({
-                where: { userId: user.id },
+                where: { userId: userId },
                 transaction: t
             })
         ])
 
-        if (!stats || !achievements) {
-            throw new Error('Stats or Achievements not found for user')
+        if (!userStat || !userAchievement) {
+            throw new Error('userStat or userAchievement not found for user')
         }
 
         const updates = {}
 
-        if (!achievements.fiveHundredWins && stats.gamesWon >= 500) {
+        if (!userAchievement.fiveHundredWins && userStat.gamesWon >= 500) {
             updates.fiveHundredWins = new Date()
         }
-        else if (!achievements.hundredWins && stats.gamesWon >= 100) {
+        else if (!userAchievement.hundredWins && userStat.gamesWon >= 100) {
             updates.hundredWins = new Date()
         }
-        else if (!achievements.firstWin && stats.gamesWon >= 1) {
+        else if (!userAchievement.firstWin && userStat.gamesWon >= 1) {
             updates.firstWin = new Date()
         }
 
-        if (!achievements.twentyFiveTenStreak && stats.gameLongestStreak >= 25) {
+        if (!userAchievement.twentyFiveTenStreak && userStat.gameLongestStreak >= 25) {
             updates.twentyFiveTenStreak = new Date()
         }
-        else if (!achievements.firstTenStreak && stats.gameLongestStreak >= 10) {
+        else if (!userAchievement.firstTenStreak && userStat.gameLongestStreak >= 10) {
             updates.firstTenStreak = new Date()
         }
 
-        if (!achievements.lessThanThreeMin && stats.gameMinDuration > 0 && stats.gameMinDuration < 180000) {
+        if (!userAchievement.lessThanThreeMin && userStat.gameMinDuration > 0 && userStat.gameMinDuration < 180000) {
             updates.lessThanThreeMin = new Date()
+        }
+
+        if (Object.keys(updates).length > 0) {
+            await userAchievement.update(updates)
         }
     }
 
     async function getAchievementProgress(user) {
-        console.log('🔍 getAchievementProgress called for user:', user?.userName, 'id:', user?.id);
-        console.log('🔍 Sequelize available?', !!fastify.sequelize);
-        console.log('🔍 Models available?', !!fastify.sequelize?.models);
-        console.log('🔍 Available models:', Object.keys(fastify.sequelize?.models || {}));
-        
-        const { Achievement, Stats } = fastify.sequelize.models
-        
-        console.log('🔍 Achievement model:', !!Achievement);
-        console.log('🔍 Stats model:', !!Stats);
-    
+        const { Achievement, Stat } = fastify.sequelize.models
+
         const [stats, achievements] = await Promise.all([
-            Stats.findOne({
+            Stat.findOne({
                 where: { userId: user.id }
             }),
             Achievement.findOne({
@@ -72,33 +60,26 @@ export default fp(async (fastify) => {
         ])
 
         if (!stats || !achievements) {
-            console.log('❌ Stats or Achievements not found. Stats:', !!stats, 'Achievements:', !!achievements);
             throw new Error('Stats or Achievements not found for user')
         }
 
         return ({
             firstWin: {
-                unlocked: !!achievements.firstWin,
                 unlockedAt: achievements.firstWin || null,
             },
             hundredWins: {
-                unlocked: !!achievements.hundredWins,
                 unlockedAt: achievements.hundredWins || null
             },
             fiveHundredWins: {
-                unlocked: !!achievements.fiveHundredWins,
                 unlockedAt: achievements.fiveHundredWins || null
             },
             firstTenStreak: {
-                unlocked: !!achievements.firstTenStreak,
                 unlockedAt: achievements.firstTenStreak || null
             },
             twentyFiveTenStreak: {
-                unlocked: !!achievements.twentyFiveTenStreak,
                 unlockedAt: achievements.twentyFiveTenStreak || null
             },
             lessThanThreeMin: {
-                unlocked: !!achievements.lessThanThreeMin,
                 unlockedAt: achievements.lessThanThreeMin || null
             }
         })
@@ -126,25 +107,28 @@ export default fp(async (fastify) => {
     }
 
     async function statCalculate(user) {
-        console.log('🔍 statCalculate called for user:', user?.userName, 'id:', user?.id);
-        console.log('🔍 Sequelize available?', !!fastify.sequelize);
-        console.log('🔍 Models available?', !!fastify.sequelize?.models);
-        console.log('🔍 Available models:', Object.keys(fastify.sequelize?.models || {}));
-        
-        const { Stats } = fastify.sequelize.models
-        
-        console.log('🔍 Stats model:', !!Stats);
+        const { Stat } = fastify.sequelize.models
 
-        const stats = await Stats.findOne({
-            where: { userId: user.id }
+        const stats = await Stat.findOne({
+            where: { userId: user.id },
+            attributes: [
+                'xp',
+                'gamesPlayed',
+                'gamesWon',
+                'gamesLost',
+                'gameTotalDuration',
+                'gameCurrentStreak',
+                'gameLongestStreak',
+                'gameMinDuration'
+            ]
         })
 
         if (!stats) {
-            console.log('❌ Stats not found for user');
             throw new Error('Stats not found for user')
         }
 
         return ({
+            ...stats.toJSON(),
             ...levelCalculate(stats.xp),
             winRate: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0,
             speed: (stats.gamesPlayed > 0 && stats.gameTotalDuration > 0) ? (stats.ballHitCount / (stats.gameTotalDuration * stats.gamesPlayed)) * 100 : 0,
@@ -158,6 +142,5 @@ export default fp(async (fastify) => {
 
 }, {
     name: 'checkachievement',
-    dependencies: ['myDBPlugin'],
     fastify: '4.x'
 })

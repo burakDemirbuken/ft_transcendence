@@ -10,18 +10,18 @@ export default (sequelize, DataTypes, Model) => {
         },
         teamOneId: {
 			type: DataTypes.INTEGER,
-			allowNull: false,
+			allowNull: true,
 			references: {
-				model: 'Team',
+				model: 'teams',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
 		},
 		teamTwoId: {
 			type: DataTypes.INTEGER,
-			allowNull: false,
+			allowNull: true,
 			references: {
-				model: 'Team',
+				model: 'teams',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
@@ -36,9 +36,9 @@ export default (sequelize, DataTypes, Model) => {
 		},
 		winnerTeamId: {
 			type: DataTypes.INTEGER,
-			defaultValue: null,
+			allowNull: true,
 			references: {
-				model: 'Team',
+				model: 'teams',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'

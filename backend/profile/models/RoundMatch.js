@@ -11,10 +11,10 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.INTEGER,
 			allowNull: false,
 			references: {
-				model: 'Round',
+				model: 'rounds',
 				key: 'id'
 			},
-			onDelete: 'SET NULL'
+			onDelete: 'CASCADE'
 		},
 		roundNumber: {
 			type: DataTypes.INTEGER,
@@ -28,7 +28,7 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.INTEGER,
 			allowNull: true,
 			references: {
-				model: 'Profile',
+				model: 'profiles',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
@@ -37,7 +37,7 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.INTEGER,
 			allowNull: true,
 			references: {
-				model: 'Profile',
+				model: 'profiles',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
@@ -54,12 +54,18 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.INTEGER,
 			allowNull: true,
 			references: {
-				model: 'Profile',
+				model: 'profiles',
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
 		}
 	}, {
+		indexes: [
+			{
+				unique: true,
+				fields: ['roundId', 'matchNumber']
+			},
+		],
 		sequelize,
 		modelName: 'RoundMatch',
 		tableName: 'round_matches'

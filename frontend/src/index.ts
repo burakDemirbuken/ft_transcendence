@@ -8,6 +8,7 @@ import Login from "../dist/Login.js";
 import I18n from './I18n.js';
 import { getAuthToken } from './utils/auth.js';
 import { removeAuthToken } from './utils/auth.js';
+import { showNotification } from './notification.js';
 
 
 // Dynamic API base URL based on current hostname
@@ -28,19 +29,20 @@ const routes = {
 
 let view = null;
 
-const router = async function(page:string) {
+const router = async function(page:string, logout = false) {
 	const content = document.querySelector("#content");
 	const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
 
 	if (page === "profile" || page === "settings" || page === "friends" || page === "play") {
-		if (!hasToken)
+		if (!hasToken) {
 			return window.location.replace("/login");
+		}
 	}
-	
+
 	if (page === "login") {
-	 	if (hasToken) {
-	 		return window.location.replace("/home");
-	 	}
+		if (hasToken && !logout) {
+			return window.location.replace("/home");
+		}
 	}
 
 	if (view) {
@@ -65,9 +67,9 @@ const router = async function(page:string) {
 	}
 }
 
-export function navigateTo(page:string) {
+export function navigateTo(page:string, logout = false) {
 	history.pushState({ page }, "", `/${page}`);
-	router(page);
+	router(page, logout);
 }
 
 document.addEventListener("DOMContentLoaded", () =>
@@ -80,7 +82,8 @@ document.addEventListener("DOMContentLoaded", () =>
 			if (e.currentTarget.matches("[data-link]"))
 			{
 				e.preventDefault();
-				navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
+				if (!e.currentTarget.matches("[id='logout']"))
+					navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
 				document.querySelector(".selected")?.classList.toggle("selected");
 				e.currentTarget.classList.toggle("selected");
 				if (e.currentTarget.matches("[id='logout']"))
@@ -100,14 +103,18 @@ document.addEventListener("DOMContentLoaded", () =>
 							{
 								removeAuthToken();
 								document.querySelector("#navbar")?.classList.add("logout");
+								navigateTo("login", true);
 							}
-							else
-								alert(`${json.error}`);
+							else {
+								showNotification(`${json.error}`);
+								navigateTo("home");
+							}
 						}
 					}
 					catch(error)
 					{
-						alert(`System Error: ${error.message}`);
+						showNotification(`System Error: ${error.message}`);
+						navigateTo("home");
 					}
 				}
 			}

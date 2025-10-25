@@ -18,6 +18,7 @@ export default class TournamentRoom extends Room
 		this.currentRound = 0;
 		this.maxRounds = Math.log2(this.maxPlayers);
 
+
 		for (let i = 0; i < this.maxRounds; i++)
 		{
 			const matchs = [];
@@ -40,6 +41,23 @@ export default class TournamentRoom extends Room
 			this.matches.set(i, matchs);
 		}
 		this.status = 'waiting'; // 'waiting', 'running', 'finished', "ready2start"
+	}
+
+	addPlayer(player)
+	{
+		super.addPlayer(player);
+		if (this.players.length === this.maxPlayers)
+			this.status = 'ready2match';
+	}
+
+	removePlayer(playerId)
+	{
+		if (this.spectators.find(s => s.id === playerId))
+			this.spectators = this.spectators.filter(s => s.id !== playerId);
+		else
+			super.removePlayer(playerId);
+		if ((this.status === "waiting" || this.status === "ready2match") && this.players.length < this.maxPlayers)
+			this.status = 'waiting';
 	}
 
 	initData()
@@ -67,21 +85,50 @@ export default class TournamentRoom extends Room
 				name: p.name,
 				gameNumber: this.currentMatches.findIndex(m => m.player1 === p || m.player2 === p) + 1
 			})),
+			spectators: this.spectators.map(s => ({ id: s.id, name: s.name })),
 		}
 	}
 
 	finishRoom(payload)
 	{
-		let losePlayers;
+		const players = [...this.players, ...this.spectators];
 		const matches = payload.matches;
-		if (this.currentRound === this.maxRounds - 1)
+
+		const previousRoundMatches = this.matches.get(this.currentRound);
+		previousRoundMatches.forEach(
+			(match, index) =>
+			{
+				if (matches[index]) {
+					match.player1Score = matches[index].score?.team1 || 0;
+					match.player2Score = matches[index].score?.team2 || 0;
+					match.winner = matches[index].winner;
+					match.loser = matches[index].loser;
+					if (match.winner === null || match.winner === undefined)
+						match.winner = "bye-" + match.matchNumber + "-" + Date.now();
+
+					if (match.loser)
+					{
+						const loserPlayer = this.players.find(p => p.id === match.loser);
+						if (loserPlayer)
+						{
+							if (loserPlayer.id === this.host)
+								this.host = this.players.find(p => p.id !== match.loser)?.id || null;
+							this.players = this.players.filter(p => p.id !== match.loser);
+							this.spectators.push(loserPlayer);
+						}
+					}
+				}
+			}
+		);
+		this.currentRound++;
+		if (this.currentRound === this.maxRounds)
 		{
 			this.status = 'finished';
 			this.emit('finished', { ...this.getMatchmakingInfo() });
 		}
 		else
-			losePlayers = this.nextRound(matches);
-		return { ...this.getMatchmakingInfo(), losePlayers };
+			this.nextRound();
+		return { state: this.getState(), players: players };
 	}
 
 	startGame(playerId)
@@ -94,13 +141,6 @@ export default class TournamentRoom extends Room
 		this.status = 'in_game';
 
 		const matches = this.currentMatches;
-		let playingPlayers = [];
-		matches.forEach(match => {
-			if (match.player1) playingPlayers.push(match.player1);
-			else playingPlayers.push("bye-" + match.matchNumber + "-" + Date.now());
-			if (match.player2) playingPlayers.push(match.player2);
-			else playingPlayers.push("bye2-" + match.matchNumber + "-" + Date.now());
-		});
 		return {
 			gameMode: this.gameMode,
 			maxPlayers: this.maxPlayers,
@@ -110,7 +150,7 @@ export default class TournamentRoom extends Room
 
 	matchMake()
 	{
-		if (this.status !== 'waiting')
+		if (this.status !== 'ready2match')
 			return this.emit('error', new Error(`Tournament is not in waiting state, current status: ${this.status}`));
 		//	if (this.players.length < this.playerCount)
 		//		return this.emit('error', new Error(`Not enough players to start matchmaking, current count: ${this.players.length}, required: ${this.playerCount}`));
@@ -138,6 +178,7 @@ export default class TournamentRoom extends Room
 			match.loser = null;
 			this.currentMatches.push(match);
 		}
+		this.status = 'ready2start';
 		return { ...this.getMatchmakingInfo()};
 	}
 
@@ -163,31 +204,16 @@ export default class TournamentRoom extends Room
 
 		return {
 			currentRound: this.currentRound,
-			rounds: rounds
+			maxRound: this.maxRounds,
+			rounds: rounds,
+			matchType: 'tournament'
 		};
 	}
 
-	nextRound(matches)
+	nextRound()
 	{
-		let losePlayers = [];
 		this.currentMatches = [];
-		const previousRoundMatches = this.matches.get(this.currentRound);
-		previousRoundMatches.forEach(
-			(match, index) =>
-			{
-				if (matches[index]) {
-					match.player1Score = matches[index].score?.team1 || 0;
-					match.player2Score = matches[index].score?.team2 || 0;
-					match.winner = matches[index].winner;
-					match.loser = matches[index].loser;
-					if (match.loser) {
-						const loserPlayer = this.players.find(p => p.id === match.loser);
-						if (loserPlayer) losePlayers.push(loserPlayer);
-					}
-				}
-			}
-		);
-		this.currentRound++;
+		const previousRoundMatches = this.matches.get(this.currentRound - 1);
 		const nextRoundMatches = this.matches.get(this.currentRound);
 		for (let i = 0; i < nextRoundMatches.length; i++)
 		{
@@ -239,19 +265,36 @@ export default class TournamentRoom extends Room
 
 			this.currentMatches.push(match);
 		}
-		this.status = 'waiting';
+		this.status = 'next_round';
 	}
 
 	getState()
 	{
+		const rounds = [];
+		this.currentMatches.forEach((match) => {
+			rounds.push({
+				matchId: match.matchId,
+				matchNumber: match.matchNumber,
+				matchStatus: match.matchStatus,
+				player1: this.participants.find(p => p.id === match.player1)?.getState() || { name: "BYE", id: null },
+				player2: this.participants.find(p => p.id === match.player2)?.getState() || { name: "BYE", id: null },
+				player1Score: match.player1Score,
+				player2Score: match.player2Score,
+				winner: match.winner,
+				loser: match.loser,
+			});
+		});
 		return {
 			name: this.name,
 			gameMode: this.gameMode,
 			status: this.status,
 			maxPlayers: this.maxPlayers,
-			host: this.host,
+			losers: this.spectators.map(s => s.getState()),
 			players: this.players.map(p => p.getState(this.host)),
 			gameSettings: this.gameSettings,
+			maxRound: this.maxRounds,
+			currentRound: this.currentRound,
+			match: rounds
 			// Additional tournament-specific state can be added here
 		};
 	}
