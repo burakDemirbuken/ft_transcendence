@@ -153,6 +153,52 @@ function storeVerificationCode(email, type = '2fa')
     return (code);
 }
 
+async function sendEmailChangeRequest(email, username, token)
+{
+	const response = await fetch(`http://email:3005/send-email-change`,
+    {
+		method: 'POST',
+		headers:
+		{
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify
+        ({
+			to: email,
+			username: username,
+			changeUrl: `https://${process.env.HOST_IP}:3030/api/auth/change-email?token=${token}`,
+			token: token
+		})
+	});
+
+	if (!response.ok)
+		throw new Error(`Email service error: ${response.status}`);
+	return (response.json());
+}
+
+async function sendNewEmailVerification(email, username, token)
+{
+	const response = await fetch(`http://email:3005/send-new-email-verification`,
+    {
+		method: 'POST',
+		headers:
+		{
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify
+        ({
+			to: email,
+			username: username,
+			verificationUrl: `https://${process.env.HOST_IP}:3030/api/auth/verify-new-email?token=${token}`,
+			token: token
+		})
+	});
+
+	if (!response.ok)
+		throw new Error(`Email service error: ${response.status}`);
+	return (response.json());
+}
+
 export default
 {
 	blacklistToken,
@@ -160,6 +206,8 @@ export default
 	sendVerificationEmail,
 	send2FAEmail,
 	sendLoginNotification,
+	sendEmailChangeRequest,
+	sendNewEmailVerification,
 	storeVerificationToken,
 	storeVerificationCode,
 	tempStorage

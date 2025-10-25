@@ -262,5 +262,76 @@ export async function postRoutes(fastify, options)
 		  		}
 		  	}
 		}
-	}, postController.autoRefreshToken);  
+	}, postController.autoRefreshToken);
+
+    fastify.post('/request-email-change',
+    {
+        schema:
+        {
+            querystring:
+            {
+                type: 'object',
+                properties:
+                {
+                    lang:
+                    {
+                        type: 'string'
+                    }
+                }
+            }
+        }
+    }, postController.requestEmailChange);
+
+    fastify.post('/process-email-change',
+    {
+        schema:
+        {
+            body:
+            {
+                type: 'object',
+                required:
+                [
+                    'token',
+                    'newEmail',
+                    'oldEmail',
+                    'password'
+                ],
+                properties:
+                {
+                    token:
+                    {
+                        type: 'string',
+                        minLength: 32,
+                        maxLength: 64
+                    },
+                    newEmail:
+                    {
+                        type: 'string',
+                        format: 'email'
+                    },
+                    oldEmail:
+                    {
+                        type: 'string',
+                        format: 'email'
+                    },
+                    password:
+                    {
+                        type: 'string',
+                        minLength: 6
+                    }
+                }
+            },
+            querystring:
+            {
+                type: 'object',
+                properties:
+                {
+                    lang:
+                    {
+                        type: 'string'
+                    }
+                }
+            }
+        }
+    }, postController.processEmailChange);
 }

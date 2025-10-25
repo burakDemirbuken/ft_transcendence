@@ -1,4 +1,5 @@
 import  getController   from    '../controllers/GetController.js';
+import  postController  from    '../controllers/PostController.js';
 import  { verifyEmail } from    '../controllers/PostController.js';
 
 export async function getRoutes(fastify, options)
@@ -121,4 +122,60 @@ export async function getRoutes(fastify, options)
             }
         }
     }, getController.getProfile);
+
+    fastify.get('/change-email',
+    {
+        schema:
+        {
+            querystring:
+            {
+                type: 'object',
+                required:
+                [
+                    'token'
+                ],
+                properties:
+                {
+                    token:
+                    {
+                        type: 'string',
+                        minLength: 32,
+                        maxLength: 64 
+                    },
+                    lang:
+                    {
+                        type: 'string'
+                    }
+                }
+            }
+        }
+    }, getController.showEmailChangeForm);
+
+    fastify.get('/verify-new-email',
+    {
+        schema:
+        {
+            querystring:
+            {
+                type: 'object',
+                required:
+                [
+                    'token'
+                ],
+                properties:
+                {
+                    token:
+                    {
+                        type: 'string',
+                        minLength: 32,
+                        maxLength: 64 
+                    },
+                    lang:
+                    {
+                        type: 'string'
+                    }
+                }
+            }
+        }
+    }, postController.verifyNewEmail);
 }

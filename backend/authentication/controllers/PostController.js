@@ -477,6 +477,339 @@ async function blacklistTokens(request, reply)
 	}
 }
 
+async function requestEmailChange(request, reply)
+{
+	const trlt = getTranslations(request.query.lang || "eng");
+	try
+	{
+		// Cookie'den kullanıcı bilgisini al
+		const cookieToken = request.cookies?.accessToken;
+		if (!cookieToken) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Authentication required',
+				code: 'NO_TOKEN'
+			});
+		}
+
+		let userId, username, currentEmail;
+		try {
+			const decoded = request.server.jwt.verify(cookieToken);
+			userId = decoded.userId;
+			username = decoded.username;
+			currentEmail = decoded.email;
+		} catch (error) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Invalid token',
+				code: 'INVALID_TOKEN'
+			});
+		}
+
+		// Kullanıcıyı veritabanından getir
+		const user = await User.findByPk(userId);
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: trlt.unotFound || 'User not found'
+			});
+		}
+
+		// Email değiştirme token'ı oluştur
+		const changeToken = utils.storeVerificationToken(currentEmail, 'email_change');
+		
+		try {
+			await utils.sendEmailChangeRequest(currentEmail, username, changeToken);
+			return reply.send({
+				success: true,
+				message: 'Email change request sent. Please check your current email.',
+				next_step: 'check_email'
+			});
+		} catch (emailError) {
+			utils.tempStorage.delete(currentEmail);
+			return reply.status(500).send({
+				success: false,
+				error: 'Failed to send email change request'
+			});
+		}
+	}
+	catch (error)
+	{
+		console.log('Request email change error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
+}
+
+async function processEmailChange(request, reply)
+{
+    console.log("Processing email change request...");
+	const trlt = getTranslations(request.query.lang || "eng");
+	try
+	{
+		const { token, newEmail, oldEmail, password } = request.body;
+		
+		if (!token || !newEmail || !oldEmail || !password) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Missing required fields'
+			});
+		}
+
+		// Token'ı kontrol et
+		const storedData = utils.tempStorage.get(oldEmail);
+		if (!storedData || storedData.type !== 'email_change') {
+			return reply.status(400).send({
+				success: false,
+				error: 'Invalid or expired token'
+			});
+		}
+
+		if (storedData.expires < new Date()) {
+			utils.tempStorage.delete(oldEmail);
+			return reply.status(400).send({
+				success: false,
+				error: 'Token has expired'
+			});
+		}
+
+		if (storedData.token !== token) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Invalid token'
+			});
+		}
+
+		// Kullanıcıyı eski email ile bul
+		const user = await User.findByEmail(oldEmail);
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: 'User not found'
+			});
+		}
+
+		// Şifreyi kontrol et
+		const isPasswordValid = await user.validatePassword(password);
+		if (!isPasswordValid) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Invalid password'
+			});
+		}
+
+		// Yeni email'in başka kullanıcı tarafından kullanılmadığını kontrol et
+		const existingUser = await User.findByEmail(newEmail);
+		if (existingUser && existingUser.id !== user.id) {
+			return reply.status(409).send({
+				success: false,
+				error: 'Email already in use'
+			});
+		}
+
+		// Eski token'ı temizle
+		utils.tempStorage.delete(oldEmail);
+
+		// Yeni email için doğrulama token'ı oluştur
+		const verificationToken = utils.storeVerificationToken(newEmail, 'new_email_verification');
+		
+		// Eski email bilgilerini yeni email verification ile birlikte sakla
+		utils.tempStorage.set(`change_${newEmail}`, {
+			userId: user.id,
+			oldEmail: oldEmail,
+			newEmail: newEmail,
+			expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 saat
+			type: 'email_change_pending'
+		});
+
+		try {
+			await utils.sendNewEmailVerification(newEmail, user.username, verificationToken);
+			return reply.send({
+				success: true,
+				message: 'Verification email sent to your new email address. Please check and verify.',
+				newEmail: newEmail,
+				next_step: 'verify_new_email'
+			});
+		} catch (emailError) {
+			utils.tempStorage.delete(newEmail);
+			utils.tempStorage.delete(`change_${newEmail}`);
+			return reply.status(500).send({
+				success: false,
+				error: 'Failed to send verification email'
+			});
+		}
+	}
+	catch (error)
+	{
+		console.log('Process email change error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
+}
+
+async function verifyNewEmail(request, reply)
+{
+	const trlt = getTranslations(request.query.lang || "eng");
+	try
+	{
+		const { token } = request.query;
+		
+		if (!token) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Verification token is required'
+			});
+		}
+
+		// Token'ı bul
+		let newEmail = null;
+		for (const [email, data] of utils.tempStorage.entries()) {
+			if (data.type === 'new_email_verification' && data.token === token) {
+				if (data.expires > new Date()) {
+					newEmail = email;
+					break;
+				} else {
+					utils.tempStorage.delete(email);
+				}
+			}
+		}
+
+		if (!newEmail) {
+			return reply.type('text/html').code(400).send(`
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<title>Email Verification - Invalid Token</title>
+					<meta charset="UTF-8">
+					<style>
+						body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
+						.error { color: #d32f2f; text-align: center; }
+					</style>
+				</head>
+				<body>
+					<div class="error">
+						<h2>Invalid or Expired Token</h2>
+						<p>The email verification link is invalid or has expired.</p>
+					</div>
+				</body>
+				</html>
+			`);
+		}
+
+		// Email değişiklik bilgilerini al
+		const changeData = utils.tempStorage.get(`change_${newEmail}`);
+		if (!changeData || changeData.type !== 'email_change_pending') {
+			return reply.type('text/html').code(400).send(`
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<title>Email Change - Error</title>
+					<meta charset="UTF-8">
+					<style>
+						body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
+						.error { color: #d32f2f; text-align: center; }
+					</style>
+				</head>
+				<body>
+					<div class="error">
+						<h2>Email Change Data Not Found</h2>
+						<p>Email change request has expired or is invalid.</p>
+					</div>
+				</body>
+				</html>
+			`);
+		}
+
+		// Kullanıcıyı bul ve email'i güncelle
+		const user = await User.findByPk(changeData.userId);
+		if (!user) {
+			return reply.type('text/html').code(404).send(`
+				<!DOCTYPE html>
+				<html>
+				<head>
+					<title>Email Change - User Not Found</title>
+					<meta charset="UTF-8">
+					<style>
+						body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
+						.error { color: #d32f2f; text-align: center; }
+					</style>
+				</head>
+				<body>
+					<div class="error">
+						<h2>User Not Found</h2>
+						<p>The user account could not be found.</p>
+					</div>
+				</body>
+				</html>
+			`);
+		}
+
+		// Email'i güncelle
+		await user.update({ email: newEmail.toLowerCase() });
+		
+		// Tüm temp data'yı temizle
+		utils.tempStorage.delete(newEmail);
+		utils.tempStorage.delete(`change_${newEmail}`);
+
+		// Kullanıcının tüm token'larını blacklist'e ekle (yeniden login zorla)
+		// Not: Bu noktada kullanıcının aktif token'larına erişimimiz yok
+		// Bu yüzden sadece veritabanındaki refresh token'ı temizleyelim
+		await user.clearRefreshToken();
+
+		return reply.type('text/html').send(`
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<title>Email Successfully Changed</title>
+				<meta charset="UTF-8">
+				<style>
+					body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
+					.success { color: #2e7d32; text-align: center; }
+					.info { background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; }
+				</style>
+			</head>
+			<body>
+				<div class="success">
+					<h2>✅ Email Successfully Changed!</h2>
+					<p>Your email has been updated from:</p>
+					<p><strong>${changeData.oldEmail}</strong></p>
+					<p>to:</p>
+					<p><strong>${newEmail}</strong></p>
+				</div>
+				<div class="info">
+					<p><strong>Next Step:</strong> Please login again with your new email address.</p>
+					<p>For security reasons, you have been logged out from all devices.</p>
+				</div>
+				<div style="text-align: center;">
+					<a href="https://${process.env.HOST_IP}:3030" style="background-color: #2e7d32; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Login</a>
+				</div>
+			</body>
+			</html>
+		`);
+	}
+	catch (error)
+	{
+		console.log('Verify new email error:', error);
+		return reply.type('text/html').code(500).send(`
+			<!DOCTYPE html>
+			<html>
+			<head>
+				<title>Email Verification - Error</title>
+				<meta charset="UTF-8">
+			</head>
+			<body>
+				<h2>Error</h2>
+				<p>An error occurred while processing your email verification.</p>
+			</body>
+			</html>
+		`);
+	}
+}
+
 export default {
     register,
     login,
@@ -486,5 +819,8 @@ export default {
     refreshToken,
     checkTokenBlacklist,
     autoRefreshToken,
-    blacklistTokens
+    blacklistTokens,
+    requestEmailChange,
+    processEmailChange,
+    verifyNewEmail
 };

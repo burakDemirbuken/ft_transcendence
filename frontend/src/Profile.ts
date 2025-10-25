@@ -1000,9 +1000,10 @@ async function onLoad()
         window.location.href = '/login';
         return;
     }
-
     try
     {
+
+
         const getProfileDatas = await fetch(`${API_BASE_URL}/auth/me`,
         {
             credentials: 'include',
