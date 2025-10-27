@@ -9,8 +9,6 @@ async function deleteAccount(e) {
 	const isConfirmed = confirm("Are you sure you want to delete your account? This action cannot be undone.");
 	if (isConfirmed) {
 		try {
-			console.log("DELETE ACCOUNT! FETCH COMES HERE!");
-
 			const res = await fetch(`${API_BASE_URL}/auth/profile`,
 			{
 				method: 'DELETE',
@@ -30,17 +28,12 @@ async function deleteAccount(e) {
 	}
 }
 
-function changeAvatar(e) {
-	console.log("CHANGE AVATAR");
-	console.log(e);
-	const inpt = document.getElementById('hidden-file-input');
-	inpt.click();
-	console.log(inpt);
+function changeAvatar() {
+	document.getElementById('hidden-file-input')?.click();
 }
 
 async function sendAvatarChangeReq(e) {
-	console.log(e.target.files);
-	console.log(e.target.files[0]);
+	e.preventDefault();
 	console.log("SEND AVATAR CHANGE REQ");
 
 	const formData = new FormData();
@@ -55,36 +48,39 @@ async function sendAvatarChangeReq(e) {
 	if (res.ok)
 		console.log("success");
 	else
-		console.log(res.error);
+		console.log(res.statusText);
 }
 
-async function sendChangeReq(e) {
+async function sendDNameChangeReq(e) {
 	e.preventDefault();
-	console.log("SEND CHANGE REQ");
-	console.log(e);
+	console.log("SEND DNAME CHANGE REQ");
 
 	const form = e.target.closest('form');
 	const formData = new FormData(form);
 	const inputs = Object.fromEntries(formData);
-	// try
-	const getProfileDatas = await fetch(form.action,
-	{
-		method: form.method.toUpperCase(),
-		credentials: 'include',
-		headers:
+
+	try {
+		const getProfileDatas = await fetch(`${API_BASE_URL}/profile/displaynameupdate`,
 		{
-			'Content-Type': 'application/json',
-			...getAuthHeaders()
-		},
-		body: JSON.stringify({userName: "bkorkut", ...inputs})
-	});
-	if (getProfileDatas.ok)
-		console.log(await getProfileDatas.json());
+			method: "POST",
+			credentials: 'include',
+			headers:
+			{
+				'Content-Type': 'application/json',
+				...getAuthHeaders()
+			},
+			body: JSON.stringify({userName: "bkorkut", ...inputs})
+		});
+		if (getProfileDatas.ok)
+			console.log(await getProfileDatas.json());
+	} catch (error) {
+		console.error("❌ Error during profile update:", error);
+	}
 }
 
 async function sendEmailChangeReq(e) {
 	e.preventDefault();
-	console.log("SEND CHANGE REQ");
+	console.log("SEND EMAIL CHANGE REQ");
 	console.log(e);
 
 	const getProfileDatas = await fetch(`${API_BASE_URL}/auth/request-email-change`,
@@ -110,8 +106,6 @@ export default class extends AView {
 	}
 
 	async setEventHandlers() {
-		const buttons = document.querySelectorAll(".submit");
-		buttons.forEach(button => button.addEventListener("click", sendChangeReq));
 		document.querySelector(".avatar").addEventListener("click", changeAvatar);
 		document.getElementById('hidden-file-input').addEventListener('click', (e) => {
 			e.stopPropagation();
@@ -119,19 +113,19 @@ export default class extends AView {
 		document.getElementById('hidden-file-input').addEventListener('change', sendAvatarChangeReq);
 		document.getElementById("delete-account").addEventListener("click", deleteAccount);
 		document.querySelector(".email").addEventListener("click", sendEmailChangeReq);
-		onLoad(); // Profile yüklendiğinde onLoad fonksiyonunu çağır
+		document.querySelector(".dname").addEventListener("click", sendDNameChangeReq);
+		onLoad();
 	}
 
 	async unsetEventHandlers() {
-		const buttons = document.querySelectorAll(".submit");
-		buttons.forEach(button => button.removeEventListener("click", sendChangeReq));
 		document.querySelector(".avatar").removeEventListener("click", changeAvatar);
 		document.getElementById('hidden-file-input').removeEventListener('click', (e) => {
 			e.stopPropagation();
 		});
 		document.getElementById('hidden-file-input').removeEventListener('change', sendAvatarChangeReq);
 		document.getElementById("delete-account").removeEventListener("click", deleteAccount);
-		document.querySelector("email").removeEventListener("click", sendEmailChangeReq);
+		document.querySelector(".email").removeEventListener("click", sendEmailChangeReq);
+		document.querySelector(".dname").removeEventListener("click", sendDNameChangeReq);
 	}
 
 	async setStylesheet() {
