@@ -1,1 +1,0 @@
-{"version":3,"file":"TournamentConfig.js","sourceRoot":"","sources":["../../src/json/TournamentConfig.ts"],"names":[],"mappings":"AAAA,OAAO,UAAU,MAAM,iBAAiB,CAAC;AAYzC,MAAM,gBAAgB,GAAqB;IAC1C,GAAG,UAAU;IACb,kBAAkB,EAClB;QACC,IAAI,EAAE,oBAAoB;QAC1B,UAAU,EAAE,CAAC;KACb;CACD,CAAC;AAEF,eAAe,gBAAgB,CAAC"}
