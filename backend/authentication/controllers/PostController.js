@@ -28,7 +28,7 @@ async function register(request, reply)
                 success: true,
                 message: trlt.register.success,
                 user: newUser.toSafeObject(),
-                next_step: 'email_verification' 
+                next_step: 'email_verification'
             }));
         }
         catch (emailError)
@@ -231,7 +231,7 @@ async function logout(request, reply)
 	try
 	{
 		let username;
-		
+
 		// Cookie'den JWT token'ı çek ve decode et
 		const cookieToken = request.cookies?.accessToken;
 		if (cookieToken) {
@@ -242,7 +242,7 @@ async function logout(request, reply)
 				console.log('JWT token decode error:', error);
 			}
 		}
-		
+
 	    reply.clearCookie('accessToken',
         {
 			httpOnly: true, secure: true, sameSite: 'Lax', path: '/'
@@ -253,7 +253,7 @@ async function logout(request, reply)
 		});
 		reply.clearCookie('authStatus',
         {
-			httpOnly: false, secure: true, sameSite: 'Lax', path: '/'
+			httpOnly: true, secure: true, sameSite: 'Lax', path: '/'
 		});
 		reply.send({
 			success: true,
@@ -516,7 +516,7 @@ async function requestEmailChange(request, reply)
 
 		// Email değiştirme token'ı oluştur
 		const changeToken = utils.storeVerificationToken(currentEmail, 'email_change');
-		
+
 		try {
 			await utils.sendEmailChangeRequest(currentEmail, username, changeToken);
 			return reply.send({
@@ -549,7 +549,7 @@ async function processEmailChange(request, reply)
 	try
 	{
 		const { token, newEmail, oldEmail, password } = request.body;
-		
+
 		if (!token || !newEmail || !oldEmail || !password) {
 			return reply.status(400).send({
 				success: false,
@@ -613,7 +613,7 @@ async function processEmailChange(request, reply)
 
 		// Yeni email için doğrulama token'ı oluştur
 		const verificationToken = utils.storeVerificationToken(newEmail, 'new_email_verification');
-		
+
 		// Eski email bilgilerini yeni email verification ile birlikte sakla
 		utils.tempStorage.set(`change_${newEmail}`, {
 			userId: user.id,
@@ -656,7 +656,7 @@ async function verifyNewEmail(request, reply)
 	try
 	{
 		const { token } = request.query;
-		
+
 		if (!token) {
 			return reply.status(400).send({
 				success: false,
@@ -749,7 +749,7 @@ async function verifyNewEmail(request, reply)
 
 		// Email'i güncelle
 		await user.update({ email: newEmail.toLowerCase() });
-		
+
 		// Tüm temp data'yı temizle
 		utils.tempStorage.delete(newEmail);
 		utils.tempStorage.delete(`change_${newEmail}`);

@@ -1,15 +1,35 @@
 import AView from "./AView.js";
 import { getAuthToken, getAuthHeaders } from './utils/auth.js';
-import { API_BASE_URL } from './index.js';
+import { API_BASE_URL, navigateTo } from './index.js';
+import { showNotification } from "./notification.js";
 
 
-function settingsClick(e) {
+async function settingsClick(e) {
 	if (e.target.id === "delete-account")
 	{
 		e.preventDefault();
-		const isConfirmed = confirm("You sure bout that?");
-		if (isConfirmed)
-			console.log("DELETE ACCOUNT! FETCH COMES HERE!");
+		const isConfirmed = confirm("Are you sure you want to delete your account? This action cannot be undone.");
+		if (isConfirmed) {
+			try {
+				console.log("DELETE ACCOUNT! FETCH COMES HERE!");
+
+				const res = await fetch(`${API_BASE_URL}/auth/profile`,
+				{
+					method: 'DELETE',
+					credentials: 'include',
+
+				});
+				const json = await res.json();
+				if (res.ok) {
+					showNotification(json.message, "success");
+					navigateTo("login");
+				} else {
+					showNotification(json.error, "error");
+				}
+			} catch (error) {
+				showNotification(`System Error: ${error.message}`, "error");
+			}
+		}
 	}
 }
 
@@ -62,6 +82,7 @@ export default class extends AView {
 		document.getElementById('hidden-file-input').addEventListener('click', (e) => {
 			e.stopPropagation();
 		});
+		document.getElementById("delete-account").addEventListener("click", settingsClick);
 		onLoad(); // Profile yüklendiğinde onLoad fonksiyonunu çağır
 	}
 
@@ -86,7 +107,7 @@ export default class extends AView {
 
 async function onLoad()
 {
-	const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
+	const hasToken = getAuthToken();
 	if (!hasToken)
 		return ( window.location.href = 'login' );
 
@@ -125,10 +146,10 @@ async function onLoad()
 				console.error("❌ Failed to fetch profile data:", profileReq.statusText);
 		} else {
 			if (meReq.status === 401) {
-				window.location.replace('/login');
+				navigateTo("login");
 			}
 		}
 	} catch (error) {
-		window.location.replace('/login');
+		navigateTo("login");
 	}
 }

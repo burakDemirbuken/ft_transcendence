@@ -1013,7 +1013,7 @@ async function setAchievementStats(user: any) {
 
 async function onLoad()
 {
-    const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
+    const hasToken = getAuthToken();
 
     if (!hasToken) {
         return window.location.replace('/login');
