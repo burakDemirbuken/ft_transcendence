@@ -103,7 +103,7 @@
 	transition: all .1s ease-in-out;
 }
 
-.settings-container #delete-account, .settings-container #delete-account {
+.settings-container #delete-account:hover, .settings-container #delete-account:focus {
 	box-shadow: 0 0 10px #c20;
 	border-color: #910;
 	background-color: #c20;
@@ -116,6 +116,7 @@
 	border: 1px solid #666;
 
 	padding: 1.5em;
+	padding: clamp(.8rem, .1rem + 4vw, 1.5em);
 	color: #ccc;
 }
 
@@ -129,6 +130,26 @@
 	display: flex;
 	flex-direction: column;
 	color: #ccc;
+}
+
+.s1 .settings-content .password-label {
+	flex-direction: row;
+	gap: .3em;
+}
+
+.password-label-text {
+	text-wrap: nowrap;
+}
+
+.settings-container .pass {
+	width: auto;
+	height: auto;
+	color: #ccc;
+	padding: .3em;
+	background: #111;
+	border: 1px solid #555;
+	border-radius: 3px;
+	font-size: .8em;
 }
 
 .settings-container span {

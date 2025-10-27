@@ -188,7 +188,7 @@
 			"uname": "User Name",
 			"dname": "Display Name",
 			"email": "E-mail",
-			"pass": "Password"
+			"pass": "Change Password:"
 		},
 		"language": "Language",
 		"dzone": {
