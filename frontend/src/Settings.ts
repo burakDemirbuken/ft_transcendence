@@ -4,31 +4,28 @@ import { API_BASE_URL, navigateTo } from './index.js';
 import { showNotification } from "./notification.js";
 
 
-async function settingsClick(e) {
-	if (e.target.id === "delete-account")
-	{
-		e.preventDefault();
-		const isConfirmed = confirm("Are you sure you want to delete your account? This action cannot be undone.");
-		if (isConfirmed) {
-			try {
-				console.log("DELETE ACCOUNT! FETCH COMES HERE!");
+async function deleteAccount(e) {
+	e.preventDefault();
+	const isConfirmed = confirm("Are you sure you want to delete your account? This action cannot be undone.");
+	if (isConfirmed) {
+		try {
+			console.log("DELETE ACCOUNT! FETCH COMES HERE!");
 
-				const res = await fetch(`${API_BASE_URL}/auth/profile`,
-				{
-					method: 'DELETE',
-					credentials: 'include',
+			const res = await fetch(`${API_BASE_URL}/auth/profile`,
+			{
+				method: 'DELETE',
+				credentials: 'include',
 
-				});
-				const json = await res.json();
-				if (res.ok) {
-					showNotification(json.message, "success");
-					navigateTo("login");
-				} else {
-					showNotification(json.error, "error");
-				}
-			} catch (error) {
-				showNotification(`System Error: ${error.message}`, "error");
+			});
+			const json = await res.json();
+			if (res.ok) {
+				showNotification(json.message, "success");
+				navigateTo("login");
+			} else {
+				showNotification(json.error, "error");
 			}
+		} catch (error) {
+			showNotification(`System Error: ${error.message}`, "error");
 		}
 	}
 }
@@ -41,6 +38,22 @@ function changeAvatar(e) {
 	console.log(inpt);
 }
 
+function sendAvatarChangeReq(e) {
+	console.log(e.target.files);
+	console.log(e.target.files[0]);
+	console.log("SEND AVATAR CHANGE REQ");
+	// const res = fetch(`${API_BASE_URL}/profile/avatar`,
+	// {
+	// 	method: 'POST',
+	// 	credentials: 'include',
+	// 	headers:
+	// 	{
+	// 		...getAuthHeaders()
+	// 	},
+	// 	body: e.target.files[0]
+	// });
+}
+
 async function sendChangeReq(e) {
 	e.preventDefault();
 	console.log("SEND CHANGE REQ");
@@ -49,6 +62,7 @@ async function sendChangeReq(e) {
 	const form = e.target.closest('form');
 	const formData = new FormData(form);
 	const inputs = Object.fromEntries(formData);
+	// try
 	const getProfileDatas = await fetch(form.action,
 	{
 		method: form.method.toUpperCase(),
@@ -62,6 +76,22 @@ async function sendChangeReq(e) {
 	});
 	if (getProfileDatas.ok)
 		console.log(await getProfileDatas.json());
+}
+
+async function sendEmailChangeReq(e) {
+	e.preventDefault();
+	console.log("SEND CHANGE REQ");
+	console.log(e);
+
+	const getProfileDatas = await fetch(`${API_BASE_URL}/auth/request-email-change`,
+	{
+		method: 'POST',
+		credentials: 'include',
+	});
+	if (getProfileDatas.ok)
+		console.log("success");
+	else
+		console.log(getProfileDatas.statusText);
 }
 
 export default class extends AView {
@@ -82,14 +112,22 @@ export default class extends AView {
 		document.getElementById('hidden-file-input').addEventListener('click', (e) => {
 			e.stopPropagation();
 		});
-		document.getElementById("delete-account").addEventListener("click", settingsClick);
+		document.getElementById('hidden-file-input').addEventListener('change', sendAvatarChangeReq);
+		document.getElementById("delete-account").addEventListener("click", deleteAccount);
+		document.querySelector(".email").addEventListener("click", sendEmailChangeReq);
 		onLoad(); // Profile yüklendiğinde onLoad fonksiyonunu çağır
 	}
 
 	async unsetEventHandlers() {
-		document.removeEventListener("click", settingsClick);
 		const buttons = document.querySelectorAll(".submit");
 		buttons.forEach(button => button.removeEventListener("click", sendChangeReq));
+		document.querySelector(".avatar").removeEventListener("click", changeAvatar);
+		document.getElementById('hidden-file-input').removeEventListener('click', (e) => {
+			e.stopPropagation();
+		});
+		document.getElementById('hidden-file-input').removeEventListener('change', sendAvatarChangeReq);
+		document.getElementById("delete-account").removeEventListener("click", deleteAccount);
+		document.querySelector("email").removeEventListener("click", sendEmailChangeReq);
 	}
 
 	async setStylesheet() {
