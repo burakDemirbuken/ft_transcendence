@@ -74,6 +74,9 @@ log-gateway:
 log-friend:
 	@echo "$(GREEN)Showing logs for friend service$(NC)"
 	@$(COMPOSE_CMD) logs -f friend
+log-static:
+	@echo "$(GREEN)Showing logs for static service$(NC)"
+	@$(COMPOSE_CMD) logs -f static
 
 log-gameserver:
 	@echo "$(GREEN)Showing logs for gameserver service$(NC)"

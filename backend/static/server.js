@@ -13,10 +13,10 @@ const fastify = Fastify({
     logger: true
 })
 
-fastify.register(fastifyStatic, {
+/* fastify.register(fastifyStatic, {
     root: path.join(__dirname, "default"),
     prefix: "/default/"
-})
+}) */
 
 fastify.register(fastifyStatic, {
     root: path.join(__dirname, "uploads"),

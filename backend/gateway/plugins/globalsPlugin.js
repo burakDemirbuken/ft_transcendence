@@ -6,10 +6,11 @@ dotenv.config()
 async function globalsPlugin(fastify, options) {
 	const services = {
 		auth: "http://authentication:3001",
-		gateway: "http://gateway:3000", 
+		gateway: "http://gateway:3000",
 		email: "http://email:3005",
 		profile: "http://profile:3006",
-		gameServer: "http://gameserver:3003"
+		gameServer: "http://gameserver:3003",
+		static: "http://static:3008",
 	};
 
 	const settings =
@@ -40,7 +41,7 @@ async function globalsPlugin(fastify, options) {
 	fastify.decorate('services', services);
 	fastify.decorate('settings', settings);
 	fastify.decorate('secrets', secrets);
-	
+
 	fastify.decorate('isPublicPath', function(path)
 	{
 		return (publicPaths.some((pattern) => pattern.test(path)));

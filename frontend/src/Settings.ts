@@ -38,20 +38,24 @@ function changeAvatar(e) {
 	console.log(inpt);
 }
 
-function sendAvatarChangeReq(e) {
+async function sendAvatarChangeReq(e) {
 	console.log(e.target.files);
 	console.log(e.target.files[0]);
 	console.log("SEND AVATAR CHANGE REQ");
-	// const res = fetch(`${API_BASE_URL}/profile/avatar`,
-	// {
-	// 	method: 'POST',
-	// 	credentials: 'include',
-	// 	headers:
-	// 	{
-	// 		...getAuthHeaders()
-	// 	},
-	// 	body: e.target.files[0]
-	// });
+
+	const formData = new FormData();
+	formData.append('avatar', e.target.files[0]);
+	const res = await fetch(`${API_BASE_URL}/static/avatar?username=bkorkut`,
+	{
+		method: 'POST',
+		credentials: 'include',
+		body: formData
+	});
+
+	if (res.ok)
+		console.log("success");
+	else
+		console.log(res.error);
 }
 
 async function sendChangeReq(e) {

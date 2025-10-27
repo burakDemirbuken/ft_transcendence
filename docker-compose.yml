@@ -23,6 +23,8 @@ volumes:
     external: false
   friend_src:
     external: false
+  static_src:
+    external: false
 
 services:
   frontend:
@@ -173,8 +175,9 @@ services:
     expose:
       - 3008
     volumes:
+      - ./backend/static:/app
       - /app/node_modules
-
+      
   gameclientburak:
     container_name: gameclientburak
     build: ./backend/gameClient
