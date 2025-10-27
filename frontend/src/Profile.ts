@@ -673,7 +673,7 @@ function handleMatchOverlay(e) {
     console.log(matchdetails);
     matchdetails.innerHTML = `
         <h2 class="match-details-title">Match Details</h2>
-        <div class="match-info">
+        <div class="match-details-info">
             <span class="">Date: 2024-10-05</span>
             <span class="">Duration: 4.23 mins</span>
             <span class="">Score: 11</span>
