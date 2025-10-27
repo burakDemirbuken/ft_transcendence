@@ -228,14 +228,19 @@ async function showEmailChangeForm(request, reply) {
                         <h2>Change Email Address</h2>
                         
                         <div class="info">
-                            <strong>Current Email:</strong> <span class="current-email">${userEmail}</span>
+                            <strong>Email Change Request</strong>
                             <br><br>
-                            Please enter your new email address and confirm with your password.
+                            Please enter your current email, new email address and confirm with your password.
                         </div>
 
                         <form id="emailChangeForm">
                             <input type="hidden" name="token" value="${token}">
-                            <input type="hidden" name="oldEmail" value="${userEmail}">
+                            
+                            <div class="form-group">
+                                <label for="currentEmail">Current Email Address:</label>
+                                <input type="email" id="currentEmail" name="oldEmail" required>
+                                <div id="currentEmailValidation" class="validation-message"></div>
+                            </div>
                             
                             <div class="form-group">
                                 <label for="newEmail">New Email Address:</label>
@@ -261,26 +266,48 @@ async function showEmailChangeForm(request, reply) {
                 </div>
 
                 <script>
+                const HOST_IP = '${process.env.HOST_IP}';
                 let emailCheckTimeout;
-                let isEmailValid = false;
+                let isCurrentEmailFilled = false;
+                let isNewEmailValid = false;
                 let isPasswordFilled = false;
 
+                const currentEmailInput = document.getElementById('currentEmail');
                 const newEmailInput = document.getElementById('newEmail');
                 const passwordInput = document.getElementById('password');
                 const submitBtn = document.getElementById('submitBtn');
+                const currentEmailValidation = document.getElementById('currentEmailValidation');
                 const emailValidation = document.getElementById('emailValidation');
                 const form = document.getElementById('emailChangeForm');
 
                 function updateSubmitButton() {
-                    submitBtn.disabled = !(isEmailValid && isPasswordFilled);
+                    const shouldEnable = isCurrentEmailFilled && isNewEmailValid && isPasswordFilled;
+                    console.log('Updating submit button:', {
+                        isCurrentEmailFilled,
+                        isNewEmailValid,
+                        isPasswordFilled,
+                        shouldEnable
+                    });
+                    submitBtn.disabled = !shouldEnable;
                 }
 
-                function checkEmail(email) {
-                    if (!email || email === '${userEmail}') {
-                        emailValidation.textContent = email === '${userEmail}' ? 'New email must be different from current email' : '';
+                function checkNewEmail(email) {
+                    const currentEmail = currentEmailInput.value.trim();
+                    
+                    if (!email) {
+                        emailValidation.textContent = '';
+                        emailValidation.className = 'validation-message';
+                        newEmailInput.className = '';
+                        isNewEmailValid = false;
+                        updateSubmitButton();
+                        return;
+                    }
+                    
+                    if (email === currentEmail) {
+                        emailValidation.textContent = 'New email must be different from current email';
                         emailValidation.className = 'validation-message error';
                         newEmailInput.className = 'input-error';
-                        isEmailValid = false;
+                        isNewEmailValid = false;
                         updateSubmitButton();
                         return;
                     }
@@ -288,47 +315,85 @@ async function showEmailChangeForm(request, reply) {
                     emailValidation.textContent = 'Checking email availability...';
                     emailValidation.className = 'validation-message loading';
                     newEmailInput.className = '';
-
-                    fetch('/api/auth/check-email?email=' + encodeURIComponent(email))
-                        .then(response => response.json())
+                    const link = 'https://' + HOST_IP + ':3030/api/auth/check-email?email=' + email;
+                    fetch(link)
+                        .then(response => {
+                            console.log(link);
+                            console.log('Response status:', response.status, 'OK:', response.ok);
+                            if (!response.ok) {
+                                throw new Error('HTTP ' + response.status);
+                            }
+                            return response.json();
+                        })
                         .then(data => {
-                            if (data.success && data.available) {
+                            console.log('Email check response:', data);
+                            console.log('data.exists:', data.exists, 'is available:', data.exists === false);
+                            
+                            if (data.exists === false) {
                                 emailValidation.textContent = '✓ Email is available';
                                 emailValidation.className = 'validation-message success';
                                 newEmailInput.className = 'input-valid';
-                                isEmailValid = true;
+                                isNewEmailValid = true;
+                                console.log('Email is available, isNewEmailValid set to true');
                             } else {
                                 emailValidation.textContent = 'Email is already in use';
                                 emailValidation.className = 'validation-message error';
                                 newEmailInput.className = 'input-error';
-                                isEmailValid = false;
+                                isNewEmailValid = false;
+                                console.log('Email not available, isNewEmailValid set to false');
                             }
                             updateSubmitButton();
                         })
                         .catch(error => {
-                            emailValidation.textContent = 'Error checking email';
+                            console.log('Fetch error:', error);
+                            emailValidation.textContent = 'Error checking email: ' + error.message;
                             emailValidation.className = 'validation-message error';
                             newEmailInput.className = 'input-error';
-                            isEmailValid = false;
+                            isNewEmailValid = false;
                             updateSubmitButton();
                         });
                 }
 
+                // Current email input validation
+                currentEmailInput.addEventListener('input', function() {
+                    const email = this.value.trim();
+                    isCurrentEmailFilled = email.length > 0 && email.includes('@');
+                    
+                    if (isCurrentEmailFilled) {
+                        currentEmailValidation.textContent = '✓ Current email entered';
+                        currentEmailValidation.className = 'validation-message success';
+                        currentEmailInput.className = 'input-valid';
+                    } else {
+                        currentEmailValidation.textContent = email.length > 0 ? 'Please enter a valid email' : '';
+                        currentEmailValidation.className = 'validation-message error';
+                        currentEmailInput.className = email.length > 0 ? 'input-error' : '';
+                    }
+                    
+                    updateSubmitButton();
+                    
+                    // Re-check new email if current email changes
+                    if (newEmailInput.value.trim()) {
+                        checkNewEmail(newEmailInput.value.trim());
+                    }
+                });
+
+                // New email input validation
                 newEmailInput.addEventListener('input', function() {
                     clearTimeout(emailCheckTimeout);
                     const email = this.value.trim();
                     
                     if (email) {
-                        emailCheckTimeout = setTimeout(() => checkEmail(email), 500);
+                        emailCheckTimeout = setTimeout(() => checkNewEmail(email), 500);
                     } else {
                         emailValidation.textContent = '';
                         emailValidation.className = 'validation-message';
                         newEmailInput.className = '';
-                        isEmailValid = false;
+                        isNewEmailValid = false;
                         updateSubmitButton();
                     }
                 });
 
+                // Password input validation
                 passwordInput.addEventListener('input', function() {
                     isPasswordFilled = this.value.trim().length > 0;
                     updateSubmitButton();
@@ -337,7 +402,7 @@ async function showEmailChangeForm(request, reply) {
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
                     
-                    if (!isEmailValid || !isPasswordFilled) {
+                    if (!isCurrentEmailFilled || !isNewEmailValid || !isPasswordFilled) {
                         return;
                     }
 
@@ -352,7 +417,7 @@ async function showEmailChangeForm(request, reply) {
                         password: formData.get('password')
                     };
 
-                    fetch('/api/auth/process-email-change', {
+                    fetch('https://' + HOST_IP + ':3030/api/auth/process-email-change', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

@@ -390,6 +390,126 @@ class EmailService {
       throw error
     }
   }
+
+  async sendEmailChangeRequest(email, username, changeUrl, token) {
+    try {
+      const mailOptions = {
+        from: config.email.from,
+        to: email,
+        subject: '🔄 Email Değişiklik İsteği - ft_transcendence',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #ff9800; text-align: center;">🔄 Email Adresinizi Değiştirin</h2>
+            <p>Merhaba <strong>${username}</strong>,</p>
+            <p>Hesabınıza ait email adresini değiştirmek için bir istek aldık. Email adresinizi değiştirmek istiyorsanız aşağıdaki butona tıklayın.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${changeUrl}" style="background-color: #ff9800; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                📧 Email Değiştir
+              </a>
+            </div>
+            
+            <div style="background-color: #fff3e0; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ff9800;">
+              <h4 style="margin: 0 0 10px 0; color: #e65100;">⚠️ Güvenlik Uyarısı</h4>
+              <p style="margin: 0;">
+                • Bu işlemi siz yapmadıysanız, bu emaili görmezden gelin<br>
+                • Link 24 saat geçerlidir<br>
+                • Email değişikliği sonrasında yeniden giriş yapmanız gerekecek
+              </p>
+            </div>
+            
+            <p style="color: #666; font-size: 14px;">
+              Eğer butona tıklayamıyorsanız, aşağıdaki linki kopyalayıp tarayıcınıza yapıştırın:<br>
+              <a href="${changeUrl}" style="color: #ff9800; word-break: break-all;">${changeUrl}</a>
+            </p>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            
+            <p style="color: #999; font-size: 12px; text-align: center;">
+              Bu email ft_transcendence tarafından gönderilmiştir.<br>
+              Herhangi bir sorunuz varsa bizimle iletişime geçin.
+            </p>
+          </div>
+        `
+      }
+
+      const info = await this.transporter.sendMail(mailOptions)
+      console.log(`✅ Email değişiklik isteği gönderildi: ${email} - MessageId: ${info.messageId}`)
+      
+      return {
+        success: true,
+        messageId: info.messageId,
+        email: email
+      }
+    } catch (error) {
+      console.error(`❌ Email değişiklik isteği gönderilemedi: ${email}`, error.message)
+      throw error
+    }
+  }
+
+  async sendNewEmailVerification(email, username, verificationUrl, token) {
+    try {
+      const mailOptions = {
+        from: config.email.from,
+        to: email,
+        subject: '✅ Yeni Email Adresinizi Doğrulayın - ft_transcendence',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #4caf50; text-align: center;">✅ Yeni Email Adresinizi Doğrulayın</h2>
+            <p>Merhaba <strong>${username}</strong>,</p>
+            <p>ft_transcendence hesabınızın email adresini bu adrese değiştirmek istediğinizi belirttiniz. Email değişikliğini tamamlamak için aşağıdaki butona tıklayarak yeni email adresinizi doğrulayın.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${verificationUrl}" style="background-color: #4caf50; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                ✅ Email Adresimi Doğrula
+              </a>
+            </div>
+            
+            <div style="background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #4caf50;">
+              <h4 style="margin: 0 0 10px 0; color: #2e7d32;">ℹ️ Önemli Bilgiler</h4>
+              <p style="margin: 0;">
+                • Bu doğrulama linkine tıkladığınızda email adresiniz değişecek<br>
+                • Değişiklik sonrasında tüm cihazlardan çıkış yapılacak<br>
+                • Yeni email adresinizle tekrar giriş yapmanız gerekecek<br>
+                • Link 24 saat geçerlidir
+              </p>
+            </div>
+            
+            <p style="color: #666; font-size: 14px;">
+              Eğer butona tıklayamıyorsanız, aşağıdaki linki kopyalayıp tarayıcınıza yapıştırın:<br>
+              <a href="${verificationUrl}" style="color: #4caf50; word-break: break-all;">${verificationUrl}</a>
+            </p>
+            
+            <div style="background-color: #ffebee; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f44336;">
+              <h4 style="margin: 0 0 10px 0; color: #c62828;">⚠️ Bu İşlemi Siz Yapmadıysanız</h4>
+              <p style="margin: 0; color: #666;">
+                Eğer email değişiklik talebinde bulunmadıysanız, bu emaili görmezden gelin ve hesabınızın güvenliği için şifrenizi değiştirmeyi düşünün.
+              </p>
+            </div>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            
+            <p style="color: #999; font-size: 12px; text-align: center;">
+              Bu email ft_transcendence tarafından gönderilmiştir.<br>
+              Herhangi bir sorunuz varsa bizimle iletişime geçin.
+            </p>
+          </div>
+        `
+      }
+
+      const info = await this.transporter.sendMail(mailOptions)
+      console.log(`✅ Yeni email doğrulama gönderildi: ${email} - MessageId: ${info.messageId}`)
+      
+      return {
+        success: true,
+        messageId: info.messageId,
+        email: email
+      }
+    } catch (error) {
+      console.error(`❌ Yeni email doğrulama gönderilemedi: ${email}`, error.message)
+      throw error
+    }
+  }
 }
 
 export default new EmailService()

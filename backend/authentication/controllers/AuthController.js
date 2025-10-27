@@ -22,7 +22,7 @@ async function deleteProfile(request, reply)
 				console.log('JWT token decode error:', error);
 			}
 		}
-		
+
 		const { userId, userEmail, username } = request.body ?? {};
 		let user;
 		if (tokenUsername)
@@ -85,6 +85,9 @@ async function deleteProfile(request, reply)
 		});
 		reply.clearCookie('refreshToken',
 		{
+			httpOnly: true, secure: true, sameSite: 'strict', path: '/'
+		});
+		reply.clearCookie('authStatus', {
 			httpOnly: true, secure: true, sameSite: 'strict', path: '/'
 		});
 		reply.send(

@@ -10,7 +10,6 @@ import { getAuthToken } from './utils/auth.js';
 import { removeAuthToken } from './utils/auth.js';
 import { showNotification } from './notification.js';
 
-
 // Dynamic API base URL based on current hostname
 export const API_BASE_URL = `https://${window.location.hostname}:3030/api`;
 
@@ -29,19 +28,24 @@ const routes = {
 
 let view = null;
 
-const router = async function(page:string, logout = false) {
+const router = async function(page:string) {
 	const content = document.querySelector("#content");
-	const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
+	const hasToken = getAuthToken();
+
+	if (!hasToken) {
+		console.log('User is not authenticated');
+		document.querySelector("#navbar")?.classList.add("logout");
+	}
 
 	if (page === "profile" || page === "settings" || page === "friends" || page === "play") {
 		if (!hasToken) {
-			return window.location.replace("/login");
+			page = "login";
 		}
 	}
 
 	if (page === "login") {
-		if (hasToken && !logout) {
-			return window.location.replace("/home");
+		if (hasToken) {
+			page = "home";
 		}
 	}
 
@@ -90,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () =>
 				{
 					try
 					{
-						const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
+						const hasToken = getAuthToken();
 						if (hasToken)
 						{
 							const response = await fetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref") ?? 'eng'}`, {
@@ -103,12 +107,16 @@ document.addEventListener("DOMContentLoaded", () =>
 							{
 								removeAuthToken();
 								document.querySelector("#navbar")?.classList.add("logout");
-								navigateTo("login", true);
+								showNotification("Logged out successfully.", "success");
+								navigateTo("login");
 							}
 							else {
 								showNotification(`${json.error}`);
 								navigateTo("home");
 							}
+						}
+						else {
+							navigateTo("login");
 						}
 					}
 					catch(error)
@@ -160,12 +168,6 @@ window.addEventListener("load", () => {
 
 	if (!localStorage.getItem("langPref"))
 		localStorage.setItem("langPref", "eng");
-
-	const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
-	if (!hasToken) {
-		console.log('User is not authenticated');
-		document.querySelector("#navbar")?.classList.add("logout");
-	}
 
 	I18n.loadLanguage();
 

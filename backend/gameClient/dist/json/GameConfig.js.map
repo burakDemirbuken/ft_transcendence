@@ -1,1 +1,0 @@
-{"version":3,"file":"GameConfig.js","sourceRoot":"","sources":["../../src/json/GameConfig.ts"],"names":[],"mappings":"AAcA,MAAM,UAAU,GAAe;IAC9B,YAAY,EACZ;QACC,WAAW,EAAE,EAAE;QACf,YAAY,EAAE,GAAG;QACjB,WAAW,EAAE,GAAG;QAChB,UAAU,EAAE,CAAC;QACb,SAAS,EAAE,GAAG;QACd,iBAAiB,EAAE,GAAG;QACtB,QAAQ,EAAE,CAAC;KACX;CACD,CAAC;AAEF,eAAe,UAAU,CAAC"}

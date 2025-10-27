@@ -135,6 +135,10 @@
 	padding: .1em;
 }
 
+.s3 label {
+	padding: .1em;
+}
+
 .settings-container input {
 	border-radius: 4px;
 	padding: .2em .4em;
