@@ -991,10 +991,29 @@ function parseCookies(): Record<string, string> {
     return cookies;
 }
 
+async function setTextStats(user: any) {
+    // Title Card
+    document.querySelector(".user-title").textContent = user.profile.displayName;
+    document.querySelector(".username").textContent = "@" + user.profile.userName;
+    // Overview
+    document.getElementById("mwon").textContent = user.stats.gamesWon;
+    document.getElementById("mlost").textContent = user.stats.gamesLost;
+    document.getElementById("mdur-average").textContent = `${user.stats.gameTotalDuration / user.stats.gamesPlayed || 0}`;
+    document.getElementById("total-play-time").textContent = user.stats.gameTotalDuration;
+    // Win Streak
+    document.querySelector(".streak-number").textContent = user.stats.gameCurrentStreak;
+    document.querySelector(".streak-value").textContent = user.stats.gameLongestStreak;
+}
+
+async function setChartStats(user: any) {
+}
+
+async function setAchievementStats(user: any) {
+}
 
 async function onLoad()
 {
-    const hasToken = getAuthToken() || document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
+    const hasToken = getAuthToken();
 
     if (!hasToken) {
         return window.location.replace('/login');
@@ -1030,8 +1049,9 @@ async function onLoad()
             {
                 const user = await ProfileUsername.json();
                 console.log(user);
-                document.querySelector(".user-title").textContent = user.profile.displayName;
-                document.querySelector(".username").textContent = "@" + user.profile.userName;
+                setTextStats(user);
+                setChartStats(user);
+                setAchievementStats(user);
             }
             else
                 console.error("❌ Failed to fetch profile data:", ProfileUsername.statusText);

@@ -28,7 +28,7 @@ async function register(request, reply)
                 success: true,
                 message: trlt.register.success,
                 user: newUser.toSafeObject(),
-                next_step: 'email_verification' 
+                next_step: 'email_verification'
             }));
         }
         catch (emailError)
@@ -177,13 +177,13 @@ async function verify2FA(request, reply) {
         if (storedData.code !== code)
             return (reply.status(400).send({ success: false, error: trlt.verify2FA.invalid }));
         await user.markLogin();
-        
+
         console.log("Creating JWT token for user:", {
             id: user.id,
             username: user.username,
             email: user.email
         });
-        
+
         const accessToken = await reply.jwtSign(
             { userId: user.id, username: user.username, email: user.email, type: 'access' },
             { expiresIn: '15m' }
@@ -238,7 +238,7 @@ async function logout(request, reply)
 	try
 	{
 		let username;
-		
+
 		// Cookie'den JWT token'ı çek ve decode et
 		const cookieToken = request.cookies?.accessToken;
 		if (cookieToken) {
@@ -249,7 +249,7 @@ async function logout(request, reply)
 				console.log('JWT token decode error:', error);
 			}
 		}
-		
+
 	    reply.clearCookie('accessToken',
         {
 			httpOnly: true, secure: true, sameSite: 'Lax', path: '/'
@@ -260,7 +260,7 @@ async function logout(request, reply)
 		});
 		reply.clearCookie('authStatus',
         {
-			httpOnly: false, secure: true, sameSite: 'Lax', path: '/'
+			httpOnly: true, secure: true, sameSite: 'Lax', path: '/'
 		});
 		reply.send({
 			success: true,
@@ -492,7 +492,7 @@ async function requestEmailChange(request, reply)
 		const cookieToken = request.cookies?.accessToken;
 		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
 		const token = cookieToken || headerToken;
-		
+
 		if (!token) {
 			return reply.status(401).send({
 				success: false,
@@ -517,7 +517,7 @@ async function requestEmailChange(request, reply)
 				code: 'INVALID_TOKEN'
 			});
 		}
-		
+
 		// Kullanıcıyı veritabanından getir
 		const user = await User.findByPk(userId);
 		if (!user) {
@@ -533,7 +533,7 @@ async function requestEmailChange(request, reply)
 			is_active: user.is_active
 		});
 		console.log("Current email from JWT vs DB:", currentEmail, "vs", user.email);
-		
+
 		// JWT token'da email boşsa database'den al
 		const actualEmail = currentEmail || user.email;
 		if (!actualEmail) {
@@ -542,11 +542,10 @@ async function requestEmailChange(request, reply)
 				error: 'User email not found'
 			});
 		}
-		
+
 		// Email değiştirme token'ı oluştur
 		const changeToken = utils.storeVerificationToken(actualEmail, 'email_change');
 		console.log("Using email for change request:", actualEmail, "(from:", currentEmail ? "JWT" : "DB", ")");
-		
 		try {
 			await utils.sendEmailChangeRequest(actualEmail, username, changeToken);
 			return reply.send({
@@ -580,7 +579,7 @@ async function processEmailChange(request, reply)
 	try
 	{
 		const { token, newEmail, oldEmail, password } = request.body;
-		
+
 		if (!token || !newEmail || !oldEmail || !password) {
 			return reply.status(400).send({
 				success: false,
@@ -644,7 +643,7 @@ async function processEmailChange(request, reply)
 
 		// Yeni email için doğrulama token'ı oluştur
 		const verificationToken = utils.storeVerificationToken(newEmail, 'new_email_verification');
-		
+
 		// Eski email bilgilerini yeni email verification ile birlikte sakla
 		utils.tempStorage.set(`change_${newEmail}`, {
 			userId: user.id,
@@ -687,7 +686,7 @@ async function verifyNewEmail(request, reply)
 	try
 	{
 		const { token } = request.query;
-		
+
 		if (!token) {
 			return reply.status(400).send({
 				success: false,
@@ -780,7 +779,7 @@ async function verifyNewEmail(request, reply)
 
 		// Email'i güncelle
 		await user.update({ email: newEmail.toLowerCase() });
-		
+
 		// Tüm temp data'yı temizle
 		utils.tempStorage.delete(newEmail);
 		utils.tempStorage.delete(`change_${newEmail}`);

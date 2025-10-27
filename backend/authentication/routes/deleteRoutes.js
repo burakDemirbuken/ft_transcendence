@@ -6,25 +6,6 @@ export default async function deleteRoute(fastify, options)
 	{
 		schema:
 		{
-    	    body:
-			{
-    	    	type: 'object',
-    	    	properties:
-				{
-    	      		userId:
-					{
-						type: 'number'
-					},
-    	      		userEmail:
-					{
-						type: 'string'
-					},
-    	      		username:
-					{
-						type: 'string'
-					}
-    	    	}
-    	  	},
     	  	querystring:
 			{
     	    	type: 'object',

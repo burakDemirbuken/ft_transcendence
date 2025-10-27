@@ -1,45 +1,50 @@
 
 export function getAuthToken(): string | null
 {
-    // HttpOnly cookie'ler kullanıldığı için JavaScript'ten erişim yok
-    // Bu fonksiyon sadece backward compatibility için kalıyor
-    return localStorage.getItem('authToken');
+	// Sadece cookie'lerde bak
+	const hasCookie = document.cookie.includes('accessToken') || document.cookie.includes('authStatus');
+	return hasCookie ? 'cookie-exists' : null;
 }
 
 export function setAuthToken(token: string): void
 {
     console.log("🔐 Setting auth token:", token);
-    
-    // HTTP için secure flag'i kaldır
+
+    // Sadece cookie'ye kaydet, localStorage kullanma
     const isHttps = window.location.protocol === 'https:';
-    const cookieString = isHttps 
-        ? `accessToken=${token}; path=/; secure; samesite=lax` 
+    const cookieString = isHttps
+        ? `accessToken=${token}; path=/; secure; samesite=lax`
         : `accessToken=${token}; path=/; samesite=lax`;
-    
+
     console.log("🍪 Setting cookie:", cookieString);
     document.cookie = cookieString;
-    localStorage.setItem('authToken', token);
-    
+
     // Hemen kontrol et
     console.log("🍪 Cookie after setting:", document.cookie);
     console.log("🔑 Token after setting:", getAuthToken());
 }
 
-
 export function removeAuthToken(): void
 {
-    console.log('🗑️ Removing all auth tokens and cookies');
-    
-    // Tüm auth cookie'lerini temizle
-    document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    document.cookie = 'authStatus=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    
-    // localStorage'dan da temizle
-    localStorage.removeItem('authToken');
-    
-    console.log('✅ All auth tokens cleared');
+    console.log('🗑️ Removing all auth cookies');
+
+    // Sadece cookie'leri temizle, localStorage kullanma
+    const cookieOptions = [
+        'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure',
+        'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure',
+        'authStatus=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        'authStatus=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; secure'
+    ];
+
+    cookieOptions.forEach(cookie => {
+        document.cookie = cookie;
+    });
+
+    console.log('✅ All auth cookies cleared');
     console.log('🍪 Cookies after clearing:', document.cookie);
+    console.log('🔑 Has token after clearing:', getAuthToken());
 }
 
 export function isAuthenticated(): boolean
