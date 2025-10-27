@@ -1,3 +1,0 @@
-1: Cors headerları nasil çalışıyor ne yapmak lazim auth mu gatewayde mi olmasi daha mantıklı iyicr bi üstünde düş bence
-2: Jwtyide authta veriyoruz ama kontrolu verify i gatewayde yapalim
-3: Kullanıcı register olduğunda benim profil dbsinde de tabloya eklemem için bi istek at

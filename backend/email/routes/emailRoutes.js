@@ -33,4 +33,10 @@ export default async function emailRoutes(fastify, opts) {
 
   // Email verification endpoint
   fastify.post('/send-verification', EmailController.sendVerification)
+
+  // Email change request endpoint
+  fastify.post('/send-email-change', EmailController.sendEmailChange)
+  
+  // New email verification endpoint
+  fastify.post('/send-new-email-verification', EmailController.sendNewEmailVerification)
 }
