@@ -244,6 +244,8 @@ export default async function gamedataRoute(fastify) {
 			}, { transaction: t })
 			console.log('Created tournament record with ID:', tournament.id)
 
+			let allPlayerProfile = []
+
 			for (const [roundIndex, roundData] of rounds.entries()) {
 				const round = await Round.create({
 					roundNumber: roundIndex + 1,
@@ -264,7 +266,14 @@ export default async function gamedataRoute(fastify) {
 							attributes: ['id', 'userName']
 						})
 					])
-					
+
+					if (playerOneProfile?.id && !allPlayerProfile.includes(playerOneProfile.id)) {
+						allPlayerProfile.push(playerOneProfile.id)
+					}
+					if (playerTwoProfile?.id && !allPlayerProfile.includes(playerTwoProfile.id)) {
+						allPlayerProfile.push(playerTwoProfile.id)
+					}
+
 					const [winnerPlayer, loserPlayer] = await Promise.all([
 						matchData.winner === playerOneProfile?.userName ? playerOneProfile :
 							(matchData.winner === playerTwoProfile?.userName ? playerTwoProfile : null),
@@ -323,6 +332,12 @@ export default async function gamedataRoute(fastify) {
 				}
 				console.log(' Completed processing matches for round number:', roundIndex + 1)
 			}
+
+			await Promise.all(
+				allPlayerProfile
+					.filter(Boolean)
+					.map(async (playerId) => fastify.checkAchievements(playerId, t))
+			)
 
 			await t.commit()
 			return reply.status(200).send({ message: 'Tournament data processed successfully' })
