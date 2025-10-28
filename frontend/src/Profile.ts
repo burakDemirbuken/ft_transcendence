@@ -21,7 +21,7 @@ class ManagerProfile {
     private monthChartData: { label0: string, label1: string, labels: string[], data1: number[], data2: number[] } = {
 		label0: "Total Matches",
 		label1: "Matches Won",
-		labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+		labels: ["1st Quarter", "2nd Quarter", "3rd Quarter", "4th Quarter"],
         data1: [],
         data2: []
     };
