@@ -234,7 +234,6 @@ export default async function gamedataRoute(fastify) {
 
 		console.log(JSON.stringify(request.body, null, 2))
 		try {
-			console.log('Creating tournament record for:', name)
 			const tournament = await TournamentHistory.create({
 				name: name,
 				winnerPlayer: (await Profile.findOne({
@@ -242,7 +241,6 @@ export default async function gamedataRoute(fastify) {
 					attributes: ['id']
 				}))?.id ?? null
 			}, { transaction: t })
-			console.log('Created tournament record with ID:', tournament.id)
 
 			let allPlayerProfile = []
 
@@ -251,7 +249,6 @@ export default async function gamedataRoute(fastify) {
 					roundNumber: roundData.round,
 					tournamentId: tournament.id
 				}, { transaction: t })
-				console.log(' Created round record with ID:', round.id, 'for tournament ID:', tournament.id, 'round number:', roundIndex + 1, 'roundData:', roundData)
 
 				for (const [matchIndex, matchData] of roundData.matchs.entries()) {
 					const [playerOneProfile, playerTwoProfile] = await Promise.all([
@@ -266,34 +263,20 @@ export default async function gamedataRoute(fastify) {
 							attributes: ['id', 'userName']
 						})
 					])
-					console.log('  Retrieved player profiles for match number:', matchIndex + 1, {
-						playerOne: playerOneProfile ? playerOneProfile.userName : null,
-						playerTwo: playerTwoProfile ? playerTwoProfile.userName : null
-					})
+
 					if (playerOneProfile?.id && !allPlayerProfile.includes(playerOneProfile.id)) {
 						allPlayerProfile.push(playerOneProfile.id)
 					}
 					if (playerTwoProfile?.id && !allPlayerProfile.includes(playerTwoProfile.id)) {
 						allPlayerProfile.push(playerTwoProfile.id)
 					}
-					console.log('   Updated allPlayerProfile list:', allPlayerProfile)
+
 					const [winnerPlayer, loserPlayer] = await Promise.all([
 						matchData.winner === playerOneProfile?.userName ? playerOneProfile :
 							(matchData.winner === playerTwoProfile?.userName ? playerTwoProfile : null),
 						matchData.loser === playerOneProfile?.userName ? playerOneProfile :
-							(matchData.loser === playerTwoProfile?.userName ? playerTwoProfile : null)				])
-				console.log('   Identified winner and loser for match number:', matchIndex + 1)
-
-					console.log('Check datas', {
-						roundId: round.id,
-						roundNumber: roundData.round,
-						matchNumber: matchData.matchNumber,
-						playerOneID: playerOneProfile ? playerOneProfile.id : null,
-						playerTwoID: playerTwoProfile ? playerTwoProfile.id : null,
-						playerOneScore: matchData.player1Score,
-						playerTwoScore: matchData.player2Score,
-						winnerPlayerID: winnerPlayer ? winnerPlayer.id : null,
-					})
+							(matchData.loser === playerTwoProfile?.userName ? playerTwoProfile : null)
+					])
 
 					const match = await RoundMatch.create({
 						roundId: round.id,
@@ -304,16 +287,7 @@ export default async function gamedataRoute(fastify) {
 						playerOneScore: matchData.player1Score,
 						playerTwoScore: matchData.player2Score,
 						winnerPlayerID: winnerPlayer ? winnerPlayer.id : null,
-					}, { transaction: t }).catch(err => {
-						console.log('Error creating RoundMatch:', err)
-						throw err
-					})
-					console.log('  Created match record with ID:', match.id, 'for round ID:', round.id)
-
-					console.log('   Retrieved players for match:', {
-						winner: winnerPlayer ? winnerPlayer.userName : null,
-						loser: loserPlayer ? loserPlayer.userName : null
-					})
+					}, { transaction: t })
 
 					if (winnerPlayer && loserPlayer) {
 						const winnerState = matchData.state.players.find(p => p.id === winnerPlayer.userName)
@@ -346,9 +320,7 @@ export default async function gamedataRoute(fastify) {
 							}, { transaction: t })
 						])
 					}
-					console.log('   Updated statistics for players in match number:', matchIndex + 1)
 				}
-				console.log(' Completed processing matches for round number:', roundIndex + 1)
 			}
 
 			await Promise.all(

@@ -59,6 +59,7 @@ export default (sequelize, DataTypes, Model) => {
 			},
 			onDelete: 'SET NULL'
 		}
+
 	}, {
 		indexes: [
 			{
