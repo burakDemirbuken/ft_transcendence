@@ -11,7 +11,8 @@ export default async function profileRoute(fastify) {
 
 		try {
 			const userProfile = await fastify.sequelize.models.Profile.findOne({
-				where: { userName: userName }
+				where: { userName: userName },
+				attributes: ['userName', 'displayName', 'avatarUrl']
 			})
 
 			if (!userProfile) {
