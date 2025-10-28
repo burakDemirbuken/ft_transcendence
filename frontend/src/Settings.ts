@@ -6,11 +6,9 @@ import { showNotification } from "./notification.js";
 
 async function deleteAccount(e) {
 	e.preventDefault();
-	const isConfirmed = confirm("Are you sure you want to delete your account? This action cannot be undone.");
+	const isConfirmed = confirm("Are you sure you want to delete your account? This action cannot be undone");
 	if (isConfirmed) {
 		try {
-			console.log("DELETE ACCOUNT! FETCH COMES HERE!");
-
 			const res = await fetch(`${API_BASE_URL}/auth/profile`,
 			{
 				method: 'DELETE',
@@ -30,72 +28,120 @@ async function deleteAccount(e) {
 	}
 }
 
-function changeAvatar(e) {
-	console.log("CHANGE AVATAR");
-	console.log(e);
-	const inpt = document.getElementById('hidden-file-input');
-	inpt.click();
-	console.log(inpt);
+function changeAvatar() {
+	document.getElementById('hidden-file-input')?.click();
 }
 
 async function sendAvatarChangeReq(e) {
-	console.log(e.target.files);
-	console.log(e.target.files[0]);
+	e.preventDefault();
 	console.log("SEND AVATAR CHANGE REQ");
 
-	const formData = new FormData();
-	formData.append('avatar', e.target.files[0]);
-	const res = await fetch(`${API_BASE_URL}/static/avatar?username=bkorkut`,
-	{
-		method: 'POST',
-		credentials: 'include',
-		body: formData
-	});
+	try {
+		const formData = new FormData();
+		formData.append('avatar', e.target.files[0]);
 
-	if (res.ok)
-		console.log("success");
-	else
-		console.log(res.error);
+		const res = await fetch(`${API_BASE_URL}/static/avatar?username=bkorkut`,
+		{
+			method: 'POST',
+			credentials: 'include',
+			body: formData
+		});
+		if (res.ok) {
+			console.log("success");
+			showNotification("Avatar changed successfully", "success");
+		}
+		else {
+			console.log(res.statusText);
+			showNotification("Failed to change avatar", "error");
+		}
+	} catch (error) {
+		console.error("❌ Error during avatar change request:", error);
+		showNotification(`System Error: ${error.message}`, "error");
+	}
 }
 
-async function sendChangeReq(e) {
+async function sendDNameChangeReq(e) {
 	e.preventDefault();
-	console.log("SEND CHANGE REQ");
-	console.log(e);
+	console.log("SEND DNAME CHANGE REQ");
 
 	const form = e.target.closest('form');
 	const formData = new FormData(form);
 	const inputs = Object.fromEntries(formData);
-	// try
-	const getProfileDatas = await fetch(form.action,
-	{
-		method: form.method.toUpperCase(),
-		credentials: 'include',
-		headers:
+
+	try {
+		const getProfileDatas = await fetch(`${API_BASE_URL}/profile/displaynameupdate`,
 		{
-			'Content-Type': 'application/json',
-			...getAuthHeaders()
-		},
-		body: JSON.stringify({userName: "bkorkut", ...inputs})
-	});
-	if (getProfileDatas.ok)
-		console.log(await getProfileDatas.json());
+			method: "POST",
+			credentials: 'include',
+			headers:
+			{
+				'Content-Type': 'application/json',
+				...getAuthHeaders()
+			},
+			body: JSON.stringify({userName: "bkorkut", ...inputs})
+		});
+		if (getProfileDatas.ok) {
+			console.log(await getProfileDatas.json());
+			showNotification("Display name updated successfully", "success");
+		} else {
+			console.log(getProfileDatas.statusText);
+			showNotification("Failed to update display name", "error");
+		}
+	} catch (error) {
+		console.error("❌ Error during profile update:", error);
+		showNotification(`System Error: ${error.message}`, "error");
+	}
 }
 
 async function sendEmailChangeReq(e) {
 	e.preventDefault();
-	console.log("SEND CHANGE REQ");
+	console.log("SEND EMAIL CHANGE REQ");
 	console.log(e);
 
-	const getProfileDatas = await fetch(`${API_BASE_URL}/auth/request-email-change`,
-	{
-		method: 'POST',
-		credentials: 'include',
-	});
-	if (getProfileDatas.ok)
-		console.log("success");
-	else
-		console.log(getProfileDatas.statusText);
+	try {
+
+		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/request-email-change`,
+		{
+			method: 'POST',
+			credentials: 'include',
+		});
+		if (getProfileDatas.ok) {
+			console.log("success");
+			showNotification("Email change link sent to your email", "success");
+		}
+		else {
+			console.log(getProfileDatas.statusText);
+			showNotification("Failed to send email change link", "error");
+		}
+	} catch (error) {
+		console.error("❌ Error during email change request:", error);
+		showNotification(`System Error: ${error.message}`, "error");
+	}
+}
+
+async function sendPassChangeReq(e) {
+	e.preventDefault();
+	console.log("SEND PASS CHANGE REQ");
+	console.log(e);
+
+	try {
+		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/request-password-change`,
+		{
+			method: 'POST',
+			credentials: 'include',
+		});
+		if (getProfileDatas.ok) {
+			console.log("success");
+			showNotification("Password change link sent to your email", "success");
+		}
+		else {
+			console.log(getProfileDatas.statusText);
+			showNotification("Failed to send password change link", "error");
+		}
+	} catch (error) {
+		console.error("❌ Error during password change request:", error);
+		showNotification(`System Error: ${error.message}`, "error");
+	}
 }
 
 export default class extends AView {
@@ -110,28 +156,28 @@ export default class extends AView {
 	}
 
 	async setEventHandlers() {
-		const buttons = document.querySelectorAll(".submit");
-		buttons.forEach(button => button.addEventListener("click", sendChangeReq));
-		document.querySelector(".avatar").addEventListener("click", changeAvatar);
-		document.getElementById('hidden-file-input').addEventListener('click', (e) => {
+		document.querySelector(".avatar")?.addEventListener("click", changeAvatar);
+		document.getElementById('hidden-file-input')?.addEventListener('click', (e) => {
 			e.stopPropagation();
 		});
-		document.getElementById('hidden-file-input').addEventListener('change', sendAvatarChangeReq);
-		document.getElementById("delete-account").addEventListener("click", deleteAccount);
-		document.querySelector(".email").addEventListener("click", sendEmailChangeReq);
-		onLoad(); // Profile yüklendiğinde onLoad fonksiyonunu çağır
+		document.getElementById('hidden-file-input')?.addEventListener('change', sendAvatarChangeReq);
+		document.getElementById("delete-account")?.addEventListener("click", deleteAccount);
+		document.querySelector(".email")?.addEventListener("click", sendEmailChangeReq);
+		document.querySelector(".dname")?.addEventListener("click", sendDNameChangeReq);
+		document.querySelector(".pass")?.addEventListener("click", sendPassChangeReq);
+		onLoad();
 	}
 
 	async unsetEventHandlers() {
-		const buttons = document.querySelectorAll(".submit");
-		buttons.forEach(button => button.removeEventListener("click", sendChangeReq));
-		document.querySelector(".avatar").removeEventListener("click", changeAvatar);
-		document.getElementById('hidden-file-input').removeEventListener('click', (e) => {
+		document.querySelector(".avatar")?.removeEventListener("click", changeAvatar);
+		document.getElementById('hidden-file-input')?.removeEventListener('click', (e) => {
 			e.stopPropagation();
 		});
-		document.getElementById('hidden-file-input').removeEventListener('change', sendAvatarChangeReq);
-		document.getElementById("delete-account").removeEventListener("click", deleteAccount);
-		document.querySelector("email").removeEventListener("click", sendEmailChangeReq);
+		document.getElementById('hidden-file-input')?.removeEventListener('change', sendAvatarChangeReq);
+		document.getElementById("delete-account")?.removeEventListener("click", deleteAccount);
+		document.querySelector(".email")?.removeEventListener("click", sendEmailChangeReq);
+		document.querySelector(".dname")?.removeEventListener("click", sendDNameChangeReq);
+		document.querySelector(".pass")?.removeEventListener("click", sendPassChangeReq);
 	}
 
 	async setStylesheet() {
