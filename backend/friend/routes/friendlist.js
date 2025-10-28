@@ -3,67 +3,74 @@ import { Op } from 'sequelize'
 export default async function friendListRoutes(fastify) {
 	fastify.get('/list', async (request, reply) => {
 		const { userName } = request.query
-		if (!userName) {
-			return reply.code(400).send({ error: 'Username is required' });
-		}
 		
 		try {
+			if (!userName) {
+				throw new Error("userName is required.")
+			}
 			const friendships = await fastify.sequelize.models.Friend.findAll({
 				where: {
-					status: 'accepted',
 					[Op.or]: [
-						{ userName: userName },
+						{ userName: userName},
 						{ peerName: userName }
-					],
+					]
 				},
-				attributes: ['userName', 'peerName']
+				attributes: ['userName', 'peerName', 'status'],
+				raw: true
 			})
 
-			const friendIds = [
-				...new Set(friendships.map(f => 
-					(f.userName === userName ? f.peerName : f.userName)).filter(Boolean))
-			]
+			const [incomingPending, outgoingPending, accepted] = friendships.reduce((acc, friendship) => {
+				const isUserInitiator = friendship.userName === userName
+				if (friendship.status === 'pending') {
+					if (isUserInitiator) {
+						acc[1].push(friendship.peerName)
+					} else {
+						acc[0].push(friendship.userName)
+					}
+				} else if (friendship.status === 'accepted') {
+					const friendName = isUserInitiator ? friendship.peerName : friendship.userName
+					acc[2].push(friendName)
+				}
+				return acc
+			}, [[], [], []])
+			
 
-			if (friendIds.length === 0) { 
-				return reply.code(200).send({ friends: [] })
-			}
- 
-			const friendProfiles = await fetch('http://profile:3006/internal/friend', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ friends: friendIds }) //body kullanılımını desteklemeyebilir, querye koymak gerekebilir
+			return reply.send({ 
+				pendingFriends: {
+					incoming: incomingPending,
+					outcoming: outgoingPending
+				},
+				acceptedFriends: accepted
 			})
-			if (!friendProfiles.ok) throw new Error('Network response was not ok')
-
-			const data = await friendProfiles.json()
-			const friends = Array.isArray(data?.users) ? data.users : []
-
-			return reply.code(200).send({ friends })
 		} catch (error) {
 			fastify.log.error('Error retrieving user friends:', { message: error.message,
 				details: error.toString() })
-			return reply.code(500).send({
-				error: 'Error retrieving user friends',
-			})
+			return reply.code(500).send({message: 'Failed to retrieve friend list'})
 		}
 	})
 
 	fastify.delete('/list', async (request, reply) => {
 		const { userName } = request.body ?? {}
 
-		if (!userName) {
-			return reply.code(400).send({ error: 'Username is required' })
-		}
-
-		await fastify.sequelize.models.Friend.destroy({
-			where: { 
-				[Op.or]: [
-					{ userName: userName },
-					{ peerName: userName }
-				]
+		try {
+			if (!userName) {
+				throw new Error('Username is required')
 			}
-		})
 
-		return reply.code(200).send({ message: 'All friendships deleted successfully' })
+			await fastify.sequelize.models.Friend.destroy({
+				where: { 
+					[Op.or]: [
+						{ userName: userName },
+						{ peerName: userName }
+					]
+				}
+			})
+
+			return reply.code(200).send({ message: 'All friendships deleted successfully' })
+		} catch (error) {
+			fastify.log.error('Error deleting friendships:', { message: error.message,
+				details: error.toString() })
+			return reply.code(500).send({ error: 'Failed to delete friendships' })
+		}
 	})
 }

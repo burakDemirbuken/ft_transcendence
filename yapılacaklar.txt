@@ -1,9 +1,7 @@
 3. nginx websoket location blockları yok (?)
-8. profil silindiğinde auth servisinden veriler silinmiyor (?)
 9. xss kontrolleri backende yapılmıyor json alındığını farz sayarak 
     html'de (sanırsam script kısmında) gelen inputlarda kontrol edilmesi gerek
-10. mock datalarla tüm testler yapılamadı genel manada bir database testleri gerek
-
+11. try catchleri kontrol et hata mesajları ve replyla gönderilmesi gerekenleri ayır
 
 
 
