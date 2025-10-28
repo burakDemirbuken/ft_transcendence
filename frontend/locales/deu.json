@@ -81,13 +81,7 @@
 				"lost": "Verloren"
 			},
 			"skills": {
-				"title": "Fähigkeiten",
-				"speed": "Shnelligkeit",
-				"accur": "Präzision",
-				"defence": "Verteidigung",
-				"attack": "Angriff",
-				"strat": "Strategie",
-				"dur": "Dauerhaftigkeit"
+				"title": "Fähigkeiten"
 			},
 			"mprog": {
 				"title": "Monatlicher Fortschritt",

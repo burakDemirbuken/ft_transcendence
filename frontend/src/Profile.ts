@@ -1009,6 +1009,18 @@ async function setChartStats(user: any) {
 }
 
 async function setAchievementStats(user: any) {
+	const achievements = document.querySelectorAll('.achievement-card');
+
+	achievements.forEach(card => {
+		const attrib = card.getAttribute("data-achievement");
+		if (user?.achievements[attrib]?.unlockedAt)
+		{
+			card.classList.replace("locked", "unlocked");
+			const date = card.querySelector(".achievement-date");
+			if (date)
+				date.textContent = user.achievements[attrib].unlockedAt;
+		}
+	});
 }
 
 async function onLoad()
