@@ -248,10 +248,10 @@ export default async function gamedataRoute(fastify) {
 
 			for (const [roundIndex, roundData] of rounds.entries()) {
 				const round = await Round.create({
-					roundNumber: roundIndex + 1,
+					roundNumber: roundData.round,
 					tournamentId: tournament.id
 				}, { transaction: t })
-				console.log(' Created round record with ID:', round.id, 'for tournament ID:', tournament.id, 'round number:', roundIndex + 1)
+				console.log(' Created round record with ID:', round.id, 'for tournament ID:', tournament.id, 'round number:', roundIndex + 1, 'roundData:', roundData)
 
 				for (const [matchIndex, matchData] of roundData.matchs.entries()) {
 					const [playerOneProfile, playerTwoProfile] = await Promise.all([
@@ -266,30 +266,48 @@ export default async function gamedataRoute(fastify) {
 							attributes: ['id', 'userName']
 						})
 					])
-
+					console.log('  Retrieved player profiles for match number:', matchIndex + 1, {
+						playerOne: playerOneProfile ? playerOneProfile.userName : null,
+						playerTwo: playerTwoProfile ? playerTwoProfile.userName : null
+					})
 					if (playerOneProfile?.id && !allPlayerProfile.includes(playerOneProfile.id)) {
 						allPlayerProfile.push(playerOneProfile.id)
 					}
 					if (playerTwoProfile?.id && !allPlayerProfile.includes(playerTwoProfile.id)) {
 						allPlayerProfile.push(playerTwoProfile.id)
 					}
-
+					console.log('   Updated allPlayerProfile list:', allPlayerProfile)
 					const [winnerPlayer, loserPlayer] = await Promise.all([
 						matchData.winner === playerOneProfile?.userName ? playerOneProfile :
 							(matchData.winner === playerTwoProfile?.userName ? playerTwoProfile : null),
 						matchData.loser === playerOneProfile?.userName ? playerOneProfile :
-							(matchData.loser === playerTwoProfile?.userName ? playerTwoProfile : null)
-					])
+							(matchData.loser === playerTwoProfile?.userName ? playerTwoProfile : null)				])
+				console.log('   Identified winner and loser for match number:', matchIndex + 1)
 
-					const match = await RoundMatch.create({
-						roundNumber: matchData.round,
+					console.log('Check datas', {
+						roundId: round.id,
+						roundNumber: roundData.round,
 						matchNumber: matchData.matchNumber,
 						playerOneID: playerOneProfile ? playerOneProfile.id : null,
 						playerTwoID: playerTwoProfile ? playerTwoProfile.id : null,
 						playerOneScore: matchData.player1Score,
 						playerTwoScore: matchData.player2Score,
 						winnerPlayerID: winnerPlayer ? winnerPlayer.id : null,
-					}, { transaction: t })
+					})
+
+					const match = await RoundMatch.create({
+						roundId: round.id,
+						roundNumber: roundData.round,
+						matchNumber: matchData.matchNumber,
+						playerOneID: playerOneProfile ? playerOneProfile.id : null,
+						playerTwoID: playerTwoProfile ? playerTwoProfile.id : null,
+						playerOneScore: matchData.player1Score,
+						playerTwoScore: matchData.player2Score,
+						winnerPlayerID: winnerPlayer ? winnerPlayer.id : null,
+					}, { transaction: t }).catch(err => {
+						console.log('Error creating RoundMatch:', err)
+						throw err
+					})
 					console.log('  Created match record with ID:', match.id, 'for round ID:', round.id)
 
 					console.log('   Retrieved players for match:', {
@@ -392,92 +410,44 @@ export default async function gamedataRoute(fastify) {
 
 		const userProfile = await fastify.sequelize.models.Profile.findOne({
 			where: { userName: userName },
+			as: 'userProfile',
 			attributes: ['id']
 		})
 		if (!userProfile) {
 			return reply.code(404).send({ error: 'User profile not found' })
 		}
 
-		// Fetch all round matches where the user participated and include round -> tournament and player info
-		const roundMatches = await fastify.sequelize.models.RoundMatch.findAll({
+		const usersTournament = await fastify.sequelize.models.TournamentHistory.findAll({
 			include: [
 				{
 					model: fastify.sequelize.models.Round,
 					include: [
 						{
-							model: fastify.sequelize.models.TournamentHistory
+							model: fastify.sequelize.models.RoundMatch,
+							include: [
+								{
+									model: fastify.sequelize.models.Profile,
+									as: 'playerOne',
+									attributes: ['userName', 'displayName', 'avatarUrl']
+								},
+								{
+									model: fastify.sequelize.models.Profile,
+									as: 'playerTwo',
+									attributes: ['userName', 'displayName', 'avatarUrl']
+								}
+							],
+							attributes: ['matchNumber', 'playerOneID', 'playerTwoID', 'playerOneScore', 'playerTwoScore', 'winnerPlayerID'],
+							order: [['matchNumber', 'ASC']]
 						}
-					]
-				},
-				{
-					model: fastify.sequelize.models.Profile,
-					as: 'playerOne'
-				},
-				{
-					model: fastify.sequelize.models.Profile,
-					as: 'playerTwo'
+					],
+					attributes: ['roundNumber'],
+					order: [['roundNumber', 'ASC']]
 				}
 			],
-			where: {
-				[Op.or]: [
-					{ playerOneID: userProfile.id },
-					{ playerTwoID: userProfile.id }
-				]
-			},
-			order: [[{ model: fastify.sequelize.models.Round }, 'roundNumber', 'ASC'], ['matchNumber', 'ASC']]
+			attributes: ['name', 'winnerPlayer']
+		
 		})
 
-		// Convert to plain objects
-		const matchesJSON = roundMatches.map(m => m.toJSON())
-
-		// Group matches by tournament -> round
-		const tournamentsMap = new Map()
-		for (const m of matchesJSON) {
-			const round = m.Round
-			const tournament = round?.TournamentHistory
-			if (!tournament) continue
-
-			const tId = tournament.id
-			if (!tournamentsMap.has(tId)) {
-				tournamentsMap.set(tId, {
-					id: tId,
-					name: tournament.name ?? null,
-					winnerPlayer: tournament.winnerPlayer ?? null,
-					rounds: new Map()
-				})
-			}
-
-			const tObj = tournamentsMap.get(tId)
-			const roundNumber = round.roundNumber ?? m.roundNumber ?? 0
-			if (!tObj.rounds.has(roundNumber)) {
-				tObj.rounds.set(roundNumber, { roundNumber: roundNumber, matches: [] })
-			}
-
-			const rObj = tObj.rounds.get(roundNumber)
-			rObj.matches.push({
-				id: m.id,
-				matchNumber: m.matchNumber,
-				roundNumber: m.roundNumber,
-				playerOneID: m.playerOneID,
-				playerTwoID: m.playerTwoID,
-				playerOne: m.playerOne ? m.playerOne.userName : null,
-				playerTwo: m.playerTwo ? m.playerTwo.userName : null,
-				playerOneScore: m.playerOneScore,
-				playerTwoScore: m.playerTwoScore,
-				winnerPlayerID: m.winnerPlayerID
-			})
-		}
-
-		// Convert map structure to array and sort rounds
-		const tournaments = Array.from(tournamentsMap.values()).map(t => ({
-			id: t.id,
-			name: t.name,
-			winnerPlayer: t.winnerPlayer,
-			rounds: Array.from(t.rounds.values()).sort((a, b) => a.roundNumber - b.roundNumber)
-		}))
-
-		fastify.log.debug('Tournaments found for user:', { userName, count: tournaments.length })
-
-		return reply.send({ success: true, tournaments })
+		return reply.send({ success: true, usersTournament: JSON.parse(JSON.stringify(usersTournament)) })
 	})
  }

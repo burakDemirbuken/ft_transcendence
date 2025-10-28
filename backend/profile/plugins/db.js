@@ -53,9 +53,9 @@ export default fp(async (fastify) => {
 		Round.hasMany(RoundMatch, { foreignKey: 'roundId', onDelete: 'CASCADE', hooks: true })
 		RoundMatch.belongsTo(Round, { foreignKey: 'roundId', onDelete: 'CASCADE' })
 
-		RoundMatch.belongsTo(Profile, { foreignKey: 'playerOneID', onDelete: 'SET NULL'  })
-		RoundMatch.belongsTo(Profile, { foreignKey: 'playerTwoID', onDelete: 'SET NULL' })
-		RoundMatch.belongsTo(Profile, { foreignKey: 'winnerPlayerID', onDelete: 'SET NULL' })
+		RoundMatch.belongsTo(Profile, { as: 'playerOne', foreignKey: 'playerOneID', onDelete: 'SET NULL'  })
+		RoundMatch.belongsTo(Profile, { as: 'playerTwo', foreignKey: 'playerTwoID', onDelete: 'SET NULL' })
+		RoundMatch.belongsTo(Profile, { as: 'winnerPlayer', foreignKey: 'winnerPlayerID', onDelete: 'SET NULL' })
 
 		TournamentHistory.belongsTo(Profile, { foreignKey: 'winnerPlayer', onDelete: 'SET NULL' })
 
