@@ -123,144 +123,107 @@ export default async function gamedataRoute(fastify) {
 		const {
 
 			/*
-			profile  | {
-profile  |   "name": "asdasd",
-profile  |   "winner": "test2",
-profile  |   "rounds": [
-profile  |     {
-profile  |       "round": 0,
-profile  |       "matchs": [
-profile  |         {
-profile  |           "matchNumber": 0,
-profile  |           "player1": "test2",
-profile  |           "player2": "test0",
-profile  |           "player1Score": 1,
-profile  |           "player2Score": 0,
-profile  |           "winner": "test2",
-profile  |           "loser": "test0",
-profile  |           "state": {
-profile  |             "players": [
-profile  |               {
-profile  |                 "id": "test2",
-profile  |                 "kickBall": 0,
-profile  |                 "missedBall": 0
-profile  |               },
-profile  |               {
-profile  |                 "id": "test0",
-profile  |                 "kickBall": 0,
-profile  |                 "missedBall": 1
-profile  |               }
-profile  |             ]
-profile  |           },
-profile  |           "time": {
-profile  |             "start": 1761413543844,
-profile  |             "finish": 1761413547123,
-profile  |             "duration": 1287
-profile  |           }
-profile  |         },
-profile  |         {
-profile  |           "matchNumber": 1,
-profile  |           "player1": "test3",
-profile  |           "player2": "test1",
-profile  |           "player1Score": 1,
-profile  |           "player2Score": 0,
-profile  |           "winner": "test3",
-profile  |           "loser": "test1",
-profile  |           "state": {
-profile  |             "players": [
-profile  |               {
-profile  |                 "id": "test3",
-profile  |                 "kickBall": 0,
-profile  |                 "missedBall": 0
-profile  |               },
-profile  |               {
-profile  |                 "id": "test1",
-profile  |                 "kickBall": 0,
-profile  |                 "missedBall": 1
-profile  |               }
-profile  |             ]
-profile  |           },
-profile  |           "time": {
-profile  |             "start": 1761413543844,
-profile  |             "finish": 1761413547123,
-profile  |             "duration": 1287
-profile  |           }
-profile  |         }
-profile  |       ]
-profile  |     },
-profile  |     {
-profile  |       "round": 1,
-profile  |       "matchs": [
-profile  |         {
-profile  |           "matchNumber": 0,
-profile  |           "player1": "test2",
-profile  |           "player2": "test3",
-profile  |           "player1Score": 1,
-profile  |           "player2Score": 0,
-profile  |           "winner": "test2",
-profile  |           "loser": "test3",
-profile  |           "state": {
-profile  |             "players": [
-profile  |               {
-profile  |                 "id": "test2",
-profile  |                 "kickBall": 0,
-profile  |                 "missedBall": 0
-profile  |               },
-profile  |               {
-profile  |                 "id": "test3",
-profile  |                 "kickBall": 0,
-profile  |                 "missedBall": 1
-profile  |               }
-profile  |             ]
-profile  |           },
-profile  |           "time": {
-profile  |             "start": 1761413553317,
-profile  |             "finish": 1761413556612,
-profile  |             "duration": 1302
-profile  |           }
-profile  |         }
-profile  |       ]
-profile  |     }
-profile  |   ],
-profile  |   "matchType": "tournament"
-profile  | }
-
-
-			*/
-			/*
-				name,
-				rounds[
-					{
-						matchs[
-							{
-								round: i,
-								matchNumber: j,
-								player1: null,
-								player2: null,
-								player1Score: null,
-								player2Score: null,
-								winner: null,
-								loser: null,
-								time: {
-									start: null,
-									end: null,
-									duration: null
-								},
-								state: {
-									players: [
-										{
-											id: null,
-											kickBall: null,
-											missedBall: null
-										}
-									]
-								}
-							},
-							{}
-						]
-
-					}
-				]
+			 {
+   "name": "asdasd",
+   "winner": "test2",
+   "rounds": [
+     {
+       "round": 0,
+       "matchs": [
+         {
+           "matchNumber": 0,
+           "player1": "test2",
+           "player2": "test0",
+           "player1Score": 1,
+           "player2Score": 0,
+           "winner": "test2",
+           "loser": "test0",
+           "state": {
+             "players": [
+               {
+                 "id": "test2",
+                 "kickBall": 0,
+                 "missedBall": 0
+               },
+               {
+                 "id": "test0",
+                 "kickBall": 0,
+                 "missedBall": 1
+               }
+             ]
+           },
+           "time": {
+             "start": 1761413543844,
+             "finish": 1761413547123,
+             "duration": 1287
+           }
+         },
+         {
+           "matchNumber": 1,
+           "player1": "test3",
+           "player2": "test1",
+           "player1Score": 1,
+           "player2Score": 0,
+           "winner": "test3",
+           "loser": "test1",
+           "state": {
+             "players": [
+               {
+                 "id": "test3",
+                 "kickBall": 0,
+                 "missedBall": 0
+               },
+               {
+                 "id": "test1",
+                 "kickBall": 0,
+                 "missedBall": 1
+               }
+             ]
+           },
+           "time": {
+             "start": 1761413543844,
+             "finish": 1761413547123,
+             "duration": 1287
+           }
+         }
+       ]
+     },
+     {
+       "round": 1,
+       "matchs": [
+         {
+           "matchNumber": 0,
+           "player1": "test2",
+           "player2": "test3",
+           "player1Score": 1,
+           "player2Score": 0,
+           "winner": "test2",
+           "loser": "test3",
+           "state": {
+             "players": [
+               {
+                 "id": "test2",
+                 "kickBall": 0,
+                 "missedBall": 0
+               },
+               {
+                 "id": "test3",
+                 "kickBall": 0,
+                 "missedBall": 1
+               }
+             ]
+           },
+           "time": {
+             "start": 1761413553317,
+             "finish": 1761413556612,
+             "duration": 1302
+           }
+         }
+       ]
+     }
+   ],
+   "matchType": "tournament"
+ }
 			*/
 			name,
 			winner,
@@ -274,7 +237,10 @@ profile  | }
 			console.log('Creating tournament record for:', name)
 			const tournament = await TournamentHistory.create({
 				name: name,
-				winnerPlayer: (await Profile.findOne({ where: { userName: winner } }))?.id ?? null
+				winnerPlayer: (await Profile.findOne({
+					where: { userName: winner },
+					attributes: ['id']
+				}))?.id ?? null
 			}, { transaction: t })
 			console.log('Created tournament record with ID:', tournament.id)
 
@@ -286,41 +252,45 @@ profile  | }
 				console.log(' Created round record with ID:', round.id, 'for tournament ID:', tournament.id, 'round number:', roundIndex + 1)
 
 				for (const [matchIndex, matchData] of roundData.matchs.entries()) {
+					const [playerOneProfile, playerTwoProfile] = await Promise.all([
+						Profile.findOne({
+							where: { userName: matchData.player1 },
+							include: [{ model: Stat }],
+							attributes: ['id', 'userName']
+						}),
+						Profile.findOne({
+							where: { userName: matchData.player2 },
+							include: [{ model: Stat }],
+							attributes: ['id', 'userName']
+						})
+					])
+					
+					const [winnerPlayer, loserPlayer] = await Promise.all([
+						matchData.winner === playerOneProfile?.userName ? playerOneProfile :
+							(matchData.winner === playerTwoProfile?.userName ? playerTwoProfile : null),
+						matchData.loser === playerOneProfile?.userName ? playerOneProfile :
+							(matchData.loser === playerTwoProfile?.userName ? playerTwoProfile : null)
+					])
+
 					const match = await RoundMatch.create({
 						roundNumber: matchData.round,
 						matchNumber: matchData.matchNumber,
-						playerOneID: ( Profile.findOne({ where: { userName: matchData.player1 } }))?.id ?? null,
-						playerTwoID: ( Profile.findOne({ where: { userName: matchData.player2 } }))?.id ?? null,
+						playerOneID: playerOneProfile ? playerOneProfile.id : null,
+						playerTwoID: playerTwoProfile ? playerTwoProfile.id : null,
 						playerOneScore: matchData.player1Score,
 						playerTwoScore: matchData.player2Score,
-						winnerPlayerID: ( Profile.findOne({ where: { userName: matchData.winner } }))?.id ?? null
+						winnerPlayerID: winnerPlayer ? winnerPlayer.id : null,
 					}, { transaction: t })
 					console.log('  Created match record with ID:', match.id, 'for round ID:', round.id)
 
-					const [winnerPlayer, loserPlayer] = await Promise.all([
-						Profile.findOne({
-							where: {
-								userName: matchData.winner ?? null,
-							},
-							include: [{ model: Stat }],
-							transaction: t
-						}),
-						Profile.findOne({
-							where: {
-								userName: matchData.loser ?? null
-							},
-							include: [{ model: Stat }],
-							transaction: t
-						})
-					])
 					console.log('   Retrieved players for match:', {
 						winner: winnerPlayer ? winnerPlayer.userName : null,
 						loser: loserPlayer ? loserPlayer.userName : null
 					})
 
 					if (winnerPlayer && loserPlayer) {
-						const winnerState = matchData.state.players.find(p => p.id === matchData.winner)
-						const loserState = matchData.state.players.find(p => p.id === matchData.loser)
+						const winnerState = matchData.state.players.find(p => p.id === winnerPlayer.userName)
+						const loserState = matchData.state.players.find(p => p.id === loserPlayer.userName)
 
 						await Promise.all([
 							winnerPlayer.Stat.increment({
@@ -413,13 +383,14 @@ profile  | }
 			return reply.code(404).send({ error: 'User profile not found' })
 		}
 
-		let RoundMatch = await fastify.sequelize.models.RoundMatch.findAll({
+		// Fetch all round matches where the user participated and include round -> tournament and player info
+		const roundMatches = await fastify.sequelize.models.RoundMatch.findAll({
 			include: [
 				{
 					model: fastify.sequelize.models.Round,
 					include: [
 						{
-							model: fastify.sequelize.models.TournamentHistory,
+							model: fastify.sequelize.models.TournamentHistory
 						}
 					]
 				},
@@ -438,12 +409,60 @@ profile  | }
 					{ playerTwoID: userProfile.id }
 				]
 			},
+			order: [[{ model: fastify.sequelize.models.Round }, 'roundNumber', 'ASC'], ['matchNumber', 'ASC']]
 		})
 
-		console.log(RoundMatch.toJSON())
+		// Convert to plain objects
+		const matchesJSON = roundMatches.map(m => m.toJSON())
 
-		return reply.send({ success: true,
-			matches: RoundMatch.toJSON()
-		})
+		// Group matches by tournament -> round
+		const tournamentsMap = new Map()
+		for (const m of matchesJSON) {
+			const round = m.Round
+			const tournament = round?.TournamentHistory
+			if (!tournament) continue
+
+			const tId = tournament.id
+			if (!tournamentsMap.has(tId)) {
+				tournamentsMap.set(tId, {
+					id: tId,
+					name: tournament.name ?? null,
+					winnerPlayer: tournament.winnerPlayer ?? null,
+					rounds: new Map()
+				})
+			}
+
+			const tObj = tournamentsMap.get(tId)
+			const roundNumber = round.roundNumber ?? m.roundNumber ?? 0
+			if (!tObj.rounds.has(roundNumber)) {
+				tObj.rounds.set(roundNumber, { roundNumber: roundNumber, matches: [] })
+			}
+
+			const rObj = tObj.rounds.get(roundNumber)
+			rObj.matches.push({
+				id: m.id,
+				matchNumber: m.matchNumber,
+				roundNumber: m.roundNumber,
+				playerOneID: m.playerOneID,
+				playerTwoID: m.playerTwoID,
+				playerOne: m.playerOne ? m.playerOne.userName : null,
+				playerTwo: m.playerTwo ? m.playerTwo.userName : null,
+				playerOneScore: m.playerOneScore,
+				playerTwoScore: m.playerTwoScore,
+				winnerPlayerID: m.winnerPlayerID
+			})
+		}
+
+		// Convert map structure to array and sort rounds
+		const tournaments = Array.from(tournamentsMap.values()).map(t => ({
+			id: t.id,
+			name: t.name,
+			winnerPlayer: t.winnerPlayer,
+			rounds: Array.from(t.rounds.values()).sort((a, b) => a.roundNumber - b.roundNumber)
+		}))
+
+		fastify.log.debug('Tournaments found for user:', { userName, count: tournaments.length })
+
+		return reply.send({ success: true, tournaments })
 	})
  }
