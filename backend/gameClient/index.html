@@ -1746,6 +1746,65 @@ html {
     display: flex;
 }
 
+#loadingScreen {
+  position: absolute;
+  inset: 0;
+  background-image: url('arcadeMachine.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 1.3rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  z-index: 10;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.loading-text {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-top: 30px;
+  color: #ffffffcc;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  letter-spacing: 1px;
+}
+
+#loadingScreen.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  display: none !important;
+}
+
+#loadingBar {
+  width: 300px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+#loadingProgress {
+  width: 0%;
+  height: 100%;
+  background: #ffffff;
+  transition: width 0.3s ease;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .fast-game-mode-card {
@@ -2754,10 +2813,19 @@ html {
 	            </div>
 	        </div>
 	    </div>
+
 		<div class="game-container" id="gameContainer">
+			<div id="loadingScreen">
+			    <div class="game-loading-content">
+			        <div class="game-loading-spinner"></div>
+			        <div class="game-loading-text">Yükleniyor...</div>
+			        <div id="loadingBar">
+			            <div id="loadingProgress"></div>
+			        </div>
+			    </div>
+			</div>
 			<canvas id="renderCanvas"></canvas>
 		</div>
-
 	</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -42,34 +42,72 @@ class ArcadeMachine
 		this.joystick1 = null;
     }
 
-    async load(position, angle)
-	{
-        try
-		{
-			const result = await BABYLON.SceneLoader.ImportMeshAsync("", "./assets/models/arcade/", "arcade.glb", this.scene);
-			this.meshs = result.meshes;
-			this.position = position || { x: 0, y: 0, z: 0 };
-			this.angle = angle || 0;
-			const parentMesh = this.meshs.find(mesh => mesh.parent === null) || this.meshs[0];
-			if (parentMesh)
-			{
-				parentMesh.position = new BABYLON.Vector3(this.position.x, this.position.y, this.position.z);
-				parentMesh.rotation = new BABYLON.Vector3(0, this.angle, 0);
-			}
-			else
-				console.warn("Parent mesh not found. Using default position and rotation.");
-        }
-		catch (error)
-		{
-            console.error("Error loading arcade machine:", error);
-            return;
-        }
+    async load(position, angle) {
+        // gameContainer içindeki loading elementi kullan
+        const gameContainer = document.getElementById("gameContainer");
+        const loadingScreen = gameContainer ? gameContainer.querySelector("#loadingScreen") : null;
+        const loadingText = loadingScreen ? loadingScreen.querySelector(".game-loading-text") : null;
+        const loadingProgress = loadingScreen ? loadingScreen.querySelector("#loadingProgress") : null;
 
-		const light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(this.position.x, this.position.y + 1, this.position.z), this.scene);
-		light1.intensity = 0.4;
+        try {
+            // 1. Loading ekranını göster
+            if (loadingScreen) {
+                loadingScreen.classList.remove("hidden");
+                if (loadingText) loadingText.textContent = "Loading... 0%";
+                if (loadingProgress) loadingProgress.style.width = "0%";
+            }
 
-        this.createGameScreen();
-		this.setActive(true);
+            console.log("🎮 Loading arcade model from: ./assets/models/arcade/arcade.glb");
+
+            // 2. Modeli yükle (ilerleme takibi)
+            const result = await BABYLON.SceneLoader.ImportMeshAsync(
+                "",
+                "./assets/models/arcade/",
+                "arcade.glb",
+                this.scene,
+                (evt) => {
+                    if (evt.lengthComputable) {
+                        const progress = evt.loaded / evt.total;
+                        if (loadingText) loadingText.textContent = `Loading... ${Math.round(progress * 100)}%`;
+                        if (loadingProgress) loadingProgress.style.width = `${progress * 100}%`;
+                    }
+                }
+            );
+
+            this.meshs = result.meshes;
+            this.position = position || { x: 0, y: 0, z: 0 };
+            this.angle = angle || 0;
+
+            const parentMesh = this.meshs.find(mesh => mesh.parent === null) || this.meshs[0];
+            if (parentMesh) {
+                parentMesh.position = new BABYLON.Vector3(this.position.x, this.position.y, this.position.z);
+                parentMesh.rotation = new BABYLON.Vector3(0, this.angle, 0);
+            } else {
+                console.warn("Parent mesh not found. Using default position and rotation.");
+            }
+
+            const light1 = new BABYLON.HemisphericLight(
+                "light1",
+                new BABYLON.Vector3(this.position.x, this.position.y + 1, this.position.z),
+                this.scene
+            );
+            light1.intensity = 0.4;
+
+            this.createGameScreen();
+            this.setActive(true);
+
+            console.log("✅ Arcade machine loaded successfully");
+        } catch (error) {
+            console.error("❌ Error loading arcade machine:", error);
+            throw error; // Hatayı yukarı fırlat
+        } finally {
+            // 3. Yükleme tamamlandıktan sonra loading ekranını kapat
+            if (loadingScreen) {
+                setTimeout(() => {
+                    loadingScreen.classList.add("hidden");
+                }, 500);
+            }
+        }
         return this;
     }
 
