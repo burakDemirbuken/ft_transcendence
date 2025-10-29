@@ -3585,6 +3585,13 @@ function handleGameFinished(payload) {
     const gameContainer = document.getElementById('gameContainer');
     gameContainer.style.display = 'none';
 
+    // Hızlı oyun için kontrol
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen.classList.contains('active')) {
+        loadingScreen.classList.remove('active');
+        document.getElementById('game-page').classList.remove('hidden');
+    }
+
     // Tournament modunda round bitişi kontrolü
     if (currentGameMode === 'tournament') {
         // Status 'next_round' ise bir sonraki round var demektir
@@ -3606,10 +3613,6 @@ function handleGameFinished(payload) {
                 showNotification(`🎉 Kazanan: ${payload.players[0].name}`, 'success');
             }
 
-            // Lobiye dön
-            // setTimeout(() => {
-            //     returnToLobby();
-            // }, 3000);
             return;
         }
     }
@@ -3624,6 +3627,7 @@ function handleGameFinished(payload) {
     // Show game page
     document.getElementById('game-page').classList.remove('hidden');
 }
+
 function handleError(payload) {
     console.error('❌ Error:', payload);
     const errorMessage = payload.message || payload.error || 'Bir hata oluştu';
