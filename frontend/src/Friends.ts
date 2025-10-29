@@ -50,70 +50,57 @@ function esc(e: KeyboardEvent) {
 async function friendRequest(e: any) {
 	e.preventDefault();
 	console.log("SEND FRIEND REQUEST!!!");
+	const list = await fetch(`${API_BASE_URL}/friend/send?userName=bkorkut&peerName=test0`, {
+		method: "POST",
+		credentials: "include",
+	});
 }
 
-async function createFriends() {
-	try {
-		const list = await fetch(`${API_BASE_URL}/friend/list?userName=bkorkut`, {
-			method: "GET",
-			credentials: "include",
-		});
-
-		console.log("FETCHED FRIEND LIST RESPONSE", list);
-		const json = await list.json();
-
-		console.log("FETCHED FRIEND LIST JSON", json);
-
-		for (const user of json) {
-			console.log("FETCHED FRIEND LIST MAN");
-			console.log(user);
-			// const div = document.createElement("div");
-			// <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
-			// div.innerHTML = `
-			// 	<div class="user-profile">
-			// 		<div class="friend-user-avatar">
-			// 			${user.avatar_url}
-			// 		</div>
-			// 		<div class="friends-user-info">
-			// 			<span class="dname">${user.dname}</span>
-			// 			<span class="uname">${user.uname}</span>
-			// 		</div>
-			// 	</div>
-			// 	<div class="user-actions">
-			// 		<div class="user-menu">
-			// 			<button class="menu-btn">⋮</button>
-			// 			<div class="menu-options">
-			// 				<button class="option prof">Profile</button>
-			// 				<button class="option unfr">Unfriend</button>
-			// 			</div>
-			// 		</div>
-			// 	</div>
-			// `;
-	// 	div.classList.add("friend");
-	// 	div.classList.add("online");
-
-	// 	const friends = document.querySelector("#friends");
-	// 	friends.appendChild(div);
-		}
-	} catch {
-		console.log("COULD NOT FETCH FRIEND LIST");
-	}
-}
-
-async function createInvites() {
-	const usr = await fetch("mockdata/invitelist.json");
-	const userList = await usr.json();
-	for (const user of userList) {
+async function createFriends(list: any) {
+	if (!list)
+		return ;
+	for (const user of list) {
 		const div = document.createElement("div");
-		// <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
 		div.innerHTML = `
 			<div class="user-profile">
 				<div class="friend-user-avatar">
-					${user.avatar_url}
+					<img src="${user?.avatarUrl ?? "../profile.svg"}" alt="">
 				</div>
 				<div class="friends-user-info">
-					<span class="dname">${user.dname}</span>
-					<span class="uname">${user.uname}</span>
+					<span class="dname">${user?.displayName ?? user?.userName}</span>
+					<span class="uname">@${user?.userName}</span>
+				</div>
+			</div>
+			<div class="user-actions">
+				<div class="user-menu">
+					<button class="menu-btn">⋮</button>
+					<div class="menu-options">
+						<button class="option prof">Profile</button>
+						<button class="option unfr">Unfriend</button>
+					</div>
+				</div>
+			</div>
+			`;
+		div.classList.add("friend");
+
+		const friends = document.querySelector("#friends");
+		friends.appendChild(div);
+	}
+}
+
+async function createInvites(list: any) {
+	if (!list)
+		return ;
+	for (const user of list) {
+		const div = document.createElement("div");
+		div.innerHTML = `
+			<div class="user-profile">
+				<div class="friend-user-avatar">
+					<img src="${user?.avatarUrl ?? "../profile.svg"}" alt="">
+				</div>
+				<div class="friends-user-info">
+					<span class="dname">${user?.displayName ?? user?.username}</span>
+					<span class="uname">@${user?.userName}</span>
 				</div>
 			</div>
 			<div class="user-actions">
@@ -125,31 +112,29 @@ async function createInvites() {
 					</div>
 				</div>
 			</div>
-		`;
+			`;
 		div.classList.add("friend");
-		div.classList.add("online");
 
 		const friends = document.querySelector("#invites");
 		friends.appendChild(div);
 	}
 }
 
-async function createRequests() {
-	const usr = await fetch("mockdata/requestlist.json");
-	const userList = await usr.json();
-	for (const user of userList) {
+async function createRequests(list:any) {
+	if (!list)
+		return ;
+	for (const user of list) {
 		const div = document.createElement("div");
-		// <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
 		div.innerHTML = `
 			<div class="user-profile">
 				<div class="friend-user-avatar">
-					${user.avatar_url}
+					<img src="${user?.avatarUrl ?? "../profile.svg"}" alt="">
 				</div>
 				<div class="friends-user-info">
-					<span class="dname">${user.dname}</span>
-					<span class="uname">${user.uname}</span>
+						<span class="dname">${user?.displayName ?? user?.userName}</span>
+						<span class="uname">@${user?.userName}</span>
+					</div>
 				</div>
-			</div>
 			<div class="user-actions">
 				<div class="user-menu">
 					<button class="menu-btn">⋮</button>
@@ -160,9 +145,8 @@ async function createRequests() {
 					</div>
 				</div>
 			</div>
-		`;
+			`;
 		div.classList.add("friend");
-		div.classList.add("online");
 
 		const req = document.querySelector("#requests");
 		const ugrid = req?.querySelector(".user-grid");
@@ -207,9 +191,22 @@ export default class extends AView {
 	}
 
 	async setDynamicContent() {
-		createFriends();
-		createInvites();
-		createRequests();
+		try {
+			// const lists = await fetch(`${API_BASE_URL}/friend/list?userName=bkorkut`, {
+			const lists = await fetch(`../../mockdata/friendslists.json`, {
+				method: "GET",
+				credentials: "include",
+			});
+			const json = await lists.json();
+			console.info("FRIENDS PAGE: FETCHED LISTS");
+			console.log(lists);
+			console.log(json);
+			createFriends(json?.friends);
+			createRequests(json?.requests);
+			createInvites(json?.invitations);
+		} catch {
+			console.log("fetch failed");
+		}
 		createOverlay();
 	}
 

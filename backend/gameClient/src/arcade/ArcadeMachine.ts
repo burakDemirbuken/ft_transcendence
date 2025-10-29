@@ -90,7 +90,7 @@ class ArcadeMachine
         }
 
 		const light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(this.position.x, this.position.y + 1, this.position.z), this.scene);
-		light1.intensity = 0.4;
+		light1.intensity = 0.2; // Daha düşük ışık yoğunluğu
 
         this.createGameScreen();
 		this.setActive(true);
@@ -120,6 +120,11 @@ class ArcadeMachine
 		{
             console.warn(`Screen mesh not found. Available meshes: ${this.meshs.map(m => m.name).join(', ')}`);
         }
+		const ctx = this.gameScreen.getContext();
+
+		ctx.fillStyle = "#000000";
+		ctx.fillRect(0, 0, this.screenSize.width, this.screenSize.height);
+		this.gameScreen.update();
     }
 
 	joystickMove(number: number, direction: string): void

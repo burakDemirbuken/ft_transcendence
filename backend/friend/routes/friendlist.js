@@ -3,7 +3,7 @@ import { Op } from 'sequelize'
 export default async function friendListRoutes(fastify) {
 	fastify.get('/list', async (request, reply) => {
 		const { userName } = request.query
-		
+
 		try {
 			if (!userName) {
 				throw new Error("userName is required.")
@@ -33,14 +33,39 @@ export default async function friendListRoutes(fastify) {
 				}
 				return acc
 			}, [[], [], []])
-			
 
-			return reply.send({ 
+			const allFriendNames = [...incomingPending, ...outgoingPending, ...accepted]
+
+			const friendsProfiles = await fetch("http://profile:3006/internal/friend", {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ friends: allFriendNames })
+			})
+
+			if (!friendsProfiles.ok) {
+				fastify.log.error(`Failed to fetch friend profiles: ${friendsProfiles.status}`)
+				return reply.code(500).send({ message: 'Failed to retrieve friend profiles' })
+			}
+
+			const {users} =  await friendsProfiles.json()
+
+			const [incomingProfiles, outgoingProfiles, acceptedProfiles] = users.reduce((acc, profile) => {
+				if (incomingPending.includes(profile.userName)) {
+					acc[0].push(profile)
+				} else if (outgoingPending.includes(profile.userName)) {
+					acc[1].push(profile)
+				} else if (accepted.includes(profile.userName)) {
+					acc[2].push(profile)
+				}
+				return acc
+			}, [[], [], []])
+
+			return reply.send({
 				pendingFriends: {
-					incoming: incomingPending,
-					outcoming: outgoingPending
+					incoming: incomingProfiles,
+					outcoming: outgoingProfiles
 				},
-				acceptedFriends: accepted
+				acceptedFriends: acceptedProfiles
 			})
 		} catch (error) {
 			fastify.log.error('Error retrieving user friends:', { message: error.message,
@@ -58,7 +83,7 @@ export default async function friendListRoutes(fastify) {
 			}
 
 			await fastify.sequelize.models.Friend.destroy({
-				where: { 
+				where: {
 					[Op.or]: [
 						{ userName: userName },
 						{ peerName: userName }

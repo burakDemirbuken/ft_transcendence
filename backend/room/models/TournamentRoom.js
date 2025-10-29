@@ -141,10 +141,10 @@ export default class TournamentRoom extends Room
 
 		this.matches.forEach((matchsArray, roundIndex) => {
 			rounds.push({
-				round: roundIndex,
+				round: roundIndex + 1,
 				matchs: matchsArray.map(match => ({
 					matchId: match.matchId,
-					matchNumber: match.matchNumber,
+					matchNumber: match.matchNumber + 1,
 					matchStatus: match.matchStatus,
 					player1: match.player1,
 					player2: match.player2,
@@ -162,6 +162,7 @@ export default class TournamentRoom extends Room
 			name: this.name,
 			winner: this.players[0].id,
 			rounds: rounds,
+			participants: this.players.map(p => ({ id: p.id})),
 			matchType: 'tournament'
 		};
 	}
