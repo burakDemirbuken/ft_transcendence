@@ -4,27 +4,71 @@ networks:
 
 volumes:
   frontend_src:
-    external: false
+   driver: local
+   driver_opts:
+     type: none
+     device: ./frontend
+     o: bind
   gateway_src:
-    external: false
+   driver: local
+   driver_opts:
+     type: none
+     device: ./backend/gateway
+     o: bind
   authentication_src:
-    external: false
+   driver: local
+   driver_opts:
+     type: none
+     device: ./backend/authentication
+     o: bind
   email_src:
-    external: false
+   driver: local
+   driver_opts:
+     type: none
+     device: ./backend/email
+     o: bind
   profile_src:
-    external: false
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/profile
+      o: bind
   aiServer_src:
-    external: false
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/aiServer
+      o: bind
   gameClient_src:
-    external: false
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/gameClient
+      o: bind
   gameServer:
-    external: false
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/gameServer
+      o: bind
   room_src:
-    external: false
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/room
+      o: bind
   friend_src:
-    external: false
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/friend
+      o: bind
   static_src:
-    external: false
+    driver: local
+    driver_opts:
+      type: none
+      device: ./backend/static
+      o: bind
 
 services:
   frontend:
@@ -32,7 +76,7 @@ services:
     build: ./frontend
     restart: on-failure
     volumes:
-      - ./frontend:/app
+      - frontend_src:/app
       - /app/node_modules
     networks:
       - transcendency
@@ -45,7 +89,7 @@ services:
     build: ./backend/nginx
     restart: on-failure
     volumes:
-      - ./frontend:/usr/share/nginx/html
+      - frontend_src:/usr/share/nginx/html
     networks:
       - transcendency
     ports:
@@ -62,7 +106,7 @@ services:
     expose:
       - 3001
     volumes:
-      - ./backend/authentication:/app
+      - authentication_src:/app
       - /app/node_modules
     environment:
       - HOST_IP=${HOST_IP}
@@ -76,7 +120,7 @@ services:
     expose:
       - 3000
     volumes:
-      - ./backend/gateway:/app
+      - gateway_src:/app
       - /app/node_modules
 
   email:
@@ -88,7 +132,7 @@ services:
     expose:
       - 3005
     volumes:
-      - ./backend/email:/app
+      - email_src:/app
       - /app/node_modules
     environment:
       - EMAIL_SERVICE=gmail
@@ -108,7 +152,7 @@ services:
     ports:
       - "3002:3002"
     volumes:
-      - ./backend/gameServer:/app
+      - gameServer:/app
       - /app/node_modules
     depends_on:
       - room
@@ -123,7 +167,7 @@ services:
     ports:
       - "3004:3004"
     volumes:
-      - ./backend/room:/app
+      - room_src:/app
       - /app/node_modules
     networks:
       - transcendency
@@ -137,7 +181,7 @@ services:
     expose:
       - 3006
     volumes:
-      - ./backend/profile:/app
+      - profile_src:/app
       - /app/node_modules
     networks:
       - transcendency
@@ -149,7 +193,7 @@ services:
     expose:
       - 3007
     volumes:
-      - ./backend/friend:/app
+      - friend_src:/app
       - /app/node_modules
     networks:
       - transcendency
@@ -163,8 +207,7 @@ services:
     expose:
       - 3003
     volumes:
-      - ./backend/aiServer:/app
-      - /app/node_modules
+      - aiServer_src:/app
 
   static:
     container_name: static
@@ -175,9 +218,10 @@ services:
     expose:
       - 3008
     volumes:
-      - ./backend/static:/app
+      - static_src:/app
       - /app/node_modules
-      
+      - /app/database
+
   gameclientburak:
     container_name: gameclientburak
     build: ./backend/gameClient
@@ -190,4 +234,4 @@ services:
       - "4000:4000"
     volumes:
       - /app/node_modules
-      - ./backend/gameClient:/app
+      - gameClient_src:/app

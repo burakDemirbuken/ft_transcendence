@@ -3,33 +3,27 @@ import fastifyStatic from "@fastify/static"
 import fastifyMultipart from "@fastify/multipart"
 import avatarRoutes from "./routes/avatar.js"
 import path from "path"
-import { fileURLToPath } from 'url'
-import { dirname } from 'path'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+const __dirname = process.cwd()
 
 const fastify = Fastify({
     logger: true
 })
 
-/* fastify.register(fastifyStatic, {
-    root: path.join(__dirname, "default"),
-    prefix: "/default/"
-}) */
+console.log(path.join(__dirname, "database/avatars"))
 
 fastify.register(fastifyStatic, {
-    root: path.join(__dirname, "uploads"),
-    prefix: "/uploads/"
-})
+    root: path.join(__dirname, "database/avatars"),
+    prefix: "/database/avatars/"
+}) 
 
-fastify.decorate("cwd", process.cwd())
+fastify.decorate("cwd", __dirname)
 fastify.register(fastifyMultipart)
 fastify.register(avatarRoutes)
 
 await fastify.ready()
 
-fastify.listen({port: 3010, host: '0.0.0.0'}, (err, address) => {
+fastify.listen({port: 3008, host: '0.0.0.0'}, (err, address) => {
     if (err) {
         fastify.log.error(err)
         process.exit(1)

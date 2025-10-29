@@ -106,6 +106,11 @@ shell-friend:
 	@echo "$(GREEN)Entering shell for friend service$(NC)"
 	@docker exec -it friend /bin/sh
 
+shell-static:
+	@echo "$(GREEN)Entering shell for static service$(NC)"
+	@docker exec -it static /bin/sh
+
+
 clean-db:
 	@echo "$(RED)Cleaning databases...$(NC)"
 	# @rm -f ./db_profile.sqlite 2>/dev/null || true
@@ -165,6 +170,11 @@ dev-frontend:
 	@echo "$(BLUE)Development mode for frontend service$(NC)"
 	@$(COMPOSE_CMD) up -d --build frontend
 	@$(COMPOSE_CMD) logs -f frontend
+
+dev-static:
+	@echo "$(BLUE)Development mode for static service$(NC)"
+	@$(COMPOSE_CMD) up -d --build static
+	@$(COMPOSE_CMD) logs -f static
 
 # Health check
 health:
