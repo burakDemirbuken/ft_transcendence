@@ -29,7 +29,6 @@ class GameCore
 
 	async initialize(canvas: HTMLCanvasElement, gameConfig?: any): Promise<void>
 	{
-		// Check if BABYLON is available
 		if (typeof BABYLON === 'undefined') {
 			throw new Error('BABYLON.js is not loaded. Please ensure the library is included.');
 		}
@@ -37,16 +36,14 @@ class GameCore
 		this.engine = new BABYLON.Engine(canvas, true);
 		this.scene = new BABYLON.Scene(this.engine);
 
+		this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
+
 		this.camera = new BABYLON.UniversalCamera("camera",
 			new BABYLON.Vector3(0, 4.5, 2.5), this.scene);
 
 		this.camera.attachControl(canvas, true);
 		this.camera.angularSensibility = 5000;
 		this.camera.speed = 0;
-		// Note: lowerRadiusLimit and upperRadiusLimit are for ArcRotateCamera, not UniversalCamera
-		// Commenting out for now as they don't apply to UniversalCamera
-		// this.camera.lowerRadiusLimit = this.camera.radius;
-		// this.camera.upperRadiusLimit = this.camera.radius;
 		this.gameConfig = gameConfig;
 
 		this.engine.runRenderLoop(
