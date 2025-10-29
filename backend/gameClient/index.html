@@ -3601,7 +3601,7 @@ function handleGameFinished(payload) {
             return;
         }
 
-        // Status 'finished' veya son round ise turnuva bitti demektir
+        // Status 'finished' ise turnuva bitti demektir
         if (payload.status === 'finished' || payload.isFinal) {
             console.log('🏆 Tournament completed!');
             showNotification('🏆 Turnuva tamamlandı!', 'success');
@@ -3612,20 +3612,6 @@ function handleGameFinished(payload) {
             } else if (payload.players && payload.players.length === 1) {
                 showNotification(`🎉 Kazanan: ${payload.players[0].name}`, 'success');
             }
-
-            // Odadan ayrıl
-            if (currentRoomId) {
-                roomSocket.send("leave", { roomId: currentRoomId });
-            }
-
-            // Game page'e dön
-            document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
-            document.getElementById('game-page').classList.remove('hidden');
-            document.getElementById('back-arrow').classList.remove('active');
-
-            // Reset game mode ve room
-            currentGameMode = null;
-            currentRoomId = null;
 
             return;
         }
@@ -3906,7 +3892,7 @@ document.getElementById('custom-join-btn').addEventListener('click', function() 
 
 // Custom Game - Start Game
 document.getElementById('custom-start-game-btn').addEventListener('click', function() {
-    roomSocket.send("start", {}, );
+    roomSocket.send("start", {});
     showNotification('Oyun başlatılıyor...', 'info');
 });
 
@@ -4535,20 +4521,6 @@ function showRoundWaitingRoom(data) {
         if (currentRound >= totalRounds) {
             console.log('Tournament completed');
             showNotification('🏆 Turnuva tamamlandı!', 'success');
-
-            // Odadan ayrıl
-            if (currentRoomId) {
-                roomSocket.send("leave", { roomId: currentRoomId });
-            }
-
-            // Game page'e dön
-            document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
-            document.getElementById('game-page').classList.remove('hidden');
-            document.getElementById('back-arrow').classList.remove('active');
-
-            // Reset game mode ve room
-            currentGameMode = null;
-            currentRoomId = null;
         }
         // Final round mu?
         else if (nextRound === totalRounds) {
