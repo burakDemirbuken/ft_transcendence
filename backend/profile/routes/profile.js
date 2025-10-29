@@ -209,11 +209,11 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.post('/internal/avatar-update', async (request, reply) => {
-		const {userName, filename, avatarUrlPath } = request.body ?? {}
+		const {userName, avatarUrlPath } = request.body ?? {}
 
 		try {
-			if (!userName || !filename || !avatarUrlPath) {
-				throw new Error('userName, filename, and avatarUrlPath are required')
+			if (!userName || !avatarUrlPath) {
+				throw new Error('userName and avatarUrlPath are required')
 			}
 
 			const userProfile = await fastify.sequelize.models.Profile.findOne({
@@ -226,11 +226,8 @@ export default async function profileRoute(fastify) {
 
 			userProfile.avatarUrl = avatarUrlPath
 			await userProfile.save()
-
-			return reply.code(200).send({
-				success: true,
-				message: 'Avatar updated successfully'
-			})
+			console.log('Avatar updated successfully for user:', avatarUrlPath)
+			return reply.code(200).send({  message: 'Avatar updated successfully', newAvatarUrl: userProfile.avatarUrl  })
 		} catch (error) {
 			fastify.log.error('Error updating avatar:', { message: error.message,
 				details: error.toString() })

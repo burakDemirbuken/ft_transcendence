@@ -4,6 +4,7 @@ import jwtMiddleware from './plugins/authorization.js'
 import allRoutes from './routes/index.js'
 import cookie from '@fastify/cookie'
 import jwt from '@fastify/jwt'
+import multipart from '@fastify/multipart'
 
 const fastify = Fastify({
 	logger: true,
@@ -15,6 +16,8 @@ const fastify = Fastify({
 await fastify.register(globalsPlugin)
 
 await fastify.register(cookie)
+
+await fastify.register(multipart)
 
 await fastify.register(jwt, {
 	secret: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production',
