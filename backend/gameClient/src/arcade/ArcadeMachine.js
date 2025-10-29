@@ -108,7 +108,6 @@ class ArcadeMachine
                 }, 500);
             }
         }
-
         return this;
     }
 
