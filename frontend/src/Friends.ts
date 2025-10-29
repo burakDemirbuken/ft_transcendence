@@ -1,11 +1,22 @@
 import AView from "./AView.js";
 import Profile from "./Profile.js";
+import { API_BASE_URL } from "./index.js";
 import { showNotification } from "./notification.js";
 
 let currentFrPage:string = "friends";
 
-function handle_clicks(e) {
+function handleOverlay(e: any) {
+	if (e.target.classList.contains("prof")) {
+		document.querySelector(".overlay").classList.remove("hide-away");
+		// Add user profile to overlay
+	}
+	else if (e.currentTarget.id === "card-exit") {
+		document.querySelector(".overlay").classList.add("hide-away");
+		// Clear user profile information
+	}
+}
 
+function subpageSwitch(e: any) {
 	if (e.target.classList.contains("pg-switch")) {
 		let fields = document.querySelectorAll(`.${currentFrPage}`);
 
@@ -28,15 +39,6 @@ function handle_clicks(e) {
 		}
 		document.querySelector(`#${currentFrPage}`).removeAttribute("inert");
 	}
-	else if (e.target.classList.contains("prof")) {
-		// Add overlay
-		// Add profile to overlay
-		document.querySelector(".overlay").classList.remove("hide-away");
-	}
-	else if (e.currentTarget.id === "card-exit") {
-		// clear friend information?
-		document.querySelector(".overlay").classList.add("hide-away");
-	}
 }
 
 function esc(e: KeyboardEvent) {
@@ -45,38 +47,56 @@ function esc(e: KeyboardEvent) {
 		ol.classList.add("hide-away");
 }
 
+async function friendRequest(e: any) {
+	e.preventDefault();
+	console.log("SEND FRIEND REQUEST!!!");
+}
 
 async function createFriends() {
-	const usr = await fetch("mockdata/friendslist.json");
-	const userList = await usr.json();
-	for (const user of userList) {
-		const div = document.createElement("div");
-		// <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
-		div.innerHTML = `
-			<div class="user-profile">
-				<div class="friend-user-avatar">
-					${user.avatar_url}
-				</div>
-				<div class="friends-user-info">
-					<span class="dname">${user.dname}</span>
-					<span class="uname">${user.uname}</span>
-				</div>
-			</div>
-			<div class="user-actions">
-				<div class="user-menu">
-					<button class="menu-btn">⋮</button>
-					<div class="menu-options">
-						<button class="option prof">Profile</button>
-						<button class="option unfr">Unfriend</button>
-					</div>
-				</div>
-			</div>
-		`;
-		div.classList.add("friend");
-		div.classList.add("online");
+	try {
+		const list = await fetch(`${API_BASE_URL}/friend/list?userName=bkorkut`, {
+			method: "GET",
+			credentials: "include",
+		});
 
-		const friends = document.querySelector("#friends");
-		friends.appendChild(div);
+		console.log("FETCHED FRIEND LIST RESPONSE", list);
+		const json = await list.json();
+
+		console.log("FETCHED FRIEND LIST JSON", json);
+
+		for (const user of json) {
+			console.log("FETCHED FRIEND LIST MAN");
+			console.log(user);
+			// const div = document.createElement("div");
+			// <img src="${friend.avatar_url}" alt="${friend.username}'s avatar">
+			// div.innerHTML = `
+			// 	<div class="user-profile">
+			// 		<div class="friend-user-avatar">
+			// 			${user.avatar_url}
+			// 		</div>
+			// 		<div class="friends-user-info">
+			// 			<span class="dname">${user.dname}</span>
+			// 			<span class="uname">${user.uname}</span>
+			// 		</div>
+			// 	</div>
+			// 	<div class="user-actions">
+			// 		<div class="user-menu">
+			// 			<button class="menu-btn">⋮</button>
+			// 			<div class="menu-options">
+			// 				<button class="option prof">Profile</button>
+			// 				<button class="option unfr">Unfriend</button>
+			// 			</div>
+			// 		</div>
+			// 	</div>
+			// `;
+	// 	div.classList.add("friend");
+	// 	div.classList.add("online");
+
+	// 	const friends = document.querySelector("#friends");
+	// 	friends.appendChild(div);
+		}
+	} catch {
+		console.log("COULD NOT FETCH FRIEND LIST");
 	}
 }
 
@@ -194,15 +214,18 @@ export default class extends AView {
 	}
 
 	async setEventHandlers() {
-		document.addEventListener("click", handle_clicks);
-		document.querySelector("#card-exit").addEventListener("click", handle_clicks);
+		document.addEventListener("click", handleOverlay);
+		document.querySelector("#card-exit").addEventListener("click", handleOverlay);
 		document.addEventListener("keydown", esc);
+		document.querySelector(".friend-nav").addEventListener("click", subpageSwitch);
+		document.getElementById("add-friend").addEventListener("click", friendRequest);
 	}
 
 	async unsetEventHandlers() {
-		console.log("Unsetting Friends Event Handlers");
-		document.removeEventListener("click", handle_clicks);
+		document.removeEventListener("click", handleOverlay);
+		document.querySelector("#card-exit").removeEventListener("click", handleOverlay);
 		document.removeEventListener("keydown", esc);
+		document.querySelector(".friend-nav").removeEventListener("click", subpageSwitch);
 	}
 
 	async setStylesheet() {
@@ -213,7 +236,6 @@ export default class extends AView {
 	}
 
 	async unsetStylesheet() {
-		console.log("Unsetting Friends Style Sheets");
 		let link = document.querySelector("link[href='styles/friends.css']");
 		document.head.removeChild(link);
 		link = document.querySelector("link[href='styles/profile.css']");

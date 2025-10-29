@@ -3,7 +3,7 @@ import fp from 'fastify-plugin'
 export default fp(async (fastify) => {
 	async function checkAchievements(userId, t) {
 		const { Achievement, Stat } = fastify.sequelize.models
-		console.log('Checking achievements for user:', userId)
+
 		const [userStat, userAchievement] = await Promise.all([
 			Stat.findOne({
 				where: { userId: userId },
@@ -45,15 +45,15 @@ export default fp(async (fastify) => {
 		}
 
 	}
-	async function getAchievementProgress(user) {
+	async function getAchievementProgress(userId) {
 		const { Achievement, Stat } = fastify.sequelize.models
 
 		const [stats, achievements] = await Promise.all([
 			Stat.findOne({
-				where: { userId: user.id }
+				where: { userId: userId }
 			}),
 			Achievement.findOne({
-				where: { userId: user.id }
+				where: { userId: userId }
 			})
 		])
 
@@ -104,11 +104,11 @@ export default fp(async (fastify) => {
 		}
 	}
 
-	async function statCalculate(user) {
+	async function statCalculate(userId) {
 		const { Stat } = fastify.sequelize.models
 
 		const stats = await Stat.findOne({
-			where: { userId: user.id },
+			where: { userId: userId },
 			attributes: [
 				'xp',
 				'gamesPlayed',

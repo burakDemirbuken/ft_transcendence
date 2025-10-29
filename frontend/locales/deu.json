@@ -81,13 +81,7 @@
 				"lost": "Verloren"
 			},
 			"skills": {
-				"title": "Fähigkeiten",
-				"speed": "Shnelligkeit",
-				"accur": "Präzision",
-				"defence": "Verteidigung",
-				"attack": "Angriff",
-				"strat": "Strategie",
-				"dur": "Dauerhaftigkeit"
+				"title": "Fähigkeiten"
 			},
 			"mprog": {
 				"title": "Monatlicher Fortschritt",
@@ -202,7 +196,7 @@
 			"uname": "Benutzername",
 			"dname": "Anzeigename",
 			"email": "E-Mail",
-			"pass": "Passwort"
+			"pass": "Passwort Ändern:"
 		},
 		"language": "Sprache",
 		"dzone": {

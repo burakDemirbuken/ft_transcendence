@@ -1,14 +1,14 @@
 export default (sequelize, DataTypes, Model) => {
 
-    class MatchHistory extends Model {}
+	class MatchHistory extends Model {}
 
-    MatchHistory.init({
-        id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true
-        },
-        teamOneId: {
+	MatchHistory.init({
+		id: {
+			type: DataTypes.INTEGER,
+			primaryKey: true,
+			autoIncrement: true
+		},
+		teamOneId: {
 			type: DataTypes.INTEGER,
 			allowNull: true,
 			references: {
@@ -41,23 +41,23 @@ export default (sequelize, DataTypes, Model) => {
 				model: 'teams',
 				key: 'id'
 			},
-			onDelete: 'SET NULL'
+			onDelete: 'SET NULL'/*  */
 		},
-        matchStartDate: {
-            type: DataTypes.DATE
-        },
+		matchStartDate: {
+			type: DataTypes.DATE
+		},
 		matchEndDate: {
 			type: DataTypes.DATE
 		},
-        matchType: {
-            type: DataTypes.STRING,
-            allowNull: false
-        }
+		matchType: {
+			type: DataTypes.STRING,
+			allowNull: false
+		}
 	}, {
-        sequelize,
-        modelName: 'MatchHistory',
-        tableName: 'match_histories'
-    })
+		sequelize,
+		modelName: 'MatchHistory',
+		tableName: 'match_histories'
+	})
 
-    return MatchHistory
+	return MatchHistory
 }

@@ -21,7 +21,7 @@ class ManagerProfile {
     private monthChartData: { label0: string, label1: string, labels: string[], data1: number[], data2: number[] } = {
 		label0: "Total Matches",
 		label1: "Matches Won",
-		labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+		labels: ["1st Quarter", "2nd Quarter", "3rd Quarter", "4th Quarter"],
         data1: [],
         data2: []
     };
@@ -673,7 +673,7 @@ function handleMatchOverlay(e) {
     console.log(matchdetails);
     matchdetails.innerHTML = `
         <h2 class="match-details-title">Match Details</h2>
-        <div class="match-info">
+        <div class="match-details-info">
             <span class="">Date: 2024-10-05</span>
             <span class="">Duration: 4.23 mins</span>
             <span class="">Score: 11</span>
@@ -1009,6 +1009,18 @@ async function setChartStats(user: any) {
 }
 
 async function setAchievementStats(user: any) {
+	const achievements = document.querySelectorAll('.achievement-card');
+
+	achievements.forEach(card => {
+		const attrib = card.getAttribute("data-achievement");
+		if (user?.achievements[attrib]?.unlockedAt)
+		{
+			card.classList.replace("locked", "unlocked");
+			const date = card.querySelector(".achievement-date");
+			if (date)
+				date.textContent = user.achievements[attrib].unlockedAt;
+		}
+	});
 }
 
 async function onLoad()

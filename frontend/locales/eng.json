@@ -131,8 +131,8 @@
 		"achiev": {
 			"fwin": {
 				"title": "First Victory",
-				"active": "Win your first match",
-				"passive": "You won your first match!"
+				"active": "You won your first match!",
+				"passive": "Win your first match"
 			},
 			"smaster": {
 				"title": "Streak Master",
@@ -188,7 +188,7 @@
 			"uname": "User Name",
 			"dname": "Display Name",
 			"email": "E-mail",
-			"pass": "Password"
+			"pass": "Change Password:"
 		},
 		"language": "Language",
 		"dzone": {

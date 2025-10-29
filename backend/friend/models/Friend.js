@@ -19,13 +19,8 @@ export default (sequelize, DataTypes, Model) => {
         status: {
             type: DataTypes.ENUM('pending', 'accepted'),
         }
-    }, {
-        indexes: [
-            {
-                unique: true,
-                fields: ['userName', 'peerName']
-            }
-        ],
+    },
+    {
         sequelize,
         modelName: 'Friend',
         tableName: 'friends'
