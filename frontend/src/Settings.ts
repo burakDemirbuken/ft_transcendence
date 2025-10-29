@@ -228,8 +228,9 @@ async function onLoad()
 
 			if (profileReq.ok) {
 				const user = await profileReq.json();
-				console.log(user);
 				document.querySelector('input[name="dname"]').setAttribute('value', user.profile.displayName ?? '');
+				if (user?.profile?.avatarUrl)
+					document.getElementById('settings-avatar').setAttribute('src', user.profile.avatarUrl);
 			} else
 				console.error("❌ Failed to fetch profile data:", profileReq.statusText);
 		} else {
