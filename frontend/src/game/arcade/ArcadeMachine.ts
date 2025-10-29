@@ -64,33 +64,62 @@ class ArcadeMachine
 		this.joystick1 = null;
 		this.debugCanvas = null;
 		this.debugCtx = null;
-    }
+	}
 
-    async load(position?: Position, angle?: number): Promise<ArcadeMachine>
+	async load(position?: Position, angle?: number): Promise<ArcadeMachine>
 	{
-        try
+		try
 		{
-			const result = await BABYLON.SceneLoader.ImportMeshAsync("", "./assets/models/arcade/", "arcade.glb", this.scene);
+			console.log("🎮 Loading arcade machine model from: /assets/models/arcade/arcade.glb");
+
+			// First check if BABYLON is available
+			if (typeof BABYLON === 'undefined') {
+				throw new Error('BABYLON.js is not available');
+			}
+
+			console.log("📦 Model loaded, processing meshes...");
+			const result = await BABYLON?.SceneLoader?.ImportMeshAsync("", "./assets/models/arcade/", "arcade.glb", this.scene);
+			console.log("🔍 Model import result:", result);
 			this.meshs = result.meshes;
 			this.position = position || { x: 0, y: 0, z: 0 };
 			this.angle = angle || 0;
+
+			console.log(`✅ Successfully loaded ${this.meshs.length} meshes`);
+
 			const parentMesh = this.meshs.find(mesh => mesh.parent === null) || this.meshs[0];
 			if (parentMesh)
 			{
 				parentMesh.position = new BABYLON.Vector3(this.position.x, this.position.y, this.position.z);
 				parentMesh.rotation = new BABYLON.Vector3(0, this.angle, 0);
+				console.log(`📍 Positioned arcade machine at (${this.position.x}, ${this.position.y}, ${this.position.z})`);
 			}
 			else
 				console.warn("Parent mesh not found. Using default position and rotation.");
         }
 		catch (error)
 		{
-            console.error("Error loading arcade machine:", error);
-            return;
+            console.error("❌ Error loading arcade machine:", error);
+            // Try to provide more specific error information
+            if (error instanceof Error) {
+                console.error("Error message:", error.message);
+                console.error("Error stack:", error.stack);
+            }
+            // Don't return undefined, return this instance even if loading failed
+            console.log("🔄 Continuing without 3D model, creating fallback...");
+
+            // Set position and angle even when model loading fails
+            this.position = position || { x: 0, y: 0, z: 0 };
+            this.angle = angle || 0;
+
+            // Create a simple fallback box mesh
+            this.createFallbackMesh();
         }
 
-		const light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(this.position.x, this.position.y + 1, this.position.z), this.scene);
-		light1.intensity = 0.2; // Daha düşük ışık yoğunluğu
+        // Only create light if position is set
+        if (this.position) {
+            const light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(this.position.x, this.position.y + 1, this.position.z), this.scene);
+            light1.intensity = 0.2; // Daha düşük ışık yoğunluğu
+        }
 
         this.createGameScreen();
 		this.setActive(true);
@@ -202,6 +231,28 @@ class ArcadeMachine
 				}
 			);
     }
+
+	private createFallbackMesh(): void
+	{
+		try {
+			console.log("🔧 Creating fallback mesh...");
+			// Create a simple box as fallback
+			const box = BABYLON.MeshBuilder.CreateBox("arcadeFallback", {size: 2}, this.scene);
+			box.position = new BABYLON.Vector3(this.position.x, this.position.y + 1, this.position.z);
+			box.rotation = new BABYLON.Vector3(0, this.angle, 0);
+
+			// Create a simple material
+			const material = new BABYLON.StandardMaterial("arcadeFallbackMaterial", this.scene);
+			material.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.8);
+			box.material = material;
+
+			this.meshs = [box];
+			console.log("✅ Fallback mesh created successfully");
+		} catch (error) {
+			console.error("❌ Failed to create fallback mesh:", error);
+			this.meshs = [];
+		}
+	}
 }
 
 export default ArcadeMachine;

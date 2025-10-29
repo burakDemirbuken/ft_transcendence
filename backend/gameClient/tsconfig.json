@@ -13,7 +13,6 @@
     "allowJs": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "types": ["babylonjs"],
     "allowImportingTsExtensions": false
   },
   "include": ["src/**/*"],

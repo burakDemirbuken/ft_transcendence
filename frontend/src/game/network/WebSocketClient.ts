@@ -16,7 +16,7 @@ class NetworkManager
 	constructor(ip: string, port: number)
 	{
 		this.socket = null;
-		this.serverAddress = `ws://${ip}:${port}`;
+		this.serverAddress = `wss://${ip}:${port}`;
 
 		this.callbacks = {
 			onConnect : null,

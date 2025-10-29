@@ -2,12 +2,12 @@
 // IMPORTS
 // ============================================================================
 import AView from "./AView.js";
-import { showNotification } from '../dist/notifications.js';
-import App from './src/App.js';
-import WebSocketClient from './src/network/WebSocketClient.js';
-import gameConfig from './src/json/GameConfig.js';
-import aiConfig from './src/json/AiConfig.js';
-import tournamentConfig from './src/json/TournamentConfig.js';
+import { showNotification } from '../dist/notification.js';
+import App from '../dist/game/App.js';
+import WebSocketClient from '../dist/game/network/WebSocketClient.js';
+import gameConfig from '../dist/game/json/GameConfig.js';
+import aiConfig from '../dist/game/json/AiConfig.js';
+import tournamentConfig from '../dist/game/json/TournamentConfig.js';
 
 // ============================================================================
 // GLOBAL VARIABLES
@@ -202,9 +202,9 @@ interface Participant {
 
 // updateParticipants fonksiyonunu güncelle
 function updateParticipants(
-    participants: Participant[], 
-    gridId: string, 
-    matchPairs?: MatchPair[] | null, 
+    participants: Participant[],
+    gridId: string,
+    matchPairs?: MatchPair[] | null,
     multiplayerMode?: boolean
 ): void {
     const grid = document.getElementById(gridId);
@@ -824,7 +824,7 @@ function handleGameFinished(payload: GameFinishPayload): void {
 
     if (loadingScreen && loadingScreen.classList.contains('active')) {
         loadingScreen.classList.remove('active');
-        
+
         if (gamePage) {
             gamePage.classList.remove('hidden');
         }
@@ -973,9 +973,9 @@ function showTournamentWaitingRoom(data: TournamentData): void {
                 } else {
                     if (waitingPlayersBtn) {
                         waitingPlayersBtn.style.display = 'block';
-                        waitingPlayersBtn.textContent = 
-                            playerCount < minPlayers 
-                                ? `En az ${minPlayers - playerCount} oyuncu daha gerekli` 
+                        waitingPlayersBtn.textContent =
+                            playerCount < minPlayers
+                                ? `En az ${minPlayers - playerCount} oyuncu daha gerekli`
                                 : 'Çift sayıda oyuncu gerekli';
                     }
                     if (matchPlayersBtn) matchPlayersBtn.style.display = 'none';
@@ -1152,12 +1152,12 @@ function showAIWaitingRoom(data: AIWaitingRoomData): void {
 
     // Zorluk seviyesi için güvenli erişim
     const difficulty = data.aiSettings?.difficulty || 'medium';
-    
+
     // Null kontrolü ile ekran güncelleme
     if (aiDifficultyDisplay) {
         aiDifficultyDisplay.textContent = difficultyMap[difficulty];
     }
-    
+
     if (aiTypeDisplay) {
         aiTypeDisplay.textContent = difficulty === 'custom' ? 'Özelleştirilmiş' : 'Standart';
     }
@@ -1167,16 +1167,16 @@ function showAIWaitingRoom(data: AIWaitingRoomData): void {
         if (aiPaddleDisplay) {
             aiPaddleDisplay.textContent = `${data.gameSettings.paddleHeight || 0}px`;
         }
-        
+
         if (aiBallDisplay) {
             aiBallDisplay.textContent = `${data.gameSettings.ballRadius || 0}px`;
         }
 
         // Corner boost için güvenli hesaplama
-        const cornerBoost = data.gameSettings.cornerBoost || 
-                            data.gameSettings.ballSpeedIncrease || 
+        const cornerBoost = data.gameSettings.cornerBoost ||
+                            data.gameSettings.ballSpeedIncrease ||
                             1.0;
-        
+
         if (aiCornerDisplay) {
             aiCornerDisplay.textContent = `${parseFloat(cornerBoost.toString()).toFixed(1)}x`;
         }
@@ -1212,15 +1212,15 @@ function showAIWaitingRoom(data: AIWaitingRoomData): void {
     // Katılımcıları güncelle
     // currentUserName'in tanımlı olduğunu varsayıyoruz
     const players: Participant[] = [
-        { 
-            id: 'current-user', 
-            name: currentUserName || 'Player', 
-            isAI: false 
+        {
+            id: 'current-user',
+            name: currentUserName || 'Player',
+            isAI: false
         },
-        { 
-            id: 'ai-opponent', 
-            name: 'AI Opponent', 
-            isAI: true 
+        {
+            id: 'ai-opponent',
+            name: 'AI Opponent',
+            isAI: true
         }
     ];
 
@@ -1242,8 +1242,8 @@ let currentRoomId: string | null = null;
 
 // Ortak işlevi çıkaralım
 function setupGameModeSelection(
-    modeCardId: string, 
-    settingsPanelId: string, 
+    modeCardId: string,
+    settingsPanelId: string,
     mode: GameMode
 ): void {
     // Null kontrolü ekleyelim
@@ -1310,8 +1310,8 @@ type TournamentSize = '4' | '8' | '16' | '32' | 'custom';
 // ============================================================================
 
 function updateSliderDisplay(
-    sliderId: string, 
-    displayId: string, 
+    sliderId: string,
+    displayId: string,
     formatter?: (value: string) => string
 ): void {
     const slider = document.getElementById(sliderId) as HTMLInputElement;
@@ -1320,10 +1320,10 @@ function updateSliderDisplay(
     if (slider && display) {
         slider.addEventListener('input', function() {
             // Varsayılan formatter kullanılmazsa direkt değeri göster
-            const formattedValue = formatter 
-                ? formatter(this.value) 
+            const formattedValue = formatter
+                ? formatter(this.value)
                 : this.value;
-            
+
             display.textContent = formattedValue;
         });
     }
@@ -1331,37 +1331,37 @@ function updateSliderDisplay(
 
 // AI Custom Settings Sliders
 const aiCustomSliderConfigs = [
-    { 
-        sliderId: 'ai-reaction-speed', 
-        displayId: 'ai-reaction-speed-value' 
+    {
+        sliderId: 'ai-reaction-speed',
+        displayId: 'ai-reaction-speed-value'
     },
-    { 
-        sliderId: 'ai-prediction-accuracy', 
-        displayId: 'ai-prediction-accuracy-value' 
+    {
+        sliderId: 'ai-prediction-accuracy',
+        displayId: 'ai-prediction-accuracy-value'
     },
-    { 
-        sliderId: 'ai-general-accuracy', 
-        displayId: 'ai-general-accuracy-value' 
+    {
+        sliderId: 'ai-general-accuracy',
+        displayId: 'ai-general-accuracy-value'
     },
-    { 
-        sliderId: 'ai-learning-speed', 
-        displayId: 'ai-learning-speed-value' 
+    {
+        sliderId: 'ai-learning-speed',
+        displayId: 'ai-learning-speed-value'
     },
-    { 
-        sliderId: 'ai-preparation-distance', 
-        displayId: 'ai-preparation-distance-value' 
+    {
+        sliderId: 'ai-preparation-distance',
+        displayId: 'ai-preparation-distance-value'
     },
-    { 
-        sliderId: 'ai-freeze-distance', 
-        displayId: 'ai-freeze-distance-value' 
+    {
+        sliderId: 'ai-freeze-distance',
+        displayId: 'ai-freeze-distance-value'
     },
-    { 
-        sliderId: 'ai-fairness-level', 
-        displayId: 'ai-fairness-level-value' 
+    {
+        sliderId: 'ai-fairness-level',
+        displayId: 'ai-fairness-level-value'
     },
-    { 
-        sliderId: 'ai-max-consecutive-wins', 
-        displayId: 'ai-max-consecutive-wins-value' 
+    {
+        sliderId: 'ai-max-consecutive-wins',
+        displayId: 'ai-max-consecutive-wins-value'
     }
 ];
 
@@ -1375,7 +1375,7 @@ currentUserName = generateRandomName();
 console.log(`🎮 User initialized - ID: ${currentUserId}, Name: ${currentUserName}`);
 
 // Initialize WebSocket
-roomSocket = new WebSocketClient(window.location.hostname, 3004);
+roomSocket = new WebSocketClient(window.location.hostname, 3030);
 
 // WebSocket event handlers
 roomSocket.onConnect(() => {
@@ -1413,7 +1413,7 @@ roomSocket.onError((error) => {
 });
 
 // Connect to server
-roomSocket.connect("ws/client", {
+roomSocket.connect("ws-room/client", {
     userID: currentUserId,
     userName: currentUserName
 });
@@ -1800,25 +1800,25 @@ export default class extends AView {
 	private initAllEventListeners(): void {
 		// Game Mode Selection Listeners
 		this.initGameModeListeners();
-		
+
 		// Custom Game Listeners
 		this.initCustomGameListeners();
-		
+
 		// AI Game Listeners
 		this.initAIGameListeners();
-		
+
 		// Tournament Listeners
 		this.initTournamentListeners();
-		
+
 		// Navigation Listeners
 		this.initNavigationListeners();
-		
+
 		// Settings and UI Listeners
 		this.initSettingsListeners();
-		
+
 		// Slider Display Listeners
 		this.initSliderListeners();
-		
+
 		// Keyboard and Quick Actions
 		this.initKeyboardListeners();
 
@@ -1862,7 +1862,7 @@ export default class extends AView {
 		document.getElementById('custom-create-btn')?.addEventListener('click', function() {
 			// Null kontrolü ile radio button seçimini al
 			const gameTypeElement = document.querySelector('input[name="custom-game-type"]:checked') as HTMLInputElement;
-			
+
 			if (!gameTypeElement) {
 				showNotification('Lütfen oyun türünü seçin!', 'error');
 				return;
@@ -1930,10 +1930,10 @@ export default class extends AView {
 			radio.addEventListener('change', function() {
 				// Type assertion ile input elementini al
 				const radioInput = this as HTMLInputElement;
-				
+
 				// Custom settings elementini al
 				const customSettings = document.getElementById('ai-custom-settings');
-				
+
 				if (radioInput.value === 'custom') {
 					customSettings?.classList.add('active');
 				} else {
@@ -1982,7 +1982,7 @@ export default class extends AView {
 
 			// Turnuva boyutu seçimini al
 			const tournamentSizeElement = document.querySelector('input[name="tournament-size"]:checked') as HTMLInputElement;
-			
+
 			if (!tournamentSizeElement) {
 				showNotification('Lütfen turnuva boyutu seçin!', 'error');
 				return;
@@ -1992,17 +1992,17 @@ export default class extends AView {
 			if (tournamentSizeElement.value === 'custom') {
 				const customSizeElement = document.getElementById('custom-tournament-size') as HTMLInputElement;
 				const customSize = parseInt(customSizeElement.value, 10);
-				
+
 				if (!customSize || customSize < 4 || customSize > 64) {
 					showNotification('Geçerli bir turnuva boyutu girin (4-64 arası)!', 'error');
 					return;
 				}
-				
+
 				if (customSize & (customSize - 1)) {
 					showNotification('Turnuva boyutu 2\'nin kuvveti olmalıdır (4, 8, 16, 32, 64)!', 'error');
 					return;
 				}
-				
+
 				tournamentSize = customSize;
 			} else {
 				tournamentSize = parseInt(tournamentSizeElement.value, 10);
@@ -2052,9 +2052,9 @@ export default class extends AView {
 
 			// Güvenli socket gönderimi
 			if (roomSocket) {
-				roomSocket.send("join", { 
-					roomId: tournamentCode, 
-					gameMode: 'tournament' 
+				roomSocket.send("join", {
+					roomId: tournamentCode,
+					gameMode: 'tournament'
 				});
 				showNotification(`${tournamentCode} kodlu turnuvaya katılıyorsunuz...`, 'info');
 			} else {
@@ -2129,10 +2129,10 @@ export default class extends AView {
 			radio.addEventListener('change', function() {
 				// Type assertion ile input elementini al
 				const radioInput = this as HTMLInputElement;
-				
+
 				// Custom input elementini al
 				const customInput = document.getElementById('custom-tournament-size') as HTMLInputElement;
-				
+
 				if (radioInput.value === 'custom') {
 					customInput.style.display = 'block';
 				} else {
@@ -2227,8 +2227,8 @@ export default class extends AView {
 	}
 
 	private setupAICustomSliderDisplay(
-		sliderId: string, 
-		displayId: string, 
+		sliderId: string,
+		displayId: string,
 		formatter?: (value: string) => string
 	): void {
 		const slider = document.getElementById(sliderId) as HTMLInputElement;
@@ -2236,10 +2236,10 @@ export default class extends AView {
 
 		if (slider && display) {
 			slider.addEventListener('input', function() {
-				const formattedValue = formatter 
-					? formatter(this.value) 
+				const formattedValue = formatter
+					? formatter(this.value)
 					: this.value;
-				
+
 				display.textContent = formattedValue;
 			});
 		}
