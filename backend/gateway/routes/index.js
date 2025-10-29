@@ -54,12 +54,39 @@ export default async function allRoutes(fastify) {
 					delete headers['host'];
 					delete headers['content-length'];
 					delete headers['connection'];
-					delete headers['content-type']; // Remove to avoid duplicates
 
 					let body = undefined;
-					if (request.method !== 'GET' && request.method !== 'HEAD' && request.body) {
-						body = JSON.stringify(request.body);
-						headers['Content-Type'] = 'application/json';
+					const isMultipart = request.headers['content-type']?.includes('multipart/form-data');
+
+					if (request.method !== 'GET' && request.method !== 'HEAD') {
+						if (isMultipart) {
+							// Handle multipart/form-data (file uploads)
+							const formData = new FormData();
+							
+							if (request.isMultipart()) {
+								const parts = request.parts();
+								for await (const part of parts) {
+									if (part.file) {
+										// File field
+										const buffer = await part.toBuffer();
+										const blob = new Blob([buffer], { type: part.mimetype });
+										formData.append(part.fieldname, blob, part.filename);
+									} else {
+										// Regular field
+										formData.append(part.fieldname, part.value);
+									}
+								}
+							}
+							
+							body = formData;
+							// Remove content-type to let fetch set it with boundary
+							delete headers['content-type'];
+						} else if (request.body) {
+							// Handle JSON (default)
+							body = JSON.stringify(request.body);
+							headers['Content-Type'] = 'application/json';
+							delete headers['content-type'];
+						}
 					}
 
 					const response = await fetch(finalUrl, {
