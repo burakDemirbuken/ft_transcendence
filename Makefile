@@ -226,6 +226,11 @@ help:
 	@echo "$(YELLOW)Development modes (build + logs):$(NC)"
 	@echo "  dev-<service>    - Build, start and follow logs for specific service"
 	@echo ""
+	@echo "$(YELLOW)Friend service API commands:$(NC)"
+	@echo "  send             - Send friend request (usage: make send userName=user1 peerName=user2)"
+	@echo "  remove           - Remove friend connection (usage: make remove userName=user1 peerName=user2)"
+	@echo "  accept           - Accept friend request (usage: make accept userName=user1 peerName=user2)"
+	@echo ""
 	@echo "$(BLUE)Volume directories:$(NC)"
 	@echo "  Nginx data:   $(NGINX_DATA_DIR)"
 	@echo "  Gateway src:  $(GATEWAY_SRC_DIR)"
@@ -239,9 +244,25 @@ help:
 	@echo "  make shell-sqlite      # Enter sqlite container"
 	@echo "  make dev-authentication # Development mode for authentication"
 
+# Friend service API commands
+# Usage: make send userName=test3 peerName=test0
+send:
+	@echo "$(GREEN)Sending friend request from $(userName) to $(peerName)$(NC)"
+	curl -i "http://friend:3007/send" -d '{"userName": "$(userName)", "peerName": "$(peerName)"}' -H "Content-Type: application/json"
+
+# Usage: make remove userName=test0 peerName=test1
+remove:
+	@echo "$(GREEN)Removing friend connection between $(userName) and $(peerName)$(NC)"
+	@curl -i "http://friend:3007/remove" -d '{"userName":"$(userName)", "peerName": "$(peerName)"}' -H "Content-Type: application/json"
+
+# Usage: make accept userName=test0 peerName=test1
+accept:
+	@echo "$(GREEN)Accepting friend request from $(peerName) to $(userName)$(NC)"
+	@curl -i "http://friend:3007/accept" -d '{"userName":"$(userName)", "peerName": "$(peerName)"}' -H "Content-Type: application/json"
+
 .PHONY: all up down stop status logs clean clean-db fclean re health list-services help \
         volumes create-nginx-volume create-gateway-volume create-sqlite-volume \
-        clean-volumes check-volumes \
+        clean-volumes check-volumes send remove accept \
         $(addprefix up-,$(ALL_SERVICES)) \
         $(addprefix down-,$(ALL_SERVICES)) \
         $(addprefix restart-,$(ALL_SERVICES)) \

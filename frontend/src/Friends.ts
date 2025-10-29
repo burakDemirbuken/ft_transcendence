@@ -5,7 +5,7 @@ import { showNotification } from "./notification.js";
 
 let currentFrPage:string = "friends";
 
-function handleOverlay(e: any) {
+function handleOverlay(e) {
 	if (e.target.classList.contains("prof")) {
 		document.querySelector(".overlay").classList.remove("hide-away");
 		// Add user profile to overlay
@@ -16,7 +16,7 @@ function handleOverlay(e: any) {
 	}
 }
 
-function subpageSwitch(e: any) {
+function subpageSwitch(e) {
 	if (e.target.classList.contains("pg-switch")) {
 		let fields = document.querySelectorAll(`.${currentFrPage}`);
 
@@ -47,13 +47,30 @@ function esc(e: KeyboardEvent) {
 		ol.classList.add("hide-away");
 }
 
-async function friendRequest(e: any) {
+async function friendRequest(e) {
 	e.preventDefault();
 	console.log("SEND FRIEND REQUEST!!!");
 	const list = await fetch(`${API_BASE_URL}/friend/send?userName=bkorkut&peerName=test0`, {
 		method: "POST",
 		credentials: "include",
 	});
+}
+
+async function unfriend(e) {
+	console.info("UNFRIEND CLICKED");
+
+	const uname = e.target.closest(".friend").querySelector(".uname").textContent.slice(1);
+	const res = await fetch(`${API_BASE_URL}/friend/remove?userName=bkorkut&peerName=${uname}`, {
+		method: "POST",
+		credentials: "include",
+	});
+
+	if (res.ok) {
+		showNotification(`You have unfriended @${uname}.`);
+		// e.target.closest(".friend").remove();
+	} else {
+		showNotification(`Could not unfriend @${uname}. Please try again later.`);
+	}
 }
 
 async function createFriends(list: any) {
@@ -82,6 +99,7 @@ async function createFriends(list: any) {
 			</div>
 			`;
 		div.classList.add("friend");
+		div.querySelector(".unfr").addEventListener("click", unfriend);
 
 		const friends = document.querySelector("#friends");
 		friends.appendChild(div);
