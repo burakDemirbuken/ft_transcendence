@@ -107,7 +107,7 @@ async function addFourPeople(sequelize) {
 		{ firstWin: new Date(), hundredWins: new Date(), fiveHundredWins: new Date(), firstTenStreak: new Date(), twentyFiveTenStreak: new Date(), lessThanThreeMin: new Date() }
 	]
 
-	for (let i = 0; i < 4; i++) {
+	for (let i = 0; i <5; i++) {
 		const [profile] = await sequelize.models.Profile.findOrCreate({
 			where: {
 				userName: `test${i}`,
