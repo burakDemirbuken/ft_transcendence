@@ -29,7 +29,7 @@
 				"label": "Total Matches"
 			},
 			"monthly": {
-				"labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+				"labels": ["1st Quarter", "2nd Quarter", "3rd Quarter", "4th Quarter"],
 				"label0": "Total Matches",
 				"label1": "Matches Won"
 			},
@@ -63,7 +63,7 @@
 				"label": "Toplam Maçlar"
 			},
 			"monthly": {
-				"labels": ["Pzt", "Sal", "Çar", "Prş", "Cum", "Cmt", "Paz"],
+				"labels": ["1. Çeyrek", "2. Çeyrek", "3. Çeyrek", "4. Çeyrek"],
 				"label0": "Toplam Maçlar",
 				"label1": "Kazanılan Maçlar"
 			},
@@ -97,7 +97,7 @@
 				"label": "Gesamtzahl der Spiele"
 			},
 			"monthly": {
-				"labels": ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"],
+				"labels": ["1. Quartal", "2. Quartal", "3. Quartal", "4. Quartal"],
 				"label0": "Gesamtzahl der Spiele",
 				"label1": "Gewonnene Spiele"
 			},
