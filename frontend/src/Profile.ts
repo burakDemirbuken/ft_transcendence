@@ -1071,10 +1071,10 @@ async function onLoad()
         else
         {
             if (getProfileDatas.status === 401) {
-                window.location.replace('/login');
+               // window.location.replace('/login');
             }
         }
     } catch (error) {
-        window.location.replace('/login');
+        // window.location.replace('/login');
     }
 }

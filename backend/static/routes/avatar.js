@@ -42,13 +42,6 @@ export default async function avatarRoutes(fastify) {
 		}
 		const data = await request.file()
 
-		console.log("Uploaded file info:", {
-			fieldname: data?.fieldname,
-			filename: data?.filename,
-			encoding: data?.encoding,
-			mimetype: data?.mimetype
-		})
-
 		if (!data) {
 			return reply.code(400).send({ message: "No file uploaded" })
 		} else if (!allowedMimeTypes.includes(data.mimetype)) {
@@ -56,7 +49,9 @@ export default async function avatarRoutes(fastify) {
 			return reply.code(400).send({ message: "Invalid file type" })
 		}
 
-		const filePath = fastify.cwd + `/database/avatars/${data.filename}`
+		const randomNamefromFileName = await fastify.renameFile(data.filename)
+
+		const filePath = fastify.cwd + `/database/avatars/${randomNamefromFileName}`
 
 		await pipeline(data.file, fs.createWriteStream(filePath))
 
@@ -64,14 +59,14 @@ export default async function avatarRoutes(fastify) {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				avatarUrlPath: 'database/avatars/' + data.filename,
+				avatarUrlPath: 'database/avatars/' + randomNamefromFileName,
 				userName: userName
 			})
 		})
 		if (!response.ok) {
 			return reply.code(500).send({ message: "Failed to update avatar in profile service" })
 		}
-
-		return reply.code(200).send({ newAvatarUrl: 'database/avatars/' + data.filename})
+		console.log("Avatar updated successfully for user:", response.body.newAvatarUrl)
+		return reply.code(200).send({ newAvatarUrl: response.body.newAvatarUrl })
 	})
 }

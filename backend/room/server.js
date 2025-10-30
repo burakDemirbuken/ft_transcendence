@@ -15,6 +15,9 @@ fastify.register(fastifyWebsocket)
 fastify.register(clientConc)
 fastify.register(gameServerConc)
 
+fastify.addHook('onRequest', async (req) => {
+	console.log(`[${new Date().toISOString()}] Incoming request: ${req.method} ${req.url} from ${req.ip}`);
+})
 await fastify.ready()
 
 //console.log(JSON.stringify(fastify.overview(), null, 2))

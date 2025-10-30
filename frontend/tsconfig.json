@@ -21,6 +21,7 @@
     "noPropertyAccessFromIndexSignature": false,
     "noUncheckedIndexedAccess": false,
     "strictFunctionTypes": false,
+    "types": ["babylonjs"],
     "strictBindCallApply": false,
     "strictPropertyInitialization": false,
     "noImplicitThis": false

@@ -1,8 +1,9 @@
 import Fastify from "fastify"
 import fastifyStatic from "@fastify/static"
 import fastifyMultipart from "@fastify/multipart"
-import avatarRoutes from "./routes/avatar.js"
 import path from "path"
+import reName from "./plugins/renamer.js"
+import avatarRoutes from "./routes/avatar.js"
 
 const __dirname = process.cwd()
 
@@ -16,7 +17,7 @@ fastify.register(fastifyStatic, {
     root: path.join(__dirname, "database/avatars"),
     prefix: "/database/avatars/"
 }) 
-
+fastify.register(reName)
 fastify.decorate("cwd", __dirname)
 fastify.register(fastifyMultipart)
 fastify.register(avatarRoutes)

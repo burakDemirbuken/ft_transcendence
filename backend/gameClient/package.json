@@ -4,8 +4,6 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "babylonjs": "^8.32.2",
-    "babylonjs-gltf2interface": "^8.32.2",
     "typescript": "^5.9.3",
     "undici-types": "^7.16.0"
   },
@@ -18,6 +16,5 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/babylonjs": "^2.4.5"
   }
 }

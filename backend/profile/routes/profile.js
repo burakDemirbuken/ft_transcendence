@@ -4,12 +4,12 @@ export default async function profileRoute(fastify) {
 
 	fastify.get('/profile', async (request, reply) => {
 		const { userName } = request.query ?? {}
-		
+
 		try {
 			if (!userName) {
 				throw new Error('userName is required')
 			}
-			
+
 			const userProfile = await fastify.sequelize.models.Profile.findOne({
 				where: { userName: userName },
 				attributes: ['id', 'userName', 'displayName', 'avatarUrl']
@@ -107,7 +107,7 @@ export default async function profileRoute(fastify) {
 	fastify.post('/displaynameupdate', async (request, reply) => {
 		const { userName , dname } = request.body ?? {}
 
-		
+
 		try {
 			if (!userName) {
 				throw new Error('userName is required')
@@ -135,16 +135,16 @@ export default async function profileRoute(fastify) {
 	{
 		const { userName } = request.body ?? {}
 
-		
+
 		try {
 			if (!userName) {
 				throw new Error('userName is required')
 			}
-	
+
 			const existingProfile = await fastify.sequelize.models.Profile.findOne({
 				where: { userName: userName }
 			})
-	
+
 			if (existingProfile) {
 				return reply.code(409).send({ error: 'Profile already exists' })
 			}
@@ -182,7 +182,7 @@ export default async function profileRoute(fastify) {
 
 	fastify.post('/internal/friend', async (request, reply) => {
 		const { friends } = request.body ?? {}
-		try {		
+		try {
 			if (!friends || !Array.isArray(friends) || friends.length === 0) {
 				throw new Error('Friends array is required')
 			}
@@ -195,14 +195,12 @@ export default async function profileRoute(fastify) {
 				},
 				attributes: ['userName', 'displayName', 'avatarUrl']
 			})
+
 			if (!userProfiles) {
 				return reply.code(404).send({ message: 'Users not found' })
 			}
-
-			return reply.code(200).send({
-				success: true,
-				users: userProfiles.map(profile => profile.toJSON())
-			})
+			//console.log("userProfiles found:", userProfiles.map(profile => profile.toJSON()))
+			return reply.code(200).send({ users: userProfiles.map(profile => profile.toJSON()) })
 		} catch (error) {
 			fastify.log.error('Error retrieving friends profiles:', { message: error.message,
 				details: error.toString() })
@@ -211,11 +209,11 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.post('/internal/avatar-update', async (request, reply) => {
-		const {userName, filename, avatarUrlPath } = request.body ?? {}
-		
+		const {userName, avatarUrlPath } = request.body ?? {}
+
 		try {
-			if (!userName || !filename || !avatarUrlPath) {
-				throw new Error('userName, filename, and avatarUrlPath are required')
+			if (!userName || !avatarUrlPath) {
+				throw new Error('userName and avatarUrlPath are required')
 			}
 
 			const userProfile = await fastify.sequelize.models.Profile.findOne({
@@ -228,11 +226,8 @@ export default async function profileRoute(fastify) {
 
 			userProfile.avatarUrl = avatarUrlPath
 			await userProfile.save()
-
-			return reply.code(200).send({
-				success: true,
-				message: 'Avatar updated successfully'
-			})
+			console.log('Avatar updated successfully for user:', avatarUrlPath)
+			return reply.code(200).send({  message: 'Avatar updated successfully', newAvatarUrl: userProfile.avatarUrl  })
 		} catch (error) {
 			fastify.log.error('Error updating avatar:', { message: error.message,
 				details: error.toString() })
