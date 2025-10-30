@@ -1,4 +1,5 @@
-/// <reference types="babylonjs" />
+// Using global BABYLON from CDN (loaded via script tag in index.html)
+declare const BABYLON: any;
 
 /*
 const exampleArcadeSettings =
@@ -66,63 +67,74 @@ class ArcadeMachine
 		this.debugCtx = null;
 	}
 
-	async load(position?: Position, angle?: number): Promise<ArcadeMachine>
-	{
-		try
-		{
-			console.log("🎮 Loading arcade machine model from: /assets/models/arcade/arcade.glb");
+  async load(position?: Position, angle?: number) {
+        // gameContainer içindeki loading elementi kullan
+	  const gameContainer = document.getElementById("gameContainer");
+	  const loadingScreen = gameContainer ? gameContainer.querySelector("#loadingScreen") as HTMLElement | null : null;
+	  const loadingText = loadingScreen ? loadingScreen.querySelector(".game-loading-text") as HTMLElement | null : null;
+	  const loadingProgress = loadingScreen ? loadingScreen.querySelector("#loadingProgress") as HTMLElement | null : null;
 
-			// First check if BABYLON is available
-			if (typeof BABYLON === 'undefined') {
-				throw new Error('BABYLON.js is not available');
+        try {
+            // 1. Loading ekranını göster
+			if (loadingScreen) {
+				loadingScreen.classList.remove("hidden");
+				if (loadingText) loadingText.textContent = "Loading... 0%";
+				if (loadingProgress) (loadingProgress as HTMLElement).style.width = "0%";
 			}
 
-			console.log("📦 Model loaded, processing meshes...");
-			const result = await BABYLON?.SceneLoader?.ImportMeshAsync("", "./assets/models/arcade/", "arcade.glb", this.scene);
-			console.log("🔍 Model import result:", result);
-			this.meshs = result.meshes;
-			this.position = position || { x: 0, y: 0, z: 0 };
-			this.angle = angle || 0;
+            console.log("🎮 Loading arcade model from: /assets/models/arcade/arcade.glb");
 
-			console.log(`✅ Successfully loaded ${this.meshs.length} meshes`);
+            // 2. Modeli yükle (ilerleme takibi)
+            const result = await BABYLON.SceneLoader.ImportMeshAsync(
+                "",
+                "/assets/models/arcade/",
+                "arcade.glb",
+                this.scene,
+                (evt) => {
+					if (evt.lengthComputable) {
+						const progress = evt.loaded / evt.total;
+						if (loadingText) loadingText.textContent = `Loading... ${Math.round(progress * 100)}%`;
+						if (loadingProgress) (loadingProgress as HTMLElement).style.width = `${progress * 100}%`;
+					}
+                }
+            );
 
-			const parentMesh = this.meshs.find(mesh => mesh.parent === null) || this.meshs[0];
-			if (parentMesh)
-			{
-				parentMesh.position = new BABYLON.Vector3(this.position.x, this.position.y, this.position.z);
-				parentMesh.rotation = new BABYLON.Vector3(0, this.angle, 0);
-				console.log(`📍 Positioned arcade machine at (${this.position.x}, ${this.position.y}, ${this.position.z})`);
-			}
-			else
-				console.warn("Parent mesh not found. Using default position and rotation.");
+            this.meshs = result.meshes;
+            this.position = position || { x: 0, y: 0, z: 0 };
+            this.angle = angle || 0;
+
+            const parentMesh = this.meshs.find(mesh => mesh.parent === null) || this.meshs[0];
+            if (parentMesh) {
+                parentMesh.position = new BABYLON.Vector3(this.position.x, this.position.y, this.position.z);
+                parentMesh.rotation = new BABYLON.Vector3(0, this.angle, 0);
+            } else {
+                console.warn("Parent mesh not found. Using default position and rotation.");
+            }
+
+            const light1 = new BABYLON.HemisphericLight(
+                "light1",
+                new BABYLON.Vector3(this.position.x, this.position.y + 1, this.position.z),
+                this.scene
+            );
+            light1.intensity = 0.4;
+
+            this.createGameScreen();
+            this.setActive(true);
+
+            console.log("✅ Arcade machine loaded successfully");
         }
 		catch (error)
 		{
             console.error("❌ Error loading arcade machine:", error);
-            // Try to provide more specific error information
-            if (error instanceof Error) {
-                console.error("Error message:", error.message);
-                console.error("Error stack:", error.stack);
-            }
-            // Don't return undefined, return this instance even if loading failed
-            console.log("🔄 Continuing without 3D model, creating fallback...");
-
-            // Set position and angle even when model loading fails
-            this.position = position || { x: 0, y: 0, z: 0 };
-            this.angle = angle || 0;
-
-            // Create a simple fallback box mesh
-            this.createFallbackMesh();
+            throw error;
+        }
+		finally
+		{
+			if (loadingScreen) {
+				setTimeout(() => { loadingScreen.classList.add("hidden"); }, 500);
+			}
         }
 
-        // Only create light if position is set
-        if (this.position) {
-            const light1 = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(this.position.x, this.position.y + 1, this.position.z), this.scene);
-            light1.intensity = 0.2; // Daha düşük ışık yoğunluğu
-        }
-
-        this.createGameScreen();
-		this.setActive(true);
         return this;
     }
 

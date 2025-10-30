@@ -1,5 +1,5 @@
-/// <reference types="babylonjs" />
-
+// Using global BABYLON from CDN (loaded via script tag in index.html)
+declare const BABYLON: any;
 import GameCore from './core/GameCore.js';
 import Renderer from './rendering/Renderer.js';
 import EventEmitter from './utils/EventEmitter.js';

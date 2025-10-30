@@ -205,7 +205,7 @@ class App
 		{
 		});
 
-		this.webSocketClient.connect("ws-game/ws", { userID: this.playerId, userName: this.playerName, gameId: roomId, gameMode: gameMode });
+		this.webSocketClient.connect("ws-game", { userID: this.playerId, userName: this.playerName, gameId: roomId, gameMode: gameMode });
 	}
 
 	createRoom(mode: string, gameSettings: GameSettings): void

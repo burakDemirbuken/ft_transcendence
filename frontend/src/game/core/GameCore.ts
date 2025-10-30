@@ -1,4 +1,5 @@
-/// <reference types="babylonjs" />
+// Using global BABYLON from CDN (loaded via script tag in index.html)
+declare const BABYLON: any;
 
 interface Position {
 	x: number;
