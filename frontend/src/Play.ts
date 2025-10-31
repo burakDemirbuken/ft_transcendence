@@ -1877,7 +1877,7 @@ export default class extends AView {
 			// Data objesi oluştur
 			const data = {
 				gameType: gameTypeElement.value,
-				gameMode: 'play-page',
+				gameMode: 'classic',
 				gameSettings: {
 					...gameConfig.gameSettings,
 					paddleHeight: parseInt(paddleHeightEl.value, 10),
@@ -1887,7 +1887,6 @@ export default class extends AView {
 				}
 			};
 
-			currentGameMode = 'custom';
 			roomSocket.send("create", data);
 			showNotification('Oda oluşturuluyor...', 'info');
 		});
