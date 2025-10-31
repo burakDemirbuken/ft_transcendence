@@ -149,8 +149,6 @@ services:
       - transcendency
     expose:
       - 3002
-    ports:
-      - "3002:3002"
     volumes:
       - gameServer:/app
       - /app/node_modules
@@ -164,8 +162,6 @@ services:
     restart: on-failure
     expose:
       - 3004
-    ports:
-      - "3004:3004"
     volumes:
       - room_src:/app
       - /app/node_modules
@@ -221,17 +217,3 @@ services:
       - static_src:/app
       - /app/node_modules
       - /app/database
-
-  gameclientburak:
-    container_name: gameclientburak
-    build: ./backend/gameClient
-    restart: on-failure
-    networks:
-      - transcendency
-    expose:
-      - 4000
-    ports:
-      - "4000:4000"
-    volumes:
-      - /app/node_modules
-      - gameClient_src:/app

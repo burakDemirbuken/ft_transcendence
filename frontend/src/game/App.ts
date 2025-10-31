@@ -52,7 +52,8 @@ class App
 		this.playerId = id;
 		this.playerName = name;
 		this.gameRenderer = new GameRenderer();
-		this.webSocketClient = new WebSocketClient(window.location.hostname, 3002);
+		// Use nginx proxy instead of direct connection
+		this.webSocketClient = new WebSocketClient(window.location.hostname, 3030);
 		this.inputManager = new InputManager();
 	}
 
@@ -107,7 +108,7 @@ class App
 	}
 
 	_pingpong(name: string): void {
-		const socket = new WebSocket(`ws://${window.location.hostname}:3007/ws-friend/presence?` + new URLSearchParams({ userName: name }).toString());
+		const socket = new WebSocket(`wss://${window.location.hostname}:3007/ws-friend/presence?` + new URLSearchParams({ userName: name }).toString());
 		socket.onopen = () => {
 			console.log('Connected to presence server');
 		}
@@ -204,7 +205,7 @@ class App
 		{
 		});
 
-		this.webSocketClient.connect("ws", { userID: this.playerId, userName: this.playerName, gameId: roomId, gameMode: gameMode });
+		this.webSocketClient.connect("ws-game/ws", { userID: this.playerId, userName: this.playerName, gameId: roomId, gameMode: gameMode });
 	}
 
 	createRoom(mode: string, gameSettings: GameSettings): void

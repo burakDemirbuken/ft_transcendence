@@ -241,7 +241,7 @@ help:
 
 .PHONY: all up down stop status logs clean clean-db fclean re health list-services help \
         volumes create-nginx-volume create-gateway-volume create-sqlite-volume \
-        clean-volumes check-volumes \
+        clean-volumes check-volumes send remove accept \
         $(addprefix up-,$(ALL_SERVICES)) \
         $(addprefix down-,$(ALL_SERVICES)) \
         $(addprefix restart-,$(ALL_SERVICES)) \

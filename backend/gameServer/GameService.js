@@ -82,7 +82,7 @@ class GameService
 			console.log('📨 Message from Room Service:', message);
 		});
 
-		this.roomSocket.connect('ws/server');
+		this.roomSocket.connect('ws-room/server');
 	}
 
 	_getplayerByConnectionId(connectionId)

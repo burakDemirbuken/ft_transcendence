@@ -31,7 +31,7 @@ let view = null;
 const router = async function(page:string) {
 	const content = document.querySelector("#content");
 	const hasToken = getAuthToken();
-
+/*
 	if (!hasToken) {
 		console.log('User is not authenticated');
 		document.querySelector("#navbar")?.classList.add("logout");
@@ -41,7 +41,7 @@ const router = async function(page:string) {
 		if (!hasToken) {
 			page = "login";
 		}
-	}
+	} */
 
 	if (page === "login") {
 		if (hasToken) {
