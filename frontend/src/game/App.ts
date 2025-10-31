@@ -108,7 +108,6 @@ class App
 	}
 
 	_pingpong(name: string): void {
-		const socket = new WebSocket(`wss://${window.location.hostname}:3007/ws-friend/presence?` + new URLSearchParams({ userName: name }).toString());
 		socket.onopen = () => {
 			console.log('Connected to presence server');
 		}

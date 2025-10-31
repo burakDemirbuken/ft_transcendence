@@ -1,9 +1,7 @@
-import { Op } from "sequelize"
-
-export default async function onlineOfflineRoutes(fastify) {
+export default async function friendRoutes(fastify) {
 	const presence = new Map()
 
-	fastify.get("/presence", { websocket: true }, async (socket, req) => {
+	fastify.get("/ws-friend/friends", { websocket: true }, async (socket, req) => {
 		// cookie'den gelicek
 		const { userName } = req.query
 		console.log('New presence connection:', userName)
@@ -33,6 +31,17 @@ export default async function onlineOfflineRoutes(fastify) {
 					break
 				case "reject":
 					result = fastify.postReject(userName, peerName)
+					break
+				case "list":
+					const userResult = await fastify.getFriendList(userName)
+
+					return socket.send(JSON.stringify({
+						type: 'list',
+						payload: {
+							friendlist: userResult,
+							message: userResult.message || null
+						}
+					}))
 					break
 				default:
 					fastify.log.warn({ userName, type }, 'Unknown presence message type')

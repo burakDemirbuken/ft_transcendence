@@ -13,6 +13,8 @@ import { showNotification } from './notification.js';
 // Dynamic API base URL based on current hostname
 export const API_BASE_URL = `https://${window.location.hostname}:3030/api`;
 
+let friendSocket = null;
+
 const pageState = {
 	current: "login", // default
 };
@@ -31,17 +33,20 @@ let view = null;
 const router = async function(page:string, logout: boolean = false) {
 	const content = document.querySelector("#content");
 	const hasToken = getAuthToken();
-/*
+
 	if (!hasToken) {
 		console.log('User is not authenticated');
 		document.querySelector("#navbar")?.classList.add("logout");
+		friendSocket = null;
 	}
+	else if (friendSocket !== null) // Betül ile danışılacak
+		friendSocket = new WebSocket(`wss://${window.location.hostname}:3007/ws-friend/friends?` + new URLSearchParams({ userName: localStorage.getItem("userName") }).toString());
 
 	if (page === "profile" || page === "settings" || page === "friends" || page === "play") {
 		if (!hasToken) {
 			page = "login";
 		}
-	} */
+	}
 
 	if (page === "login") {
 		if (hasToken) {
