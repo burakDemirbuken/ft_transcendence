@@ -3,6 +3,7 @@ export default async function friendRoutes(fastify) {
 
 	fastify.get("/ws-friend/friends", { websocket: true }, async (socket, req) => {
 		// cookie'den gelicek
+		// url: ws://.../ws-friend/friends?userName=...
 		const { userName } = req.query
 		console.log('New presence connection:', userName)
 
@@ -13,7 +14,7 @@ export default async function friendRoutes(fastify) {
 
 		const state = { lastseen: Date.now(), socket: socket }
 		presence.set(userName, state)
-
+		// { type: "send" | "accept" | "remove" | "reject" | "list", payload: { peerName: string } }
 		socket.on('message', async (message) => {
 			const { type, payload } = JSON.parse(message)
 			const { peerName } = payload.peerName || {}

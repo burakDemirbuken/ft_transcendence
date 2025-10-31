@@ -3,6 +3,32 @@ import Profile from "./Profile.js";
 import { API_BASE_URL } from "./index.js";
 import { showNotification } from "./notification.js";
 
+let friendSocket = null;
+
+
+export function connectWebSocket() {
+
+	if (friendSocket !== null)
+		return;
+	friendSocket = new WebSocket(`wss://${window.location.hostname}:3007/ws-friend/friends?` + new URLSearchParams({ userName: "test0"/* BETÜL localStorage.getItem("userName") */ }).toString());
+
+	friendSocket.onmessage = (event) => {
+		const data = JSON.parse(event.data);
+		const { type, payload } = data;
+		switch (type)
+		{
+			case "list":
+				upda
+				break;
+			case "response":
+
+				break;
+			default:
+				break;
+		}
+	};
+}
+
 let currentFrPage:string = "friends";
 
 function handleOverlay(e) {
