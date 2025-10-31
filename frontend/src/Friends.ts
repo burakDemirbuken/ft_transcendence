@@ -87,20 +87,23 @@ class UserLists {
 
 	async init() {
 		this.friendCont = document.getElementById("friends");
-		this.requestCont = document.getElementById("requests").querySelector("user-grid");
+		this.requestCont = document.getElementById("requests").querySelector(".user-grid");
 		this.inviteCont = document.getElementById("invites");
 		document.getElementById("add-friend")?.addEventListener("click", this.request);
-
 		try {
-			const lists = await fetch(`${API_BASE_URL}/friend/list?userName=bkorkut`, {
+			const lists = await fetch(`${API_BASE_URL}/friend/list?userName=${this.userName}`, {
 				// const lists = await fetch(`../../mockdata/friendslists.json`, {
-				method: "GET",
-				credentials: "include",
-			});
-			const json = await lists.json();
-			console.info("FRIENDS PAGE: FETCHED LISTS", json);
-			this.update(json);
-			this.update(json); // JUST TO SEE THE DOM / LISTS ACTUALLY FULL
+					method: "GET",
+					credentials: "include",
+				});
+			console.info("url:", lists.url);
+
+			if (lists.ok) {
+				const json = await lists.json();
+				console.info("FRIENDS PAGE: FETCHED LISTS", json);
+				this.update(json);
+				this.update(json); // JUST TO SEE THE DOM / LISTS ACTUALLY FULL
+			}
 		} catch (error) {
 			console.error("FRIEND LIST FETCH FAILED", error);
 		}
@@ -163,6 +166,7 @@ class UserLists {
 		console.info("ACCEPT CLICKED");
 
 		const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
+		console.log("Accepting friend requesst from:", uname);
 
 		try {
 			const res = await fetch(`${API_BASE_URL}/friend/accept?userName=${this.userName}&peerName=${uname}`, {
@@ -185,38 +189,6 @@ class UserLists {
 		console.info("DECLINE CLICKED");
 	}
 
-	update(lists) {
-		console.warn("LISTS LOOKS LIKE:", lists);
-		const newFriends = new Set<string>(lists?.acceptedFriends.map(user => user.userName));
-		const newRequests = new Set<string>(lists?.pendingFriends.outcoming.map(user => user.userName));
-		const newInvites = new Set<string>(lists?.pendingFriends.incoming.map(user => user.userName));
-
-		this.removeUsers(newFriends, "friend");
-		this.removeUsers(newRequests, "request");
-		this.removeUsers(newInvites, "invite");
-
-		lists?.acceptedFriends.forEach(user => {
-			if (this.currentFriends.has(user.userName))
-				this.updateUser(this.currentFriends.get(user.userName), user, "friend");
-			else
-				this.addUser(user, "friend");
-		});
-
-		lists?.pendingFriends.outcoming.forEach(user => {
-			if (this.currentRequests.has(user.userName))
-				this.updateUser(this.currentRequests.get(user.userName), user, "request");
-			else
-				this.addUser(user, "request");
-		});
-
-		lists?.pendingFriends.incoming.forEach(user => {
-			if (this.currentInvites.has(user.userName))
-				this.updateUser(this.currentInvites.get(user.userName), user, "invite");
-			else
-				this.addUser(user, "invite");
-		});
-	}
-
 	private removeUsers(set:Set<string>, type: "friend" | "request" | "invite") {
 		const config = {
 			friend: { currentUsers: this.currentFriends },
@@ -226,14 +198,14 @@ class UserLists {
 
 		console.log("CURRENT USERS", type, config[type].currentUsers);
 		config[type].currentUsers.forEach((element, username) => {
-			// if (!newInvites.has(username)) {
-			// 	element.remove();
-			// 	currentUsers.delete(username);
-			// }
+			if (!set.has(username)) {
+				element.remove();
+				config[type].currentUsers.delete(username);
+			}
 		});
 	}
 
-	private createUser(user: any, type: "friend" | "request" | "invite"): HTMLElement {
+		private createUser(user: any, type: "friend" | "request" | "invite"): HTMLElement {
 		const div = document.createElement("div");
 
 		const config = {
@@ -295,10 +267,42 @@ class UserLists {
 	private updateUser(currentUser, newUser, type: "friend" | "request" | "invite") {
 		console.log("USER", newUser.userName, "ALREADY EXISTS");
 	}
+
+	update(lists) {
+		console.warn("LISTS LOOKS LIKE:", lists);
+		const newFriends = new Set<string>(lists?.acceptedFriends.map(user => user.userName));
+		const newRequests = new Set<string>(lists?.pendingFriends.outcoming.map(user => user.userName));
+		const newInvites = new Set<string>(lists?.pendingFriends.incoming.map(user => user.userName));
+
+		this.removeUsers(newFriends, "friend");
+		this.removeUsers(newRequests, "request");
+		this.removeUsers(newInvites, "invite");
+
+		lists?.acceptedFriends.forEach(user => {
+			if (this.currentFriends.has(user.userName))
+				this.updateUser(this.currentFriends.get(user.userName), user, "friend");
+			else
+				this.addUser(user, "friend");
+		});
+
+		lists?.pendingFriends.outcoming.forEach(user => {
+			if (this.currentRequests.has(user.userName))
+				this.updateUser(this.currentRequests.get(user.userName), user, "request");
+			else
+				this.addUser(user, "request");
+		});
+
+		lists?.pendingFriends.incoming.forEach(user => {
+			if (this.currentInvites.has(user.userName))
+				this.updateUser(this.currentInvites.get(user.userName), user, "invite");
+			else
+				this.addUser(user, "invite");
+		});
+	}
 }
 
 export default class extends AView {
-	private userManager = new UserLists("bkorkut");
+	private userManager = new UserLists("test0");
 
 	constructor() {
 		super();

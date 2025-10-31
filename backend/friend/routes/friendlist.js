@@ -59,7 +59,9 @@ export default async function friendListRoutes(fastify) {
 				}
 				return acc
 			}, [[], [], []])
-
+			console.log('pending incoming:', incomingProfiles)
+			console.log('pending outgoing:', outgoingProfiles)
+			console.log('accepted:', acceptedProfiles)
 			return reply.send({
 				pendingFriends: {
 					incoming: incomingProfiles,

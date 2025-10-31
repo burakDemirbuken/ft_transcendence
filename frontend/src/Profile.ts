@@ -887,27 +887,27 @@ export default class extends AView {
         this.turnuva = document.getElementById('turnuva') as HTMLDivElement;
 
         // Kullanıcıyı fetch et
-        fetch(`${API_BASE_URL}/auth/me`)
-          .then(res => res.json())
-          .then((user: User) => {
-            this.USERNAME = user.username;
-            return fetch(`${API_BASE_URL}/user-tournaments/${encodeURIComponent(this.USERNAME)}`);
-          })
-          .then(res => res.json())
-          .then((tournaments: Tournament[]) => {
-            tournaments.forEach(tr => {
-              const row = document.createElement('div');
-              row.classList.add('tournament-row');
-              row.innerHTML = `
-                <span>${tr.name}</span>
-                <span>${tr.start_date}</span>
-                <span>${tr.end_date}</span>
-                <span>${tr.total_matches}</span>
-              `;
-              row.dataset.players = JSON.stringify(tr.players);
-              this.table.appendChild(row);
-            });
-          });
+        // fetch(`${API_BASE_URL}/auth/me`)
+        //   .then(res => res.json())
+        //   .then((user: User) => {
+        //     this.USERNAME = user.username;
+        //     return fetch(`${API_BASE_URL}/user-tournaments/${encodeURIComponent(this.USERNAME)}`);
+        //   })
+        //   .then(res => res.json())
+        //   .then((tournaments: Tournament[]) => {
+        //     tournaments.forEach(tr => {
+        //       const row = document.createElement('div');
+        //       row.classList.add('tournament-row');
+        //       row.innerHTML = `
+        //         <span>${tr.name}</span>
+        //         <span>${tr.start_date}</span>
+        //         <span>${tr.end_date}</span>
+        //         <span>${tr.total_matches}</span>
+        //       `;
+        //       row.dataset.players = JSON.stringify(tr.players);
+        //       this.table.appendChild(row);
+        //     });
+        //   });
 
         // Event delegation
         this.table.addEventListener('click', (e) => {
@@ -1048,7 +1048,7 @@ async function onLoad()
         {
             const userData = await getProfileDatas.json();
 
-            const ProfileUsername = await fetch(`${API_BASE_URL}/profile/profile?userName=${userData.user.username}`,
+            const ProfileUsername = await fetch(`${API_BASE_URL}/profile/profile?userName=${"test0"}`,
             {
                 credentials: 'include',
                 headers: {
