@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import dbPlugin from './plugins/db.js'
 import friendRoutes from './routes/index.js'
 import fastifyWebsocket from '@fastify/websocket'
+import friendchange from './plugins/friendchange.js'
 
 const fastify = Fastify({
     logger: true
@@ -9,6 +10,7 @@ const fastify = Fastify({
 
 await fastify.register(dbPlugin)
 await fastify.register(fastifyWebsocket)
+await fastify.register(friendchange)
 await fastify.register(friendRoutes)
 
 await fastify.ready()

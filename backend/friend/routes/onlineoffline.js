@@ -4,6 +4,7 @@ export default async function onlineOfflineRoutes(fastify) {
 	const presence = new Map()
 
 	fastify.get("/presence", { websocket: true }, async (socket, req) => {
+		// cookie'den gelicek
 		const { userName } = req.query
 		console.log('New presence connection:', userName)
 
@@ -12,50 +13,54 @@ export default async function onlineOfflineRoutes(fastify) {
 			return
 		}
 
-		const state = { lastseen: Date.now() }
+		const state = { lastseen: Date.now(), socket: socket }
 		presence.set(userName, state)
 
-		const friendships = await fastify.sequelize.models.Friend.findAll({
-			where: { 
-				status: 'accepted',
-				[Op.or]: [
-					{ userName: userName },
-					{ peerName: userName }
-				]
-			},
-			attributes: ['userName', 'peerName']
-		})
+		socket.on('message', async (message) => {
+			const { type, payload } = JSON.parse(message)
+			const { peerName } = payload.peerName || {}
+			const result = {}
 
-		const friends = friendships.map(friend => friend.userName === userName ? friend.peerName : friend.userName)
-		const onlineFriends = friends.filter(name => presence.has(name))
-
-		const heartbeat = setInterval(() => {
-			if (Date.now() - state.lastseen > 60000) {
-				socket.close(1000, "No pong received")
-			} else {
-				if (socket.readyState === 1) {
-					socket.send(JSON.stringify({
-						type: 'ping',
-						onlineFriends: onlineFriends
-					}))
-				}
+			switch (type) {
+				case "send":
+					result = fastify.postSend(userName, peerName)
+					break
+				case "accept":
+					result = fastify.postAccept(userName, peerName)
+					break
+				case "remove":
+					result = fastify.postRemove(userName, peerName)
+					break
+				case "reject":
+					result = fastify.postReject(userName, peerName)
+					break
+				default:
+					fastify.log.warn({ userName, type }, 'Unknown presence message type')
+					break
 			}
-			fastify.log.info({ userName, situation: 'heartbeat' })
-		}, 30000)
 
-		socket.on('message', message => {
-			try {
-				const { type } = JSON.parse(message.toString())
-				if (type === 'pong') {
-					state.lastseen = Date.now()
+			const userResult = await fastify.getFriendList(userName)
+			socket.send(JSON.stringify({
+				type: 'response',
+				payload: {
+					friendlist: userResult,
+					message: result.user
 				}
-			} catch (err) {
-				fastify.log.error(err)
+			}))
+
+			if (result.peer && presence.has(peerName)) {
+				const peerResult = await fastify.getFriendList(peerName)
+				presence.get(peerName).socket.send(JSON.stringify({
+					type: 'response',
+					payload: {
+						friendlist: peerResult,
+						message: result.peer
+					}
+				}))
 			}
 		})
 
 		const cleanup = async (situation) => {
-			clearInterval(heartbeat)
 			presence.delete(userName)
 			fastify.log.info({ userName, situation })
 		}
@@ -63,5 +68,6 @@ export default async function onlineOfflineRoutes(fastify) {
 		socket.on('close', () => cleanup('closed'))
 		socket.on('error', (err) => cleanup(err))
 	})
+
 	fastify.decorate('presence', presence)
 }
