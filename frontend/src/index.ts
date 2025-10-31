@@ -28,7 +28,7 @@ const routes = {
 
 let view = null;
 
-const router = async function(page:string) {
+const router = async function(page:string, logout: boolean = false) {
 	const content = document.querySelector("#content");
 	const hasToken = getAuthToken();
 /*

@@ -23,8 +23,6 @@
     "@types/chart.js": "^2.9.41",
     "@types/navigo": "^7.0.1",
     "@types/express": "^4.17.0",
-    "nodemon": "^3.0.0",
-    "@types/babylonjs": "^2.4.5"
-
+    "nodemon": "^3.0.0"
   }
 }
