@@ -115,7 +115,6 @@ class GameManager extends EventEmitter
 	removeGame(gameId)
 	{
 		const game = this.getGame(gameId);
-		game.stop();
 		this.games.delete(gameId);
 		console.log(`🗑️ Game ${gameId} removed from engine`);
 	}
@@ -143,15 +142,6 @@ class GameManager extends EventEmitter
 	start()
 	{
 		this.updateInterval = setInterval(() => this.update(), TICK_RATE);
-	}
-
-	stop()
-	{
-		if (this.updateInterval)
-		{
-			clearInterval(this.updateInterval);
-			this.updateInterval = null;
-		}
 	}
 
 	pause(gameId)

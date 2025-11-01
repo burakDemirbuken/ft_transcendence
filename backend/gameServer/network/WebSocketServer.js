@@ -127,13 +127,6 @@ class NetworkManager
 		}
 	}
 
-	stop()
-	{
-		this.fastify.close();
-		this.connections.clear();
-		this.callbacks.clear();
-	}
-
 	send(connectionId, message)
 	{
 		const client = this.connections.get(connectionId);

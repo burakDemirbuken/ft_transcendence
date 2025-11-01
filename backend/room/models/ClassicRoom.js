@@ -11,7 +11,7 @@ export default class ClassicRoom extends Room
 			ballRadius: 7,
 			ballSpeed: 600,
 			ballSpeedIncrease: 100,
-			maxScore: 1
+			maxScore: 11
 		};
 		super(name, gameSettings);
 		this.gameMode = 'classic';

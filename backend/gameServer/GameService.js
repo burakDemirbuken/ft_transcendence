@@ -331,15 +331,6 @@ class GameService
 			this.websocketServer.send(connId, { type: 'error', payload: { message: errorMessage } });
 	}
 
-	stop()
-	{
-		console.log('Stopping Game Server...');
-
-		this.gameManager.stop();
-		this.websocketServer.stop();
-
-		console.log('Game Server stopped!');
-	}
 }
 
 

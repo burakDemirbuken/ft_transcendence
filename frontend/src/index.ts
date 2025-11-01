@@ -38,7 +38,9 @@ const router = async function(page:string, logout: boolean = false) {
 		document.querySelector("#navbar")?.classList.add("logout");
 	}
 	else // Betül ile danışılacak
-		Friends.connectWebSocket();
+	{
+		// friend websocket bağlantısı
+	}
 
 	if (page === "profile" || page === "settings" || page === "friends" || page === "play") {
 		if (!hasToken) {

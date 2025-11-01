@@ -18,7 +18,7 @@ export function connectWebSocket() {
 		switch (type)
 		{
 			case "list":
-				upda
+				
 				break;
 			case "response":
 
