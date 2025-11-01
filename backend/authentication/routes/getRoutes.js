@@ -151,6 +151,34 @@ export async function getRoutes(fastify, options)
         }
     }, getController.showEmailChangeForm);
 
+    fastify.get('/change-password',
+    {
+        schema:
+        {
+            querystring:
+            {
+                type: 'object',
+                required:
+                [
+                    'token'
+                ],
+                properties:
+                {
+                    token:
+                    {
+                        type: 'string',
+                        minLength: 32,
+                        maxLength: 64 
+                    },
+                    lang:
+                    {
+                        type: 'string'
+                    }
+                }
+            }
+        }
+    }, getController.showPasswordChangeForm);
+
     fastify.get('/verify-new-email',
     {
         schema:

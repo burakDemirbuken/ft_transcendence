@@ -447,6 +447,62 @@ class EmailService {
     }
   }
 
+  async sendPasswordChangeRequest(email, username, changeUrl, token) {
+    try {
+      const mailOptions = {
+        from: config.email.from,
+        to: email,
+        subject: '🔐 Şifre Değişiklik İsteği - ft_transcendence',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #ff5722; text-align: center;">🔐 Şifrenizi Değiştirin</h2>
+            <p>Merhaba <strong>${username}</strong>,</p>
+            <p>Hesabınıza ait şifreyi değiştirmek için bir istek aldık. Şifrenizi değiştirmek istiyorsanız aşağıdaki butona tıklayın.</p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${changeUrl}" style="background-color: #ff5722; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+                🔑 Şifre Değiştir
+              </a>
+            </div>
+            
+            <div style="background-color: #ffebee; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ff5722;">
+              <h4 style="margin: 0 0 10px 0; color: #c62828;">⚠️ Güvenlik Uyarısı</h4>
+              <p style="margin: 0;">
+                • Bu işlemi siz yapmadıysanız, HEMEN şifrenizi değiştirin<br>
+                • Link 1 saat geçerlidir<br>
+                • Şifre değişikliği sonrasında tüm cihazlardan çıkış yapılacak
+              </p>
+            </div>
+            
+            <p style="color: #666; font-size: 14px;">
+              Eğer butona tıklayamıyorsanız, aşağıdaki linki kopyalayıp tarayıcınıza yapıştırın:<br>
+              <a href="${changeUrl}" style="color: #ff5722; word-break: break-all;">${changeUrl}</a>
+            </p>
+            
+            <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+            
+            <p style="color: #999; font-size: 12px; text-align: center;">
+              Bu email ft_transcendence tarafından gönderilmiştir.<br>
+              Herhangi bir sorunuz varsa bizimle iletişime geçin.
+            </p>
+          </div>
+        `
+      }
+
+      const info = await this.transporter.sendMail(mailOptions)
+      console.log(`✅ Şifre değişiklik isteği gönderildi: ${email} - MessageId: ${info.messageId}`)
+      
+      return {
+        success: true,
+        messageId: info.messageId,
+        email: email
+      }
+    } catch (error) {
+      console.error('❌ Şifre değişiklik emaili gönderme hatası:', error)
+      throw error
+    }
+  }
+
   async sendNewEmailVerification(email, username, verificationUrl, token) {
     try {
       const mailOptions = {

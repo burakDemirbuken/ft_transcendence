@@ -36,6 +36,9 @@ async function globalsPlugin(fastify, options) {
 		/^\/auth\/change-email$/,
 		/^\/auth\/process-email-change$/,
 		/^\/auth\/verify-new-email$/,
+		/^\/auth\/change-password$/,
+		/^\/auth\/request-password-change$/,
+		/^\/auth\/process-password-change$/,
 	];
 
 	fastify.decorate('services', services);

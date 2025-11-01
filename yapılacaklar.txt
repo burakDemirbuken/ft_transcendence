@@ -4,7 +4,7 @@
     html'de (sanırsam script kısmında) gelen inputlarda kontrol edilmesi gerek
 10. mock datalarla tüm testler yapılamadı genel manada bir database testleri gerek
 
-
+submite basınca cookiler silinsede frontdan silinmiyor 
 
 
 

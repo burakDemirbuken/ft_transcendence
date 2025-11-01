@@ -334,4 +334,69 @@ export async function postRoutes(fastify, options)
             }
         }
     }, postController.processEmailChange);
+
+    fastify.post('/request-password-change',
+    {
+        schema:
+        {
+            querystring:
+            {
+                type: 'object',
+                properties:
+                {
+                    lang:
+                    {
+                        type: 'string'
+                    }
+                }
+            }
+        }
+    }, postController.requestPasswordChange);
+
+    fastify.post('/process-password-change',
+    {
+        schema:
+        {
+            body:
+            {
+                type: 'object',
+                required:
+                [
+                    'token',
+                    'currentPassword',
+                    'newPassword'
+                ],
+                properties:
+                {
+                    token:
+                    {
+                        type: 'string',
+                        minLength: 32,
+                        maxLength: 64
+                    },
+                    currentPassword:
+                    {
+                        type: 'string',
+                        minLength: 6
+                    },
+                    newPassword:
+                    {
+                        type: 'string',
+                        minLength: 8
+                    }
+                }
+            },
+            querystring:
+            {
+                type: 'object',
+                properties:
+                {
+                    lang:
+                    {
+                        type: 'string'
+                    }
+                }
+            }
+        }
+    }, postController.processPasswordChange);
 }
