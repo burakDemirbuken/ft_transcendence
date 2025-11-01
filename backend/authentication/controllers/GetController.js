@@ -568,18 +568,23 @@ async function showEmailChangeForm(request, reply) {
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Clear cookies to force logout
-                            document.cookie = 'accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Secure; SameSite=Lax';
-                            document.cookie = 'refreshToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Secure; SameSite=Lax';
-                            document.cookie = 'authStatus=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Secure; SameSite=Lax';
+                            console.log('✅ Email change successful');
+                            console.log('📧 Logout flag:', data.logout);
                             
                             document.getElementById('form-screen').style.display = 'none';
                             document.getElementById('success-screen').style.display = 'block';
                             
-                            // Redirect to login page after 3 seconds
+                            // Ana pencereyi login sayfasına yönlendir ve bu sekmeyi kapat
                             setTimeout(() => {
-                                window.location.href = 'https://' + HOST_IP + ':3030/login';
-                            }, 3000);
+                                if (window.opener && !window.opener.closed) {
+                                    console.log('👉 Redirecting opener window to login');
+                                    window.opener.location.href = 'https://' + HOST_IP + ':3030/login';
+                                    window.close();
+                                } else {
+                                    console.log('👉 No opener, redirecting current window');
+                                    window.location.href = 'https://' + HOST_IP + ':3030/login';
+                                }
+                            }, 2000);
                         } else {
                             alert('Error: ' + (data.error || 'Unknown error'));
                             submitBtn.disabled = false;
@@ -587,6 +592,7 @@ async function showEmailChangeForm(request, reply) {
                         }
                     })
                     .catch(error => {
+                        console.error('❌ Network error:', error);
                         alert('Network error occurred');
                         submitBtn.disabled = false;
                         submitBtn.textContent = 'Change Email';
@@ -987,18 +993,23 @@ async function showPasswordChangeForm(request, reply) {
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            // Clear cookies to force logout
-                            document.cookie = 'accessToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Secure; SameSite=Lax';
-                            document.cookie = 'refreshToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Secure; SameSite=Lax';
-                            document.cookie = 'authStatus=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Secure; SameSite=Lax';
+                            console.log('✅ Password change successful');
+                            console.log('🔐 Logout flag:', data.logout);
                             
                             document.getElementById('form-screen').style.display = 'none';
                             document.getElementById('success-screen').style.display = 'block';
                             
-                            // Redirect to login page after 3 seconds
+                            // Ana pencereyi login sayfasına yönlendir ve bu sekmeyi kapat
                             setTimeout(() => {
-                                window.location.href = 'https://' + HOST_IP + ':3030/login';
-                            }, 3000);
+                                if (window.opener && !window.opener.closed) {
+                                    console.log('👉 Redirecting opener window to login');
+                                    window.opener.location.href = 'https://' + HOST_IP + ':3030/login';
+                                    window.close();
+                                } else {
+                                    console.log('👉 No opener, redirecting current window');
+                                    window.location.href = 'https://' + HOST_IP + ':3030/login';
+                                }
+                            }, 2000);
                         } else {
                             alert('Error: ' + (data.error || 'Unknown error'));
                             submitBtn.disabled = false;
@@ -1006,6 +1017,7 @@ async function showPasswordChangeForm(request, reply) {
                         }
                     })
                     .catch(error => {
+                        console.error('❌ Network error:', error);
                         alert('Network error occurred');
                         submitBtn.disabled = false;
                         submitBtn.textContent = 'Change Password';

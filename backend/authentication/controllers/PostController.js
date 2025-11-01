@@ -655,11 +655,18 @@ async function processEmailChange(request, reply)
 
 		try {
 			await utils.sendNewEmailVerification(newEmail, user.username, verificationToken);
+			
+			// Cookie'leri temizle
+			reply.clearCookie('accessToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+			reply.clearCookie('refreshToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+			reply.clearCookie('authStatus', { path: '/', secure: true, sameSite: 'lax' });
+			
 			return reply.send({
 				success: true,
 				message: 'Verification email sent to your new email address. Please check and verify.',
 				newEmail: newEmail,
-				next_step: 'verify_new_email'
+				next_step: 'verify_new_email',
+				logout: true // Frontend'e logout yapması gerektiğini belirt
 			});
 		} catch (emailError) {
 			utils.tempStorage.delete(newEmail);
@@ -984,10 +991,16 @@ async function processPasswordChange(request, reply)
 		// Tüm refresh token'ları temizle (güvenlik için)
 		await user.clearRefreshToken();
 
+		// Cookie'leri temizle
+		reply.clearCookie('accessToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+		reply.clearCookie('refreshToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+		reply.clearCookie('authStatus', { path: '/', secure: true, sameSite: 'lax' });
+
 		return reply.send({
 			success: true,
 			message: 'Password successfully changed. Please login with your new password.',
-			next_step: 'login'
+			next_step: 'login',
+			logout: true // Frontend'e logout yapması gerektiğini belirt
 		});
 	}
 	catch (error)
