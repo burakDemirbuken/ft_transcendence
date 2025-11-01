@@ -24,18 +24,22 @@ export default class Room extends EventEmitter
 			this.host = player.id;
 		this.players.push(player);
 		this.participants.push(player);
+		if (this.players.length == this.maxPlayers)
+			this.status = "startable";
 	}
 
 	removePlayer(playerId)
 	{
+		this.status = "waiting";
 		this.players = this.players.filter(p => p.id !== playerId);
-		if (this.status === 'waiting')
+		if (this.status === 'waiting' || this.status == "startable")
 		{
 			console.log('Removing from participants:', playerId);
 			this.participants = this.participants.filter(p => p.id !== playerId);
 		}
 		if (this.host === playerId)
 			this.host = this.players[0]?.id;
+		
 	}
 
 	startGame(playerId)

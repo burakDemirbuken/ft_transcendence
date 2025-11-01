@@ -59,7 +59,7 @@ class AiNetworkManager
 			ai_config: {
 				difficulty: difficulty
 			},
-			game_id: gameId  // Game server'dan gelen ID'yi gönder
+			game_id: gameId
 		};
 
 		if (difficulty === "custom")
