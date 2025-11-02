@@ -176,6 +176,29 @@ async function sendEmailChangeRequest(email, username, token)
 	return (response.json());
 }
 
+async function sendPasswordChangeRequest(email, username, token)
+{
+	const response = await fetch(`http://email:3005/send-password-change`,
+    {
+		method: 'POST',
+		headers:
+		{
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify
+        ({
+			to: email,
+			username: username,
+			changeUrl: `https://${process.env.HOST_IP}:3030/api/auth/change-password?token=${token}`,
+			token: token
+		})
+	});
+
+	if (!response.ok)
+		throw new Error(`Email service error: ${response.status}`);
+	return (response.json());
+}
+
 async function sendNewEmailVerification(email, username, token)
 {
 	const response = await fetch(`http://email:3005/send-new-email-verification`,
@@ -207,6 +230,7 @@ export default
 	send2FAEmail,
 	sendLoginNotification,
 	sendEmailChangeRequest,
+	sendPasswordChangeRequest,
 	sendNewEmailVerification,
 	storeVerificationToken,
 	storeVerificationCode,

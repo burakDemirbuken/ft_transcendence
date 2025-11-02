@@ -655,11 +655,18 @@ async function processEmailChange(request, reply)
 
 		try {
 			await utils.sendNewEmailVerification(newEmail, user.username, verificationToken);
+			
+			// Cookie'leri temizle
+			reply.clearCookie('accessToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+			reply.clearCookie('refreshToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+			reply.clearCookie('authStatus', { path: '/', secure: true, sameSite: 'lax' });
+			
 			return reply.send({
 				success: true,
 				message: 'Verification email sent to your new email address. Please check and verify.',
 				newEmail: newEmail,
-				next_step: 'verify_new_email'
+				next_step: 'verify_new_email',
+				logout: true // Frontend'e logout yapması gerektiğini belirt
 			});
 		} catch (emailError) {
 			utils.tempStorage.delete(newEmail);
@@ -839,6 +846,173 @@ async function verifyNewEmail(request, reply)
 	}
 }
 
+async function requestPasswordChange(request, reply)
+{
+	const trlt = getTranslations(request.query.lang || "eng");
+	try
+	{
+		// JWT token'dan kullanıcıyı al
+		const cookieToken = request.cookies?.accessToken;
+		if (!cookieToken) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Authentication required'
+			});
+		}
+
+		let userId, username, currentEmail;
+		try {
+			const decoded = request.server.jwt.verify(cookieToken);
+			userId = decoded.userId;
+			username = decoded.username;
+			currentEmail = decoded.email;
+		} catch (error) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Invalid authentication token'
+			});
+		}
+
+		// Kullanıcıyı database'den al
+		const user = await User.findByPk(userId);
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: 'User not found'
+			});
+		}
+
+		// Email'i al (JWT'den veya DB'den)
+		const actualEmail = currentEmail || user.email;
+		if (!actualEmail) {
+			return reply.status(400).send({
+				success: false,
+				error: 'User email not found'
+			});
+		}
+
+		// Password değiştirme token'ı oluştur
+		const changeToken = utils.storeVerificationToken(actualEmail, 'password_change');
+		
+		try {
+			await utils.sendPasswordChangeRequest(actualEmail, username, changeToken);
+			return reply.send({
+				success: true,
+				message: 'Password change request sent. Please check your email.',
+				next_step: 'check_email'
+			});
+		} catch (emailError) {
+			console.log("Email service error:", emailError);
+			utils.tempStorage.delete(actualEmail);
+			return reply.status(500).send({
+				success: false,
+				error: 'Failed to send password change request'
+			});
+		}
+	}
+	catch (error)
+	{
+		console.log('Request password change error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
+}
+
+async function processPasswordChange(request, reply)
+{
+	const trlt = getTranslations(request.query.lang || "eng");
+	try
+	{
+		const { token, currentPassword, newPassword } = request.body;
+
+		if (!token || !currentPassword || !newPassword) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Missing required fields'
+			});
+		}
+
+		// Token'ı kontrol et
+		let userEmail = null;
+		for (const [email, data] of utils.tempStorage.entries()) {
+			if (data.type === 'password_change' && data.token === token) {
+				if (data.expires > new Date()) {
+					userEmail = email;
+					break;
+				} else {
+					utils.tempStorage.delete(email);
+				}
+			}
+		}
+
+		if (!userEmail) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Invalid or expired token'
+			});
+		}
+
+		// Kullanıcıyı email ile bul
+		const user = await User.findByEmail(userEmail);
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: 'User not found'
+			});
+		}
+
+		// Mevcut şifreyi kontrol et
+		const isPasswordValid = await user.validatePassword(currentPassword);
+		if (!isPasswordValid) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Current password is incorrect'
+			});
+		}
+
+		// Yeni şifrenin eski şifreyle aynı olmadığını kontrol et
+		const isSamePassword = await user.validatePassword(newPassword);
+		if (isSamePassword) {
+			return reply.status(400).send({
+				success: false,
+				error: 'New password must be different from current password'
+			});
+		}
+
+		// Şifreyi güncelle
+		user.password = newPassword;
+		await user.save();
+
+		// Token'ı temizle
+		utils.tempStorage.delete(userEmail);
+
+		// Tüm refresh token'ları temizle (güvenlik için)
+		await user.clearRefreshToken();
+
+		// Cookie'leri temizle
+		reply.clearCookie('accessToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+		reply.clearCookie('refreshToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
+		reply.clearCookie('authStatus', { path: '/', secure: true, sameSite: 'lax' });
+
+		return reply.send({
+			success: true,
+			message: 'Password successfully changed. Please login with your new password.',
+			next_step: 'login',
+			logout: true // Frontend'e logout yapması gerektiğini belirt
+		});
+	}
+	catch (error)
+	{
+		console.log('Process password change error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
+}
+
 export default {
     register,
     login,
@@ -851,5 +1025,7 @@ export default {
     blacklistTokens,
     requestEmailChange,
     processEmailChange,
-    verifyNewEmail
+    verifyNewEmail,
+    requestPasswordChange,
+    processPasswordChange
 };
