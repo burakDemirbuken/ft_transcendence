@@ -12,13 +12,14 @@ class RoomManager extends EventEmitter
 		super();
 		this.waitingPlayers = [];
 		this.rooms = new Map();
- /*		setInterval(() => {
+		setInterval(() => {
 			console.log(`Current rooms: ${this.rooms.size}`);
 			this.rooms.forEach((room, roomId) => {
 				console.log(`Room ID: ${roomId}, Name: ${room.name}, Players: ${room.players.length}/${room.maxPlayers}, Status: ${room.status}`);
 				console.log('Players:', room.players.map(p => ({ id: p.id, name: p.name, isReady: p.isReady })));
 			});
-		}, 1000); // Log every 1 second */
+		}, 1000); // Log every 1 second
+
 	}
 
 	async handleClientRoomMessage(action, payload, player)
@@ -160,6 +161,8 @@ class RoomManager extends EventEmitter
 			{
 				let url = 'http://profile:3006/internal/';
 				console.log('🏆 Sending match/tournament data to profile service:', data);
+				if (data.matchType === 'local' || data.matchType === 'ai')
+					return;
 				try
 				{
 					if (data.matchType === 'tournament')
@@ -268,8 +271,6 @@ class RoomManager extends EventEmitter
 	{
 		let roomId;
 		do {
-			//! TEST
-			//roomId = "Naber";
 			roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
 		} while (this.rooms.has(roomId));
 		return roomId;

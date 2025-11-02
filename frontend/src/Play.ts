@@ -2275,5 +2275,6 @@ export default class extends AView {
 	async unsetStylesheet() {
 		const link = document.querySelector("link[href='styles/play.css']");
 		document.head.removeChild(link);
+        roomSocket.disconnect();
 	}
 }

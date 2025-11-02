@@ -123,6 +123,13 @@ class NetworkManager
 	{
 		if (this.socket)
 			this.socket.close();
+		this.socket = null;
+		this.callbacks = {
+			onConnect : null,
+			onMessage: null,
+			onClose: null,
+			onError: null
+		};
 	}
 
 	isConnect(): boolean

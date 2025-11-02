@@ -1,17 +1,7 @@
 import WebSocketClient from './network/WebSocketClient.js';
 import GameRenderer from "./GameRenderer.js";
-
-//!
 import InputManager from './input/InputManager.js';
 import rendererConfig from './json/rendererConfig.js';
-
-/*
-const gl = canvas.getContext("webgl");
-if (!gl) {
-  alert("WebGL not supported");
-  throw new Error("WebGL not supported");
-}
-*/
 
 interface StartData {
 	gameMode: string;
@@ -57,76 +47,36 @@ class App
 		this.inputManager = new InputManager();
 	}
 
-	start(data: StartData): void
+	async start(data: StartData): Promise<void>
 	{
+		let initData;
 		console.log('🚀 Starting app with data:', JSON.stringify(data, null, 2));
+
+		initData = {
+			canvasId: "renderCanvas",
+			gameMode: data.gameMode,
+			renderConfig:
+			{
+				...rendererConfig,
+				paddleSize:
+				{
+					width: data.gameSettings.paddleWidth,
+					height: data.gameSettings.paddleHeight
+				},
+			},
+		};
+
 		if (data.gameMode === 'tournament')
 		{
 			let playerArcadeNumber = data.games.find(g => g.players.includes(this.playerId))?.matchNumber;
 			if (playerArcadeNumber === undefined)
 				playerArcadeNumber = 0;
-			this.loadGame(
-				{
-					canvasId: "renderCanvas",
-					gameMode: 'tournament',
-					renderConfig:
-					{
-						...rendererConfig,
-						paddleSize:
-						{
-							width: data.gameSettings.paddleWidth,
-							height: data.gameSettings.paddleHeight
-						},
-					},
-					arcadeCount: data.gameCount,
-					arcadeOwnerNumber: playerArcadeNumber,
-				}
-			);
+			initData.arcadeCount = data.gameCount;
+			initData.arcadeOwnerNumber = playerArcadeNumber;
 		}
-		else
-		{
-			this.loadGame({
-					canvasId: "renderCanvas",
-					gameMode: data.gameMode,
-					renderConfig:
-					{
-						...rendererConfig,
-						paddleSize:
-						{
-							width: data.gameSettings.paddleWidth,
-							height: data.gameSettings.paddleHeight
-						},
-					},
-				}
-			);
-		}
-
-		// ulas :
-		// this._pingpong(this.playerName);
+		await this.loadGame(initData);
 		this._setupNetworkListeners(data.roomId, data.gameMode);
 		this._gameControllerSetup();
-	}
-
-	_pingpong(name: string): void {
-		socket.onopen = () => {
-			console.log('Connected to presence server');
-		}
-
-		socket.onmessage = (event) => {
-			try {
-				const message = JSON.parse(event.data);
-				if (message.type === 'ping') {
-					socket.send(JSON.stringify({ type: 'pong' }));
-				}
-			} catch (err) {
-				console.error('Error parsing message from presence server:', err);
-			}
-		}
-
-		socket.onerror = (error) => {
-			console.error('Heartbeat WebSocket error:', error);
-		}
-
 	}
 
 	_gameControllerSetup(): void
@@ -307,10 +257,10 @@ class App
 		}
 	}
 
-	loadGame(gameConfig: GameConfig): void
+	async loadGame(gameConfig: GameConfig): Promise<void>
 	{
 		console.log('🎮 Loading game with config:', gameConfig);
-		this.gameRenderer.initialize(gameConfig).then(
+		await this.gameRenderer.initialize(gameConfig).then(
 			() =>
 			{
 				this.gameRenderer.startRendering();

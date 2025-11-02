@@ -186,7 +186,6 @@ class GameService
 
 	handleWebSocketMessage(message, clientId)
 	{
-		//! jwt doğrulama burada yapılabilir
 		const player = this.players.get(clientId);
 
 		if (typeof(player) === "undefined")
@@ -335,3 +334,4 @@ class GameService
 
 
 export default GameService;
+

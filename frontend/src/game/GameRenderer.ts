@@ -99,6 +99,9 @@ class GameRenderer extends EventEmitter
 		this.canvas = document.getElementById(gameConfig.canvasId) as HTMLCanvasElement;
 		if (!this.canvas)
 			throw new Error('Canvas is missing');
+		const gl = this.canvas.getContext("webgl");
+		if (!gl)
+			throw new Error("WebGL not supported");
 		if (!gameConfig.renderConfig)
 			throw new Error('Game render configuration is missing');
 		await this.gameCore.initialize(this.canvas, gameConfig.arcade);
