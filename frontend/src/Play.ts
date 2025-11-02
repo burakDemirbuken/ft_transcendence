@@ -1369,63 +1369,66 @@ const aiCustomSliderConfigs = [
 // INITIALIZATION
 // ============================================================================
 
-// Generate user credentials
-currentUserId = generateRandomId();
-currentUserName = generateRandomName();
-console.log(`🎮 User initialized - ID: ${currentUserId}, Name: ${currentUserName}`);
+function connectWebSocket() {
+	// Generate user credentials
+	currentUserId = generateRandomId();
+	// currentUserName = generateRandomName();
+	currentUserName = localStorage.getItem("userName") ?? "Player";
+	console.log(`🎮 User initialized - ID: ${currentUserId}, Name: ${currentUserName}`);
 
-// Initialize WebSocket
-roomSocket = new WebSocketClient(window.location.hostname, 3030);
+	// Initialize WebSocket
+	roomSocket = new WebSocketClient(window.location.hostname, 3030);
 
-// WebSocket event handlers
-roomSocket.onConnect(() => {
-    console.log('✅ Connected to room server');
-    showNotification('Sunucuya bağlandı', 'success');
-});
+	// WebSocket event handlers
+	roomSocket.onConnect(() => {
+		console.log('✅ Connected to room server');
+		showNotification('Sunucuya bağlandı', 'success');
+	});
 
-roomSocket.onMessage((message) => {
-    try {
-        console.log(`📥 Received WebSocket message:`, message);
+	roomSocket.onMessage((message) => {
+		try {
+			console.log(`📥 Received WebSocket message:`, message);
 
-        // Eğer matchReady mesajı gelirse özel işleme yap
-        if (message.type === "matchReady") {
-            const transformedData = transformMatchmakingData(message.payload);
-            handleMatchReady(transformedData);
-            return;
-        }
+			// Eğer matchReady mesajı gelirse özel işleme yap
+			if (message.type === "matchReady") {
+				const transformedData = transformMatchmakingData(message.payload);
+				handleMatchReady(transformedData);
+				return;
+			}
 
-        // Diğer mesajlar için normal işleme devam et
-        handleWebSocketMessage(message);
-    } catch (error) {
-        console.error('Error processing WebSocket message:', error);
-        showNotification('Mesaj işlenirken hata oluştu', 'error');
-    }
-});
+			// Diğer mesajlar için normal işleme devam et
+			handleWebSocketMessage(message);
+		} catch (error) {
+			console.error('Error processing WebSocket message:', error);
+			showNotification('Mesaj işlenirken hata oluştu', 'error');
+		}
+	});
 
-roomSocket.onClose((error) => {
-    console.log(`❌ Disconnected from room server: ${error.code} - ${error.reason}`);
-    showNotification('Sunucu bağlantısı kesildi', 'error');
-});
+	roomSocket.onClose((error) => {
+		console.log(`❌ Disconnected from room server: ${error.code} - ${error.reason}`);
+		showNotification('Sunucu bağlantısı kesildi', 'error');
+	});
 
-roomSocket.onError((error) => {
-    console.error('❌ Room server connection error:', error);
-    showNotification('Bağlantı hatası', 'error');
-});
+	roomSocket.onError((error) => {
+		console.error('❌ Room server connection error:', error);
+		showNotification('Bağlantı hatası', 'error');
+	});
 
-// Connect to server
-roomSocket.connect("ws-room/client", {
-    userID: currentUserId,
-    userName: currentUserName
-});
+	// Connect to server
+	roomSocket.connect("ws-room/client", {
+		userID: currentUserId,
+		userName: currentUserName
+	});
 
-// Export for debugging
-window.roomSocket = roomSocket;
-if (app) {
-    window.app = app;
+	// Export for debugging
+	window.roomSocket = roomSocket;
+	if (app) {
+		window.app = app;
+	}
+
+	console.log('🎮 Application initialized successfully!');
+	showNotification('Hoş geldiniz! ' + currentUserName, 'success');
 }
-
-console.log('🎮 Application initialized successfully!');
-showNotification('Hoş geldiniz! ' + currentUserName, 'success');
 
 // DOM Elements
 const gameModeCards = document.querySelectorAll<HTMLElement>('.game-mode-card');
@@ -1460,7 +1463,6 @@ function updateSliderValue(sliderId: string, valueId: string, suffix: string = '
         }, 200);
     });
 }
-
 
 // Initialize all sliders (paddle-speed ve ball-speed çıkarıldı)
 const sliders = [
@@ -1795,6 +1797,11 @@ export default class extends AView {
 	async setEventHandlers() {
 		this.initAllEventListeners();
 	}
+
+	async setDynamicContent() {
+		connectWebSocket();
+	}
+
 	async unsetEventHandlers() {}
 
 	private initAllEventListeners(): void {
