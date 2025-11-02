@@ -335,6 +335,42 @@ class EmailController {
     }
   }
 
+  async sendPasswordChange(req, rep) {
+    try {
+      const { to, username, changeUrl, token } = req.body
+
+      if (!to || !username || !changeUrl || !token) {
+        return rep.status(400).send({
+          success: false,
+          error: 'Missing required fields: to, username, changeUrl, token'
+        })
+      }
+
+      if (!to.includes('@')) {
+        return rep.status(400).send({
+          success: false,
+          error: 'Invalid email format'
+        })
+      }
+
+      const result = await EmailService.sendPasswordChangeRequest(to, username, changeUrl, token)
+
+      rep.send({
+        success: true,
+        message: 'Password change request sent successfully',
+        data: result
+      })
+
+    } catch (error) {
+      req.log.error('Send password change error:', error)
+      rep.status(500).send({
+        success: false,
+        error: 'Password change request could not be sent',
+        details: error.message
+      })
+    }
+  }
+
   async sendNewEmailVerification(req, rep) {
     try {
       const { to, username, verificationUrl, token } = req.body

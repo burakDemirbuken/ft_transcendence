@@ -10,7 +10,7 @@ export function connectWebSocket() {
 
 	if (friendSocket !== null)
 		return;
-	friendSocket = new WebSocket(`wss://${window.location.hostname}:3007/ws-friend/friends?` + new URLSearchParams({ userName: "test0"/* BETÜL localStorage.getItem("userName") */ }).toString());
+	friendSocket = new WebSocket(`wss://${window.location.hostname}:3007/ws-friend/friends?` + new URLSearchParams({ userName: localStorage.getItem("userName") }).toString());
 
 	friendSocket.onmessage = (event) => {
 		const data = JSON.parse(event.data);
@@ -18,7 +18,7 @@ export function connectWebSocket() {
 		switch (type)
 		{
 			case "list":
-				
+
 				break;
 			case "response":
 

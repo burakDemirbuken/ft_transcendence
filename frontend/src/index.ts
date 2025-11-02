@@ -111,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () =>
 							if (response.ok)
 							{
 								removeAuthToken();
+								localStorage.removeItem('userName');
 								document.querySelector("#navbar")?.classList.add("logout");
 								showNotification("Logged out successfully.", "success");
 								navigateTo("login");
