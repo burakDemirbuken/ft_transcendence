@@ -1794,7 +1794,31 @@ export default class extends AView {
 
 	async setEventHandlers() {
 		this.initAllEventListeners();
+
+        // Sayfa yüklendiğinde "Oyun" sekmesini aç
+        requestAnimationFrame(() => {
+            const customModeCard = document.getElementById('custom-mode');
+            const customSettings = document.getElementById('custom-settings');
+
+            if (customModeCard && customSettings) {
+                // Tüm mod kartlarını ve ayar panellerini kapat
+                document.querySelectorAll('.game-mode-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                document.querySelectorAll('.settings-panel').forEach(panel => {
+                    panel.classList.remove('active');
+                });
+
+                // Custom Game sekmesini aç
+                customModeCard.classList.add('active');
+                customSettings.classList.add('active');
+
+                // Geçerli oyun modunu güncelle
+                currentGameMode = 'custom';
+            }
+        });
 	}
+
 	async unsetEventHandlers() {}
 
 	private initAllEventListeners(): void {
