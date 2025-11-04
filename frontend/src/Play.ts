@@ -708,7 +708,7 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
     const customCount = document.getElementById('custom-players-count');
     if (customCount) customCount.textContent = `${playerCount}/${maxPlayers}`;
 
-    if (payload.gameMode === 'multiplayer') {
+    if (payload.gameMode === 'multiplayer' || payload.gameMode === '2vs2') {
       updateParticipants(payload.players, 'custom-participants-grid', null, true);
     } else {
       updateParticipants(payload.players, 'custom-participants-grid');
@@ -742,7 +742,7 @@ interface GameSettings {
 
 interface GameStartPayload {
     roomId: string;
-    gameMode: 'classic' | 'local' | 'multiplayer' | 'tournament' | 'ai';
+    gameMode: '1v1' | '2vs2' | 'classic' | 'local' | 'multiplayer' | 'tournament' | 'ai';
     gameSettings: GameSettings;
 }
 
@@ -1001,7 +1001,7 @@ interface CustomRoomPlayer {
 
 interface CustomRoomData {
     roomId: string;
-    gameMode: 'classic' | 'multiplayer' | 'local';
+    gameMode: '1v1' | '2vs2' | 'classic' | 'multiplayer' | 'local';
     players?: CustomRoomPlayer[];
     maxPlayers?: number;
     gameSettings?: GameSettings;
@@ -1034,6 +1034,8 @@ function showCustomWaitingRoom(data: CustomRoomData): void {
 
     // Game type display
     const gameTypeMap: Record<string, string> = {
+        '1v1': '1 vs 1',
+        '2vs2': '2 vs 2',
         'classic': '1 vs 1',
         'multiplayer': '2 vs 2',
         'local': 'local'
@@ -1070,7 +1072,7 @@ function showCustomWaitingRoom(data: CustomRoomData): void {
 
     // Update participants
     if (data.players) {
-        if (data.gameMode === "multiplayer") {
+        if (data.gameMode === "multiplayer" || data.gameMode === '2vs2') {
             updateParticipants(data.players, 'custom-participants-grid', null, true);
         } else {
             updateParticipants(data.players, 'custom-participants-grid');
@@ -1233,7 +1235,7 @@ function showAIWaitingRoom(data: AIWaitingRoomData): void {
 // ============================================================================
 
 // Oyun modu türlerini tanımlayan bir type
-type GameMode =  'classic' | 'multiplayer' | 'local' | 'custom' | 'tournament' | 'ai';
+type GameMode =  '1v1' | '2vs2' | 'classic' | 'multiplayer' | 'local' | 'custom' | 'tournament' | 'ai';
 type GameType = '1v1' | '2v2' | 'co-op';
 
 // currentGameMode değişkenini doğru şekilde tanımlayın
@@ -1796,6 +1798,29 @@ export default class extends AView {
 
 	async setEventHandlers() {
 		this.initAllEventListeners();
+
+        // Sayfa yüklendiğinde "Oyun" sekmesini aç
+        requestAnimationFrame(() => {
+            const customModeCard = document.getElementById('custom-mode');
+            const customSettings = document.getElementById('custom-settings');
+
+            if (customModeCard && customSettings) {
+                // Tüm mod kartlarını ve ayar panellerini kapat
+                document.querySelectorAll('.game-mode-card').forEach(card => {
+                    card.classList.remove('active');
+                });
+                document.querySelectorAll('.settings-panel').forEach(panel => {
+                    panel.classList.remove('active');
+                });
+
+                // Custom Game sekmesini aç
+                customModeCard.classList.add('active');
+                customSettings.classList.add('active');
+
+                // Geçerli oyun modunu güncelle
+                currentGameMode = 'custom';
+            }
+        });
 	}
 
 	async setDynamicContent() {
@@ -1881,10 +1906,26 @@ export default class extends AView {
 			const cornerBoostEl = document.getElementById('custom-corner-boost') as HTMLInputElement;
 			const winningScoreEl = document.getElementById('custom-winning-score') as HTMLInputElement;
 
+			// Oyun tipine göre gameMode'u belirle
+			let gameMode: string;
+			switch (gameTypeElement.value) {
+				case '1vs1':
+					gameMode = 'classic';
+					break;
+				case '2vs2':
+					gameMode = 'multiplayer';
+					break;
+				case 'local':
+					gameMode = 'local';
+					break;
+				default:
+					gameMode = 'classic';
+			}
+
 			// Data objesi oluştur
 			const data = {
 				gameType: gameTypeElement.value,
-				gameMode: 'local',
+				gameMode: gameMode,
 				gameSettings: {
 					...gameConfig.gameSettings,
 					paddleHeight: parseInt(paddleHeightEl.value, 10),
