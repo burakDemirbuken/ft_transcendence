@@ -1373,8 +1373,9 @@ const aiCustomSliderConfigs = [
 
 function connectWebSocket() {
 	// Generate user credentials
-	currentUserId = generateRandomId();
+	currentUserId = localStorage.getItem("userName") ?? "Player";
 	// currentUserName = generateRandomName();
+    // displayname gelicek VVVVVVVV
 	currentUserName = localStorage.getItem("userName") ?? "Player";
 	console.log(`🎮 User initialized - ID: ${currentUserId}, Name: ${currentUserName}`);
 

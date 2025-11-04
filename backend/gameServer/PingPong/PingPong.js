@@ -120,24 +120,14 @@ class PingPong extends EventEmitter
 	removePlayer(playerId)
 	{
 		const playerIndex = this.players.findIndex(p => p.id === playerId);
-		console.log('Removing player:', playerId);
 		if (playerIndex !== -1)
 		{
-			this.players.splice(playerIndex, 1);
-			this.paddles.delete(playerId);
 			if (this.team.get(1).playersId.includes(playerId))
-			{
-				this.team.get(1).playersId = this.team.get(1).playersId.filter(id => id !== playerId);
 				this.team.get(2).score = this.settings.maxScore;
-				console.log(`Player ${playerId} removed from team 1`);
-			}
 			else if (this.team.get(2).playersId.includes(playerId))
-			{
-				this.team.get(2).playersId = this.team.get(2).playersId.filter(id => id !== playerId);
 				this.team.get(1).score = this.settings.maxScore;
-				console.log(`Player ${playerId} removed from team 2`);
-			}
 			this.finishedControls();
+			this.players.splice(playerIndex, 1);
 		}
 		else
 			console.warn(`⚠️ Player ${playerId} not found in game`);
