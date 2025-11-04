@@ -9,7 +9,6 @@ class PingPong extends EventEmitter
 	constructor(property)
 	{
 		super();
-		this.isStarted = false;
 		this.status = 'not initialized'; // 'waiting', 'playing', 'paused', 'finished', 'not initialized'
 		this.gameMode = "classic"; // 'local', 'online', 'tournament', 'ai'
 
@@ -20,33 +19,6 @@ class PingPong extends EventEmitter
 
 
 		this.timeout = null;
-	/*
-		toplam vuruş sayısı (tüm maçlardaki)
-		toplam topu kaçırma sayısı (tüm maçlardaki)
-		toplam süre (tüm maçlardaki)
-	*/
-
-
-/*
-		state:
-		{
-			players:
-			[
-				{
-					id: 1,
-					kickBall: 2,
-					missedBall: 1,
-				},
-				{
-					id: 2,
-					kickBall: 3,
-					missedBall: 0,
-				},
-			],
-		}
-*/
-
-
 		this.state = {
 			players: [],
 		};
@@ -330,7 +302,6 @@ class PingPong extends EventEmitter
 				},
 			}
 		);
-		this.isStarted = false;
 		console.log(`winner: ${this.getWinnerTeam().playersId}, loser: ${this.getLoserTeam().playersId}`);
 		console.log(`🏁 Game finished! Final Score - team1: ${this.team.get(1).score}, team2: ${this.team.get(2).score}`);
 	}
@@ -455,7 +426,6 @@ class PingPong extends EventEmitter
 		{
 			this.status = 'playing';
 		}, 2000);
-		this.isStarted = true;
 	}
 
 	pause()

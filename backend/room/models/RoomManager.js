@@ -12,13 +12,13 @@ class RoomManager extends EventEmitter
 		super();
 		this.waitingPlayers = [];
 		this.rooms = new Map();
-		setInterval(() => {
+/* 		setInterval(() => {
 			console.log(`Current rooms: ${this.rooms.size}`);
 			this.rooms.forEach((room, roomId) => {
 				console.log(`Room ID: ${roomId}, Name: ${room.name}, Players: ${room.players.length}/${room.maxPlayers}, Status: ${room.status}`);
 				console.log('Players:', room.players.map(p => ({ id: p.id, name: p.name, isReady: p.isReady })));
 			});
-		}, 1000); // Log every 1 second
+		}, 1000); // Log every 1 second */
 
 	}
 
@@ -33,7 +33,7 @@ class RoomManager extends EventEmitter
 					player.clientSocket.send(JSON.stringify({ type: 'created', payload: { ...state } }));
 					break;
 				case 'join':
-					this.joinRoom(payload.roomId, player);
+					this.joinRoom(payload, player);
 					player.clientSocket.send(JSON.stringify({ type: 'joined', payload: { roomId: payload.roomId, ...this.getRoom(payload.roomId).getState() } }));
 					break;
 				case 'leave':
@@ -207,19 +207,20 @@ class RoomManager extends EventEmitter
 		return false;
 	}
 
-	joinRoom(roomId, player)
+	joinRoom(payload, player)
 	{
-		const room = this.getRoom(roomId);
+		const room = this.getRoom(payload.roomId);
 		if (!room)
-			throw new Error(`Room with ID ${roomId} does not exist`);
+			throw new Error(`Room with ID ${payload.roomId} does not exist`);
 		if (room.players.length >= room.maxPlayers)
-			throw new Error(`Room with ID ${roomId} is full`);
+			throw new Error(`Room with ID ${payload.roomId} is full`);
 		if (room.players.find(p => p.id === player.id))
-			throw new Error(`Player with ID ${player.id} is already in room ${roomId}`);
-
+			throw new Error(`Player with ID ${player.id} is already in room ${payload.roomId}`);
+		if (payload.gameMode !== room.gameMode)
+			throw new Error(`Player with ID ${player.id} cannot join room ${payload.roomId} with game mode ${payload.gameMode}`);
 		room.addPlayer(player);
-		console.log(`Player with ID ${player.id} joined room ${roomId}`);
-		this.notifyRoomUpdate(roomId);
+		console.log(`Player with ID ${player.id} joined room ${payload.roomId}`);
+		this.notifyRoomUpdate(payload.roomId);
 	}
 
 	leaveRoom(player)

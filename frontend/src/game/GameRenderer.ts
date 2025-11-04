@@ -125,8 +125,8 @@ class GameRenderer extends EventEmitter
 
 	async tournamentInitialize(arcadeCount: number = 0, playerOwnerNumber: number = 0): Promise<void>
 	{
-		const radius = 5; // Yuvarlağın yarıçapı
-		const angleStep = (Math.PI * 2) / arcadeCount; // Her oyuncu arası açı
+		const radius = 5;
+		const angleStep = (Math.PI * 2) / arcadeCount;
 		for (let i = 0; i < arcadeCount; i++)
 		{
 			const angle = i * angleStep;
@@ -142,7 +142,6 @@ class GameRenderer extends EventEmitter
 			this.arcadeMachines.set(i, machine);
 		}
 
-		// PlayerMachine'i set et
 		this.playerMachine = this.arcadeMachines.get(playerOwnerNumber) || null;
 
 		this.focusOnPlayer(playerOwnerNumber);
@@ -213,9 +212,9 @@ class GameRenderer extends EventEmitter
 	{
 		const cameraDistance = 3;
 		const cameraHeight = 4.5;
-		const angleStep = (Math.PI * 2) / this.arcadeMachines.size; // Her oyuncu arası açı
+		const angleStep = (Math.PI * 2) / this.arcadeMachines.size;
 
-		const angle = machineNumber * angleStep + BABYLON.Tools.ToRadians(4);
+		const angle = machineNumber * angleStep + BABYLON.Tools.ToRadians(5);
 		const cameraPosition = {
 			x: Math.round(Math.cos(angle) * cameraDistance * 1000) / 1000,
 			y: cameraHeight,
@@ -240,7 +239,7 @@ class GameRenderer extends EventEmitter
 		if (this.gameState)
 			this.render(this.gameState);
 		else if (this.playerMachine)
-			this.renderer.renderWaitingScreen("Waiting for game state...", this.playerMachine);
+			this.renderer.renderWaitingScreen("waiting opponent...", this.playerMachine);
 		requestAnimationFrame(() => this.gameLoop());
 	}
 
