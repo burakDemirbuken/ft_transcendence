@@ -261,20 +261,61 @@ export default async function gamedataRoute(fastify) {
 					{
 						model: fastify.sequelize.models.Team,
 						as: 'teamOne',
-						required: false
+						required: false,
+						include: [
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerOne',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							},
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerTwo',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							}
+						]
 					},
 					{
 						model: fastify.sequelize.models.Team,
 						as: 'teamTwo',
-						required: false
+						required: false,
+						include: [
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerOne',
+								attributes: ['userName', 'displayName', 'avatarUrl'],
+							},
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerTwo',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							}
+						]
 					},
+					{
+						model: fastify.sequelize.models.Team,
+						as: 'winnerTeam',
+						required: false,
+						include: [
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerOne',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							},
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerTwo',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							}
+						]
+					}
 				],
 				where: {
 					[Op.or]: [
 						{ '$teamOne.playerOneId$': userProfile.id },
 						{ '$teamOne.playerTwoId$': userProfile.id },
 						{ '$teamTwo.playerOneId$': userProfile.id },
-						{ '$teamTwo.playerTwoId$': userProfile.id }
+						{ '$teamTwo.playerTwoId$': userProfile.id },
 					]
 				}
 			})
@@ -324,6 +365,11 @@ export default async function gamedataRoute(fastify) {
 										model: fastify.sequelize.models.Profile,
 										as: 'playerTwo',
 										attributes: ['userName', 'displayName', 'avatarUrl'],
+									},
+									{
+										model: fastify.sequelize.models.Profile,
+										as: 'winnerPlayer',
+										attributes: ['userName', 'displayName', 'avatarUrl']
 									}
 								],
 								attributes: ['matchNumber', 'playerOneID', 'playerTwoID', 'playerOneScore', 'playerTwoScore', 'winnerPlayerID'],
@@ -350,4 +396,96 @@ export default async function gamedataRoute(fastify) {
 			return reply.code(500).send({message: 'Failed to retrieve tournament history' })
 		}
 	})
- }
+
+	function mockTournamentHistory() {
+		// This function can be expanded to create mock tournament data for testing purposes
+		// usersTournament: JSON.parse(JSON.stringify(usersTournament))
+
+		return {
+			name: "Mock Tournament",
+			winnerPlayer: "player1",
+			Rounds: [
+				{
+					roundNumber: 1,
+					RoundMatches: [
+						{
+							matchNumber: 1,
+							playerOneID: {
+								userName: "player1",
+								displayName: "Player One",
+								avatarUrl: "http://example.com/avatar1.png"
+							},
+							playerTwoID: {
+								userName: "player2",
+								displayName: "Player Two",
+								avatarUrl: "http://example.com/avatar2.png"
+							},
+							playerOneScore: 3,
+							playerTwoScore: 2,
+							winnerPlayerID: 1 // şaibeli
+							
+						},
+						{
+							matchNumber: 2,
+							playerOneID: {
+								userName: "player1",
+								displayName: "Player One",
+								avatarUrl: "http://example.com/avatar1.png"
+							},
+							playerTwoID: {
+								userName: "player2",
+								displayName: "Player Two",
+								avatarUrl: "http://example.com/avatar2.png"
+							},
+							playerOneScore: 3,
+							playerTwoScore: 2,
+							winnerPlayerID: 1 // şaibeli
+						}
+					]
+				},
+				{
+					roundNumber: 2,
+					RoundMatches: [
+						{
+							matchNumber: 1,
+							playerOneID: {
+								userName: "player1",
+								displayName: "Player One",
+								avatarUrl: "http://example.com/avatar1.png"
+							},
+							playerTwoID: {
+								userName: "player2",
+								displayName: "Player Two",
+								avatarUrl: "http://example.com/avatar2.png"
+							},
+							playerOneScore: 3,
+							playerTwoScore: 2,
+							winnerPlayerID: 1 // şaibeli
+						},
+						{
+							matchNumber: 2,
+							playerOneID: {
+								userName: "player1",
+								displayName: "Player One",
+								avatarUrl: "http://example.com/avatar1.png"
+							},
+							playerTwoID: {
+								userName: "player2",
+								displayName: "Player Two",
+								avatarUrl: "http://example.com/avatar2.png"
+							},
+							playerOneScore: 3,
+							playerTwoScore: 2,
+							winnerPlayerID: 1 // şaibeli
+						}
+					]
+				}
+			]
+		}
+	}
+
+	function mockMatchHistory() {
+		// This function can be expanded to create mock match data for testing purposes
+		return 
+	}
+}
