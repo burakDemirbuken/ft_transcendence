@@ -1,4 +1,11 @@
 /* Matches Tab */
+
+.match-row.empty-state {
+    color: var(--color-muted);
+    font-style: italic;
+    opacity: 0.7;
+}
+
 .matches-header {
     display: flex;
     justify-content: space-between;
