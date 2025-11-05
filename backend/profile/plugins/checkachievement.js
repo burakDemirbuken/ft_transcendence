@@ -86,7 +86,7 @@ export default fp(async (fastify) => {
 	fastify.decorate('checkAchievements', checkAchievements)
 	fastify.decorate('getAchievementProgress', getAchievementProgress)
 
-	function calculateLevel(xp, baseXP = 100, growthFactor = 1.25) {
+	function nRealcalculate(xp, baseXP = 100, growthFactor = 1.25) {
 		if (xp < 0)
 			return 0;
 
@@ -105,7 +105,7 @@ export default fp(async (fastify) => {
 		if (xp < 0)
 			return { level: 0, currentXP: 0, xpForNextLevel: baseXP }
 
-		const nReal = calculateLevel(xp, baseXP, growthFactor)
+		const nReal = nRealcalculate(xp, baseXP, growthFactor)
 		const level = Math.max(1, Math.floor(nReal))
 
 		const S = (level) => Math.floor(baseXP * (Math.pow(growthFactor, level) - 1) / (growthFactor - 1))
