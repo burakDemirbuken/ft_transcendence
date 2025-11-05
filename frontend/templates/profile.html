@@ -101,47 +101,12 @@
                 </div>
                 <!-- Recent Matches -->
                 <div class="stat-card recent-matches">
-                    <h3><i class="fa-solid fa-clock"></i> <span data-i18n="profile.dash.mlast.title">Son Maçlar</span></h3>
-                    <div class="matches-list">
-                        <div class="match-item win">
-                            <div class="match-result">W</div>
-                            <div class="match-info">
-                                <span class="opponent">NeonKiller</span>
-                                <span class="score">11-7</span>
-                            </div>
-                            <div class="match-time">2 saat önce</div>
-                        </div>
-                        <div class="match-item win">
-                            <div class="match-result">W</div>
-                            <div class="match-info">
-                                <span class="opponent">PongPro</span>
-                                <span class="score">11-9</span>
-                            </div>
-                            <div class="match-time">5 saat önce</div>
-                        </div>
-                        <div class="match-item win">
-                            <div class="match-result">W</div>
-                            <div class="match-info">
-                                <span class="opponent">CyberPaddle</span>
-                                <span class="score">11-4</span>
-                            </div>
-                            <div class="match-time">1 gün önce</div>
-                        </div>
-                        <div class="match-item loss">
-                            <div class="match-result">L</div>
-                            <div class="match-info">
-                                <span class="opponent">TableMaster</span>
-                                <span class="score">8-11</span>
-                            </div>
-                            <div class="match-time">2 gün önce</div>
-                        </div>
-                    </div>
+                    <h3><i class="fa-solid fa-clock"></i><span data-i18n="profile.dash.mlast.title">Son Maçlar</span></h3>
+                    <div class="matches-list"></div>
                 </div>
                 <!-- Performance Chart -->
                 <div class="stat-card chart-card">
-                    <h3>
-                        <i class="fa-solid fa-cubes"></i>
-                        <span data-i18n="profile.dash.wperf.title">Haftalık Performans</span></h3>
+                    <h3><i class="fa-solid fa-cubes"></i><span data-i18n="profile.dash.wperf.title">Haftalık Performans</span></h3>
                     <canvas id="performanceChart" data-labels='["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]' data-values='[4, 6, 3, 9, 7, 5, 8]'></canvas>
                 </div>
             </div>
@@ -276,44 +241,13 @@
                     <span data-i18n="profile.mhistory.table.time">Süre</span>
                     <span data-i18n="profile.mhistory.table.result">Sonuç</span>
                 </div>
-                <!-- <div class="match-row" data-result="win" data-match-id="1">
-                    <span>28.06.2025 19:30</span>
-                    <span>NeonKiller</span>
-                    <span>11-7</span>
-                    <span>4:23</span>
-                    <span class="result win">Galibiyet</span>
-                </div>
-                <div class="match-row" data-result="win" data-match-id="2">
-                    <span>28.07.2025 16:15</span>
-                    <span>PongPro</span>
-                    <span>11-9</span>
-                    <span>6:45</span>
-                    <span class="result win">Galibiyet</span>
-                </div>
-                <div class="match-row" data-result="win" data-match-id="3">
-                    <span>27.06.2025 20:00</span>
-                    <span>CyberPaddle</span>
-                    <span>11-4</span>
-                    <span>3:12</span>
-                    <span class="result win">Galibiyet</span>
-                </div>
-                <div class="match-row" data-result="loss" data-match-id="4">
-                    <span>26.07.2025 18:30</span>
-                    <span>TableMaster</span>
-                    <span>8-11</span>
-                    <span>7:28</span>
-                    <span class="result loss">Mağlubiyet</span>
-                </div>
-            </div> -->
             <div id="match-overlay" class="hide-away">
                 <div class="match-card"></div>
 	            <div id="match-card-exit" class="profile-close">
-		            <svg class="profile-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM231 231C240.4 221.6 255.6 221.6 264.9 231L319.9 286L374.9 231C384.3 221.6 399.5 221.6 408.8 231C418.1 240.4 418.2 255.6 408.8 264.9L353.8 319.9L408.8 374.9C418.2 384.3 418.2 399.5 408.8 408.8C399.4 418.1 384.2 418.2 374.9 408.8L319.9 353.8L264.9 408.8C255.5 418.2 240.3 418.2 231 408.8C221.7 399.4 221.6 384.2 231 374.9L286 319.9L231 264.9C221.6 255.5 221.6 240.3 231 231z"/></svg>
+		            <svg class="profile-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM231 231C240.4 221.6 255.6 221.6 264.9 231L319.9 286L374.9 231C384.3 221.6 399.5 221.6 408.8 231C418.1 240.4 418.2 255.6 408.8 264.9L353.8 319.9L408.8 374.9C418.2 384.3 418.2 399.5 408.8 408.8C399.4 418.1 384.2 418.2 374.9 408.8L319.9 353.8L264.9 408.8C255.5 418.2 240.3 418.2 231 408.8C221.7 399.4 221.6 384.2 231 374.9L286 319.9L231 264.9C221.6 255.5 221.6 240.3 231 231z"/></svg>
 	            </div>
             </div>
         </section>
-        <!-- Maç Analizi Popup -->
-
         <!-- Achievements Tab -->
         <section id="achievements" class="tab-content">
             <div class="achievements-grid" class="stats-grid">

@@ -1101,6 +1101,88 @@ export function refreshMatchHistory() {
     }
 }
 
+async function populateRecentMatches(userName: string) {
+    const matchesList = document.querySelector('.matches-list');
+    if (!matchesList) return;
+
+    try {
+        // Match history'yi çek
+        const response = await fetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            }
+        });
+
+        if (!response.ok) {
+            console.error("❌ Failed to fetch match history for recent matches");
+            return;
+        }
+
+        const data = await response.json();
+        const matches = data.matches || [];
+
+        // Mevcut içeriği temizle
+        matchesList.innerHTML = '';
+
+        if (matches.length === 0) {
+            const translations = await getJsTranslations(localStorage.getItem("langPref"));
+            matchesList.innerHTML = `<p style="text-align: center; color: var(--color-muted);">${translations?.profile?.mhistory?.nomatch || 'Henüz maç geçmişi bulunmuyor'}</p>`;
+            return;
+        }
+
+        // Son 4 maçı al
+        const recentMatches = matches.slice(-4).reverse();
+
+        // Çevirileri al
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+        const winText = translations?.profile?.mhistory?.win || 'Galibiyet';
+        const loseText = translations?.profile?.mhistory?.lose || 'Mağlubiyet';
+
+        recentMatches.forEach((match: any) => {
+            const isUserInTeamOne = match.teamOne?.PlayerOne?.userName === userName ||
+                                    match.teamOne?.PlayerTwo?.userName === userName;
+
+            const userScore = isUserInTeamOne ? match.teamOneScore : match.teamTwoScore;
+            const opponentScore = isUserInTeamOne ? match.teamTwoScore : match.teamOneScore;
+
+            const isWin = match.winnerTeam &&
+                         (match.winnerTeam.PlayerOne?.userName === userName ||
+                          match.winnerTeam.PlayerTwo?.userName === userName);
+
+            // Rakip ismi
+            const opponentTeam = isUserInTeamOne ? match.teamTwo : match.teamOne;
+            let opponentName = '';
+            if (opponentTeam?.PlayerOne && opponentTeam?.PlayerTwo) {
+                opponentName = `${opponentTeam.PlayerOne.displayName} & ${opponentTeam.PlayerTwo.displayName}`;
+            } else if (opponentTeam?.PlayerOne) {
+                opponentName = opponentTeam.PlayerOne.displayName;
+            } else if (opponentTeam?.PlayerTwo) {
+                opponentName = opponentTeam.PlayerTwo.displayName;
+            } else {
+                opponentName = 'Unknown';
+            }
+
+            // Match item oluştur
+            const matchItem = document.createElement('div');
+            matchItem.className = `match-item ${isWin ? 'win' : 'loss'}`;
+            matchItem.innerHTML = `
+                <div class="match-result">${isWin ? 'W' : 'L'}</div>
+                <div class="match-info">
+                    <span class="opponent">${opponentName}</span>
+                    <span class="score">${userScore}-${opponentScore}</span>
+                </div>
+            `;
+
+            matchesList.appendChild(matchItem);
+        });
+
+    } catch (error) {
+        console.error("❌ Error fetching recent matches:", error);
+    }
+}
+
 // Cookie'leri parse etmek için yardımcı fonksiyon
 function parseCookies(): Record<string, string> {
     const cookies: Record<string, string> = {};
@@ -1127,6 +1209,8 @@ async function setTextStats(user: any) {
     // Win Streak
     document.querySelector(".streak-number").textContent = user.stats.gameCurrentStreak;
     document.querySelector(".streak-value").textContent = user.stats.gameLongestStreak;
+	// Last Matches
+	await populateRecentMatches(user.profile.userName);
 }
 
 async function setChartStats(user: any) {
