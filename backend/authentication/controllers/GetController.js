@@ -47,7 +47,7 @@ async function getProfile(request, reply) {
     const trlt = getTranslations(request.query.lang || "eng");
     try {
         let userId;
-        
+
         // Cookie'den JWT token'ı çek ve decode et
         const cookieToken = request.cookies.accessToken ?? {};
         if (cookieToken) {
@@ -58,7 +58,7 @@ async function getProfile(request, reply) {
                 console.log('JWT token decode error:', error);
             }
         }
-        
+
         if (!userId)
         {
             return (reply.status(401).send({
@@ -85,7 +85,7 @@ async function showEmailChangeForm(request, reply) {
     const trlt = getTranslations(request.query.lang || "eng");
     try {
         const { token } = request.query;
-        
+
         // Token'ı kontrol et - hangi email için olduğunu bul
         let userEmail = null;
         for (const [email, data] of utils.tempStorage.entries()) {
@@ -230,7 +230,7 @@ async function showEmailChangeForm(request, reply) {
                 <div class="container">
                     <div id="form-screen">
                         <h2>Change Email Address</h2>
-                        
+
                         <div class="info">
                             <strong>Email Change Request</strong>
                             <br><br>
@@ -239,24 +239,24 @@ async function showEmailChangeForm(request, reply) {
 
                         <form id="emailChangeForm">
                             <input type="hidden" name="token" value="${token}">
-                            
+
                             <div class="form-group">
                                 <label for="currentEmail">Current Email Address:</label>
                                 <input type="email" id="currentEmail" name="oldEmail" required>
                                 <div id="currentEmailValidation" class="validation-message"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="newEmail">New Email Address:</label>
                                 <input type="email" id="newEmail" name="newEmail" required>
                                 <div id="emailValidation" class="validation-message"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="password">Current Password:</label>
                                 <input type="password" id="password" name="password" required>
                             </div>
-                            
+
                             <button type="submit" id="submitBtn" disabled>Change Email</button>
                         </form>
                     </div>
@@ -293,24 +293,24 @@ async function showEmailChangeForm(request, reply) {
                     const currentEmail = currentEmailInput.value.trim();
                     const newEmail = newEmailInput.value.trim();
                     const password = passwordInput.value.trim();
-                    
+
                     console.log('🔘 updateSubmitButton called');
                     console.log('  📧 Current:', currentEmail);
                     console.log('  📧 New:', newEmail);
                     console.log('  🔑 Password:', password ? '***' : '(empty)');
-                    
+
                     // Validate current email
                     const isCurrentValid = currentEmail.length > 0 && /^[^\\s@]+@[^\\s@]+\\.[a-zA-Z]{2,}$/.test(currentEmail);
-                    
+
                     // Validate new email
                     const isNewValid = newEmail.length > 0 && /^[^\\s@]+@[^\\s@]+\\.[a-zA-Z]{2,}$/.test(newEmail);
-                    
+
                     // Check if emails are different
                     const isDifferent = currentEmail !== newEmail;
-                    
+
                     // Password must be filled
                     const hasPassword = password.length > 0;
-                    
+
                     console.log('  ✓ isCurrentValid:', isCurrentValid);
                     console.log('  ✓ isNewValid:', isNewValid);
                     console.log('  ✓ isDifferent:', isDifferent);
@@ -318,11 +318,11 @@ async function showEmailChangeForm(request, reply) {
                     console.log('  ✓ isCurrentEmailFilled:', isCurrentEmailFilled);
                     console.log('  ✓ isNewEmailValid:', isNewEmailValid);
                     console.log('  ✓ isPasswordFilled:', isPasswordFilled);
-                    
+
                     // Enable button only if all conditions are met
                     const shouldEnable = isCurrentValid && isNewValid && isDifferent && hasPassword && isCurrentEmailFilled && isNewEmailValid && isPasswordFilled;
                     console.log('  🎯 Button should be enabled:', shouldEnable);
-                    
+
                     submitBtn.disabled = !shouldEnable;
                 }
 
@@ -338,7 +338,7 @@ async function showEmailChangeForm(request, reply) {
                     console.log('🔍 checkNewEmail called with:', email);
                     const currentEmail = currentEmailInput.value.trim();
                     console.log('📧 Current email:', currentEmail);
-                    
+
                     if (!email) {
                         console.log('❌ Email is empty');
                         emailValidation.textContent = '';
@@ -348,11 +348,11 @@ async function showEmailChangeForm(request, reply) {
                         updateSubmitButton();
                         return;
                     }
-                    
+
                     // Email format validation
                     const isValid = isValidEmail(email);
                     console.log('🔎 Email format check:', email, '-> Valid:', isValid);
-                    
+
                     if (!isValid) {
                         console.log('❌ Invalid email format');
                         emailValidation.textContent = 'Please enter a valid email address (e.g., user@example.com)';
@@ -362,7 +362,7 @@ async function showEmailChangeForm(request, reply) {
                         updateSubmitButton();
                         return;
                     }
-                    
+
                     if (email === currentEmail) {
                         console.log('❌ Emails are the same');
                         emailValidation.textContent = 'New email must be different from current email';
@@ -379,7 +379,7 @@ async function showEmailChangeForm(request, reply) {
                     newEmailInput.className = '';
                     const link = 'https://' + HOST_IP + ':3030/api/auth/check-email?email=' + email;
                     console.log('🔗 API URL:', link);
-                    
+
                     fetch(link)
                         .then(response => {
                             console.log('📡 API Response status:', response.status, response.ok);
@@ -397,11 +397,11 @@ async function showEmailChangeForm(request, reply) {
                         .then(data => {
                             console.log('📦 API Response data:', data);
                             if (!data) return;
-                            
+
                             // exists: true means email is already taken
                             // exists: false means email is available
                             console.log('🔍 Email exists in DB:', data.exists);
-                            
+
                             if (!data.exists) {  // Email is available (not exists)
                                 console.log('✅ Email is available');
                                 emailValidation.textContent = '✓ Email is available';
@@ -433,7 +433,7 @@ async function showEmailChangeForm(request, reply) {
                     clearTimeout(currentEmailTimeout);
                     const email = this.value.trim();
                     console.log('⌨️ Current email input:', email);
-                    
+
                     // Clear validation while typing
                     if (email.length > 0) {
                         currentEmailValidation.textContent = '';
@@ -442,7 +442,7 @@ async function showEmailChangeForm(request, reply) {
                         isCurrentEmailFilled = false;
                         updateSubmitButton();
                     }
-                    
+
                     if (email.length === 0) {
                         console.log('📧 Current email cleared');
                         currentEmailValidation.textContent = '';
@@ -452,13 +452,13 @@ async function showEmailChangeForm(request, reply) {
                         updateSubmitButton();
                         return;
                     }
-                    
+
                     // Validate after user stops typing
                     currentEmailTimeout = setTimeout(() => {
                         console.log('⏱️ Current email timeout fired, validating:', email);
                         isCurrentEmailFilled = /^[^\\s@]+@[^\\s@]+\\.[a-zA-Z]{2,}$/.test(email);
                         console.log('✅ isCurrentEmailFilled:', isCurrentEmailFilled);
-                        
+
                         if (isCurrentEmailFilled) {
                             currentEmailValidation.textContent = '✓ Current email entered';
                             currentEmailValidation.className = 'validation-message success';
@@ -468,9 +468,9 @@ async function showEmailChangeForm(request, reply) {
                             currentEmailValidation.className = 'validation-message error';
                             currentEmailInput.className = 'input-error';
                         }
-                        
+
                         updateSubmitButton();
-                        
+
                         // Re-check new email if current email changes
                         if (newEmailInput.value.trim()) {
                             console.log('🔄 Re-checking new email because current email changed');
@@ -483,7 +483,7 @@ async function showEmailChangeForm(request, reply) {
                 newEmailInput.addEventListener('input', function() {
                     clearTimeout(emailCheckTimeout);
                     const email = this.value.trim();
-                    
+
                     // Clear previous validation state while typing
                     if (email.length > 0) {
                         emailValidation.textContent = '';
@@ -492,7 +492,7 @@ async function showEmailChangeForm(request, reply) {
                         isNewEmailValid = false;
                         updateSubmitButton();
                     }
-                    
+
                     if (email) {
                         emailCheckTimeout = setTimeout(() => checkNewEmail(email), 800);
                     } else {
@@ -512,36 +512,36 @@ async function showEmailChangeForm(request, reply) {
 
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     // Final validation before submit
                     const currentEmail = currentEmailInput.value.trim();
                     const newEmail = newEmailInput.value.trim();
                     const password = passwordInput.value.trim();
-                    
+
                     // Validate current email format
                     if (!currentEmail || !/^[^\\s@]+@[^\\s@]+\\.[a-zA-Z]{2,}$/.test(currentEmail)) {
                         alert('Please enter a valid current email address');
                         return;
                     }
-                    
+
                     // Validate new email format
                     if (!newEmail || !/^[^\\s@]+@[^\\s@]+\\.[a-zA-Z]{2,}$/.test(newEmail)) {
                         alert('Please enter a valid new email address');
                         return;
                     }
-                    
+
                     // Check if emails are different
                     if (currentEmail === newEmail) {
                         alert('New email must be different from current email');
                         return;
                     }
-                    
+
                     // Check password
                     if (!password) {
                         alert('Please enter your password');
                         return;
                     }
-                    
+
                     if (!isCurrentEmailFilled || !isNewEmailValid || !isPasswordFilled) {
                         alert('Please complete all fields correctly');
                         return;
@@ -570,10 +570,10 @@ async function showEmailChangeForm(request, reply) {
                         if (data.success) {
                             console.log('✅ Email change successful');
                             console.log('📧 Logout flag:', data.logout);
-                            
+
                             document.getElementById('form-screen').style.display = 'none';
                             document.getElementById('success-screen').style.display = 'block';
-                            
+
                             // Ana pencereyi login sayfasına yönlendir ve bu sekmeyi kapat
                             setTimeout(() => {
                                 if (window.opener && !window.opener.closed) {
@@ -626,7 +626,7 @@ async function showPasswordChangeForm(request, reply) {
     const trlt = getTranslations(request.query.lang || "eng");
     try {
         const { token } = request.query;
-        
+
         // Token'ı kontrol et - hangi email için olduğunu bul
         let userEmail = null;
         for (const [email, data] of utils.tempStorage.entries()) {
@@ -768,7 +768,7 @@ async function showPasswordChangeForm(request, reply) {
                 <div class="container">
                     <div id="form-screen">
                         <h2>Change Password</h2>
-                        
+
                         <div class="info">
                             <strong>Password Change Request</strong>
                             <br><br>
@@ -777,13 +777,13 @@ async function showPasswordChangeForm(request, reply) {
 
                         <form id="passwordChangeForm">
                             <input type="hidden" name="token" value="${token}">
-                            
+
                             <div class="form-group">
                                 <label for="currentPassword">Current Password:</label>
                                 <input type="password" id="currentPassword" name="currentPassword" required autocomplete="current-password">
                                 <div id="currentPasswordValidation" class="validation-message"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="newPassword">New Password:</label>
                                 <input type="password" id="newPassword" name="newPassword" required autocomplete="new-password">
@@ -792,13 +792,13 @@ async function showPasswordChangeForm(request, reply) {
                                 </div>
                                 <div id="newPasswordValidation" class="validation-message"></div>
                             </div>
-                            
+
                             <div class="form-group">
                                 <label for="confirmPassword">Confirm New Password:</label>
                                 <input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="new-password">
                                 <div id="confirmPasswordValidation" class="validation-message"></div>
                             </div>
-                            
+
                             <button type="submit" id="submitBtn" disabled>Change Password</button>
                         </form>
                     </div>
@@ -831,17 +831,17 @@ async function showPasswordChangeForm(request, reply) {
                     const currentPassword = currentPasswordInput.value.trim();
                     const newPassword = newPasswordInput.value.trim();
                     const confirmPassword = confirmPasswordInput.value.trim();
-                    
+
                     console.log('🔘 updateSubmitButton called');
                     console.log('  🔑 Current Password:', currentPassword ? '***' : '(empty)');
                     console.log('  🔑 New Password:', newPassword ? '***' : '(empty)');
                     console.log('  🔑 Confirm Password:', confirmPassword ? '***' : '(empty)');
-                    
+
                     const hasCurrentPassword = currentPassword.length > 0;
                     const hasNewPassword = newPassword.length >= 8;
                     const passwordsMatch = newPassword === confirmPassword && confirmPassword.length > 0;
                     const isDifferent = currentPassword !== newPassword;
-                    
+
                     console.log('  ✓ hasCurrentPassword:', hasCurrentPassword);
                     console.log('  ✓ hasNewPassword (>=8):', hasNewPassword);
                     console.log('  ✓ passwordsMatch:', passwordsMatch);
@@ -849,11 +849,11 @@ async function showPasswordChangeForm(request, reply) {
                     console.log('  ✓ isCurrentPasswordFilled:', isCurrentPasswordFilled);
                     console.log('  ✓ isNewPasswordValid:', isNewPasswordValid);
                     console.log('  ✓ isConfirmPasswordValid:', isConfirmPasswordValid);
-                    
-                    const shouldEnable = hasCurrentPassword && hasNewPassword && passwordsMatch && isDifferent && 
+
+                    const shouldEnable = hasCurrentPassword && hasNewPassword && passwordsMatch && isDifferent &&
                                        isCurrentPasswordFilled && isNewPasswordValid && isConfirmPasswordValid;
                     console.log('  🎯 Button should be enabled:', shouldEnable);
-                    
+
                     submitBtn.disabled = !shouldEnable;
                 }
 
@@ -861,7 +861,7 @@ async function showPasswordChangeForm(request, reply) {
                 currentPasswordInput.addEventListener('input', function() {
                     const password = this.value.trim();
                     isCurrentPasswordFilled = password.length > 0;
-                    
+
                     if (isCurrentPasswordFilled) {
                         currentPasswordValidation.textContent = '✓ Current password entered';
                         currentPasswordValidation.className = 'validation-message success';
@@ -871,7 +871,7 @@ async function showPasswordChangeForm(request, reply) {
                         currentPasswordValidation.className = 'validation-message';
                         currentPasswordInput.className = '';
                     }
-                    
+
                     updateSubmitButton();
                 });
 
@@ -879,7 +879,7 @@ async function showPasswordChangeForm(request, reply) {
                 newPasswordInput.addEventListener('input', function() {
                     const password = this.value.trim();
                     const currentPassword = currentPasswordInput.value.trim();
-                    
+
                     if (password.length === 0) {
                         newPasswordValidation.textContent = '';
                         newPasswordValidation.className = 'validation-message';
@@ -901,13 +901,13 @@ async function showPasswordChangeForm(request, reply) {
                         newPasswordInput.className = 'input-valid';
                         isNewPasswordValid = true;
                     }
-                    
+
                     // Re-validate confirm password
                     if (confirmPasswordInput.value.trim()) {
                         const event = new Event('input');
                         confirmPasswordInput.dispatchEvent(event);
                     }
-                    
+
                     updateSubmitButton();
                 });
 
@@ -915,7 +915,7 @@ async function showPasswordChangeForm(request, reply) {
                 confirmPasswordInput.addEventListener('input', function() {
                     const password = this.value.trim();
                     const newPassword = newPasswordInput.value.trim();
-                    
+
                     if (password.length === 0) {
                         confirmPasswordValidation.textContent = '';
                         confirmPasswordValidation.className = 'validation-message';
@@ -932,33 +932,33 @@ async function showPasswordChangeForm(request, reply) {
                         confirmPasswordInput.className = 'input-valid';
                         isConfirmPasswordValid = true;
                     }
-                    
+
                     updateSubmitButton();
                 });
 
                 form.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const currentPassword = currentPasswordInput.value.trim();
                     const newPassword = newPasswordInput.value.trim();
                     const confirmPassword = confirmPasswordInput.value.trim();
-                    
+
                     // Final validation
                     if (!currentPassword) {
                         alert('Please enter your current password');
                         return;
                     }
-                    
+
                     if (newPassword.length < 8) {
                         alert('New password must be at least 8 characters long');
                         return;
                     }
-                    
+
                     if (newPassword !== confirmPassword) {
                         alert('Passwords do not match');
                         return;
                     }
-                    
+
                     if (currentPassword === newPassword) {
                         alert('New password must be different from current password');
                         return;
@@ -974,13 +974,13 @@ async function showPasswordChangeForm(request, reply) {
                     console.log('  🎫 Token length:', token ? token.length : 0);
                     console.log('  🔑 Current Password:', currentPassword ? '***' : '(empty)');
                     console.log('  🔑 New Password:', newPassword ? '***' : '(empty)');
-                    
+
                     const data = {
                         token: token,
                         currentPassword: currentPassword,
                         newPassword: newPassword
                     };
-                    
+
                     console.log('📤 Sending data:', JSON.stringify(data, null, 2));
 
                     fetch('https://' + HOST_IP + ':3030/api/auth/process-password-change', {
@@ -995,10 +995,10 @@ async function showPasswordChangeForm(request, reply) {
                         if (data.success) {
                             console.log('✅ Password change successful');
                             console.log('🔐 Logout flag:', data.logout);
-                            
+
                             document.getElementById('form-screen').style.display = 'none';
                             document.getElementById('success-screen').style.display = 'block';
-                            
+
                             // Ana pencereyi login sayfasına yönlendir ve bu sekmeyi kapat
                             setTimeout(() => {
                                 if (window.opener && !window.opener.closed) {

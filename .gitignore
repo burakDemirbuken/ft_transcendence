@@ -11,3 +11,5 @@ backend/profile/database/*
 backend/profile/database
 backend/friend/database
 backend/friend/database/*
+backend/authentication/database
+backend/authentication/database/*

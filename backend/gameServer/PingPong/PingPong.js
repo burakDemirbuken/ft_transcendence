@@ -9,7 +9,6 @@ class PingPong extends EventEmitter
 	constructor(property)
 	{
 		super();
-		this.isStarted = false;
 		this.status = 'not initialized'; // 'waiting', 'playing', 'paused', 'finished', 'not initialized'
 		this.gameMode = "classic"; // 'local', 'online', 'tournament', 'ai'
 
@@ -20,33 +19,6 @@ class PingPong extends EventEmitter
 
 
 		this.timeout = null;
-	/*
-		toplam vuruş sayısı (tüm maçlardaki)
-		toplam topu kaçırma sayısı (tüm maçlardaki)
-		toplam süre (tüm maçlardaki)
-	*/
-
-
-/*
-		state:
-		{
-			players:
-			[
-				{
-					id: 1,
-					kickBall: 2,
-					missedBall: 1,
-				},
-				{
-					id: 2,
-					kickBall: 3,
-					missedBall: 0,
-				},
-			],
-		}
-*/
-
-
 		this.state = {
 			players: [],
 		};
@@ -150,20 +122,12 @@ class PingPong extends EventEmitter
 		const playerIndex = this.players.findIndex(p => p.id === playerId);
 		if (playerIndex !== -1)
 		{
-			this.players.splice(playerIndex, 1);
-			this.paddles.delete(playerId);
-			// çıkan takım otomatik mağlup olur
 			if (this.team.get(1).playersId.includes(playerId))
-			{
-				this.team.get(1).playersId = this.team.get(1).playersId.filter(id => id !== playerId);
-				this.team.get(2).score = this.settings.maxScore; // diğer takım kazanır
-			}
+				this.team.get(2).score = this.settings.maxScore;
 			else if (this.team.get(2).playersId.includes(playerId))
-			{
-				this.team.get(2).playersId = this.team.get(2).playersId.filter(id => id !== playerId);
-				this.team.get(1).score = this.settings.maxScore; // diğer takım kazanır
-			}
+				this.team.get(1).score = this.settings.maxScore;
 			this.finishedControls();
+			this.players.splice(playerIndex, 1);
 		}
 		else
 			console.warn(`⚠️ Player ${playerId} not found in game`);
@@ -193,8 +157,8 @@ class PingPong extends EventEmitter
 	initializeGame()
 	{
 		this.ball = new Ball(
-			this.settings.canvasWidth / 2,
-			this.settings.canvasHeight / 2,
+			this.settings.canvasWidth / 2 - this.settings.ballRadius / 2,
+			this.settings.canvasHeight / 2 - this.settings.ballRadius / 2,
 			this.settings.ballRadius,
 			this.settings.ballSpeed,
 			{width: this.settings.canvasWidth, height: this.settings.canvasHeight}
@@ -244,12 +208,12 @@ class PingPong extends EventEmitter
 				}
 				else if (border === 'top')
 				{
-					this.ball.revertPosition();
+					this.ball.setPosition(this.ball.pos.x, this.ball.height + 1);
 					this.ball.launchBall({x: this.ball.direction.x, y: Math.abs(this.ball.direction.y)});
 				}
 				else if (border === 'bottom')
 				{
-					this.ball.revertPosition();
+					this.ball.setPosition(this.ball.pos.x, 	this.ball.canvasSize.height - this.ball.height - 1);
 					this.ball.launchBall({x: this.ball.direction.x, y: -Math.abs(this.ball.direction.y)});
 				}
 			}
@@ -328,7 +292,6 @@ class PingPong extends EventEmitter
 				},
 			}
 		);
-		this.isStarted = false;
 		console.log(`winner: ${this.getWinnerTeam().playersId}, loser: ${this.getLoserTeam().playersId}`);
 		console.log(`🏁 Game finished! Final Score - team1: ${this.team.get(1).score}, team2: ${this.team.get(2).score}`);
 	}
@@ -453,7 +416,6 @@ class PingPong extends EventEmitter
 		{
 			this.status = 'playing';
 		}, 2000);
-		this.isStarted = true;
 	}
 
 	pause()
@@ -466,12 +428,6 @@ class PingPong extends EventEmitter
 	{
 		this.status = 'playing';
 		console.log(`▶️ Game resumed`);
-	}
-
-	stop()
-	{
-		this.status = 'stopped';
-		console.log(`⏸️ Game stopped`);
 	}
 
 	isRunning()

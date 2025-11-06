@@ -82,7 +82,7 @@ class GameService
 			console.log('📨 Message from Room Service:', message);
 		});
 
-		this.roomSocket.connect('ws/server');
+		this.roomSocket.connect('ws-room/server');
 	}
 
 	_getplayerByConnectionId(connectionId)
@@ -186,7 +186,6 @@ class GameService
 
 	handleWebSocketMessage(message, clientId)
 	{
-		//! jwt doğrulama burada yapılabilir
 		const player = this.players.get(clientId);
 
 		if (typeof(player) === "undefined")
@@ -331,16 +330,8 @@ class GameService
 			this.websocketServer.send(connId, { type: 'error', payload: { message: errorMessage } });
 	}
 
-	stop()
-	{
-		console.log('Stopping Game Server...');
-
-		this.gameManager.stop();
-		this.websocketServer.stop();
-
-		console.log('Game Server stopped!');
-	}
 }
 
 
 export default GameService;
+

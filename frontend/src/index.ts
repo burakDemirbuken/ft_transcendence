@@ -13,6 +13,7 @@ import { showNotification } from './notification.js';
 // Dynamic API base URL based on current hostname
 export const API_BASE_URL = `https://${window.location.hostname}:3030/api`;
 
+
 const pageState = {
 	current: "login", // default
 };
@@ -28,13 +29,17 @@ const routes = {
 
 let view = null;
 
-const router = async function(page:string) {
+const router = async function(page:string, logout: boolean = false) {
 	const content = document.querySelector("#content");
 	const hasToken = getAuthToken();
 
 	if (!hasToken) {
 		console.log('User is not authenticated');
 		document.querySelector("#navbar")?.classList.add("logout");
+	}
+	else // Betül ile danışılacak
+	{
+		// friend websocket bağlantısı
 	}
 
 	if (page === "profile" || page === "settings" || page === "friends" || page === "play") {
@@ -106,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () =>
 							if (response.ok)
 							{
 								removeAuthToken();
+								localStorage.removeItem('userName');
 								document.querySelector("#navbar")?.classList.add("logout");
 								showNotification("Logged out successfully.", "success");
 								navigateTo("login");

@@ -6,6 +6,9 @@ class NetworkManager
 	constructor(logger = false)
 	{
 		this.fastify = Fastify({ logger: logger});
+		this.fastify.addHook('onRequest', async (request) => {
+			console.log(`--> ${request.method} ${request.url}`);
+		});
 		this.connections = new Map(); // connectionId -> WebSocket
 
 		this.callbacks = {
@@ -33,7 +36,7 @@ class NetworkManager
 		await this.fastify.register(
 			async function(fastify)
 			{
-				fastify.get('/ws', { websocket: true },
+				fastify.get('/ws-game', { websocket: true },
 					(connection, req) =>
 					{
 						const client = connection.socket;
@@ -122,13 +125,6 @@ class NetworkManager
 			client.close();
 			this.connections.delete(connectionId);
 		}
-	}
-
-	stop()
-	{
-		this.fastify.close();
-		this.connections.clear();
-		this.callbacks.clear();
 	}
 
 	send(connectionId, message)

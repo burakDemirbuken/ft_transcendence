@@ -14,6 +14,12 @@ export default async function gamedataRoute(fastify) {
 		const t = await fastify.sequelize.transaction()
 		console.log('Processing match data:', { team1, team2, winner, matchType, state, time })
 		try {
+			if (!team1 || !team2 || !state || !time || !matchType || !winner) {
+				throw new Error('Invalid match data provided')
+			} else if (!Profile || !Stat || !MatchHistory || !Team) {
+				throw new Error('Database models are not properly initialized')
+			}
+
 			const [teamOnePlayers, teamTwoPlayers] = await Promise.all([
 				Profile.findAll({
 					where: { userName: team1.playersId },
@@ -26,17 +32,13 @@ export default async function gamedataRoute(fastify) {
 					transaction: t
 				})
 			])
-			console.log('Retrieved team players:', {
-				teamOnePlayers: teamOnePlayers.map(p => p.userName),
-				teamTwoPlayers: teamTwoPlayers.map(p => p.userName)
-			})
 			const winnerTeam = winner?.team ?
 				(winner.team.playersId[0] === team1.playersId[0] ? teamOnePlayers : teamTwoPlayers)
 				: null
 			const loserTeam = winner?.team ?
 				(winner.team.playersId[0] === team1.playersId[0] ? teamTwoPlayers : teamOnePlayers)
 				: null
-			console.log('Identified winner and loser teams:', { winnerTeam, loserTeam })
+
 			if (winnerTeam) {
 				await Promise.all([
 					...winnerTeam.map(async (player) => {
@@ -71,7 +73,7 @@ export default async function gamedataRoute(fastify) {
 					})
 				])
 			}
-			console.log('Updated player statistics for both teams')
+
 			const [teamOne, teamTwo] = await Promise.all([
 				Team.create({
 					playerOneId: teamOnePlayers?.[0]?.id ?? null,
@@ -82,7 +84,7 @@ export default async function gamedataRoute(fastify) {
 					playerTwoId: teamTwoPlayers?.[1]?.id ?? null
 				}, { transaction: t })
 			])
-			console.log('Created team records:', { teamOneId: teamOne.id, teamTwoId: teamTwo.id })
+
 			await MatchHistory.create({
 				teamOneId: teamOne.id,
 				teamTwoId: teamTwo.id,
@@ -93,234 +95,102 @@ export default async function gamedataRoute(fastify) {
 				matchStartDate: time.start ? new Date(time.start) : null,
 				matchEndDate: time.finish ? new Date(time.finish) : null
 			}, { transaction: t })
-			console.log('Match history recorded successfully')
+
 			await Promise.all([
 				...teamOnePlayers.map(async (player) => {
 					if (player && player.id) {
-						console.log('Checking achievements for player:', player.userName)
 						await fastify.checkAchievements(player.id, t)
 					}
 				}),
 				...teamTwoPlayers.map(async (player) => {
 					if (player && player.id) {
-						console.log('Checking achievements for player:', player.userName)
 						await fastify.checkAchievements(player.id, t)
 					}
 				})
 			])
-			console.log('Achievement checks completed for all players')
+
 			await t.commit()
 			return reply.status(200).send({ message: 'Match data processed successfully' })
 		} catch (error) {
 			await t.rollback()
 			fastify.log.error('Error saving match data:', { message: error.message,
 				details: error.toString() })
-			return reply.status(500).send({ error: 'Internal Server Error', details: error && error.message ? error.message : error })
+			return reply.status(500).send({ message: 'Error processing match data' })
 		}
 	})
 
 	fastify.post('/internal/tournament', async (request, reply) => {
-		const {
-
-			/*
-			profile  | {
-profile  |   "name": "asdasd",
-profile  |   "winner": "test2",
-profile  |   "rounds": [
-profile  |     {
-profile  |       "round": 0,
-profile  |       "matchs": [
-profile  |         {
-profile  |           "matchNumber": 0,
-profile  |           "player1": "test2",
-profile  |           "player2": "test0",
-profile  |           "player1Score": 1,
-profile  |           "player2Score": 0,
-profile  |           "winner": "test2",
-profile  |           "loser": "test0",
-profile  |           "state": {
-profile  |             "players": [
-profile  |               {
-profile  |                 "id": "test2",
-profile  |                 "kickBall": 0,
-profile  |                 "missedBall": 0
-profile  |               },
-profile  |               {
-profile  |                 "id": "test0",
-profile  |                 "kickBall": 0,
-profile  |                 "missedBall": 1
-profile  |               }
-profile  |             ]
-profile  |           },
-profile  |           "time": {
-profile  |             "start": 1761413543844,
-profile  |             "finish": 1761413547123,
-profile  |             "duration": 1287
-profile  |           }
-profile  |         },
-profile  |         {
-profile  |           "matchNumber": 1,
-profile  |           "player1": "test3",
-profile  |           "player2": "test1",
-profile  |           "player1Score": 1,
-profile  |           "player2Score": 0,
-profile  |           "winner": "test3",
-profile  |           "loser": "test1",
-profile  |           "state": {
-profile  |             "players": [
-profile  |               {
-profile  |                 "id": "test3",
-profile  |                 "kickBall": 0,
-profile  |                 "missedBall": 0
-profile  |               },
-profile  |               {
-profile  |                 "id": "test1",
-profile  |                 "kickBall": 0,
-profile  |                 "missedBall": 1
-profile  |               }
-profile  |             ]
-profile  |           },
-profile  |           "time": {
-profile  |             "start": 1761413543844,
-profile  |             "finish": 1761413547123,
-profile  |             "duration": 1287
-profile  |           }
-profile  |         }
-profile  |       ]
-profile  |     },
-profile  |     {
-profile  |       "round": 1,
-profile  |       "matchs": [
-profile  |         {
-profile  |           "matchNumber": 0,
-profile  |           "player1": "test2",
-profile  |           "player2": "test3",
-profile  |           "player1Score": 1,
-profile  |           "player2Score": 0,
-profile  |           "winner": "test2",
-profile  |           "loser": "test3",
-profile  |           "state": {
-profile  |             "players": [
-profile  |               {
-profile  |                 "id": "test2",
-profile  |                 "kickBall": 0,
-profile  |                 "missedBall": 0
-profile  |               },
-profile  |               {
-profile  |                 "id": "test3",
-profile  |                 "kickBall": 0,
-profile  |                 "missedBall": 1
-profile  |               }
-profile  |             ]
-profile  |           },
-profile  |           "time": {
-profile  |             "start": 1761413553317,
-profile  |             "finish": 1761413556612,
-profile  |             "duration": 1302
-profile  |           }
-profile  |         }
-profile  |       ]
-profile  |     }
-profile  |   ],
-profile  |   "matchType": "tournament"
-profile  | }
-
-
-			*/
-			/*
-				name,
-				rounds[
-					{
-						matchs[
-							{
-								round: i,
-								matchNumber: j,
-								player1: null,
-								player2: null,
-								player1Score: null,
-								player2Score: null,
-								winner: null,
-								loser: null,
-								time: {
-									start: null,
-									end: null,
-									duration: null
-								},
-								state: {
-									players: [
-										{
-											id: null,
-											kickBall: null,
-											missedBall: null
-										}
-									]
-								}
-							},
-							{}
-						]
-
-					}
-				]
-			*/
-			name,
-			winner,
-			rounds
-		} = request.body ?? {}
+		const { name, winner, rounds } = request.body ?? {}
 		const { Profile, Stat, RoundMatch, Round, TournamentHistory } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
 
 		console.log(JSON.stringify(request.body, null, 2))
 		try {
-			console.log('Creating tournament record for:', name)
+
+			if (!name || !rounds || !Array.isArray(rounds) || rounds.length === 0) {
+				throw new Error('Invalid tournament data provided')
+			} else if (!Profile || !Stat || !RoundMatch || !Round || !TournamentHistory) {
+				throw new Error('Database models are not properly initialized')
+			}
+
 			const tournament = await TournamentHistory.create({
 				name: name,
-				winnerPlayer: (await Profile.findOne({ where: { userName: winner } }))?.id ?? null
+				winnerPlayer: (await Profile.findOne({
+					where: { userName: winner },
+					attributes: ['id']
+				}))?.id ?? null
 			}, { transaction: t })
-			console.log('Created tournament record with ID:', tournament.id)
+
+			let allPlayerProfile = []
 
 			for (const [roundIndex, roundData] of rounds.entries()) {
 				const round = await Round.create({
-					roundNumber: roundIndex + 1,
+					roundNumber: roundData.round,
 					tournamentId: tournament.id
 				}, { transaction: t })
-				console.log(' Created round record with ID:', round.id, 'for tournament ID:', tournament.id, 'round number:', roundIndex + 1)
 
 				for (const [matchIndex, matchData] of roundData.matchs.entries()) {
-					const match = await RoundMatch.create({
-						roundNumber: matchData.round,
-						matchNumber: matchData.matchNumber,
-						playerOneID: ( Profile.findOne({ where: { userName: matchData.player1 } }))?.id ?? null,
-						playerTwoID: ( Profile.findOne({ where: { userName: matchData.player2 } }))?.id ?? null,
-						playerOneScore: matchData.player1Score,
-						playerTwoScore: matchData.player2Score,
-						winnerPlayerID: ( Profile.findOne({ where: { userName: matchData.winner } }))?.id ?? null
-					}, { transaction: t })
-					console.log('  Created match record with ID:', match.id, 'for round ID:', round.id)
-
-					const [winnerPlayer, loserPlayer] = await Promise.all([
+					const [playerOneProfile, playerTwoProfile] = await Promise.all([
 						Profile.findOne({
-							where: {
-								userName: matchData.winner ?? null,
-							},
+							where: { userName: matchData.player1 },
 							include: [{ model: Stat }],
-							transaction: t
+							attributes: ['id', 'userName']
 						}),
 						Profile.findOne({
-							where: {
-								userName: matchData.loser ?? null
-							},
+							where: { userName: matchData.player2 },
 							include: [{ model: Stat }],
-							transaction: t
+							attributes: ['id', 'userName']
 						})
 					])
-					console.log('   Retrieved players for match:', {
-						winner: winnerPlayer ? winnerPlayer.userName : null,
-						loser: loserPlayer ? loserPlayer.userName : null
-					})
+
+					if (playerOneProfile?.id && !allPlayerProfile.includes(playerOneProfile.id)) {
+						allPlayerProfile.push(playerOneProfile.id)
+					}
+					if (playerTwoProfile?.id && !allPlayerProfile.includes(playerTwoProfile.id)) {
+						allPlayerProfile.push(playerTwoProfile.id)
+					}
+
+					const [winnerPlayer, loserPlayer] = await Promise.all([
+						matchData.winner === playerOneProfile?.userName ? playerOneProfile :
+							(matchData.winner === playerTwoProfile?.userName ? playerTwoProfile : null),
+						matchData.loser === playerOneProfile?.userName ? playerOneProfile :
+							(matchData.loser === playerTwoProfile?.userName ? playerTwoProfile : null)
+					])
+
+					const match = await RoundMatch.create({
+						roundId: round.id,
+						roundNumber: roundData.round,
+						matchNumber: matchData.matchNumber,
+						playerOneID: playerOneProfile ? playerOneProfile.id : null,
+						playerTwoID: playerTwoProfile ? playerTwoProfile.id : null,
+						playerOneScore: matchData.player1Score,
+						playerTwoScore: matchData.player2Score,
+						winnerPlayerID: winnerPlayer ? winnerPlayer.id : null,
+					}, { transaction: t })
 
 					if (winnerPlayer && loserPlayer) {
-						const winnerState = matchData.state.players.find(p => p.id === matchData.winner)
-						const loserState = matchData.state.players.find(p => p.id === matchData.loser)
+						const winnerState = matchData.state.players.find(p => p.id === winnerPlayer.userName)
+						const loserState = matchData.state.players.find(p => p.id === loserPlayer.userName)
 
 						await Promise.all([
 							winnerPlayer.Stat.increment({
@@ -349,10 +219,14 @@ profile  | }
 							}, { transaction: t })
 						])
 					}
-					console.log('   Updated statistics for players in match number:', matchIndex + 1)
 				}
-				console.log(' Completed processing matches for round number:', roundIndex + 1)
 			}
+
+			await Promise.all(
+				allPlayerProfile
+					.filter(Boolean)
+					.map(async (playerId) => fastify.checkAchievements(playerId, t))
+			)
 
 			await t.commit()
 			return reply.status(200).send({ message: 'Tournament data processed successfully' })
@@ -360,90 +234,334 @@ profile  | }
 			await t.rollback()
 			fastify.log.error('Error saving tournament data:', { message: error.message,
 				details: error.toString() })
-			return reply.status(500).send({ error: 'Internal Server Error' })
+			return reply.status(500).send({ message: 'Error processing tournament data' })
 		}
 	})
 
 	fastify.get('/match-history', async (request, reply) => {
 		const { userName } = request.query ?? {}
-		if (!userName) {
-			return reply.code(400).send({ error: 'Username is required' })
-		}
 
-		const userProfile = await fastify.sequelize.models.Profile.findOne({
-			where: { userName: userName },
-			attributes: ['id']
-		})
-		if (!userProfile) {
-			return reply.code(404).send({ error: 'User profile not found' })
-		}
+		try {
+			if (!userName) {
+				throw new Error("userName is required.")
+			}
 
-		const matchHistory = await fastify.sequelize.models.MatchHistory.findAll({
-			include: [
-				{
-					model: fastify.sequelize.models.Team,
-					as: 'teamOne',
-					required: false
+			const userProfile = await fastify.sequelize.models.Profile.findOne({
+				where: { userName: userName },
+				attributes: ['id']
+			})
+			if (!userProfile) {
+				return reply.code(404).send({ error: 'User profile not found' })
+			}
+
+			const matchHistory = await fastify.sequelize.models.MatchHistory.findAll({
+				include: [
+					{
+						model: fastify.sequelize.models.Team,
+						as: 'teamOne',
+						required: false,
+						include: [
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerOne',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							},
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerTwo',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							}
+						],
+						attributes: ['createdAt']
+					},
+					{
+						model: fastify.sequelize.models.Team,
+						as: 'teamTwo',
+						required: false,
+						include: [
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerOne',
+								attributes: ['userName', 'displayName', 'avatarUrl'],
+							},
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerTwo',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							}
+						],
+						attributes: ['createdAt']
+					},
+					{
+						model: fastify.sequelize.models.Team,
+						as: 'winnerTeam',
+						required: false,
+						include: [
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerOne',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							},
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerTwo',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							}
+						],
+						attributes: ['createdAt']
+					}
+				],
+				where: {
+					[Op.or]: [
+						{ '$teamOne.playerOneId$': userProfile.id },
+						{ '$teamOne.playerTwoId$': userProfile.id },
+						{ '$teamTwo.playerOneId$': userProfile.id },
+						{ '$teamTwo.playerTwoId$': userProfile.id },
+					]
 				},
-				{
-					model: fastify.sequelize.models.Team,
-					as: 'teamTwo',
-					required: false
-				}
-			],
-		})
+				attributes: ['teamOneScore', 'teamTwoScore', 'matchStartDate', 'matchEndDate', 'matchType'],
+			})
 
-		return reply.send({
-			success: true,
-			matches: JSON.parse(JSON.stringify(matchHistory))
-		})
+			return reply.send({
+				success: true,
+				matches: JSON.parse(JSON.stringify(matchHistory))
+			})
+		} catch (error) {
+			fastify.log.error('Error retrieving user match history:', { message: error.message,
+				details: error.toString() })
+			return reply.code(500).send({message: 'Failed to retrieve match history' })
+		}
 	})
 
 	fastify.get('/tournament-history', async (request, reply) => {
 		const { userName } = request.query ?? {}
-		if (!userName) {
-			return reply.code(400).send({ error: 'Username is required' })
-		}
 
-		const userProfile = await fastify.sequelize.models.Profile.findOne({
-			where: { userName: userName },
-			attributes: ['id']
-		})
-		if (!userProfile) {
-			return reply.code(404).send({ error: 'User profile not found' })
-		}
+		try {
+			if (!userName) {
+				throw new Error("userName is required.")
+			}
 
-		let RoundMatch = await fastify.sequelize.models.RoundMatch.findAll({
-			include: [
+			const userProfile = await fastify.sequelize.models.Profile.findOne({
+				where: { userName: userName },
+				as: 'userProfile',
+				attributes: ['id']
+			})
+			if (!userProfile) {
+				return reply.code(404).send({ error: 'User profile not found' })
+			}
+
+			const usersTournament = await fastify.sequelize.models.TournamentHistory.findAll({
+				include: [
+					{
+						model: fastify.sequelize.models.Round,
+						include: [
+							{
+								model: fastify.sequelize.models.RoundMatch,
+								include: [
+									{
+										model: fastify.sequelize.models.Profile,
+										as: 'playerOne',
+										attributes: ['userName', 'displayName', 'avatarUrl'],
+									},
+									{
+										model: fastify.sequelize.models.Profile,
+										as: 'playerTwo',
+										attributes: ['userName', 'displayName', 'avatarUrl'],
+									},
+									{
+										model: fastify.sequelize.models.Profile,
+										as: 'winnerPlayer',
+										attributes: ['userName', 'displayName', 'avatarUrl']
+									}
+								],
+								attributes: ['matchNumber', 'playerOneID', 'playerTwoID', 'playerOneScore', 'playerTwoScore', 'winnerPlayerID'],
+								order: [['matchNumber', 'ASC']],
+							}
+						],
+						attributes: ['roundNumber'],
+						order: [['roundNumber', 'ASC']],
+					}
+				],
+				attributes: ['name', 'winnerPlayer'],
+				where : {
+					[Op.or]: [
+						{ '$Rounds.RoundMatches.playerOneID$': userProfile.id },
+						{ '$Rounds.RoundMatches.playerTwoID$': userProfile.id }
+					]
+				}
+			})
+
+			return reply.send({ success: true, usersTournament: JSON.parse(JSON.stringify(usersTournament)) })
+		} catch (error) {
+			fastify.log.error('Error retrieving user tournament history:', { message: error.message,
+				details: error.toString() })
+			return reply.code(500).send({message: 'Failed to retrieve tournament history' })
+		}
+	})
+
+	function mockTournamentHistory() {
+		// This function can be expanded to create mock tournament data for testing purposes
+		// usersTournament: JSON.parse(JSON.stringify(usersTournament))
+		// şaibeli
+
+		return {
+			name: "Mock Tournament",
+			winnerPlayer: "player1",
+			Rounds: [
 				{
-					model: fastify.sequelize.models.Round,
-					include: [
+					roundNumber: 1,
+					RoundMatches: [
 						{
-							model: fastify.sequelize.models.TournamentHistory,
+							matchNumber: 1,
+							playerOneID: {
+								userName: "player1",
+								displayName: "Player One",
+								avatarUrl: "http://example.com/avatar1.png"
+							},
+							playerTwoID: {
+								userName: "player2",
+								displayName: "Player Two",
+								avatarUrl: "http://example.com/avatar2.png"
+							},
+							playerOneScore: 3,
+							playerTwoScore: 2,
+							winnerPlayerID: 1 // şaibeli
+
+						},
+						{
+							matchNumber: 2,
+							playerOneID: {
+								userName: "player1",
+								displayName: "Player One",
+								avatarUrl: "http://example.com/avatar1.png"
+							},
+							playerTwoID: {
+								userName: "player2",
+								displayName: "Player Two",
+								avatarUrl: "http://example.com/avatar2.png"
+							},
+							playerOneScore: 3,
+							playerTwoScore: 2,
+							winnerPlayerID: 1 // şaibeli
 						}
 					]
 				},
 				{
-					model: fastify.sequelize.models.Profile,
-					as: 'playerOne'
+					roundNumber: 2,
+					RoundMatches: [
+						{
+							matchNumber: 1,
+							playerOneID: {
+								userName: "player1",
+								displayName: "Player One",
+								avatarUrl: "http://example.com/avatar1.png"
+							},
+							playerTwoID: {
+								userName: "player2",
+								displayName: "Player Two",
+								avatarUrl: "http://example.com/avatar2.png"
+							},
+							playerOneScore: 3,
+							playerTwoScore: 2,
+							winnerPlayerID: 1 // şaibeli
+						},
+						{
+							matchNumber: 2,
+							playerOneID: {
+								userName: "player1",
+								displayName: "Player One",
+								avatarUrl: "http://example.com/avatar1.png"
+							},
+							playerTwoID: {
+								userName: "player2",
+								displayName: "Player Two",
+								avatarUrl: "http://example.com/avatar2.png"
+							},
+							playerOneScore: 3,
+							playerTwoScore: 2,
+							winnerPlayerID: 1 // şaibeli
+						}
+					]
+				}
+			]
+		}
+	}
+
+	function mockMatchHistory() {
+		// This function can be expanded to create mock match data for testing purposes
+		return { a: JSON.stringify({
+			"success": true,
+			"matches": [
+				{
+				"teamOneScore": 1,
+				"teamTwoScore": 0,
+				"matchStartDate": "2025-11-04T23:17:36.789Z",
+				"matchEndDate": "2025-11-04T23:17:47.829Z",
+				"matchType": "classic",
+				"teamOne": {
+					"createdAt": "2025-11-04T23:17:50.854Z",
+					"PlayerOne": {
+					"userName": "Burak",
+					"displayName": "Burak",
+					"avatarUrl": null
+					},
+					"PlayerTwo": null
+				},
+				"teamTwo": {
+					"createdAt": "2025-11-04T23:17:50.854Z",
+					"PlayerOne": {
+					"userName": "FireOflife",
+					"displayName": "FireOflife",
+					"avatarUrl": null
+					},
+					"PlayerTwo": null
+				},
+				"winnerTeam": {
+					"createdAt": "2025-11-04T23:17:50.854Z",
+					"PlayerOne": {
+					"userName": "Burak",
+					"displayName": "Burak",
+					"avatarUrl": null
+					},
+					"PlayerTwo": null
+				}
 				},
 				{
-					model: fastify.sequelize.models.Profile,
-					as: 'playerTwo'
+				"teamOneScore": 0,
+				"teamTwoScore": 1,
+				"matchStartDate": "2025-11-04T23:24:29.217Z",
+				"matchEndDate": "2025-11-04T23:24:35.932Z",
+				"matchType": "classic",
+				"teamOne": {
+					"createdAt": "2025-11-04T23:24:38.950Z",
+					"PlayerOne": {
+					"userName": "FireOflife",
+					"displayName": "FireOflife",
+					"avatarUrl": null
+					},
+					"PlayerTwo": null
+				},
+				"teamTwo": {
+					"createdAt": "2025-11-04T23:24:38.950Z",
+					"PlayerOne": {
+					"userName": "Burak",
+					"displayName": "Burak",
+					"avatarUrl": null
+					},
+					"PlayerTwo": null
+				},
+				"winnerTeam": {
+					"createdAt": "2025-11-04T23:24:38.950Z",
+					"PlayerOne": {
+					"userName": "Burak",
+					"displayName": "Burak",
+					"avatarUrl": null
+					},
+					"PlayerTwo": null
 				}
-			],
-			where: {
-				[Op.or]: [
-					{ playerOneID: userProfile.id },
-					{ playerTwoID: userProfile.id }
-				]
-			},
-		})
-
-		console.log(RoundMatch.toJSON())
-
-		return reply.send({ success: true,
-			matches: RoundMatch.toJSON()
-		})
-	})
- }
+				}
+			]
+			}
+			)}
+	}
+}

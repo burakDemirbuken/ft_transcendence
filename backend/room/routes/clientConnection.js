@@ -2,7 +2,11 @@
 import Player from '../models/Player.js';
 
 export default async function clientConnectionSocket(fastify) {
-	fastify.get("/ws/client", {
+/* 	setInterval(() => {
+		console.log(`connected clients: ${fastify.websocketServer.clients.size}`);
+
+	}, 1000); */
+	fastify.get("/ws-room/client", {
 		websocket: true
 	},
 	(connection, req) => {
@@ -11,12 +15,12 @@ export default async function clientConnectionSocket(fastify) {
 			return;
 		}
 		const currentPlayer = new Player(req.query.userID, connection.socket, req.query.userName || 'Anonymous');
-/*		console.log('New client connected', {
+		console.log('New client connected', {
 			ip: req.ip,
 			protocol: connection.socket.protocol,
 			readystate: connection.socket.readyState,
 			remote:  connection.socket._socket.remoteAddress + ':' + connection.socket._socket.remotePort
-		});*/
+		});
 
 		connection.socket.on('message', (message) => {
 			console.log('Received message from client:', message.toString());
@@ -31,7 +35,12 @@ export default async function clientConnectionSocket(fastify) {
 		});
 
 		connection.socket.on('close', () => {
-
+			console.log('Client disconnected', {
+				ip: req.ip,
+				protocol: connection.socket.protocol,
+				readystate: connection.socket.readyState,
+				remote:  connection.socket._socket.remoteAddress + ':' + connection.socket._socket.remotePort
+			});
 			fastify.roomManager.leaveRoom(currentPlayer)
 			fastify.log.error('Client disconnected')
 		});

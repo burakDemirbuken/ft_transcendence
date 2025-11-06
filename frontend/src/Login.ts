@@ -168,24 +168,28 @@ async function verify() {
 			"rememberMe": rememberMe
 		};
 
-		const request = new Request(`${API_BASE_URL}/auth/verify-2fa?lang=${localStorage.getItem("langPref")}`, {
-		method: "POST",
-		headers: new Headers({ "Content-Type": "application/json" }),
-		body: JSON.stringify(obj),
-		credentials: "include",
-		});
 		try {
-			const response = await fetch(request);
+			const response = await fetch(`${API_BASE_URL}/auth/verify-2fa?lang=${localStorage.getItem("langPref")}`, {
+				method: "POST",
+				headers: new Headers({ "Content-Type": "application/json" }),
+				body: JSON.stringify(obj),
+				credentials: "include",
+			});
 			const json = await response.json();
 			if (response.ok) {
 				console.log("🎉 2FA verification successful!");
 				console.log("🍪 Cookies after login:", document.cookie);
 
 				// Token'ı response'tan al ve localStorage'a kaydet
-				if (json.accessToken) {
+				console.info("SAVING TOKEN TO LOCAL STORAGE!!", json);
+				if (json?.accessToken) {
 					console.log("💾 Saving token to localStorage:", json.accessToken);
 					localStorage.setItem('authToken', json.accessToken);
 					console.log("🔑 Auth token after saving:", getAuthToken());
+				}
+				console.info("SAVING USERNAME TO LOCAL STORAGE!!", json?.user?.username);
+				if (json?.user?.username) {
+					localStorage.setItem('userName', json.user.username);
 				}
 				document.querySelector("#navbar")?.classList.remove("logout");
 				navigateTo("home");

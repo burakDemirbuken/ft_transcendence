@@ -10,7 +10,11 @@
     "start": "nodemon --watch frontend --ext ts,js,json,css,html --exec node server.js"
   },
   "dependencies": {
-    "chart.js": "^4.4.3"
+    "chart.js": "^4.4.3",
+    "undici-types": "^7.16.0",
+    "typescript": "^5.9.3",
+    "babylonjs": "^8.32.2",
+    "babylonjs-gltf2interface": "^8.32.2"
   },
   "devDependencies": {
     "typescript": "^5.5.3",

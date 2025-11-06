@@ -1,0 +1,100 @@
+{
+	"acceptedFriends": [
+		{
+			"user_id": 67890,
+			"userName": "alice42dkdkdkkdkdkdkdkdkdkdkdkdkdkdkdkdkkd",
+			"displayName": "Alicekflkflfklfkflkflfkflkflfkflkflfk",
+			"avatarUrl": "../profile.svg"
+		},
+		{
+			"user_id": 24680,
+			"userName": "bob_developer",
+			"displayName": "Bob",
+			"avatarUrl": "../profile.svg"
+		},
+		{
+			"user_id": 13579,
+			"userName": "charlie99",
+			"displayName": "Charlie",
+			"avatarUrl": "../profile.svg"
+		},
+		{
+			"user_id": 67890,
+			"userName": "alice42",
+			"displayName": "Alice",
+			"avatarUrl": "../profile.svg"
+		},
+		{
+			"user_id": 24680,
+			"userName": "bob_developer",
+			"displayName": "Bob",
+			"avatarUrl": "../profile.svg"
+		},
+		{
+			"user_id": 13579,
+			"userName": "charlie99",
+			"displayName": "Charlie",
+			"avatarUrl": "../profile.svg"
+		},
+		{
+			"user_id": 67890,
+			"userName": "alice42",
+			"displayName": "Alice",
+			"avatarUrl": "../profile.svg"
+		},
+		{
+			"user_id": 24680,
+			"userName": "bob_developer",
+			"displayName": "Bob",
+			"avatarUrl": "../profile.svg"
+		},
+		{
+			"user_id": 13579,
+			"userName": "charlie99",
+			"displayName": "Charlie",
+			"avatarUrl": "../profile.svg"
+		}
+	],
+	"pendingFriends": {
+		"incoming": [
+			{
+				"user_id": 67890,
+				"userName": "alice42",
+				"displayName": "Alice",
+				"avatarUrl": "../profile.svg"
+			},
+			{
+				"user_id": 24680,
+				"userName": "bob_developer",
+				"displayName": "Bob",
+				"avatarUrl": "../profile.svg"
+			},
+			{
+				"user_id": 13579,
+				"userName": "charlie99",
+				"displayName": "Charlie",
+				"avatarUrl": "../profile.svg"
+			}
+		],
+		"outcoming": [
+			{
+				"user_id": 67890,
+				"userName": "alice42",
+				"displayName": "Alice",
+				"avatarUrl": "../profile.svg"
+			},
+			{
+				"user_id": 24680,
+				"userName": "bob_developer",
+				"displayName": "Bob",
+				"avatarUrl": "../profile.svg"
+			},
+			{
+				"user_id": 13579,
+				"userName": "charlie99",
+				"displayName": "Charlie",
+				"avatarUrl": "../profile.svg"
+			}
+		]
+	}
+}

@@ -27,9 +27,6 @@ export default fp(async (fastify) => {
 		const Stat = StatModel(sequelize, DataTypes, Model)
 		const Achievements = AchievementsModel(sequelize, DataTypes, Model)
 
-
-		// check a few hasmany can be hasone
-
 		Profile.hasMany(Team, { foreignKey: 'playerOneId', onDelete: 'SET NULL', hooks: true })
 		Profile.hasMany(Team, { foreignKey: 'playerTwoId', onDelete: 'SET NULL', hooks: true })
 		Team.belongsTo(Profile, { as: 'PlayerOne', foreignKey: 'playerOneId', onDelete: 'SET NULL' })
@@ -53,9 +50,9 @@ export default fp(async (fastify) => {
 		Round.hasMany(RoundMatch, { foreignKey: 'roundId', onDelete: 'CASCADE', hooks: true })
 		RoundMatch.belongsTo(Round, { foreignKey: 'roundId', onDelete: 'CASCADE' })
 
-		RoundMatch.belongsTo(Profile, { foreignKey: 'playerOneID', onDelete: 'SET NULL'  })
-		RoundMatch.belongsTo(Profile, { foreignKey: 'playerTwoID', onDelete: 'SET NULL' })
-		RoundMatch.belongsTo(Profile, { foreignKey: 'winnerPlayerID', onDelete: 'SET NULL' })
+		RoundMatch.belongsTo(Profile, { as: 'playerOne', foreignKey: 'playerOneID', onDelete: 'SET NULL'  })
+		RoundMatch.belongsTo(Profile, { as: 'playerTwo', foreignKey: 'playerTwoID', onDelete: 'SET NULL' })
+		RoundMatch.belongsTo(Profile, { as: 'winnerPlayer', foreignKey: 'winnerPlayerID', onDelete: 'SET NULL' })
 
 		TournamentHistory.belongsTo(Profile, { foreignKey: 'winnerPlayer', onDelete: 'SET NULL' })
 
@@ -66,8 +63,6 @@ export default fp(async (fastify) => {
 
 		await sequelize.authenticate()
 
-		// Ensure all defined models are created/updated in the SQLite database
-		// so subsequent operations (like seeding) don't fail with "no such table".
 		await sequelize.sync()
 
 		fastify.decorate('sequelize', sequelize)
@@ -107,7 +102,7 @@ async function addFourPeople(sequelize) {
 		{ firstWin: new Date(), hundredWins: new Date(), fiveHundredWins: new Date(), firstTenStreak: new Date(), twentyFiveTenStreak: new Date(), lessThanThreeMin: new Date() }
 	]
 
-	for (let i = 0; i < 4; i++) {
+	for (let i = 0; i < 10; i++) {
 		const [profile] = await sequelize.models.Profile.findOrCreate({
 			where: {
 				userName: `test${i}`,

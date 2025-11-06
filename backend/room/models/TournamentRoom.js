@@ -108,7 +108,7 @@ export default class TournamentRoom extends Room
 					match.state = matches[index].state || null;
 					match.time = matches[index].time || null;
 					if (match.winner === null || match.winner === undefined)
-						match.winner = "bye-" + match.matchNumber + "-" + Date.now();
+						match.winner = null;
 
 					if (match.loser)
 					{
@@ -141,10 +141,10 @@ export default class TournamentRoom extends Room
 
 		this.matches.forEach((matchsArray, roundIndex) => {
 			rounds.push({
-				round: roundIndex,
+				round: roundIndex + 1,
 				matchs: matchsArray.map(match => ({
 					matchId: match.matchId,
-					matchNumber: match.matchNumber,
+					matchNumber: match.matchNumber + 1,
 					matchStatus: match.matchStatus,
 					player1: match.player1,
 					player2: match.player2,
@@ -162,6 +162,7 @@ export default class TournamentRoom extends Room
 			name: this.name,
 			winner: this.players[0].id,
 			rounds: rounds,
+			participants: this.players.map(p => ({ id: p.id})),
 			matchType: 'tournament'
 		};
 	}
@@ -311,8 +312,8 @@ export default class TournamentRoom extends Room
 				matchId: match.matchId,
 				matchNumber: match.matchNumber,
 				matchStatus: match.matchStatus,
-				player1: this.participants.find(p => p.id === match.player1)?.getState() || { name: "BYE", id: null },
-				player2: this.participants.find(p => p.id === match.player2)?.getState() || { name: "BYE", id: null },
+				player1: this.participants.find(p => p.id === match.player1)?.getState() || { name: null, id: null },
+				player2: this.participants.find(p => p.id === match.player2)?.getState() || { name: null, id: null },
 				player1Score: match.player1Score,
 				player2Score: match.player2Score,
 				winner: match.winner,

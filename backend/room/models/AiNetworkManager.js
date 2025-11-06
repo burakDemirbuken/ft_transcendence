@@ -6,7 +6,7 @@ class AiNetworkManager
 	{
 		try
 		{
-			this.socket = new WebSocketClient('ws:', 'ai-server', 3003);
+			this.socket = new WebSocketClient('wss:', 'ai-server', 3003);
 
 			this.socket.onConnect(() => {
 				console.log('🤖 Connected to AI server');
@@ -59,7 +59,7 @@ class AiNetworkManager
 			ai_config: {
 				difficulty: difficulty
 			},
-			game_id: gameId  // Game server'dan gelen ID'yi gönder
+			game_id: gameId
 		};
 
 		if (difficulty === "custom")

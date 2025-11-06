@@ -81,13 +81,7 @@
 				"lost": "Kaybedilen"
 			},
 			"skills": {
-				"title": "Beceriler",
-				"speed": "Hız",
-				"accur": "Doğruluk",
-				"defence": "Savunma",
-				"attack": "Saldırı",
-				"strat": "Strateji",
-				"dur": "Dayanıklılık"
+				"title": "Beceriler"
 			},
 			"mprog": {
 				"title": "Aylık İlerleme",

@@ -9,11 +9,9 @@ async function deleteAccount(e) {
 	const isConfirmed = confirm("Are you sure you want to delete your account? This action cannot be undone");
 	if (isConfirmed) {
 		try {
-			const res = await fetch(`${API_BASE_URL}/auth/profile`,
-			{
+			const res = await fetch(`${API_BASE_URL}/auth/profile`, {
 				method: 'DELETE',
 				credentials: 'include',
-
 			});
 			const json = await res.json();
 			if (res.ok) {
@@ -40,8 +38,7 @@ async function sendAvatarChangeReq(e) {
 		const formData = new FormData();
 		formData.append('avatar', e.target.files[0]);
 
-		const res = await fetch(`${API_BASE_URL}/static/avatar?username=bkorkut`,
-		{
+		const res = await fetch(`${API_BASE_URL}/static/avatar?userName=${localStorage.getItem("userName")}`, {
 			method: 'POST',
 			credentials: 'include',
 			body: formData
@@ -69,12 +66,10 @@ async function sendDNameChangeReq(e) {
 	const inputs = Object.fromEntries(formData);
 
 	try {
-		const getProfileDatas = await fetch(`${API_BASE_URL}/profile/displaynameupdate`,
-		{
+		const getProfileDatas = await fetch(`${API_BASE_URL}/profile/displaynameupdate`, {
 			method: "POST",
 			credentials: 'include',
-			headers:
-			{
+			headers: {
 				'Content-Type': 'application/json',
 				...getAuthHeaders()
 			},
@@ -93,17 +88,24 @@ async function sendDNameChangeReq(e) {
 	}
 }
 
+// body: JSON.stringify({...inputs}) : formdaki inputları olduğu gibi alıp yollar.
+// Değişken isimlerin için name="" baz alır.
+// Örn.:
+// 	html: <input name="current-email" value="kullanıcı-inputu">
+// 	body: { "current-email": "kulanıcı-inputu"}
 async function sendEmailChangeReq(e) {
 	e.preventDefault();
 	console.log("SEND EMAIL CHANGE REQ");
-	console.log(e);
 
 	try {
+		const form = e.target.closest('form');
+		const formData = new FormData(form);
+		const inputs = Object.fromEntries(formData);
 
-		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/request-email-change`,
-		{
+		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/request-email-change`, {
 			method: 'POST',
 			credentials: 'include',
+			body: JSON.stringify({...inputs})
 		});
 		if (getProfileDatas.ok) {
 			console.log("success");
@@ -119,16 +121,24 @@ async function sendEmailChangeReq(e) {
 	}
 }
 
+// body: JSON.stringify({...inputs}) : formdaki inputları olduğu gibi alıp yollar.
+// Değişken isimlerin için name="" baz alır.
+// Örn.:
+// 	html: <input name="current-email" value="kullanıcı-inputu">
+// 	body: { "current-email": "kulanıcı-inputu"}
 async function sendPassChangeReq(e) {
 	e.preventDefault();
 	console.log("SEND PASS CHANGE REQ");
-	console.log(e);
+
+	const form = e.target.closest('form');
+	const formData = new FormData(form);
+	const inputs = Object.fromEntries(formData);
 
 	try {
-		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/request-password-change`,
-		{
+		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/request-password-change`, {
 			method: 'POST',
 			credentials: 'include',
+			body: JSON.stringify({...inputs})
 		});
 		if (getProfileDatas.ok) {
 			console.log("success");
@@ -197,12 +207,10 @@ async function onLoad()
 {
 	const hasToken = getAuthToken();
 	if (!hasToken)
-		return ( window.location.href = 'login' );
+		return navigateTo('login');
 
-	try
-	{
-		const meReq = await fetch(`${API_BASE_URL}/auth/me`,
-		{
+	try {
+		const meReq = await fetch(`${API_BASE_URL}/auth/me`, {
 			credentials: 'include',
 			headers:
 			{
@@ -214,11 +222,10 @@ async function onLoad()
 		if (meReq.ok) {
 			const profileData = await meReq.json();
 			console.log(profileData);
-			document.querySelector('input[name="uname"]').setAttribute('value', profileData?.user?.username ?? '');
-			document.querySelector('input[name="email"]').setAttribute('value', profileData?.user?.email ?? '');
+			document.querySelector('input[name="uname"]')?.setAttribute('value', profileData?.user?.username ?? '');
+			document.querySelector('input[name="current-email"]')?.setAttribute('value', profileData?.user?.email ?? '');
 
-			const profileReq = await fetch(`${API_BASE_URL}/profile/profile?userName=${profileData?.user?.username}`,
-			{
+			const profileReq = await fetch(`${API_BASE_URL}/profile/profile?userName=${profileData?.user?.username}`, {
 				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json',
@@ -228,16 +235,19 @@ async function onLoad()
 
 			if (profileReq.ok) {
 				const user = await profileReq.json();
-				console.log(user);
-				document.querySelector('input[name="dname"]').setAttribute('value', user.profile.displayName ?? '');
+				document.querySelector('input[name="dname"]')?.setAttribute('value', user.profile.displayName ?? '');
+				if (user?.profile?.avatarUrl)
+					document.getElementById('settings-avatar')?.setAttribute('src', `${API_BASE_URL}/static/${user.profile.avatarUrl}`);
 			} else
 				console.error("❌ Failed to fetch profile data:", profileReq.statusText);
 		} else {
 			if (meReq.status === 401) {
+				console.log("REQUSET NOT OK");
 				navigateTo("login");
 			}
 		}
 	} catch (error) {
+		console.error(error);
 		navigateTo("login");
 	}
 }

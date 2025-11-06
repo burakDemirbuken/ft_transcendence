@@ -131,8 +131,8 @@
 		"achiev": {
 			"fwin": {
 				"title": "First Victory",
-				"active": "Win your first match",
-				"passive": "You won your first match!"
+				"active": "You won your first match!",
+				"passive": "Win your first match"
 			},
 			"smaster": {
 				"title": "Streak Master",

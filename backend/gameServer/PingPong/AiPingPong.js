@@ -200,16 +200,6 @@ class AIPingPong extends PingPong
 		});
 	}
 
-	stop()
-	{
-		this.status = 'stopped';
-		if (this._aiSendInterval)
-		{
-			clearInterval(this._aiSendInterval);
-			this._aiSendInterval = null;
-		}
-		console.log(`⏸️ Game stopped`);
-	}
 }
 
 export default AIPingPong;

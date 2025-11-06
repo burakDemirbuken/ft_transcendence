@@ -11,6 +11,7 @@ async function globalsPlugin(fastify, options) {
 		profile: "http://profile:3006",
 		gameServer: "http://gameserver:3003",
 		static: "http://static:3008",
+		friend: "http://friend:3007",
 	};
 
 	const settings =
