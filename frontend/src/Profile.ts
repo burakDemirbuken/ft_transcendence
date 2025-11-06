@@ -397,8 +397,6 @@ class ManagerProfile {
     }
 
     public switchTab(tabName: string): void {
-        console.log('Switching to tab:', tabName); // Debug için
-
         // Mevcut aktif sekmeyi kaldır - tab-btn class'ını kullan
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('active');
@@ -408,7 +406,6 @@ class ManagerProfile {
         const activeBtn = document.querySelector(`[data-tab="${tabName}"]`) as HTMLElement | null;
         if (activeBtn) {
             activeBtn.classList.add('active');
-            console.log('Active button set for:', tabName); // Debug için
         } else {
             console.log('Button not found for tab:', tabName); // Debug için
         }
@@ -424,7 +421,6 @@ class ManagerProfile {
         if (activeTab) {
             activeTab.classList.add('active');
             activeTab.style.display = 'block'; // Ekstra güvenlik için
-            console.log('Active tab content set for:', tabName); // Debug için
         } else {
             console.log('Tab content not found for:', tabName); // Debug için
         }
@@ -477,18 +473,11 @@ class ManagerProfile {
 
         if (progressBar) {
             const targetWidth = progressBar.dataset.progress ?? '75';
-
-            // 🔍 DEBUG
-            console.log("🎯 Target Width:", targetWidth);
-            console.log("🎯 Progress Bar:", progressBar);
-
             progressBar.style.width = '0%';
 
             setTimeout(() => {
                 progressBar.style.transition = 'width 2s ease-in-out';
                 progressBar.style.width = `${targetWidth}%`;
-                // 🔍 DEBUG
-                console.log("🎯 Width set to:", progressBar.style.width);
             }, 500);
         }
     }
@@ -997,8 +986,7 @@ async function fetchMatchHistory(userName: string) {
 
         if (response.ok) {
             const data = await response.json();
-            console.log("🎮 Match history response:", data); // ✅ Debug log
-            console.log("📊 Matches array:", data.matches); // ✅ Debug log
+            console.log("Match history:", data);
             return data.matches || [];
         } else {
             console.error("❌ Failed to fetch match history:", response.statusText);
@@ -1073,10 +1061,7 @@ async function populateMatchHistory(userName: string) {
             opponentName = opponentTeam.PlayerTwo.displayName;
         }
 
-        // Maç süresi hesapla
-        const duration = match.matchEndDate && match.matchStartDate
-            ? Math.floor((new Date(match.matchEndDate).getTime() - new Date(match.matchStartDate).getTime()) / 1000)
-            : 0;
+        const durationFormatted = formatDuration(match.matchDuration || 0);
 
         const matchRow = document.createElement('div');
         matchRow.className = 'match-row';
@@ -1087,7 +1072,7 @@ async function populateMatchHistory(userName: string) {
             <span>${formatDate(match.matchStartDate)}</span>
             <span>${opponentName}</span>
             <span>${userScore}-${opponentScore}</span>
-            <span>${formatDuration(duration)}</span>
+            <span>${durationFormatted}</span>
             <span class="result ${isWin ? 'win' : 'loss'}">${isWin ? winText : loseText}</span>
         `;
 
@@ -1213,11 +1198,7 @@ async function setTextStats(user: any) {
     const levelProgress = document.querySelector(".level-progress") as HTMLElement;
     if (levelProgress && user.stats.progressRatio !== undefined) {
         const progressValue = Math.min(100, Math.max(0, user.stats.progressRatio));
-        levelProgress.setAttribute("data-progress", progressValue.toString());
-        console.log("✅ data-progress set to:", progressValue);
-    } else {
-        console.warn("⚠️ progressRatio undefined:", user.stats.progressRatio);
-    }
+        levelProgress.setAttribute("data-progress", progressValue.toString()); }
     document.getElementById("current-streak").textContent = user.stats.gameCurrentStreak;
     document.getElementById("total-games").textContent = user.stats.gamesPlayed;
     document.getElementById("win-rate").textContent = Math.round(user.stats.winRate) + "%";
@@ -1288,7 +1269,7 @@ async function onLoad()
             if (ProfileUsername.ok)
             {
                 const user = await ProfileUsername.json();
-                console.log("API Response (Tüm Veri):", user);
+                console.log("All data:", user);
                 setTextStats(user);
                 setChartStats(user);
                 setAchievementStats(user);
@@ -1299,24 +1280,6 @@ async function onLoad()
             }
             else
                 console.error("❌ Failed to fetch profile data:", ProfileUsername.statusText);
-
-            // const ProfileTournament = await fetch(`${API_BASE_URL}/tournament-history?userName=player1)}`,
-            // {
-            //     method: "GET",
-            //     credentials: 'include',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //         ...getAuthHeaders()
-            //     }
-            // });
-
-            // if (ProfileTournament.ok) {
-            //     const user = await ProfileTournament.json();
-            //     console.warn("TOURNAMENT HISTRORY FETCHED!!!");
-            //     console.log(user);
-            // }
-            // else
-            //     console.error("❌ Failed to fetch profile data:", ProfileTournament.statusText);
         }
         else
         {
