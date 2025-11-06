@@ -3,7 +3,6 @@ import { getAuthToken, getAuthHeaders } from './utils/auth.js';
 import { API_BASE_URL, navigateTo } from './index.js';
 import { showNotification } from "./notification.js";
 
-
 let currentUserName = null;
 
 async function deleteAccount(e) {
