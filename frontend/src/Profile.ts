@@ -976,6 +976,212 @@ export default class extends AView {
     }
 }
 
+// Profile.ts içine eklenecek fonksiyonlar
+
+async function fetchMatchHistory(userName: string) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log("🎮 Match history response:", data); // ✅ Debug log
+            console.log("📊 Matches array:", data.matches); // ✅ Debug log
+            return data.matches || [];
+        } else {
+            console.error("❌ Failed to fetch match history:", response.statusText);
+            return [];
+        }
+    } catch (error) {
+        console.error("❌ Error fetching match history:", error);
+        return [];
+    }
+}
+
+function formatDuration(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+}
+
+function formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${day}.${month}.${year} ${hours}:${minutes}`;
+}
+
+async function populateMatchHistory(userName: string) {
+    const matchTable = document.querySelector('.match-table');
+    if (!matchTable) return;
+
+    const matches = await fetchMatchHistory(userName);
+
+    // Mevcut satırları temizle (header hariç)
+    const existingRows = matchTable.querySelectorAll('.match-row:not(.header)');
+    existingRows.forEach(row => row.remove());
+
+    if (matches.length === 0) {
+        // Eğer maç yoksa bilgi mesajı göster
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+        const emptyRow = document.createElement('div');
+        emptyRow.className = 'match-row empty-state';
+        emptyRow.style.gridColumn = '1 / -1';
+        emptyRow.style.textAlign = 'center';
+        emptyRow.style.padding = '2rem';
+        emptyRow.innerHTML = `<span data-i18n="profile.mhistory.nomatch">${translations?.profile?.mhistory?.nomatch || 'Henüz maç geçmişi bulunmuyor'}</span>`;
+        matchTable.appendChild(emptyRow);
+        return;
+    }
+
+    // Çeviriyi bir kez al
+    const translations = await getJsTranslations(localStorage.getItem("langPref"));
+    const winText = translations?.profile?.mhistory?.win || 'Galibiyet';
+    const loseText = translations?.profile?.mhistory?.lose || 'Mağlubiyet';
+
+    // Her maç için satır oluştur
+    matches.forEach((match: any, index: number) => {
+        const isUserInTeamOne = match.teamOne.PlayerOne?.userName === userName ||
+                                match.teamOne.PlayerTwo?.userName === userName;
+
+        const userTeam = isUserInTeamOne ? match.teamOne : match.teamTwo;
+        const opponentTeam = isUserInTeamOne ? match.teamTwo : match.teamOne;
+
+        const userScore = isUserInTeamOne ? match.teamOneScore : match.teamTwoScore;
+        const opponentScore = isUserInTeamOne ? match.teamTwoScore : match.teamOneScore;
+
+        const isWin = match.winnerTeam &&
+                     (match.winnerTeam.PlayerOne?.userName === userName ||
+                      match.winnerTeam.PlayerTwo?.userName === userName);
+
+        // Rakip ismi (tek veya çift oyuncu)
+        let opponentName = '';
+        if (opponentTeam.PlayerOne && opponentTeam.PlayerTwo) {
+            opponentName = `${opponentTeam.PlayerOne.displayName} & ${opponentTeam.PlayerTwo.displayName}`;
+        } else if (opponentTeam.PlayerOne) {
+            opponentName = opponentTeam.PlayerOne.displayName;
+        } else if (opponentTeam.PlayerTwo) {
+            opponentName = opponentTeam.PlayerTwo.displayName;
+        }
+
+        // Maç süresi hesapla
+        const duration = match.matchEndDate && match.matchStartDate
+            ? Math.floor((new Date(match.matchEndDate).getTime() - new Date(match.matchStartDate).getTime()) / 1000)
+            : 0;
+
+        const matchRow = document.createElement('div');
+        matchRow.className = 'match-row';
+        matchRow.dataset.result = isWin ? 'win' : 'loss';
+        matchRow.dataset.matchId = index.toString();
+
+        matchRow.innerHTML = `
+            <span>${formatDate(match.matchStartDate)}</span>
+            <span>${opponentName}</span>
+            <span>${userScore}-${opponentScore}</span>
+            <span>${formatDuration(duration)}</span>
+            <span class="result ${isWin ? 'win' : 'loss'}">${isWin ? winText : loseText}</span>
+        `;
+
+        matchTable.appendChild(matchRow);
+    });
+}
+
+export function refreshMatchHistory() {
+    const userName = document.querySelector('.username')?.textContent?.replace('@', '');
+    if (userName) {
+        populateMatchHistory(userName);
+    }
+}
+
+async function populateRecentMatches(userName: string) {
+    const matchesList = document.querySelector('.matches-list');
+    if (!matchesList) return;
+
+    try {
+        // Match history'yi çek
+        const response = await fetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            }
+        });
+
+        if (!response.ok) {
+            console.error("❌ Failed to fetch match history for recent matches");
+            return;
+        }
+
+        const data = await response.json();
+        const matches = data.matches || [];
+
+        // Mevcut içeriği temizle
+        matchesList.innerHTML = '';
+
+        if (matches.length === 0) {
+            const translations = await getJsTranslations(localStorage.getItem("langPref"));
+            matchesList.innerHTML = `<p style="text-align: center; color: var(--color-muted);">${translations?.profile?.mhistory?.nomatch || 'Henüz maç geçmişi bulunmuyor'}</p>`;
+            return;
+        }
+
+        // Son 4 maçı al
+        const recentMatches = matches.slice(-4).reverse();
+
+        // Çevirileri al
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+        const winText = translations?.profile?.mhistory?.win || 'Galibiyet';
+        const loseText = translations?.profile?.mhistory?.lose || 'Mağlubiyet';
+
+        recentMatches.forEach((match: any) => {
+            const isUserInTeamOne = match.teamOne?.PlayerOne?.userName === userName ||
+                                    match.teamOne?.PlayerTwo?.userName === userName;
+
+            const userScore = isUserInTeamOne ? match.teamOneScore : match.teamTwoScore;
+            const opponentScore = isUserInTeamOne ? match.teamTwoScore : match.teamOneScore;
+
+            const isWin = match.winnerTeam &&
+                         (match.winnerTeam.PlayerOne?.userName === userName ||
+                          match.winnerTeam.PlayerTwo?.userName === userName);
+
+            // Rakip ismi
+            const opponentTeam = isUserInTeamOne ? match.teamTwo : match.teamOne;
+            let opponentName = '';
+            if (opponentTeam?.PlayerOne && opponentTeam?.PlayerTwo) {
+                opponentName = `${opponentTeam.PlayerOne.displayName} & ${opponentTeam.PlayerTwo.displayName}`;
+            } else if (opponentTeam?.PlayerOne) {
+                opponentName = opponentTeam.PlayerOne.displayName;
+            } else if (opponentTeam?.PlayerTwo) {
+                opponentName = opponentTeam.PlayerTwo.displayName;
+            } else {
+                opponentName = 'Unknown';
+            }
+
+            // Match item oluştur
+            const matchItem = document.createElement('div');
+            matchItem.className = `match-item ${isWin ? 'win' : 'loss'}`;
+            matchItem.innerHTML = `
+                <div class="match-result">${isWin ? 'W' : 'L'}</div>
+                <div class="match-info">
+                    <span class="opponent">${opponentName}</span>
+                    <span class="score">${userScore}-${opponentScore}</span>
+                </div>
+            `;
+
+            matchesList.appendChild(matchItem);
+        });
+
+    } catch (error) {
+        console.error("❌ Error fetching recent matches:", error);
+    }
+}
 
 // Cookie'leri parse etmek için yardımcı fonksiyon
 function parseCookies(): Record<string, string> {
@@ -1003,6 +1209,8 @@ async function setTextStats(user: any) {
     // Win Streak
     document.querySelector(".streak-number").textContent = user.stats.gameCurrentStreak;
     document.querySelector(".streak-value").textContent = user.stats.gameLongestStreak;
+	// Last Matches
+	await populateRecentMatches(user.profile.userName);
 }
 
 async function setChartStats(user: any) {
@@ -1032,8 +1240,6 @@ async function onLoad()
     }
     try
     {
-
-
         const getProfileDatas = await fetch(`${API_BASE_URL}/auth/me`,
         {
             credentials: 'include',
@@ -1046,9 +1252,15 @@ async function onLoad()
 
         if (getProfileDatas.ok)
         {
-            const userData = await getProfileDatas.json();
+            const authData = await getProfileDatas.json(); // ✅ response yerine authData
 
-            const ProfileUsername = await fetch(`${API_BASE_URL}/profile/profile?userName=${"test0"}`,
+            // ✅ user objesi içinden username'i al
+            const userData = authData.user;
+            const currentUserName = userData.username; // "nisa"
+
+            console.log("👤 Current username:", currentUserName);
+
+            const ProfileUsername = await fetch(`${API_BASE_URL}/profile/profile?userName=${currentUserName}`,
             {
                 credentials: 'include',
                 headers: {
@@ -1064,9 +1276,28 @@ async function onLoad()
                 setTextStats(user);
                 setChartStats(user);
                 setAchievementStats(user);
+				await populateMatchHistory(currentUserName);
             }
             else
                 console.error("❌ Failed to fetch profile data:", ProfileUsername.statusText);
+
+            // const ProfileTournament = await fetch(`${API_BASE_URL}/tournament-history?userName=player1)}`,
+            // {
+            //     method: "GET",
+            //     credentials: 'include',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         ...getAuthHeaders()
+            //     }
+            // });
+
+            // if (ProfileTournament.ok) {
+            //     const user = await ProfileTournament.json();
+            //     console.warn("TOURNAMENT HISTRORY FETCHED!!!");
+            //     console.log(user);
+            // }
+            // else
+            //     console.error("❌ Failed to fetch profile data:", ProfileTournament.statusText);
         }
         else
         {
