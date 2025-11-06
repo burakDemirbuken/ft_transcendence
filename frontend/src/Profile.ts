@@ -477,11 +477,18 @@ class ManagerProfile {
 
         if (progressBar) {
             const targetWidth = progressBar.dataset.progress ?? '75';
+
+            // 🔍 DEBUG
+            console.log("🎯 Target Width:", targetWidth);
+            console.log("🎯 Progress Bar:", progressBar);
+
             progressBar.style.width = '0%';
 
             setTimeout(() => {
                 progressBar.style.transition = 'width 2s ease-in-out';
                 progressBar.style.width = `${targetWidth}%`;
+                // 🔍 DEBUG
+                console.log("🎯 Width set to:", progressBar.style.width);
             }, 500);
         }
     }
@@ -1201,6 +1208,18 @@ async function setTextStats(user: any) {
     // Title Card
     document.querySelector(".user-title").textContent = user.profile.displayName;
     document.querySelector(".username").textContent = "@" + user.profile.userName;
+    document.getElementById("level-value").textContent = user.stats.level;
+    const levelProgress = document.querySelector(".level-progress") as HTMLElement;
+    if (levelProgress && user.stats.progressRatio !== undefined) {
+        const progressValue = Math.min(100, Math.max(0, user.stats.progressRatio));
+        levelProgress.setAttribute("data-progress", progressValue.toString());
+        console.log("✅ data-progress set to:", progressValue);
+    } else {
+        console.warn("⚠️ progressRatio undefined:", user.stats.progressRatio);
+    }
+    document.getElementById("current-streak").textContent = user.stats.gameCurrentStreak;
+    document.getElementById("total-games").textContent = user.stats.gamesPlayed;
+    document.getElementById("win-rate").textContent = Math.round(user.stats.winRate) + "%";
     // Overview
     document.getElementById("mwon").textContent = user.stats.gamesWon;
     document.getElementById("mlost").textContent = user.stats.gamesLost;
@@ -1252,13 +1271,9 @@ async function onLoad()
 
         if (getProfileDatas.ok)
         {
-            const authData = await getProfileDatas.json(); // ✅ response yerine authData
-
-            // ✅ user objesi içinden username'i al
+            const authData = await getProfileDatas.json();
             const userData = authData.user;
-            const currentUserName = userData.username; // "nisa"
-
-            console.log("👤 Current username:", currentUserName);
+            const currentUserName = userData.username;
 
             const ProfileUsername = await fetch(`${API_BASE_URL}/profile/profile?userName=${currentUserName}`,
             {
@@ -1272,11 +1287,14 @@ async function onLoad()
             if (ProfileUsername.ok)
             {
                 const user = await ProfileUsername.json();
-                console.log(user);
+                console.log("API Response (Tüm Veri):", user);
                 setTextStats(user);
                 setChartStats(user);
                 setAchievementStats(user);
-				await populateMatchHistory(currentUserName);
+                await populateMatchHistory(currentUserName);
+                setTimeout(() => {
+                    profileManager.animateLevelProgress();
+                }, 100);
             }
             else
                 console.error("❌ Failed to fetch profile data:", ProfileUsername.statusText);
