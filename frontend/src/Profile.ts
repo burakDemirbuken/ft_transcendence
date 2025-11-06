@@ -1010,12 +1010,6 @@ async function fetchMatchHistory(userName: string) {
     }
 }
 
-function formatDuration(seconds: number): string {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
-}
-
 function formatDate(dateString: string): string {
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, '0');
@@ -1204,6 +1198,13 @@ function parseCookies(): Record<string, string> {
     return cookies;
 }
 
+function formatDuration(seconds) {
+	seconds = Math.floor(seconds);
+	const minutes = Math.floor(seconds / 60);
+	const secs = seconds % 60;
+	return `${minutes}:${secs.toString().padStart(2, '0')}`;
+}
+
 async function setTextStats(user: any) {
     // Title Card
     document.querySelector(".user-title").textContent = user.profile.displayName;
@@ -1223,8 +1224,8 @@ async function setTextStats(user: any) {
     // Overview
     document.getElementById("mwon").textContent = user.stats.gamesWon;
     document.getElementById("mlost").textContent = user.stats.gamesLost;
-    document.getElementById("mdur-average").textContent = `${user.stats.gameTotalDuration / user.stats.gamesPlayed || 0}`;
-    document.getElementById("total-play-time").textContent = user.stats.gameTotalDuration;
+    document.getElementById("mdur-average").textContent = formatDuration(user.stats.gameAverageDuration);
+    document.getElementById("total-play-time").textContent = formatDuration(user.stats.gameTotalDuration);
     // Win Streak
     document.querySelector(".streak-number").textContent = user.stats.gameCurrentStreak;
     document.querySelector(".streak-value").textContent = user.stats.gameLongestStreak;

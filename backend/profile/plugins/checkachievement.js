@@ -143,6 +143,7 @@ export default fp(async (fastify) => {
 		return ({
 			...stats.toJSON(),
 			...levelCalculate(stats.xp),
+			gameAverageDuration: (stats.gameTotalDuration / stats.gamesPlayed) || 0,
 			winRate: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0,
 			speed: (stats.gamesPlayed > 0 && stats.gameTotalDuration > 0) ? (stats.ballHitCount / (stats.gameTotalDuration * stats.gamesPlayed)) * 100 : 0,
 			endurance: (stats.gamesPlayed > 0 && stats.gameTotalDuration > 0) ? (stats.gameTotalDuration / (stats.gameTotalDuration + stats.gamesPlayed)) * 100 : 0,
