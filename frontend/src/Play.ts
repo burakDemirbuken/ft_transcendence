@@ -498,15 +498,13 @@ export function transformMatchmakingData(data: MatchmakingData | null | undefine
   // Match dizisini al
   let matches: Match[] = [];
 
-  if (data.match && Array.isArray(data.match)) {
+  if (data.match && Array.isArray(data.match))
     matches = data.match;
-    console.log('✅ Found direct match array:', matches);
-  } else if (data.rounds && Array.isArray(data.rounds)) {
+  else if (data.rounds && Array.isArray(data.rounds)) {
     const currentRoundIndex = data.currentRound ?? 0;
     const currentRound =
       data.rounds.find((r) => r.round === currentRoundIndex) || data.rounds[0];
     matches = currentRound?.matchs || [];
-    console.log('✅ Found matches in rounds:', matches);
   }
 
   if (!matches || matches.length === 0) {
