@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import register from './srcs/registration.js';
 import { sequelize, testConnection } from './models/database.js';
+import { createTestUsers } from './testUsers.js';
 import fs from 'fs';
 
 const fastify = Fastify(
@@ -20,6 +21,10 @@ const start = async () =>
     		fs.mkdirSync('./data', { recursive: true });
     	await testConnection();
     	await sequelize.sync({ force: false });
+    	
+    	// Test kullanıcıları oluştur (development için)
+    	await createTestUsers();
+    	
     	await fastify.listen
     	({
     		port: 3001,
