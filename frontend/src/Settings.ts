@@ -4,6 +4,8 @@ import { API_BASE_URL, navigateTo } from './index.js';
 import { showNotification } from "./notification.js";
 
 
+let currentUserName = null;
+
 async function deleteAccount(e) {
 	e.preventDefault();
 	const isConfirmed = confirm("Are you sure you want to delete your account? This action cannot be undone");
@@ -40,7 +42,7 @@ async function sendAvatarChangeReq(e) {
 		const formData = new FormData();
 		formData.append('avatar', e.target.files[0]);
 
-		const res = await fetch(`${API_BASE_URL}/static/avatar?userName=ulas`,
+		const res = await fetch(`${API_BASE_URL}/static/avatar?userName=${currentUserName}`,
 		{
 			method: 'POST',
 			credentials: 'include',
@@ -78,7 +80,7 @@ async function sendDNameChangeReq(e) {
 				'Content-Type': 'application/json',
 				...getAuthHeaders()
 			},
-			body: JSON.stringify({userName: "bkorkut", ...inputs})
+			body: JSON.stringify({userName: currentUserName, ...inputs})
 		});
 		if (getProfileDatas.ok) {
 			console.log(await getProfileDatas.json());
@@ -214,6 +216,7 @@ async function onLoad()
 		if (meReq.ok) {
 			const profileData = await meReq.json();
 			console.log(profileData);
+			currentUserName = profileData?.user?.username;
 			document.querySelector('input[name="uname"]').setAttribute('value', profileData?.user?.username ?? '');
 			document.querySelector('input[name="email"]').setAttribute('value', profileData?.user?.email ?? '');
 
