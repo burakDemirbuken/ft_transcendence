@@ -216,9 +216,9 @@ class RoomManager extends EventEmitter
 			throw new Error(`Room with ID ${payload.roomId} is full`);
 		if (room.players.find(p => p.id === player.id))
 			throw new Error(`Player with ID ${player.id} is already in room ${payload.roomId}`);
-/* 		if (payload.gameMode !== room.gameMode)
+		if (payload.gameMode !== room.type)
 			throw new Error(`Player with ID ${player.id} cannot join room ${payload.roomId} with game mode ${payload.gameMode}`);
-	 */	room.addPlayer(player);
+		room.addPlayer(player);
 		console.log(`Player with ID ${player.id} joined room ${payload.roomId}`);
 		this.notifyRoomUpdate(payload.roomId);
 	}
@@ -241,7 +241,6 @@ class RoomManager extends EventEmitter
 			this.deleteRoom(roomId);
 		if (room.players.length > 0 || (room.spectators?.length || 0) > 0)
 			this.notifyRoomUpdate(roomId);
-
 		return room;
 	}
 

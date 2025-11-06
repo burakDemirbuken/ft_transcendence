@@ -1956,7 +1956,7 @@ export default class extends AView {
 			}
 
 			currentGameMode = 'custom';
-			roomSocket.send("join", { roomId: roomCode, gameMode: 'play-page' });
+			roomSocket.send("join", { roomId: roomCode, gameMode: 'classic' });
 			showNotification(`${roomCode} kodlu odaya katılıyorsunuz...`, 'info');
 		});
 

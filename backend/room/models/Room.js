@@ -7,6 +7,7 @@ export default class Room extends EventEmitter
 		super();
 		this.name = name;
 		this.gameMode = null;
+		this.gameType = 'classic';
 		this.status = 'waiting'; // "waiting", "in_game", "completed", "startable"
 		this.maxPlayers = null;
 		this.host = null;
@@ -39,7 +40,7 @@ export default class Room extends EventEmitter
 		}
 		if (this.host === playerId)
 			this.host = this.players[0]?.id;
-		
+
 	}
 
 	startGame(playerId)

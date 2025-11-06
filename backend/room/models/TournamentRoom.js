@@ -6,6 +6,7 @@ export default class TournamentRoom extends Room
 	constructor(name, gameSettings, tournamentSettings)
 	{
 		super(name, gameSettings);
+		this.gameType = 'tournament';
 		this.gameMode = 'tournament';
 
 		this.tournamentSettings = tournamentSettings;
