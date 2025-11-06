@@ -14,7 +14,7 @@ RED = \033[0;31m
 YELLOW = \033[1;33m
 BLUE = \033[0;34m
 NC = \033[0m
-HOST_IP := 127.0.0.1#$(shell hostname -I | awk '{print $$1}')
+HOST_IP := $(shell hostname -I | awk '{print $$1}')
 export HOST_IP
 
 all: up
