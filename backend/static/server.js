@@ -16,7 +16,7 @@ console.log(path.join(__dirname, "database/avatars"))
 fastify.register(fastifyStatic, {
     root: path.join(__dirname, "database/avatars"),
     prefix: "/database/avatars/"
-}) 
+})
 fastify.register(reName)
 fastify.decorate("cwd", __dirname)
 fastify.register(fastifyMultipart)

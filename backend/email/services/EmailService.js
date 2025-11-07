@@ -14,7 +14,16 @@ class EmailService {
         auth: {
           user: config.email.user,
           pass: config.email.pass
-        }
+        },
+        pool: true,
+        maxConnections: 3,
+        maxMessages: 50,
+        rateLimit: 5,
+        connectionTimeout: 5000,
+        greetingTimeout: 5000,
+        socketTimeout: 15000,
+        secure: true,
+        requireTLS: true
       })
 
       console.log('📧 Email transporter initialized successfully')
