@@ -38,11 +38,11 @@ export default (sequelize, DataTypes, Model) => {
 			defaultValue: 0
 		},
 		gameTotalDuration: {
-			type: DataTypes.INTEGER,
+			type: DataTypes.BIGINT,
 			defaultValue: 0
 		},
 		gameMinDuration: {
-			type: DataTypes.INTEGER,
+			type: DataTypes.BIGINT,
 			defaultValue: 0
 		},
 		xp: {

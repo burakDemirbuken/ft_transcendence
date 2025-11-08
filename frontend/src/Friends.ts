@@ -123,7 +123,7 @@ class UserLists {
 
 		const formData = new FormData(e.currentTarget as HTMLFormElement);
 		try {
-			friendSocket.send(JSON.stringify({ type: "list", payload: { } }));
+			friendSocket.send(JSON.stringify({ type: "send", payload: { peerName: formData.get("req-user") } }));
 			console.log("Friend request sent to:", formData.get("req-user"));
 		} catch (error) {
 			showNotification("System error, please try again later.", "error");

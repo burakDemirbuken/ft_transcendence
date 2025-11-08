@@ -1,4 +1,5 @@
 import fp from 'fastify-plugin'
+import { getUserMatchHistory } from '../routes/gamedata.js'
 
 export default fp(async (fastify) => {
 	async function checkAchievements(userId, t) {
@@ -83,8 +84,44 @@ export default fp(async (fastify) => {
 		})
 	}
 
+	async function updateGameStreak(userId, isWin, t) {
+		const { Stat } = fastify.sequelize.models
+
+		const userStat = await Stat.findOne({
+			where: { userId: userId },
+			transaction: t,
+			lock: t.LOCK.UPDATE // Concurrent updates'i önlemek için
+		})
+
+		if (!userStat) {
+			throw new Error('Stat not found for user')
+		}
+
+		let newStreak = userStat.gameCurrentStreak || 0
+
+		if (isWin) {
+			newStreak += 1
+		} else {
+			newStreak = 0
+		}
+
+		// En uzun streak'i güncelle
+		const longestStreak = Math.max(
+			userStat.gameLongestStreak || 0,
+			newStreak
+		)
+
+		await userStat.update({
+			gameCurrentStreak: newStreak,
+			gameLongestStreak: longestStreak
+		}, { transaction: t })
+
+		return { gameCurrentStreak: newStreak, gameLongestStreak: longestStreak }
+	}
+
 	fastify.decorate('checkAchievements', checkAchievements)
 	fastify.decorate('getAchievementProgress', getAchievementProgress)
+	fastify.decorate('updateGameStreak', updateGameStreak)
 
 	function nRealcalculate(xp, baseXP = 100, growthFactor = 1.25) {
 		if (xp < 0)
@@ -120,7 +157,7 @@ export default fp(async (fastify) => {
 	}
 
 	async function statCalculate(userId) {
-		const { Stat } = fastify.sequelize.models
+		const { Stat, Profile } = fastify.sequelize.models
 
 		const stats = await Stat.findOne({
 			where: { userId: userId },
@@ -132,7 +169,9 @@ export default fp(async (fastify) => {
 				'gameTotalDuration',
 				'gameCurrentStreak',
 				'gameLongestStreak',
-				'gameMinDuration'
+				'gameMinDuration',
+				'ballHitCount',
+				'ballMissCount'
 			]
 		})
 
@@ -140,12 +179,33 @@ export default fp(async (fastify) => {
 			throw new Error('Stats not found for user')
 		}
 
+		// userId'den userName'i al
+		const userProfile = await Profile.findOne({
+			where: { id: userId },
+			attributes: ['userName']
+		})
+
+		if (!userProfile) {
+			throw new Error('User profile not found')
+		}
+
+		// Match history'yi al
+		const matchData = await getUserMatchHistory(fastify, userProfile.userName)
+
+		if (matchData.error) {
+			throw new Error(matchData.error)
+		}
+
+		const totalDurationSeconds = matchData.totalDuration
+
 		return ({
 			...stats.toJSON(),
 			...levelCalculate(stats.xp),
+			gameTotalDuration: totalDurationSeconds,
+			gameAverageDuration: stats.gamesPlayed > 0 ? (totalDurationSeconds / stats.gamesPlayed) : 0,
 			winRate: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0,
-			speed: (stats.gamesPlayed > 0 && stats.gameTotalDuration > 0) ? (stats.ballHitCount / (stats.gameTotalDuration * stats.gamesPlayed)) * 100 : 0,
-			endurance: (stats.gamesPlayed > 0 && stats.gameTotalDuration > 0) ? (stats.gameTotalDuration / (stats.gameTotalDuration + stats.gamesPlayed)) * 100 : 0,
+			speed: (stats.gamesPlayed > 0 && totalDurationSeconds > 0) ? (stats.ballHitCount / (totalDurationSeconds)) * 100 : 0,
+			endurance: (stats.gamesPlayed > 0 && totalDurationSeconds > 0) ? (totalDurationSeconds / (totalDurationSeconds + stats.gamesPlayed)) * 100 : 0,
 			defence: (stats.ballHitCount > 0 && stats.gamesLost > 0) ? (stats.ballHitCount / (stats.ballHitCount + stats.gamesLost + 1)) * 100 : 0,
 			accuracy: (stats.ballHitCount > 0 && stats.ballMissCount > 0) ? (stats.ballHitCount / (stats.ballHitCount + stats.ballMissCount)) * 100 : 0
 		})

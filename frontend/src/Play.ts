@@ -358,6 +358,8 @@ function updateParticipants(
 
 // handleWebSocketMessage fonksiyonunu güncelle
 function handleWebSocketMessage(message) {
+	console.log('Started payload:', message.payload);
+    console.log('Started payload keys:', Object.keys(message.payload));
     console.log('📨 Received message:', message);
 
     switch (message.type) {
@@ -410,29 +412,62 @@ function handleMatchReady(payload) {
 
     displayMatchPairs(payload.matchPairs, payload.players);
 
-    const statusDisplay = document.getElementById('tournament-status-display');
+    const statusDisplay = document.getElementById('tournament-status-display') as HTMLElement;
     if (statusDisplay) {
         statusDisplay.textContent = payload.tournamentStatus || 'Eşleşmeler Hazır';
     }
 
-    // DÜZELTME: id kullan, userId değil
     const isHost = payload.players && payload.players.some(player => player.id === currentUserId && player.isHost);
 
-    const waitingBtn = document.getElementById('waiting-players-btn');
-    const matchBtn = document.getElementById('match-players-btn');
-    const startBtn = document.getElementById('start-tournament-btn');
+    console.log('👤 Current User ID:', currentUserId);
+    console.log('🏠 Is Host:', isHost);
+    console.log('📋 Players:', payload.players);
+
+    // ===== DEBUG: Butonları kontrol et =====
+    const waitingBtn = document.getElementById('waiting-players-btn') as HTMLButtonElement;
+    const matchBtn = document.getElementById('match-players-btn') as HTMLButtonElement;
+    const startBtn = document.getElementById('start-tournament-btn') as HTMLButtonElement;
+
+    console.log('=== BUTTON CHECK ===');
+    console.log('Waiting btn exists:', !!waitingBtn);
+    console.log('Match btn exists:', !!matchBtn);
+    console.log('Start btn exists:', !!startBtn);
+
+    if (startBtn) {
+        console.log('Start btn display BEFORE:', window.getComputedStyle(startBtn).display);
+        console.log('Start btn parent:', startBtn.parentElement?.id || startBtn.parentElement?.className);
+    }
 
     if (isHost) {
-        if (waitingBtn) waitingBtn.style.display = 'none';
-        if (matchBtn) matchBtn.style.display = 'none';
-        if (startBtn) startBtn.style.display = 'block';
-    } else {
+        console.log('✅ HOST DETECTED - Showing start button');
+
         if (waitingBtn) {
-            waitingBtn.style.display = 'block';
-            waitingBtn.textContent = '⏳ Turnuva Başlatılıyor...';
+            waitingBtn.style.display = 'none';
+            console.log('✅ Hidden waiting button');
         }
-        if (matchBtn) matchBtn.style.display = 'none';
-        if (startBtn) startBtn.style.display = 'none';
+
+        if (matchBtn) {
+            matchBtn.style.display = 'none';
+            console.log('✅ Hidden match button');
+        }
+
+        if (startBtn) {
+            startBtn.style.display = 'block';
+            startBtn.disabled = false;
+
+            console.log('=== START BUTTON SHOWN ===');
+            console.log('Start btn display AFTER:', window.getComputedStyle(startBtn).display);
+            console.log('Start btn disabled:', startBtn.disabled);
+            console.log('Start btn offsetHeight:', startBtn.offsetHeight);
+            console.log('Start btn offsetWidth:', startBtn.offsetWidth);
+        } else {
+            console.error('❌ START BUTTON NOT FOUND IN DOM!');
+        }
+    } else {
+        console.log('❌ NOT HOST - Hiding start button');
+        if (startBtn) {
+            startBtn.style.display = 'none';
+        }
     }
 
     showNotification('Eşleştirmeler tamamlandı!', 'success');
@@ -498,15 +533,13 @@ export function transformMatchmakingData(data: MatchmakingData | null | undefine
   // Match dizisini al
   let matches: Match[] = [];
 
-  if (data.match && Array.isArray(data.match)) {
+  if (data.match && Array.isArray(data.match))
     matches = data.match;
-    console.log('✅ Found direct match array:', matches);
-  } else if (data.rounds && Array.isArray(data.rounds)) {
+  else if (data.rounds && Array.isArray(data.rounds)) {
     const currentRoundIndex = data.currentRound ?? 0;
     const currentRound =
       data.rounds.find((r) => r.round === currentRoundIndex) || data.rounds[0];
     matches = currentRound?.matchs || [];
-    console.log('✅ Found matches in rounds:', matches);
   }
 
   if (!matches || matches.length === 0) {
@@ -747,7 +780,8 @@ interface GameStartPayload {
 }
 
 function handleGameStarted(payload: GameStartPayload): void {
-    console.log('🎮 Game started:', payload);
+    console.log('Payload gameSettings:', payload.gameSettings);
+    console.log('Payload keys:', Object.keys(payload));
     showNotification('Oyun başlıyor!', 'success');
 
     // Non-null assertion operator kullanarak kesin var olduğunu belirtiyoruz
@@ -1956,7 +1990,7 @@ export default class extends AView {
 			}
 
 			currentGameMode = 'custom';
-			roomSocket.send("join", { roomId: roomCode, gameMode: 'play-page' });
+			roomSocket.send("join", { roomId: roomCode, gameMode: 'classic' });
 			showNotification(`${roomCode} kodlu odaya katılıyorsunuz...`, 'info');
 		});
 
@@ -2021,8 +2055,14 @@ export default class extends AView {
 		}
 	}
 
+    // // Eski listener'ı temizle
+    // const newStartBtn = startBtn.cloneNode(true) as HTMLButtonElement;
+    // startBtn.parentNode?.replaceChild(newStartBtn, startBtn);
+
+
 	private initTournamentListeners(): void {
 		// Tournament Create Event Listener
+		console.log('🔍 Tournament listeners initializing...');
 		document.getElementById('tournament-create-btn')?.addEventListener('click', function() {
 			// Null ve type assertion ile güvenli erişim
 			const tournamentNameElement = document.getElementById('tournament-name') as HTMLInputElement;
@@ -2111,67 +2151,89 @@ export default class extends AView {
 		});
 
 		// Tournament start button
-		document.getElementById('tournament-start-btn')?.addEventListener('click', function() {
-			console.log("TOURNAMENT START!")
-			const startButton = this as HTMLButtonElement;
-			startButton.disabled = true;
-			startButton.innerHTML = '<div class="loading"></div> Başlatılıyor...';
+        document.getElementById('start-tournament-btn')?.addEventListener('click', function() {
+            console.log("TOURNAMENT START BUTTON CLICKED!");
 
-			if (roomSocket && currentRoomId) {
-				roomSocket.send("start", { roomId: currentRoomId });
-				showNotification('🚀 Turnuva başlatılıyor!', 'success');
-			} else {
-				showNotification('Soket bağlantısı hatası!', 'error');
-			}
+            const startButton = this as HTMLButtonElement;
 
-			// Eğer sunucudan yanıt gelmezse butonu 10 saniye sonra tekrar etkinleştir
-			setTimeout(() => {
-				if (startButton.disabled) {
-					startButton.disabled = false;
-					startButton.innerHTML = '🚀 Turnuvayı Başlat';
-				}
-			}, 10000);
-		});
+            // Null kontrolü
+            if (!currentRoomId) {
+                showNotification('Oda ID\'si bulunamadı!', 'error');
+                return;
+            }
+
+            if (!roomSocket) {
+                showNotification('WebSocket bağlantısı yok!', 'error');
+                return;
+            }
+
+            // Butonu devre dışı bırak
+            startButton.disabled = true;
+            startButton.innerHTML = '<div class="loading"></div> Başlatılıyor...';
+
+            // WebSocket mesajı gönder - roomId'yi ekle
+            roomSocket.send("start", {
+                roomId: currentRoomId,
+                gameMode: 'tournament'
+            });
+
+            console.log(`✅ Start message sent for room: ${currentRoomId}`);
+            showNotification('🚀 Turnuva başlatılıyor!', 'success');
+
+            // Timeout - eğer yanıt gelmezse butonu tekrar etkinleştir
+            setTimeout(() => {
+                if (startButton.disabled) {
+                    startButton.disabled = false;
+                    startButton.innerHTML = '🚀 Turnuvayı Başlat';
+                    showNotification('⚠️ Turnuva başlatma zaman aşımına uğradı', 'warning');
+                }
+            }, 10000);
+        });
 
 		// Final Round butonuna event listener ekle
-		const finalRoundBtn1 = document.getElementById('final-round-btn') as HTMLButtonElement | null;
-		if (finalRoundBtn1) {
-			finalRoundBtn1.addEventListener('click', () => {
-				finalRoundBtn1.disabled = true;
-				finalRoundBtn1.innerHTML = '<div class="loading"></div> Starting Final Round...';
+        const finalRoundBtn = document.getElementById('final-round-btn') as HTMLButtonElement | null;
+        if (finalRoundBtn) {
+            finalRoundBtn.addEventListener('click', () => {
+                if (!currentRoomId || !roomSocket) {
+                    showNotification('Bağlantı hatası!', 'error');
+                    return;
+                }
 
-				// Safely access currentRoundNumber
-				const currentRound = tournamentData?.currentRoundNumber ?? 1;
+                finalRoundBtn.disabled = true;
+                finalRoundBtn.innerHTML = '<div class="loading"></div> Başlatılıyor...';
 
-				roomSocket.send("start", {
-					roomId: currentRoomId,
-					round: currentRound + 1,
-					isFinal: true
-				});
+                const currentRound = tournamentData?.currentRoundNumber ?? 1;
 
-				showNotification('🏆 Final round başlatılıyor!', 'success');
+                roomSocket.send("start", {
+                    roomId: currentRoomId,
+                    round: currentRound + 1,
+                    isFinal: true,
+                    gameMode: 'tournament'
+                });
 
-				setTimeout(() => {
-					if (finalRoundBtn1.disabled) {
-						finalRoundBtn1.disabled = false;
-						finalRoundBtn1.innerHTML = '🏆 Start Final Round';
-					}
-				}, 10000);
-			});
-		}
+                console.log(`✅ Final round start message sent`);
+                showNotification('🏆 Final round başlatılıyor!', 'success');
+
+                setTimeout(() => {
+                    if (finalRoundBtn.disabled) {
+                        finalRoundBtn.disabled = false;
+                        finalRoundBtn.innerHTML = '🏆 Final Turunu Başlat';
+                    }
+                }, 10000);
+            });
+        }
 
 		// Kişileri eşleştir butonu
-		document.getElementById('match-players-btn')?.addEventListener('click', function() {
-			if (!currentRoomId) return;
+        document.getElementById('match-players-btn')?.addEventListener('click', function() {
+            if (!currentRoomId || !roomSocket) {
+                showNotification('Bağlantı hatası!', 'error');
+                return;
+            }
 
-			// Güvenli socket gönderimi
-			if (roomSocket) {
-				roomSocket.send("matchTournament", { roomId: currentRoomId });
-				showNotification('Eşleştirmeler yapılıyor...', 'info');
-			} else {
-				showNotification('Soket bağlantısı hatası!', 'error');
-			}
-		});
+            console.log(`🎲 Matching players for room: ${currentRoomId}`);
+            roomSocket.send("matchTournament", { roomId: currentRoomId });
+            showNotification('Eşleştirmeler yapılıyor...', 'info');
+        });
 
 		// Tournament Size - Custom Option
 		document.querySelectorAll('input[name="tournament-size"]').forEach((radio: Element) => {

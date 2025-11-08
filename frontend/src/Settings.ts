@@ -3,6 +3,7 @@ import { getAuthToken, getAuthHeaders } from './utils/auth.js';
 import { API_BASE_URL, navigateTo } from './index.js';
 import { showNotification } from "./notification.js";
 
+let currentUserName = null;
 
 async function deleteAccount(e) {
 	e.preventDefault();
@@ -73,7 +74,7 @@ async function sendDNameChangeReq(e) {
 				'Content-Type': 'application/json',
 				...getAuthHeaders()
 			},
-			body: JSON.stringify({userName: "bkorkut", ...inputs})
+			body: JSON.stringify({userName: currentUserName, ...inputs})
 		});
 		if (getProfileDatas.ok) {
 			console.log(await getProfileDatas.json());

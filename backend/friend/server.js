@@ -9,11 +9,14 @@ const fastify = Fastify({
     logger: true
 })
 
+const presence = new Map()
+fastify.decorate('presence', presence)
+
 await fastify.register(dbPlugin)
 await fastify.register(fastifyWebsocket)
 await fastify.register(friendRoutes)
-await fastify.register(friendchange)
 await fastify.register(friendListRoutes)
+await fastify.register(friendchange)
 await fastify.ready()
 
 fastify.listen({ port: 3007, host: '0.0.0.0' })

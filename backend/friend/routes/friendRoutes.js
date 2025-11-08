@@ -1,5 +1,5 @@
 export default async function friendRoutes(fastify) {
-	const presence = new Map()
+	const presence = fastify.presence
 	setInterval(() => {
 		console.log('presence map:', Array.from(presence.keys()))
 	}, 1000);
@@ -80,6 +80,4 @@ export default async function friendRoutes(fastify) {
 		socket.on('close', () => cleanup('closed'))
 		socket.on('error', (err) => cleanup(err))
 	})
-
-	fastify.decorate('presence', presence)
 }
