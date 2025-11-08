@@ -1,12 +1,22 @@
 import AView from "./AView.js";
 import Profile from "./Profile.js";
-import { API_BASE_URL } from "./index.js";
 import { showNotification } from "./notification.js";
 
 let friendSocket = null;
 
-export function connectWebSocket() {
+function safeSend(msg:string)
+{
+	try {
+		if (friendSocket && friendSocket.readyState === WebSocket.OPEN)
+			return friendSocket.send(msg);
+		else if (friendSocket && friendSocket.readyState === WebSocket.CONNECTING)
+			friendSocket.addEventListener('open', () => friendSocket.send(msg), { once: true });
+	} catch (e) {
+		console.error("safeSend failed:", e);
+	}
+}
 
+export function connectWebSocket() {
 	if (friendSocket !== null)
 		return;
 	friendSocket = new WebSocket(`wss://${window.location.hostname}:3030/ws-friend/friends?` + new URLSearchParams({ userName: localStorage.getItem("userName") }).toString());
@@ -111,7 +121,7 @@ class UserLists {
 		this.inviteCont = document.getElementById("invites");
 		document.querySelector(".search-bar form")?.addEventListener("submit", this.request);
 		try {
-			friendSocket.send(JSON.stringify({ type: "list", payload: {} }));
+			safeSend(JSON.stringify({ type: "list", payload: {} }));
 			console.log("List request sent");
 		} catch (error) {
 			console.error("FRIEND LIST FETCH FAILED", error);
@@ -123,7 +133,7 @@ class UserLists {
 
 		const formData = new FormData(e.currentTarget as HTMLFormElement);
 		try {
-			friendSocket.send(JSON.stringify({ type: "send", payload: { peerName: formData.get("req-user") } }));
+			safeSend(JSON.stringify({ type: "send", payload: { peerName: formData.get("req-user") } }));
 			console.log("Friend request sent to:", formData.get("req-user"));
 		} catch (error) {
 			showNotification("System error, please try again later.", "error");
@@ -136,7 +146,7 @@ class UserLists {
 
 		const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
 		try {
-			friendSocket.send(JSON.stringify({ type: "remove", payload: { peerName: uname } }));
+			safeSend(JSON.stringify({ type: "remove", payload: { peerName: uname } }));
 			console.log("Unfriend request sent to:", uname);
 		} catch {
 			showNotification("System error, please try again later.", "error");
@@ -147,14 +157,14 @@ class UserLists {
 	async undo(e) {
 		console.info("UNDO CLICKED");
 
-		// const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
-		// try {
-		// 	friendSocket.send(JSON.stringify({ type: "accept", payload: { peerName: uname } }));
-		// 	console.log("Accept request sent to:", uname);
-		// } catch {
-		// 	showNotification("System error, please try again later.", "error");
-		// 	console.log("Failed to send accept request");
-		// }
+		const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
+		try {
+			safeSend(JSON.stringify({ type: "reject", payload: { peerName: uname } }));
+			console.log("Reject request sent to:", uname);
+		} catch {
+			showNotification("System error, please try again later.", "error");
+			console.log("Failed to send reject request");
+		}
 	}
 
 	async accept(e) {
@@ -162,7 +172,7 @@ class UserLists {
 
 		const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
 		try {
-			friendSocket.send(JSON.stringify({ type: "accept", payload: { peerName: uname } }));
+			safeSend(JSON.stringify({ type: "accept", payload: { peerName: uname } }));
 			console.log("Accept request sent to:", uname);
 		} catch {
 			showNotification("System error, please try again later.", "error");
@@ -175,7 +185,7 @@ class UserLists {
 
 		const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
 		try {
-			friendSocket.send(JSON.stringify({ type: "reject", payload: { peerName: uname } }));
+			safeSend(JSON.stringify({ type: "reject", payload: { peerName: uname } }));
 			console.log("Decline request sent to:", uname);
 		} catch {
 			showNotification("System error, please try again later.", "error");
@@ -296,7 +306,7 @@ class UserLists {
 }
 
 export default class extends AView {
-	private userManager = new UserLists();
+	public userManager = new UserLists();
 
 	constructor() {
 		super();

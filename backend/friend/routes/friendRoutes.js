@@ -1,8 +1,5 @@
 export default async function friendRoutes(fastify) {
 	const presence = fastify.presence
-	setInterval(() => {
-		console.log('presence map:', Array.from(presence.keys()))
-	}, 1000);
 
 	fastify.get("/ws-friend/friends", { websocket: true }, async (socket, req) => {
 		// cookie'den gelicek

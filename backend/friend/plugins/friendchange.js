@@ -33,16 +33,25 @@ export default fp(async function friendChanges(fastify) {
 				return acc
 			}, [[], [], []])
 			const allFriendNames = [...incomingPending, ...outgoingPending, ...accepted]
+			if (allFriendNames.length === 0) {
+				return {
+					pendingFriends: {
+						incoming: [],
+						outgoing: []
+					},
+					acceptedFriends: []
+				}
+			}
 			const friendsProfiles = await fetch("http://profile:3006/internal/friend", {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ friends: allFriendNames })
 			})
 			if (!friendsProfiles.ok) {
+				console.error("Error response from profile service:", friendsProfiles.status, await friendsProfiles.text());
 				throw new Error(`Failed to fetch friend profiles: ${friendsProfiles.status} ${await friendsProfiles.text()}`)
 			}
 			const { users } =  await friendsProfiles.json()
-
 			const [incomingProfiles, outgoingProfiles, acceptedProfiles] = users.reduce((acc, profile) => {
 				const baseProfile = {
 					isOnline: fastify.presence.has(profile.userName),
