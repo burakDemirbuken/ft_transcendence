@@ -4,11 +4,12 @@ import fp from 'fastify-plugin'
 export default fp(async function friendChanges(fastify) {
 
 	async function getFriendList(userName) {
-
+		console.log("1111 getFriendList called for:", userName)
 		try {
 			if (!userName) {
 				throw new Error("userName is required.")
 			}
+			console.log("2222 getFriendList proceeding for:", userName)
 			const friendships = await fastify.sequelize.models.Friend.findAll({
 				where: {
 					[Op.or]: [
@@ -19,7 +20,7 @@ export default fp(async function friendChanges(fastify) {
 				attributes: ['userName', 'peerName', 'status'],
 				raw: true
 			})
-
+			console.log("3333 friendships retrieved:", friendships)
 			const [incomingPending, outgoingPending, accepted] = friendships.reduce((acc, friendship) => {
 				const isUserInitiator = friendship.userName === userName
 				if (friendship.status === 'pending') {
@@ -34,27 +35,27 @@ export default fp(async function friendChanges(fastify) {
 				}
 				return acc
 			}, [[], [], []])
-
+			console.log("4444 Friend categories:", { incomingPending, outgoingPending, accepted })
 			const allFriendNames = [...incomingPending, ...outgoingPending, ...accepted]
-
+			console.log("5555 All friend names to fetch profiles for:", allFriendNames)
 			const friendsProfiles = await fetch("http://profile:3006/internal/friend", {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ friends: allFriendNames })
 			})
-
 			if (!friendsProfiles.ok) {
 				throw new Error(`Failed to fetch friend profiles: ${friendsProfiles.status} ${await friendsProfiles.text()}`)
 			}
-
 			const { users } =  await friendsProfiles.json()
 
+			console.log("6666 Retrieved friend profiles:", users)
 			const [incomingProfiles, outgoingProfiles, acceptedProfiles] = users.reduce((acc, profile) => {
+				console.log(`Reducing profile for ${profile.userName}:`, profile)
 				const baseProfile = {
 					isOnline: fastify.presence.has(profile.userName),
 					...profile
 				}
-
+				console.log(`Processing profile for ${profile.userName}:`, baseProfile)
 				if (incomingPending.includes(profile.userName)) {
 					acc[0].push(baseProfile)
 				} else if (outgoingPending.includes(profile.userName)) {
@@ -65,7 +66,7 @@ export default fp(async function friendChanges(fastify) {
 
 				return acc
 			}, [[], [], []])
-
+			console.log("7777 Categorized friend profiles:", { incomingProfiles, outgoingProfiles, acceptedProfiles })
 			return ({
 				pendingFriends: {
 					incoming: incomingProfiles,
@@ -85,11 +86,9 @@ export default fp(async function friendChanges(fastify) {
 			if (!userName || !peerName) {
 				throw new Error("userName and peerName are required.")
 			}
-
 			if (userName === peerName) {
 				return { user: "Can not send friend request to yourself.", peer: null }
 			}
-
 			const existingFriendship = await fastify.sequelize.models.Friend.findOne({
 				where: {
 					[Op.or]: [
@@ -98,7 +97,6 @@ export default fp(async function friendChanges(fastify) {
 					]
 				}
 			}) || null
-
 			if (existingFriendship) {
 				if (existingFriendship.status === 'pending') {
 					return { user: "Friend request already pending.", peer: null }
@@ -106,7 +104,6 @@ export default fp(async function friendChanges(fastify) {
 					return { user: "Already friends.", peer: null }
 				}
 			}
-
 			await fastify.sequelize.models.Friend.create({ userName, peerName, status: 'pending' })
 			return { user: "Friend request sent.", peer: `${userName} has sent you a friend request.` }
 		} catch (error) {

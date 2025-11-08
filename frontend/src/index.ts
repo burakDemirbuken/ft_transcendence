@@ -3,6 +3,7 @@ import Profile from "../dist/Profile.js";
 import { updateChartLanguage } from "./Profile.js";
 import Play from "../dist/Play.js";
 import Friends from "../dist/Friends.js";
+import { connectWebSocket } from "../dist/Friends.js"
 import Settings from "../dist/Settings.js";
 import Login from "../dist/Login.js";
 import I18n from './I18n.js';
@@ -12,7 +13,6 @@ import { showNotification } from './notification.js';
 
 // Dynamic API base URL based on current hostname
 export const API_BASE_URL = `https://${window.location.hostname}:3030/api`;
-
 
 const pageState = {
 	current: "login", // default
@@ -36,10 +36,8 @@ const router = async function(page:string, logout: boolean = false) {
 	if (!hasToken) {
 		console.log('User is not authenticated');
 		document.querySelector("#navbar")?.classList.add("logout");
-	}
-	else // Betül ile danışılacak
-	{
-		// friend websocket bağlantısı
+	} else {
+		connectWebSocket();
 	}
 
 	if (page === "profile" || page === "settings" || page === "friends" || page === "play") {
