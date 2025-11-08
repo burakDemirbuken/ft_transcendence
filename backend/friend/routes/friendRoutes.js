@@ -1,37 +1,39 @@
 export default async function friendRoutes(fastify) {
 	const presence = new Map()
+	setInterval(() => {
+		console.log('presence map:', Array.from(presence.keys()))
+	}, 1000);
 
 	fastify.get("/ws-friend/friends", { websocket: true }, async (socket, req) => {
 		// cookie'den gelicek
 		// url: ws://.../ws-friend/friends?userName=...
 		const { userName } = req.query
-		console.log('New presence connection:', userName)
 
 		if (!userName) {
 			socket.close(1008, "Missing parameter: userName")
 			return
 		}
+		console.log('New presence connection:', userName)
 
 		const state = { lastseen: Date.now(), socket: socket }
 		presence.set(userName, state)
 		// { type: "send" | "accept" | "remove" | "reject" | "list", payload: { peerName: string } }
 		socket.on('message', async (message) => {
 			const { type, payload } = JSON.parse(message)
-			const { peerName } = payload.peerName || {}
-			const result = {}
-
+			const peerName = payload?.peerName
+			let result = {}
 			switch (type) {
 				case "send":
-					result = fastify.postSend(userName, peerName)
+					result = await fastify.postSend(userName, peerName)
 					break
 				case "accept":
-					result = fastify.postAccept(userName, peerName)
+					result = await fastify.postAccept(userName, peerName)
 					break
 				case "remove":
-					result = fastify.postRemove(userName, peerName)
+					result = await fastify.postRemove(userName, peerName)
 					break
 				case "reject":
-					result = fastify.postReject(userName, peerName)
+					result = await fastify.postReject(userName, peerName)
 					break
 				case "list":
 					const userResult = await fastify.getFriendList(userName)

@@ -2,8 +2,8 @@ import Fastify from 'fastify'
 import dbPlugin from './plugins/db.js'
 import fastifyWebsocket from '@fastify/websocket'
 import friendchange from './plugins/friendchange.js'
-import friendListRoutes from './friendlist.js'
-import friendRoutes from './friendRoutes.js'
+import friendListRoutes from './routes/friendlist.js'
+import friendRoutes from './routes/friendRoutes.js'
 
 const fastify = Fastify({
     logger: true
@@ -11,8 +11,8 @@ const fastify = Fastify({
 
 await fastify.register(dbPlugin)
 await fastify.register(fastifyWebsocket)
-await fastify.register(friendchange)
 await fastify.register(friendRoutes)
+await fastify.register(friendchange)
 await fastify.register(friendListRoutes)
 await fastify.ready()
 

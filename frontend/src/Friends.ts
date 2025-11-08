@@ -4,13 +4,12 @@ import { API_BASE_URL } from "./index.js";
 import { showNotification } from "./notification.js";
 
 let friendSocket = null;
-
-
+const WS_BASE_URL = `wss://${window.location.hostname}:3030/ws-friend/friends?userName=${localStorage.getItem("userName")}`
 export function connectWebSocket() {
 
 	if (friendSocket !== null)
 		return;
-	friendSocket = new WebSocket(`wss://${window.location.hostname}:3007/ws-friend/friends?` + new URLSearchParams({ userName: localStorage.getItem("userName") }).toString());
+	friendSocket = new WebSocket(`wss://${window.location.hostname}:3030/ws-friend/friends?` + new URLSearchParams({ userName: localStorage.getItem("userName") }).toString());
 
 	friendSocket.onmessage = (event) => {
 		const data = JSON.parse(event.data);
@@ -18,10 +17,10 @@ export function connectWebSocket() {
 		switch (type)
 		{
 			case "list":
-
+				console.warn("LIST RESPONSE: ", payload);
 				break;
 			case "response":
-
+				console.warn("NORMAL RESPONSE: ", payload);
 				break;
 			default:
 				break;
@@ -105,31 +104,15 @@ class UserLists {
 	private currentFriends: Map<string, HTMLElement> = new Map();
 	private currentRequests: Map<string, HTMLElement> = new Map();
 	private currentInvites: Map<string, HTMLElement> = new Map();
-	private userName: string;
-
-	constructor(userName: string) {
-		this.userName = userName;
-	}
 
 	async init() {
 		this.friendCont = document.getElementById("friends");
-		this.requestCont = document.getElementById("requests").querySelector(".user-grid");
+		this.requestCont = document.getElementById("requests")?.querySelector(".user-grid");
 		this.inviteCont = document.getElementById("invites");
-		document.getElementById("add-friend")?.addEventListener("click", this.request);
+		document.querySelector(".search-bar form")?.addEventListener("submit", this.request);
 		try {
-			const lists = await fetch(`${API_BASE_URL}/friend/list?userName=${this.userName}`, {
-				// const lists = await fetch(`../../mockdata/friendslists.json`, {
-					method: "GET",
-					credentials: "include",
-				});
-			console.info("url:", lists.url);
-
-			if (lists.ok) {
-				const json = await lists.json();
-				console.info("FRIENDS PAGE: FETCHED LISTS", json);
-				this.update(json);
-				this.update(json); // JUST TO SEE THE DOM / LISTS ACTUALLY FULL
-			}
+			friendSocket.send(JSON.stringify({ type: "list", payload: {} }));
+			console.log("List request sent");
 		} catch (error) {
 			console.error("FRIEND LIST FETCH FAILED", error);
 		}
@@ -137,28 +120,14 @@ class UserLists {
 
 	async request(e) {
 		e.preventDefault();
-		console.log("SEND FRIEND REQUEST!!!");
-		try {
-			const res = await fetch(`${API_BASE_URL}/friend/send`, {
-				method: "POST",
-				credentials: "include",
-				headers: {
-					"Content-Type": "application/json"
-				},
-				body: JSON.stringify({
-					"userName": "bkorkut",
-					"peerName": "test0"
-				})
-			});
 
-			if (res.ok) {
-				// update request list
-				showNotification("Friend rquest sent successfully!", "success");
-			} else
-				showNotification("Friend rquest failed", "error");
-		} catch {
-			showNotification("Friend rquest failed (system)", "error");
-			console.log("Failed to send frequest");
+		const formData = new FormData(e.currentTarget as HTMLFormElement);
+		try {
+			friendSocket.send(JSON.stringify({ type: "list", payload: { } }));
+			console.log("Friend request sent to:", formData.get("req-user"));
+		} catch (error) {
+			showNotification("System error, please try again later.", "error");
+			console.log("Failed to send friend request", error);
 		}
 	}
 
@@ -166,53 +135,52 @@ class UserLists {
 		console.info("UNFRIEND CLICKED");
 
 		const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
-
 		try {
-			const res = await fetch(`${API_BASE_URL}/friend/remove?userName=${this.userName}&peerName=${uname}`, {
-				method: "POST",
-				credentials: "include",
-			});
-
-			if (res.ok) {
-				showNotification(`You have unfriended @${uname}.`);
-			} else {
-				showNotification(`Could not unfriend @${uname}. Please try again later.`);
-			}
+			friendSocket.send(JSON.stringify({ type: "remove", payload: { peerName: uname } }));
+			console.log("Unfriend request sent to:", uname);
 		} catch {
-			showNotification("Friend rquest failed (system)", "error");
-			console.log("Failed to send frequest");
+			showNotification("System error, please try again later.", "error");
+			console.log("Failed to send unfriend request");
 		}
 	}
 
 	async undo(e) {
 		console.info("UNDO CLICKED");
+
+		// const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
+		// try {
+		// 	friendSocket.send(JSON.stringify({ type: "accept", payload: { peerName: uname } }));
+		// 	console.log("Accept request sent to:", uname);
+		// } catch {
+		// 	showNotification("System error, please try again later.", "error");
+		// 	console.log("Failed to send accept request");
+		// }
 	}
 
 	async accept(e) {
 		console.info("ACCEPT CLICKED");
 
 		const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
-		console.log("Accepting friend requesst from:", uname);
-
 		try {
-			const res = await fetch(`${API_BASE_URL}/friend/accept?userName=${this.userName}&peerName=${uname}`, {
-				method: "POST",
-				credentials: "include",
-			});
-
-			if (res.ok) {
-				showNotification(`You have unfriended @${uname}.`);
-			} else {
-				showNotification(`Could not unfriend @${uname}. Please try again later.`);
-			}
+			friendSocket.send(JSON.stringify({ type: "accept", payload: { peerName: uname } }));
+			console.log("Accept request sent to:", uname);
 		} catch {
-			showNotification("Friend rquest failed (system)", "error");
-			console.log("Failed to send frequest");
+			showNotification("System error, please try again later.", "error");
+			console.log("Failed to send accept request");
 		}
 	}
 
 	async decline(e) {
 		console.info("DECLINE CLICKED");
+
+		const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
+		try {
+			friendSocket.send(JSON.stringify({ type: "reject", payload: { peerName: uname } }));
+			console.log("Decline request sent to:", uname);
+		} catch {
+			showNotification("System error, please try again later.", "error");
+			console.log("Failed to send decline request");
+		}
 	}
 
 	private removeUsers(set:Set<string>, type: "friend" | "request" | "invite") {
@@ -231,7 +199,7 @@ class UserLists {
 		});
 	}
 
-		private createUser(user: any, type: "friend" | "request" | "invite"): HTMLElement {
+	private createUser(user: any, type: "friend" | "request" | "invite"): HTMLElement {
 		const div = document.createElement("div");
 
 		const config = {
