@@ -4,7 +4,7 @@ import { API_BASE_URL } from "./index.js";
 import { showNotification } from "./notification.js";
 
 let friendSocket = null;
-const WS_BASE_URL = `wss://${window.location.hostname}:3030/ws-friend/friends?userName=${localStorage.getItem("userName")}`
+
 export function connectWebSocket() {
 
 	if (friendSocket !== null)
@@ -296,7 +296,7 @@ class UserLists {
 }
 
 export default class extends AView {
-	private userManager = new UserLists("test0");
+	private userManager = new UserLists();
 
 	constructor() {
 		super();

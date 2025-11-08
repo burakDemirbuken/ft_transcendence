@@ -288,6 +288,11 @@ export default class extends AView {
 		currentStep = "welcome";
 		document.addEventListener("click", move);
 		document.addEventListener("input", growInput);
+		document.addEventListener("keydown", (e) => {
+			if (e.key === "Enter") {
+				enter();
+			}
+		});
 	}
 
 	async unsetEventHandlers() {
