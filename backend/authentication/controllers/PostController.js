@@ -19,24 +19,57 @@ async function register(request, reply)
             password,
             is_active: false
         });
-        const verificationToken = utils.storeVerificationToken(email, 'email_verification');
-        try
-        {
-            await utils.sendVerificationEmail(email, username, verificationToken);
-
+        // Test email'leri için email doğrulama atla
+        const isTestEmail = email.endsWith('@test.com');
+        
+        if (isTestEmail) {
+            // Test kullanıcısı - direkt aktif yap
+            newUser.is_active = true;
+            await newUser.save();
+            
+            // Profile servisi çağır
+            try {
+                await fetch('http://profile:3006/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userName: newUser.username,
+                    })
+                });
+            } catch (profileError) {
+                console.log('Profile service error:', profileError);
+            }
+            
             return (reply.status(201).send({
                 success: true,
-                message: trlt.register.success,
+                message: 'Test user created successfully - ready to login',
                 user: newUser.toSafeObject(),
-                next_step: 'email_verification'
+                next_step: 'ready_to_login'
             }));
         }
-        catch (emailError)
-        {
-            await User.destroy({ where: { id: newUser.id } });
-            utils.tempStorage.delete(email);
-            return (reply.status(400).send({ success: false, error: trlt.register.fail }));
-        }
+        
+        // Normal kullanıcı - email doğrulama gerekli
+        const verificationToken = utils.storeVerificationToken(email, 'email_verification');
+        
+        // Email gönderimini background'da yap - response'u bloklama
+        utils.sendVerificationEmail(email, username, verificationToken)
+            .then(() => {
+                console.log(`✅ Verification email sent to: ${email}`);
+            })
+            .catch((emailError) => {
+                console.log(`❌ Failed to send verification email to ${email}:`, emailError);
+                // Email gönderilemezse user'ı sil
+                User.destroy({ where: { id: newUser.id } }).catch(console.error);
+                utils.tempStorage.delete(email);
+            });
+
+        // Hemen response dön - email gönderimini bekleme
+        return (reply.status(201).send({
+            success: true,
+            message: trlt.register.success,
+            user: newUser.toSafeObject(),
+            next_step: 'email_verification'
+        }));
     } catch (error)
     {
         console.log('Register error:', error);
@@ -65,14 +98,36 @@ async function login(request, reply) {
             return (reply.status(401).send({ success: false, error: trlt.login.invalid }));
         if (!user.is_active)
             return (reply.status(403).send({ success: false, error: trlt.login.notverified }));
-        const twoFACode = utils.storeVerificationCode(user.email, '2fa');
+        
+        // 2FA kodu oluştur (hem normal hem test kullanıcı için)
+        const isTestUser = user.email.endsWith('@test.com');
+        const twoFACode = isTestUser ? '415200' : utils.storeVerificationCode(user.email, '2fa');
         const userIP = request.headers['x-forwarded-for'] || request.headers['x-real-ip'] || request.socket.remoteAddress || 'Unknown';
-        try {
-            await utils.send2FAEmail(user.email, user.username, twoFACode, userIP);
-        } catch (emailError) {
-            console.log('2FA email error:', emailError);
+        
+        // Test kullanıcıları için email gönderme - asenkron
+        if (!isTestUser) {
+            utils.send2FAEmail(user.email, user.username, twoFACode, userIP)
+                .then(() => {
+                    console.log(`✅ 2FA email sent to: ${user.email}`);
+                })
+                .catch((emailError) => {
+                    console.log(`❌ Failed to send 2FA email to ${user.email}:`, emailError);
+                });
         }
-        return (reply.send({ success: true, message: trlt.login.verify, next_step: '2fa_verification', email: user.email }));
+        
+        // Test kullanıcıları için store et
+        if (isTestUser) {
+            const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 dakika
+            utils.tempStorage.set(user.email, {
+                code: twoFACode,
+                expires,
+                type: '2fa'
+            });
+        }
+        const message = isTestUser ? 
+            `${trlt.login.verify} (Test code: 415200)` : 
+            trlt.login.verify;
+        return (reply.send({ success: true, message, next_step: '2fa_verification', email: user.email }));
     } catch (error) {
         console.log('Login error:', error);
         return (reply.status(500).send({ success: false, error: trlt.login.system }));
@@ -167,15 +222,24 @@ async function verify2FA(request, reply) {
         const user = await User.findByEmail(login) || await User.findByUsername(login);
         if (!user)
             return (reply.status(404).send({ success: false, error: trlt.unotFound }));
-        const storedData = utils.tempStorage.get(user.email);
-        if (!storedData || storedData.type !== '2fa')
-            return (reply.status(400).send({ success: false, error: trlt.verify2FA.expired }));
-        if (storedData.expires < new Date()) {
-            utils.tempStorage.delete(user.email);
-            return (reply.status(400).send({ success: false, error: trlt.verify2FA.expired }));
+        // Test kullanıcıları için özel kod kontrolü
+        const isTestUser = user.email.endsWith('@test.com');
+        
+        if (isTestUser && code === '415200') {
+            // Test kullanıcısı ve özel kod - direkt geç
+            console.log(`Test user ${user.username} using special code 4152`);
+        } else {
+            // Normal kullanıcı - normal kod kontrolü
+            const storedData = utils.tempStorage.get(user.email);
+            if (!storedData || storedData.type !== '2fa')
+                return (reply.status(400).send({ success: false, error: trlt.verify2FA.expired }));
+            if (storedData.expires < new Date()) {
+                utils.tempStorage.delete(user.email);
+                return (reply.status(400).send({ success: false, error: trlt.verify2FA.expired }));
+            }
+            if (storedData.code !== code)
+                return (reply.status(400).send({ success: false, error: trlt.verify2FA.invalid }));
         }
-        if (storedData.code !== code)
-            return (reply.status(400).send({ success: false, error: trlt.verify2FA.invalid }));
         await user.markLogin();
 
         console.log("Creating JWT token for user:", {
@@ -213,12 +277,32 @@ async function verify2FA(request, reply) {
         reply.setCookie('authStatus', 'authenticated', {
             httpOnly: false, secure: true, sameSite: 'Lax', path: '/', maxAge: 24 * 60 * 60 * 1000
         });
+        // Profile servisi çağrısı - ilk login'de profil oluştur
+        try {
+            await fetch('http://profile:3006/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userName: user.username,
+                })
+            });
+            console.log(`Profile created for user: ${user.username}`);
+        } catch (profileError) {
+            console.log('Profile service error during 2FA verification:', profileError);
+        }
+        
         utils.tempStorage.delete(user.email);
         const userIP = request.headers['x-forwarded-for'] || request.headers['x-real-ip'] || request.socket.remoteAddress || 'Unknown';
-        try {
-            await utils.sendLoginNotification(user.email, user.username, userIP);
-        } catch (emailError) {
-            console.log('Login notification error:', emailError);
+        
+        // Test kullanıcıları için login notification gönderme - asenkron
+        if (!isTestUser) {
+            utils.sendLoginNotification(user.email, user.username, userIP)
+                .then(() => {
+                    console.log(`✅ Login notification sent to: ${user.email}`);
+                })
+                .catch((emailError) => {
+                    console.log(`❌ Failed to send login notification to ${user.email}:`, emailError);
+                });
         }
         reply.send({
             success: true,
