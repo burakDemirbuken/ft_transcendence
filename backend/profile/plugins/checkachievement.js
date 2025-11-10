@@ -1,5 +1,5 @@
 import fp from 'fastify-plugin'
-import { getUserMatchHistory } from '../routes/gamedata.js'
+import { getUserMatchHistory, getLastSevenDaysMatches } from '../routes/gamedata.js'
 
 export default fp(async (fastify) => {
 	async function checkAchievements(userId, t) {
@@ -196,6 +196,14 @@ export default fp(async (fastify) => {
 			throw new Error(matchData.error)
 		}
 
+		let lastSevenDaysData = { matchesByDay: {}, totalMatchesLastSevenDays: 0 }
+
+		try {
+			lastSevenDaysData = await getLastSevenDaysMatches(fastify, userProfile.userName)
+		} catch (error) {
+			fastify.log.warn('Error getting last seven days matches:', error.message)
+		}
+
 		const totalDurationSeconds = matchData.totalDuration
 
 		return ({
@@ -207,7 +215,9 @@ export default fp(async (fastify) => {
 			speed: (stats.gamesPlayed > 0 && totalDurationSeconds > 0) ? (stats.ballHitCount / (totalDurationSeconds)) * 100 : 0,
 			endurance: (stats.gamesPlayed > 0 && totalDurationSeconds > 0) ? (totalDurationSeconds / (totalDurationSeconds + stats.gamesPlayed)) * 100 : 0,
 			defence: (stats.ballHitCount > 0 && stats.gamesLost > 0) ? (stats.ballHitCount / (stats.ballHitCount + stats.gamesLost + 1)) * 100 : 0,
-			accuracy: (stats.ballHitCount > 0 && stats.ballMissCount > 0) ? (stats.ballHitCount / (stats.ballHitCount + stats.ballMissCount)) * 100 : 0
+			accuracy: (stats.ballHitCount > 0 && stats.ballMissCount > 0) ? (stats.ballHitCount / (stats.ballHitCount + stats.ballMissCount)) * 100 : 0,
+			lastSevenDaysMatches: lastSevenDaysData.matchesByDay,
+			totalMatchesLastSevenDays: lastSevenDaysData.totalMatchesLastSevenDays
 		})
 	}
 

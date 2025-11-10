@@ -1214,6 +1214,30 @@ async function setTextStats(user: any) {
 }
 
 async function setChartStats(user: any) {
+	// Haftalık performans verilerini al
+	if (user?.stats?.lastSevenDaysMatches) {
+		const matchesByDay = user.stats.lastSevenDaysMatches;
+
+		// Son 7 günü sırayla al (bugünden 6 gün geriye)
+		const labels: string[] = [];
+		const data: number[] = [];
+		const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+
+		for (let i = 6; i >= 0; i--) {
+			const date = new Date();
+			date.setDate(date.getDate() - i);
+			const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD formatında
+			const dayIndex = date.getDay(); // 0 = Pazar, 1 = Pazartesi, vb.
+
+			// Pazartesi = 1, Pazar = 0 olduğu için düzelt
+			const adjustedDayIndex = dayIndex === 0 ? 6 : dayIndex - 1;
+			labels.push(dayNames[adjustedDayIndex]);
+			data.push(matchesByDay[dateKey] || 0);
+		}
+
+		// Grafiği güncelle
+		profileManager.updatePerformanceData(data, labels);
+	}
 }
 
 async function setAchievementStats(user: any) {
@@ -1231,62 +1255,67 @@ async function setAchievementStats(user: any) {
 	});
 }
 
-async function onLoad()
-{
+async function onLoad() {
 	const hasToken = getAuthToken();
 
 	if (!hasToken) {
+		console.warn("⚠️ No auth token found, redirecting to login");
 		return window.location.replace('/login');
 	}
-	try
-	{
-		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/me`,
-		{
+
+	try {
+		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/me`, {
 			credentials: 'include',
-			headers:
-			{
+			headers: {
 				'Content-Type': 'application/json',
 				...getAuthHeaders()
 			}
 		});
 
-		if (getProfileDatas.ok)
-		{
+		if (getProfileDatas.ok) {
 			const authData = await getProfileDatas.json();
 			const userData = authData.user;
 			const currentUserName = userData.username;
 
-			const ProfileUsername = await fetch(`${API_BASE_URL}/profile/profile?userName=${currentUserName}`,
-			{
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-					...getAuthHeaders()
+			const ProfileUsername = await fetch(
+				`${API_BASE_URL}/profile/profile?userName=${currentUserName}`,
+				{
+					credentials: 'include',
+					headers: {
+						'Content-Type': 'application/json',
+						...getAuthHeaders()
+					}
 				}
-			});
+			);
 
-			if (ProfileUsername.ok)
-			{
+			if (ProfileUsername.ok) {
 				const user = await ProfileUsername.json();
-				console.log("All data:", user);
+				console.log("✅ All data:", user);
+
 				setTextStats(user);
-				setChartStats(user);
+				await setChartStats(user);
 				setAchievementStats(user);
 				await populateMatchHistory(currentUserName);
+
 				setTimeout(() => {
 					profileManager.animateLevelProgress();
 				}, 100);
-			}
-			else
+			} else {
 				console.error("❌ Failed to fetch profile data:", ProfileUsername.statusText);
-		}
-		else
-		{
+				if (ProfileUsername.status === 401) {
+					window.location.replace('/login');
+				}
+			}
+		} else {
+			console.error("❌ Auth failed:", getProfileDatas.status, getProfileDatas.statusText);
+
 			if (getProfileDatas.status === 401) {
-			   // window.location.replace('/login');
+				console.warn("⚠️ Token expired or invalid, redirecting to login");
+				window.location.replace('/login');
 			}
 		}
 	} catch (error) {
-		// window.location.replace('/login');
+		console.error("❌ Error in onLoad:", error);
+		window.location.replace('/login');
 	}
 }

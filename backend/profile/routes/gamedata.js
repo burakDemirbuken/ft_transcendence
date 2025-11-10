@@ -111,6 +111,88 @@ export async function getUserMatchHistory(fastify, userName) {
 	}
 }
 
+export async function getLastSevenDaysMatches(fastify, userName) {
+	const { Profile, MatchHistory } = fastify.sequelize.models
+
+	try {
+		if (!userName) {
+			throw new Error("userName is required.")
+		}
+
+		const userProfile = await Profile.findOne({
+			where: { userName: userName },
+			attributes: ['id']
+		})
+
+		if (!userProfile) {
+			return { error: 'User profile not found', code: 404 }
+		}
+
+		// Son 7 günü hesapla
+		const sevenDaysAgo = new Date()
+		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+		sevenDaysAgo.setHours(0, 0, 0, 0)
+
+		const matchHistory = await MatchHistory.findAll({
+			include: [
+				{
+					model: fastify.sequelize.models.Team,
+					as: 'teamOne',
+					required: false,
+					attributes: ['playerOneId', 'playerTwoId']
+				},
+				{
+					model: fastify.sequelize.models.Team,
+					as: 'teamTwo',
+					required: false,
+					attributes: ['playerOneId', 'playerTwoId']
+				}
+			],
+			where: {
+				matchStartDate: {
+					[Op.gte]: sevenDaysAgo
+				},
+				[Op.or]: [
+					{ '$teamOne.playerOneId$': userProfile.id },
+					{ '$teamOne.playerTwoId$': userProfile.id },
+					{ '$teamTwo.playerOneId$': userProfile.id },
+					{ '$teamTwo.playerTwoId$': userProfile.id },
+				]
+			},
+			attributes: ['matchStartDate']
+		})
+
+		// Günlere göre grupla
+		const matchesByDay = {}
+
+		// Son 7 günü önceden oluştur (0 ile başlat)
+		for (let i = 6; i >= 0; i--) {
+			const date = new Date()
+			date.setDate(date.getDate() - i)
+			const dateKey = date.toISOString().split('T')[0]
+			matchesByDay[dateKey] = 0
+		}
+
+		// Maçları say
+		matchHistory.forEach(match => {
+			const matchDate = new Date(match.matchStartDate)
+			const dateKey = matchDate.toISOString().split('T')[0]
+
+			if (matchesByDay.hasOwnProperty(dateKey)) {
+				matchesByDay[dateKey]++
+			}
+		})
+
+		return {
+			success: true,
+			matchesByDay: matchesByDay,
+			totalMatchesLastSevenDays: matchHistory.length
+		}
+	} catch (error) {
+		throw error
+	}
+}
+
 export default async function gamedataRoute(fastify) {
 	fastify.post('/internal/match', async (request, reply) => {
 		const {
