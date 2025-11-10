@@ -45,8 +45,8 @@
     </header>
     <!-- Navigation -->
     <div class="profile-nav">
-        <button class="tab-btn active" data-tab="overview"><i class="fa-solid fa-grip-vertical"></i> <span data-i18n="profile.sections.dashboard">Dashboard</span> <span class="btn-glow"></span></button>
-        <button class="tab-btn" data-tab="performance"><i class="fa-solid fa-chart-line"></i> <span data-i18n="profile.sections.performance">Performans</span> <span class="btn-glow"></span></button>
+        <button class="tab-btn" data-tab="overview"><i class="fa-solid fa-grip-vertical"></i> <span data-i18n="profile.sections.dashboard">Dashboard</span> <span class="btn-glow"></span></button>
+        <button class="tab-btn active" data-tab="performance"><i class="fa-solid fa-chart-line"></i> <span data-i18n="profile.sections.performance">Performans</span> <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="tournaments"><i class="fa-solid fa-trophy"></i> <span data-i18n="profile.sections.thishtory">Turnuva Geçmişi</span> <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="match_history"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="profile.sections.mhistory">Maç Geçmişi</span> <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="achievements"><i class="fa-solid fa-star"></i> <span data-i18n="profile.sections.achievements">Achievements</span> <span class="btn-glow"></span></button>
@@ -54,7 +54,7 @@
     <!-- Content Tabs -->
     <main class="profile-content">
         <!-- Overview Tab -->
-        <section id="overview" class="tab-content active">
+        <section id="overview" class="tab-content">
             <div class="stats-grid">
                 <!-- Performance Cards -->
                 <div class="stat-card performance-card">
@@ -112,12 +112,12 @@
             </div>
         </section>
         <!-- Statistics Tab -->
-        <section id="performance" class="tab-content">
+        <section id="performance" class="tab-content active">
             <div class="stats-grid">
                 <!-- Win/Loss Pie Chart -->
                 <div class="stat-card">
                     <h3><i class="fa-solid fa-chart-pie"></i> <span data-i18n="profile.perf.winlose.title">Kazanma/Kaybetme Oranı</span></h3>
-                    <canvas id="winLossChart" width="300" height="300" data-wins="171" data-losses="63" data-labels='["Kazanılan", "Kaybedilen"]'></canvas>
+                    <canvas id="winLossChart" width="300" height="300"></canvas>
                 </div>
                 <!-- Performance Radar -->
                 <div class="stat-card">

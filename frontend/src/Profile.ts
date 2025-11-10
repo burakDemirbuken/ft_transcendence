@@ -136,17 +136,18 @@ class ManagerProfile {
 
 		if (!winLossCtx) return;
 
-		const wins = parseInt(winLossCtx.dataset.wins || '0', 10);
-		const losses = parseInt(winLossCtx.dataset.losses || '0', 10);
+		// HTML'den veya data attribute'lerinden wins/losses al
+		let wins = parseInt(winLossCtx.dataset.wins || '0', 10);
+		let losses = parseInt(winLossCtx.dataset.losses || '0', 10);
+
+		// Eğer hiç veri yoksa default değerleri kullan
+		if (wins === 0 && losses === 0) {
+			wins = 0;
+			losses = 0;
+		}
 
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
-		let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost']; // default fallback
-
-		// BU NE İÇİN ??
-		// JSON string olan labels'ı diziye çevir
-		// if (winLossCtx.dataset.labels) {
-		// labels = JSON.parse(winLossCtx.dataset.labels);
-		// }
+		let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost'];
 
 		this.charts.winLoss = new Chart(winLossCtx, {
 			type: 'doughnut',
@@ -175,11 +176,23 @@ class ManagerProfile {
 								family: 'Orbitron'
 							}
 						}
+					},
+					tooltip: {
+						callbacks: {
+							label: function(context) {
+								const label = context.label || '';
+								const value = context.parsed || 0;
+								const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+								const percentage = ((value / total) * 100).toFixed(1);
+								return `${label}: ${value} (${percentage}%)`;
+							}
+						}
 					}
 				}
 			}
 		});
 	}
+
 
 	private async createSkillRadarChart(): Promise<void> {
 		const skillCtx = document.getElementById('skillRadar') as HTMLCanvasElement | null;
@@ -1213,6 +1226,35 @@ async function setTextStats(user: any) {
 	await populateRecentMatches(user.profile.userName);
 }
 
+async function updateWinLossChart(wins: number, losses: number) {
+	const winLossCtx = document.getElementById('winLossChart') as HTMLCanvasElement | null;
+
+	if (!winLossCtx) {
+		console.warn("⚠️ Win/Loss chart canvas not found");
+		return;
+	}
+
+	// Canvas'a data attribute'lerini ayarla
+	winLossCtx.dataset.wins = wins.toString();
+	winLossCtx.dataset.losses = losses.toString();
+
+	// Çeviriler al
+	const translations = await getJsTranslations(localStorage.getItem("langPref"));
+	const labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost'];
+
+	// Chart'ı güncelle veya oluştur
+	if (profileManager['charts'] && profileManager['charts'].winLoss) {
+		// Mevcut chart'ı güncelle
+		const chart = profileManager['charts'].winLoss;
+		chart.data.datasets[0].data = [wins, losses];
+		chart.data.labels = labels;
+		chart.update();
+	} else {
+		// Yeni chart oluştur (ManagerProfile içinde createWinLossChart çağrılacak)
+		console.log("Chart will be created by ManagerProfile");
+	}
+}
+
 async function setChartStats(user: any) {
 	// Haftalık performans verilerini al
 	if (user?.stats?.lastSevenDaysMatches) {
@@ -1237,6 +1279,11 @@ async function setChartStats(user: any) {
 
 		// Grafiği güncelle
 		profileManager.updatePerformanceData(data, labels);
+	}
+
+	// Win/Loss Chart verilerini güncelle
+	if (user?.stats?.gamesWon !== undefined && user?.stats?.gamesLost !== undefined) {
+		updateWinLossChart(user.stats.gamesWon, user.stats.gamesLost);
 	}
 }
 
