@@ -20,7 +20,9 @@ interface StartData {
 interface GameConfig {
 	canvasId: string;
 	gameMode: string;
-	renderConfig: any;
+	renderConfig: {
+		[key: string]: any;
+	};
 	arcadeCount?: number;
 	arcadeOwnerNumber?: number;
 }
@@ -49,7 +51,7 @@ class App
 
 	async start(data: StartData): Promise<void>
 	{
-		let initData;
+		let initData = null;
 		console.log('🚀 Starting app with data:', JSON.stringify(data, null, 2));
 
 		initData = {

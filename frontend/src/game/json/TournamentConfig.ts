@@ -11,7 +11,6 @@ interface TournamentConfig {
 }
 
 const tournamentConfig: TournamentConfig = {
-	...gameConfig,
 	tournamentSettings:
 	{
 		name: 'Default Tournament',

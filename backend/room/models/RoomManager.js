@@ -98,6 +98,7 @@ class RoomManager extends EventEmitter
 			case 'created':
 				room = this.getRoom(payload.roomId);
 				const initData = room.initData();
+				console.log('initData:', JSON.stringify(initData, null, 2));
 				room.players.forEach(player => {
 					player.clientSocket.send(JSON.stringify({ type: 'started', payload: { roomId: payload.roomId, ...initData } }));
 				});
@@ -148,7 +149,7 @@ class RoomManager extends EventEmitter
 		else if (payload.gameMode === 'multiplayer')
 			room = new MultiPlayerRoom(payload.name, payload.gameSettings);
 		else if (payload.gameMode === 'tournament')
-			room = new TournamentRoom(payload.name, payload.gameSettings, payload.tournamentSettings);
+			room = new TournamentRoom(payload.name, payload.tournamentSettings);
 		else if (payload.gameMode === 'ai')
 			room = new AIRoom(payload.name, payload.gameSettings, payload.aiSettings, roomId);
 		else if (payload.gameMode === 'local')
@@ -160,7 +161,6 @@ class RoomManager extends EventEmitter
 		room.on('finished', async (data) =>
 			{
 				let url = 'http://profile:3006/internal/';
-				console.log('🏆 Sending match/tournament data to profile service:', data);
 				if (data.matchType === 'local' || data.matchType === 'ai')
 					return;
 				try
@@ -263,6 +263,7 @@ class RoomManager extends EventEmitter
 			throw new Error('All players must be ready before starting the game');
 
 		const state = {...room.startGame(playerId), roomId: roomId};
+		console.log(`state: ${JSON.stringify(state, null, 2)}`);
 		this.emit(`create`, state);
 		this.notifyRoomUpdate(roomId);
 	}
