@@ -1739,7 +1739,7 @@ html {
 #loadingScreen {
   position: absolute;
   inset: 0;
-  background-image: url('arcadeMachine.jpg');
+  background-image: url('../arcadeMachine.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

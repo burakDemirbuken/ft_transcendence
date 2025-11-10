@@ -1961,12 +1961,15 @@ export default class extends AView {
 			const data = {
 				gameType: gameTypeElement.value,
 				gameMode: gameMode,
-				gameSettings: {
+				gameSettings: {t
 					...gameConfig.gameSettings,
 					paddleHeight: parseInt(paddleHeightEl.value, 10),
 					ballRadius: parseInt(ballRadiusEl.value, 10),
 					ballSpeedIncrease: parseFloat(cornerBoostEl.value),
-					maxScore: parseInt(winningScoreEl.value, 10)
+					maxScore: parseInt(winningScoreEl.value, 10),
+					ballSpeed: 5, // Varsayılan değer
+					paddleWidth: 15, // Varsayılan değer
+					paddleSpeed: 6, // Varsayılan değer
 				}
 			};
 
