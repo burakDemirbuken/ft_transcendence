@@ -9,7 +9,30 @@ RED = \033[0;31m
 YELLOW = \033[1;33m
 BLUE = \033[0;34m
 NC = \033[0m
-HOST_IP := $(shell hostname -I | awk '{print $$1}')
+
+# İşletim sistemini algıla
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Linux) # linux
+	HOST_IP := $(shell hostname -I | awk '{print $$1}')
+endif
+
+ifeq ($(UNAME_S),Darwin) # macOS için
+	HOST_IP := $(shell ipconfig getifaddr en0)
+endif
+
+ifeq ($(UNAME_S),MINGW64_NT) # Windows (Git Bash) için
+	HOST_IP := $(shell hostname -I | awk '{print $$1}')
+endif
+
+# Eğer en0 çalışmazsa en1'i dene
+ifeq ($(HOST_IP),)
+	HOST_IP := $(shell ipconfig getifaddr en1)
+endif
+
+$(info Host IP: $(HOST_IP))
+
+# HOST_IP := $(shell hostname -I | awk '{print $$1}')
 export HOST_IP
 
 all: up
