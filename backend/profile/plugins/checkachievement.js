@@ -213,6 +213,7 @@ export default fp(async (fastify) => {
 			gameAverageDuration: stats.gamesPlayed > 0 ? (totalDurationSeconds / stats.gamesPlayed) : 0,
 			winRate: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0,
 			speed: (stats.gamesPlayed > 0 && totalDurationSeconds > 0) ? (stats.ballHitCount / (totalDurationSeconds)) * 100 : 0,
+			attack: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0,
 			endurance: (stats.gamesPlayed > 0 && totalDurationSeconds > 0) ? (totalDurationSeconds / (totalDurationSeconds + stats.gamesPlayed)) * 100 : 0,
 			defence: (stats.ballHitCount > 0 && stats.gamesLost > 0) ? (stats.ballHitCount / (stats.ballHitCount + stats.gamesLost + 1)) * 100 : 0,
 			accuracy: (stats.ballHitCount > 0 && stats.ballMissCount > 0) ? (stats.ballHitCount / (stats.ballHitCount + stats.ballMissCount)) * 100 : 0,

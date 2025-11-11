@@ -25,6 +25,14 @@ class ManagerProfile {
 		data1: [],
 		data2: []
 	};
+	private skillChartData: { speed: number, accuracy: number, defence: number, attack: number, strategy: number, durability: number } = {
+	speed: 0,
+	accuracy: 0,
+	defence: 0,
+	attack: 0,
+	strategy: 0,
+	durability: 0
+	};
 
 	constructor() {
 		this.currentTab = 'overview';
@@ -193,33 +201,42 @@ class ManagerProfile {
 		});
 	}
 
+	public updateSkillChartData(stats: any): void {
+		// Skill verilerini güncelle
+		this.skillChartData = {
+			speed: Math.min(100, stats.speed || 0),
+			accuracy: Math.min(100, stats.accuracy || 0),
+			defence: Math.min(100, stats.defence || 0),
+			attack: Math.min(100, stats.attack || 0),
+			strategy: Math.min(100, stats.endurance || 0),  // Strategy = Endurance
+			durability: Math.min(100, stats.endurance || 0) // Durability = Endurance
+		};
+
+		// Chart'ı güncelle
+		const chart = this.charts.skill;
+		if (chart && chart.data && Array.isArray(chart.data.datasets) && chart.data.datasets.length > 0) {
+			chart.data.datasets[0].data = [
+				this.skillChartData.speed,
+				this.skillChartData.accuracy,
+				this.skillChartData.defence,
+				this.skillChartData.attack,
+				this.skillChartData.strategy,
+				this.skillChartData.durability
+			];
+			chart.update();
+			console.log("✅ Skill Radar Chart updated:", this.skillChartData);
+		} else {
+			console.warn("⚠️ Skill chart not initialized yet");
+		}
+	}
 
 	private async createSkillRadarChart(): Promise<void> {
 		const skillCtx = document.getElementById('skillRadar') as HTMLCanvasElement | null;
 		if (!skillCtx) return;
 
-		// HTML'den beceri verilerini oku
-		const skillDataElement = document.getElementById('skill-data');
-		if (!skillDataElement) return;
-
-		// Gerekli veri alanlarını oku ve sayıya çevir
-		const parseSkill = (key: string): number => {
-			const val = skillDataElement.getAttribute(`data-${key}`);
-			return val ? parseFloat(val) : 0;
-		};
-
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 		const skills = translations?.profile?.skills.labels ?? ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"];
 		const label = translations?.profile?.skills.label ?? 'Skills';
-
-		const skillValues = {
-			hiz: parseSkill('hiz'),
-			dogruluk: parseSkill('dogruluk'),
-			savunma: parseSkill('savunma'),
-			saldiri: parseSkill('saldiri'),
-			strateji: parseSkill('strateji'),
-			dayaniklilik: parseSkill('dayaniklilik')
-		};
 
 		this.charts.skill = new Chart(skillCtx, {
 			type: 'radar',
@@ -228,29 +245,45 @@ class ManagerProfile {
 				datasets: [{
 					label: label,
 					data: [
-						skillValues.hiz,
-						skillValues.dogruluk,
-						skillValues.savunma,
-						skillValues.saldiri,
-						skillValues.strateji,
-						skillValues.dayaniklilik
+						this.skillChartData.speed,
+						this.skillChartData.accuracy,
+						this.skillChartData.defence,
+						this.skillChartData.attack,
+						this.skillChartData.strategy,
+						this.skillChartData.durability
 					],
 					borderColor: '#ff00ff',
 					backgroundColor: 'rgba(255, 0, 255, 0.2)',
 					borderWidth: 3,
 					pointBackgroundColor: '#ff00ff',
 					pointBorderColor: '#ffffff',
-					pointBorderWidth: 2
+					pointBorderWidth: 2,
+					pointRadius: 5,
+					pointHoverRadius: 7
 				}]
 			},
 			options: {
 				responsive: true,
+				maintainAspectRatio: true,
 				plugins: {
 					legend: {
 						labels: {
 							color: '#ffffff',
 							font: {
-								family: 'Orbitron'
+								family: 'Orbitron',
+								size: 12
+							}
+						}
+					},
+					tooltip: {
+						backgroundColor: 'rgba(0, 0, 0, 0.8)',
+						titleColor: '#ffffff',
+						bodyColor: '#00ffff',
+						borderColor: '#ff00ff',
+						borderWidth: 1,
+						callbacks: {
+							label: function(context) {
+								return `${context.label}: ${context.parsed.r.toFixed(1)}`;
 							}
 						}
 					}
@@ -282,14 +315,18 @@ class ManagerProfile {
 						pointLabels: {
 							color: getCSSVar('--color-primary'),
 							font: {
-								size: 10,
-								family: 'Orbitron'
-							}
+								size: 11,
+								family: 'Orbitron',
+								weight: 'bold'
+							},
+							padding: 10
 						}
 					}
-				} as any // << Tip uyumsuzluğu hatalarını bastırır
+				} as any
 			}
 		});
+
+		console.log("✅ Skill Radar Chart created with data:", this.skillChartData);
 	}
 
 	private async createMonthlyChart(): Promise<void> {
@@ -1285,6 +1322,11 @@ async function setChartStats(user: any) {
 	if (user?.stats?.gamesWon !== undefined && user?.stats?.gamesLost !== undefined) {
 		updateWinLossChart(user.stats.gamesWon, user.stats.gamesLost);
 	}
+
+	// Skill Radar verilerini güncelle
+	if (user?.stats) {
+		profileManager.updateSkillChartData(user.stats);
+	}
 }
 
 async function setAchievementStats(user: any) {
@@ -1337,7 +1379,7 @@ async function onLoad() {
 
 			if (ProfileUsername.ok) {
 				const user = await ProfileUsername.json();
-				console.log("✅ All data:", user);
+				console.log("All data:", user);
 
 				setTextStats(user);
 				await setChartStats(user);
