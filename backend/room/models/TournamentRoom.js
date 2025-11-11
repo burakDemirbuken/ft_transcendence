@@ -1,9 +1,10 @@
 import Room from './Room.js';
+import gameSettings from './defaultGameSettings.js';
 
 export default class TournamentRoom extends Room
 {
 
-	constructor(name, gameSettings, tournamentSettings)
+	constructor(name, tournamentSettings)
 	{
 		super(name, gameSettings);
 		this.gameType = 'tournament';

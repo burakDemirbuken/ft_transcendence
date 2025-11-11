@@ -2,7 +2,6 @@ import { TOURNAMENT_GAME_PROPERTIES } from '../utils/constants.js';
 import PingPong from '../PingPong/PingPong.js';
 import EventEmitter from '../utils/EventEmitter.js';
 
-
 // TODOO: Host playerId eklen
 // TODOO: Herkes hazır mı kontrolü
 // TODOO: Oyuncu çıkarsa ne olacak?
