@@ -358,9 +358,7 @@ function updateParticipants(
 
 // handleWebSocketMessage fonksiyonunu güncelle
 function handleWebSocketMessage(message) {
-	console.log('Started payload:', message.payload);
-    console.log('Started payload keys:', Object.keys(message.payload));
-    console.log('📨 Received message:', message);
+    console.log('Started payload:', message.payload);
 
     switch (message.type) {
         case "created":
@@ -439,16 +437,13 @@ function handleMatchReady(payload) {
     }
 
     if (isHost) {
-        console.log('✅ HOST DETECTED - Showing start button');
 
         if (waitingBtn) {
             waitingBtn.style.display = 'none';
-            console.log('✅ Hidden waiting button');
         }
 
         if (matchBtn) {
             matchBtn.style.display = 'none';
-            console.log('✅ Hidden match button');
         }
 
         if (startBtn) {
@@ -608,7 +603,7 @@ export function transformMatchmakingData(data: MatchmakingData | null | undefine
     };
   });
 
-  console.log('✅ Match pairs transformed:', matchPairs);
+  console.log('Match pairs transformed:', matchPairs);
 
   return {
     matchPairs,
@@ -619,7 +614,7 @@ export function transformMatchmakingData(data: MatchmakingData | null | undefine
 }
 
 function handleRoomCreated(payload) {
-    console.log('✅ Room created:', payload);
+    console.log('Room created:', payload);
     currentRoomId = payload.roomId;
 
     showNotification(`Oda oluşturuldu: ${payload.roomId}`, 'success');
@@ -635,9 +630,7 @@ function handleRoomCreated(payload) {
 }
 
 function handleRoomJoined(payload) {
-    console.log('✅ Joined room:', payload);
     currentRoomId = payload.roomId;
-
     showNotification(`Odaya katıldınız: ${payload.roomId}`, 'success');
 
     // Show appropriate waiting room
@@ -1411,28 +1404,23 @@ function connectWebSocket() {
 	// currentUserName = generateRandomName();
     // displayname gelicek VVVVVVVV
 	currentUserName = localStorage.getItem("userName") ?? "Player";
-	console.log(`🎮 User initialized - ID: ${currentUserId}, Name: ${currentUserName}`);
 
 	// Initialize WebSocket
 	roomSocket = new WebSocketClient(window.location.hostname, 3030);
 
 	// WebSocket event handlers
 	roomSocket.onConnect(() => {
-		console.log('✅ Connected to room server');
-		showNotification('Sunucuya bağlandı', 'success');
+		console.log('Connected to room server');
 	});
 
 	roomSocket.onMessage((message) => {
 		try {
-			console.log(`📥 Received WebSocket message:`, message);
-
 			// Eğer matchReady mesajı gelirse özel işleme yap
 			if (message.type === "matchReady") {
 				const transformedData = transformMatchmakingData(message.payload);
 				handleMatchReady(transformedData);
 				return;
 			}
-
 			// Diğer mesajlar için normal işleme devam et
 			handleWebSocketMessage(message);
 		} catch (error) {
@@ -1443,12 +1431,10 @@ function connectWebSocket() {
 
 	roomSocket.onClose((error) => {
 		console.log(`❌ Disconnected from room server: ${error.code} - ${error.reason}`);
-		showNotification('Sunucu bağlantısı kesildi', 'error');
 	});
 
 	roomSocket.onError((error) => {
 		console.error('❌ Room server connection error:', error);
-		showNotification('Bağlantı hatası', 'error');
 	});
 
 	// Connect to server
@@ -1462,9 +1448,6 @@ function connectWebSocket() {
 	if (app) {
 		window.app = app;
 	}
-
-	console.log('🎮 Application initialized successfully!');
-	showNotification('Hoş geldiniz! ' + currentUserName, 'success');
 }
 
 // DOM Elements
@@ -1734,8 +1717,6 @@ function showRoundWaitingRoom(data) {
             roundWaitingBtn.textContent = '⏳ Waiting for Host...';
         }
     }
-
-    console.log('✅ Round waiting room displayed successfully');
 }
 
 interface RoundFinishedPayload {
@@ -1806,19 +1787,6 @@ function handleRoundFinished(payload) {
 
     showNotification(`Round ${currentRound} tamamlandı!`, 'success');
 }
-
-// Back arrow'a round waiting room için de destek ekle
-document.getElementById('back-arrow')?.addEventListener('click', function() {
-    // Leave room if in one
-    if (currentRoomId) {
-        roomSocket.send("leave", { roomId: currentRoomId });
-        currentRoomId = null;
-    }
-
-    // Reset tournament data
-    tournamentData = null;
-    showNotification('Odadan ayrıldınız', 'info');
-});
 
 export default class extends AView {
 	constructor() {
@@ -1961,7 +1929,7 @@ export default class extends AView {
 			const data = {
 				gameType: gameTypeElement.value,
 				gameMode: gameMode,
-				gameSettings: {t
+				gameSettings: {
 					...gameConfig.gameSettings,
 					paddleHeight: parseInt(paddleHeightEl.value, 10),
 					ballRadius: parseInt(ballRadiusEl.value, 10),
@@ -1999,9 +1967,29 @@ export default class extends AView {
 
 		// Custom Game - Start Game
 		document.getElementById('custom-start-game-btn')?.addEventListener('click', function() {
-			roomSocket.send("start", {});
-			showNotification('Oyun başlatılıyor...', 'info');
+		    if (!currentRoomId || !roomSocket) {
+		        showNotification('Bağlantı hatası!', 'error');
+		        return;
+		    }
+		    const startButton = this as HTMLButtonElement;
+		    startButton.disabled = true;
+		    startButton.innerHTML = '<div class="loading"></div> Başlatılıyor...';
+		    roomSocket.send("start", {
+		        roomId: currentRoomId,
+		        gameMode: 'classic'
+		    });
+		    console.log(`Start message sent for room: ${currentRoomId}`);
+		    showNotification('🚀 Oyun başlatılıyor!', 'success');
+		    // Timeout - eğer yanıt gelmezse butonu tekrar etkinleştir
+		    setTimeout(() => {
+		        if (startButton.disabled) {
+		            startButton.disabled = false;
+		            startButton.innerHTML = '🚀 Oyunu Başlat';
+		            showNotification('⚠️ Oyun başlatma zaman aşımına uğradı', 'warning');
+		        }
+		    }, 10000);
 		});
+
 	}
 
 	private initAIGameListeners(): void {
@@ -2058,14 +2046,8 @@ export default class extends AView {
 		}
 	}
 
-    // // Eski listener'ı temizle
-    // const newStartBtn = startBtn.cloneNode(true) as HTMLButtonElement;
-    // startBtn.parentNode?.replaceChild(newStartBtn, startBtn);
-
-
 	private initTournamentListeners(): void {
 		// Tournament Create Event Listener
-		console.log('🔍 Tournament listeners initializing...');
 		document.getElementById('tournament-create-btn')?.addEventListener('click', function() {
 			// Null ve type assertion ile güvenli erişim
 			const tournamentNameElement = document.getElementById('tournament-name') as HTMLInputElement;
@@ -2180,7 +2162,7 @@ export default class extends AView {
                 gameMode: 'tournament'
             });
 
-            console.log(`✅ Start message sent for room: ${currentRoomId}`);
+            console.log(`Start message sent for room: ${currentRoomId}`);
             showNotification('🚀 Turnuva başlatılıyor!', 'success');
 
             // Timeout - eğer yanıt gelmezse butonu tekrar etkinleştir
@@ -2213,8 +2195,6 @@ export default class extends AView {
                     isFinal: true,
                     gameMode: 'tournament'
                 });
-
-                console.log(`✅ Final round start message sent`);
                 showNotification('🏆 Final round başlatılıyor!', 'success');
 
                 setTimeout(() => {
@@ -2278,7 +2258,7 @@ export default class extends AView {
 
 			// Hide back arrow
 			backArrow.classList.remove('active');
-
+			tournamentData = null;
 			showNotification('Odadan ayrıldınız', 'info');
 		});
 	}

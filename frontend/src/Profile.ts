@@ -224,7 +224,6 @@ class ManagerProfile {
 				this.skillChartData.durability
 			];
 			chart.update();
-			console.log("✅ Skill Radar Chart updated:", this.skillChartData);
 		} else {
 			console.warn("⚠️ Skill chart not initialized yet");
 		}
@@ -325,8 +324,6 @@ class ManagerProfile {
 				} as any
 			}
 		});
-
-		console.log("✅ Skill Radar Chart created with data:", this.skillChartData);
 	}
 
 	private async createMonthlyChart(): Promise<void> {
