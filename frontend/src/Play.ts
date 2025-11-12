@@ -1850,7 +1850,7 @@ class CanvasOrientationManager {
             this.setupKeyboardControls();
         } else {
             this.hidePortraitWarning();
-            this.hideDirectionButtons(); 
+            this.hideDirectionButtons();
             this.removeKeyboardControls();
         }
     }
@@ -2123,15 +2123,38 @@ class CanvasOrientationManager {
         const upBtn = document.getElementById('btn-up');
         const downBtn = document.getElementById('btn-down');
 
-        upBtn?.addEventListener('click', () => {
-            console.log('⬆️ Landscape button pressed');
-            window.dispatchEvent(new CustomEvent('portraitKeyPress', { detail: { direction: 'up' } }));
-        });
+		downBtn?.addEventListener('touchstart',
+			() =>
+			{
+				const e = new KeyboardEvent('keydown', { key: 's' });
+				document.dispatchEvent(e);
+			}
+		);
 
-        downBtn?.addEventListener('click', () => {
-            console.log('⬇️ Landscape button pressed');
-            window.dispatchEvent(new CustomEvent('portraitKeyPress', { detail: { direction: 'down' } }));
-        });
+		downBtn?.addEventListener('touchend',
+			() =>
+			{
+				const e = new KeyboardEvent('keyup', { key: 's' });
+				document.dispatchEvent(e);
+			}
+		);
+
+		upBtn?.addEventListener('touchstart',
+			() =>
+			{
+				const e = new KeyboardEvent('keydown', { key: 'w' });
+				document.dispatchEvent(e);
+			}
+		);
+
+		upBtn?.addEventListener('touchend',
+			() =>
+			{
+				const e = new KeyboardEvent('keyup', { key: 'w' });
+				document.dispatchEvent(e);
+			}
+		);
+
     }
 
     private showDirectionButtons(): void {

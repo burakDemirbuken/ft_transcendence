@@ -25,19 +25,20 @@ class InputManager
 		document.addEventListener('keydown',
 			(e: KeyboardEvent) =>
 			{
-				if (this.pressedKeys.has(e.key))
+				const key = e.key.toLowerCase();
+				if (this.pressedKeys.has(key))
 				{
-					if (this.isRegisteredKey(e.key))
+					if (this.isRegisteredKey(key))
 						e.preventDefault();
 					return;
 				}
 
-				this.pressedKeys.add(e.key);
+				this.pressedKeys.add(key);
 
-				if (this.isRegisteredKey(e.key))
+				if (this.isRegisteredKey(key))
 					e.preventDefault();
 
-				const callback = this.keyDownCallbacks.get(e.key);
+				const callback = this.keyDownCallbacks.get(key);
 				if (callback)
 					callback(e);
 			}
@@ -46,8 +47,9 @@ class InputManager
 		document.addEventListener('keyup',
 			(e: KeyboardEvent) =>
 			{
-				this.pressedKeys.delete(e.key);
-				const callback = this.keyUpCallbacks.get(e.key);
+				const key = e.key.toLowerCase();
+				this.pressedKeys.delete(key);
+				const callback = this.keyUpCallbacks.get(key);
 				if (callback)
 					callback(e);
 			}
