@@ -117,6 +117,12 @@ class Renderer
 			return;
 		}
 
+		if (data.currentState === "waiting")
+		{
+			this.renderWaitingScreen('Waiting for players...', machine);
+			return;
+		}
+
 		if (data.currentState === "canceled")
 		{
 			this.renderWaitingScreen('Game Canceled', machine);

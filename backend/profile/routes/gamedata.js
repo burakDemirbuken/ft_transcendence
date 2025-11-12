@@ -82,7 +82,7 @@ export async function getUserMatchHistory(fastify, userName) {
 					{ '$teamTwo.playerTwoId$': userProfile.id },
 				]
 			},
-			attributes: ['teamOneScore', 'teamTwoScore', 'matchStartDate', 'matchEndDate', 'matchType'],
+			attributes: ['teamOneScore', 'teamTwoScore', 'matchStartDate', 'matchEndDate', 'matchType', 'matchSettings'],
 		})
 
 		let totalDurationSeconds = 0
@@ -201,11 +201,12 @@ export default async function gamedataRoute(fastify) {
 			winner,
 			matchType,
 			state,
-			time
+			time,
+			gameSettings
 		} = request.body ?? {}
 		const { Profile, Stat, MatchHistory, Team } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
-		console.log('Processing match data:', { team1, team2, winner, matchType, state, time })
+		console.log('Processing match data:', { team1, team2, winner, matchType, state, time, gameSettings })
 		try {
 			if (!team1 || !team2 || !state || !time || !matchType || !winner) {
 				throw new Error('Invalid match data provided')
@@ -299,7 +300,8 @@ export default async function gamedataRoute(fastify) {
 				teamTwoScore: team2.score,
 				matchType: matchType,
 				matchStartDate: time.start ? new Date(time.start) : null,
-				matchEndDate: time.finish ? new Date(time.finish) : null
+				matchEndDate: time.finish ? new Date(time.finish) : null,
+				matchSettings: gameSettings
 			}, { transaction: t })
 
 			await Promise.all([
