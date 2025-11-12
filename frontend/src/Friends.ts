@@ -7,10 +7,13 @@ let friendSocket = null;
 function safeSend(msg:string)
 {
 	try {
-		if (friendSocket && friendSocket.readyState === WebSocket.OPEN)
+		if (friendSocket && friendSocket.readyState === WebSocket.OPEN) {
+			console.log("friendSocket sent message");
 			return friendSocket.send(msg);
-		else if (friendSocket && friendSocket.readyState === WebSocket.CONNECTING)
+		} else if (friendSocket && friendSocket.readyState === WebSocket.CONNECTING) {
+			console.log("friend socket is connecting");
 			friendSocket.addEventListener('open', () => friendSocket.send(msg), { once: true });
+		}
 	} catch (e) {
 		console.error("safeSend failed:", e);
 	}
@@ -28,9 +31,19 @@ export function connectWebSocket() {
 		{
 			case "list":
 				console.warn("LIST RESPONSE: ", payload);
+				try {
+					document.dispatchEvent(new CustomEvent('friends:list', { detail: payload }));
+				} catch (e) {
+					console.error("Failed to dispatch friends:list event", e);
+				}
 				break;
 			case "response":
 				console.warn("NORMAL RESPONSE: ", payload);
+				try {
+					document.dispatchEvent(new CustomEvent('friends:response', { detail: payload }));
+				} catch (e) {
+					console.error("Failed to dispatch friends:response event", e);
+				}
 				break;
 			default:
 				break;
@@ -107,210 +120,199 @@ async function createOverlay() {
 	}
 }
 
-class UserLists {
-	private friendCont: HTMLElement;
-	private requestCont: HTMLElement;
-	private inviteCont: HTMLElement;
-	private currentFriends: Map<string, HTMLElement> = new Map();
-	private currentRequests: Map<string, HTMLElement> = new Map();
-	private currentInvites: Map<string, HTMLElement> = new Map();
+// -----------------------------------------------------------------------------
+// **************************** CLASS FUNCTIONS ********************************
+// -----------------------------------------------------------------------------
 
-	async init() {
-		this.friendCont = document.getElementById("friends");
-		this.requestCont = document.getElementById("requests")?.querySelector(".user-grid");
-		this.inviteCont = document.getElementById("invites");
-		document.querySelector(".search-bar form")?.addEventListener("submit", this.request);
-		try {
-			safeSend(JSON.stringify({ type: "list", payload: {} }));
-			console.log("List request sent");
-		} catch (error) {
-			console.error("FRIEND LIST FETCH FAILED", error);
-		}
-	}
+async function request(e) {
+	e.preventDefault();
 
-	async request(e) {
-		e.preventDefault();
-
-		const formData = new FormData(e.currentTarget as HTMLFormElement);
-		try {
-			safeSend(JSON.stringify({ type: "send", payload: { peerName: formData.get("req-user") } }));
-			console.log("Friend request sent to:", formData.get("req-user"));
-		} catch (error) {
-			showNotification("System error, please try again later.", "error");
-			console.log("Failed to send friend request", error);
-		}
-	}
-
-	async unfriend(e) {
-		console.info("UNFRIEND CLICKED");
-
-		const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
-		try {
-			safeSend(JSON.stringify({ type: "remove", payload: { peerName: uname } }));
-			console.log("Unfriend request sent to:", uname);
-		} catch {
-			showNotification("System error, please try again later.", "error");
-			console.log("Failed to send unfriend request");
-		}
-	}
-
-	async undo(e) {
-		console.info("UNDO CLICKED");
-
-		const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
-		try {
-			safeSend(JSON.stringify({ type: "reject", payload: { peerName: uname } }));
-			console.log("Reject request sent to:", uname);
-		} catch {
-			showNotification("System error, please try again later.", "error");
-			console.log("Failed to send reject request");
-		}
-	}
-
-	async accept(e) {
-		console.info("ACCEPT CLICKED");
-
-		const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
-		try {
-			safeSend(JSON.stringify({ type: "accept", payload: { peerName: uname } }));
-			console.log("Accept request sent to:", uname);
-		} catch {
-			showNotification("System error, please try again later.", "error");
-			console.log("Failed to send accept request");
-		}
-	}
-
-	async decline(e) {
-		console.info("DECLINE CLICKED");
-
-		const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
-		try {
-			safeSend(JSON.stringify({ type: "reject", payload: { peerName: uname } }));
-			console.log("Decline request sent to:", uname);
-		} catch {
-			showNotification("System error, please try again later.", "error");
-			console.log("Failed to send decline request");
-		}
-	}
-
-	private removeUsers(set:Set<string>, type: "friend" | "request" | "invite") {
-		const config = {
-			friend: { currentUsers: this.currentFriends },
-			request: { currentUsers: this.currentRequests },
-			invite: { currentUsers: this.currentInvites }
-		};
-
-		console.log("CURRENT USERS", type, config[type].currentUsers);
-		config[type].currentUsers.forEach((element, username) => {
-			if (!set.has(username)) {
-				element.remove();
-				config[type].currentUsers.delete(username);
-			}
-		});
-	}
-
-	private createUser(user: any, type: "friend" | "request" | "invite"): HTMLElement {
-		const div = document.createElement("div");
-
-		const config = {
-			friend: { html: `<button class="option unfr">Unfriend</button>`,
-				events: [{ selector: ".unfr", handler: this.unfriend }] },
-			request: { html: `<button class="option undo">Undo</button>`,
-				events: [{ selector: ".undo", handler: this.undo }] },
-			invite: { html: `<button class="option accept">Accept</button>
-						<button class="option decline">Decline</button>`,
-				events: [{ selector: ".accept", handler: this.accept },
-					{ selector: ".decline", handler: this.decline }] }
-		};
-
-		const opt = config[type].html;
-		div.innerHTML = `
-			<div class="user-profile">
-				<div class="friend-user-avatar">
-					<img src="${user?.avatarUrl ?? "../profile.svg"}" alt="">
-				</div>
-				<div class="friends-user-info">
-					<span class="dname">${user?.displayName ?? user?.userName}</span>
-					<span class="uname">@${user?.userName}</span>
-				</div>
-			</div>
-			<div class="user-actions">
-				<div class="user-menu">
-					<button class="menu-btn">⋮</button>
-					<div class="menu-options">
-						<button class="option prof">Profile</button>
-						${opt}
-					</div>
-				</div>
-			</div>
-		`;
-
-		div.classList.add("friend");
-		div.querySelector(".prof")?.addEventListener("click", handleOverlay);
-		config[type].events.forEach(({ selector, handler }) => {
-			div.querySelector(selector)?.addEventListener("click", handler);
-		});
-
-		return div;
-	}
-
-	private addUser(user: any, type: "friend" | "request" | "invite") {
-		const config = {
-			friend: { currentUsers: this.currentFriends, container: this.friendCont },
-			request: { currentUsers: this.currentRequests, container: this.requestCont },
-			invite: { currentUsers: this.currentInvites, container: this.inviteCont }
-		};
-
-		const { currentUsers, container } = config[type];
-		const div = this.createUser(user, type);
-
-		currentUsers.set(user.userName, div);
-		container?.appendChild(div);
-	}
-
-	private updateUser(currentUser, newUser, type: "friend" | "request" | "invite") {
-		console.log("USER", newUser.userName, "ALREADY EXISTS");
-	}
-
-	update(lists) {
-		console.warn("LISTS LOOKS LIKE:", lists);
-		const newFriends = new Set<string>(lists?.acceptedFriends.map(user => user.userName));
-		const newRequests = new Set<string>(lists?.pendingFriends.outcoming.map(user => user.userName));
-		const newInvites = new Set<string>(lists?.pendingFriends.incoming.map(user => user.userName));
-
-		this.removeUsers(newFriends, "friend");
-		this.removeUsers(newRequests, "request");
-		this.removeUsers(newInvites, "invite");
-
-		lists?.acceptedFriends.forEach(user => {
-			if (this.currentFriends.has(user.userName))
-				this.updateUser(this.currentFriends.get(user.userName), user, "friend");
-			else
-				this.addUser(user, "friend");
-		});
-
-		lists?.pendingFriends.outcoming.forEach(user => {
-			if (this.currentRequests.has(user.userName))
-				this.updateUser(this.currentRequests.get(user.userName), user, "request");
-			else
-				this.addUser(user, "request");
-		});
-
-		lists?.pendingFriends.incoming.forEach(user => {
-			if (this.currentInvites.has(user.userName))
-				this.updateUser(this.currentInvites.get(user.userName), user, "invite");
-			else
-				this.addUser(user, "invite");
-		});
+	const formData = new FormData(e.currentTarget as HTMLFormElement);
+	try {
+		safeSend(JSON.stringify({ type: "send", payload: { peerName: formData.get("req-user") } }));
+		console.log("Friend request sent to:", formData.get("req-user"));
+	} catch (error) {
+		showNotification("System error, please try again later.", "error");
+		console.log("Failed to send friend request", error);
 	}
 }
 
+async function unfriend(e) {
+	console.info("UNFRIEND CLICKED");
+
+	const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
+	try {
+		safeSend(JSON.stringify({ type: "remove", payload: { peerName: uname } }));
+		console.log("Unfriend request sent to:", uname);
+	} catch {
+		showNotification("System error, please try again later.", "error");
+		console.log("Failed to send unfriend request");
+	}
+}
+
+async function undo(e) {
+	console.info("UNDO CLICKED");
+
+	const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
+	try {
+		safeSend(JSON.stringify({ type: "reject", payload: { peerName: uname } }));
+		console.log("Reject request sent to:", uname);
+	} catch {
+		showNotification("System error, please try again later.", "error");
+		console.log("Failed to send reject request");
+	}
+}
+
+async function accept(e) {
+	console.info("ACCEPT CLICKED");
+
+	const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
+	try {
+		safeSend(JSON.stringify({ type: "accept", payload: { peerName: uname } }));
+		console.log("Accept request sent to:", uname);
+	} catch {
+		showNotification("System error, please try again later.", "error");
+		console.log("Failed to send accept request");
+	}
+}
+
+async function decline(e) {
+	console.info("DECLINE CLICKED");
+
+	const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
+	try {
+		safeSend(JSON.stringify({ type: "reject", payload: { peerName: uname } }));
+		console.log("Decline request sent to:", uname);
+	} catch {
+		showNotification("System error, please try again later.", "error");
+		console.log("Failed to send decline request");
+	}
+}
+
+function removeUsers(set:Set<string>, domContainer:HTMLElement) {
+	console.log("CURRENT USERS", domContainer);
+	console.log("NEW USERS", set);
+	domContainer.querySelectorAll(".friend").forEach((element: HTMLElement) => {
+		const username = (element.dataset && element.dataset.username) ?? "";
+		if (!set.has(username)) {
+			element.remove();
+		}
+	});
+}
+
+function createUser(user: any, type: "friend" | "request" | "invite"): HTMLElement {
+	const div = document.createElement("div");
+
+	const config = {
+		friend: { html: `<button class="option unfr">Unfriend</button>`,
+			events: [{ selector: ".unfr", handler: unfriend }] },
+		request: { html: `<button class="option undo">Undo</button>`,
+			events: [{ selector: ".undo", handler: undo }] },
+		invite: { html: `<button class="option accept">Accept</button>
+					<button class="option decline">Decline</button>`,
+			events: [{ selector: ".accept", handler: accept },
+				{ selector: ".decline", handler: decline }] }
+	};
+
+	const opt = config[type].html;
+	div.innerHTML = `
+		<div class="user-profile">
+			<div class="friend-user-avatar">
+				<img src="${user?.avatarUrl ?? "../profile.svg"}" alt="">
+			</div>
+			<div class="friends-user-info">
+				<span class="dname">${user?.displayName ?? user?.userName}</span>
+				<span class="uname">@${user?.userName}</span>
+			</div>
+		</div>
+		<div class="user-actions">
+			<div class="user-menu">
+				<button class="menu-btn">⋮</button>
+				<div class="menu-options">
+					<button class="option prof">Profile</button>
+					${opt}
+				</div>
+			</div>
+		</div>
+	`;
+
+	div.classList.add("friend");
+	// store username on the root element for reliable lookups later
+	// use `data-username` (accessed as `dataset.username`) to keep the attribute simple
+	div.dataset.username = user?.userName ?? "";
+	div.querySelector(".prof")?.addEventListener("click", handleOverlay);
+	config[type].events.forEach(({ selector, handler }) => {
+		div.querySelector(selector)?.addEventListener("click", handler);
+	});
+
+	return div;
+}
+
+function addUser(user: any, domContainer: HTMLElement, type: "friend" | "request" | "invite") {
+	if (!domContainer || !user)
+		return console.warn("No domContainer or user to add", type);
+	const div = createUser(user, type);
+	domContainer.appendChild(div);
+}
+
+function updateUser(currentUser, newUser, type: "friend" | "request" | "invite") {
+	console.log("USER", newUser.userName, "ALREADY EXISTS");
+}
+
+function updateUserList(list, domContainer, type: "friend" | "request" | "invite") {
+	if (!domContainer || !list)
+		return console.warn("No domContainer or list to update user list", type);
+
+	console.info("RECIEVED USER LIST: ", list)
+	const newUserList = new Set<string>(list.map(user => user.userName));
+	removeUsers(newUserList, domContainer);
+
+	list?.forEach(listUser => {
+		// select the root `.friend` element that has the data-username attribute
+		const domUser = domContainer.querySelector(`.friend[data-username="${CSS.escape(listUser.userName)}"]`);
+		if (domUser) {
+			console.log("USER", listUser.userName, "FOUND IN DOM, UPDATING");
+			updateUser(domUser, listUser, type);
+		} else {
+			console.log("USER", listUser.userName, "NOT FOUND IN DOM, ADDING");
+			addUser(listUser, domContainer, type);
+		}
+	});
+}
+
+function update(lists) {
+	console.warn("LISTS LOOKS LIKE:", lists);
+	updateUserList(lists?.friendlist?.acceptedFriends ?? [], document.getElementById("friends"), "friend");
+	updateUserList(lists?.friendlist?.pendingFriends?.outgoing ?? [], document.querySelector("#requests > .user-grid"), "request");
+	updateUserList(lists?.friendlist?.pendingFriends?.incoming ?? [], document.getElementById("invites"), "invite");
+}
+
 export default class extends AView {
-	public userManager = new UserLists();
+	_onFriendsList: (ev: Event) => void;
+	_onFriendsResponse: (ev: Event) => void;
 
 	constructor() {
 		super();
 		this.setTitle("Friends");
+
+		this._onFriendsList = (ev: Event) => {
+			try {
+				const detail = (ev as CustomEvent).detail;
+				update(detail);
+			} catch (e) {
+				console.error('friends:list handler failed', e);
+			}
+		};
+
+		this._onFriendsResponse = (ev: Event) => {
+			try {
+				const detail = (ev as CustomEvent).detail;
+				console.log('friends:response event received', detail);
+				update(detail);
+			} catch (e) {
+				console.error('friends:response handler failed', e);
+			}
+		};
 	}
 
 	async getHtml(): Promise<string> {
@@ -319,7 +321,6 @@ export default class extends AView {
 	}
 
 	async setDynamicContent() {
-		this.userManager.init();
 		createOverlay();
 	}
 
@@ -328,6 +329,10 @@ export default class extends AView {
 		document.querySelector("#card-exit")?.addEventListener("click", handleOverlay);
 		document.addEventListener("keydown", esc);
 		document.querySelector(".friend-nav")?.addEventListener("click", subpageSwitch);
+		document.addEventListener('friends:list', this._onFriendsList as EventListener);
+		document.addEventListener('friends:response', this._onFriendsResponse as EventListener);
+		document.querySelector(".search-bar form")?.addEventListener("submit", request);
+		safeSend(JSON.stringify({ type: "list", payload: {} }));
 	}
 
 	async unsetEventHandlers() {
@@ -335,6 +340,9 @@ export default class extends AView {
 		document.querySelector("#card-exit")?.removeEventListener("click", handleOverlay);
 		document.removeEventListener("keydown", esc);
 		document.querySelector(".friend-nav")?.removeEventListener("click", subpageSwitch);
+		document.removeEventListener('friends:list', this._onFriendsList as EventListener);
+		document.removeEventListener('friends:response', this._onFriendsResponse as EventListener);
+		document.querySelector(".search-bar form")?.removeEventListener("submit", request);
 	}
 
 	async setStylesheet() {
