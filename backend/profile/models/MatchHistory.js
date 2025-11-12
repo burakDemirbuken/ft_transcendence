@@ -56,6 +56,10 @@ export default (sequelize, DataTypes, Model) => {
 		matchSettings: {
 			type: DataTypes.JSON,
 			allowNull: true
+		},
+		matchState: {
+			type: DataTypes.JSON,
+			allowNull: true
 		}
 	}, {
 		sequelize,

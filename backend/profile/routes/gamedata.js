@@ -82,7 +82,7 @@ export async function getUserMatchHistory(fastify, userName) {
 					{ '$teamTwo.playerTwoId$': userProfile.id },
 				]
 			},
-			attributes: ['teamOneScore', 'teamTwoScore', 'matchStartDate', 'matchEndDate', 'matchType', 'matchSettings'],
+			attributes: ['teamOneScore', 'teamTwoScore', 'matchStartDate', 'matchEndDate', 'matchType', 'matchSettings', "matchState"],
 		})
 
 		let totalDurationSeconds = 0
@@ -301,7 +301,8 @@ export default async function gamedataRoute(fastify) {
 				matchType: matchType,
 				matchStartDate: time.start ? new Date(time.start) : null,
 				matchEndDate: time.finish ? new Date(time.finish) : null,
-				matchSettings: gameSettings
+				matchSettings: gameSettings,
+				matchState: state
 			}, { transaction: t })
 
 			await Promise.all([

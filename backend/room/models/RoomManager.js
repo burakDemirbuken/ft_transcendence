@@ -73,6 +73,11 @@ class RoomManager extends EventEmitter
 
 	quickMatch(player)
 	{
+		if (this.waitingPlayers.find(p => p.id === player.id))
+			throw new Error('Player is already in the quick match waiting list');
+		if (this._getRoomWithPlayer(player.id).room !== null)
+			throw new Error('Player is already in a room');
+
 		this.waitingPlayers.push(player);
 		if (this.waitingPlayers.length >= 2)
 		{
