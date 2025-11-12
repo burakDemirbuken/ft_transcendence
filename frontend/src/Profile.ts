@@ -1215,20 +1215,6 @@ async function populateRecentMatches(userName: string) {
 	}
 }
 
-// Cookie'leri parse etmek için yardımcı fonksiyon
-function parseCookies(): Record<string, string> {
-	const cookies: Record<string, string> = {};
-	if (document.cookie) {
-		document.cookie.split(';').forEach(cookie => {
-			const [name, value] = cookie.trim().split('=');
-			if (name && value) {
-				cookies[name] = decodeURIComponent(value);
-			}
-		});
-	}
-	return cookies;
-}
-
 function formatDuration(seconds) {
 	seconds = Math.floor(seconds);
 	const minutes = Math.floor(seconds / 60);

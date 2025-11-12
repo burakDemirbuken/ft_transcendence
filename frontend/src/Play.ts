@@ -1850,7 +1850,7 @@ class CanvasOrientationManager {
             this.setupKeyboardControls();
         } else {
             this.hidePortraitWarning();
-            this.hideDirectionButtons(); 
+            this.hideDirectionButtons();
             this.removeKeyboardControls();
         }
     }
@@ -2370,36 +2370,6 @@ class CanvasOrientationManager {
         if (btnStyle) btnStyle.remove();
     }
 }
-
-// function handleOrientation(): void {
-//     const canvas = document.getElementById('renderCanvas') as HTMLCanvasElement;
-//     if (!canvas) return;
-
-//     const isMobile = window.innerWidth <= 1024;
-//     const isPortrait = window.innerHeight > window.innerWidth;
-
-//     if (isMobile && isPortrait) {
-//         // Portre modda
-//         canvas.style.display = 'none';
-
-//         // Uyarı göster
-//         let warning = document.getElementById('portrait-warning');
-//         if (warning) {
-//             warning.classList.remove('hide');
-//             warning.classList.add('show');
-//         }
-//     } else {
-//         // Landscape modda
-//         canvas.style.display = 'block';
-
-//         const warning = document.getElementById('portrait-warning');
-//         if (warning) {
-//             warning.classList.remove('show');
-//             warning.classList.add('hide');
-//         }
-//     }
-// }
-
 
 export default class extends AView {
 
