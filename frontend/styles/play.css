@@ -1179,6 +1179,28 @@ html {
     display: none;
 }
 
+/* Portrait Mode Keyboard Hint */
+@media (max-height: 800px) and (max-width: 600px) {
+    .portrait-warning-content::after {
+        content: "⬆️ Yukarı / Aşağı tuşlarını kullanın";
+        display: block;
+        margin-top: 20px;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.6);
+        animation: pulse 2s ease-in-out infinite;
+    }
+}
+
+/* Keyboard hint animation */
+@keyframes keyboardHint {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
 .game-container {
     position: fixed;
     top: 0;

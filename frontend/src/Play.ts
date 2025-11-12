@@ -16,12 +16,14 @@ let app: App | null = null;
 let roomSocket: any = null;
 let currentUserId: string | null = null;
 let currentUserName: string | null = null;
+let canvasManager: CanvasOrientationManager | null = null;
 
 // Window interface'ini genişletin
 declare global {
     interface Window {
         roomSocket?: WebSocketClient;
         app?: App;
+        canvasManager?: CanvasOrientationManager; // ✅ YENİ
     }
 }
 
@@ -815,6 +817,17 @@ function handleGameStarted(payload: GameStartPayload): void {
     // App constructor'ına TypeScript desteği eklendiğini varsayarak
     app = new App(currentUserId, currentUserName);
     app.start(payload);
+
+    // ✅ Canvas manager'ı kontrol et
+    if (canvasManager) {
+        console.log('🎮 Canvas manager found, setting game running...');
+        canvasManager.setGameRunning(true);
+    } else if (window.canvasManager) {
+        console.log('🎮 Canvas manager found on window, setting game running...');
+        window.canvasManager.setGameRunning(true);
+    } else {
+        console.warn('⚠️ Canvas manager not found!');
+    }
 }
 
 interface GameFinishPayload {
@@ -832,6 +845,13 @@ interface GameFinishPayload {
 
 function handleGameFinished(payload: GameFinishPayload): void {
     console.log('🏁 Game finished:', payload);
+
+    // ✅ Canvas manager'ı kontrol et
+    if (canvasManager) {
+        canvasManager.setGameRunning(false);
+    } else if (window.canvasManager) {
+        window.canvasManager.setGameRunning(false);
+    }
 
     // Destroy game
     if (app) {
@@ -1788,7 +1808,601 @@ function handleRoundFinished(payload) {
     showNotification(`Round ${currentRound} tamamlandı!`, 'success');
 }
 
+
+// ============================================================================
+// CANVAS ORIENTATION LOCK - LANDSCAPE ONLY
+// ============================================================================
+
+class CanvasOrientationManager {
+    private canvas: HTMLCanvasElement | null;
+    private resizeObserver: ResizeObserver | null = null;
+    private portraitWarning: HTMLElement | null = null;
+    private isResizing: boolean = false;
+    private resizeTimeout: number | null = null;
+    private hasTouchCapability: boolean = false;
+    private isCanvasReady: boolean = false;
+    private isGameRunning: boolean = false;
+    private keyboardListener: ((e: KeyboardEvent) => void) | null = null;
+    private directionButtonsContainer: HTMLElement | null = null;
+
+    constructor(canvasId: string = 'renderCanvas') {
+        this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+        this.hasTouchCapability = this.detectTouchCapability();
+
+        console.log(`🔍 DETECTION RESULT:`);
+        console.log(`   Touch Capability: ${this.hasTouchCapability}`);
+        console.log(`   maxTouchPoints: ${navigator.maxTouchPoints}`);
+        console.log(`   ontouchstart: ${'ontouchstart' in window}`);
+
+        if (this.canvas) {
+            this.waitForCanvasReady();
+        } else {
+            console.error('Canvas element not found!');
+        }
+    }
+
+    public setGameRunning(isRunning: boolean): void {
+        console.log(`🎮 Game running state changed: ${isRunning}`);
+        this.isGameRunning = isRunning;
+
+        if (isRunning) {
+            this.checkOrientation();
+            this.setupKeyboardControls();
+        } else {
+            this.hidePortraitWarning();
+            this.hideDirectionButtons(); 
+            this.removeKeyboardControls();
+        }
+    }
+
+    private setupKeyboardControls(): void {
+        if (this.keyboardListener) return; // Zaten kuruluysa tekrar kurma
+
+        this.keyboardListener = (e: KeyboardEvent) => {
+            const isPortrait = window.innerHeight > window.innerWidth;
+
+            // Sadece portrait modda ve touch cihazda çalış
+            if (!isPortrait || !this.hasTouchCapability) return;
+
+            // Arrow Up / Arrow Down tuşlarını yakala
+            if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                e.preventDefault(); // Varsayılan davranışı engelle
+
+                // Custom event oluştur ve gönder
+                const direction = e.key === 'ArrowUp' ? 'up' : 'down';
+                console.log(`⬆️ Portrait mode key pressed: ${direction}`);
+
+                window.dispatchEvent(new CustomEvent('portraitKeyPress', {
+                    detail: { direction }
+                }));
+            }
+        };
+
+        // Event listener'ı ekle
+        window.addEventListener('keydown', this.keyboardListener);
+        console.log('⌨️ Portrait mode keyboard controls enabled');
+    }
+
+    private removeKeyboardControls(): void {
+        if (this.keyboardListener) {
+            window.removeEventListener('keydown', this.keyboardListener);
+            this.keyboardListener = null;
+            console.log('⌨️ Portrait mode keyboard controls disabled');
+        }
+    }
+
+    private waitForCanvasReady(): void {
+        if (!this.canvas) return;
+
+        const checkCanvasReady = () => {
+            if (this.canvas!.width > 0 && this.canvas!.height > 0) {
+                console.log('✅ Canvas is ready!');
+                this.isCanvasReady = true;
+
+                if (this.hasTouchCapability) {
+                    this.init();
+                } else {
+                    this.initDesktopMode();
+                }
+            } else {
+                requestAnimationFrame(checkCanvasReady);
+            }
+        };
+
+        checkCanvasReady();
+    }
+
+    private detectTouchCapability(): boolean {
+        const maxTouchPoints = navigator.maxTouchPoints ?? 0;
+        const hasOnTouchStart = 'ontouchstart' in window;
+        const hasMsMaxTouchPoints = ((navigator as any).msMaxTouchPoints ?? 0) > 0;
+
+        let hasTouchEvent = false;
+        try {
+            new TouchEvent('test');
+            hasTouchEvent = true;
+        } catch (e) {
+            hasTouchEvent = false;
+        }
+
+        const result = maxTouchPoints > 0 || hasOnTouchStart || hasMsMaxTouchPoints || hasTouchEvent;
+
+        console.log(`🔍 Touch Detection Details:`);
+        console.log(`   - maxTouchPoints: ${maxTouchPoints} (MOST RELIABLE)`);
+        console.log(`   - ontouchstart: ${hasOnTouchStart}`);
+        console.log(`   - msMaxTouchPoints: ${hasMsMaxTouchPoints}`);
+        console.log(`   - TouchEvent: ${hasTouchEvent}`);
+        console.log(`   - FINAL RESULT: ${result}`);
+
+        return result;
+    }
+
+    private initDesktopMode(): void {
+        if (!this.canvas) return;
+
+        console.log('💻 DESKTOP MODE - No touch capability detected');
+
+        this.updateCanvasLayout();
+        window.addEventListener('resize', () => this.throttledHandleResize());
+        this.setupResizeObserver();
+    }
+
+    private init(): void {
+        if (!this.canvas) return;
+
+        console.log('📱 MOBILE MODE - Touch capability detected');
+
+        this.updateCanvasLayout();
+        window.addEventListener('orientationchange', () => this.handleOrientationChange());
+        window.addEventListener('resize', () => this.throttledHandleResize());
+        this.setupResizeObserver();
+        this.ensureViewportMeta();
+        this.createPortraitWarning();
+		this.createDirectionButtons();
+        this.checkOrientation();
+    }
+
+    private throttledHandleResize(): void {
+        if (this.resizeTimeout) {
+            clearTimeout(this.resizeTimeout);
+        }
+
+        this.resizeTimeout = setTimeout(() => {
+            this.handleResize();
+            this.resizeTimeout = null;
+        }, 100);
+    }
+
+    public handleOrientationChange(): void {
+        setTimeout(() => {
+            this.checkOrientation();
+            this.updateCanvasLayout();
+            this.dispatchCanvasResizeEvent();
+        }, 100);
+    }
+
+    private handleResize(): void {
+        if (this.isResizing) return;
+
+        this.isResizing = true;
+
+        this.checkOrientation();
+        this.updateCanvasLayout();
+        this.dispatchCanvasResizeEvent();
+
+        this.isResizing = false;
+    }
+
+    private checkOrientation(): void {
+        // ✅ Sadece canvas hazırsa, touch cihazsa VE oyun çalışıyorsa kontrol et
+        if (!this.isCanvasReady || !this.hasTouchCapability || !this.isGameRunning) {
+            return;
+        }
+
+        const isPortrait = window.innerHeight > window.innerWidth;
+
+        console.log(`📐 Mobile Orientation: ${isPortrait ? 'PORTRAIT' : 'LANDSCAPE'}`);
+
+    if (isPortrait) {
+        this.showPortraitWarning();
+        this.hideDirectionButtons();
+    } else {
+        this.hidePortraitWarning();
+        this.showDirectionButtons();
+    }
+    }
+
+    private createPortraitWarning(): void {
+        if (document.getElementById('portrait-warning')) return;
+
+        this.portraitWarning = document.createElement('div');
+        this.portraitWarning.id = 'portrait-warning';
+        this.portraitWarning.innerHTML = `
+            <div class="portrait-warning-content">
+                <svg class="rotate-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 4v6h6M23 20v-6h-6"></path>
+                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64"></path>
+                    <path d="M3.51 15A9 9 0 0 0 18.36 18.36"></path>
+                </svg>
+                <h2>Lütfen Cihazınızı Döndürün</h2>
+                <p>Bu oyun yatay (landscape) modda oynanmalıdır</p>
+                <div class="device-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                        <line x1="2" y1="20" x2="22" y2="20"></line>
+                    </svg>
+                </div>
+            </div>
+        `;
+
+        // ✅ DÜZELTME: Canvas'ın üzerine yazdır - z-index yüksek tut
+        this.portraitWarning.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            pointer-events: none;
+        `;
+
+        document.body.appendChild(this.portraitWarning);
+        this.addPortraitWarningStyles();
+        this.createDirectionButtons();
+    }
+
+    private createDirectionButtons(): void {
+        if (document.getElementById('direction-buttons')) return;
+
+        this.directionButtonsContainer = document.createElement('div');
+        this.directionButtonsContainer.id = 'direction-buttons';
+        this.directionButtonsContainer.innerHTML = `
+            <button id="btn-up" class="direction-btn">▲</button>
+            <button id="btn-down" class="direction-btn">▼</button>
+        `;
+        document.body.appendChild(this.directionButtonsContainer);
+
+        const style = document.createElement('style');
+        style.id = 'direction-buttons-style';
+        style.textContent = `
+            #direction-buttons {
+                position: fixed;
+                bottom: 10vh;
+                right: 5vw;
+                display: none; /* Başta görünmesin */
+                flex-direction: column;
+                gap: 20px;
+                z-index: 11000;
+                pointer-events: auto;
+            }
+
+            .direction-btn {
+                width: 70px;
+                height: 70px;
+                border-radius: 50%;
+                border: 2px solid #00ffff;
+                background-color: transparent;
+                color: #00ffff;
+                font-size: 32px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+
+            .direction-btn:active {
+                transform: scale(0.9);
+                background-color: rgba(0, 255, 255, 0.1);
+                box-shadow: 0 0 20px #00ffff;
+            }
+
+            @media (max-width: 768px) {
+                .direction-btn {
+                    width: 60px;
+                    height: 60px;
+                    font-size: 28px;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Event binding
+        const upBtn = document.getElementById('btn-up');
+        const downBtn = document.getElementById('btn-down');
+
+        upBtn?.addEventListener('click', () => {
+            console.log('⬆️ Landscape button pressed');
+            window.dispatchEvent(new CustomEvent('portraitKeyPress', { detail: { direction: 'up' } }));
+        });
+
+        downBtn?.addEventListener('click', () => {
+            console.log('⬇️ Landscape button pressed');
+            window.dispatchEvent(new CustomEvent('portraitKeyPress', { detail: { direction: 'down' } }));
+        });
+    }
+
+    private showDirectionButtons(): void {
+        const container = document.getElementById('direction-buttons');
+        if (container) container.style.display = 'flex';
+    }
+
+    private hideDirectionButtons(): void {
+        const container = document.getElementById('direction-buttons');
+        if (container) container.style.display = 'none';
+    }
+
+    private addPortraitWarningStyles(): void {
+        if (document.getElementById('portrait-warning-styles')) return;
+
+        const style = document.createElement('style');
+        style.id = 'portrait-warning-styles';
+        style.textContent = `
+            #portrait-warning {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+
+            #portrait-warning.show {
+                display: flex !important;
+                pointer-events: auto;
+            }
+
+            #portrait-warning.hide {
+                display: none !important;
+                pointer-events: none;
+            }
+
+            .portrait-warning-content {
+                text-align: center;
+                animation: slideUp 0.5s ease-out;
+                pointer-events: auto;
+            }
+
+            .portrait-warning-content h2 {
+                font-size: 28px;
+                margin: 20px 0 10px 0;
+                font-weight: 600;
+                letter-spacing: -0.5px;
+            }
+
+            .portrait-warning-content p {
+                font-size: 16px;
+                color: rgba(255, 255, 255, 0.7);
+                margin: 0 0 40px 0;
+                line-height: 1.5;
+            }
+
+            .rotate-icon {
+                width: 80px;
+                height: 80px;
+                margin-bottom: 20px;
+                animation: rotate 2s linear infinite;
+            }
+
+            .device-icon {
+                margin-top: 40px;
+                animation: pulse 2s ease-in-out infinite;
+            }
+
+            .device-icon svg {
+                width: 120px;
+                height: 80px;
+                stroke: rgba(255, 255, 255, 0.5);
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+
+            @keyframes slideUp {
+                from {
+                    transform: translateY(30px);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+
+            @keyframes rotate {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+
+            @keyframes pulse {
+                0%, 100% {
+                    opacity: 0.5;
+                    transform: scale(1);
+                }
+                50% {
+                    opacity: 1;
+                    transform: scale(1.05);
+                }
+            }
+
+            @media (max-width: 768px) {
+                .portrait-warning-content h2 {
+                    font-size: 24px;
+                }
+
+                .portrait-warning-content p {
+                    font-size: 14px;
+                }
+
+                .rotate-icon {
+                    width: 60px;
+                    height: 60px;
+                }
+
+                .device-icon svg {
+                    width: 100px;
+                    height: 70px;
+                }
+            }
+        `;
+
+        document.head.appendChild(style);
+    }
+
+    private showPortraitWarning(): void {
+        if (this.portraitWarning) {
+            this.portraitWarning.classList.remove('hide');
+            this.portraitWarning.classList.add('show');
+        }
+    }
+
+    private hidePortraitWarning(): void {
+        if (this.portraitWarning) {
+            this.portraitWarning.classList.remove('show');
+            this.portraitWarning.classList.add('hide');
+        }
+    }
+
+    private updateCanvasLayout(): void {
+        if (!this.canvas) return;
+
+        // ✅ Canvas'ı her zaman göster
+        this.canvas.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            border: none;
+            display: block;
+            transform: none;
+            z-index: 1000;
+        `;
+
+        // Body ve HTML'i düzenle
+        document.body.style.cssText = `
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+        `;
+
+        document.documentElement.style.cssText = `
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        `;
+    }
+
+    private setupResizeObserver(): void {
+        if (!this.canvas || !('ResizeObserver' in window)) return;
+
+        this.resizeObserver = new ResizeObserver(() => {
+            this.throttledHandleResize();
+        });
+
+        this.resizeObserver.observe(this.canvas);
+    }
+
+    private dispatchCanvasResizeEvent(): void {
+        window.dispatchEvent(new Event('resize'));
+
+        window.dispatchEvent(new CustomEvent('canvasResize', {
+            detail: {
+                width: window.innerWidth,
+                height: window.innerHeight
+            }
+        }));
+    }
+
+    private ensureViewportMeta(): void {
+        let viewportMeta = document.querySelector('meta[name="viewport"]');
+
+        if (!viewportMeta) {
+            viewportMeta = document.createElement('meta');
+            viewportMeta.setAttribute('name', 'viewport');
+            document.head.appendChild(viewportMeta);
+        }
+
+        viewportMeta.setAttribute('content',
+            'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover'
+        );
+    }
+
+    public destroy(): void {
+        if (this.resizeTimeout) {
+            clearTimeout(this.resizeTimeout);
+        }
+
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+        }
+
+        if (this.portraitWarning && this.portraitWarning.parentNode) {
+            this.portraitWarning.parentNode.removeChild(this.portraitWarning);
+        }
+
+        const styleTag = document.getElementById('portrait-warning-styles');
+        if (styleTag && styleTag.parentNode) {
+            styleTag.parentNode.removeChild(styleTag);
+        }
+
+        this.removeKeyboardControls();
+
+        const btnContainer = document.getElementById('direction-buttons');
+        const btnStyle = document.getElementById('direction-buttons-style');
+        if (btnContainer) btnContainer.remove();
+        if (btnStyle) btnStyle.remove();
+    }
+}
+
+// function handleOrientation(): void {
+//     const canvas = document.getElementById('renderCanvas') as HTMLCanvasElement;
+//     if (!canvas) return;
+
+//     const isMobile = window.innerWidth <= 1024;
+//     const isPortrait = window.innerHeight > window.innerWidth;
+
+//     if (isMobile && isPortrait) {
+//         // Portre modda
+//         canvas.style.display = 'none';
+
+//         // Uyarı göster
+//         let warning = document.getElementById('portrait-warning');
+//         if (warning) {
+//             warning.classList.remove('hide');
+//             warning.classList.add('show');
+//         }
+//     } else {
+//         // Landscape modda
+//         canvas.style.display = 'block';
+
+//         const warning = document.getElementById('portrait-warning');
+//         if (warning) {
+//             warning.classList.remove('show');
+//             warning.classList.add('hide');
+//         }
+//     }
+// }
+
+
 export default class extends AView {
+
 	constructor() {
 		super();
 		this.setTitle("Play");
@@ -1823,11 +2437,16 @@ export default class extends AView {
                 // Geçerli oyun modunu güncelle
                 currentGameMode = 'custom';
             }
+			// handleOrientation();
         });
 	}
 
 	async setDynamicContent() {
 		connectWebSocket();
+
+		// Canvas manager'ı başlat
+		canvasManager = new CanvasOrientationManager('renderCanvas');
+		window.canvasManager = canvasManager;
 	}
 
 	async unsetEventHandlers() {}
@@ -1858,9 +2477,9 @@ export default class extends AView {
 		this.initKeyboardListeners();
 
 		// Custom Game Sliders
-        updateSliderDisplay('paddle-height', 'paddle-height-value', (value) => `${value}px`);
-        updateSliderDisplay('ball-radius', 'ball-radius-value', (value) => `${value}px`);
-        updateSliderDisplay('corner-boost', 'corner-boost-value', (value) => `${parseFloat(value).toFixed(1)}x`);
+		updateSliderDisplay('paddle-height', 'paddle-height-value', (value) => `${value}px`);
+		updateSliderDisplay('ball-radius', 'ball-radius-value', (value) => `${value}px`);
+		updateSliderDisplay('corner-boost', 'corner-boost-value', (value) => `${parseFloat(value).toFixed(1)}x`);
 	}
 
 	private initGameModeListeners(): void {
@@ -2364,6 +2983,10 @@ export default class extends AView {
 	async unsetStylesheet() {
 		const link = document.querySelector("link[href='styles/play.css']");
 		document.head.removeChild(link);
-        roomSocket.disconnect();
+		if (canvasManager) {
+			canvasManager?.destroy();
+			canvasManager = null;
+		}
+		roomSocket.disconnect();
 	}
 }
