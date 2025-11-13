@@ -2076,3 +2076,12 @@ html {
         font-size: 1rem;
     }
 }
+
+#next-round-btn {
+    display: none !important; /* Başta gizli */
+}
+
+#next-round-btn.show {
+    display: block !important;
+}
+
