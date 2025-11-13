@@ -1240,6 +1240,7 @@ html {
 .back-arrow.active {
     display: flex;
     animation: slideInLeft 0.5s ease;
+    pointer-events: auto;
 }
 
 .back-arrow:hover {

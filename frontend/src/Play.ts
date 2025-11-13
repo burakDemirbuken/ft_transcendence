@@ -2893,30 +2893,41 @@ export default class extends AView {
 	}
 
 	private initNavigationListeners(): void {
-		// Back Arrow
-		document.getElementById('back-arrow')?.addEventListener('click', function() {
-			// Type assertion ile element tipini belirle
-			const backArrow = this as HTMLElement;
+		// Back Arrow - DÜZELTME
+		const backArrowBtn = document.getElementById('back-arrow');
 
-			// Leave room if in one
-			if (currentRoomId && roomSocket) {
-				roomSocket.send("leave", { roomId: currentRoomId });
-				currentRoomId = null;
-			}
-
-			// Hide all waiting rooms
-			document.querySelectorAll('.waiting-room').forEach((room: Element) => {
-				room.classList.remove('active');
+		if (backArrowBtn) {
+			backArrowBtn.addEventListener('click', () => {
+				console.log('✅ Back arrow clicked!');
+				// Leave room if in one
+				if (currentRoomId && roomSocket) {
+					console.log(`Leaving room: ${currentRoomId}`);
+					roomSocket.send("leave", { roomId: currentRoomId });
+					currentRoomId = null;
+				}
+				// Hide all waiting rooms
+				document.querySelectorAll('.waiting-room').forEach((room: Element) => {
+					(room as HTMLElement).classList.remove('active');
+				});
+				// Hide game container
+				const gameContainer = document.getElementById('gameContainer');
+				if (gameContainer) {
+					gameContainer.style.display = 'none';
+				}
+				// Show game mode selection
+				const gameModeSelection = document.getElementById('game-page');
+				if (gameModeSelection) {
+					gameModeSelection.classList.remove('hidden');
+				}
+				// Hide back arrow
+				backArrowBtn.classList.remove('active');
+				// Reset tournament data
+				tournamentData = null;
+				showNotification('Odadan ayrıldınız', 'info');
 			});
-
-			// Show game mode selection
-			document.getElementById('game-mode-selection')?.classList.add('active');
-
-			// Hide back arrow
-			backArrow.classList.remove('active');
-			tournamentData = null;
-			showNotification('Odadan ayrıldınız', 'info');
-		});
+		} else {
+			console.error('❌ Back arrow button not found!');
+		}
 	}
 
 	private initSettingsListeners(): void {
