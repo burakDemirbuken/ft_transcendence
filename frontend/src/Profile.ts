@@ -21,7 +21,7 @@ class ManagerProfile {
 	private monthChartData: { label0: string, label1: string, labels: string[], data1: number[], data2: number[] } = {
 		label0: "Total Matches",
 		label1: "Matches Won",
-		labels: ["1st Quarter", "2nd Quarter", "3rd Quarter", "4th Quarter"],
+		labels: ["Vuruşlar"],
 		data1: [],
 		data2: []
 	};
@@ -326,34 +326,49 @@ class ManagerProfile {
 		});
 	}
 
+	public updateBallStats(ballHitCount: number, ballMissCount: number): void {
+		const chart = this.charts.monthly;
+		if (chart && chart.data && Array.isArray(chart.data.datasets) && chart.data.datasets.length >= 2) {
+			// İlk dataset: Hit Count
+			chart.data.datasets[0].data = [ballHitCount];
+			// İkinci dataset: Miss Count
+			chart.data.datasets[1].data = [ballMissCount];
+			chart.update();
+		}
+	}
+
 	private async createMonthlyChart(): Promise<void> {
 		const monthlyCtx = document.getElementById('monthlyChart') as HTMLCanvasElement | null;
 		if (!monthlyCtx) return;
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
-		this.monthChartData.label0 = translations?.profile?.monthly?.label0 ?? this.monthChartData.label0;
-		this.monthChartData.label1 = translations?.profile?.monthly?.label1 ?? this.monthChartData.label1;
-		this.monthChartData.labels = translations?.profile?.monthly?.labels ?? this.monthChartData.labels;
+		const hitLabel = translations?.profile?.monthly?.hitCount ?? 'Topa Vurma Sayısı';
+		const missLabel = translations?.profile?.monthly?.missCount ?? 'Iskalamalar';
+		const Label = translations?.profile?.monthly?.label ?? 'Vuruşlar';
 
 		this.charts.monthly = new Chart(monthlyCtx, {
 			type: 'bar',
 			data: {
-				labels: this.monthChartData.labels,
+				labels: [Label],
 				datasets: [
 					{
-						label: this.monthChartData.label0,
-						data: [15, 22, 18, 35, 28, 42, 38],
-						backgroundColor: 'rgba(0, 255, 255, 0.6)',
+						label: hitLabel,
+						data: [0],
+						backgroundColor: 'rgba(0, 255, 255, 0.8)',
 						borderColor: '#00ffff',
 						borderWidth: 2,
+						borderRadius: 5,
+						barThickness: 40
 					},
 					{
-						label: this.monthChartData.label1,
-						data: [12, 16, 14, 28, 21, 32, 28],
-						backgroundColor: 'rgba(0, 255, 0, 0.6)',
-						borderColor: '#00ff00',
+						label: missLabel,
+						data: [0],
+						backgroundColor: 'rgba(255, 0, 0, 0.8)',
+						borderColor: '#ff0000',
 						borderWidth: 2,
-					},
+						borderRadius: 5,
+						barThickness: 40
+					}
 				],
 			},
 			options: {
@@ -362,9 +377,7 @@ class ManagerProfile {
 					legend: {
 						labels: {
 							color: '#ffffff',
-							font: {
-								family: 'Orbitron',
-							},
+							font: { family: 'Orbitron' },
 						},
 					},
 				},
@@ -372,26 +385,23 @@ class ManagerProfile {
 					x: {
 						ticks: {
 							color: '#888',
-							font: {
-								family: 'Orbitron',
-							},
+							font: { family: 'Orbitron' },
 						},
 						grid: {
 							color: 'rgba(255, 255, 255, 0.1)',
 						},
 					},
 					y: {
+						beginAtZero: true,
 						ticks: {
 							color: '#888',
-							font: {
-								family: 'Orbitron',
-							},
+							font: { family: 'Orbitron' },
 						},
 						grid: {
 							color: 'rgba(255, 255, 255, 0.1)',
 						},
 					},
-				} as any
+				},
 			},
 		});
 	}
@@ -414,19 +424,17 @@ class ManagerProfile {
 		this.perfChartData.labelName = translations?.profile?.weekly?.label ?? this.perfChartData.labelName;
 		this.perfChartData.labels = translations?.profile?.weekly?.labels ?? this.perfChartData.labels;
 
-
 		chart.data.labels = this.perfChartData.labels;
 		chart.data.datasets[0].label = this.perfChartData.labelName;
 		chart.update();
 
 		chart = this.charts.monthly;
-		this.monthChartData.label0 = translations?.profile?.monthly?.label0 ?? this.monthChartData.label0;
-		this.monthChartData.label1 = translations?.profile?.monthly?.label1 ?? this.monthChartData.label1;
-		this.monthChartData.labels = translations?.profile?.monthly?.labels ?? this.monthChartData.labels;
-
-		chart.data.labels = this.monthChartData.labels;
-		chart.data.datasets[0].label = this.monthChartData.label0;
-		chart.data.datasets[1].label = this.monthChartData.label1;
+		const hitLabel = translations?.profile?.monthly?.hitCount ?? 'Topa Vurma Sayısı';
+		const missLabel = translations?.profile?.monthly?.missCount ?? 'İskalamalar';
+		const chartTitle = translations?.profile?.monthly?.label ?? 'Vuruşlar';
+		chart.data.labels = [chartTitle];
+		chart.data.datasets[0].label = hitLabel;
+		chart.data.datasets[1].label = missLabel;
 		chart.update();
 
 		chart = this.charts.winLoss;
@@ -1309,6 +1317,11 @@ async function setChartStats(user: any) {
 	// Skill Radar verilerini güncelle
 	if (user?.stats) {
 		profileManager.updateSkillChartData(user.stats);
+	}
+
+	// Ball Hit/Miss verilerini güncelle (YENİ)
+	if (user?.stats?.ballHitCount !== undefined && user?.stats?.ballMissCount !== undefined) {
+		profileManager.updateBallStats(user.stats.ballHitCount, user.stats.ballMissCount);
 	}
 }
 
