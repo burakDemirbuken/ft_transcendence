@@ -65,12 +65,12 @@
 				"best": "Best Streak"
 			},
 			"mlast": {
-				"title": "Last Matches",
+				"title": " Last Matches",
 				"win": "W",
 				"lose": "L"
 			},
 			"wperf": {
-				"title": "Weekly Performance"
+				"title": " Weekly Performance"
 			}
 		},
 		"perf": {
@@ -88,7 +88,7 @@
 			"dstats": {
 				"title": "Detailed Statistics",
 				"tpts": "Total Points",
-				"ascore": "Average Score Difference",
+				"ascore": "Hit Rate",
 				"mfastest": "Fastest Win",
 				"mlongest": "Longest Match"
 			}

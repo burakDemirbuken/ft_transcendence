@@ -154,7 +154,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    color: var(--color-text);
+    color: #ffffff;
 }
 
 .match-item.win .match-result {
@@ -275,8 +275,10 @@
     color: #888;
 }
 
-.stat-row .stat-value {
-    color: var(--color-primary);
+.stats-value {
+    display: block;
+    font-size: clamp(.8rem, 2vw + .6rem, 1.6rem);
     font-weight: 700;
-    text-shadow: 0 0 10px var(--color-primary);
+    color: var(--color-primary);
+    text-shadow: 0 0 15px var(--color-primary);
 }

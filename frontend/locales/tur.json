@@ -65,12 +65,12 @@
 				"best": "En İyi Seri"
 			},
 			"mlast": {
-				"title": "Son Maçlar",
+				"title": " Son Maçlar",
 				"win": "G",
 				"lose": "M"
 			},
 			"wperf": {
-				"title": "Haftalık Performans",
+				"title": " Haftalık Performans",
 				"mwon": "Kazanılan Maçlar"
 			}
 		},
@@ -89,7 +89,7 @@
 			"dstats": {
 				"title": "Detaylı İstatistikler",
 				"tpts": "Toplam Puan",
-				"ascore": "Ortalama Skor Farkı",
+				"ascore": "İsabet Oranı",
 				"mfastest": "En Hızlı Galibiyet",
 				"mlongest": "En Uzun Maç"
 			}

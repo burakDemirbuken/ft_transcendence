@@ -86,6 +86,9 @@ export async function getUserMatchHistory(fastify, userName) {
 		})
 
 		let totalDurationSeconds = 0
+		let fastestWinDuration = null
+		let longestMatchDuration = null
+
 		const matchesWithDuration = matchHistory.map(match => {
 			const matchData = match.toJSON()
 			if (matchData.matchStartDate && matchData.matchEndDate) {
@@ -94,6 +97,21 @@ export async function getUserMatchHistory(fastify, userName) {
 				const durationSeconds = Math.floor(durationMs / 1000)
 				matchData.matchDuration = durationSeconds
 				totalDurationSeconds += durationSeconds
+
+				// En uzun maçı bul
+				if (longestMatchDuration === null || durationSeconds > longestMatchDuration) {
+					longestMatchDuration = durationSeconds
+				}
+
+				// Kazanılan maçları kontrol et ve en hızlı olanı bul
+				const isWin = match.winnerTeam?.PlayerOne?.userName === userName ||
+							  match.winnerTeam?.PlayerTwo?.userName === userName
+
+				if (isWin) {
+					if (fastestWinDuration === null || durationSeconds < fastestWinDuration) {
+						fastestWinDuration = durationSeconds
+					}
+				}
 			} else {
 				matchData.matchDuration = 0
 			}
@@ -104,7 +122,9 @@ export async function getUserMatchHistory(fastify, userName) {
 			success: true,
 			matches: matchesWithDuration,
 			totalDuration: totalDurationSeconds,
-			matchCount: matchesWithDuration.length
+			matchCount: matchesWithDuration.length,
+			fastestWinDuration: fastestWinDuration || 0,
+			longestMatchDuration: longestMatchDuration || 0
 		}
 	} catch (error) {
 		throw error
