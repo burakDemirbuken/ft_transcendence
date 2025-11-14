@@ -41,6 +41,7 @@
 	"profile": {
 		"header": {
 			"level": "Stufe",
+			"curr": "Aktuelle Serie",
 			"tgames": "Gesamtspiele",
 			"winrate": "Gewinnrate"
 		},

@@ -41,6 +41,7 @@
 	"profile": {
 		"header": {
 			"level": "Seviye",
+			"curr":"Mevcut Seri",
 			"tgames": "Toplam Oyun",
 			"winrate": "Kazanma Oranı"
 		},
