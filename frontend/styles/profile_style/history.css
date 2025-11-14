@@ -142,13 +142,14 @@
 }
 
 .match-card {
-    width: clamp(320px, 85%, 900px);
-    max-height: 90vh;
-    border: 2px solid rgba(0, 255, 255, 0.6);
-    border-radius: 15px;
-    padding: clamp(15px, 3vw, 30px);
+    width: clamp(270px, 70% + 80px, 2400px);
+    height: 90%;
+    border: 2px solid #0cce;
+    border-radius: 10px;
+    padding: clamp(2px, 3vw + 1px, 20px);
     overflow-y: auto;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: var(--bg-secondary);
+    max-height: 90vh;
     box-shadow: 0 0 40px rgba(0, 255, 255, 0.3);
     animation: slideUp 0.4s ease;
     position: relative;
@@ -553,16 +554,6 @@
     .score-value {
         font-size: 2rem;
     }
-}
-
-.match-card {
-	width: clamp(270px, 70% + 80px, 2400px);
-	height: 90%;
-	border: 2px solid #0cce;
-	border-radius: 10px;
-	padding: clamp(2px, 3vw + 1px, 20px);
-	overflow-y: auto;
-	background: var(--bg-secondary);
 }
 
 .match-details-title {

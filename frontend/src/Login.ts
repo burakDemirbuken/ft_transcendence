@@ -10,12 +10,13 @@ let userEmail:string;
 
 function goToNextField(field) {
 	let step = document.querySelector(`.field[data-step="${currentStep}"]`);
-	step.classList.remove("active");
+	step?.classList.remove("active");
 	step?.setAttribute("inert", "");
 	currentStep = field;
 	step = document.querySelector(`[data-step="${currentStep}"]`);
-	step.classList.add("active");
+	step?.classList.add("active");
 	step?.removeAttribute("inert");
+	step?.querySelector("input")?.focus();
 }
 
 async function username() {
