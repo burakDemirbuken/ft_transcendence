@@ -119,9 +119,9 @@ shell-gameserver:
 
 clean-db:
 	@echo "$(RED)Cleaning databases...$(NC)"
-	@rm -f backend/profile/databases/*
-	@rm -f backend/authentication/data/*
-	@rm -f backend/friend/database/*
+	@rm -rf backend/profile/database/
+	@rm -rf backend/authentication/data/
+	@rm -rf backend/friend/database/
 	@echo "$(GREEN)Databases cleaned$(NC)"
 clean: stop
 	@echo "$(RED)Cleaning up...$(NC)"
