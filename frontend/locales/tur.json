@@ -132,6 +132,22 @@
 					"vic": "Galibiyet",
 					"def": "Mağlubiyet"
 				}
+			},
+			"overlay": {
+				"title": "Maç Detayları",
+				"yourteam": "Siz",
+				"score": "Skor",
+				"opponent": "Rakip",
+				"duration": "Süre",
+				"gamemode": "Oyun Modu",
+				"gametype": "Klasik",
+				"ballhit": "Topa Vurma",
+				"ballmiss": "Iskalama",
+				"settings": "Maç Ayarları",
+				"ballradius": "Top Yarıçapı",
+				"paddleheight": "Raket Yüksekliği",
+				"cornerspeed": "Köşe Hızlanması",
+				"winningscore": "Bitiş Skoru"
 			}
 		},
 		"achiev": {

@@ -748,6 +748,9 @@ async function showMatchDetails(matchIndex: number) {
 
         if (!match) return;
 
+        // Çevirileri al
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+
         // Overlay'i doldur
         const overlay = document.getElementById('match-overlay') as HTMLDivElement;
         const content = overlay.querySelector('.match-overlay-content') as HTMLDivElement;
@@ -773,11 +776,6 @@ async function showMatchDetails(matchIndex: number) {
 
         content.querySelector('.match-date').textContent = dateStr;
         content.querySelector('.match-time').textContent = timeStr;
-
-        // Match type
-        const matchTypeText = match.matchType === 'classic' ? 'Classic' : match.matchType;
-        content.querySelector('.match-type').textContent = matchTypeText;
-        content.querySelector('.match-type-text').textContent = matchTypeText;
 
         // User team (Team One)
         const userTeamOneDiv = content.querySelector('.team-one');
@@ -836,7 +834,12 @@ async function showMatchDetails(matchIndex: number) {
         // Result
         const resultBadge = content.querySelector('.result-badge') as HTMLDivElement;
         resultBadge.className = `result-badge ${isWin ? 'win' : 'loss'}`;
-        const resultText = isWin ? 'GALİBİYET' : 'MAĞLUBİYET';
+
+        // Çeviriden sonuç metni al
+        const resultText = isWin ?
+            (translations?.profile?.mhistory?.overlay?.result?.win || 'GALİBİYET') :
+            (translations?.profile?.mhistory?.overlay?.result?.loss || 'MAĞLUBİYET');
+
         resultBadge.innerHTML = `
             <span class="result-text">${resultText}</span>
         `;
@@ -858,7 +861,6 @@ async function showMatchDetails(matchIndex: number) {
             content.querySelector('.ball-radius').textContent = settings.ballRadius?.toString() || '-';
             content.querySelector('.ball-speed').textContent = settings.ballSpeed?.toString() || '-';
             content.querySelector('.paddle-height').textContent = settings.paddleHeight?.toString() || '-';
-            content.querySelector('.paddle-speed').textContent = settings.paddleSpeed?.toString() || '-';
             content.querySelector('.max-score').textContent = settings.maxScore?.toString() || '-';
         }
 

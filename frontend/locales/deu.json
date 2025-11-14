@@ -132,6 +132,22 @@
 					"vic": "Sieg",
 					"def": "Verlust"
 				}
+			},
+			"overlay": {
+				"title": "Spielanalyse",
+				"yourteam": "Dein Team",
+				"score": "Ergebnis",
+				"opponent": "Gegner",
+				"duration": "Dauer",
+				"gamemode": "Spielmodus",
+				"gametype": "Klassisch",
+				"ballhit": "Balltreffer",
+				"ballmiss": "Ballfehlschlag",
+				"settings": "Spieleinstellungen",
+				"ballradius": "Ballradius",
+				"paddleheight": "Schlägerhöhe",
+				"cornerspeed": "Eckengeschwindigkeit",
+				"winningscore": "Siegesergebnis"
 			}
 		},
 		"achiev": {

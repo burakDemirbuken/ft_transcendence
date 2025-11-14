@@ -126,6 +126,22 @@
 				"score": "Score",
 				"time": "Duration",
 				"result": "Result"
+			},
+			"overlay": {
+				"title": "Match Analysis",
+				"yourteam": "Your",
+				"score": "Score",
+				"opponent": "Oppenent",
+				"duration": "Duration",
+				"gamemode": "Game Mode",
+				"gametype": "Classic",
+				"ballhit": "Ball Hit",
+				"ballmiss": "Ball Miss",
+				"settings": "Match Settings",
+				"ballradius": "Ball Radius",
+				"paddleheight": "Paddle Height",
+				"cornerspeed": "Corner Speed",
+				"winningscore": "Winning Score"
 			}
 		},
 		"achiev": {
