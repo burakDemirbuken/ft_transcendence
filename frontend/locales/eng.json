@@ -65,9 +65,7 @@
 				"best": "Best Streak"
 			},
 			"mlast": {
-				"title": " Last Matches",
-				"win": "W",
-				"lose": "L"
+				"title": " Last Matches"
 			},
 			"wperf": {
 				"title": " Weekly Performance"

@@ -37,8 +37,8 @@
 				"labels": ["Won", "Lost"]
 			},
 			"mhistory": {
-				"win": "Victory",
-				"lose": "Defeat"
+				"win": "VICTORY",
+				"lose": "DEFEAT"
 			}
 		}
 	},
@@ -75,8 +75,8 @@
 				"labels": ["Kazanılan", "Kaybedilen"]
 			},
 			"mhistory": {
-				"win": "Galibiyet",
-				"lose": "Mağlubiyet"
+				"win": "GALİBİYET",
+				"lose": "MAĞLUBİYET"
 			}
 		}
 	},
@@ -113,8 +113,8 @@
 				"labels": ["Sieg", "Verlust"]
 			},
 			"mhistory": {
-				"win": "Gewinnen",
-				"lose": "Verlust"
+				"win": "GEWINNEN",
+				"lose": "VERLUST"
 			}
 		}
 	}

@@ -65,9 +65,7 @@
 				"best": "Beste Serie"
 			},
 			"mlast": {
-				"title": " Letzte Spiele",
-				"win": "S",
-				"lose": "V"
+				"title": " Letzte Spiele"
 			},
 			"wperf": {
 				"title": " Wöchentliche Leistung",
@@ -146,7 +144,7 @@
 				"settings": "Spieleinstellungen",
 				"ballradius": "Ballradius",
 				"paddleheight": "Schlägerhöhe",
-				"cornerspeed": "Eckengeschwindigkeit",
+				"cornerspeed": "Eckbeschleunigung",
 				"winningscore": "Siegesergebnis"
 			}
 		},

@@ -65,9 +65,7 @@
 				"best": "En İyi Seri"
 			},
 			"mlast": {
-				"title": " Son Maçlar",
-				"win": "G",
-				"lose": "M"
+				"title": " Son Maçlar"
 			},
 			"wperf": {
 				"title": " Haftalık Performans",

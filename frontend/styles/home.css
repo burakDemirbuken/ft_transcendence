@@ -151,7 +151,6 @@ body {
     src: url('../fonts/RubikGlitchPop.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 0.5px;
 }
 
 /* RubikPixels */
@@ -160,7 +159,6 @@ body {
     src: url('../fonts/RubikPixels.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 1px;
 }
 
 /* RubikVinyl */
@@ -169,7 +167,6 @@ body {
     src: url('../fonts/RubikVinyl.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 0.5px;
 }
 
 /* RubikBrokenFax */
@@ -178,7 +175,6 @@ body {
     src: url('../fonts/RubikBrokenFax.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 1px;
 }
 
 /* RubikGlitch */
@@ -187,7 +183,6 @@ body {
     src: url('../fonts/RubikGlitch.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 0.5px;
 }
 
 /* RubikMaps */
@@ -196,7 +191,6 @@ body {
     src: url('../fonts/RubikMaps.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 0.5px;
 }
 
 /* RubikMaze */
@@ -205,7 +199,6 @@ body {
     src: url('../fonts/RubikMaze.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 0.5px;
 }
 
 /* RubikPuddles */
@@ -214,7 +207,6 @@ body {
     src: url('../fonts/RubikPuddles.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 1px;
 }
 
 @keyframes fontChange {

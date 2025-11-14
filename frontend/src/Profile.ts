@@ -620,14 +620,35 @@ class ManagerProfile {
 	}
 }
 
-
 let profileManager: ManagerProfile;
 
 export function updateChartLanguage() {
 	if (profileManager)
 		profileManager.updateChartLanguage();
 	refreshMatchHistory();
+
+	// Eğer overlay açıksa, içeriğini güncelle
+	const matchOverlay = document.getElementById('match-overlay') as HTMLDivElement;
+	if (matchOverlay && !matchOverlay.classList.contains('hide-away')) {
+		const content = matchOverlay.querySelector('.match-overlay-content') as HTMLDivElement;
+		if (content) {
+			updateMatchOverlayLanguage(content);
+		}
+	}
 }
+
+// Overlay'deki çevirileri güncelle
+async function updateMatchOverlayLanguage(content: HTMLDivElement) {
+	const translations = await getJsTranslations(localStorage.getItem("langPref"));
+
+	// Overlay'den matchIndex'i al
+	const overlay = document.getElementById('match-overlay') as HTMLDivElement;
+	const matchIndex = parseInt(overlay.dataset.currentMatchIndex || '0');
+
+	// Overlay'i yeniden yükle (güncel çevirilerle)
+	await showMatchDetails(matchIndex);
+}
+
 
 function handleCardMouseMove(e: MouseEvent) {
 	const cards = document.querySelectorAll<HTMLElement>('.stat-card');
@@ -748,7 +769,7 @@ async function showMatchDetails(matchIndex: number) {
 
         if (!match) return;
 
-        // Çevirileri al
+        // Çevirileri her seferinde al (dil değişikliğini yakala)
         const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
         // Overlay'i doldur
@@ -837,12 +858,15 @@ async function showMatchDetails(matchIndex: number) {
 
         // Çeviriden sonuç metni al
         const resultText = isWin ?
-            (translations?.profile?.mhistory?.overlay?.result?.win || 'GALİBİYET') :
-            (translations?.profile?.mhistory?.overlay?.result?.loss || 'MAĞLUBİYET');
+            (translations?.profile?.mhistory?.win || 'GALİBİYET') :
+            (translations?.profile?.mhistory?.loss || 'MAĞLUBİYET');
 
         resultBadge.innerHTML = `
             <span class="result-text">${resultText}</span>
         `;
+
+        // Overlay'e matchIndex'i data attribute olarak sakla
+        overlay.dataset.currentMatchIndex = matchIndex.toString();
 
         // Stats
         const durationFormatted = formatDuration(match.matchDuration || 0);
@@ -1172,7 +1196,7 @@ async function fetchMatchHistory(userName: string) {
 
 		if (response.ok) {
 			const data = await response.json();
-			console.log("Match history:", data);
+			// console.log("Match history:", data);
 			return data.matches || [];
 		} else {
 			console.error("❌ Failed to fetch match history:", response.statusText);
@@ -1471,7 +1495,7 @@ async function setAchievementStats(user: any) {
 			card.classList.replace("locked", "unlocked");
 			const date = card.querySelector(".achievement-date");
 			if (date) {
-				// ✅ Tarihten sadece tarih kısmını al
+				// Tarihten sadece tarih kısmını al
 				const unlockedDate = new Date(user.achievements[attrib].unlockedAt);
 				const formattedDate = unlockedDate.toLocaleDateString('tr-TR'); // "14.11.2025" formatında
 				date.textContent = formattedDate;
@@ -1515,7 +1539,7 @@ async function onLoad() {
 
 			if (ProfileUsername.ok) {
 				const user = await ProfileUsername.json();
-				console.log("All data:", user);
+				// console.log("All data:", user);
 
 				setTextStats(user);
 				await setChartStats(user);
