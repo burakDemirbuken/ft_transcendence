@@ -717,36 +717,162 @@ function handleOverlayClick(e: MouseEvent, overlay: HTMLDivElement, turnuva: HTM
   }
 }
 
-function handleMatchOverlay(e) {
-	if (e.target.classList.contains("match-row") || e.target.closest(".match-row"))
-		document.querySelector('#match-overlay').classList.remove("hide-away");
+function handleMatchOverlay(e: Event) {
+    const target = e.target as HTMLElement;
+    const matchRow = target.closest(".match-row:not(.header)") as HTMLElement | null;
 
-	const matchdetails = document.querySelector('.match-card');
-	console.log(matchdetails);
-	matchdetails.innerHTML = `
-		<h2 class="match-details-title">Match Details</h2>
-		<div class="match-details-info">
-			<span class="">Date: 2024-10-05</span>
-			<span class="">Duration: 4.23 mins</span>
-			<span class="">Score: 11</span>
-		</div>
-		<div class="players-comp">
-			<div class="match-player">
-				<h3>You</h3>
-				<span class="player-result">winner</span>
-				<span class="player-score">11</span>
-			</div>
-			<div class="match-player">
-				<h3>Opponent</h3>
-				<span class="player-result">loser</span>
-				<span class="player-score">10</span>
-			</div>
-		</div>
-	`;
+    if (!matchRow) return;
+
+    const matchId = parseInt(matchRow.dataset.matchId || '0');
+    showMatchDetails(matchId);
+}
+
+async function showMatchDetails(matchIndex: number) {
+    try {
+        const userName = document.querySelector('.username')?.textContent?.replace('@', '');
+        if (!userName) return;
+
+        const response = await fetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            }
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const matches = data.matches || [];
+        const match = matches[matchIndex];
+
+        if (!match) return;
+
+        // Overlay'i doldur
+        const overlay = document.getElementById('match-overlay') as HTMLDivElement;
+        const content = overlay.querySelector('.match-overlay-content') as HTMLDivElement;
+
+        // Kullanıcı bilgisi
+        const isUserInTeamOne = match.teamOne?.PlayerOne?.userName === userName ||
+                               match.teamOne?.PlayerTwo?.userName === userName;
+
+        const userTeam = isUserInTeamOne ? match.teamOne : match.teamTwo;
+        const opponentTeam = isUserInTeamOne ? match.teamTwo : match.teamOne;
+
+        const userScore = isUserInTeamOne ? match.teamOneScore : match.teamTwoScore;
+        const opponentScore = isUserInTeamOne ? match.teamTwoScore : match.teamOneScore;
+
+        const isWin = match.winnerTeam &&
+                     (match.winnerTeam.PlayerOne?.userName === userName ||
+                      match.winnerTeam.PlayerTwo?.userName === userName);
+
+        // Tarih ve saat
+        const matchDate = new Date(match.matchStartDate);
+        const dateStr = matchDate.toLocaleDateString('tr-TR');
+        const timeStr = matchDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+
+        content.querySelector('.match-date').textContent = dateStr;
+        content.querySelector('.match-time').textContent = timeStr;
+
+        // Match type
+        const matchTypeText = match.matchType === 'classic' ? 'Classic' : match.matchType;
+        content.querySelector('.match-type').textContent = matchTypeText;
+        content.querySelector('.match-type-text').textContent = matchTypeText;
+
+        // User team (Team One)
+        const userTeamOneDiv = content.querySelector('.team-one');
+        const userPlayersDiv = userTeamOneDiv.querySelector('.team-players') as HTMLDivElement;
+        userPlayersDiv.innerHTML = '';
+
+        if (userTeam?.PlayerOne) {
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player-item';
+            playerDiv.innerHTML = `
+                <span class="player-avatar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"/></svg></span>
+                <span class="player-name">${userTeam.PlayerOne.displayName}</span>
+            `;
+            userPlayersDiv.appendChild(playerDiv);
+        }
+
+        if (userTeam?.PlayerTwo) {
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player-item';
+            playerDiv.innerHTML = `
+                <span class="player-avatar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"/></svg></span>
+                <span class="player-name">${userTeam.PlayerTwo.displayName}</span>
+            `;
+            userPlayersDiv.appendChild(playerDiv);
+        }
+
+        userTeamOneDiv.querySelector('.score-value').textContent = userScore.toString();
+
+        // Opponent team (Team Two)
+        const opponentTeamDiv = content.querySelector('.team-two');
+        const opponentPlayersDiv = opponentTeamDiv.querySelector('.team-players') as HTMLDivElement;
+        opponentPlayersDiv.innerHTML = '';
+
+        if (opponentTeam?.PlayerOne) {
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player-item';
+            playerDiv.innerHTML = `
+                <span class="player-avatar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"/></svg></span>
+                <span class="player-name">${opponentTeam.PlayerOne.displayName}</span>
+            `;
+            opponentPlayersDiv.appendChild(playerDiv);
+        }
+
+        if (opponentTeam?.PlayerTwo) {
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player-item';
+            playerDiv.innerHTML = `
+                <span class="player-avatar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"/></svg></span>
+                <span class="player-name">${opponentTeam.PlayerTwo.displayName}</span>
+            `;
+            opponentPlayersDiv.appendChild(playerDiv);
+        }
+
+        opponentTeamDiv.querySelector('.score-value').textContent = opponentScore.toString();
+
+        // Result
+        const resultBadge = content.querySelector('.result-badge') as HTMLDivElement;
+        resultBadge.className = `result-badge ${isWin ? 'win' : 'loss'}`;
+        const resultText = isWin ? 'GALİBİYET' : 'MAĞLUBİYET';
+        resultBadge.innerHTML = `
+            <span class="result-text">${resultText}</span>
+        `;
+
+        // Stats
+        const durationFormatted = formatDuration(match.matchDuration || 0);
+        content.querySelector('.match-duration').textContent = durationFormatted;
+
+        // Ball stats (matchState'den al)
+        const userStats = match.matchState?.players?.find(p => p.id === userName);
+        if (userStats) {
+            content.querySelector('.ball-hit').textContent = (userStats.kickBall || 0).toString();
+            content.querySelector('.ball-miss').textContent = (userStats.missedBall || 0).toString();
+        }
+
+        // Match Settings
+        if (match.matchSettings) {
+            const settings = match.matchSettings;
+            content.querySelector('.ball-radius').textContent = settings.ballRadius?.toString() || '-';
+            content.querySelector('.ball-speed').textContent = settings.ballSpeed?.toString() || '-';
+            content.querySelector('.paddle-height').textContent = settings.paddleHeight?.toString() || '-';
+            content.querySelector('.paddle-speed').textContent = settings.paddleSpeed?.toString() || '-';
+            content.querySelector('.max-score').textContent = settings.maxScore?.toString() || '-';
+        }
+
+        // Overlay'i göster
+        overlay.classList.remove('hide-away');
+
+    } catch (error) {
+        console.error("❌ Error showing match details:", error);
+    }
 }
 
 function hideMatchOverlay() {
-	document.querySelector('#match-overlay').classList.add("hide-away");
+    const overlay = document.getElementById('match-overlay') as HTMLDivElement;
+    overlay.classList.add('hide-away');
 }
 
 function initBracket(players: Player[], n: number, currentUser: string, turnuva: HTMLDivElement, wrapper: HTMLDivElement) {
@@ -981,14 +1107,17 @@ export default class extends AView {
 		document.querySelector("#match-card-exit")?.addEventListener('click', hideMatchOverlay);
 
 		document.addEventListener('keydown', (e: KeyboardEvent) => {
-		  if (e.key === "Escape" && this.overlay.style.display === 'flex') {
-			this.closeBtn.classList.add('close');
-			setTimeout(() => {
-			  this.overlay.style.display = 'none';
-			  this.turnuva.innerHTML = '';
-			  this.closeBtn.classList.remove('close');
-			}, 300);
-		  }
+			if (e.key === "Escape") {
+				hideMatchOverlay();
+			}
+			if (e.key === "Escape" && this.overlay.style.display === 'flex') {
+				this.closeBtn.classList.add('close');
+				setTimeout(() => {
+					this.overlay.style.display = 'none';
+					this.turnuva.innerHTML = '';
+					this.closeBtn.classList.remove('close');
+				}, 300);
+			}
 		});
 	}
 
@@ -1178,8 +1307,6 @@ async function populateRecentMatches(userName: string) {
 
 		// Çevirileri al
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
-		const winText = translations?.profile?.mhistory?.win || 'Galibiyet';
-		const loseText = translations?.profile?.mhistory?.lose || 'Mağlubiyet';
 
 		recentMatches.forEach((match: any) => {
 			const isUserInTeamOne = match.teamOne?.PlayerOne?.userName === userName ||
