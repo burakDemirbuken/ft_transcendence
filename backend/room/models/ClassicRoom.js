@@ -3,9 +3,9 @@ import gameSettings from './defaultGameSettings.js';
 
 export default class ClassicRoom extends Room
 {
-	constructor(name)
+	constructor()
 	{
-		super(name, gameSettings);
+		super(gameSettings);
 		this.gameMode = 'classic';
 		this.maxPlayers = 2;
 	}

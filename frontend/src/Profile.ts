@@ -1194,6 +1194,25 @@ async function fetchMatchHistory(userName: string) {
 			}
 		});
 
+		const tournamentResponse = await fetch(`${API_BASE_URL}/profile/tournament-history?userName=${encodeURIComponent(userName)}`, {
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            }
+        });
+
+		if (!tournamentResponse.ok)
+		{
+			console.error("Turnuva geçmişi alınamadı");
+			return;
+		}
+		else
+		{
+			const tourData = await tournamentResponse.json();
+			console.log("Turnuva verisi:", tourData);
+		}
+
 		if (response.ok) {
 			const data = await response.json();
 			// console.log("Match history:", data);
