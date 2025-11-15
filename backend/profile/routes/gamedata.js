@@ -487,6 +487,7 @@ export default async function gamedataRoute(fastify) {
 
 	fastify.get('/tournament-history', async (request, reply) => {
 		const { userName } = request.query ?? {}
+		try {
 
 			if (!userName) {
 				throw new Error("userName is required.")
@@ -570,7 +571,10 @@ export default async function gamedataRoute(fastify) {
 			console.log('User joined tournaments IDs:', userJoinedTournamentsId)
 
 			return reply.send({ success: true, usersTournament: JSON.parse(JSON.stringify(usersTournament)) })
+		} catch (error) {
+			fastify.log.error('Error retrieving user tournament history:', { message: error.message,
+				details: error.toString() })
+			return reply.code(500).send({message: 'Failed to retrieve tournament history' })
+		}
 	})
-
-
 }
