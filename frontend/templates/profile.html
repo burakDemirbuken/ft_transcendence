@@ -47,8 +47,8 @@
     <div class="profile-nav">
         <button class="tab-btn" data-tab="overview"><i class="fa-solid fa-grip-vertical"></i> <span data-i18n="profile.sections.dashboard">Dashboard</span> <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="performance"><i class="fa-solid fa-chart-line"></i> <span data-i18n="profile.sections.performance">Performans</span> <span class="btn-glow"></span></button>
-        <button class="tab-btn" data-tab="tournaments"><i class="fa-solid fa-trophy"></i> <span data-i18n="profile.sections.thishtory">Turnuva Geçmişi</span> <span class="btn-glow"></span></button>
-        <button class="tab-btn active" data-tab="match_history"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="profile.sections.mhistory">Maç Geçmişi</span> <span class="btn-glow"></span></button>
+        <button class="tab-btn active" data-tab="tournaments"><i class="fa-solid fa-trophy"></i> <span data-i18n="profile.sections.thishtory">Turnuva Geçmişi</span> <span class="btn-glow"></span></button>
+        <button class="tab-btn" data-tab="match_history"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="profile.sections.mhistory">Maç Geçmişi</span> <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="achievements"><i class="fa-solid fa-star"></i> <span data-i18n="profile.sections.achievements">Achievements</span> <span class="btn-glow"></span></button>
     </div>
     <!-- Content Tabs -->
@@ -154,7 +154,7 @@
             </div>
         </section>
         <!-- Tournaments Tab -->
-        <section id="tournaments" class="tab-content">
+        <section id="tournaments" class="tab-content active">
             <div class="tournaments-header">
                 <h3><i class="fa-solid fa-trophy"></i> <span data-i18n="profile.thistory.title">Turnuva Geçmişi</span></h3>
                 <div class="tournaments-filters">
@@ -169,13 +169,13 @@
             </div>
             <div class="tournament-table" id="tournament-table">
                 <div class="tournament-row header">
-                    <span data-i18n="profile.thistory.header.tname">Turnuva Adı</span>
-                    <span data-i18n="profile.thistory.header.tstart">Başlangıç</span>
-                    <span data-i18n="profile.thistory.header.tend">Bitiş</span>
-                    <span data-i18n="profile.thistory.header.total">Toplam Maç</span>
+                    <span data-i18n="profile.tournament.name">Turnuva Adı</span>
+                    <span data-i18n="profile.tournament.startdate">Başlangıç</span>
+                    <span data-i18n="profile.tournament.enddate">Bitiş</span>
+                    <span data-i18n="profile.tournament.rounds">Tur Sayısı</span>
+                    <span data-i18n="profile.tournament.status">Durum</span>
                 </div>
-				<!-- Burası database eklendikten sonra silinecek (BAŞLANGIÇ) -->
-                <div class="tournament-row"
+                <!-- <div class="tournament-row"
                      data-name="Yaz Turnuvası"
                      data-start="2025-07-01"
                      data-end="2025-07-15"
@@ -210,8 +210,7 @@
                        {"etap":1, "kutu":4, "kazanan":null, "text":"Oyuncu 4"}
                      ]'>
                     <span>Kış Turnuvası</span><span>20.05.2025</span><span>01.06.2025</span><span>33</span>
-                </div>
-				<!-- Burası database eklendikten sonra silinecek (BİTİŞ) -->
+                </div> -->
             </div>
 			<div id="overlay">
                 <div id="turnuva-wrapper">
@@ -221,7 +220,7 @@
             </div>
         </section>
         <!-- Matches Tab (Birleştirilmiş Maç Geçmişi ve Analizi) -->
-        <section id="match_history" class="tab-content active">
+        <section id="match_history" class="tab-content">
             <div class="tournaments-header">
                 <h3><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="profile.mhistory.title">Maç Geçmişi ve Analizi</span></h3>
                 <div class="matches-filters">

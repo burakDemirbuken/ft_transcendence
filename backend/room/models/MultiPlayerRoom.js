@@ -2,9 +2,9 @@ import Room from "./Room.js";
 
 export default class MultiplayerRoom extends Room
 {
-	constructor(name, gameSettings)
+	constructor(gameSettings)
 	{
-		super(name, gameSettings);
+		super(gameSettings);
 		this.gameMode = 'multiplayer';
 		this.maxPlayers = 4;
 		this.createdAt = Date.now();
@@ -14,7 +14,6 @@ export default class MultiplayerRoom extends Room
 	{
 		return {
 			id: this.id,
-			name: this.name,
 			gameMode: this.gameMode,
 			status: this.status,
 			maxPlayers: this.maxPlayers,

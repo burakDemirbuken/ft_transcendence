@@ -4,12 +4,14 @@ import gameSettings from './defaultGameSettings.js';
 export default class TournamentRoom extends Room
 {
 
-	constructor(name, tournamentSettings)
+	constructor(tournamentSettings)
 	{
-		super(name, gameSettings);
+		super(gameSettings);
 		this.gameType = 'tournament';
 		this.gameMode = 'tournament';
-
+		this.tournamentName = tournamentSettings.name || 'deafult_tournament';
+		console.log('Creating TournamentRoom with settings:', JSON.stringify(tournamentSettings, null, 2));
+		console.log('name:', this.tournamentName);
 		this.tournamentSettings = tournamentSettings;
 		this.maxPlayers = tournamentSettings.maxPlayers || 8;
 		this.spectators = [];
@@ -161,10 +163,10 @@ export default class TournamentRoom extends Room
 		});
 
 		return {
-			name: this.name,
+			name: this.tournamentName,
 			winner: this.players[0].id,
 			rounds: rounds,
-			participants: this.players.map(p => ({ id: p.id})),
+			participants: this.participants.map(p => ({ id: p.id})),
 			matchType: 'tournament'
 		};
 	}
@@ -323,7 +325,7 @@ export default class TournamentRoom extends Room
 			});
 		});
 		return {
-			name: this.name,
+			name: this.tournamentName,
 			gameMode: this.gameMode,
 			status: this.status,
 			maxPlayers: this.maxPlayers,

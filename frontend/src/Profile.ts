@@ -622,10 +622,18 @@ class ManagerProfile {
 
 let profileManager: ManagerProfile;
 
+export function updateTournamentLanguage() {
+	const userName = document.querySelector('.username')?.textContent?.replace('@', '');
+	if (userName) {
+		populateTournamentHistory(userName);
+	}
+}
+
 export function updateChartLanguage() {
 	if (profileManager)
 		profileManager.updateChartLanguage();
 	refreshMatchHistory();
+	updateTournamentLanguage();
 
 	// Eğer overlay açıksa, içeriğini güncelle
 	const matchOverlay = document.getElementById('match-overlay') as HTMLDivElement;
@@ -1089,29 +1097,6 @@ export default class extends AView {
 		this.wrapper = document.getElementById('turnuva-wrapper') as HTMLDivElement;
 		this.turnuva = document.getElementById('turnuva') as HTMLDivElement;
 
-		// Kullanıcıyı fetch et
-		// fetch(`${API_BASE_URL}/auth/me`)
-		// 	.then(res => res.json())
-		// 	.then((user: User) => {
-		// 		this.USERNAME = user.username;
-		// 		return fetch(`${API_BASE_URL}/user-tournaments/${encodeURIComponent(this.USERNAME)}`);
-		// 	})
-		// 	.then(res => res.json())
-		// 	.then((tournaments: Tournament[]) => {
-		// 	tournaments.forEach(tr => {
-		// 		const row = document.createElement('div');
-		// 		row.classList.add('tournament-row');
-		// 		row.innerHTML = `
-		// 			<span>${tr.name}</span>
-		// 			<span>${tr.start_date}</span>
-		// 			<span>${tr.end_date}</span>
-		// 			<span>${tr.total_matches}</span>
-		// 		`;
-		// 		row.dataset.players = JSON.stringify(tr.players);
-		// 		this.table.appendChild(row);
-		// 	});
-		// 	});
-
 		// Event delegation
 		this.table.addEventListener('click', (e) => {
 		  if (!this.USERNAME) return;
@@ -1143,6 +1128,19 @@ export default class extends AView {
 					this.turnuva.innerHTML = '';
 					this.closeBtn.classList.remove('close');
 				}, 300);
+			}
+		});
+
+		// Tournament satırı tıklaması
+		const tournamentTable = document.querySelector('.tournament-table');
+		tournamentTable?.addEventListener('click', (e: Event) => {
+			const target = e.target as HTMLElement;
+			const row = target.closest('.tournament-row:not(.header)') as HTMLElement;
+			if (row) {
+				const tournamentId = row.dataset.tournamentId;
+				if (tournamentId) {
+					openTournamentBracket(tournamentId);
+				}
 			}
 		});
 	}
@@ -1193,6 +1191,25 @@ async function fetchMatchHistory(userName: string) {
 				...getAuthHeaders()
 			}
 		});
+
+		// const tournamentResponse = await fetch(`${API_BASE_URL}/profile/x?userName=${encodeURIComponent(userName)}`, {
+        //     credentials: 'include',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //         ...getAuthHeaders()
+        //     }
+        // });
+
+		// if (!tournamentResponse.ok)
+		// {
+		// 	console.error("Turnuva geçmişi alınamadı");
+		// 	return;
+		// }
+		// else
+		// {
+		// 	const tourData = await tournamentResponse.json();
+		// 	console.log("Turnuva verisi:", tourData);
+		// }
 
 		if (response.ok) {
 			const data = await response.json();
@@ -1504,6 +1521,157 @@ async function setAchievementStats(user: any) {
 	});
 }
 
+// ==================== TOURNAMENT HISTORY FETCH ====================
+
+async function fetchTournamentHistory(userName: string) {
+	try {
+		// Endpoint'i deneyin - hangisi çalışırsa onu kullanın
+		let response = await fetch(
+			`${API_BASE_URL}/profile/tournament-history?userName=${encodeURIComponent(userName)}`,
+			{
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+					...getAuthHeaders()
+				}
+			}
+		);
+
+		// Eğer 404 ise alternatif endpoint'i deneyin
+		if (response.status === 404) {
+			response = await fetch(
+				`${API_BASE_URL}/tournaments/user/${encodeURIComponent(userName)}`,
+				{
+					credentials: 'include',
+					headers: {
+						'Content-Type': 'application/json',
+						...getAuthHeaders()
+					}
+				}
+			);
+		}
+
+		if (response.ok) {
+			const data = await response.json();
+			console.log("Tournament history:", data);
+			return data.usersTournament || data.tournaments || [];
+		} else {
+			console.error("❌ Failed to fetch tournament history:", response.statusText);
+			return [];
+		}
+	} catch (error) {
+		console.error("❌ Error fetching tournament history:", error);
+		return [];
+	}
+}
+
+// ==================== TOURNAMENT TABLE POPULATE ====================
+
+async function populateTournamentHistory(userName: string) {
+	const tournamentTable = document.querySelector('.tournament-table');
+	if (!tournamentTable) return;
+
+	const tournaments = await fetchTournamentHistory(userName);
+
+	// Mevcut satırları temizle (header hariç)
+	const existingRows = tournamentTable.querySelectorAll('.tournament-row:not(.header)');
+	existingRows.forEach(row => row.remove());
+
+	if (tournaments.length === 0) {
+		const translations = await getJsTranslations(localStorage.getItem("langPref"));
+		const emptyRow = document.createElement('div');
+		emptyRow.className = 'match-row empty-state';
+		emptyRow.style.gridColumn = '1 / -1';
+		emptyRow.style.textAlign = 'center';
+		emptyRow.style.padding = '2rem';
+		emptyRow.innerHTML = `<span data-i18n="profile.thistory.nomatch">${translations?.profile?.tournament?.notournament || 'Henüz turnuva geçmişi bulunmuyor'}</span>`;
+		tournamentTable.appendChild(emptyRow);
+		return;
+	}
+
+	const translations = await getJsTranslations(localStorage.getItem("langPref"));
+
+	tournaments.forEach((tournament: any) => {
+		const tournamentRow = document.createElement('div');
+		tournamentRow.className = 'tournament-row';
+		tournamentRow.dataset.tournamentId = tournament.id?.toString() || '';
+		tournamentRow.dataset.start = tournament.startDate || tournament.start_date || '';
+
+		// Tarih formatla
+		const startDate = new Date(tournament.startDate || tournament.start_date || '');
+		const endDate = new Date(tournament.endDate || tournament.end_date || '');
+
+		const startDateStr = startDate.toLocaleDateString('tr-TR');
+		const endDateStr = endDate.toLocaleDateString('tr-TR');
+
+		// Kazanan kontrolü
+		const isWinner = tournament.winnerPlayer === userName ||
+						 tournament.winner?.userName === userName;
+		const winnerBadge = isWinner ?
+			`<span class="winner-badge">👑 ${translations?.profile?.tournament?.winner || 'Şampiyon'}</span>` :
+			'';
+
+		tournamentRow.innerHTML = `
+			<span class="tournament-name">${tournament.name || 'Unnamed Tournament'}</span>
+			<span class="tournament-date">${startDateStr}</span>
+			<span class="tournament-end-date">${endDateStr}</span>
+			<span class="tournament-matches">${tournament.Rounds?.length || 0} ${translations?.profile?.tournament?.rounds || 'Tur'}</span>
+			<span class="tournament-status">${winnerBadge}</span>
+		`;
+
+		// Turnuva verilerini data attribute'e kaydet
+		tournamentRow.dataset.players = JSON.stringify(tournament.players || []);
+		tournamentRow.dataset.rounds = JSON.stringify(tournament.Rounds || []);
+
+		tournamentTable.appendChild(tournamentRow);
+	});
+}
+
+// ==================== TOURNAMENT FILTER ====================
+
+export function filterTournamentsByYear(year: string) {
+	const tourRows = document.querySelectorAll('.tournament-row:not(.header)');
+
+	tourRows.forEach(row => {
+		const rowElement = row as HTMLElement;
+		let show = true;
+
+		if (year !== 'all') {
+			const startDate = rowElement.dataset.start;
+			const rowYear = new Date(startDate).getFullYear().toString();
+			show = rowYear === year;
+		}
+
+		rowElement.style.display = show ? 'grid' : 'none';
+	});
+}
+
+// ==================== TOURNAMENT BRACKET MODAL ====================
+
+function openTournamentBracket(tournamentId: string) {
+	const overlay = document.getElementById('overlay') as HTMLDivElement;
+	const turnuva = document.getElementById('turnuva') as HTMLDivElement;
+	const wrapper = document.getElementById('turnuva-wrapper') as HTMLDivElement;
+
+	if (!overlay || !turnuva || !wrapper) {
+		console.error("❌ Tournament elements not found");
+		return;
+	}
+
+	// Turnuva verilerini al
+	const row = document.querySelector(`[data-tournament-id="${tournamentId}"]`) as HTMLElement;
+	if (!row) return;
+
+	const players: Player[] = JSON.parse(row.dataset.players || '[]');
+	const userName = document.querySelector('.username')?.textContent?.replace('@', '') || '';
+
+	const firstRoundCount = players.filter(p => Number(p.etap) === 0).length;
+	const n = Math.max(1, Math.ceil(Math.log2(Math.max(1, firstRoundCount))));
+
+	overlay.style.display = 'flex';
+	initBracket(players, n, userName, turnuva, wrapper);
+}
+
 async function onLoad() {
 	const hasToken = getAuthToken();
 
@@ -1545,6 +1713,7 @@ async function onLoad() {
 				await setChartStats(user);
 				setAchievementStats(user);
 				await populateMatchHistory(currentUserName);
+				await populateTournamentHistory(currentUserName);
 
 				setTimeout(() => {
 					profileManager.animateLevelProgress();
