@@ -15,6 +15,10 @@ export default class TournamentRoom extends Room
 		this.tournamentSettings = tournamentSettings;
 		this.maxPlayers = tournamentSettings.maxPlayers || 8;
 		this.spectators = [];
+		this.time = {
+			start: null,
+			end: null,
+		};
 
 		this.matches = new Map(); // Round -> Matchs array
 
@@ -132,6 +136,7 @@ export default class TournamentRoom extends Room
 		if (this.currentRound === this.maxRounds)
 		{
 			this.status = 'finished';
+			this.time.end = new Date();
 			this.emit('finished', { ...this.finishData() });
 		}
 		else
@@ -167,7 +172,8 @@ export default class TournamentRoom extends Room
 			winner: this.players[0].id,
 			rounds: rounds,
 			participants: this.participants.map(p => ({ id: p.id})),
-			matchType: 'tournament'
+			matchType: 'tournament',
+			time: this.time
 		};
 	}
 
@@ -219,6 +225,7 @@ export default class TournamentRoom extends Room
 			this.currentMatches.push(match);
 		}
 		this.status = 'ready2start';
+		this.time.start = new Date();
 		return { ...this.getMatchmakingInfo()};
 	}
 
