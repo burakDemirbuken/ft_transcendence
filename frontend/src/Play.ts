@@ -2671,7 +2671,6 @@ export default class extends AView {
 			// Null ve type assertion ile güvenli erişim
 			const tournamentNameElement = document.getElementById('tournament-name') as HTMLInputElement;
 			const tournamentName = tournamentNameElement.value.trim();
-
 			// Turnuva boyutu seçimini al
 			const tournamentSizeElement = document.querySelector('input[name="tournament-size"]:checked') as HTMLInputElement;
 
@@ -2684,17 +2683,14 @@ export default class extends AView {
 			if (tournamentSizeElement.value === 'custom') {
 				const customSizeElement = document.getElementById('custom-tournament-size') as HTMLInputElement;
 				const customSize = parseInt(customSizeElement.value, 10);
-
 				if (!customSize || customSize < 4 || customSize > 64) {
 					showNotification('Geçerli bir turnuva boyutu girin (4-64 arası)!', 'error');
 					return;
 				}
-
 				if (customSize & (customSize - 1)) {
 					showNotification('Turnuva boyutu 2\'nin kuvveti olmalıdır (4, 8, 16, 32, 64)!', 'error');
 					return;
 				}
-
 				tournamentSize = customSize;
 			} else {
 				tournamentSize = parseInt(tournamentSizeElement.value, 10);
@@ -2705,14 +2701,13 @@ export default class extends AView {
 				return;
 			}
 
-			// Turnuva verilerini hazırla
 			const data = {
 				gameMode: 'tournament',
 				gameType: 'tournament',
 				tournamentSettings: {
+					...tournamentConfig.tournamentSettings,
 					name: tournamentName,
-					maxPlayers: tournamentSize,
-					...tournamentConfig.tournamentSettings
+					maxPlayers: tournamentSize
 				}
 			};
 
@@ -2721,8 +2716,9 @@ export default class extends AView {
 
 			// Güvenli socket gönderimi
 			if (roomSocket) {
+				console.log(`🏆 Creating tournament: "${tournamentName}" with ${tournamentSize} players`);
 				roomSocket.send("create", data);
-				showNotification('Turnuva oluşturuluyor...', 'info');
+				showNotification(`"${tournamentName}" turnuvası oluşturuluyor...`, 'info');
 			} else {
 				showNotification('Soket bağlantısı hatası!', 'error');
 			}
