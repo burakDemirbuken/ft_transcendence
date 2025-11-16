@@ -254,22 +254,22 @@
 }
 
 .card {
-	width: clamp(270px, 70% + 80px, 2400px);
-	height: 90%;
-	border: 2px solid #5557;
+	position: relative;
+	width: clamp(270px, 70% + 80px, 400px);
+	height: 300px;
+	border: 2px solid #0cce;
 	border-radius: 10px;
 	padding: clamp(2px, 3% + 1px,20px);
 	overflow-y: auto;
-	background:
-		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.145) 0%, transparent 50%),
-		radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.161) 0%, transparent 50%),
-		linear-gradient(135deg, #0a0a0a91 0%, #2525348e 50%, #2b324498 100%);
+	background: rgb(10, 10, 10);
 }
 
 #card-exit {
 	position: absolute;
-	top: calc(5% + 5px);
-	right: calc(15% - 30px);
+	/* top: calc(5% + 5px);
+	right: calc(15% - 30px); */
+	top: 5px;
+	right: 5px;
 	cursor: pointer;
 }
 
@@ -280,8 +280,73 @@
 	transition: all 0.3s ease;
 }
 
-#card-exit:hover svg {
+#card-exit:hover svg, #card-exit:focus svg {
 	rotate: 90deg;
 	filter: drop-shadow(0 0 10px rgb(193, 1, 1)); /* üzerine gelince kırmızı gölge */
 	fill: #e30;
+}
+
+.validation-form {
+	height: 100%;
+}
+
+.validation-label {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	gap: clamp(.5rem, 10% + 1vw, 1.5rem);
+	color: #ccc;
+}
+
+.validation-label span {
+	font-size: clamp(1rem, .8rem + 2vw, 1.8rem);
+	font-family: "Orbitron", monospace;
+}
+
+.validation-label input {
+	font-size: clamp(.6rem, .5rem + 2vw, 1.2rem);
+	background: none;
+	color: #ccc;
+	padding: .2em .5em;
+
+	border-radius: 5px;
+	border: 1px solid #444;
+	background: rgb(10,10,10, 0.9);
+}
+
+.validation-label .enter-code{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1em;
+
+	width: 90%;
+	background: #111;
+	padding: 2em 1em 1.5em 1em;
+	margin-top: 1.6em;
+	border-radius: 5px;
+	border: 1px solid #333;
+}
+
+.validation-label button {
+	width: 90%;
+	padding: .4em 1em;
+	font-size: clamp(.8rem, .6rem + 2vw, 1.2rem);
+
+	border-radius: 5px;
+	border: 2px solid #0666;
+	background: #1443;
+	color: #3cc9;
+
+	transition: all .2s ease-in-out;
+}
+
+.validation-label button:hover, .validation-label button:focus {
+	box-shadow: 0 0 10px #0cc, inset 0 0 5px #0cc;
+	border-color: #0cc;
+	background: #0999;
+	color: #111;
 }
