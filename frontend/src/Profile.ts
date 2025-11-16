@@ -1597,26 +1597,28 @@ async function populateTournamentHistory(userName: string) {
 		tournamentRow.dataset.tournamentId = tournament.id?.toString() || '';
 		tournamentRow.dataset.start = tournament.startDate || tournament.start_date || '';
 
-		// Tarih formatla
-		const startDate = new Date(tournament.startDate || tournament.start_date || '');
-		const endDate = new Date(tournament.endDate || tournament.end_date || '');
+		// Tarih ve saat formatla
+		const startDate = new Date(tournament.TournamentStartDate || '');
+		const endDate = new Date(tournament.TournamentEndDate || '');
 
+		// Tarih + Saat formatı
 		const startDateStr = startDate.toLocaleDateString('tr-TR');
-		const endDateStr = endDate.toLocaleDateString('tr-TR');
+		const startTimeStr = startDate.toLocaleTimeString('tr-TR', {
+			hour: '2-digit',
+			minute: '2-digit'
+		});
 
-		// Kazanan kontrolü
-		const isWinner = tournament.winnerPlayer === userName ||
-						 tournament.winner?.userName === userName;
-		const winnerBadge = isWinner ?
-			`<span class="winner-badge">👑 ${translations?.profile?.tournament?.winner || 'Şampiyon'}</span>` :
-			'';
+		const endDateStr = endDate.toLocaleDateString('tr-TR');
+		const endTimeStr = endDate.toLocaleTimeString('tr-TR', {
+			hour: '2-digit',
+			minute: '2-digit'
+		});
 
 		tournamentRow.innerHTML = `
 			<span class="tournament-name">${tournament.name || 'Unnamed Tournament'}</span>
-			<span class="tournament-date">${startDateStr}</span>
-			<span class="tournament-end-date">${endDateStr}</span>
-			<span class="tournament-matches">${tournament.Rounds?.length || 0} ${translations?.profile?.tournament?.rounds || 'Tur'}</span>
-			<span class="tournament-status">${winnerBadge}</span>
+			<span class="tournament-date">${startDateStr} ${startTimeStr}</span>
+			<span class="tournament-end-date">${endDateStr} ${endTimeStr}</span>
+			<span class="tournament-matches">${tournament.Rounds?.length || 0}</span>
 		`;
 
 		// Turnuva verilerini data attribute'e kaydet
@@ -1707,7 +1709,7 @@ async function onLoad() {
 
 			if (ProfileUsername.ok) {
 				const user = await ProfileUsername.json();
-				// console.log("All data:", user);
+				console.log("All data:", user);
 
 				setTextStats(user);
 				await setChartStats(user);
