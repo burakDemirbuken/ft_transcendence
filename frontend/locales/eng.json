@@ -99,7 +99,7 @@
 				"tname": "Tournament Name",
 				"tstart": "Start",
 				"tend": "End",
-				"total": "Total Matches"
+				"trounds": "Rounds Number"
 			},
 			"table": {
 				"matches": "Matches",

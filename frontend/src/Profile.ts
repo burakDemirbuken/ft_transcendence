@@ -628,6 +628,7 @@ export function updateChartLanguage() {
 		profileManager.updateChartLanguage();
 	refreshMatchHistory();
 	updateTournamentLanguage();
+	updateRecentMatchesLanguage();
 
 	// Eğer overlay açıksa, içeriğini güncelle
 	const matchOverlay = document.getElementById('match-overlay') as HTMLDivElement;
@@ -1303,7 +1304,8 @@ async function populateMatchHistory(userName: string) {
 		emptyRow.style.gridColumn = '1 / -1';
 		emptyRow.style.textAlign = 'center';
 		emptyRow.style.padding = '2rem';
-		emptyRow.innerHTML = `<span data-i18n="profile.mhistory.nomatch">${translations?.profile?.mhistory?.nomatch || 'Henüz maç geçmişi bulunmuyor'}</span>`;
+		const nomatchText = translations?.profile?.mhistory?.nomatch || 'Henüz maç geçmişi bulunmuyor';
+		emptyRow.innerHTML = `<span>${nomatchText}</span>`;
 		matchTable.appendChild(emptyRow);
 		return;
 	}
@@ -1361,6 +1363,13 @@ export function refreshMatchHistory() {
 	const userName = document.querySelector('.username')?.textContent?.replace('@', '');
 	if (userName) {
 		populateMatchHistory(userName);
+	}
+}
+
+async function updateRecentMatchesLanguage() {
+	const userName = document.querySelector('.username')?.textContent?.replace('@', '');
+	if (userName) {
+		await populateRecentMatches(userName);
 	}
 }
 
@@ -1626,6 +1635,9 @@ async function populateTournamentHistory(userName: string) {
 	const existingRows = tournamentTable.querySelectorAll('.tournament-row:not(.header)');
 	existingRows.forEach(row => row.remove());
 
+	const existingEmptyStates = tournamentTable.querySelectorAll('.empty-state');
+	existingEmptyStates.forEach(row => row.remove());
+
 	if (tournaments.length === 0) {
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 		const emptyRow = document.createElement('div');
@@ -1633,7 +1645,7 @@ async function populateTournamentHistory(userName: string) {
 		emptyRow.style.gridColumn = '1 / -1';
 		emptyRow.style.textAlign = 'center';
 		emptyRow.style.padding = '2rem';
-		emptyRow.innerHTML = `<span data-i18n="profile.thistory.nomatch">${translations?.profile?.tournament?.notournament || 'Henüz turnuva geçmişi bulunmuyor'}</span>`;
+		emptyRow.innerHTML = `<span data-i18n="profile.thistory.nomatch">${translations?.profile?.thistory?.nomatch || 'Henüz turnuva geçmişi bulunmuyor'}</span>`;
 		tournamentTable.appendChild(emptyRow);
 		return;
 	}

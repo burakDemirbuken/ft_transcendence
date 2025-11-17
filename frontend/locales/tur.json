@@ -100,7 +100,7 @@
 				"tname": "Turnuva Adı",
 				"tstart": "Başlangıç",
 				"tend": "Bitiş",
-				"total": "Toplam Maç"
+				"trounds": "Tur Sayısı"
 			},
 			"table": {
 				"matches": "Maçlar",

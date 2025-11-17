@@ -100,7 +100,7 @@
 				"tname": "Turniername",
 				"tstart": "Anfang",
 				"tend": "Ende",
-				"total": "Gesamtspiele"
+				"trounds": "Touren Anzahl"
 			},
 			"table": {
 				"matches": "Spiele",
