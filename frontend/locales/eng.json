@@ -203,12 +203,12 @@
 			"uname": "User Name",
 			"dname": "Display Name",
 			"email": "E-mail",
-			"pass": "Change Password:"
+			"pass": "Password"
 		},
 		"language": "Language",
 		"dzone": {
 			"title": "Danger Zone",
-			"prompt": "Delete Account:",
+			"prompt": "Delete Account",
 			"button": "Delete"
 		},
 		"delacc": "Are you sure about deleting your account? This action is irreversible."
