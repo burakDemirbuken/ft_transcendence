@@ -2614,6 +2614,19 @@ export default class extends AView {
 			showNotification('Oda oluşturuluyor...', 'info');
 		});
 
+		document.getElementById('custom-winning-score')?.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				document.getElementById('custom-create-btn')?.click();
+			}
+		});
+
+		document.getElementById('custom-room-code')?.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				document.getElementById('custom-join-btn')?.click();
+			}
+		});
+
 		// Custom Game - Join Room
 		document.getElementById('custom-join-btn')?.addEventListener('click', function() {
 			const roomCodeEl = document.getElementById('custom-room-code') as HTMLInputElement;
@@ -2774,6 +2787,12 @@ export default class extends AView {
 			}
 		});
 
+		document.getElementById('tournament-name')?.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				document.getElementById('tournament-create-btn')?.click();
+			}
+		});
+
 		// Tournament - Join
 		document.getElementById('tournament-join-btn')?.addEventListener('click', function() {
 			// Null ve type assertion ile güvenli erişim
@@ -2797,6 +2816,12 @@ export default class extends AView {
 				showNotification(`${tournamentCode} kodlu turnuvaya katılıyorsunuz...`, 'info');
 			} else {
 				showNotification('Soket bağlantısı hatası!', 'error');
+			}
+		});
+
+		document.getElementById('tournament-code')?.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				document.getElementById('tournament-join-btn')?.click();
 			}
 		});
 
@@ -2840,7 +2865,7 @@ export default class extends AView {
             }, 10000);
         });
 
-        // Next Round Button - YENİ EKLE
+        // Next Round Button
         document.getElementById('next-round-btn')?.addEventListener('click', function() {
             console.log("NEXT ROUND BUTTON CLICKED!");
 
@@ -2877,6 +2902,12 @@ export default class extends AView {
             }, 10000);
         });
 
+		document.getElementById('next-round-btn')?.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				(this as HTMLElement).click();
+			}
+		});
+
         // Final Round butonuna event listener ekle
         const finalRoundBtn = document.getElementById('final-round-btn') as HTMLButtonElement | null;
         if (finalRoundBtn) {
@@ -2906,7 +2937,18 @@ export default class extends AView {
                     }
                 }, 10000);
             });
+            finalRoundBtn.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    finalRoundBtn.click();
+                }
+        });
         }
+
+		document.getElementById('match-players-btn')?.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				(this as HTMLElement).click();
+			}
+		});
 
         // Kişileri eşleştir butonu
         document.getElementById('match-players-btn')?.addEventListener('click', function() {
