@@ -1602,6 +1602,7 @@ async function fetchTournamentHistory(userName: string) {
 
 		if (response.ok) {
 			const data = await response.json();
+			console.log("tournament history: ", data);
 			return data.usersTournament || data.tournaments || [];
 		} else {
 			console.error("❌ Failed to fetch tournament history:", response.statusText);
