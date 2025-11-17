@@ -186,7 +186,6 @@ class RoomManager extends EventEmitter
 						console.error('❌ Profile service error:', response.status, await response.text());
 					else
 						console.log('✅ Data sent to profile service:', data);
-					console.log('✅ Data sent to profile service:', data);
 				}
 				catch (error)
 				{

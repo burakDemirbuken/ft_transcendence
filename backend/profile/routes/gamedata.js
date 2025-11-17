@@ -349,7 +349,7 @@ export default async function gamedataRoute(fastify) {
 	})
 
 	fastify.post('/internal/tournament', async (request, reply) => {
-		const { name, winner, rounds } = request.body ?? {}
+		const { name, winner, rounds, time } = request.body ?? {}
 		const { Profile, Stat, RoundMatch, Round, TournamentHistory } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
 
@@ -367,7 +367,9 @@ export default async function gamedataRoute(fastify) {
 				winnerPlayer: (await Profile.findOne({
 					where: { userName: winner },
 					attributes: ['id']
-				}))?.id ?? null
+				}))?.id ?? null,
+				TournamentStartDate: time.start ? new Date(time.start) : null,
+				TournamentEndDate: time.end ? new Date(time.end) : null
 			}, { transaction: t })
 
 			let allPlayerProfile = []
@@ -560,7 +562,7 @@ export default async function gamedataRoute(fastify) {
 						order: [['roundNumber', 'ASC']]
 					}
 				],
-				attributes: ['name', 'winnerPlayer'],
+				attributes: ['name', 'winnerPlayer', 'TournamentStartDate', 'TournamentEndDate'],
 				where: {
 					id: {
 						[Op.in]: tournamentIds

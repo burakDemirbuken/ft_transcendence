@@ -20,7 +20,15 @@ export default (sequelize, DataTypes, Model) => {
 				key: 'id'
 			},
 			onDelete: 'SET NULL'
-		}
+		},
+		TournamentStartDate: {
+			type: DataTypes.DATE,
+			allowNull: false
+		},
+		TournamentEndDate: {
+			type: DataTypes.DATE,
+			allowNull: false
+		},
 	}, {
 		sequelize,
 		modelName: 'TournamentHistory',
