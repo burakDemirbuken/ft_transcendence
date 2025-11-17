@@ -630,6 +630,84 @@ function handleRoomJoined(payload) {
     }
 }
 
+function updateRoundWaitingRoomButtons(players: any[]): void {
+  console.log('🔄 Updating round waiting room buttons...');
+
+  // Host kontrolü
+  const isHost = players.some(player => {
+    const playerId = player.userId || player.id;
+    const playerIsHost = player.isHost === true;
+
+    console.log(`Checking: ${player.name}, ID: ${playerId}, isHost: ${playerIsHost}, currentUserId: ${currentUserId}`);
+
+    return playerId === currentUserId && playerIsHost;
+  });
+
+  console.log(`Host status updated: ${isHost}`);
+
+  const roundWaitingBtn = document.getElementById('round-waiting-btn') as HTMLButtonElement | null;
+  const nextRoundBtn = document.getElementById('next-round-btn') as HTMLButtonElement | null;
+  const finalRoundBtn = document.getElementById('final-round-btn') as HTMLButtonElement | null;
+
+  if (isHost) {
+    console.log('✅ User is NOW HOST - showing host buttons');
+
+    if (roundWaitingBtn) {
+      roundWaitingBtn.style.display = 'none';
+      roundWaitingBtn.classList.remove('active');
+    }
+
+    // Turnuva round bilgisini al
+    const currentRound = tournamentData?.currentRoundNumber || 1;
+    const totalRounds = tournamentData?.maxRounds || 3;
+    const nextRound = currentRound + 1;
+
+    // Final round mu?
+    if (nextRound === totalRounds) {
+      console.log('🏆 Showing FINAL ROUND button');
+      if (nextRoundBtn) {
+        nextRoundBtn.style.display = 'none';
+        nextRoundBtn.classList.remove('active');
+      }
+      if (finalRoundBtn) {
+        finalRoundBtn.style.cssText = 'display: block !important;';
+        finalRoundBtn.classList.add('active');
+        finalRoundBtn.disabled = false;
+      }
+    }
+    // Normal round
+    else {
+      console.log('▶️ Showing NEXT ROUND button');
+      if (finalRoundBtn) {
+        finalRoundBtn.style.display = 'none';
+        finalRoundBtn.classList.remove('active');
+      }
+      if (nextRoundBtn) {
+        nextRoundBtn.style.cssText = 'display: block !important;';
+        nextRoundBtn.classList.add('active');
+        nextRoundBtn.disabled = false;
+      }
+    }
+  } else {
+    console.log('❌ User is NOT HOST - showing waiting button');
+
+    if (nextRoundBtn) {
+      nextRoundBtn.style.display = 'none';
+      nextRoundBtn.classList.remove('active');
+    }
+    if (finalRoundBtn) {
+      finalRoundBtn.style.display = 'none';
+      finalRoundBtn.classList.remove('active');
+    }
+
+    if (roundWaitingBtn) {
+      roundWaitingBtn.style.cssText = 'display: block !important;';
+      roundWaitingBtn.classList.add('active');
+      roundWaitingBtn.textContent = '⏳ Host Bekleniyor...';
+    }
+  }
+}
+
 // handleRoomUpdate fonksiyonunu güncelle
 export function handleRoomUpdate(payload: MatchmakingData): void {
   console.log('🔄 Room update:', payload);
@@ -640,11 +718,19 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
   const maxPlayers = payload.maxPlayers ?? 2;
 
     // ✅ Eğer round waiting room aktifse, room update'i işleme
-    const roundWaitingRoom = document.getElementById('round-waiting-room');
-    if (roundWaitingRoom && roundWaitingRoom.classList.contains('active')) {
-        console.log('⏸️ Round waiting room is active, skipping room update');
-        return;
-    }
+	const roundWaitingRoom = document.getElementById('round-waiting-room');
+	if (roundWaitingRoom && roundWaitingRoom.classList.contains('active')) {
+		console.log('📋 Round waiting room is active, updating buttons for host change');
+
+		// Tournament data'yı güncelle
+		if (tournamentData) {
+			tournamentData.winners = payload.players;
+		}
+
+		// Butonları güncelle
+		updateRoundWaitingRoomButtons(payload.players);
+		return;
+	}
 
   if (currentGameMode === 'tournament') {
     const playerCountElem = document.getElementById('players-count');
@@ -3033,12 +3119,12 @@ export default class extends AView {
 	    updateSliderDisplay('custom-ball-radius', 'custom-ball-radius-value', (value) => `${value}px`);
 	    updateSliderDisplay('custom-corner-boost', 'custom-corner-boost-value', (value) => `${value}`);
 	    updateSliderDisplay('custom-winning-score', 'custom-winning-score-value');
-	
+
 	    // AI Game Sliders
 	    updateSliderDisplay('ai-paddle-height', 'ai-paddle-height-value', (value) => `${value}px`);
 	    updateSliderDisplay('ai-ball-radius', 'ai-ball-radius-value', (value) => `${value}px`);
 	    updateSliderDisplay('ai-corner-boost', 'ai-corner-boost-value', (value) => `${parseFloat(value).toFixed(1)}x`);
-	
+
 	    // AI Custom Settings Sliders
 	    this.setupAICustomSliderDisplay('ai-paddle-speed', 'ai-paddle-speed-value');
 	    this.setupAICustomSliderDisplay('ai-reaction-time', 'ai-reaction-time-value', (value) => `${value}ms`);
@@ -3047,7 +3133,7 @@ export default class extends AView {
 	    this.setupAICustomSliderDisplay('ai-target-win-rate', 'ai-target-win-rate-value', (value) => `${value}%`);
 	    this.setupAICustomSliderDisplay('ai-fairness-level', 'ai-fairness-level-value');
 	    this.setupAICustomSliderDisplay('ai-max-consecutive-wins', 'ai-max-consecutive-wins-value');
-	
+
 	    // Slider value updates
 	    const sliders: [string, string, string?][] = [
 	        ['custom-paddle-height', 'custom-paddle-height-value', 'px'],
@@ -3067,7 +3153,7 @@ export default class extends AView {
 	        ['ai-fairness-level', 'ai-fairness-level-value', ''],
 	        ['ai-max-consecutive-wins', 'ai-max-consecutive-wins-value', '']
 	    ];
-	
+
 	    sliders.forEach(([sliderId, valueId, suffix]) => {
 	        updateSliderValue(sliderId, valueId, suffix || '');
 	    });
