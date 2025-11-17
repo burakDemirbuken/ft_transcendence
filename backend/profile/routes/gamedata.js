@@ -503,14 +503,17 @@ export default async function gamedataRoute(fastify) {
 			if (!userProfile) {
 				return reply.code(404).send({ error: 'User profile not found' })
 			}
+			console.log('Retrieved user profile:', { id: userProfile.id, userName: userName })
 
 			const userTournamentIds = await fastify.sequelize.models.TournamentHistory.findAll({
 				include: [
 					{
 						model: fastify.sequelize.models.Round,
+						required: true,
 						include: [
 							{
 								model: fastify.sequelize.models.RoundMatch,
+								required: true,
 								where: {
 									[Op.or]: [
 										{ playerOneID: userProfile.id },
@@ -528,7 +531,7 @@ export default async function gamedataRoute(fastify) {
 			});
 
 			const tournamentIds = [...new Set(userTournamentIds.map(t => t.id))];
-
+			console.log('User tournament IDs:', tournamentIds)
 			const usersTournament = await fastify.sequelize.models.TournamentHistory.findAll({
 				include: [
 					{
