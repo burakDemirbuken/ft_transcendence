@@ -1430,7 +1430,6 @@ function updateSliderDisplay(
 
     if (slider && display) {
         slider.addEventListener('input', function() {
-            // Varsayılan formatter kullanılmazsa direkt değeri göster
             const formattedValue = formatter
                 ? formatter(this.value)
                 : this.value;
@@ -1438,6 +1437,36 @@ function updateSliderDisplay(
             display.textContent = formattedValue;
         });
     }
+}
+
+function updateSliderValue(sliderId: string, valueId: string, suffix: string = ''): void {
+    const slider = document.getElementById(sliderId) as HTMLInputElement | null;
+    const valueDisplay = document.getElementById(valueId) as HTMLElement | null;
+
+    if (!slider || !valueDisplay) return;
+
+    slider.addEventListener('input', function () {
+        let value: string | number = slider.value;
+
+        if (sliderId.includes('corner-boost')) {
+            if (sliderId.includes('ai-')) {
+                value = parseFloat(value).toFixed(1) + 'x';
+            } else {
+                value = value.toString();
+            }
+        } else if (sliderId.includes('target-win-rate')) {
+            value = (parseInt(value) * 10) + '%';
+        } else {
+            value += suffix;
+        }
+
+        valueDisplay.style.transform = 'scale(1.1)';
+        valueDisplay.textContent = value.toString();
+
+        setTimeout(() => {
+            valueDisplay.style.transform = 'scale(1)';
+        }, 200);
+    });
 }
 
 // AI Custom Settings Sliders
@@ -1537,34 +1566,6 @@ const gameModeCards = document.querySelectorAll<HTMLElement>('.game-mode-card');
 const settingsPanels = document.querySelectorAll<HTMLElement>('.settings-panel');
 const aiDifficultyRadios = document.querySelectorAll<HTMLInputElement>('input[name="ai-difficulty"]');
 const aiCustomSettings = document.getElementById('ai-custom-settings') as HTMLElement | null;
-
-// Initialize all sliders
-function updateSliderValue(sliderId: string, valueId: string, suffix: string = ''): void {
-    const slider = document.getElementById(sliderId) as HTMLInputElement | null;
-    const valueDisplay = document.getElementById(valueId) as HTMLElement | null;
-
-    if (!slider || !valueDisplay) return;
-
-    slider.addEventListener('input', function () {
-        let value: string | number = slider.value;
-
-        if (sliderId.includes('corner-boost')) {
-            value = parseFloat(value).toFixed(1) + 'x';
-        } else if (sliderId.includes('target-win-rate')) {
-            value = (parseInt(value) * 10) + '%';
-        } else {
-            value += suffix;
-        }
-
-        // Animate value change
-        valueDisplay.style.transform = 'scale(1.1)';
-        valueDisplay.textContent = value.toString();
-
-        setTimeout(() => {
-            valueDisplay.style.transform = 'scale(1)';
-        }, 200);
-    });
-}
 
 // Initialize all sliders (paddle-speed ve ball-speed çıkarıldı)
 const sliders = [
@@ -2525,11 +2526,6 @@ export default class extends AView {
 
 		// Keyboard and Quick Actions
 		this.initKeyboardListeners();
-
-		// Custom Game Sliders
-		updateSliderDisplay('paddle-height', 'paddle-height-value', (value) => `${value}px`);
-		updateSliderDisplay('ball-radius', 'ball-radius-value', (value) => `${value}px`);
-		updateSliderDisplay('corner-boost', 'corner-boost-value', (value) => `${parseFloat(value).toFixed(1)}x`);
 	}
 
 	private initGameModeListeners(): void {
@@ -3032,49 +3028,49 @@ export default class extends AView {
 	}
 
 	private initSliderListeners(): void {
-		// Custom Game Sliders
-		updateSliderDisplay('custom-paddle-height', 'custom-paddle-height-value', (value) => `${value}px`);
-		updateSliderDisplay('custom-ball-radius', 'custom-ball-radius-value', (value) => `${value}px`);
-		updateSliderDisplay('custom-corner-boost', 'custom-corner-boost-value', (value) => `${parseFloat(value).toFixed(1)}x`);
-		updateSliderDisplay('custom-winning-score', 'custom-winning-score-value');
-
-		// AI Game Sliders
-		updateSliderDisplay('ai-paddle-height', 'ai-paddle-height-value', (value) => `${value}px`);
-		updateSliderDisplay('ai-ball-radius', 'ai-ball-radius-value', (value) => `${value}px`);
-		updateSliderDisplay('ai-corner-boost', 'ai-corner-boost-value', (value) => `${parseFloat(value).toFixed(1)}x`);
-
-		// AI Custom Settings Sliders
-		this.setupAICustomSliderDisplay('ai-paddle-speed', 'ai-paddle-speed-value');
-		this.setupAICustomSliderDisplay('ai-reaction-time', 'ai-reaction-time-value', (value) => `${value}ms`);
-		this.setupAICustomSliderDisplay('ai-prediction-accuracy', 'ai-prediction-accuracy-value', (value) => `${value}%`);
-		this.setupAICustomSliderDisplay('ai-error-rate', 'ai-error-rate-value', (value) => `${value}%`);
-		this.setupAICustomSliderDisplay('ai-target-win-rate', 'ai-target-win-rate-value', (value) => `${value}%`);
-		this.setupAICustomSliderDisplay('ai-fairness-level', 'ai-fairness-level-value');
-		this.setupAICustomSliderDisplay('ai-max-consecutive-wins', 'ai-max-consecutive-wins-value');
-
-		// Slider value updates
-		const sliders: [string, string, string?][] = [
-			['custom-paddle-height', 'custom-paddle-height-value', 'px'],
-			['custom-ball-radius', 'custom-ball-radius-value', 'px'],
-			['custom-corner-boost', 'custom-corner-boost-value', 'x'],
-			['custom-winning-score', 'custom-winning-score-value'],
-			['ai-paddle-height', 'ai-paddle-height-value', 'px'],
-			['ai-ball-radius', 'ai-ball-radius-value', 'px'],
-			['ai-corner-boost', 'ai-corner-boost-value', 'x'],
-			['ai-reaction-time', 'ai-reaction-time-value'],
-			['ai-prediction-accuracy', 'ai-prediction-accuracy-value'],
-			['ai-general-accuracy', 'ai-general-accuracy-value'],
-			['ai-learning-speed', 'ai-learning-speed-value'],
-			['ai-preparation-distance', 'ai-preparation-distance-value'],
-			['ai-freeze-distance', 'ai-freeze-distance-value'],
-			['ai-target-win-rate', 'ai-target-win-rate-value'],
-			['ai-fairness-level', 'ai-fairness-level-value'],
-			['ai-max-consecutive-wins', 'ai-max-consecutive-wins-value']
-		];
-
-		sliders.forEach(([sliderId, valueId, suffix]) => {
-			updateSliderValue(sliderId, valueId, suffix || '');
-		});
+	    // Custom Game Sliders
+	    updateSliderDisplay('custom-paddle-height', 'custom-paddle-height-value', (value) => `${value}px`);
+	    updateSliderDisplay('custom-ball-radius', 'custom-ball-radius-value', (value) => `${value}px`);
+	    updateSliderDisplay('custom-corner-boost', 'custom-corner-boost-value', (value) => `${value}`);
+	    updateSliderDisplay('custom-winning-score', 'custom-winning-score-value');
+	
+	    // AI Game Sliders
+	    updateSliderDisplay('ai-paddle-height', 'ai-paddle-height-value', (value) => `${value}px`);
+	    updateSliderDisplay('ai-ball-radius', 'ai-ball-radius-value', (value) => `${value}px`);
+	    updateSliderDisplay('ai-corner-boost', 'ai-corner-boost-value', (value) => `${parseFloat(value).toFixed(1)}x`);
+	
+	    // AI Custom Settings Sliders
+	    this.setupAICustomSliderDisplay('ai-paddle-speed', 'ai-paddle-speed-value');
+	    this.setupAICustomSliderDisplay('ai-reaction-time', 'ai-reaction-time-value', (value) => `${value}ms`);
+	    this.setupAICustomSliderDisplay('ai-prediction-accuracy', 'ai-prediction-accuracy-value', (value) => `${value}%`);
+	    this.setupAICustomSliderDisplay('ai-error-rate', 'ai-error-rate-value', (value) => `${value}%`);
+	    this.setupAICustomSliderDisplay('ai-target-win-rate', 'ai-target-win-rate-value', (value) => `${value}%`);
+	    this.setupAICustomSliderDisplay('ai-fairness-level', 'ai-fairness-level-value');
+	    this.setupAICustomSliderDisplay('ai-max-consecutive-wins', 'ai-max-consecutive-wins-value');
+	
+	    // Slider value updates
+	    const sliders: [string, string, string?][] = [
+	        ['custom-paddle-height', 'custom-paddle-height-value', 'px'],
+	        ['custom-ball-radius', 'custom-ball-radius-value', 'px'],
+	        ['custom-corner-boost', 'custom-corner-boost-value', ''],
+	        ['custom-winning-score', 'custom-winning-score-value', ''],
+	        ['ai-paddle-height', 'ai-paddle-height-value', 'px'],
+	        ['ai-ball-radius', 'ai-ball-radius-value', 'px'],
+	        ['ai-corner-boost', 'ai-corner-boost-value', 'x'],
+	        ['ai-reaction-time', 'ai-reaction-time-value', ''],
+	        ['ai-prediction-accuracy', 'ai-prediction-accuracy-value', ''],
+	        ['ai-general-accuracy', 'ai-general-accuracy-value', ''],
+	        ['ai-learning-speed', 'ai-learning-speed-value', ''],
+	        ['ai-preparation-distance', 'ai-preparation-distance-value', ''],
+	        ['ai-freeze-distance', 'ai-freeze-distance-value', ''],
+	        ['ai-target-win-rate', 'ai-target-win-rate-value', ''],
+	        ['ai-fairness-level', 'ai-fairness-level-value', ''],
+	        ['ai-max-consecutive-wins', 'ai-max-consecutive-wins-value', '']
+	    ];
+	
+	    sliders.forEach(([sliderId, valueId, suffix]) => {
+	        updateSliderValue(sliderId, valueId, suffix || '');
+	    });
 	}
 
 	private setupAICustomSliderDisplay(
