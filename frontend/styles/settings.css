@@ -75,18 +75,13 @@
 }
 
 .settings-container .submit {
-	width: 1.8rem;
-	height: 1.8rem;
 	border-radius: 5px;
-
 	border: 2px solid #333;
 	background: #000;
-}
 
-.settings-container .submit svg {
-	fill: #ccc;
-	background: none;
-	padding: .3em;
+	padding: .4em .4em;
+	font-size: .8em;
+	color: #ccc;
 }
 
 .settings-container #delete-account {
