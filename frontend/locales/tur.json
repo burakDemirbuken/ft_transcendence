@@ -209,11 +209,11 @@
 			"uname": "Kullanıcı Adı",
 			"dname": "Görünür Ad",
 			"email": "E-posta",
-			"pass": "Şifre Değiştir:"
+			"pass": "Şifre"
 		},
 		"dzone": {
 			"title": "Tehlikel Bölge",
-			"prompt": "Hesabı Sil:",
+			"prompt": "Hesabı Sil",
 			"button": "Sil"
 		},
 		"delacc": "Hesabınızı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
