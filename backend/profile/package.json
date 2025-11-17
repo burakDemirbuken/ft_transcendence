@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "fastify": "^4.29.1",
+    "@fastify/jwt": "^8.0.0",
+    "@fastify/cookie": "^9.0.0",
     "fastify-overview": "^3.0.0",
     "fastify-overview-ui": "^3.0.0",
     "fastify-plugin": "^4.5.1",

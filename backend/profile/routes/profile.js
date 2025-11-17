@@ -3,7 +3,7 @@ import { Op } from 'sequelize'
 export default async function profileRoute(fastify) {
 
 	fastify.get('/profile', async (request, reply) => {
-		const { userName } = request.query ?? {}
+		const userName = fastify.getDataFromToken(request).username
 
 		try {
 			if (!userName) {
@@ -35,7 +35,7 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.delete('/profile', async (request, reply) => {
-		const { userName } = request.body ?? {}
+		const userName = fastify.getDataFromToken(request).username
 
 		//?
 		const isFromAuthService = request.headers['x-auth-service'];
@@ -79,7 +79,7 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.delete('/profile-delete-by-username', async (request, reply) => {
-		const { userName } = request.body ?? {}
+		const userName = fastify.getDataFromToken(request).username
 
 		try {
 			if (!userName) {
@@ -105,8 +105,8 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.post('/displaynameupdate', async (request, reply) => {
-		const { userName , dname } = request.body ?? {}
-
+		const userName = fastify.getDataFromToken(request).username
+		const dname = request.body?.dname
 
 		try {
 			if (!userName) {
@@ -134,7 +134,6 @@ export default async function profileRoute(fastify) {
 	fastify.post('/create', async (request, reply) =>
 	{
 		const { userName } = request.body ?? {}
-
 
 		try {
 			if (!userName) {

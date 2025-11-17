@@ -1,10 +1,10 @@
 # ==============================================
 # CRITICAL: Environment & Secrets - NEVER COMMIT!
 # ==============================================
-.env
-.env.local
-.env.*.local
-*.env
+# .env
+# .env.local
+# .env.*.local
+# *.env
 
 # ==============================================
 # Database files & data

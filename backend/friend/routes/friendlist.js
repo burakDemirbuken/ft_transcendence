@@ -2,7 +2,6 @@ import { Op } from 'sequelize'
 
 export default async function friendListRoutes(fastify) {
 
-
 	fastify.delete('/list', async (request, reply) => {
 		const { userName } = request.body ?? {}
 
