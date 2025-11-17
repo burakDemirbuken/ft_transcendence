@@ -23,7 +23,7 @@ declare global {
     interface Window {
         roomSocket?: WebSocketClient;
         app?: App;
-        canvasManager?: CanvasOrientationManager; // ✅ YENİ
+        canvasManager?: CanvasOrientationManager;
     }
 }
 
@@ -50,21 +50,25 @@ function generateRandomName() {
 function displayMatchPairs(pairs, participants) {
     const matchPairsSection = document.getElementById('match-pairs-section');
     const matchPairsContainer = document.getElementById('match-pairs-container');
+    const nextRoundPairsSection = document.getElementById('next-round-pairs-section');
+    const nextRoundContainer = document.getElementById('next-round-pairs-container');
 
-    // Eğer next-round-pairs-container varsa onu kullan
-    const isNextRound = !matchPairsSection;
-    const container = isNextRound ?
-        document.getElementById('next-round-pairs-container') :
-        matchPairsContainer;
+    // next-round-pairs-section görünürse next round, yoksa ilk round
+    const isNextRound = nextRoundPairsSection && nextRoundPairsSection.style.display !== 'none';
+
+    const container = isNextRound ? nextRoundContainer : matchPairsContainer;
 
     if (!container) {
-        console.error('Match pairs container not found!');
+        console.error('❌ Match pairs container not found!');
+        console.error('   matchPairsContainer:', matchPairsContainer);
+        console.error('   nextRoundContainer:', nextRoundContainer);
+        console.error('   isNextRound:', isNextRound);
         return;
     }
 
-    if (matchPairsSection && !isNextRound) {
-        matchPairsSection.style.display = 'block';
-    }
+    console.log(`✅ Using container: ${isNextRound ? 'next-round-pairs-container' : 'match-pairs-container'}`);
+    console.log(`✅ Match pairs section display: ${matchPairsSection?.style.display}`);
+    console.log(`✅ Next round section display: ${nextRoundPairsSection?.style.display}`);
 
     container.innerHTML = '';
 
@@ -109,7 +113,7 @@ function displayMatchPairs(pairs, participants) {
         const players = document.createElement('div');
         players.className = 'match-players';
 
-        // Player names - önce pair.playerNames'i kontrol et, yoksa participantsMap'ten al
+        // Player names
         let player1Name = 'Unknown';
         let player2Name = 'Unknown';
 
@@ -125,18 +129,9 @@ function displayMatchPairs(pairs, participants) {
 
         console.log(`Match ${matchNum}: ${player1Name} vs ${player2Name}`);
 
-        // İlk oyuncu - winner/loser durumuna göre stil ekle
+        // İlk oyuncu
         const player1 = document.createElement('div');
         player1.className = 'match-player';
-        if (pair.winner === pair.players[0]) {
-            player1.classList.add('winner');
-            player1.style.borderColor = '#00ff88';
-            player1.style.background = 'rgba(0, 255, 136, 0.2)';
-        } else if (pair.loser === pair.players[0]) {
-            player1.classList.add('loser');
-            player1.style.opacity = '0.7';
-        }
-
         player1.innerHTML = `
             <div class="match-player-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="24" height="24" fill="${color.border}">
@@ -152,18 +147,9 @@ function displayMatchPairs(pairs, participants) {
         vs.className = 'vs-divider';
         vs.innerHTML = `<span class="vs-text">VS</span>`;
 
-        // İkinci oyuncu - winner/loser durumuna göre stil ekle
+        // İkinci oyuncu
         const player2 = document.createElement('div');
         player2.className = 'match-player';
-        if (pair.winner === pair.players[1]) {
-            player2.classList.add('winner');
-            player2.style.borderColor = '#00ff88';
-            player2.style.background = 'rgba(0, 255, 136, 0.2)';
-        } else if (pair.loser === pair.players[1]) {
-            player2.classList.add('loser');
-            player2.style.opacity = '0.7';
-        }
-
         player2.innerHTML = `
             <div class="match-player-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="24" height="24" fill="${color.border}">
@@ -182,6 +168,8 @@ function displayMatchPairs(pairs, participants) {
         card.appendChild(players);
         container.appendChild(card);
     });
+
+    console.log(`✅ ${pairs.length} match pairs displayed in ${isNextRound ? 'next-round' : 'first-round'}`);
 
     // Katılımcıları eşleşme renklerine göre güncelle (sadece ilk eşleştirmede)
     if (!isNextRound && participants) {
@@ -254,7 +242,6 @@ function updateParticipants(
         const card = document.createElement('div');
         card.className = 'participant-card';
 
-        // DÜZELTME: userId yerine id kullan
         const participantId = participant.userId || participant.id;
 
         // Eşleştirme yapıldıysa o rengi kullan, yoksa sırayla renk ver
@@ -652,6 +639,13 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
   const playerCount = payload.players.length;
   const maxPlayers = payload.maxPlayers ?? 2;
 
+    // ✅ Eğer round waiting room aktifse, room update'i işleme
+    const roundWaitingRoom = document.getElementById('round-waiting-room');
+    if (roundWaitingRoom && roundWaitingRoom.classList.contains('active')) {
+        console.log('⏸️ Round waiting room is active, skipping room update');
+        return;
+    }
+
   if (currentGameMode === 'tournament') {
     const playerCountElem = document.getElementById('players-count');
     if (playerCountElem) playerCountElem.textContent = `${playerCount}/${maxPlayers}`;
@@ -660,6 +654,11 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
     if (payload.status === 'ready2start' && payload.match) {
       console.log('🎲 Matches are ready, transforming data...');
       const transformedData = transformMatchmakingData(payload);
+
+      const matchPairsContainer = document.getElementById('match-pairs-container');
+      if (matchPairsContainer) {
+        matchPairsContainer.innerHTML = '';
+      }
 
       displayMatchPairs(transformedData.matchPairs, transformedData.players);
 
@@ -672,12 +671,20 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
 
       const waitingBtn = document.getElementById('waiting-players-btn');
       const matchBtn = document.getElementById('match-players-btn');
-      const startBtn = document.getElementById('start-tournament-btn');
+      const startBtn = document.getElementById('start-tournament-btn') as HTMLButtonElement;
+
+      const matchPairsSection = document.getElementById('match-pairs-section');
+      if (matchPairsSection) {
+        matchPairsSection.style.display = 'block';
+      }
 
       if (isHost) {
         if (waitingBtn) waitingBtn.style.display = 'none';
         if (matchBtn) matchBtn.style.display = 'none';
-        if (startBtn) startBtn.style.display = 'block';
+        if (startBtn) {
+          startBtn.style.display = 'block';
+          startBtn.disabled = false;
+        }
       } else {
         if (waitingBtn) {
           waitingBtn.style.display = 'block';
@@ -692,30 +699,42 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
       // Henüz eşleştirme yapılmamış
       updateParticipants(payload.players, 'participants-grid');
 
+      const matchPairsSection = document.getElementById('match-pairs-section');
+      if (matchPairsSection) {
+        matchPairsSection.style.display = 'none';
+      }
+
       const isHost = payload.players.some(
         (player) => player.id === currentUserId && player.isHost
       );
 
       const waitingBtn = document.getElementById('waiting-players-btn');
-      const matchBtn = document.getElementById('match-players-btn');
+      const matchBtn = document.getElementById('match-players-btn') as HTMLButtonElement;
       const startBtn = document.getElementById('start-tournament-btn');
       const statusDisplay = document.getElementById('tournament-status-display');
 
       if (isHost) {
-        const minPlayers = 4;
-
-        if (playerCount >= minPlayers && playerCount % 2 === 0) {
+        // maxPlayers'ı kullan, sabit 4 yerine
+        if (playerCount >= maxPlayers && playerCount % 2 === 0) {
           if (waitingBtn) waitingBtn.style.display = 'none';
-          if (matchBtn) matchBtn.style.display = 'block';
+          if (matchBtn) {
+            matchBtn.style.display = 'block';
+            matchBtn.disabled = false;
+          }
           if (startBtn) startBtn.style.display = 'none';
           if (statusDisplay) statusDisplay.textContent = 'Eşleştirme Bekleniyor';
         } else {
+          // Mesajı dinamik yap
+          let message = '';
+          if (playerCount < maxPlayers) {
+            message = `Daha ${maxPlayers - playerCount} oyuncu gerekli`;
+          } else if (playerCount % 2 !== 0) {
+            message = 'Çift sayıda oyuncu gerekli';
+          }
+
           if (waitingBtn) {
             waitingBtn.style.display = 'block';
-            waitingBtn.textContent =
-              minPlayers - playerCount > 0
-                ? `En az ${minPlayers - playerCount} oyuncu daha gerekli`
-                : 'Çift sayıda oyuncu gerekli';
+            waitingBtn.textContent = message;
           }
           if (matchBtn) matchBtn.style.display = 'none';
           if (startBtn) startBtn.style.display = 'none';
@@ -818,7 +837,6 @@ function handleGameStarted(payload: GameStartPayload): void {
     app = new App(currentUserId, currentUserName);
     app.start(payload);
 
-    // ✅ Canvas manager'ı kontrol et
     if (canvasManager) {
         console.log('🎮 Canvas manager found, setting game running...');
         canvasManager.setGameRunning(true);
@@ -846,7 +864,6 @@ interface GameFinishPayload {
 function handleGameFinished(payload: GameFinishPayload): void {
     console.log('🏁 Game finished:', payload);
 
-    // ✅ Canvas manager'ı kontrol et
     if (canvasManager) {
         canvasManager.setGameRunning(false);
     } else if (window.canvasManager) {
@@ -856,7 +873,7 @@ function handleGameFinished(payload: GameFinishPayload): void {
     // Destroy game
     if (app) {
         app.destroy();
-        app = null;  // Null atamayı kaldırın veya tipi değiştirin
+        app = null;
     }
 
     // Null kontrolü ekleyerek gameContainer'ı güvenle kullanın
@@ -865,7 +882,7 @@ function handleGameFinished(payload: GameFinishPayload): void {
         gameContainer.style.display = 'none';
     }
 
-    // Hızlı oyun için kontrol - null kontrolü ekleyin
+    // Hızlı oyun için kontrol
     const loadingScreen = document.getElementById('loading-screen');
     const gamePage = document.getElementById('game-page');
 
@@ -877,18 +894,12 @@ function handleGameFinished(payload: GameFinishPayload): void {
         }
     }
 
-    // Tournament modunda round bitişi kontrolü
     if (currentGameMode === 'tournament') {
-        // Status 'next_round' ise bir sonraki round var demektir
-        if (payload.status === 'next_round') {
-            console.log('🏆 Tournament round finished, showing round waiting room');
-            handleRoundFinished(payload);
-            return;
-        }
+        console.log('🏆 Tournament game finished, status:', payload.status);
 
-        // Status 'finished' ise turnuva bitti demektir
-        if (payload.status === 'finished' || payload.isFinal) {
-            console.log('🏆 Tournament completed!');
+        // Status 'finished' veya isFinal true ise turnuva bitti demektir
+        if (payload.status === 'finished' || payload.isFinal === true) {
+            console.log('🏆 TOURNAMENT COMPLETED!');
             showNotification('🏆 Turnuva tamamlandı!', 'success');
 
             // Kazananı göster
@@ -898,6 +909,36 @@ function handleGameFinished(payload: GameFinishPayload): void {
                 showNotification(`🎉 Kazanan: ${payload.players[0].name}`, 'success');
             }
 
+            // Tüm butonları gizle ve waiting room'u kapat
+            const roundWaitingBtn = document.getElementById('round-waiting-btn') as HTMLButtonElement | null;
+            const nextRoundBtn = document.getElementById('next-round-btn') as HTMLButtonElement | null;
+            const finalRoundBtn = document.getElementById('final-round-btn') as HTMLButtonElement | null;
+
+            if (roundWaitingBtn) roundWaitingBtn.style.display = 'none';
+            if (nextRoundBtn) nextRoundBtn.style.display = 'none';
+            if (finalRoundBtn) finalRoundBtn.style.display = 'none';
+
+            // Waiting room'u kapat
+            const roundWaitingRoom = document.getElementById('round-waiting-room');
+            if (roundWaitingRoom) {
+                roundWaitingRoom.classList.remove('active');
+            }
+
+            // Game page'i göster
+            if (gamePage) {
+                gamePage.classList.remove('hidden');
+            }
+
+            // Tournament data'yı sıfırla
+            tournamentData = null;
+
+            return;
+        }
+
+        // Status 'next_round' ise bir sonraki round var demektir
+        if (payload.status === 'next_round') {
+            console.log('🏆 Tournament round finished, showing round waiting room');
+            handleRoundFinished(payload);
             return;
         }
     }
@@ -958,8 +999,9 @@ function showTournamentWaitingRoom(data: TournamentData): void {
     const playersCount = document.getElementById('players-count');
     const tournamentStatusDisplay = document.getElementById('tournament-status-display');
     const waitingPlayersBtn = document.getElementById('waiting-players-btn');
-    const matchPlayersBtn = document.getElementById('match-players-btn');
+    const matchPlayersBtn = document.getElementById('match-players-btn') as HTMLButtonElement;
     const startTournamentBtn = document.getElementById('start-tournament-btn');
+    const matchPairsSection = document.getElementById('match-pairs-section');
 
     // Null kontrolleri ile sınıf ve stil güncellemeleri
     if (gamePage) gamePage.classList.add('hidden');
@@ -971,25 +1013,33 @@ function showTournamentWaitingRoom(data: TournamentData): void {
         roomCodeDisplay.textContent = data.roomId || 'TOUR-XXXXX';
     }
 
+    const playerCount = data.players?.length || 0;
+    const maxPlayers = data.maxPlayers || 8;
+
     // Players count
     if (playersCount) {
-        playersCount.textContent = `${data.players?.length || 0}/${data.maxPlayers || 8}`;
+        playersCount.textContent = `${playerCount}/${maxPlayers}`;
     }
 
     // Tournament status
     if (tournamentStatusDisplay) {
-        const statusText = data.status === 'ready2start' ? 'Eşleşmeler Hazır' : 'Oyuncular Bekleniyor';
+        const statusText = data.status === 'ready2start' ? 'Eşleştirmeler Hazır' : 'Oyuncular Bekleniyor';
         tournamentStatusDisplay.textContent = statusText;
     }
 
     if (data.players) {
-        // DÜZELTME: id kullan, userId değil
         const isHost = data.players.some(player => player.id === currentUserId && player.isHost);
 
         // Eğer status 'ready2start' ise ve match varsa eşleştirmeleri göster
         if (data.status === 'ready2start' && data.match) {
             console.log('🎲 Showing match pairs...');
             const transformedData = transformMatchmakingData(data);
+
+            // match-pairs-section'ı göster
+            if (matchPairsSection) {
+                matchPairsSection.style.display = 'block';
+            }
+
             displayMatchPairs(transformedData.matchPairs, transformedData.players);
 
             // Host için buton kontrolleri
@@ -1007,26 +1057,39 @@ function showTournamentWaitingRoom(data: TournamentData): void {
             }
         } else {
             // Henüz eşleştirme yapılmamış
+            // match-pairs-section'ı gizle
+            if (matchPairsSection) {
+                matchPairsSection.style.display = 'none';
+            }
+
             updateParticipants(data.players, 'participants-grid');
 
             if (isHost) {
-                const playerCount = data.players.length;
-                const minPlayers = 4;
-
-                if (playerCount >= minPlayers && playerCount % 2 === 0) {
+                // maxPlayers'ı kullan, sabit 4 yerine
+                if (playerCount >= maxPlayers && playerCount % 2 === 0) {
                     if (waitingPlayersBtn) waitingPlayersBtn.style.display = 'none';
-                    if (matchPlayersBtn) matchPlayersBtn.style.display = 'block';
+                    if (matchPlayersBtn) {
+                        matchPlayersBtn.style.display = 'block';
+                        matchPlayersBtn.disabled = false;
+                    }
                     if (startTournamentBtn) startTournamentBtn.style.display = 'none';
+                    if (tournamentStatusDisplay) tournamentStatusDisplay.textContent = 'Eşleştirme Bekleniyor';
                 } else {
+                    // Mesajı dinamik yap
+                    let message = '';
+                    if (playerCount < maxPlayers) {
+                        message = `En az ${maxPlayers - playerCount} oyuncu daha gerekli`;
+                    } else if (playerCount % 2 !== 0) {
+                        message = 'Çift sayıda oyuncu gerekli';
+                    }
+
                     if (waitingPlayersBtn) {
                         waitingPlayersBtn.style.display = 'block';
-                        waitingPlayersBtn.textContent =
-                            playerCount < minPlayers
-                                ? `En az ${minPlayers - playerCount} oyuncu daha gerekli`
-                                : 'Çift sayıda oyuncu gerekli';
+                        waitingPlayersBtn.textContent = message;
                     }
                     if (matchPlayersBtn) matchPlayersBtn.style.display = 'none';
                     if (startTournamentBtn) startTournamentBtn.style.display = 'none';
+                    if (tournamentStatusDisplay) tournamentStatusDisplay.textContent = 'Oyuncular Bekleniyor';
                 }
             } else {
                 if (waitingPlayersBtn) {
@@ -1126,7 +1189,6 @@ function showCustomWaitingRoom(data: CustomRoomData): void {
         }
     }
 
-    // DÜZELTME: id kullan, userId değil
     const isHost = data.players && data.players.some(player => player.id === currentUserId && player.isHost);
 
     // Show/hide buttons
@@ -1368,7 +1430,6 @@ function updateSliderDisplay(
 
     if (slider && display) {
         slider.addEventListener('input', function() {
-            // Varsayılan formatter kullanılmazsa direkt değeri göster
             const formattedValue = formatter
                 ? formatter(this.value)
                 : this.value;
@@ -1376,6 +1437,36 @@ function updateSliderDisplay(
             display.textContent = formattedValue;
         });
     }
+}
+
+function updateSliderValue(sliderId: string, valueId: string, suffix: string = ''): void {
+    const slider = document.getElementById(sliderId) as HTMLInputElement | null;
+    const valueDisplay = document.getElementById(valueId) as HTMLElement | null;
+
+    if (!slider || !valueDisplay) return;
+
+    slider.addEventListener('input', function () {
+        let value: string | number = slider.value;
+
+        if (sliderId.includes('corner-boost')) {
+            if (sliderId.includes('ai-')) {
+                value = parseFloat(value).toFixed(1) + 'x';
+            } else {
+                value = value.toString();
+            }
+        } else if (sliderId.includes('target-win-rate')) {
+            value = (parseInt(value) * 10) + '%';
+        } else {
+            value += suffix;
+        }
+
+        valueDisplay.style.transform = 'scale(1.1)';
+        valueDisplay.textContent = value.toString();
+
+        setTimeout(() => {
+            valueDisplay.style.transform = 'scale(1)';
+        }, 200);
+    });
 }
 
 // AI Custom Settings Sliders
@@ -1476,34 +1567,6 @@ const settingsPanels = document.querySelectorAll<HTMLElement>('.settings-panel')
 const aiDifficultyRadios = document.querySelectorAll<HTMLInputElement>('input[name="ai-difficulty"]');
 const aiCustomSettings = document.getElementById('ai-custom-settings') as HTMLElement | null;
 
-// Initialize all sliders
-function updateSliderValue(sliderId: string, valueId: string, suffix: string = ''): void {
-    const slider = document.getElementById(sliderId) as HTMLInputElement | null;
-    const valueDisplay = document.getElementById(valueId) as HTMLElement | null;
-
-    if (!slider || !valueDisplay) return;
-
-    slider.addEventListener('input', function () {
-        let value: string | number = slider.value;
-
-        if (sliderId.includes('corner-boost')) {
-            value = parseFloat(value).toFixed(1) + 'x';
-        } else if (sliderId.includes('target-win-rate')) {
-            value = (parseInt(value) * 10) + '%';
-        } else {
-            value += suffix;
-        }
-
-        // Animate value change
-        valueDisplay.style.transform = 'scale(1.1)';
-        valueDisplay.textContent = value.toString();
-
-        setTimeout(() => {
-            valueDisplay.style.transform = 'scale(1)';
-        }, 200);
-    });
-}
-
 // Initialize all sliders (paddle-speed ve ball-speed çıkarıldı)
 const sliders = [
     ['paddle-height', 'paddle-height-value', 'px'],
@@ -1585,15 +1648,15 @@ function showRoundWaitingRoom(data) {
     const remainingPlayersDisplay = document.getElementById('round-remaining-players');
     const nextRoundDisplay = document.getElementById('round-next-display');
 
-    const currentRound = data.currentRound || 1;
-    const totalRounds = data.totalRounds || data.maxRound || 3;
+    const currentRound = data.currentRoundNumber || 1;
+    const totalRounds = data.maxRounds || 3;
     const winnersCount = data.winners ? data.winners.length : 0;
 
     if (currentRoundDisplay) currentRoundDisplay.textContent = currentRound;
     if (totalRoundsDisplay) totalRoundsDisplay.textContent = totalRounds;
     if (remainingPlayersDisplay) remainingPlayersDisplay.textContent = winnersCount;
 
-    // Next round bilgisi - DÜZELTİLDİ
+    // Next round bilgisi
     const nextRound = currentRound + 1;
     if (nextRoundDisplay) {
         if (nextRound > totalRounds) {
@@ -1624,66 +1687,7 @@ function showRoundWaitingRoom(data) {
         const nextRoundContainer = document.getElementById('next-round-pairs-container');
         if (nextRoundContainer) {
             nextRoundContainer.innerHTML = '';
-
-            data.nextMatches.forEach((pair, index) => {
-                const colors = [
-                    { border: '#00ffff', bg: 'rgba(0, 255, 255, 0.1)' },
-                    { border: '#ff00ff', bg: 'rgba(255, 0, 255, 0.1)' },
-                    { border: '#00ff88', bg: 'rgba(0, 255, 136, 0.1)' },
-                    { border: '#ff8800', bg: 'rgba(255, 136, 0, 0.1)' }
-                ];
-                const color = colors[index % colors.length];
-
-                const card = document.createElement('div');
-                card.className = 'match-pair-card';
-                card.style.borderColor = color.border;
-                card.style.background = color.bg;
-
-                const header = document.createElement('div');
-                header.className = 'match-header';
-                const matchNum = pair.matchNumber !== undefined ? pair.matchNumber + 1 : index + 1;
-                header.innerHTML = `<div class="match-number">Maç ${matchNum}</div>`;
-
-                const players = document.createElement('div');
-                players.className = 'match-players';
-
-                const player1Name = pair.playerNames && pair.playerNames[0] ? pair.playerNames[0] : 'Unknown';
-                const player2Name = pair.playerNames && pair.playerNames[1] ? pair.playerNames[1] : 'Unknown';
-
-                const player1 = document.createElement('div');
-                player1.className = 'match-player';
-                player1.innerHTML = `
-                    <div class="match-player-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="24" height="24" fill="${color.border}">
-                            <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM171.7 396.1C166 382 177.4 368 192.6 368L447.5 368C462.7 368 474.1 382 468.4 396.1C444.6 454.7 387.2 496 320.1 496C253 496 195.5 454.7 171.8 396.1zM186.7 207.3C191.2 200.5 200 198.1 207.3 201.8L286.9 241.8C292.3 244.5 295.7 250 295.7 256.1C295.7 262.2 292.3 267.7 286.9 270.4L207.3 310.4C200 314 191.2 311.7 186.7 304.9C182.2 298.1 183.6 289 189.8 283.8L223 256L189.8 228.3C183.6 223.1 182.2 214 186.7 207.2zM450.3 228.4L417 256L450.2 283.7C456.4 288.9 457.8 298 453.3 304.8C448.8 311.6 440 314 432.7 310.3L353.1 270.3C347.7 267.6 344.3 262.1 344.3 256C344.3 249.9 347.7 244.4 353.1 241.7L432.7 201.7C440 198.1 448.8 200.4 453.3 207.2C457.8 214 456.4 223.1 450.2 228.3z"/>
-                        </svg>
-                    </div>
-                    <div class="match-player-name">${player1Name}</div>
-                `;
-
-                const vs = document.createElement('div');
-                vs.className = 'vs-divider';
-                vs.innerHTML = `<span class="vs-text">VS</span>`;
-
-                const player2 = document.createElement('div');
-                player2.className = 'match-player';
-                player2.innerHTML = `
-                    <div class="match-player-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="24" height="24" fill="${color.border}">
-                            <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM171.7 396.1C166 382 177.4 368 192.6 368L447.5 368C462.7 368 474.1 382 468.4 396.1C444.6 454.7 387.2 496 320.1 496C253 496 195.5 454.7 171.8 396.1zM186.7 207.3C191.2 200.5 200 198.1 207.3 201.8L286.9 241.8C292.3 244.5 295.7 250 295.7 256.1C295.7 262.2 292.3 267.7 286.9 270.4L207.3 310.4C200 314 191.2 311.7 186.7 304.9C182.2 298.1 183.6 289 189.8 283.8L223 256L189.8 228.3C183.6 223.1 182.2 214 186.7 207.2zM450.3 228.4L417 256L450.2 283.7C456.4 288.9 457.8 298 453.3 304.8C448.8 311.6 440 314 432.7 310.3L353.1 270.3C347.7 267.6 344.3 262.1 344.3 256C344.3 249.9 347.7 244.4 353.1 241.7L432.7 201.7C440 198.1 448.8 200.4 453.3 207.2C457.8 214 456.4 223.1 450.2 228.3z"/>
-                        </svg>
-                    </div>
-                    <div class="match-player-name">${player2Name}</div>
-                `;
-
-                players.appendChild(player1);
-                players.appendChild(vs);
-                players.appendChild(player2);
-
-                card.appendChild(header);
-                card.appendChild(players);
-                nextRoundContainer.appendChild(card);
-            });
+            displayMatchPairs(data.nextMatches, data.winners);
         }
     } else {
         if (nextRoundPairsSection) {
@@ -1691,50 +1695,107 @@ function showRoundWaitingRoom(data) {
         }
     }
 
-    // Host kontrolü - DÜZELTME: id kullan, userId değil
-    const isHost = data.winners && data.winners.some(player => player.id === currentUserId && player.isHost);
+    // Host kontrolü
+    const isHost = data.winners && data.winners.some(player => {
+        const playerId = player.userId || player.id;
+        const playerIsHost = player.isHost === true;
 
+        console.log(`Checking player: ${player.name}, ID: ${playerId}, isHost: ${playerIsHost}, currentUserId: ${currentUserId}`);
+
+        return playerId === currentUserId && playerIsHost;
+    });
+
+    console.log(`=== HOST CHECK RESULT ===`);
     console.log(`Host check - isHost: ${isHost}, currentUserId: ${currentUserId}`);
+    console.log(`Winners:`, data.winners);
 
-    // Butonları ayarla - DÜZELTİLDİ
+    // Butonları ayarla
     const roundWaitingBtn = document.getElementById('round-waiting-btn') as HTMLButtonElement | null;
     const nextRoundBtn = document.getElementById('next-round-btn') as HTMLButtonElement | null;
     const finalRoundBtn = document.getElementById('final-round-btn') as HTMLButtonElement | null;
 
-    // Önce tüm butonları gizle
-    if (roundWaitingBtn) roundWaitingBtn.style.display = 'none';
-    if (nextRoundBtn) nextRoundBtn.style.display = 'none';
-    if (finalRoundBtn) finalRoundBtn.style.display = 'none';
+    console.log('=== BUTTON ELEMENTS ===');
+    console.log('roundWaitingBtn exists:', !!roundWaitingBtn);
+    console.log('nextRoundBtn exists:', !!nextRoundBtn);
+    console.log('finalRoundBtn exists:', !!finalRoundBtn);
 
+    // ✅ DÜZELTME: display yerine classList kullan ve !important ekle
     if (isHost) {
-        console.log('User is host, showing appropriate button');
+        console.log('✅ User is HOST - showing appropriate button');
+
+        // Önce tüm butonları gizle
+        if (roundWaitingBtn) {
+            roundWaitingBtn.style.display = 'none';
+            roundWaitingBtn.classList.remove('active');
+        }
 
         // Turnuva bitti mi kontrol et
         if (currentRound >= totalRounds) {
-            console.log('Tournament completed');
+            console.log('🏆 Tournament completed - no buttons shown');
             showNotification('🏆 Turnuva tamamlandı!', 'success');
+            if (nextRoundBtn) nextRoundBtn.style.display = 'none';
+            if (finalRoundBtn) finalRoundBtn.style.display = 'none';
+            return;
         }
         // Final round mu?
         else if (nextRound === totalRounds) {
-            console.log('Showing final round button');
+            console.log('🏆 Showing FINAL ROUND button');
+            if (nextRoundBtn) {
+                nextRoundBtn.style.display = 'none';
+                nextRoundBtn.classList.remove('active');
+            }
             if (finalRoundBtn) {
-                finalRoundBtn.style.display = 'block';
+                finalRoundBtn.style.cssText = 'display: block !important;';
+                finalRoundBtn.classList.add('active');
                 finalRoundBtn.disabled = false;
+                console.log('Final round button display:', window.getComputedStyle(finalRoundBtn).display);
+                console.log('Final round button classList:', finalRoundBtn.classList);
             }
         }
         // Normal round
         else {
-            console.log('Showing next round button');
+            console.log('▶️ Showing NEXT ROUND button');
+            if (finalRoundBtn) {
+                finalRoundBtn.style.display = 'none';
+                finalRoundBtn.classList.remove('active');
+            }
             if (nextRoundBtn) {
-                nextRoundBtn.style.display = 'block';
+                // ✅ !important ile zorla göster
+                nextRoundBtn.style.cssText = 'display: block !important;';
+                nextRoundBtn.classList.add('active');
                 nextRoundBtn.disabled = false;
+
+                console.log('Next round button display:', window.getComputedStyle(nextRoundBtn).display);
+                console.log('Next round button classList:', nextRoundBtn.classList);
+                console.log('Next round button offsetHeight:', nextRoundBtn.offsetHeight);
+                console.log('Next round button offsetWidth:', nextRoundBtn.offsetWidth);
             }
         }
     } else {
-        console.log('User is not host, showing waiting button');
+        console.log('❌ User is NOT HOST - showing waiting button');
+
+        // Önce host butonlarını gizle
+        if (nextRoundBtn) {
+            nextRoundBtn.style.display = 'none';
+            nextRoundBtn.classList.remove('active');
+        }
+        if (finalRoundBtn) {
+            finalRoundBtn.style.display = 'none';
+            finalRoundBtn.classList.remove('active');
+        }
+
+        // Turnuva bitti mi kontrol et
+        if (currentRound >= totalRounds) {
+            console.log('🏆 Tournament completed - no waiting button');
+            if (roundWaitingBtn) roundWaitingBtn.style.display = 'none';
+            return;
+        }
+
         if (roundWaitingBtn) {
-            roundWaitingBtn.style.display = 'block';
-            roundWaitingBtn.textContent = '⏳ Waiting for Host...';
+            roundWaitingBtn.style.cssText = 'display: block !important;';
+            roundWaitingBtn.classList.add('active');
+            roundWaitingBtn.textContent = '⏳ Host Bekleniyor...';
+            console.log('Waiting button display:', window.getComputedStyle(roundWaitingBtn).display);
         }
     }
 }
@@ -1752,28 +1813,26 @@ interface RoundFinishedPayload {
 }
 
 // handleRoundFinished fonksiyonunu da güncelle
-function handleRoundFinished(payload) {
+function handleRoundFinished(payload: RoundFinishedPayload): void {
     console.log('🏁 Round finished:', payload);
 
-    // Payload kontrolü
     if (!payload) {
         console.error('Invalid round data: payload is null');
         showNotification('Round verisi geçersiz!', 'error');
-        // returnToLobby();
         return;
     }
 
-    // Round bilgilerini al
     const currentRound = payload.currentRound || 1;
     const maxRound = payload.maxRound || payload.totalRounds || 3;
 
     console.log(`Round finished - Current: ${currentRound}, Max: ${maxRound}`);
 
-    // Kazananları ve bir sonraki eşleştirmeleri hazırla
-    const winners = payload.players || payload.winners || [];
-    const eliminated = payload.spectators || payload.eliminated || [];
+    // ✅ DÜZELTME: players = kazananlar (payload.players kullan)
+    const winners = payload.players || [];
+    const eliminated = payload.losers || payload.eliminated || [];
 
     console.log(`Winners: ${winners.length}, Eliminated: ${eliminated.length}`);
+    console.log('Winners data:', winners);
 
     // Bir sonraki round'un eşleştirmelerini hazırla
     let nextMatches = [];
@@ -1795,7 +1854,7 @@ function handleRoundFinished(payload) {
     tournamentData = {
         currentRoundNumber: currentRound,
         maxRounds: maxRound,
-        winners: winners,
+        winners: winners,  // ✅ Bu artık payload.players'dan geliyor
         eliminated: eliminated,
         nextMatches: nextMatches
     };
@@ -1807,7 +1866,6 @@ function handleRoundFinished(payload) {
 
     showNotification(`Round ${currentRound} tamamlandı!`, 'success');
 }
-
 
 // ============================================================================
 // CANVAS ORIENTATION LOCK - LANDSCAPE ONLY
@@ -1896,7 +1954,7 @@ class CanvasOrientationManager {
 
         const checkCanvasReady = () => {
             if (this.canvas!.width > 0 && this.canvas!.height > 0) {
-                console.log('✅ Canvas is ready!');
+                console.log('Canvas is ready!');
                 this.isCanvasReady = true;
 
                 if (this.hasTouchCapability) {
@@ -1994,7 +2052,7 @@ class CanvasOrientationManager {
     }
 
     private checkOrientation(): void {
-        // ✅ Sadece canvas hazırsa, touch cihazsa VE oyun çalışıyorsa kontrol et
+        // Sadece canvas hazırsa, touch cihazsa VE oyun çalışıyorsa kontrol et
         if (!this.isCanvasReady || !this.hasTouchCapability || !this.isGameRunning) {
             return;
         }
@@ -2035,7 +2093,7 @@ class CanvasOrientationManager {
             </div>
         `;
 
-        // ✅ DÜZELTME: Canvas'ın üzerine yazdır - z-index yüksek tut
+        // Canvas'ın üzerine yazdır - z-index yüksek tut
         this.portraitWarning.style.cssText = `
             position: fixed;
             top: 0;
@@ -2298,7 +2356,7 @@ class CanvasOrientationManager {
     private updateCanvasLayout(): void {
         if (!this.canvas) return;
 
-        // ✅ Canvas'ı her zaman göster
+        // Canvas'ı her zaman göster
         this.canvas.style.cssText = `
             position: fixed;
             top: 0;
@@ -2468,11 +2526,6 @@ export default class extends AView {
 
 		// Keyboard and Quick Actions
 		this.initKeyboardListeners();
-
-		// Custom Game Sliders
-		updateSliderDisplay('paddle-height', 'paddle-height-value', (value) => `${value}px`);
-		updateSliderDisplay('ball-radius', 'ball-radius-value', (value) => `${value}px`);
-		updateSliderDisplay('corner-boost', 'corner-boost-value', (value) => `${parseFloat(value).toFixed(1)}x`);
 	}
 
 	private initGameModeListeners(): void {
@@ -2555,6 +2608,19 @@ export default class extends AView {
 
 			roomSocket.send("create", data);
 			showNotification('Oda oluşturuluyor...', 'info');
+		});
+
+		document.getElementById('custom-winning-score')?.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				document.getElementById('custom-create-btn')?.click();
+			}
+		});
+
+		document.getElementById('custom-room-code')?.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				document.getElementById('custom-join-btn')?.click();
+			}
 		});
 
 		// Custom Game - Join Room
@@ -2664,7 +2730,6 @@ export default class extends AView {
 			// Null ve type assertion ile güvenli erişim
 			const tournamentNameElement = document.getElementById('tournament-name') as HTMLInputElement;
 			const tournamentName = tournamentNameElement.value.trim();
-
 			// Turnuva boyutu seçimini al
 			const tournamentSizeElement = document.querySelector('input[name="tournament-size"]:checked') as HTMLInputElement;
 
@@ -2677,17 +2742,14 @@ export default class extends AView {
 			if (tournamentSizeElement.value === 'custom') {
 				const customSizeElement = document.getElementById('custom-tournament-size') as HTMLInputElement;
 				const customSize = parseInt(customSizeElement.value, 10);
-
 				if (!customSize || customSize < 4 || customSize > 64) {
 					showNotification('Geçerli bir turnuva boyutu girin (4-64 arası)!', 'error');
 					return;
 				}
-
 				if (customSize & (customSize - 1)) {
 					showNotification('Turnuva boyutu 2\'nin kuvveti olmalıdır (4, 8, 16, 32, 64)!', 'error');
 					return;
 				}
-
 				tournamentSize = customSize;
 			} else {
 				tournamentSize = parseInt(tournamentSizeElement.value, 10);
@@ -2698,14 +2760,13 @@ export default class extends AView {
 				return;
 			}
 
-			// Turnuva verilerini hazırla
 			const data = {
 				gameMode: 'tournament',
 				gameType: 'tournament',
 				tournamentSettings: {
+					...tournamentConfig.tournamentSettings,
 					name: tournamentName,
-					maxPlayers: tournamentSize,
-					...tournamentConfig.tournamentSettings
+					maxPlayers: tournamentSize
 				}
 			};
 
@@ -2714,10 +2775,17 @@ export default class extends AView {
 
 			// Güvenli socket gönderimi
 			if (roomSocket) {
+				console.log(`🏆 Creating tournament: "${tournamentName}" with ${tournamentSize} players`);
 				roomSocket.send("create", data);
-				showNotification('Turnuva oluşturuluyor...', 'info');
+				showNotification(`"${tournamentName}" turnuvası oluşturuluyor...`, 'info');
 			} else {
 				showNotification('Soket bağlantısı hatası!', 'error');
+			}
+		});
+
+		document.getElementById('tournament-name')?.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				document.getElementById('tournament-create-btn')?.click();
 			}
 		});
 
@@ -2744,6 +2812,12 @@ export default class extends AView {
 				showNotification(`${tournamentCode} kodlu turnuvaya katılıyorsunuz...`, 'info');
 			} else {
 				showNotification('Soket bağlantısı hatası!', 'error');
+			}
+		});
+
+		document.getElementById('tournament-code')?.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				document.getElementById('tournament-join-btn')?.click();
 			}
 		});
 
@@ -2787,7 +2861,50 @@ export default class extends AView {
             }, 10000);
         });
 
-		// Final Round butonuna event listener ekle
+        // Next Round Button
+        document.getElementById('next-round-btn')?.addEventListener('click', function() {
+            console.log("NEXT ROUND BUTTON CLICKED!");
+
+            const nextRoundBtn = this as HTMLButtonElement;
+
+            if (!currentRoomId) {
+                showNotification('Oda ID\'si bulunamadı!', 'error');
+                return;
+            }
+
+            if (!roomSocket) {
+                showNotification('WebSocket bağlantısı yok!', 'error');
+                return;
+            }
+
+            nextRoundBtn.disabled = true;
+            nextRoundBtn.innerHTML = '<div class="loading"></div> Başlatılıyor...';
+
+            const currentRound = tournamentData?.currentRoundNumber ?? 1;
+
+            roomSocket.send("start", {
+                roomId: currentRoomId,
+                round: currentRound + 1,
+                gameMode: 'tournament'
+            });
+
+            showNotification('🎮 Sonraki round başlatılıyor!', 'success');
+
+            setTimeout(() => {
+                if (nextRoundBtn.disabled) {
+                    nextRoundBtn.disabled = false;
+                    nextRoundBtn.innerHTML = '▶️ Start Next Round';
+                }
+            }, 10000);
+        });
+
+		document.getElementById('next-round-btn')?.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				(this as HTMLElement).click();
+			}
+		});
+
+        // Final Round butonuna event listener ekle
         const finalRoundBtn = document.getElementById('final-round-btn') as HTMLButtonElement | null;
         if (finalRoundBtn) {
             finalRoundBtn.addEventListener('click', () => {
@@ -2816,9 +2933,20 @@ export default class extends AView {
                     }
                 }, 10000);
             });
+            finalRoundBtn.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    finalRoundBtn.click();
+                }
+        });
         }
 
-		// Kişileri eşleştir butonu
+		document.getElementById('match-players-btn')?.addEventListener('keypress', function(e) {
+			if (e.key === 'Enter') {
+				(this as HTMLElement).click();
+			}
+		});
+
+        // Kişileri eşleştir butonu
         document.getElementById('match-players-btn')?.addEventListener('click', function() {
             if (!currentRoomId || !roomSocket) {
                 showNotification('Bağlantı hatası!', 'error');
@@ -2850,29 +2978,40 @@ export default class extends AView {
 
 	private initNavigationListeners(): void {
 		// Back Arrow
-		document.getElementById('back-arrow')?.addEventListener('click', function() {
-			// Type assertion ile element tipini belirle
-			const backArrow = this as HTMLElement;
+		const backArrowBtn = document.getElementById('back-arrow');
 
-			// Leave room if in one
-			if (currentRoomId && roomSocket) {
-				roomSocket.send("leave", { roomId: currentRoomId });
-				currentRoomId = null;
-			}
-
-			// Hide all waiting rooms
-			document.querySelectorAll('.waiting-room').forEach((room: Element) => {
-				room.classList.remove('active');
+		if (backArrowBtn) {
+			backArrowBtn.addEventListener('click', () => {
+				console.log('Back arrow clicked!');
+				// Leave room if in one
+				if (currentRoomId && roomSocket) {
+					console.log(`Leaving room: ${currentRoomId}`);
+					roomSocket.send("leave", { roomId: currentRoomId });
+					currentRoomId = null;
+				}
+				// Hide all waiting rooms
+				document.querySelectorAll('.waiting-room').forEach((room: Element) => {
+					(room as HTMLElement).classList.remove('active');
+				});
+				// Hide game container
+				const gameContainer = document.getElementById('gameContainer');
+				if (gameContainer) {
+					gameContainer.style.display = 'none';
+				}
+				// Show game mode selection
+				const gameModeSelection = document.getElementById('game-page');
+				if (gameModeSelection) {
+					gameModeSelection.classList.remove('hidden');
+				}
+				// Hide back arrow
+				backArrowBtn.classList.remove('active');
+				// Reset tournament data
+				tournamentData = null;
+				showNotification('Odadan ayrıldınız', 'info');
 			});
-
-			// Show game mode selection
-			document.getElementById('game-mode-selection')?.classList.add('active');
-
-			// Hide back arrow
-			backArrow.classList.remove('active');
-			tournamentData = null;
-			showNotification('Odadan ayrıldınız', 'info');
-		});
+		} else {
+			console.error('❌ Back arrow button not found!');
+		}
 	}
 
 	private initSettingsListeners(): void {
@@ -2889,49 +3028,49 @@ export default class extends AView {
 	}
 
 	private initSliderListeners(): void {
-		// Custom Game Sliders
-		updateSliderDisplay('custom-paddle-height', 'custom-paddle-height-value', (value) => `${value}px`);
-		updateSliderDisplay('custom-ball-radius', 'custom-ball-radius-value', (value) => `${value}px`);
-		updateSliderDisplay('custom-corner-boost', 'custom-corner-boost-value', (value) => `${parseFloat(value).toFixed(1)}x`);
-		updateSliderDisplay('custom-winning-score', 'custom-winning-score-value');
-
-		// AI Game Sliders
-		updateSliderDisplay('ai-paddle-height', 'ai-paddle-height-value', (value) => `${value}px`);
-		updateSliderDisplay('ai-ball-radius', 'ai-ball-radius-value', (value) => `${value}px`);
-		updateSliderDisplay('ai-corner-boost', 'ai-corner-boost-value', (value) => `${parseFloat(value).toFixed(1)}x`);
-
-		// AI Custom Settings Sliders
-		this.setupAICustomSliderDisplay('ai-paddle-speed', 'ai-paddle-speed-value');
-		this.setupAICustomSliderDisplay('ai-reaction-time', 'ai-reaction-time-value', (value) => `${value}ms`);
-		this.setupAICustomSliderDisplay('ai-prediction-accuracy', 'ai-prediction-accuracy-value', (value) => `${value}%`);
-		this.setupAICustomSliderDisplay('ai-error-rate', 'ai-error-rate-value', (value) => `${value}%`);
-		this.setupAICustomSliderDisplay('ai-target-win-rate', 'ai-target-win-rate-value', (value) => `${value}%`);
-		this.setupAICustomSliderDisplay('ai-fairness-level', 'ai-fairness-level-value');
-		this.setupAICustomSliderDisplay('ai-max-consecutive-wins', 'ai-max-consecutive-wins-value');
-
-		// Slider value updates
-		const sliders: [string, string, string?][] = [
-			['custom-paddle-height', 'custom-paddle-height-value', 'px'],
-			['custom-ball-radius', 'custom-ball-radius-value', 'px'],
-			['custom-corner-boost', 'custom-corner-boost-value', 'x'],
-			['custom-winning-score', 'custom-winning-score-value'],
-			['ai-paddle-height', 'ai-paddle-height-value', 'px'],
-			['ai-ball-radius', 'ai-ball-radius-value', 'px'],
-			['ai-corner-boost', 'ai-corner-boost-value', 'x'],
-			['ai-reaction-time', 'ai-reaction-time-value'],
-			['ai-prediction-accuracy', 'ai-prediction-accuracy-value'],
-			['ai-general-accuracy', 'ai-general-accuracy-value'],
-			['ai-learning-speed', 'ai-learning-speed-value'],
-			['ai-preparation-distance', 'ai-preparation-distance-value'],
-			['ai-freeze-distance', 'ai-freeze-distance-value'],
-			['ai-target-win-rate', 'ai-target-win-rate-value'],
-			['ai-fairness-level', 'ai-fairness-level-value'],
-			['ai-max-consecutive-wins', 'ai-max-consecutive-wins-value']
-		];
-
-		sliders.forEach(([sliderId, valueId, suffix]) => {
-			updateSliderValue(sliderId, valueId, suffix || '');
-		});
+	    // Custom Game Sliders
+	    updateSliderDisplay('custom-paddle-height', 'custom-paddle-height-value', (value) => `${value}px`);
+	    updateSliderDisplay('custom-ball-radius', 'custom-ball-radius-value', (value) => `${value}px`);
+	    updateSliderDisplay('custom-corner-boost', 'custom-corner-boost-value', (value) => `${value}`);
+	    updateSliderDisplay('custom-winning-score', 'custom-winning-score-value');
+	
+	    // AI Game Sliders
+	    updateSliderDisplay('ai-paddle-height', 'ai-paddle-height-value', (value) => `${value}px`);
+	    updateSliderDisplay('ai-ball-radius', 'ai-ball-radius-value', (value) => `${value}px`);
+	    updateSliderDisplay('ai-corner-boost', 'ai-corner-boost-value', (value) => `${parseFloat(value).toFixed(1)}x`);
+	
+	    // AI Custom Settings Sliders
+	    this.setupAICustomSliderDisplay('ai-paddle-speed', 'ai-paddle-speed-value');
+	    this.setupAICustomSliderDisplay('ai-reaction-time', 'ai-reaction-time-value', (value) => `${value}ms`);
+	    this.setupAICustomSliderDisplay('ai-prediction-accuracy', 'ai-prediction-accuracy-value', (value) => `${value}%`);
+	    this.setupAICustomSliderDisplay('ai-error-rate', 'ai-error-rate-value', (value) => `${value}%`);
+	    this.setupAICustomSliderDisplay('ai-target-win-rate', 'ai-target-win-rate-value', (value) => `${value}%`);
+	    this.setupAICustomSliderDisplay('ai-fairness-level', 'ai-fairness-level-value');
+	    this.setupAICustomSliderDisplay('ai-max-consecutive-wins', 'ai-max-consecutive-wins-value');
+	
+	    // Slider value updates
+	    const sliders: [string, string, string?][] = [
+	        ['custom-paddle-height', 'custom-paddle-height-value', 'px'],
+	        ['custom-ball-radius', 'custom-ball-radius-value', 'px'],
+	        ['custom-corner-boost', 'custom-corner-boost-value', ''],
+	        ['custom-winning-score', 'custom-winning-score-value', ''],
+	        ['ai-paddle-height', 'ai-paddle-height-value', 'px'],
+	        ['ai-ball-radius', 'ai-ball-radius-value', 'px'],
+	        ['ai-corner-boost', 'ai-corner-boost-value', 'x'],
+	        ['ai-reaction-time', 'ai-reaction-time-value', ''],
+	        ['ai-prediction-accuracy', 'ai-prediction-accuracy-value', ''],
+	        ['ai-general-accuracy', 'ai-general-accuracy-value', ''],
+	        ['ai-learning-speed', 'ai-learning-speed-value', ''],
+	        ['ai-preparation-distance', 'ai-preparation-distance-value', ''],
+	        ['ai-freeze-distance', 'ai-freeze-distance-value', ''],
+	        ['ai-target-win-rate', 'ai-target-win-rate-value', ''],
+	        ['ai-fairness-level', 'ai-fairness-level-value', ''],
+	        ['ai-max-consecutive-wins', 'ai-max-consecutive-wins-value', '']
+	    ];
+	
+	    sliders.forEach(([sliderId, valueId, suffix]) => {
+	        updateSliderValue(sliderId, valueId, suffix || '');
+	    });
 	}
 
 	private setupAICustomSliderDisplay(

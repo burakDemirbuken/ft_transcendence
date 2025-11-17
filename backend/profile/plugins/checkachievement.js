@@ -205,6 +205,8 @@ export default fp(async (fastify) => {
 		}
 
 		const totalDurationSeconds = matchData.totalDuration
+		const fastestWinDuration = matchData.fastestWinDuration || 0
+		const longestMatchDuration = matchData.longestMatchDuration || 0
 
 		return ({
 			...stats.toJSON(),
@@ -218,7 +220,10 @@ export default fp(async (fastify) => {
 			defence: (stats.ballHitCount > 0 && stats.gamesLost > 0) ? (stats.ballHitCount / (stats.ballHitCount + stats.gamesLost + 1)) * 100 : 0,
 			accuracy: (stats.ballHitCount > 0 && stats.ballMissCount > 0) ? (stats.ballHitCount / (stats.ballHitCount + stats.ballMissCount)) * 100 : 0,
 			lastSevenDaysMatches: lastSevenDaysData.matchesByDay,
-			totalMatchesLastSevenDays: lastSevenDaysData.totalMatchesLastSevenDays
+			totalMatchesLastSevenDays: lastSevenDaysData.totalMatchesLastSevenDays,
+			hitRate: (stats.ballHitCount > 0 && stats.ballMissCount > 0) ?((stats.ballHitCount / (stats.ballHitCount + stats.ballMissCount)) * 100) : 0,
+			fastestWinDuration: fastestWinDuration,
+			longestMatchDuration: longestMatchDuration
 		})
 	}
 

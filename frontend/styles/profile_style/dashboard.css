@@ -154,7 +154,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    color: var(--color-text);
+    color: #ffffff;
 }
 
 .match-item.win .match-result {
@@ -175,19 +175,27 @@
     padding: 0 .5em;
 }
 
-.opponent {
-    color: var(--color-text);
-    font-weight: 600;
+.match-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
 }
 
-.score {
-    color: var(--color-muted);
-    font-size: 0.9rem;
+.match-header .opponent {
+	flex: 1;
+	color: var(--color-text);
+	font-weight: 500;
+	font-family: 'Orbitron';
+	font-size: 1.2rem;
 }
 
-.match-time {
-    color: var(--border-medium);
-    font-size: 0.8rem;
+.match-header .score {
+	color: #a6a6a6;
+	font-weight: bold;
+	font-family: 'Orbitron';
+	font-size: 1.1rem;
+	white-space: nowrap;
 }
 
 /* Stat Cards */
@@ -275,8 +283,10 @@
     color: #888;
 }
 
-.stat-row .stat-value {
-    color: var(--color-primary);
+.stats-value {
+    display: block;
+    font-size: clamp(.8rem, 2vw + .6rem, 1.6rem);
     font-weight: 700;
-    text-shadow: 0 0 10px var(--color-primary);
+    color: var(--color-primary);
+    text-shadow: 0 0 15px var(--color-primary);
 }

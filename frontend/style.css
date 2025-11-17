@@ -198,7 +198,6 @@ body {
 
 .no-select {
 	-webkit-user-drag: none;
-	user-drag: none;
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
@@ -248,11 +247,4 @@ body {
 	font-family: "PixeloidSansBold";
 	src: url('fonts/pixeloid.sans-bold.ttf'), format("tff");
 	font-weight: normal;
-}
-
-@font-face {
-	font-family: "NitroBreak";
-	src: url('fonts/Nitro\ Break.otf'), format("otf");
-	font-weight: normal;
-	font-size: xx-small;
 }

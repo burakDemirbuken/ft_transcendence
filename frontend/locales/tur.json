@@ -41,6 +41,7 @@
 	"profile": {
 		"header": {
 			"level": "Seviye",
+			"curr":"Mevcut Seri",
 			"tgames": "Toplam Oyun",
 			"winrate": "Kazanma Oranı"
 		},
@@ -65,12 +66,10 @@
 				"best": "En İyi Seri"
 			},
 			"mlast": {
-				"title": "Son Maçlar",
-				"win": "G",
-				"lose": "M"
+				"title": " Son Maçlar"
 			},
 			"wperf": {
-				"title": "Haftalık Performans",
+				"title": " Haftalık Performans",
 				"mwon": "Kazanılan Maçlar"
 			}
 		},
@@ -84,14 +83,12 @@
 				"title": "Beceriler"
 			},
 			"mprog": {
-				"title": "Aylık İlerleme",
-				"mtotal": "Toplam Maç",
-				"mwon": "Kazanılan Maç"
+				"title": "Topa Vuruş İstatistikleri"
 			},
 			"dstats": {
 				"title": "Detaylı İstatistikler",
 				"tpts": "Toplam Puan",
-				"ascore": "Ortalama Skor Farkı",
+				"ascore": "İsabet Oranı",
 				"mfastest": "En Hızlı Galibiyet",
 				"mlongest": "En Uzun Maç"
 			}
@@ -134,6 +131,22 @@
 					"vic": "Galibiyet",
 					"def": "Mağlubiyet"
 				}
+			},
+			"overlay": {
+				"title": "Maç Detayları",
+				"yourteam": "Siz",
+				"score": "Skor",
+				"opponent": "Rakip",
+				"duration": "Süre",
+				"gamemode": "Oyun Modu",
+				"gametype": "Klasik",
+				"ballhit": "Topa Vurma",
+				"ballmiss": "Iskalama",
+				"settings": "Maç Ayarları",
+				"ballradius": "Top Yarıçapı",
+				"paddleheight": "Raket Yüksekliği",
+				"cornerspeed": "Köşe Hızlanması",
+				"winningscore": "Bitiş Skoru"
 			}
 		},
 		"achiev": {

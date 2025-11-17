@@ -7,7 +7,7 @@
     "build-strict": "tsc",
     "dev": "tsc --watch",
     "serve": "http-server . -p 8080",
-    "start": "nodemon --watch frontend --ext ts,js,json,css,html --exec node server.js"
+    "start": "concurrently \"tsc --watch\" \"nodemon --watch frontend --ext html,css,js,json --exec node server.js\""
   },
   "dependencies": {
     "chart.js": "^4.4.3",

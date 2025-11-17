@@ -2,9 +2,9 @@ import Room from "./Room.js";
 
 export default class LocalRoom extends Room
 {
-	constructor(name, gameSettings)
+	constructor(gameSettings)
 	{
-		super(name, gameSettings);
+		super(gameSettings);
 		this.gameMode = 'local';
 		this.maxPlayers = 1;
 	}
@@ -13,7 +13,6 @@ export default class LocalRoom extends Room
 	{
 		return {
 			id: this.id,
-			name: this.name,
 			gameMode: this.gameMode,
 			status: this.status,
 			maxPlayers: 2,

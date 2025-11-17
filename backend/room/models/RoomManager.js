@@ -150,15 +150,15 @@ class RoomManager extends EventEmitter
 		console.log(`Creating room with ID: ${roomId} for player ID: ${player.id}`);
 		let room;
 		if (payload.gameMode === 'classic')
-			room = new ClassicRoom(payload.name, payload.gameSettings);
+			room = new ClassicRoom(payload.gameSettings);
 		else if (payload.gameMode === 'multiplayer')
-			room = new MultiPlayerRoom(payload.name, payload.gameSettings);
+			room = new MultiPlayerRoom(payload.gameSettings);
 		else if (payload.gameMode === 'tournament')
-			room = new TournamentRoom(payload.name, payload.tournamentSettings);
+			room = new TournamentRoom(payload.tournamentSettings);
 		else if (payload.gameMode === 'ai')
-			room = new AIRoom(payload.name, payload.gameSettings, payload.aiSettings, roomId);
+			room = new AIRoom(payload.gameSettings, payload.aiSettings, roomId);
 		else if (payload.gameMode === 'local')
-			room = new LocalRoom(payload.name, payload.gameSettings);
+			room = new LocalRoom(payload.gameSettings);
 		else
 			throw new Error(`Invalid game mode: ${payload.gameMode}`);
 		room.addPlayer(player);
@@ -166,7 +166,7 @@ class RoomManager extends EventEmitter
 		room.on('finished', async (data) =>
 			{
 				let url = 'http://profile:3006/internal/';
-				if (data.matchType === 'local' || data.matchType === 'ai')
+				if (data.matchType === 'local' || data.matchType === 'ai' || data.matchType === 'multiplayer')
 					return;
 				try
 				{
@@ -185,7 +185,7 @@ class RoomManager extends EventEmitter
 					if (!response.ok)
 						console.error('❌ Profile service error:', response.status, await response.text());
 					else
-						console.log('✅ Tournament data sent successfully');
+						console.log('✅ Data sent to profile service:', data);
 				}
 				catch (error)
 				{
@@ -289,7 +289,6 @@ class RoomManager extends EventEmitter
 			throw new Error(`Room with ID ${roomId} does not exist`);
 		return {
 			id: room.id,
-			name: room.name,
 			gameMode: room.gameMode,
 			status: room.status,
 			maxPlayers: room.maxPlayers,

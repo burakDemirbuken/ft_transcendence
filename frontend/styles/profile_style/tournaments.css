@@ -78,6 +78,12 @@
     border-radius: 6px;
 }
 
+.tournament-row.empty-state {
+    color: var(--color-muted);
+    font-style: italic;
+    opacity: 0.7;
+}
+
 .tournament-row.header {
     background: rgba(0, 78, 78, 0.34);
     font-weight: 700;

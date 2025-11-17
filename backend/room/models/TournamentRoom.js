@@ -4,15 +4,21 @@ import gameSettings from './defaultGameSettings.js';
 export default class TournamentRoom extends Room
 {
 
-	constructor(name, tournamentSettings)
+	constructor(tournamentSettings)
 	{
-		super(name, gameSettings);
+		super(gameSettings);
 		this.gameType = 'tournament';
 		this.gameMode = 'tournament';
-
+		this.tournamentName = tournamentSettings.name || 'deafult_tournament';
+		console.log('Creating TournamentRoom with settings:', JSON.stringify(tournamentSettings, null, 2));
+		console.log('name:', this.tournamentName);
 		this.tournamentSettings = tournamentSettings;
 		this.maxPlayers = tournamentSettings.maxPlayers || 8;
 		this.spectators = [];
+		this.time = {
+			start: null,
+			end: null,
+		};
 
 		this.matches = new Map(); // Round -> Matchs array
 
@@ -130,6 +136,7 @@ export default class TournamentRoom extends Room
 		if (this.currentRound === this.maxRounds)
 		{
 			this.status = 'finished';
+			this.time.end = new Date();
 			this.emit('finished', { ...this.finishData() });
 		}
 		else
@@ -161,11 +168,12 @@ export default class TournamentRoom extends Room
 		});
 
 		return {
-			name: this.name,
+			name: this.tournamentName,
 			winner: this.players[0].id,
 			rounds: rounds,
-			participants: this.players.map(p => ({ id: p.id})),
-			matchType: 'tournament'
+			participants: this.participants.map(p => ({ id: p.id})),
+			matchType: 'tournament',
+			time: this.time
 		};
 	}
 
@@ -217,6 +225,7 @@ export default class TournamentRoom extends Room
 			this.currentMatches.push(match);
 		}
 		this.status = 'ready2start';
+		this.time.start = new Date();
 		return { ...this.getMatchmakingInfo()};
 	}
 
@@ -323,7 +332,7 @@ export default class TournamentRoom extends Room
 			});
 		});
 		return {
-			name: this.name,
+			name: this.tournamentName,
 			gameMode: this.gameMode,
 			status: this.status,
 			maxPlayers: this.maxPlayers,

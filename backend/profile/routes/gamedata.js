@@ -86,6 +86,9 @@ export async function getUserMatchHistory(fastify, userName) {
 		})
 
 		let totalDurationSeconds = 0
+		let fastestWinDuration = null
+		let longestMatchDuration = null
+
 		const matchesWithDuration = matchHistory.map(match => {
 			const matchData = match.toJSON()
 			if (matchData.matchStartDate && matchData.matchEndDate) {
@@ -94,6 +97,21 @@ export async function getUserMatchHistory(fastify, userName) {
 				const durationSeconds = Math.floor(durationMs / 1000)
 				matchData.matchDuration = durationSeconds
 				totalDurationSeconds += durationSeconds
+
+				// En uzun maçı bul
+				if (longestMatchDuration === null || durationSeconds > longestMatchDuration) {
+					longestMatchDuration = durationSeconds
+				}
+
+				// Kazanılan maçları kontrol et ve en hızlı olanı bul
+				const isWin = match.winnerTeam?.PlayerOne?.userName === userName ||
+							  match.winnerTeam?.PlayerTwo?.userName === userName
+
+				if (isWin) {
+					if (fastestWinDuration === null || durationSeconds < fastestWinDuration) {
+						fastestWinDuration = durationSeconds
+					}
+				}
 			} else {
 				matchData.matchDuration = 0
 			}
@@ -104,7 +122,9 @@ export async function getUserMatchHistory(fastify, userName) {
 			success: true,
 			matches: matchesWithDuration,
 			totalDuration: totalDurationSeconds,
-			matchCount: matchesWithDuration.length
+			matchCount: matchesWithDuration.length,
+			fastestWinDuration: fastestWinDuration || 0,
+			longestMatchDuration: longestMatchDuration || 0
 		}
 	} catch (error) {
 		throw error
@@ -329,7 +349,7 @@ export default async function gamedataRoute(fastify) {
 	})
 
 	fastify.post('/internal/tournament', async (request, reply) => {
-		const { name, winner, rounds } = request.body ?? {}
+		const { name, winner, rounds, time } = request.body ?? {}
 		const { Profile, Stat, RoundMatch, Round, TournamentHistory } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
 
@@ -347,7 +367,9 @@ export default async function gamedataRoute(fastify) {
 				winnerPlayer: (await Profile.findOne({
 					where: { userName: winner },
 					attributes: ['id']
-				}))?.id ?? null
+				}))?.id ?? null,
+				TournamentStartDate: time.start ? new Date(time.start) : null,
+				TournamentEndDate: time.end ? new Date(time.end) : null
 			}, { transaction: t })
 
 			let allPlayerProfile = []
@@ -467,8 +489,8 @@ export default async function gamedataRoute(fastify) {
 
 	fastify.get('/tournament-history', async (request, reply) => {
 		const { userName } = request.query ?? {}
-
 		try {
+
 			if (!userName) {
 				throw new Error("userName is required.")
 			}
@@ -481,7 +503,35 @@ export default async function gamedataRoute(fastify) {
 			if (!userProfile) {
 				return reply.code(404).send({ error: 'User profile not found' })
 			}
+			console.log('Retrieved user profile:', { id: userProfile.id, userName: userName })
 
+			const userTournamentIds = await fastify.sequelize.models.TournamentHistory.findAll({
+				include: [
+					{
+						model: fastify.sequelize.models.Round,
+						required: true,
+						include: [
+							{
+								model: fastify.sequelize.models.RoundMatch,
+								required: true,
+								where: {
+									[Op.or]: [
+										{ playerOneID: userProfile.id },
+										{ playerTwoID: userProfile.id }
+									]
+								},
+								attributes: []
+							}
+						],
+						attributes: []
+					}
+				],
+				attributes: ['id'],
+				raw: true
+			});
+
+			const tournamentIds = [...new Set(userTournamentIds.map(t => t.id))];
+			console.log('User tournament IDs:', tournamentIds)
 			const usersTournament = await fastify.sequelize.models.TournamentHistory.findAll({
 				include: [
 					{
@@ -506,22 +556,24 @@ export default async function gamedataRoute(fastify) {
 										attributes: ['userName', 'displayName', 'avatarUrl']
 									}
 								],
-								attributes: ['matchNumber', 'playerOneID', 'playerTwoID', 'playerOneScore', 'playerTwoScore', 'winnerPlayerID'],
-								order: [['matchNumber', 'ASC']],
+								separate: true,
+								order: [['matchNumber', 'ASC']]
 							}
 						],
 						attributes: ['roundNumber'],
-						order: [['roundNumber', 'ASC']],
+						separate: true,
+						order: [['roundNumber', 'ASC']]
 					}
 				],
-				attributes: ['name', 'winnerPlayer'],
-				where : {
-					[Op.or]: [
-						{ '$Rounds.RoundMatches.playerOneID$': userProfile.id },
-						{ '$Rounds.RoundMatches.playerTwoID$': userProfile.id }
-					]
+				attributes: ['name', 'winnerPlayer', 'TournamentStartDate', 'TournamentEndDate'],
+				where: {
+					id: {
+						[Op.in]: tournamentIds
+					}
 				}
-			})
+			});
+			const userJoinedTournamentsId = usersTournament.map(tournament => tournament.id)
+			console.log('User joined tournaments IDs:', userJoinedTournamentsId)
 
 			return reply.send({ success: true, usersTournament: JSON.parse(JSON.stringify(usersTournament)) })
 		} catch (error) {
@@ -530,170 +582,4 @@ export default async function gamedataRoute(fastify) {
 			return reply.code(500).send({message: 'Failed to retrieve tournament history' })
 		}
 	})
-
-	function mockTournamentHistory() {
-		// This function can be expanded to create mock tournament data for testing purposes
-		// usersTournament: JSON.parse(JSON.stringify(usersTournament))
-		// şaibeli
-
-		return {
-			name: "Mock Tournament",
-			winnerPlayer: "player1",
-			Rounds: [
-				{
-					roundNumber: 1,
-					RoundMatches: [
-						{
-							matchNumber: 1,
-							playerOneID: {
-								userName: "player1",
-								displayName: "Player One",
-								avatarUrl: "http://example.com/avatar1.png"
-							},
-							playerTwoID: {
-								userName: "player2",
-								displayName: "Player Two",
-								avatarUrl: "http://example.com/avatar2.png"
-							},
-							playerOneScore: 3,
-							playerTwoScore: 2,
-							winnerPlayerID: 1 // şaibeli
-
-						},
-						{
-							matchNumber: 2,
-							playerOneID: {
-								userName: "player1",
-								displayName: "Player One",
-								avatarUrl: "http://example.com/avatar1.png"
-							},
-							playerTwoID: {
-								userName: "player2",
-								displayName: "Player Two",
-								avatarUrl: "http://example.com/avatar2.png"
-							},
-							playerOneScore: 3,
-							playerTwoScore: 2,
-							winnerPlayerID: 1 // şaibeli
-						}
-					]
-				},
-				{
-					roundNumber: 2,
-					RoundMatches: [
-						{
-							matchNumber: 1,
-							playerOneID: {
-								userName: "player1",
-								displayName: "Player One",
-								avatarUrl: "http://example.com/avatar1.png"
-							},
-							playerTwoID: {
-								userName: "player2",
-								displayName: "Player Two",
-								avatarUrl: "http://example.com/avatar2.png"
-							},
-							playerOneScore: 3,
-							playerTwoScore: 2,
-							winnerPlayerID: 1 // şaibeli
-						},
-						{
-							matchNumber: 2,
-							playerOneID: {
-								userName: "player1",
-								displayName: "Player One",
-								avatarUrl: "http://example.com/avatar1.png"
-							},
-							playerTwoID: {
-								userName: "player2",
-								displayName: "Player Two",
-								avatarUrl: "http://example.com/avatar2.png"
-							},
-							playerOneScore: 3,
-							playerTwoScore: 2,
-							winnerPlayerID: 1 // şaibeli
-						}
-					]
-				}
-			]
-		}
-	}
-
-	function mockMatchHistory() {
-		// This function can be expanded to create mock match data for testing purposes
-		return { a: JSON.stringify({
-			"success": true,
-			"matches": [
-				{
-				"teamOneScore": 1,
-				"teamTwoScore": 0,
-				"matchStartDate": "2025-11-04T23:17:36.789Z",
-				"matchEndDate": "2025-11-04T23:17:47.829Z",
-				"matchType": "classic",
-				"teamOne": {
-					"createdAt": "2025-11-04T23:17:50.854Z",
-					"PlayerOne": {
-					"userName": "Burak",
-					"displayName": "Burak",
-					"avatarUrl": null
-					},
-					"PlayerTwo": null
-				},
-				"teamTwo": {
-					"createdAt": "2025-11-04T23:17:50.854Z",
-					"PlayerOne": {
-					"userName": "FireOflife",
-					"displayName": "FireOflife",
-					"avatarUrl": null
-					},
-					"PlayerTwo": null
-				},
-				"winnerTeam": {
-					"createdAt": "2025-11-04T23:17:50.854Z",
-					"PlayerOne": {
-					"userName": "Burak",
-					"displayName": "Burak",
-					"avatarUrl": null
-					},
-					"PlayerTwo": null
-				}
-				},
-				{
-				"teamOneScore": 0,
-				"teamTwoScore": 1,
-				"matchStartDate": "2025-11-04T23:24:29.217Z",
-				"matchEndDate": "2025-11-04T23:24:35.932Z",
-				"matchType": "classic",
-				"teamOne": {
-					"createdAt": "2025-11-04T23:24:38.950Z",
-					"PlayerOne": {
-					"userName": "FireOflife",
-					"displayName": "FireOflife",
-					"avatarUrl": null
-					},
-					"PlayerTwo": null
-				},
-				"teamTwo": {
-					"createdAt": "2025-11-04T23:24:38.950Z",
-					"PlayerOne": {
-					"userName": "Burak",
-					"displayName": "Burak",
-					"avatarUrl": null
-					},
-					"PlayerTwo": null
-				},
-				"winnerTeam": {
-					"createdAt": "2025-11-04T23:24:38.950Z",
-					"PlayerOne": {
-					"userName": "Burak",
-					"displayName": "Burak",
-					"avatarUrl": null
-					},
-					"PlayerTwo": null
-				}
-				}
-			]
-			}
-			)}
-	}
 }

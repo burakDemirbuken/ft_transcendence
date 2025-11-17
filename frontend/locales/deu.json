@@ -41,6 +41,7 @@
 	"profile": {
 		"header": {
 			"level": "Stufe",
+			"curr": "Aktuelle Serie",
 			"tgames": "Gesamtspiele",
 			"winrate": "Gewinnrate"
 		},
@@ -65,12 +66,10 @@
 				"best": "Beste Serie"
 			},
 			"mlast": {
-				"title": "Letzte Spiele",
-				"win": "S",
-				"lose": "V"
+				"title": " Letzte Spiele"
 			},
 			"wperf": {
-				"title": "Wöchentliche Leistung",
+				"title": " Wöchentliche Leistung",
 				"mwon": "Gewonnene Spiele"
 			}
 		},
@@ -84,14 +83,12 @@
 				"title": "Fähigkeiten"
 			},
 			"mprog": {
-				"title": "Monatlicher Fortschritt",
-				"mtotal": "Gesamtzahl der Spiele",
-				"mwon": "Gewonnene Spiele"
+				"title": "Ballschlag-Statistiken"
 			},
 			"dstats": {
 				"title": "Detaillierte Statistiken",
 				"tpts": "Gesamtpunktzahl",
-				"ascore": "Durchschnittliche Punktedifferenz",
+				"ascore": "Trefferquotient",
 				"mfastest": "Schnellster Sieg",
 				"mlongest": "Längstes Spiel"
 			}
@@ -134,6 +131,22 @@
 					"vic": "Sieg",
 					"def": "Verlust"
 				}
+			},
+			"overlay": {
+				"title": "Spielanalyse",
+				"yourteam": "Dein Team",
+				"score": "Ergebnis",
+				"opponent": "Gegner",
+				"duration": "Dauer",
+				"gamemode": "Spielmodus",
+				"gametype": "Klassisch",
+				"ballhit": "Balltreffer",
+				"ballmiss": "Ballfehlschlag",
+				"settings": "Spieleinstellungen",
+				"ballradius": "Ballradius",
+				"paddleheight": "Schlägerhöhe",
+				"cornerspeed": "Eckbeschleunigung",
+				"winningscore": "Siegesergebnis"
 			}
 		},
 		"achiev": {

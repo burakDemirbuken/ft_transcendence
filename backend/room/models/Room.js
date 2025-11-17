@@ -2,10 +2,9 @@ import EventEmitter from './EventEmitter.js';
 
 export default class Room extends EventEmitter
 {
-	constructor(name, gameSettings)
+	constructor(gameSettings)
 	{
 		super();
-		this.name = name;
 		this.gameMode = null;
 		this.gameType = 'classic';
 		this.status = 'waiting'; // "waiting", "in_game", "completed", "startable"
@@ -75,7 +74,6 @@ export default class Room extends EventEmitter
 	getState()
 	{
 		return {
-			name: this.name,
 			gameMode: this.gameMode,
 			status: this.status,
 			maxPlayers: this.maxPlayers,

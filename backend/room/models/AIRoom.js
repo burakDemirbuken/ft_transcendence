@@ -3,11 +3,11 @@ import aiNetwork from "./AiNetworkManager.js";
 export default class AIRoom extends Room
 {
 
-	constructor(name, gameSettings, aiSettings, id)
+	constructor(gameSettings, aiSettings, id)
 	{
 		if (!aiSettings)
 			throw new Error('AI settings must be provided for AI rooms');
-		super(name, gameSettings);
+		super(gameSettings);
 		this.gameMode = 'ai';
 		this.id = id;
 		this.maxPlayers = 1;

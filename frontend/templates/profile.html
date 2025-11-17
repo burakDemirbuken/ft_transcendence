@@ -22,7 +22,7 @@
                 <div class="stat-item">
                      <div class="tooltip-container">
                         <i class="fa-solid fa-fire gradient-icon"></i>
-                        <div class="tooltip-popup" data-i18n="profile.streak.curr">Current Streak</div>
+                        <div class="tooltip-popup" data-i18n="profile.header.curr">Current Streak</div>
                     </div>
                     <span id="current-streak" class="stat-value">0</span>
                 </div>
@@ -46,8 +46,8 @@
     <!-- Navigation -->
     <div class="profile-nav">
         <button class="tab-btn" data-tab="overview"><i class="fa-solid fa-grip-vertical"></i> <span data-i18n="profile.sections.dashboard">Dashboard</span> <span class="btn-glow"></span></button>
-        <button class="tab-btn active" data-tab="performance"><i class="fa-solid fa-chart-line"></i> <span data-i18n="profile.sections.performance">Performans</span> <span class="btn-glow"></span></button>
-        <button class="tab-btn" data-tab="tournaments"><i class="fa-solid fa-trophy"></i> <span data-i18n="profile.sections.thishtory">Turnuva Geçmişi</span> <span class="btn-glow"></span></button>
+        <button class="tab-btn" data-tab="performance"><i class="fa-solid fa-chart-line"></i> <span data-i18n="profile.sections.performance">Performans</span> <span class="btn-glow"></span></button>
+        <button class="tab-btn active" data-tab="tournaments"><i class="fa-solid fa-trophy"></i> <span data-i18n="profile.sections.thishtory">Turnuva Geçmişi</span> <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="match_history"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="profile.sections.mhistory">Maç Geçmişi</span> <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="achievements"><i class="fa-solid fa-star"></i> <span data-i18n="profile.sections.achievements">Achievements</span> <span class="btn-glow"></span></button>
     </div>
@@ -112,7 +112,7 @@
             </div>
         </section>
         <!-- Statistics Tab -->
-        <section id="performance" class="tab-content active">
+        <section id="performance" class="tab-content">
             <div class="stats-grid">
                 <!-- Win/Loss Pie Chart -->
                 <div class="stat-card">
@@ -126,8 +126,8 @@
                 </div>
                 <!-- Monthly Progress -->
                 <div class="stat-card">
-                    <h3><i class="fa-solid fa-chart-simple"></i> <span data-i18n="profile.perf.mprog.title">Aylık İlerleme</span></h3>
-                    <canvas id="monthlyChart" width="400" height="200"></canvas>
+                    <h3><i class="fa-solid fa-chart-simple"></i> <span data-i18n="profile.perf.mprog.title">Top İstatistikleri</span></h3>
+                    <canvas id="monthlyChart" width="200" height="200"></canvas>
                 </div>
                 <!-- Detailed Stats -->
                 <div class="stat-card detailed-stats">
@@ -135,26 +135,26 @@
                     <div class="stats-table">
                         <div class="stat-row">
                             <span class="stat-name" data-i18n="profile.perf.dstats.tpts">Toplam Puan</span>
-                            <span class="stat-value">15,420</span>
+                            <span id="xp_point" class="stats-value">0</span>
                         </div>
                         <div class="stat-row">
-                            <span class="stat-name" data-i18n="profile.perf.dstats.ascore">Ortalama Skor Farkı</span>
-                            <span class="stat-value">+3.2</span>
+                            <span class="stat-name" data-i18n="profile.perf.dstats.ascore">İsabet Oranı</span>
+                            <span id="hit_rate" class="stats-value">0</span>
                         </div>
                         <div class="stat-row">
                             <span class="stat-name" data-i18n="profile.perf.dstats.mfastest">En Hızlı Galibiyet</span>
-                            <span class="stat-value">2:15</span>
+                            <span id="mfastest" class="stats-value">0:00</span>
                         </div>
                         <div class="stat-row">
                             <span class="stat-name" data-i18n="profile.perf.dstats.mlongest">En Uzun Maç</span>
-                            <span class="stat-value">12:34</span>
+                            <span id="mlongest" class="stats-value">0:00</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
         <!-- Tournaments Tab -->
-        <section id="tournaments" class="tab-content">
+        <section id="tournaments" class="tab-content active">
             <div class="tournaments-header">
                 <h3><i class="fa-solid fa-trophy"></i> <span data-i18n="profile.thistory.title">Turnuva Geçmişi</span></h3>
                 <div class="tournaments-filters">
@@ -169,13 +169,12 @@
             </div>
             <div class="tournament-table" id="tournament-table">
                 <div class="tournament-row header">
-                    <span data-i18n="profile.thistory.header.tname">Turnuva Adı</span>
-                    <span data-i18n="profile.thistory.header.tstart">Başlangıç</span>
-                    <span data-i18n="profile.thistory.header.tend">Bitiş</span>
-                    <span data-i18n="profile.thistory.header.total">Toplam Maç</span>
+                    <span data-i18n="profile.tournament.name">Turnuva Adı</span>
+                    <span data-i18n="profile.tournament.startdate">Başlangıç</span>
+                    <span data-i18n="profile.tournament.enddate">Bitiş</span>
+                    <span data-i18n="profile.tournament.rounds">Tur Sayısı</span>
                 </div>
-				<!-- Burası database eklendikten sonra silinecek (BAŞLANGIÇ) -->
-                <div class="tournament-row"
+                <!-- <div class="tournament-row"
                      data-name="Yaz Turnuvası"
                      data-start="2025-07-01"
                      data-end="2025-07-15"
@@ -210,8 +209,7 @@
                        {"etap":1, "kutu":4, "kazanan":null, "text":"Oyuncu 4"}
                      ]'>
                     <span>Kış Turnuvası</span><span>20.05.2025</span><span>01.06.2025</span><span>33</span>
-                </div>
-				<!-- Burası database eklendikten sonra silinecek (BİTİŞ) -->
+                </div> -->
             </div>
 			<div id="overlay">
                 <div id="turnuva-wrapper">
@@ -240,11 +238,142 @@
                     <span data-i18n="profile.mhistory.table.time">Süre</span>
                     <span data-i18n="profile.mhistory.table.result">Sonuç</span>
                 </div>
+            </div>
+
+            <!-- Match Details Overlay -->
             <div id="match-overlay" class="hide-away">
-                <div class="match-card"></div>
-	            <div id="match-card-exit" class="profile-close">
-		            <svg class="profile-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM231 231C240.4 221.6 255.6 221.6 264.9 231L319.9 286L374.9 231C384.3 221.6 399.5 221.6 408.8 231C418.1 240.4 418.2 255.6 408.8 264.9L353.8 319.9L408.8 374.9C418.2 384.3 418.2 399.5 408.8 408.8C399.4 418.1 384.2 418.2 374.9 408.8L319.9 353.8L264.9 408.8C255.5 418.2 240.3 418.2 231 408.8C221.7 399.4 221.6 384.2 231 374.9L286 319.9L231 264.9C221.6 255.5 221.6 240.3 231 231z"/></svg>
-	            </div>
+                <div class="match-card">
+                    <div id="match-card-exit"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM231 231C240.4 221.6 255.6 221.6 264.9 231L319.9 286L374.9 231C384.3 221.6 399.5 221.6 408.8 231C418.1 240.4 418.2 255.6 408.8 264.9L353.8 319.9L408.8 374.9C418.2 384.3 418.2 399.5 408.8 408.8C399.4 418.1 384.2 418.2 374.9 408.8L319.9 353.8L264.9 408.8C255.5 418.2 240.3 418.2 231 408.8C221.7 399.4 221.6 384.2 231 374.9L286 319.9L231 264.9C221.6 255.5 221.6 240.3 231 231z"/></svg>
+                    </div>
+
+                    <div class="match-overlay-content">
+                        <!-- Header -->
+                        <div class="match-details-header">
+                            <h2 class="match-details-title" data-i18n="profile.mhistory.overlay.title">Maç Detayları</h2>
+                            <div class="match-meta">
+                                <span class="match-date"></span>
+                                <span class="match-time"></span>
+                            </div>
+                        </div>
+
+                        <!-- Teams Comparison -->
+                        <div class="teams-container">
+                            <!-- Team One (User) -->
+                            <div class="team-section team-one">
+                                <div class="team-header">
+                                    <h3 data-i18n="profile.mhistory.overlay.yourteam">Siz</h3>
+                                </div>
+                                <div class="team-players"></div>
+                                <div class="team-score">
+                                    <span class="score-label" data-i18n="profile.mhistory.overlay.score">Skor</span>
+                                    <span class="score-value">0</span>
+                                </div>
+                            </div>
+
+                            <!-- VS Divider -->
+                            <div class="vs-divider">
+                                <span>VS</span>
+                            </div>
+
+                            <!-- Team Two (Opponent) -->
+                            <div class="team-section team-two">
+                                <div class="team-header">
+                                    <h3 data-i18n="profile.mhistory.overlay.opponent">Rakip</h3>
+                                </div>
+                                <div class="team-players"></div>
+                                <div class="team-score">
+                                    <span class="score-label" data-i18n="profile.mhistory.overlay.score">Skor</span>
+                                    <span class="score-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Match Result -->
+                        <div class="match-result-section">
+                            <div class="result-badge">
+                                <span class="result-text"></span>
+                            </div>
+                        </div>
+
+                        <!-- Match Statistics -->
+                        <div class="match-stats-grid">
+                            <!-- Duration -->
+                            <div class="stat-box">
+                                <div class="stat-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                        <path d="M464 256A208 208 0 1 1 48 256a208 208 0 1 1 416 0zM0 256a256 256 0 1 0 512 0A256 256 0 1 0 0 256zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-label" data-i18n="profile.mhistory.overlay.duration">Süre</span>
+                                    <span class="status-value match-duration">0:00</span>
+                                </div>
+                            </div>
+
+                            <!-- Match Type Detail -->
+                            <div class="stat-box">
+                                <div class="stat-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                        <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm0-352a96 96 0 1 1 0 192 96 96 0 1 1 0-192z"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-label" data-i18n="profile.mhistory.overlay.gamemode">Oyun Modu</span>
+                                    <span class="status-value match-type-text" data-i18n="profile.mhistory.overlay.gametype">Classic</span>
+                                </div>
+                            </div>
+
+                            <!-- Ball Hit -->
+                            <div class="stat-box">
+                                <div class="stat-icon success">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                        <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-label" data-i18n="profile.mhistory.overlay.ballhit">Topa Vurma</span>
+                                    <span class="status-value ball-hit">0</span>
+                                </div>
+                            </div>
+
+                            <!-- Ball Miss -->
+                            <div class="stat-box">
+                                <div class="stat-icon error">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                                        <path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-label" data-i18n="profile.mhistory.overlay.ballmiss">Iskalama</span>
+                                    <span class="status-value ball-miss">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Match Settings -->
+                        <div class="match-settings-section">
+                            <h3 class="settings-title" data-i18n="profile.mhistory.overlay.settings">Maç Ayarları</h3>
+                            <div class="settings-grid">
+                                <div class="setting-item">
+                                    <span class="setting-label" data-i18n="profile.mhistory.overlay.ballradius">Top Yarıçapı</span>
+                                    <span class="setting-value ball-radius">-</span>
+                                </div>
+                                <div class="setting-item">
+                                    <span class="setting-label" data-i18n="profile.mhistory.overlay.paddleheight">Raket Yüksekliği</span>
+                                    <span class="setting-value paddle-height">-</span>
+                                </div>
+                                <div class="setting-item">
+                                    <span class="setting-label" data-i18n="profile.mhistory.overlay.cornerspeed">Köşe Çarpma Hızlanması</span>
+                                    <span class="setting-value ball-speed">-</span>
+                                </div>
+                                <div class="setting-item">
+                                    <span class="setting-label" data-i18n="profile.mhistory.overlay.winningscore">Bitiş Skoru</span>
+                                    <span class="setting-value max-score">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
         <!-- Achievements Tab -->

@@ -38,58 +38,10 @@ dist/
 build/
 backend/gameClient/dist/
 frontend/dist/
-*.js.map
-
-# ==============================================
-# Python
-# ==============================================
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-backend/aiServer/__pycache__/
-backend/aiServer/__pycache__/*
-
-# ==============================================
-# Logs
-# ==============================================
-logs/
-*.log
-.nf*
-
-# ==============================================
-# OS & IDE
-# ==============================================
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# ==============================================
-# Certificates & Keys
-# ==============================================
-*.pem
-*.key
-*.crt
-ssl/
-
-# ==============================================
-# Temporary & Test Files
-# ==============================================
-tmp/
-temp/
-*.tmp
-notes.md
-
-# ==============================================
-# Compiled C/C++ files
-# ==============================================
-a.out
-a
-api_server
-*.o
-*.so
+backend/profile/database/*
+*/database/*
+backend/profile/database
+backend/friend/database
+backend/friend/database/*
+backend/authentication/database
+backend/authentication/database/*

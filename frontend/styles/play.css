@@ -189,7 +189,6 @@ body::before {
 
 .no-select {
 	-webkit-user-drag: none;
-	user-drag: none;
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
@@ -1217,12 +1216,12 @@ html {
 
 /* Back Arrow Button */
 .back-arrow {
-	width: 30px;
-    height: 30px;
+	width: 20px;
+    height: 20px;
     padding: 5px;
     position: fixed;
     top: 30px;
-    left: 20px;
+    left: 90px;
     width: 50px;
     height: 50px;
     border: none;
@@ -1240,6 +1239,7 @@ html {
 .back-arrow.active {
     display: flex;
     animation: slideInLeft 0.5s ease;
+    pointer-events: auto;
 }
 
 .back-arrow:hover {
@@ -2076,3 +2076,12 @@ html {
         font-size: 1rem;
     }
 }
+
+#next-round-btn {
+    display: none !important; /* Başta gizli */
+}
+
+#next-round-btn.show {
+    display: block !important;
+}
+

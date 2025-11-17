@@ -21,7 +21,7 @@ class ManagerProfile {
 	private monthChartData: { label0: string, label1: string, labels: string[], data1: number[], data2: number[] } = {
 		label0: "Total Matches",
 		label1: "Matches Won",
-		labels: ["1st Quarter", "2nd Quarter", "3rd Quarter", "4th Quarter"],
+		labels: ["Vuruşlar"],
 		data1: [],
 		data2: []
 	};
@@ -225,7 +225,7 @@ class ManagerProfile {
 			];
 			chart.update();
 		} else {
-			console.warn("⚠️ Skill chart not initialized yet");
+			console.log("⚠️ Skill chart not initialized yet");
 		}
 	}
 
@@ -326,34 +326,49 @@ class ManagerProfile {
 		});
 	}
 
+	public updateBallStats(ballHitCount: number, ballMissCount: number): void {
+		const chart = this.charts.monthly;
+		if (chart && chart.data && Array.isArray(chart.data.datasets) && chart.data.datasets.length >= 2) {
+			// İlk dataset: Hit Count
+			chart.data.datasets[0].data = [ballHitCount];
+			// İkinci dataset: Miss Count
+			chart.data.datasets[1].data = [ballMissCount];
+			chart.update();
+		}
+	}
+
 	private async createMonthlyChart(): Promise<void> {
 		const monthlyCtx = document.getElementById('monthlyChart') as HTMLCanvasElement | null;
 		if (!monthlyCtx) return;
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
-		this.monthChartData.label0 = translations?.profile?.monthly?.label0 ?? this.monthChartData.label0;
-		this.monthChartData.label1 = translations?.profile?.monthly?.label1 ?? this.monthChartData.label1;
-		this.monthChartData.labels = translations?.profile?.monthly?.labels ?? this.monthChartData.labels;
+		const hitLabel = translations?.profile?.monthly?.hitCount ?? 'Topa Vurma Sayısı';
+		const missLabel = translations?.profile?.monthly?.missCount ?? 'Iskalamalar';
+		const Label = translations?.profile?.monthly?.label ?? 'Vuruşlar';
 
 		this.charts.monthly = new Chart(monthlyCtx, {
 			type: 'bar',
 			data: {
-				labels: this.monthChartData.labels,
+				labels: [Label],
 				datasets: [
 					{
-						label: this.monthChartData.label0,
-						data: [15, 22, 18, 35, 28, 42, 38],
-						backgroundColor: 'rgba(0, 255, 255, 0.6)',
+						label: hitLabel,
+						data: [0],
+						backgroundColor: 'rgba(0, 255, 255, 0.8)',
 						borderColor: '#00ffff',
 						borderWidth: 2,
+						borderRadius: 5,
+						barThickness: 40
 					},
 					{
-						label: this.monthChartData.label1,
-						data: [12, 16, 14, 28, 21, 32, 28],
-						backgroundColor: 'rgba(0, 255, 0, 0.6)',
-						borderColor: '#00ff00',
+						label: missLabel,
+						data: [0],
+						backgroundColor: 'rgba(255, 0, 0, 0.8)',
+						borderColor: '#ff0000',
 						borderWidth: 2,
-					},
+						borderRadius: 5,
+						barThickness: 40
+					}
 				],
 			},
 			options: {
@@ -362,9 +377,7 @@ class ManagerProfile {
 					legend: {
 						labels: {
 							color: '#ffffff',
-							font: {
-								family: 'Orbitron',
-							},
+							font: { family: 'Orbitron' },
 						},
 					},
 				},
@@ -372,26 +385,23 @@ class ManagerProfile {
 					x: {
 						ticks: {
 							color: '#888',
-							font: {
-								family: 'Orbitron',
-							},
+							font: { family: 'Orbitron' },
 						},
 						grid: {
 							color: 'rgba(255, 255, 255, 0.1)',
 						},
 					},
 					y: {
+						beginAtZero: true,
 						ticks: {
 							color: '#888',
-							font: {
-								family: 'Orbitron',
-							},
+							font: { family: 'Orbitron' },
 						},
 						grid: {
 							color: 'rgba(255, 255, 255, 0.1)',
 						},
 					},
-				} as any
+				},
 			},
 		});
 	}
@@ -414,25 +424,22 @@ class ManagerProfile {
 		this.perfChartData.labelName = translations?.profile?.weekly?.label ?? this.perfChartData.labelName;
 		this.perfChartData.labels = translations?.profile?.weekly?.labels ?? this.perfChartData.labels;
 
-
 		chart.data.labels = this.perfChartData.labels;
 		chart.data.datasets[0].label = this.perfChartData.labelName;
 		chart.update();
 
 		chart = this.charts.monthly;
-		this.monthChartData.label0 = translations?.profile?.monthly?.label0 ?? this.monthChartData.label0;
-		this.monthChartData.label1 = translations?.profile?.monthly?.label1 ?? this.monthChartData.label1;
-		this.monthChartData.labels = translations?.profile?.monthly?.labels ?? this.monthChartData.labels;
-
-		chart.data.labels = this.monthChartData.labels;
-		chart.data.datasets[0].label = this.monthChartData.label0;
-		chart.data.datasets[1].label = this.monthChartData.label1;
+		const hitLabel = translations?.profile?.monthly?.hitCount ?? 'Topa Vurma Sayısı';
+		const missLabel = translations?.profile?.monthly?.missCount ?? 'İskalamalar';
+		const chartTitle = translations?.profile?.monthly?.label ?? 'Vuruşlar';
+		chart.data.labels = [chartTitle];
+		chart.data.datasets[0].label = hitLabel;
+		chart.data.datasets[1].label = missLabel;
 		chart.update();
 
 		chart = this.charts.winLoss;
 		let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost'];
 		chart.data.labels = labels;
-		console.log(labels);
 		chart.update();
 
 		chart = this.charts.skill;
@@ -453,8 +460,6 @@ class ManagerProfile {
 		const activeBtn = document.querySelector(`[data-tab="${tabName}"]`) as HTMLElement | null;
 		if (activeBtn) {
 			activeBtn.classList.add('active');
-		} else {
-			console.log('Button not found for tab:', tabName); // Debug için
 		}
 
 		// Tüm tab içeriklerini gizle
@@ -468,8 +473,6 @@ class ManagerProfile {
 		if (activeTab) {
 			activeTab.classList.add('active');
 			activeTab.style.display = 'block'; // Ekstra güvenlik için
-		} else {
-			console.log('Tab content not found for:', tabName); // Debug için
 		}
 
 		this.currentTab = tabName;
@@ -607,18 +610,47 @@ class ManagerProfile {
 	}
 
 	public debugTabSwitch(tabName: string): void {
-		console.log('Debug tab switch called for:', tabName);
 		this.switchTab(tabName);
 	}
 }
 
-
 let profileManager: ManagerProfile;
+
+export function updateTournamentLanguage() {
+	const userName = document.querySelector('.username')?.textContent?.replace('@', '');
+	if (userName) {
+		populateTournamentHistory(userName);
+	}
+}
 
 export function updateChartLanguage() {
 	if (profileManager)
 		profileManager.updateChartLanguage();
+	refreshMatchHistory();
+	updateTournamentLanguage();
+
+	// Eğer overlay açıksa, içeriğini güncelle
+	const matchOverlay = document.getElementById('match-overlay') as HTMLDivElement;
+	if (matchOverlay && !matchOverlay.classList.contains('hide-away')) {
+		const content = matchOverlay.querySelector('.match-overlay-content') as HTMLDivElement;
+		if (content) {
+			updateMatchOverlayLanguage(content);
+		}
+	}
 }
+
+// Overlay'deki çevirileri güncelle
+async function updateMatchOverlayLanguage(content: HTMLDivElement) {
+	const translations = await getJsTranslations(localStorage.getItem("langPref"));
+
+	// Overlay'den matchIndex'i al
+	const overlay = document.getElementById('match-overlay') as HTMLDivElement;
+	const matchIndex = parseInt(overlay.dataset.currentMatchIndex || '0');
+
+	// Overlay'i yeniden yükle (güncel çevirilerle)
+	await showMatchDetails(matchIndex);
+}
+
 
 function handleCardMouseMove(e: MouseEvent) {
 	const cards = document.querySelectorAll<HTMLElement>('.stat-card');
@@ -708,41 +740,231 @@ function handleOverlayClick(e: MouseEvent, overlay: HTMLDivElement, turnuva: HTM
   }
 }
 
-function handleMatchOverlay(e) {
-	if (e.target.classList.contains("match-row") || e.target.closest(".match-row"))
-		document.querySelector('#match-overlay').classList.remove("hide-away");
+function handleMatchOverlay(e: Event) {
+    const target = e.target as HTMLElement;
+    const matchRow = target.closest(".match-row:not(.header)") as HTMLElement | null;
 
-	const matchdetails = document.querySelector('.match-card');
-	console.log(matchdetails);
-	matchdetails.innerHTML = `
-		<h2 class="match-details-title">Match Details</h2>
-		<div class="match-details-info">
-			<span class="">Date: 2024-10-05</span>
-			<span class="">Duration: 4.23 mins</span>
-			<span class="">Score: 11</span>
-		</div>
-		<div class="players-comp">
-			<div class="match-player">
-				<h3>You</h3>
-				<span class="player-result">winner</span>
-				<span class="player-score">11</span>
-			</div>
-			<div class="match-player">
-				<h3>Opponent</h3>
-				<span class="player-result">loser</span>
-				<span class="player-score">10</span>
-			</div>
-		</div>
-	`;
+    if (!matchRow) return;
+
+    const matchId = parseInt(matchRow.dataset.matchId || '0');
+    showMatchDetails(matchId);
+}
+
+async function showMatchDetails(matchIndex: number) {
+    try {
+        const userName = document.querySelector('.username')?.textContent?.replace('@', '');
+        if (!userName) return;
+
+        const response = await fetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            }
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const matches = data.matches || [];
+        const match = matches[matchIndex];
+
+        if (!match) return;
+
+        // Çevirileri her seferinde al (dil değişikliğini yakala)
+        const translations = await getJsTranslations(localStorage.getItem("langPref"));
+
+        // Overlay'i doldur
+        const overlay = document.getElementById('match-overlay') as HTMLDivElement;
+        const content = overlay.querySelector('.match-overlay-content') as HTMLDivElement;
+
+        // Kullanıcı bilgisi
+        const isUserInTeamOne = match.teamOne?.PlayerOne?.userName === userName ||
+                               match.teamOne?.PlayerTwo?.userName === userName;
+
+        const userTeam = isUserInTeamOne ? match.teamOne : match.teamTwo;
+        const opponentTeam = isUserInTeamOne ? match.teamTwo : match.teamOne;
+
+        const userScore = isUserInTeamOne ? match.teamOneScore : match.teamTwoScore;
+        const opponentScore = isUserInTeamOne ? match.teamTwoScore : match.teamOneScore;
+
+        const isWin = match.winnerTeam &&
+                     (match.winnerTeam.PlayerOne?.userName === userName ||
+                      match.winnerTeam.PlayerTwo?.userName === userName);
+
+        // Tarih ve saat
+        const matchDate = new Date(match.matchStartDate);
+        const dateStr = matchDate.toLocaleDateString('tr-TR');
+        const timeStr = matchDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+
+        content.querySelector('.match-date').textContent = dateStr;
+        content.querySelector('.match-time').textContent = timeStr;
+
+        // User team (Team One)
+        const userTeamOneDiv = content.querySelector('.team-one');
+        const userPlayersDiv = userTeamOneDiv.querySelector('.team-players') as HTMLDivElement;
+        userPlayersDiv.innerHTML = '';
+
+        if (userTeam?.PlayerOne) {
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player-item';
+            playerDiv.innerHTML = `
+                <span class="player-avatar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"/></svg></span>
+                <span class="player-name">${userTeam.PlayerOne.displayName}</span>
+            `;
+            userPlayersDiv.appendChild(playerDiv);
+        }
+
+        if (userTeam?.PlayerTwo) {
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player-item';
+            playerDiv.innerHTML = `
+                <span class="player-avatar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"/></svg></span>
+                <span class="player-name">${userTeam.PlayerTwo.displayName}</span>
+            `;
+            userPlayersDiv.appendChild(playerDiv);
+        }
+
+        userTeamOneDiv.querySelector('.score-value').textContent = userScore.toString();
+
+        // Opponent team (Team Two)
+        const opponentTeamDiv = content.querySelector('.team-two');
+        const opponentPlayersDiv = opponentTeamDiv.querySelector('.team-players') as HTMLDivElement;
+        opponentPlayersDiv.innerHTML = '';
+
+        if (opponentTeam?.PlayerOne) {
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player-item';
+            playerDiv.innerHTML = `
+                <span class="player-avatar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"/></svg></span>
+                <span class="player-name">${opponentTeam.PlayerOne.displayName}</span>
+            `;
+            opponentPlayersDiv.appendChild(playerDiv);
+        }
+
+        if (opponentTeam?.PlayerTwo) {
+            const playerDiv = document.createElement('div');
+            playerDiv.className = 'player-item';
+            playerDiv.innerHTML = `
+                <span class="player-avatar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"/></svg></span>
+                <span class="player-name">${opponentTeam.PlayerTwo.displayName}</span>
+            `;
+            opponentPlayersDiv.appendChild(playerDiv);
+        }
+
+        opponentTeamDiv.querySelector('.score-value').textContent = opponentScore.toString();
+
+        // Result
+        const resultBadge = content.querySelector('.result-badge') as HTMLDivElement;
+        resultBadge.className = `result-badge ${isWin ? 'win' : 'loss'}`;
+
+        // Çeviriden sonuç metni al
+        const resultText = isWin ?
+            (translations?.profile?.mhistory?.win || 'GALİBİYET') :
+            (translations?.profile?.mhistory?.loss || 'MAĞLUBİYET');
+
+        resultBadge.innerHTML = `
+            <span class="result-text">${resultText}</span>
+        `;
+
+        // Overlay'e matchIndex'i data attribute olarak sakla
+        overlay.dataset.currentMatchIndex = matchIndex.toString();
+
+        // Stats
+        const durationFormatted = formatDuration(match.matchDuration || 0);
+        content.querySelector('.match-duration').textContent = durationFormatted;
+
+        // Ball stats (matchState'den al)
+        const userStats = match.matchState?.players?.find(p => p.id === userName);
+        if (userStats) {
+            content.querySelector('.ball-hit').textContent = (userStats.kickBall || 0).toString();
+            content.querySelector('.ball-miss').textContent = (userStats.missedBall || 0).toString();
+        }
+
+        // Match Settings
+        if (match.matchSettings) {
+            const settings = match.matchSettings;
+            content.querySelector('.ball-radius').textContent = settings.ballRadius?.toString() || '-';
+            content.querySelector('.ball-speed').textContent = settings.ballSpeed?.toString() || '-';
+            content.querySelector('.paddle-height').textContent = settings.paddleHeight?.toString() || '-';
+            content.querySelector('.max-score').textContent = settings.maxScore?.toString() || '-';
+        }
+
+        // Overlay'i göster
+        overlay.classList.remove('hide-away');
+
+    } catch (error) {
+        console.error("❌ Error showing match details:", error);
+    }
 }
 
 function hideMatchOverlay() {
-	document.querySelector('#match-overlay').classList.add("hide-away");
+    const overlay = document.getElementById('match-overlay') as HTMLDivElement;
+    overlay.classList.add('hide-away');
+}
+
+// API verilerini bracket formatına dönüştür
+function convertTournamentDataToPlayers(tournament: any, currentUser: string): Player[] {
+	const players: Player[] = [];
+
+	if (!tournament.Rounds || tournament.Rounds.length === 0) {
+		return players;
+	}
+
+	// Kazananın adını bul
+	let winnerName = 'Unknown';
+	if (tournament.winnerPlayer) {
+		for (const round of tournament.Rounds) {
+			if (!round.RoundMatches) continue;
+			for (const match of round.RoundMatches) {
+				if (match.playerOneID === tournament.winnerPlayer) {
+					winnerName = match.playerOne?.displayName || 'Unknown';
+					break;
+				}
+				if (match.playerTwoID === tournament.winnerPlayer) {
+					winnerName = match.playerTwo?.displayName || 'Unknown';
+					break;
+				}
+			}
+			if (winnerName !== 'Unknown') break;
+		}
+	}
+
+	// Her round'u işle
+	tournament.Rounds.forEach((round: any, roundIndex: number) => {
+		if (!round.RoundMatches || round.RoundMatches.length === 0) return;
+
+		round.RoundMatches.forEach((match: any, matchIndex: number) => {
+			// PlayerOne
+			players.push({
+				etap: roundIndex,
+				kutu: matchIndex * 2 + 1,
+				kazanan: match.winnerPlayerID === match.playerOneID ? true :
+						 match.winnerPlayerID === match.playerTwoID ? false : null,
+				skor: match.playerOneScore,
+				text: match.playerOne?.displayName || 'Unknown'
+			});
+
+			// PlayerTwo
+			players.push({
+				etap: roundIndex,
+				kutu: matchIndex * 2 + 2,
+				kazanan: match.winnerPlayerID === match.playerTwoID ? true :
+						 match.winnerPlayerID === match.playerOneID ? false : null,
+				skor: match.playerTwoScore,
+				text: match.playerTwo?.displayName || 'Unknown'
+			});
+		});
+	});
+
+	return players;
 }
 
 function initBracket(players: Player[], n: number, currentUser: string, turnuva: HTMLDivElement, wrapper: HTMLDivElement) {
 	turnuva.innerHTML = '';
 	turnuva.style.transform = 'none';
+
+	const finalStageNumber = n - 1;
 
 	const etapGap = 150;
 	const kutularArray: HTMLDivElement[][] = [];
@@ -834,32 +1056,51 @@ function initBracket(players: Player[], n: number, currentUser: string, turnuva:
 	const lastStage = userBoxes.length ? Math.max(...userBoxes.map(p => p.etap)) : -1;
 
 	players.forEach(item => {
-	  const box = kutularArray[item.etap]?.[item.kutu - 1];
-	  if (!box) return;
-
-	  const isCurrentUser = item.text === currentUser;
-	  const isFinalStage = item.etap === n;
-
-	  if (item.kazanan === null) {
-		box.classList.add('devam');
-		box.innerHTML = `<span class="isim">${item.text}</span>`;
-	  } else if (item.kazanan) {
-		box.classList.add('kazanan');
-		box.innerHTML = `<span class="isim">${item.text}</span><div class="ayirici"></div><span class="skor">${item.skor}</span>`;
-	  } else {
-		box.classList.add('kaybeden');
-		box.innerHTML = `<span class="isim">${item.text}</span><div class="ayirici"></div><span class="skor">${item.skor}</span>`;
-	  }
-
-	  if (isCurrentUser) {
-		if (isFinalStage) {
-		  box.classList.add('kazanan-son');
-		  box.classList.remove('kendi');
-		} else if (item.etap === lastStage) {
-		  box.classList.add('kendi');
+		const box = kutularArray[item.etap]?.[item.kutu - 1];
+		if (!box) {
+			return;
 		}
-	  }
+
+		const isCurrentUser = item.text === currentUser;
+		const isFinalStage = item.etap === finalStageNumber;
+		const isFinalWinner = item.kazanan === true && isFinalStage;
+
+		box.classList.remove('kazanan', 'kaybeden', 'kendi', 'devam', 'kazanan-son');
+
+		if (isCurrentUser) {
+			box.classList.add('kendi');
+			if (item.kazanan === null) {
+				box.innerHTML = `<span class="isim">${item.text}</span>`;
+			} else {
+				box.innerHTML = `<span class="isim">${item.text}</span><div class="ayirici"></div><span class="skor">${item.skor}</span>`;
+			}
+		}
+
+		else if (isFinalWinner && finalStageNumber == n) {
+			box.classList.add('kazanan-son');
+			box.innerHTML = `<span class="isim">${item.text}</span>`;
+		}
+
+		else {
+			if (item.kazanan === null) {
+				box.classList.add('devam');
+				box.innerHTML = `<span class="isim">${item.text}</span>`;
+			} else if (item.kazanan) {
+				box.classList.add('kazanan');
+				box.innerHTML = `<span class="isim">${item.text}</span><div class="ayirici"></div><span class="skor">${item.skor}</span>`;
+			} else {
+				box.classList.add('kaybeden');
+				box.innerHTML = `<span class="isim">${item.text}</span><div class="ayirici"></div><span class="skor">${item.skor}</span>`;
+			}
+		}
 	});
+
+	const finalWinner = players.find(p => p.etap === finalStageNumber && p.kazanan === true);
+	if (finalWinner && kutularArray[finalStageNumber + 1]?.[0]) {
+	  const finalBox = kutularArray[finalStageNumber + 1][0];
+	  finalBox.classList.add('kazanan-son');
+	  finalBox.innerHTML = `<span class="isim">${finalWinner.text}</span>`;
+	}
 
 	setTimeout(() => {
 	  const wrapperWidth = wrapper.clientWidth;
@@ -928,29 +1169,6 @@ export default class extends AView {
 		this.wrapper = document.getElementById('turnuva-wrapper') as HTMLDivElement;
 		this.turnuva = document.getElementById('turnuva') as HTMLDivElement;
 
-		// Kullanıcıyı fetch et
-		// fetch(`${API_BASE_URL}/auth/me`)
-		// 	.then(res => res.json())
-		// 	.then((user: User) => {
-		// 		this.USERNAME = user.username;
-		// 		return fetch(`${API_BASE_URL}/user-tournaments/${encodeURIComponent(this.USERNAME)}`);
-		// 	})
-		// 	.then(res => res.json())
-		// 	.then((tournaments: Tournament[]) => {
-		// 	tournaments.forEach(tr => {
-		// 		const row = document.createElement('div');
-		// 		row.classList.add('tournament-row');
-		// 		row.innerHTML = `
-		// 			<span>${tr.name}</span>
-		// 			<span>${tr.start_date}</span>
-		// 			<span>${tr.end_date}</span>
-		// 			<span>${tr.total_matches}</span>
-		// 		`;
-		// 		row.dataset.players = JSON.stringify(tr.players);
-		// 		this.table.appendChild(row);
-		// 	});
-		// 	});
-
 		// Event delegation
 		this.table.addEventListener('click', (e) => {
 		  if (!this.USERNAME) return;
@@ -972,14 +1190,30 @@ export default class extends AView {
 		document.querySelector("#match-card-exit")?.addEventListener('click', hideMatchOverlay);
 
 		document.addEventListener('keydown', (e: KeyboardEvent) => {
-		  if (e.key === "Escape" && this.overlay.style.display === 'flex') {
-			this.closeBtn.classList.add('close');
-			setTimeout(() => {
-			  this.overlay.style.display = 'none';
-			  this.turnuva.innerHTML = '';
-			  this.closeBtn.classList.remove('close');
-			}, 300);
-		  }
+			if (e.key === "Escape") {
+				hideMatchOverlay();
+			}
+			if (e.key === "Escape" && this.overlay.style.display === 'flex') {
+				this.closeBtn.classList.add('close');
+				setTimeout(() => {
+					this.overlay.style.display = 'none';
+					this.turnuva.innerHTML = '';
+					this.closeBtn.classList.remove('close');
+				}, 300);
+			}
+		});
+
+		// Tournament satırı tıklaması
+		const tournamentTable = document.querySelector('.tournament-table');
+		tournamentTable?.addEventListener('click', (e: Event) => {
+			const target = e.target as HTMLElement;
+			const row = target.closest('.tournament-row:not(.header)') as HTMLElement;
+			if (row) {
+				const tournamentId = row.dataset.tournamentId;
+				if (tournamentId) {
+					openTournamentBracket(tournamentId);
+				}
+			}
 		});
 	}
 
@@ -1018,8 +1252,6 @@ export default class extends AView {
 	}
 }
 
-// Profile.ts içine eklenecek fonksiyonlar
-
 async function fetchMatchHistory(userName: string) {
 	try {
 		const response = await fetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
@@ -1032,7 +1264,6 @@ async function fetchMatchHistory(userName: string) {
 
 		if (response.ok) {
 			const data = await response.json();
-			console.log("Match history:", data);
 			return data.matches || [];
 		} else {
 			console.error("❌ Failed to fetch match history:", response.statusText);
@@ -1169,8 +1400,6 @@ async function populateRecentMatches(userName: string) {
 
 		// Çevirileri al
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
-		const winText = translations?.profile?.mhistory?.win || 'Galibiyet';
-		const loseText = translations?.profile?.mhistory?.lose || 'Mağlubiyet';
 
 		recentMatches.forEach((match: any) => {
 			const isUserInTeamOne = match.teamOne?.PlayerOne?.userName === userName ||
@@ -1200,10 +1429,12 @@ async function populateRecentMatches(userName: string) {
 			const matchItem = document.createElement('div');
 			matchItem.className = `match-item ${isWin ? 'win' : 'loss'}`;
 			matchItem.innerHTML = `
-				<div class="match-result">${isWin ? 'W' : 'L'}</div>
+				<div class="match-result">${isWin ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM441 335C450.4 344.4 450.4 359.6 441 368.9C431.6 378.2 416.4 378.3 407.1 368.9L320.1 281.9L233.1 368.9C223.7 378.3 208.5 378.3 199.2 368.9C189.9 359.5 189.8 344.3 199.2 335L303 231C312.4 221.6 327.6 221.6 336.9 231L441 335z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64zM199 305C189.6 295.6 189.6 280.4 199 271.1C208.4 261.8 223.6 261.7 232.9 271.1L319.9 358.1L406.9 271.1C416.3 261.7 431.5 261.7 440.8 271.1C450.1 280.5 450.2 295.7 440.8 305L337 409C327.6 418.4 312.4 418.4 303.1 409L199 305z"/></svg>'}</div>
 				<div class="match-info">
-					<span class="opponent">${opponentName}</span>
-					<span class="score">${userScore}-${opponentScore}</span>
+					<div class="match-header">
+						<span class="opponent">&nbsp;${opponentName}</span>
+						<span class="score">${userScore}-${opponentScore}</span>
+					</div>
 				</div>
 			`;
 
@@ -1244,13 +1475,18 @@ async function setTextStats(user: any) {
 	document.querySelector(".streak-value").textContent = user.stats.gameLongestStreak;
 	// Last Matches
 	await populateRecentMatches(user.profile.userName);
+	// Detail Statictic
+	document.getElementById("xp_point").textContent = (user.stats.xp || 0).toString();
+	document.getElementById("hit_rate").textContent = Math.round(user.stats.hitRate) + "%";
+	document.getElementById("mfastest").textContent = formatDuration(user.stats.fastestWinDuration);
+	document.getElementById("mlongest").textContent = formatDuration(user.stats.longestMatchDuration);
 }
 
 async function updateWinLossChart(wins: number, losses: number) {
 	const winLossCtx = document.getElementById('winLossChart') as HTMLCanvasElement | null;
 
 	if (!winLossCtx) {
-		console.warn("⚠️ Win/Loss chart canvas not found");
+		console.log("⚠️ Win/Loss chart canvas not found");
 		return;
 	}
 
@@ -1270,7 +1506,6 @@ async function updateWinLossChart(wins: number, losses: number) {
 		chart.data.labels = labels;
 		chart.update();
 	} else {
-		// Yeni chart oluştur (ManagerProfile içinde createWinLossChart çağrılacak)
 		console.log("Chart will be created by ManagerProfile");
 	}
 }
@@ -1310,6 +1545,11 @@ async function setChartStats(user: any) {
 	if (user?.stats) {
 		profileManager.updateSkillChartData(user.stats);
 	}
+
+	// Ball Hit/Miss verilerini güncelle (YENİ)
+	if (user?.stats?.ballHitCount !== undefined && user?.stats?.ballMissCount !== undefined) {
+		profileManager.updateBallStats(user.stats.ballHitCount, user.stats.ballMissCount);
+	}
 }
 
 async function setAchievementStats(user: any) {
@@ -1317,21 +1557,194 @@ async function setAchievementStats(user: any) {
 
 	achievements.forEach(card => {
 		const attrib = card.getAttribute("data-achievement");
-		if (user?.achievements[attrib]?.unlockedAt)
-		{
+		if (user?.achievements[attrib]?.unlockedAt) {
 			card.classList.replace("locked", "unlocked");
 			const date = card.querySelector(".achievement-date");
-			if (date)
-				date.textContent = user.achievements[attrib].unlockedAt;
+			if (date) {
+				// Tarihten sadece tarih kısmını al
+				const unlockedDate = new Date(user.achievements[attrib].unlockedAt);
+				const formattedDate = unlockedDate.toLocaleDateString('tr-TR'); // "14.11.2025" formatında
+				date.textContent = formattedDate;
+			}
 		}
 	});
+}
+
+// ==================== TOURNAMENT HISTORY FETCH ====================
+
+async function fetchTournamentHistory(userName: string) {
+	try {
+		// Endpoint'i deneyin - hangisi çalışırsa onu kullanın
+		let response = await fetch(
+			`${API_BASE_URL}/profile/tournament-history?userName=${encodeURIComponent(userName)}`,
+			{
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+					...getAuthHeaders()
+				}
+			}
+		);
+
+		// Eğer 404 ise alternatif endpoint'i deneyin
+		if (response.status === 404) {
+			response = await fetch(
+				`${API_BASE_URL}/tournaments/user/${encodeURIComponent(userName)}`,
+				{
+					credentials: 'include',
+					headers: {
+						'Content-Type': 'application/json',
+						...getAuthHeaders()
+					}
+				}
+			);
+		}
+
+		if (response.ok) {
+			const data = await response.json();
+			console.log("tournament history: ", data);
+			return data.usersTournament || data.tournaments || [];
+		} else {
+			console.error("❌ Failed to fetch tournament history:", response.statusText);
+			return [];
+		}
+	} catch (error) {
+		console.error("❌ Error fetching tournament history:", error);
+		return [];
+	}
+}
+
+// ==================== TOURNAMENT TABLE POPULATE ====================
+
+async function populateTournamentHistory(userName: string) {
+	const tournamentTable = document.querySelector('.tournament-table');
+	if (!tournamentTable) return;
+
+	const tournaments = await fetchTournamentHistory(userName);
+
+	// Mevcut satırları temizle (header hariç)
+	const existingRows = tournamentTable.querySelectorAll('.tournament-row:not(.header)');
+	existingRows.forEach(row => row.remove());
+
+	if (tournaments.length === 0) {
+		const translations = await getJsTranslations(localStorage.getItem("langPref"));
+		const emptyRow = document.createElement('div');
+		emptyRow.className = 'match-row empty-state';
+		emptyRow.style.gridColumn = '1 / -1';
+		emptyRow.style.textAlign = 'center';
+		emptyRow.style.padding = '2rem';
+		emptyRow.innerHTML = `<span data-i18n="profile.thistory.nomatch">${translations?.profile?.tournament?.notournament || 'Henüz turnuva geçmişi bulunmuyor'}</span>`;
+		tournamentTable.appendChild(emptyRow);
+		return;
+	}
+
+	const translations = await getJsTranslations(localStorage.getItem("langPref"));
+
+	tournaments.forEach((tournament: any) => {
+		const tournamentRow = document.createElement('div');
+		tournamentRow.className = 'tournament-row';
+		tournamentRow.dataset.tournamentId = tournament.id?.toString() || '';
+		tournamentRow.dataset.start = tournament.TournamentStartDate || '';
+
+		// Tüm turnuva verilerini data attribute'e kaydet
+		tournamentRow.dataset.tournament = JSON.stringify(tournament);
+
+		// Tarih ve saat formatla
+		const startDate = new Date(tournament.TournamentStartDate || '');
+		const endDate = new Date(tournament.TournamentEndDate || '');
+
+		const startDateStr = startDate.toLocaleDateString('tr-TR');
+		const startTimeStr = startDate.toLocaleTimeString('tr-TR', {
+			hour: '2-digit',
+			minute: '2-digit'
+		});
+
+		const endDateStr = endDate.toLocaleDateString('tr-TR');
+		const endTimeStr = endDate.toLocaleTimeString('tr-TR', {
+			hour: '2-digit',
+			minute: '2-digit'
+		});
+
+		tournamentRow.innerHTML = `
+			<span class="tournament-name">${tournament.name || 'Unnamed Tournament'}</span>
+			<span class="tournament-date">${startDateStr} ${startTimeStr}</span>
+			<span class="tournament-end-date">${endDateStr} ${endTimeStr}</span>
+			<span class="tournament-matches">${tournament.Rounds?.length || 0}</span>
+		`;
+
+		tournamentTable.appendChild(tournamentRow);
+	});
+}
+
+// ==================== TOURNAMENT FILTER ====================
+
+export function filterTournamentsByYear(year: string) {
+	const tourRows = document.querySelectorAll('.tournament-row:not(.header)');
+
+	tourRows.forEach(row => {
+		const rowElement = row as HTMLElement;
+		let show = true;
+
+		if (year !== 'all') {
+			const startDate = rowElement.dataset.start;
+			const rowYear = new Date(startDate).getFullYear().toString();
+			show = rowYear === year;
+		}
+
+		rowElement.style.display = show ? 'grid' : 'none';
+	});
+}
+
+// ==================== TOURNAMENT BRACKET MODAL ====================
+
+function openTournamentBracket(tournamentId: string) {
+	const overlay = document.getElementById('overlay') as HTMLDivElement;
+	const turnuva = document.getElementById('turnuva') as HTMLDivElement;
+	const wrapper = document.getElementById('turnuva-wrapper') as HTMLDivElement;
+
+	if (!overlay || !turnuva || !wrapper) {
+		console.error("❌ Tournament elements not found");
+		return;
+	}
+
+	// Turnuva satırını bul
+	const row = document.querySelector(`[data-tournament-id="${tournamentId}"]`) as HTMLElement;
+	if (!row) {
+		console.error("❌ Tournament row not found");
+		return;
+	}
+
+	try {
+		// API'den gelen turnuva verilerini al
+		const tournamentData = JSON.parse(row.dataset.tournament || '{}');
+
+		const userName = document.querySelector('.username')?.textContent?.replace('@', '') || '';
+
+		// Verileri Player[] formatına dönüştür
+		const players = convertTournamentDataToPlayers(tournamentData, userName);
+
+		if (players.length === 0) {
+			console.error("❌ No players found in tournament data");
+			return;
+		}
+
+		// İlk tur oyuncu sayısından tur sayısını hesapla
+		const firstRoundCount = players.filter(p => p.etap === 0).length;
+		const n = Math.max(1, Math.ceil(Math.log2(Math.max(1, firstRoundCount))));
+
+		overlay.style.display = 'flex';
+		initBracket(players, n, userName, turnuva, wrapper);
+
+	} catch (error) {
+		console.error("❌ Error opening tournament bracket:", error);
+	}
 }
 
 async function onLoad() {
 	const hasToken = getAuthToken();
 
 	if (!hasToken) {
-		console.warn("⚠️ No auth token found, redirecting to login");
+		console.log("⚠️ No auth token found, redirecting to login");
 		return window.location.replace('/login');
 	}
 
@@ -1368,6 +1781,7 @@ async function onLoad() {
 				await setChartStats(user);
 				setAchievementStats(user);
 				await populateMatchHistory(currentUserName);
+				await populateTournamentHistory(currentUserName);
 
 				setTimeout(() => {
 					profileManager.animateLevelProgress();
@@ -1382,7 +1796,7 @@ async function onLoad() {
 			console.error("❌ Auth failed:", getProfileDatas.status, getProfileDatas.statusText);
 
 			if (getProfileDatas.status === 401) {
-				console.warn("⚠️ Token expired or invalid, redirecting to login");
+				console.log("⚠️ Token expired or invalid, redirecting to login");
 				window.location.replace('/login');
 			}
 		}

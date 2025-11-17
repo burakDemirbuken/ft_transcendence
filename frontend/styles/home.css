@@ -151,16 +151,6 @@ body {
     src: url('../fonts/RubikGlitchPop.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 0.5px;
-}
-
-/* RubikMarkerHatch */
-@font-face {
-    font-family: 'RubikMarkerHatch';
-    src: url('../fonts/RubikMarkerHatch.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-    letter-spacing: 0.5px;
 }
 
 /* RubikPixels */
@@ -169,7 +159,6 @@ body {
     src: url('../fonts/RubikPixels.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 1px;
 }
 
 /* RubikVinyl */
@@ -178,7 +167,6 @@ body {
     src: url('../fonts/RubikVinyl.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 0.5px;
 }
 
 /* RubikBrokenFax */
@@ -187,7 +175,6 @@ body {
     src: url('../fonts/RubikBrokenFax.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 1px;
 }
 
 /* RubikGlitch */
@@ -196,7 +183,6 @@ body {
     src: url('../fonts/RubikGlitch.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 0.5px;
 }
 
 /* RubikMaps */
@@ -205,7 +191,6 @@ body {
     src: url('../fonts/RubikMaps.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 0.5px;
 }
 
 /* RubikMaze */
@@ -214,7 +199,6 @@ body {
     src: url('../fonts/RubikMaze.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 0.5px;
 }
 
 /* RubikPuddles */
@@ -223,7 +207,6 @@ body {
     src: url('../fonts/RubikPuddles.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 1px;
 }
 
 @keyframes fontChange {
@@ -232,37 +215,32 @@ body {
         font-weight: 400;
         letter-spacing: 0.08em;
     }
-    12.5% {
-        font-family: 'RubikMarkerHatch', cursive;
-        font-weight: 400;
-        letter-spacing: 0.12em;
-    }
-    25% {
+    14.2% {
         font-family: 'RubikPixels', cursive;
         font-weight: 400;
         letter-spacing: 0.1em;
     }
-    37.5% {
+    28.5% {
         font-family: 'RubikVinyl', cursive;
         font-weight: 400;
         letter-spacing: 0.08em;
     }
-    50% {
+    42.8% {
         font-family: 'RubikBrokenFax', cursive;
         font-weight: 400;
         letter-spacing: 0.12em;
     }
-    62.5% {
+    57.1% {
         font-family: 'RubikGlitch', cursive;
         font-weight: 400;
         letter-spacing: 0.1em;
     }
-    75% {
+    71.4% {
         font-family: 'RubikMaps', cursive;
         font-weight: 400;
         letter-spacing: 0.08em;
     }
-    87.5% {
+    85.2% {
         font-family: 'RubikMaze', cursive;
         font-weight: 400;
         letter-spacing: 0.1em;

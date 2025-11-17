@@ -41,6 +41,7 @@
 	"profile": {
 		"header": {
 			"level": "Level",
+			"curr": "Current Streak",
 			"tgames": "Total Games",
 			"winrate": "Win Rate"
 		},
@@ -65,12 +66,10 @@
 				"best": "Best Streak"
 			},
 			"mlast": {
-				"title": "Last Matches",
-				"win": "W",
-				"lose": "L"
+				"title": " Last Matches"
 			},
 			"wperf": {
-				"title": "Weekly Performance"
+				"title": " Weekly Performance"
 			}
 		},
 		"perf": {
@@ -83,12 +82,12 @@
 				"title": "Skills"
 			},
 			"mprog": {
-				"title": "Monthly Progress"
+				"title": "Ball Hit Statistics"
 			},
 			"dstats": {
 				"title": "Detailed Statistics",
 				"tpts": "Total Points",
-				"ascore": "Average Score Difference",
+				"ascore": "Hit Rate",
 				"mfastest": "Fastest Win",
 				"mlongest": "Longest Match"
 			}
@@ -126,6 +125,22 @@
 				"score": "Score",
 				"time": "Duration",
 				"result": "Result"
+			},
+			"overlay": {
+				"title": "Match Analysis",
+				"yourteam": "Your",
+				"score": "Score",
+				"opponent": "Oppenent",
+				"duration": "Duration",
+				"gamemode": "Game Mode",
+				"gametype": "Classic",
+				"ballhit": "Ball Hit",
+				"ballmiss": "Ball Miss",
+				"settings": "Match Settings",
+				"ballradius": "Ball Radius",
+				"paddleheight": "Paddle Height",
+				"cornerspeed": "Corner Speed",
+				"winningscore": "Winning Score"
 			}
 		},
 		"achiev": {
