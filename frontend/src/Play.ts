@@ -639,6 +639,13 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
   const playerCount = payload.players.length;
   const maxPlayers = payload.maxPlayers ?? 2;
 
+    // ✅ Eğer round waiting room aktifse, room update'i işleme
+    const roundWaitingRoom = document.getElementById('round-waiting-room');
+    if (roundWaitingRoom && roundWaitingRoom.classList.contains('active')) {
+        console.log('⏸️ Round waiting room is active, skipping room update');
+        return;
+    }
+
   if (currentGameMode === 'tournament') {
     const playerCountElem = document.getElementById('players-count');
     if (playerCountElem) playerCountElem.textContent = `${playerCount}/${maxPlayers}`;
@@ -1688,65 +1695,106 @@ function showRoundWaitingRoom(data) {
     }
 
     // Host kontrolü
-    const isHost = data.winners && data.winners.some(player => player.id === currentUserId && player.isHost);
+    const isHost = data.winners && data.winners.some(player => {
+        const playerId = player.userId || player.id;
+        const playerIsHost = player.isHost === true;
 
+        console.log(`Checking player: ${player.name}, ID: ${playerId}, isHost: ${playerIsHost}, currentUserId: ${currentUserId}`);
+
+        return playerId === currentUserId && playerIsHost;
+    });
+
+    console.log(`=== HOST CHECK RESULT ===`);
     console.log(`Host check - isHost: ${isHost}, currentUserId: ${currentUserId}`);
+    console.log(`Winners:`, data.winners);
 
     // Butonları ayarla
     const roundWaitingBtn = document.getElementById('round-waiting-btn') as HTMLButtonElement | null;
     const nextRoundBtn = document.getElementById('next-round-btn') as HTMLButtonElement | null;
     const finalRoundBtn = document.getElementById('final-round-btn') as HTMLButtonElement | null;
 
-    // Önce tüm butonları gizle
-    if (roundWaitingBtn) roundWaitingBtn.style.display = 'none';
-    if (nextRoundBtn) nextRoundBtn.style.display = 'none';
-    if (finalRoundBtn) finalRoundBtn.style.display = 'none';
+    console.log('=== BUTTON ELEMENTS ===');
+    console.log('roundWaitingBtn exists:', !!roundWaitingBtn);
+    console.log('nextRoundBtn exists:', !!nextRoundBtn);
+    console.log('finalRoundBtn exists:', !!finalRoundBtn);
 
+    // ✅ DÜZELTME: display yerine classList kullan ve !important ekle
     if (isHost) {
-        console.log('User is host, showing appropriate button');
+        console.log('✅ User is HOST - showing appropriate button');
+
+        // Önce tüm butonları gizle
+        if (roundWaitingBtn) {
+            roundWaitingBtn.style.display = 'none';
+            roundWaitingBtn.classList.remove('active');
+        }
 
         // Turnuva bitti mi kontrol et
         if (currentRound >= totalRounds) {
             console.log('🏆 Tournament completed - no buttons shown');
             showNotification('🏆 Turnuva tamamlandı!', 'success');
-            // Hiçbir buton gösterme
+            if (nextRoundBtn) nextRoundBtn.style.display = 'none';
+            if (finalRoundBtn) finalRoundBtn.style.display = 'none';
             return;
         }
         // Final round mu?
         else if (nextRound === totalRounds) {
-            console.log('Showing final round button');
-            if (finalRoundBtn) {
-                finalRoundBtn.style.display = 'block';
-                finalRoundBtn.disabled = false;
-            }
+            console.log('🏆 Showing FINAL ROUND button');
             if (nextRoundBtn) {
                 nextRoundBtn.style.display = 'none';
+                nextRoundBtn.classList.remove('active');
+            }
+            if (finalRoundBtn) {
+                finalRoundBtn.style.cssText = 'display: block !important;';
+                finalRoundBtn.classList.add('active');
+                finalRoundBtn.disabled = false;
+                console.log('Final round button display:', window.getComputedStyle(finalRoundBtn).display);
+                console.log('Final round button classList:', finalRoundBtn.classList);
             }
         }
         // Normal round
         else {
-            console.log('Showing next round button');
-            if (nextRoundBtn) {
-                nextRoundBtn.style.display = 'block';
-                nextRoundBtn.disabled = false;
-            }
+            console.log('▶️ Showing NEXT ROUND button');
             if (finalRoundBtn) {
                 finalRoundBtn.style.display = 'none';
+                finalRoundBtn.classList.remove('active');
+            }
+            if (nextRoundBtn) {
+                // ✅ !important ile zorla göster
+                nextRoundBtn.style.cssText = 'display: block !important;';
+                nextRoundBtn.classList.add('active');
+                nextRoundBtn.disabled = false;
+
+                console.log('Next round button display:', window.getComputedStyle(nextRoundBtn).display);
+                console.log('Next round button classList:', nextRoundBtn.classList);
+                console.log('Next round button offsetHeight:', nextRoundBtn.offsetHeight);
+                console.log('Next round button offsetWidth:', nextRoundBtn.offsetWidth);
             }
         }
     } else {
-        console.log('User is not host, showing waiting button');
+        console.log('❌ User is NOT HOST - showing waiting button');
+
+        // Önce host butonlarını gizle
+        if (nextRoundBtn) {
+            nextRoundBtn.style.display = 'none';
+            nextRoundBtn.classList.remove('active');
+        }
+        if (finalRoundBtn) {
+            finalRoundBtn.style.display = 'none';
+            finalRoundBtn.classList.remove('active');
+        }
 
         // Turnuva bitti mi kontrol et
         if (currentRound >= totalRounds) {
             console.log('🏆 Tournament completed - no waiting button');
-            // Hiçbir buton gösterme
+            if (roundWaitingBtn) roundWaitingBtn.style.display = 'none';
             return;
         }
 
         if (roundWaitingBtn) {
-            roundWaitingBtn.style.display = 'block';
-            roundWaitingBtn.textContent = '⏳ Waiting for Host...';
+            roundWaitingBtn.style.cssText = 'display: block !important;';
+            roundWaitingBtn.classList.add('active');
+            roundWaitingBtn.textContent = '⏳ Host Bekleniyor...';
+            console.log('Waiting button display:', window.getComputedStyle(roundWaitingBtn).display);
         }
     }
 }
@@ -1764,7 +1812,7 @@ interface RoundFinishedPayload {
 }
 
 // handleRoundFinished fonksiyonunu da güncelle
-function handleRoundFinished(payload) {
+function handleRoundFinished(payload: RoundFinishedPayload): void {
     console.log('🏁 Round finished:', payload);
 
     if (!payload) {
@@ -1778,11 +1826,12 @@ function handleRoundFinished(payload) {
 
     console.log(`Round finished - Current: ${currentRound}, Max: ${maxRound}`);
 
-    // players = kazananlar
+    // ✅ DÜZELTME: players = kazananlar (payload.players kullan)
     const winners = payload.players || [];
     const eliminated = payload.losers || payload.eliminated || [];
 
     console.log(`Winners: ${winners.length}, Eliminated: ${eliminated.length}`);
+    console.log('Winners data:', winners);
 
     // Bir sonraki round'un eşleştirmelerini hazırla
     let nextMatches = [];
@@ -1804,7 +1853,7 @@ function handleRoundFinished(payload) {
     tournamentData = {
         currentRoundNumber: currentRound,
         maxRounds: maxRound,
-        winners: winners,
+        winners: winners,  // ✅ Bu artık payload.players'dan geliyor
         eliminated: eliminated,
         nextMatches: nextMatches
     };
