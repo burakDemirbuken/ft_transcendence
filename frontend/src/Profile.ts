@@ -862,7 +862,7 @@ async function showMatchDetails(matchIndex: number) {
         // Çeviriden sonuç metni al
         const resultText = isWin ?
             (translations?.profile?.mhistory?.win || 'GALİBİYET') :
-            (translations?.profile?.mhistory?.loss || 'MAĞLUBİYET');
+            (translations?.profile?.mhistory?.lose || 'MAĞLUBİYET');
 
         resultBadge.innerHTML = `
             <span class="result-text">${resultText}</span>
