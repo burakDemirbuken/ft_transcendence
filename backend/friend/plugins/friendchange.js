@@ -217,4 +217,90 @@ export default fp(async function friendChanges(fastify) {
 	fastify.decorate('postReject', postReject)
 	fastify.decorate('postAccept', postAccept)
 	fastify.decorate('postSend', postSend)
+
+	async function notifyFriendChanges(userName) {
+		try {
+			const userResult = await fastify.getFriendList(userName) ?? {};
+			if (!userResult || (!userResult.pendingFriends && !userResult.acceptedFriends)) {
+				throw new Error("Failed to retrieve user friends for notification.")
+			}
+
+			const users = [...userResult.pendingFriends.incoming, ...userResult.pendingFriends.outgoing, ...userResult.acceptedFriends]
+
+			const results = await Promise.allSettled(users.map(async (user) => {
+				if (fastify.presence.has(user.userName)) {
+					const friendList = await fastify.getFriendList(user.userName) ?? {};
+					if (!friendList || (!friendList.pendingFriends && !friendList.acceptedFriends)) {
+						throw new Error("Failed to retrieve friend list for notification.")
+					}
+
+					
+
+				}
+			}))
+
+/*		users.forEach((user) => {
+			if (fastify.presence.has(user)) {
+				fastify.presence.get(user).socket.send(JSON.stringify({
+					type: 'update',
+					payload: {
+						friendlist: fastify.getFriendList(user)
+					}
+				}))
+			}
+		})*/
+		} catch (error) {
+			fastify.log.error('Error notifying friend changes:', { message: error.message})
+
+		}
+	}
+
+	fastify.decorate('notifyFriendChanges', notifyFriendChanges)
 })
+
+
+/* async function notifyFriendChanges(userName) {
+    try {
+        const userResult = await fastify.getFriendList(userName)
+        if (!userResult || !userResult.pendingFriends || !userResult.acceptedFriends) {
+            fastify.log.warn(`Invalid user result for ${userName}`)
+            return
+        }
+
+        const users = [...userResult.pendingFriends.incoming, ...userResult.pendingFriends.outgoing, ...userResult.acceptedFriends]
+        
+        if (users.length === 0) {
+            return
+        }
+
+        const results = await Promise.allSettled(users.map(async (user) => {
+            if (fastify.presence.has(user)) {
+                const friendList = await fastify.getFriendList(user)
+                const userConnection = fastify.presence.get(user)
+                
+                if (userConnection && userConnection.socket && userConnection.socket.readyState === userConnection.socket.OPEN) {
+                    userConnection.socket.send(JSON.stringify({
+                        type: 'update',
+                        payload: {
+                            friendlist: friendList
+                        }
+                    }))
+                }
+            }
+        }))
+
+        // Başarısız işlemleri logla
+        const failedUsers = results
+            .map((result, index) => ({ result, user: users[index] }))
+            .filter(({ result }) => result.status === 'rejected')
+
+        if (failedUsers.length > 0) {
+            failedUsers.forEach(({ result, user }) => {
+                fastify.log.error(`Failed to notify user ${user}:`, result.reason)
+            })
+        }
+
+    } catch (error) {
+        fastify.log.error(`Error in notifyFriendChanges for ${userName}:`, error)
+    }
+} */

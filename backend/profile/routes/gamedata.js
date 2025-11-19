@@ -528,7 +528,7 @@ export default async function gamedataRoute(fastify) {
 				],
 				attributes: ['id'],
 				raw: true
-			});
+			})
 
 			const tournamentIds = [...new Set(userTournamentIds.map(t => t.id))];
 			console.log('User tournament IDs:', tournamentIds)

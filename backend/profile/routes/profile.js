@@ -120,6 +120,12 @@ export default async function profileRoute(fastify) {
 			userProfile.displayName = dname ?? userProfile.displayName
 			await userProfile.save()
 
+			fetch('http://friend:3007/internal/notify', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ userName: userName })
+			}).catch(err => fastify.log.error('Error notifying friend service of display name change:', err))
+
 			return reply.code(200).send({
 				message: 'Display name updated successfully',
 				profile: userProfile.displayName
@@ -201,7 +207,7 @@ export default async function profileRoute(fastify) {
 				return reply.code(404).send({ message: 'Users not found' })
 			}
 			console.log("Number of userProfiles found:", userProfiles.length);
-			//console.log("userProfiles found:", userProfiles.map(profile => profile.toJSON()))
+
 			return reply.code(200).send({ users: userProfiles.map(profile => profile.toJSON()) })
 		} catch (error) {
 			fastify.log.error('Error retrieving friends profiles:', { message: error.message,
