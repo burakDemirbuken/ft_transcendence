@@ -106,8 +106,7 @@ export default async function profileRoute(fastify) {
 
 	fastify.post('/displaynameupdate', async (request, reply) => {
 		const { userName , dname } = request.body ?? {}
-
-
+		// bak -> body içindekiş değişken isimleri
 		try {
 			if (!userName) {
 				throw new Error('userName is required')
@@ -140,7 +139,6 @@ export default async function profileRoute(fastify) {
 	fastify.post('/create', async (request, reply) =>
 	{
 		const { userName } = request.body ?? {}
-
 
 		try {
 			if (!userName) {
@@ -176,11 +174,7 @@ export default async function profileRoute(fastify) {
 			t.rollback();
 			fastify.log.error({
 				msg: 'Error creating user profile',
-				name: error?.name,
 				message: error?.message,
-				errors: error?.errors,
-				parent: error?.parent,
-				sql: error?.sql,
 			})
 			return reply.code(500).send({ message: 'Failed to create user profile' })
 		}
@@ -189,11 +183,10 @@ export default async function profileRoute(fastify) {
 	fastify.post('/internal/friend', async (request, reply) => {
 		const { friends } = request.body ?? {}
 		try {
-			console.log("Received friends request for:", friends);
 			if (!friends || !Array.isArray(friends) || friends.length === 0) {
 				throw new Error('Friends array is required')
 			}
-			console.log("Fetching profiles for friends:", friends);
+
 			const userProfiles = await fastify.sequelize.models.Profile.findAll({
 				where: {
 					userName: {
@@ -202,11 +195,9 @@ export default async function profileRoute(fastify) {
 				},
 				attributes: ['userName', 'displayName', 'avatarUrl']
 			})
-			console.log("Fetched user profiles:", userProfiles);
 			if (!userProfiles) {
 				return reply.code(404).send({ message: 'Users not found' })
 			}
-			console.log("Number of userProfiles found:", userProfiles.length);
 
 			return reply.code(200).send({ users: userProfiles.map(profile => profile.toJSON()) })
 		} catch (error) {
@@ -234,7 +225,6 @@ export default async function profileRoute(fastify) {
 
 			userProfile.avatarUrl = avatarUrlPath
 			await userProfile.save()
-			console.log('Avatar updated successfully for user:', avatarUrlPath)
 			return reply.code(200).send({  message: 'Avatar updated successfully', newAvatarUrl: userProfile.avatarUrl  })
 		} catch (error) {
 			fastify.log.error('Error updating avatar:', { message: error.message,
