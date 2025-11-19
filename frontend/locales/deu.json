@@ -100,7 +100,7 @@
 				"tname": "Turniername",
 				"tstart": "Anfang",
 				"tend": "Ende",
-				"total": "Gesamtspiele"
+				"trounds": "Touren Anzahl"
 			},
 			"table": {
 				"matches": "Spiele",
@@ -209,12 +209,12 @@
 			"uname": "Benutzername",
 			"dname": "Anzeigename",
 			"email": "E-Mail",
-			"pass": "Passwort Ändern:"
+			"pass": "Passwort"
 		},
 		"language": "Sprache",
 		"dzone": {
 			"title": "Gefahrenzone",
-			"prompt": "Konto Löschen:",
+			"prompt": "Konto Löschen",
 			"button": "Löschen"
 		},
 		"delacc": "Möchten Sie Ihr Konto wirklich löschen? Möchten Sie Ihr Konto löschen? Dieser Vorgang kann nicht rückgängig gemacht werden."

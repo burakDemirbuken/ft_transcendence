@@ -38,7 +38,11 @@
 			},
 			"mhistory": {
 				"win": "VICTORY",
-				"lose": "DEFEAT"
+				"lose": "DEFEAT",
+				"nomatch": "No match history yet"
+			},
+			"thistory": {
+				"nomatch": "No tournament history yet"
 			}
 		}
 	},
@@ -76,7 +80,11 @@
 			},
 			"mhistory": {
 				"win": "GALİBİYET",
-				"lose": "MAĞLUBİYET"
+				"lose": "MAĞLUBİYET",
+				"nomatch": "Henüz maç geçmişi bulunmuyor"
+			},
+			"thistory": {
+				"nomatch": "Henüz turnuva geçmişi bulunmuyor"
 			}
 		}
 	},
@@ -114,7 +122,11 @@
 			},
 			"mhistory": {
 				"win": "GEWINNEN",
-				"lose": "VERLUST"
+				"lose": "VERLUST",
+				"nomatch": "Noch keine Spielhistorie"
+			},
+			"thistory": {
+				"nomatch": "Noch keine Turnierhistorie"
 			}
 		}
 	}
