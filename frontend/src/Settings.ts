@@ -224,6 +224,18 @@ export default class extends AView {
 		document.querySelector(".pass")?.addEventListener("click", sendPassChangeReq);
 		document.querySelector(".validation-form")?.addEventListener("submit", send2FACode);
 		document.getElementById("card-exit")?.addEventListener("click", hideSettingsOverlay);
+		document.querySelectorAll(".part-expand").forEach((btn) => {
+			btn.addEventListener("click", function (e) {
+				const clicked = e.currentTarget as HTMLElement;
+				const partHeader = clicked.closest('.part-header');
+				const part = partHeader?.parentElement;
+				const formContainer = part?.querySelector('.form-container') as HTMLElement | null;
+				if (!formContainer)
+					return;
+				formContainer.hidden = !formContainer.hidden;
+				btn.classList.toggle('rotated', !formContainer.hidden);
+			});
+		});
 		onLoad();
 	}
 

@@ -153,6 +153,10 @@
 	vertical-align: middle;
 }
 
+.part-expand.rotated svg {
+	rotate: -180deg;
+}
+
 .settings-container span {
 	padding: .1em;
 }
@@ -192,7 +196,6 @@
 .settings-container .avatar {
 	position: relative;
 	aspect-ratio: 1/1;
-	/* width: clamp(5rem, 4rem + 7vw, 10rem); */
 	width: clamp(3rem, 2rem + 5vw, 5rem);
 	border-radius: 50%;
 
@@ -285,8 +288,6 @@
 
 #card-exit {
 	position: absolute;
-	/* top: calc(5% + 5px);
-	right: calc(15% - 30px); */
 	top: 5px;
 	right: 5px;
 	cursor: pointer;
