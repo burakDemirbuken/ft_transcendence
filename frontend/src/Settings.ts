@@ -283,7 +283,9 @@ async function onLoad()
 		if (meReq.ok) {
 			const profileData = await meReq.json();
 			console.log(profileData);
-			document.querySelector('input[name="uname"]')?.setAttribute('value', profileData?.user?.username ?? '');
+			const uname = document.querySelector(".settings-uname");
+			if (uname && profileData?.user?.username)
+				uname.textContent = "@" + profileData.user.username;
 			document.querySelector('input[name="current-email"]')?.setAttribute('value', profileData?.user?.email ?? '');
 
 			const profileReq = await fetch(`${API_BASE_URL}/profile/profile?userName=${profileData?.user?.username}`, {

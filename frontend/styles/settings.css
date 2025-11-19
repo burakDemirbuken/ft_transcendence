@@ -12,7 +12,8 @@
 }
 
 #settings-box {
-	width: max(16rem, 75% + 5rem);
+	width: max(260px, 75% + 5rem);
+	flex-shrink: 0;
 
 	background: #111;
 	border-radius: 15px;
@@ -84,6 +85,10 @@
 	color: #ccc;
 }
 
+.settings-content .delete-part .part-title svg {
+	fill: #e20;
+}
+
 .settings-container #delete-account {
 	max-width: 150px;
 	position: relative;
@@ -120,11 +125,11 @@
 }
 
 .settings-content > * {
-	padding: .8em;
+	padding: .9em;
 
 	display: flex;
 	flex-direction: column;
-	gap: .5em;
+	gap: .8em;
 }
 
 .settings-content .part-header {
@@ -133,28 +138,38 @@
 	align-items: center;
 }
 
+.settings-content .part-header button {
+	border: 1px solid #0666;
+	border-radius: 5px;
+	background: #1443;
+}
+
 .settings-content .part-title {
 	display: flex;
 	align-items: center;
-	gap: .5em;
+	gap: .8em;
 }
 
 .settings-content .part-title svg {
-	width: 1.2rem;
+	width: 1.4rem;
 	aspect-ratio: 1/1;
-	fill: #0cc;
+	fill: #0bb;
 	vertical-align: middle;
 }
 
 .settings-content button svg {
 	width: 1.2rem;
 	aspect-ratio: 1/1;
-	fill: #0cc;
+	fill: #3cc9;
 	vertical-align: middle;
 }
 
+.part-expand svg {
+	transition: rotate .3s ease;
+}
+
 .part-expand.rotated svg {
-	rotate: -180deg;
+	rotate: 180deg;
 }
 
 .settings-container span {
@@ -242,6 +257,12 @@
 	flex-direction: row;
 	align-items: center;
 	gap: .5em;
+}
+
+.settings-uname {
+	color: #0ff;
+	text-shadow: 0 0 10px #0cc;
+	font-family: "Orbitron", monospace;
 }
 
 .overlay {
