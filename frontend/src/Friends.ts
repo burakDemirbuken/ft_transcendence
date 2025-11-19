@@ -1,5 +1,6 @@
 import AView from "./AView.js";
 import Profile from "./Profile.js";
+import { onUserProfile } from "./Profile.js";
 import { showNotification } from "./notification.js";
 
 let friendSocket = null;
@@ -56,7 +57,9 @@ let currentFrPage:string = "friends";
 function handleOverlay(e) {
 	if (e.target.classList.contains("prof")) {
 		document.querySelector(".overlay")?.classList.remove("hide-away");
-		// Add user profile to overlay
+		const userName = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1) ?? "";
+		if (userName)
+			onUserProfile(userName);
 	}
 	else if (e.currentTarget.id === "card-exit") {
 		document.querySelector(".overlay")?.classList.add("hide-away");
@@ -107,7 +110,7 @@ async function createOverlay() {
 		document.head.appendChild(link);
 
 		const profileInstance = new Profile();
-		profileInstance.setEventHandlers();
+		profileInstance.setFriendsEventHandlers();
 
 		let rows = document.querySelectorAll(".tournament-row");
 		for (const row of rows)
