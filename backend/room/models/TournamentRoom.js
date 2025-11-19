@@ -127,6 +127,7 @@ export default class TournamentRoom extends Room
 								this.host = this.players.find(p => p.id !== match.loser)?.id || null;
 							this.players = this.players.filter(p => p.id !== match.loser);
 							this.spectators.push(loserPlayer);
+
 						}
 					}
 				}
@@ -172,6 +173,7 @@ export default class TournamentRoom extends Room
 			winner: this.players[0].id,
 			rounds: rounds,
 			participants: this.participants.map(p => ({ id: p.id})),
+			kickedPlayers: [...this.players.map(p => p.id), ...this.spectators.map(s => s.id)],
 			matchType: 'tournament',
 			time: this.time
 		};
@@ -198,8 +200,6 @@ export default class TournamentRoom extends Room
 	{
 		if (this.status !== 'ready2match')
 			return this.emit('error', new Error(`Tournament is not in waiting state, current status: ${this.status}`));
-		//	if (this.players.length < this.playerCount)
-		//		return this.emit('error', new Error(`Not enough players to start matchmaking, current count: ${this.players.length}, required: ${this.playerCount}`));
 
 		function shuffle(array)
 		{

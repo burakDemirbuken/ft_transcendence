@@ -41,7 +41,7 @@ export default async function clientConnectionSocket(fastify) {
 				readystate: connection.socket.readyState,
 				remote:  connection.socket._socket.remoteAddress + ':' + connection.socket._socket.remotePort
 			});
-			fastify.roomManager.leaveRoom(currentPlayer)
+			fastify.roomManager.leaveRoom(currentPlayer.id)
 			fastify.log.error('Client disconnected')
 		});
 
