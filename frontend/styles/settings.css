@@ -242,14 +242,6 @@
 	flex-direction: row;
 	align-items: center;
 	gap: .5em;
-
-	background:
-		repeating-linear-gradient(
-			transparent 0px,
-			transparent 8px,
-			#444 8px,
-			#444 16px
-		);
 }
 
 .overlay {
