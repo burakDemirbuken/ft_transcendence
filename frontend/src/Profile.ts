@@ -1780,54 +1780,33 @@ async function onLoad() {
 	}
 
 	try {
-		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/me`, {
-			credentials: 'include',
-			headers: {
-				'Content-Type': 'application/json',
-				...getAuthHeaders()
-			}
-		});
-
-		if (getProfileDatas.ok) {
-			const authData = await getProfileDatas.json();
-			const userData = authData.user;
-			const currentUserName = userData.username;
-
-			const ProfileUsername = await fetch(
-				`${API_BASE_URL}/profile/profile?userName=${currentUserName}`,
-				{
-					credentials: 'include',
-					headers: {
-						'Content-Type': 'application/json',
-						...getAuthHeaders()
-					}
-				}
-			);
-
-			if (ProfileUsername.ok) {
-				const user = await ProfileUsername.json();
-				console.log("All data:", user);
-
-				setTextStats(user);
-				await setChartStats(user);
-				setAchievementStats(user);
-				await populateMatchHistory(currentUserName);
-				await populateTournamentHistory(currentUserName);
-
-				setTimeout(() => {
-					profileManager.animateLevelProgress();
-				}, 100);
-			} else {
-				console.error("❌ Failed to fetch profile data:", ProfileUsername.statusText);
-				if (ProfileUsername.status === 401) {
-					window.location.replace('/login');
+		const Profile = await fetch(
+			`${API_BASE_URL}/profile/profile`,
+			{
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+					...getAuthHeaders()
 				}
 			}
+		);
+
+		if (Profile.ok) {
+			const user = await Profile.json();
+			console.log("All data:", user);
+
+			setTextStats(user);
+			await setChartStats(user);
+			setAchievementStats(user);
+			await populateMatchHistory(user?.profile?.userName);
+			await populateTournamentHistory(user?.profile?.userName);
+
+			setTimeout(() => {
+				profileManager.animateLevelProgress();
+			}, 100);
 		} else {
-			console.error("❌ Auth failed:", getProfileDatas.status, getProfileDatas.statusText);
-
-			if (getProfileDatas.status === 401) {
-				console.log("⚠️ Token expired or invalid, redirecting to login");
+			console.error("❌ Failed to fetch profile data:", Profile.statusText);
+			if (Profile.status === 401) {
 				window.location.replace('/login');
 			}
 		}

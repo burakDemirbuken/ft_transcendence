@@ -3,7 +3,11 @@ import { Op } from 'sequelize'
 export default async function profileRoute(fastify) {
 
 	fastify.get('/profile', async (request, reply) => {
-		const userName = fastify.getDataFromToken(request).username
+		let userName;
+		if (request.query?.userName)
+			userName = request.query.userName
+		else
+			userName = fastify.getDataFromToken(request).username
 
 		try {
 			if (!userName) {
