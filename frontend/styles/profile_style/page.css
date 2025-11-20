@@ -14,10 +14,6 @@
     box-shadow: 0 0 10px var(--shadow-glow);
 }
 
-::-webkit-scrollbar-thumb:hover {
-    box-shadow: 0 0 15px var(--border-glow);
-}
-
 /* Custom Scrollbar for Modal */
 .modal-body::-webkit-scrollbar {
     width: 6px;
@@ -54,7 +50,7 @@
     border-radius: 10px;
     color: var(--color-muted);
     font-family: var(--font-family);
-    font-size: clamp(.8rem, 1vw + .6rem, 1.2rem);
+    font-size: clamp(.8rem, calc(1vw + .6rem), 1.2rem);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -75,8 +71,13 @@
     content: '';
     position: absolute;
     inset: 0;
-    padding: 2px; /* border kalınlığı */
+    padding: 2px;
     background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
+    /* Standart mask */
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    /* Webkit uyumluluğu */
     -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);

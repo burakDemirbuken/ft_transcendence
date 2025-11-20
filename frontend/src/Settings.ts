@@ -5,6 +5,49 @@ import { showNotification } from "./notification.js";
 
 let currentUserName = null;
 
+async function hideSettingsOverlay() {
+	console.log("HIDE SETTINGS OVERLAY");
+	document.querySelector(".overlay")?.classList.add("hide-away");
+	const input = document.querySelector(".card input") as HTMLInputElement;
+	if (input)
+		input.value = "";
+}
+
+async function showSettingsOverlay() {
+	console.log("SHOW SETTINGS OVERLAY");
+	document.querySelector(".overlay")?.classList.remove("hide-away");
+}
+
+async function send2FACode(e) {
+	e.preventDefault();
+	console.log("SEND 2FA CODE REQ");
+
+	const form = e.target.closest('form');
+	const formData = new FormData(form);
+	const inputs = Object.fromEntries(formData);
+
+	try {
+		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/verify-2fa`, {
+			method: 'POST',
+			credentials: 'include',
+			body: JSON.stringify({...inputs})
+		});
+		if (getProfileDatas.ok) {
+			console.log("success");
+			showNotification("2FA code sent to your email", "success");
+		}
+		else {
+			console.log(getProfileDatas.statusText);
+			showNotification("Failed to send 2FA code", "error");
+		}
+	} catch (error) {
+		console.error("❌ Error during 2FA code request:", error);
+		showNotification(`System Error: ${error.message}`, "error");
+	}
+
+	form.querySelectorAll('input').forEach((input: HTMLInputElement) => input.value = '');
+}
+
 async function deleteAccount(e) {
 	e.preventDefault();
 	const isConfirmed = confirm("Are you sure you want to delete your account? This action cannot be undone");
@@ -17,7 +60,8 @@ async function deleteAccount(e) {
 			const json = await res.json();
 			if (res.ok) {
 				showNotification(json.message, "success");
-				navigateTo("login");
+				showSettingsOverlay();
+				// navigateTo("login");
 			} else {
 				showNotification(json.error, "error");
 			}
@@ -111,6 +155,7 @@ async function sendEmailChangeReq(e) {
 		if (getProfileDatas.ok) {
 			console.log("success");
 			showNotification("Email change link sent to your email", "success");
+			showSettingsOverlay();
 		}
 		else {
 			console.log(getProfileDatas.statusText);
@@ -144,6 +189,7 @@ async function sendPassChangeReq(e) {
 		if (getProfileDatas.ok) {
 			console.log("success");
 			showNotification("Password change link sent to your email", "success");
+			showSettingsOverlay();
 		}
 		else {
 			console.log(getProfileDatas.statusText);
@@ -176,6 +222,20 @@ export default class extends AView {
 		document.querySelector(".email")?.addEventListener("click", sendEmailChangeReq);
 		document.querySelector(".dname")?.addEventListener("click", sendDNameChangeReq);
 		document.querySelector(".pass")?.addEventListener("click", sendPassChangeReq);
+		document.querySelector(".validation-form")?.addEventListener("submit", send2FACode);
+		document.getElementById("card-exit")?.addEventListener("click", hideSettingsOverlay);
+		document.querySelectorAll(".part-expand").forEach((btn) => {
+			btn.addEventListener("click", function (e) {
+				const clicked = e.currentTarget as HTMLElement;
+				const partHeader = clicked.closest('.part-header');
+				const part = partHeader?.parentElement;
+				const formContainer = part?.querySelector('.form-container') as HTMLElement | null;
+				if (!formContainer)
+					return;
+				formContainer.hidden = !formContainer.hidden;
+				btn.classList.toggle('rotated', !formContainer.hidden);
+			});
+		});
 		onLoad();
 	}
 
@@ -223,7 +283,9 @@ async function onLoad()
 		if (meReq.ok) {
 			const profileData = await meReq.json();
 			console.log(profileData);
-			document.querySelector('input[name="uname"]')?.setAttribute('value', profileData?.user?.username ?? '');
+			const uname = document.querySelector(".settings-uname");
+			if (uname && profileData?.user?.username)
+				uname.textContent = "@" + profileData.user.username;
 			document.querySelector('input[name="current-email"]')?.setAttribute('value', profileData?.user?.email ?? '');
 
 			const profileReq = await fetch(`${API_BASE_URL}/profile/profile?userName=${profileData?.user?.username}`, {

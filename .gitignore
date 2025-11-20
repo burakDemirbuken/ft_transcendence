@@ -20,6 +20,7 @@ backend/profile/database/*
 backend/friend/database/
 backend/friend/database/*
 */database/*
+backend/aiServer/__pycache__/ai_player.cpython-311.pyc
 
 # ==============================================
 # Node & Dependencies

@@ -418,6 +418,7 @@ class ManagerProfile {
 	}
 
 	public async updateChartLanguage(): Promise<void> {
+		console.log("🔄 Updating chart languages...");
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
 		let chart = this.showcharts.performance;
@@ -527,7 +528,7 @@ class ManagerProfile {
 
 			setTimeout(() => {
 				progressBar.style.transition = 'width 2s ease-in-out';
-				progressBar.style.width = `${targetWidth}%`;
+				progressBar.style.width = `${Number(targetWidth) || 0}%`;
 			}, 500);
 		}
 	}
@@ -620,23 +621,6 @@ export function updateTournamentLanguage() {
 	const userName = document.querySelector('.username')?.textContent?.replace('@', '');
 	if (userName) {
 		populateTournamentHistory(userName);
-	}
-}
-
-export function updateChartLanguage() {
-	if (profileManager)
-		profileManager.updateChartLanguage();
-	refreshMatchHistory();
-	updateTournamentLanguage();
-	updateRecentMatchesLanguage();
-
-	// Eğer overlay açıksa, içeriğini güncelle
-	const matchOverlay = document.getElementById('match-overlay') as HTMLDivElement;
-	if (matchOverlay && !matchOverlay.classList.contains('hide-away')) {
-		const content = matchOverlay.querySelector('.match-overlay-content') as HTMLDivElement;
-		if (content) {
-			updateMatchOverlayLanguage(content);
-		}
 	}
 }
 
@@ -1240,6 +1224,24 @@ export default class extends AView {
 		document.removeEventListener('keydown', () => {});
 	}
 
+	async setFriendsEventHandlers() {
+		document.addEventListener("mousemove", handleCardMouseMove);
+		document.addEventListener("mouseout", resetCardShadow);
+
+		// Tab tıklamaları
+		document.addEventListener('click', tabClickHandler);
+
+		// Filtreler
+		const resultFilter = document.getElementById('result-filter');
+		resultFilter?.addEventListener('change', resultFilterChangeHandler);
+
+		const tournamentYearFilter = document.getElementById('tournament-year-filter');
+		tournamentYearFilter?.addEventListener('change', tournamentYearFilterChangeHandler);
+
+		// Level progress animasyonu
+		profileManager.animateLevelProgress();
+	}
+
 	async setStylesheet() {
 		const link = document.createElement("link");
 		link.rel = "stylesheet";
@@ -1250,6 +1252,23 @@ export default class extends AView {
 	async unsetStylesheet() {
 		const link = document.querySelector("link[href='styles/profile.css']");
 		if (link) document.head.removeChild(link);
+	}
+
+	async updateJsLanguage() {
+		if (profileManager)
+			profileManager.updateChartLanguage();
+		refreshMatchHistory();
+		updateTournamentLanguage();
+		updateRecentMatchesLanguage();
+
+		// Eğer overlay açıksa, içeriğini güncelle
+		const matchOverlay = document.getElementById('match-overlay') as HTMLDivElement;
+		if (matchOverlay && !matchOverlay.classList.contains('hide-away')) {
+			const content = matchOverlay.querySelector('.match-overlay-content') as HTMLDivElement;
+			if (content) {
+				updateMatchOverlayLanguage(content);
+			}
+		}
 	}
 }
 
@@ -1815,5 +1834,30 @@ async function onLoad() {
 	} catch (error) {
 		console.error("❌ Error in onLoad:", error);
 		window.location.replace('/login');
+	}
+}
+
+export async function onUserProfile(userName: string) {
+	try {
+		const userProfile = await fetch(`${API_BASE_URL}/profile/profile?userName=${userName}`);
+
+		if (userProfile.ok) {
+			const user = await userProfile.json();
+			console.log("Friend Page user data:", user);
+
+			setTextStats(user);
+			await setChartStats(user);
+			setAchievementStats(user);
+			await populateMatchHistory(userName);
+			await populateTournamentHistory(userName);
+
+			setTimeout(() => {
+				profileManager.animateLevelProgress();
+			}, 100);
+		} else {
+			console.error("❌ Failed to fetch profile data:", userProfile.statusText);
+		}
+	} catch (error) {
+		console.error("ERROR LOADING OVERLAY", error);
 	}
 }
