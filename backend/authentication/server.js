@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import Fastify from 'fastify';
 import register from './srcs/registration.js';
 import { sequelize, testConnection } from './models/database.js';

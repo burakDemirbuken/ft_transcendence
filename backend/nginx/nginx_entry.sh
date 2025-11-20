@@ -1,30 +1,27 @@
 #!/bin/sh
 
-if [ ! -f /etc/nginx/ssl/localhost.crt ] || [ ! -f /etc/nginx/ssl/localhost.key ]; then
+if [ ! -f /etc/nginx/ssl/certificate.crt ] || [ ! -f /etc/nginx/ssl/certificate.key ]; then
     echo "Generating SSL certificates..."
 
-    openssl genrsa -out /etc/nginx/ssl/localhost.key 4096
+    if [ -z "$SSL_EXTERNAL_IP" ]; then
+        SSL_EXTERNAL_IP=127.0.0.1
+    fi
+    echo "Using IP: $SSL_EXTERNAL_IP"
+    openssl genrsa -out /etc/nginx/ssl/certificate.key 4096
 
-    openssl req -new -x509 -key /etc/nginx/ssl/localhost.key \
-        -out /etc/nginx/ssl/localhost.crt -days 365 \
-        -subj "/C=TR/ST=Istanbul/L=Istanbul/O=Transcendence/OU=IT/CN=localhost"
+    openssl req -new -x509 -key /etc/nginx/ssl/certificate.key \
+        -out /etc/nginx/ssl/certificate.crt -days 365 \
+        -subj "/C=TR/ST=Kocaeli/L=Gebze/O=42 Kocaeli/OU=ft_transcendence/CN=${SSL_EXTERNAL_IP}"
 
-    chmod 755 /etc/nginx/ssl/localhost.key
-    chmod 755 /etc/nginx/ssl/localhost.crt
+    chmod 600 /etc/nginx/ssl/certificate.key
+    chmod 644 /etc/nginx/ssl/certificate.crt
 
     echo "SSL certificates generated successfully!"
+    echo "Certificate valid for: ${SSL_EXTERNAL_IP}"
 else
     echo "SSL certificates already exist, skipping generation."
 fi
 
-echo "SSL configuration file created!"
-
+echo "Server configured for IP: ${SSL_EXTERNAL_IP}"
 echo "Starting nginx..."
-
-echo "Setting correct permissions for web files..."
-chmod -R 777 ./* 
-#chown -R nginx:nginx /usr/share/nginx/html
-#find /usr/share/nginx/html -type d -exec chmod 755 {} \;
-#find /usr/share/nginx/html -type f -exec chmod 644 {} \;
-
 exec "$@"

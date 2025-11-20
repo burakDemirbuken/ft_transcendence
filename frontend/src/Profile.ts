@@ -418,6 +418,7 @@ class ManagerProfile {
 	}
 
 	public async updateChartLanguage(): Promise<void> {
+		console.log("🔄 Updating chart languages...");
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
 		let chart = this.showcharts.performance;
@@ -620,23 +621,6 @@ export function updateTournamentLanguage() {
 	const userName = document.querySelector('.username')?.textContent?.replace('@', '');
 	if (userName) {
 		populateTournamentHistory(userName);
-	}
-}
-
-export function updateChartLanguage() {
-	if (profileManager)
-		profileManager.updateChartLanguage();
-	refreshMatchHistory();
-	updateTournamentLanguage();
-	updateRecentMatchesLanguage();
-
-	// Eğer overlay açıksa, içeriğini güncelle
-	const matchOverlay = document.getElementById('match-overlay') as HTMLDivElement;
-	if (matchOverlay && !matchOverlay.classList.contains('hide-away')) {
-		const content = matchOverlay.querySelector('.match-overlay-content') as HTMLDivElement;
-		if (content) {
-			updateMatchOverlayLanguage(content);
-		}
 	}
 }
 
@@ -1268,6 +1252,23 @@ export default class extends AView {
 	async unsetStylesheet() {
 		const link = document.querySelector("link[href='styles/profile.css']");
 		if (link) document.head.removeChild(link);
+	}
+
+	async updateJsLanguage() {
+		if (profileManager)
+			profileManager.updateChartLanguage();
+		refreshMatchHistory();
+		updateTournamentLanguage();
+		updateRecentMatchesLanguage();
+
+		// Eğer overlay açıksa, içeriğini güncelle
+		const matchOverlay = document.getElementById('match-overlay') as HTMLDivElement;
+		if (matchOverlay && !matchOverlay.classList.contains('hide-away')) {
+			const content = matchOverlay.querySelector('.match-overlay-content') as HTMLDivElement;
+			if (content) {
+				updateMatchOverlayLanguage(content);
+			}
+		}
 	}
 }
 

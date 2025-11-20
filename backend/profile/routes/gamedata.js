@@ -470,7 +470,9 @@ export default async function gamedataRoute(fastify) {
 	})
 
 	fastify.get('/match-history', async (request, reply) => {
-		const { userName } = request.query ?? {}
+
+		const userName = fastify.getDataFromToken(request).username
+
 		try {
 			const result = await getUserMatchHistory(fastify, userName)
 			if (result.error) {
@@ -486,9 +488,9 @@ export default async function gamedataRoute(fastify) {
 		}
 	})
 
-
 	fastify.get('/tournament-history', async (request, reply) => {
-		const { userName } = request.query ?? {}
+		const userName = fastify.getDataFromToken(request).username
+
 		try {
 
 			if (!userName) {
@@ -503,7 +505,6 @@ export default async function gamedataRoute(fastify) {
 			if (!userProfile) {
 				return reply.code(404).send({ error: 'User profile not found' })
 			}
-			console.log('Retrieved user profile:', { id: userProfile.id, userName: userName })
 
 			const userTournamentIds = await fastify.sequelize.models.TournamentHistory.findAll({
 				include: [
@@ -528,10 +529,9 @@ export default async function gamedataRoute(fastify) {
 				],
 				attributes: ['id'],
 				raw: true
-			});
+			})
 
 			const tournamentIds = [...new Set(userTournamentIds.map(t => t.id))];
-			console.log('User tournament IDs:', tournamentIds)
 			const usersTournament = await fastify.sequelize.models.TournamentHistory.findAll({
 				include: [
 					{
@@ -573,7 +573,6 @@ export default async function gamedataRoute(fastify) {
 				}
 			});
 			const userJoinedTournamentsId = usersTournament.map(tournament => tournament.id)
-			console.log('User joined tournaments IDs:', userJoinedTournamentsId)
 
 			return reply.send({ success: true, usersTournament: JSON.parse(JSON.stringify(usersTournament)) })
 		} catch (error) {
