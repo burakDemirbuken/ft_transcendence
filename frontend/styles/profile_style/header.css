@@ -6,12 +6,12 @@
     background: var(--bg-secondary);
     border: 2px solid var(--color-primary);
     border-radius: 20px;
-    padding: clamp(.6rem, 2vw + .4rem, 2.5rem);
+    padding: clamp(.6rem, calc(2vw + .4rem), 2.5rem);
     margin-bottom: 30px;
     backdrop-filter: blur(10px);
     box-shadow:
         0 0 30px var(--shadow-glow),
-        inset 0 0 30px --bg-radial;
+        inset 0 0 30px var(--bg-radial);
 }
 
 .header-content {
@@ -27,7 +27,7 @@
     display: inline-block;
     cursor: pointer;
     color: var(--color-text);
-	padding: clamp(.2rem, .2vw + .05rem, .5rem) .5rem;
+	padding: clamp(.2rem, calc(.2vw + .05rem), .5rem) .5rem;
 }
 
 .tooltip-popup {
@@ -88,7 +88,7 @@
 }
 
 .gradient-icon {
-	font-size: clamp(1rem, 2vw + .9rem, 2rem);
+	font-size: clamp(1rem, calc(2vw + .9rem), 2rem);
 	background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
 	background-clip: text;
 	-webkit-text-fill-color: transparent;
@@ -103,7 +103,7 @@
 	flex: 1 0 0;
 	min-width: 0;;
     text-align: center;
-	padding: clamp(.5rem, 2vw + .25rem, 1.2rem);
+	padding: clamp(.5rem, calc(2vw + .25rem), 1.2rem);
     background: var(--bg-overlay-dark);
     border-radius: 10px;
     border: 1px solid var(--border-light);
@@ -111,7 +111,7 @@
 
 .stat-value {
     display: block;
-    font-size: clamp(.8rem, 2vw + .6rem, 1.6rem);
+    font-size: clamp(.8rem, calc(2vw + .6rem), 1.6rem);
     font-weight: 900;
     color: var(--color-success);
     text-shadow: 0 0 15px var(--color-success);
@@ -125,8 +125,7 @@
 
 .avatar {
 	aspect-ratio: 1/1;
-	width: clamp(5rem, 4rem + 7vw, 10rem);
-	width: clamp(4rem, 3rem + 7vw, 9rem);
+	width: clamp(4rem, calc(3rem + 7vw), 9rem);
 	border-radius: 50%;
 
 	background: #000;
@@ -147,8 +146,7 @@
 
 .avatar img {
 	aspect-ratio: 1/1;
-	width: clamp(4rem, 3rem + 7vw, 9rem);
-	width: clamp(3rem, 2rem + 7vw, 8rem);
+	width: clamp(3rem, calc(2rem + 7vw), 8rem);
 	border-radius: 50%;
 	object-fit: cover;
 	background: linear-gradient(45deg, var(--color-primary), var(--color-secondary));
@@ -160,7 +158,7 @@
 }
 
 .user-title {
-    font-size: clamp(1rem, 1.5vw + .8rem, 2.5rem);
+    font-size: clamp(1rem, calc(1.5vw + .8rem), 2.5rem);
     font-weight: 900;
     color: var(--color-text);
     text-shadow: 0 0 10px var(--color-text);
@@ -171,7 +169,7 @@
 .username {
     color: var(--color-primary);
     font-size: 1.2rem;
-    font-size: clamp(.8rem, 1vw + .6rem, 1.2rem);
+    font-size: clamp(.8rem, calc(1vw + .6rem), 1.2rem);
     text-shadow: 0 0 10px var(--color-primary);
     margin-bottom: 15px;
 	text-wrap: nowrap;
@@ -185,7 +183,7 @@
 }
 
 .level-text {
-    font-size: clamp(.7rem, 1vw + .5rem, 1rem);
+    font-size: clamp(.7rem, calc(1vw + .5rem), 1rem);
     color: var(--color-secondary);
     font-weight: 700;
     text-shadow: 0 0 10px var(--color-secondary);
@@ -194,7 +192,7 @@
 
 .level-bar {
     flex: 1;
-    height: clamp(.4rem, .3vw + .3rem, .6rem);
+    height: clamp(.4rem, calc(.3vw + .3rem), .6rem);
 	min-width: 180px;
     background: var(--bg-overlay-light);
     border-radius: 5px;

@@ -10,11 +10,11 @@
 	flex-direction: column;
 	align-items: center;
 
-	font-size: clamp(.8rem, .4rem + 2vw, 1rem);
+	font-size: clamp(.8rem, calc(.4rem + 2vw), 1rem);
 }
 
 .friend-nav {
-	width: max(200px, 68% + 4rem);
+	width: max(200px, calc(68% + 4rem));
 	margin: 2rem;
 	border-radius: 5px;
 	border: 2px solid #0ff;
@@ -43,11 +43,11 @@
 
 	height: auto;
 	font-family: "Orbitron", monospace;
-	font-size: clamp(.8rem, .4rem + 1vw, 1rem);
+	font-size: clamp(.8rem, calc(.4rem + 1vw), 1rem);
 	font-weight: bold;
 	text-shadow: 0 0 10px #c0c;
 	color: #eee;
-	padding: clamp(1em, .8em + 1vw, 1.2em) 0;
+	padding: clamp(1em, calc(.8em + 1vw), 1.2em) 0;
 
 	position: relative;
 }
@@ -85,8 +85,7 @@
 
 .friend-page-box {
 	position: relative;
-	width: max(80%, 260px);
-	width: max(260px, 75% + 5rem);
+	width: max(260px, calc(75% + 5rem));
 	height: 30px;
 	margin-top: 1rem;
 }
@@ -326,11 +325,11 @@
 }
 
 .card {
-	width: clamp(270px, 70% + 80px, 2400px);
+	width: clamp(270px, calc(70% + 80px), 2400px);
 	height: 90%;
 	border: 2px solid #5557;
 	border-radius: 10px;
-	padding: clamp(2px, 3% + 1px,20px);
+	padding: clamp(2px, calc(3% + 1px),20px);
 	overflow-y: auto;
 	background:
 		radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.145) 0%, transparent 50%),
