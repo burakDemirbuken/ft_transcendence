@@ -12,7 +12,8 @@
 }
 
 #settings-box {
-	width: max(16rem, 75% + 5rem);
+	width: max(260px, 75% + 5rem);
+	flex-shrink: 0;
 
 	background: #111;
 	border-radius: 15px;
@@ -75,18 +76,17 @@
 }
 
 .settings-container .submit {
-	width: 1.8rem;
-	height: 1.8rem;
 	border-radius: 5px;
-
 	border: 2px solid #333;
 	background: #000;
+
+	padding: .4em .4em;
+	font-size: .8em;
+	color: #ccc;
 }
 
-.settings-container .submit svg {
-	fill: #ccc;
-	background: none;
-	padding: .3em;
+.settings-content .delete-part .part-title svg {
+	fill: #e20;
 }
 
 .settings-container #delete-account {
@@ -125,11 +125,11 @@
 }
 
 .settings-content > * {
-	padding: .8em;
+	padding: .9em;
 
 	display: flex;
 	flex-direction: column;
-	gap: .5em;
+	gap: .8em;
 }
 
 .settings-content .part-header {
@@ -138,24 +138,38 @@
 	align-items: center;
 }
 
+.settings-content .part-header button {
+	border: 1px solid #0666;
+	border-radius: 5px;
+	background: #1443;
+}
+
 .settings-content .part-title {
 	display: flex;
 	align-items: center;
-	gap: .5em;
+	gap: .8em;
 }
 
 .settings-content .part-title svg {
-	width: 1.2rem;
+	width: 1.4rem;
 	aspect-ratio: 1/1;
-	fill: #0cc;
+	fill: #0bb;
 	vertical-align: middle;
 }
 
 .settings-content button svg {
 	width: 1.2rem;
 	aspect-ratio: 1/1;
-	fill: #0cc;
+	fill: #3cc9;
 	vertical-align: middle;
+}
+
+.part-expand svg {
+	transition: rotate .3s ease;
+}
+
+.part-expand.rotated svg {
+	rotate: 180deg;
 }
 
 .settings-container span {
@@ -197,7 +211,6 @@
 .settings-container .avatar {
 	position: relative;
 	aspect-ratio: 1/1;
-	/* width: clamp(5rem, calc(4rem + 7vw), 10rem); */
 	width: clamp(3rem, calc(2rem + 5vw), 5rem);
 	border-radius: 50%;
 
@@ -244,14 +257,12 @@
 	flex-direction: row;
 	align-items: center;
 	gap: .5em;
+}
 
-	background:
-		repeating-linear-gradient(
-			transparent 0px,
-			transparent 8px,
-			#444 8px,
-			#444 16px
-		);
+.settings-uname {
+	color: #0ff;
+	text-shadow: 0 0 10px #0cc;
+	font-family: "Orbitron", monospace;
 }
 
 .overlay {
@@ -290,8 +301,6 @@
 
 #card-exit {
 	position: absolute;
-	/* top: calc(5% + 5px);
-	right: calc(15% - 30px); */
 	top: 5px;
 	right: 5px;
 	cursor: pointer;

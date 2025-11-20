@@ -1240,6 +1240,24 @@ export default class extends AView {
 		document.removeEventListener('keydown', () => {});
 	}
 
+	async setFriendsEventHandlers() {
+		document.addEventListener("mousemove", handleCardMouseMove);
+		document.addEventListener("mouseout", resetCardShadow);
+
+		// Tab tıklamaları
+		document.addEventListener('click', tabClickHandler);
+
+		// Filtreler
+		const resultFilter = document.getElementById('result-filter');
+		resultFilter?.addEventListener('change', resultFilterChangeHandler);
+
+		const tournamentYearFilter = document.getElementById('tournament-year-filter');
+		tournamentYearFilter?.addEventListener('change', tournamentYearFilterChangeHandler);
+
+		// Level progress animasyonu
+		profileManager.animateLevelProgress();
+	}
+
 	async setStylesheet() {
 		const link = document.createElement("link");
 		link.rel = "stylesheet";
@@ -1815,5 +1833,30 @@ async function onLoad() {
 	} catch (error) {
 		console.error("❌ Error in onLoad:", error);
 		window.location.replace('/login');
+	}
+}
+
+export async function onUserProfile(userName: string) {
+	try {
+		const userProfile = await fetch(`${API_BASE_URL}/profile/profile?userName=${userName}`);
+
+		if (userProfile.ok) {
+			const user = await userProfile.json();
+			console.log("Friend Page user data:", user);
+
+			setTextStats(user);
+			await setChartStats(user);
+			setAchievementStats(user);
+			await populateMatchHistory(userName);
+			await populateTournamentHistory(userName);
+
+			setTimeout(() => {
+				profileManager.animateLevelProgress();
+			}, 100);
+		} else {
+			console.error("❌ Failed to fetch profile data:", userProfile.statusText);
+		}
+	} catch (error) {
+		console.error("ERROR LOADING OVERLAY", error);
 	}
 }
