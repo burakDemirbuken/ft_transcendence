@@ -67,10 +67,10 @@ export default class Room extends EventEmitter
 	finishRoom(payload)
 	{
 		this.status = 'finished';
-		this.emit('finished', { ...payload, gameSettings: this.gameSettings });
+		this.emit('finished', { ...payload, gameSettings: this.gameSettings, kickedPlayers: [...this.players.map(p => p.id)] });
 		return { state: payload, players: this.players };
 	}
-
+1
 	getState()
 	{
 		return {
