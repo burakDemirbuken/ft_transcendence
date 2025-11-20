@@ -105,6 +105,7 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.post('/displaynameupdate', async (request, reply) => {
+		console.log(request.body);
 		const { userName , dname } = request.body ?? {}
 		// bak -> body içindekiş değişken isimleri
 		try {
@@ -131,7 +132,7 @@ export default async function profileRoute(fastify) {
 			})
 
 		} catch (error) {
-			fastify.log.error('Error updating display name:', error)
+			fastify.log.error('Error updating display name:', error.message)
 			return reply.code(500).send({ message: 'Failed to update display name' })
 		}
 	})
@@ -208,7 +209,7 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.post('/internal/avatar-update', async (request, reply) => {
-		const {userName, avatarUrlPath } = request.body ?? {}
+		const { userName, avatarUrlPath } = request.body ?? {}
 
 		try {
 			if (!userName || !avatarUrlPath) {

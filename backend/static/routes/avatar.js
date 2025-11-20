@@ -26,6 +26,8 @@ export default async function avatarRoutes(fastify) {
 	})
 
 	fastify.post("/avatar", async (request, reply) => {
+		console.log(request.body);
+
 		/* 
 		  const data = await req.file()
 
