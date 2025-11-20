@@ -242,10 +242,10 @@ export default fp(async function friendChanges(fastify) {
 								friendlist: friendList
 							}
 						}))
+						console.log(`list ${JSON.stringify(friendList)} sent to ${user.userName}`);
 					}
 				}
 			}))
-
 			const failed = results.map((result, index) => ({ result, user: users[index] })).filter(({ result }) => result.status === 'rejected')
 		
 			if (failed.length > 0) {

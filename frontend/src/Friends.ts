@@ -47,6 +47,8 @@ export function connectWebSocket() {
 					console.error("Failed to dispatch friends:response event", e);
 				}
 				break;
+			case "update": // herhangi bir değişiklik olduğunda bu type ile geliyo
+				console.warn("UPDATE RESPONSE: ", payload);
 			default:
 				break;
 		}

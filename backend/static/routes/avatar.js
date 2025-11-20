@@ -5,30 +5,6 @@ const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg"]
 
 export default async function avatarRoutes(fastify) {
 
-/* 	fastify.get("/avatar", async (request, reply) => {
-		const userName = fastify.getDataFromToken(request).username ?? null
-		
-		try {
-			if (!userName) {
-				throw new Error("userName is required")
-			}
-
-			
-
-			const response = await fetch(`http://profile:3006/internal/avatar-get?userName=${userName}`)
-			if (!response.ok) {
-				return reply.code(404).send({ message: "Avatar not found" })
-			}
-			
-			const data = await response.json()
-			console.log("Fetched avatar data:", data);
-			console.log("Retrieved avatar URL:", data.avatarUrl);
-			return reply.code(200).send({ avatarUrl: data.avatarUrl })
-		} catch (error) {
-			return reply.code(500).send({ message: "Failed to retrieve avatar" })
-		}
-	}) */
-
 	fastify.post("/avatar", async (request, reply) => {
 		/* 
 		  const data = await req.file()

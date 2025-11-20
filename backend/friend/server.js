@@ -15,14 +15,14 @@ const presence = new Map()
 fastify.decorate('presence', presence)
 
 await fastify.register(dbPlugin)
+await fastify.register(friendchange)
 await fastify.register(fastifyWebsocket)
 await fastify.register(friendRoutes)
 await fastify.register(friendListRoutes)
-await fastify.register(friendchange)
 await fastify.register(cookie)
 fastify.register(jwt, {
     secret: process.env.JWT_SECRET
-});
+})
 function getDataFromToken(request)
 {
     const token = request.cookies.accessToken;

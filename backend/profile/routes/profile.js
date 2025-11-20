@@ -223,10 +223,16 @@ export default async function profileRoute(fastify) {
 			if (!userProfile) {
 				return reply.code(404).send({ error: 'User not found' })
 			}
-			console.log("Updating avatar for user:", userName, "to", avatarUrlPath);
+
 			userProfile.avatarUrl = avatarUrlPath
-			console.log("New avatar URL set to:", userProfile.avatarUrl);
 			await userProfile.save()
+
+			fetch('http://friend:3007/internal/notify', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ userName: userName })
+			}).catch(err => fastify.log.error('Error notifying friend service of avatar change:', err))
+
 			return reply.code(200).send({  message: 'Avatar updated successfully', newAvatarUrl: userProfile.avatarUrl  })
 		} catch (error) {
 			fastify.log.error('Error updating avatar:', { message: error.message,

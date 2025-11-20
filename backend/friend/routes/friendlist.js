@@ -35,7 +35,7 @@ export default async function friendListRoutes(fastify) {
 			}
 
 			await fastify.notifyFriendChanges(userName)	
-
+			console.log(`Notified friends of ${userName} about status change.`)
 			return reply.code(200).send({ message: 'Friends notified successfully' })
 		} catch (error) {
 			fastify.log.error('Error notifying friend changes:', { message: error.message })
