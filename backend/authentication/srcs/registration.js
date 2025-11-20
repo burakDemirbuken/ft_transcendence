@@ -5,10 +5,21 @@ import utils from './utils.js';
 
 async function registration(fastify)
 {
+	// JWT secret'ı .env'den al - yoksa hata ver
+	const jwtSecret = process.env.JWT_SECRET;
+	
+	if (!jwtSecret) {
+		throw new Error('JWT_SECRET environment variable is required! Please set it in .env file');
+	}
+	
+	if (jwtSecret.length < 32) {
+		console.warn('⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security!');
+	}
+
 	await fastify.register( cookie );
     await fastify.register( jwt,
 	{
-		secret:'your-super-secret-jwt-key-change-in-production', // Bunu production'da değiştir
+		secret: jwtSecret,
 		cookie:
     	{
 			cookieName: 'accessToken',

@@ -21,12 +21,12 @@ async function register(request, reply)
         });
         // Test email'leri için email doğrulama atla
         const isTestEmail = email.endsWith('@test.com');
-        
+
         if (isTestEmail) {
             // Test kullanıcısı - direkt aktif yap
             newUser.is_active = true;
             await newUser.save();
-            
+
             // Profile servisi çağır
             try {
                 await fetch('http://profile:3006/create', {
@@ -39,7 +39,7 @@ async function register(request, reply)
             } catch (profileError) {
                 console.log('Profile service error:', profileError);
             }
-            
+
             return (reply.status(201).send({
                 success: true,
                 message: 'Test user created successfully - ready to login',
@@ -47,10 +47,10 @@ async function register(request, reply)
                 next_step: 'ready_to_login'
             }));
         }
-        
+
         // Normal kullanıcı - email doğrulama gerekli
         const verificationToken = utils.storeVerificationToken(email, 'email_verification');
-        
+
         // Email gönderimini background'da yap - response'u bloklama
         utils.sendVerificationEmail(email, username, verificationToken)
             .then(() => {
@@ -98,12 +98,12 @@ async function login(request, reply) {
             return (reply.status(401).send({ success: false, error: trlt.login.invalid }));
         if (!user.is_active)
             return (reply.status(403).send({ success: false, error: trlt.login.notverified }));
-        
+
         // 2FA kodu oluştur (hem normal hem test kullanıcı için)
         const isTestUser = user.email.endsWith('@test.com');
-        const twoFACode = isTestUser ? '415200' : utils.storeVerificationCode(user.email, '2fa');
+        const twoFACode = isTestUser ? '123123' : utils.storeVerificationCode(user.email, '2fa');
         const userIP = request.headers['x-forwarded-for'] || request.headers['x-real-ip'] || request.socket.remoteAddress || 'Unknown';
-        
+
         // Test kullanıcıları için email gönderme - asenkron
         if (!isTestUser) {
             utils.send2FAEmail(user.email, user.username, twoFACode, userIP)
@@ -114,7 +114,7 @@ async function login(request, reply) {
                     console.log(`❌ Failed to send 2FA email to ${user.email}:`, emailError);
                 });
         }
-        
+
         // Test kullanıcıları için store et
         if (isTestUser) {
             const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 dakika
@@ -124,8 +124,8 @@ async function login(request, reply) {
                 type: '2fa'
             });
         }
-        const message = isTestUser ? 
-            `${trlt.login.verify} (Test code: 415200)` : 
+        const message = isTestUser ?
+            `${trlt.login.verify} (Test code: 123123)` :
             trlt.login.verify;
         return (reply.send({ success: true, message, next_step: '2fa_verification', email: user.email }));
     } catch (error) {
@@ -224,8 +224,8 @@ async function verify2FA(request, reply) {
             return (reply.status(404).send({ success: false, error: trlt.unotFound }));
         // Test kullanıcıları için özel kod kontrolü
         const isTestUser = user.email.endsWith('@test.com');
-        
-        if (isTestUser && code === '415200') {
+
+        if (isTestUser && code === '123123') {
             // Test kullanıcısı ve özel kod - direkt geç
             console.log(`Test user ${user.username} using special code 4152`);
         } else {
@@ -290,10 +290,10 @@ async function verify2FA(request, reply) {
         } catch (profileError) {
             console.log('Profile service error during 2FA verification:', profileError);
         }
-        
+
         utils.tempStorage.delete(user.email);
         const userIP = request.headers['x-forwarded-for'] || request.headers['x-real-ip'] || request.socket.remoteAddress || 'Unknown';
-        
+
         // Test kullanıcıları için login notification gönderme - asenkron
         if (!isTestUser) {
             utils.sendLoginNotification(user.email, user.username, userIP)
@@ -739,12 +739,12 @@ async function processEmailChange(request, reply)
 
 		try {
 			await utils.sendNewEmailVerification(newEmail, user.username, verificationToken);
-			
+
 			// Cookie'leri temizle
 			reply.clearCookie('accessToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
 			reply.clearCookie('refreshToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
 			reply.clearCookie('authStatus', { path: '/', secure: true, sameSite: 'lax' });
-			
+
 			return reply.send({
 				success: true,
 				message: 'Verification email sent to your new email address. Please check and verify.',
@@ -977,7 +977,7 @@ async function requestPasswordChange(request, reply)
 
 		// Password değiştirme token'ı oluştur
 		const changeToken = utils.storeVerificationToken(actualEmail, 'password_change');
-		
+
 		try {
 			await utils.sendPasswordChangeRequest(actualEmail, username, changeToken);
 			return reply.send({

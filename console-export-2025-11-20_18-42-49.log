@@ -1,0 +1,4 @@
+
+							<img id="settings-avatar" src="https://10.0.2.15:3030/api/static/database/avatars/1763653539850_1qtahsbtz6ki_laepp.jpg" alt="">
+							<input type="file" id="hidden-file-input" accept="image/*" inert="" style="display: none;">
+						

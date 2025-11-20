@@ -4,7 +4,7 @@ export default async function friendRoutes(fastify) {
 	fastify.get("/ws-friend/friends", { websocket: true }, async (socket, req) => {
 		// cookie'den gelicek
 		// url: ws://.../ws-friend/friends?userName=...
-		const { userName } = req.query
+		const userName  = fastify.getDataFromToken(req)?.userName
 
 		if (!userName) {
 			socket.close(1008, "Missing parameter: userName")
@@ -14,7 +14,9 @@ export default async function friendRoutes(fastify) {
 
 		const state = { lastseen: Date.now(), socket: socket }
 		presence.set(userName, state)
-		// { type: "send" | "accept" | "remove" | "reject" | "list", payload: { peerName: string } }
+
+		fastify.notifyFriendChanges(userName)
+
 		socket.on('message', async (message) => {
 			const { type, payload } = JSON.parse(message)
 			const peerName = payload?.peerName
@@ -42,7 +44,6 @@ export default async function friendRoutes(fastify) {
 							message: userResult.message || null
 						}
 					}))
-					break
 				default:
 					fastify.log.warn({ userName, type }, 'Unknown presence message type')
 					break
@@ -71,7 +72,7 @@ export default async function friendRoutes(fastify) {
 
 		const cleanup = async (situation) => {
 			presence.delete(userName)
-			
+			fastify.notifyFriendChanges(userName)
 			fastify.log.info({ userName, situation })
 		}
 

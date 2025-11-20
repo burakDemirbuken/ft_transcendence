@@ -1,0 +1,20 @@
+Object { success: true, user: {…} }
+Settings.js:274:21
+📋 Profile data: 
+Object { profile: {…}, achievements: {…}, stats: {…} }
+Settings.js:283:25
+🖼️  Loading initial avatar from: https://10.0.2.15:3030/api/static/database/avatars/1763653449869_2kqjyfed2hw_lpepa.jpg Settings.js:287:29
+SEND AVATAR CHANGE REQ Settings.js:76:13
+✅ Avatar upload success Settings.js:86:21
+📦 Response: 
+Object { newAvatarUrl: "database/avatars/1763653468837_zihluiska4_lpepa.jpg" }
+Settings.js:88:21
+🖼️  New avatar URL: database/avatars/1763653468837_zihluiska4_lpepa.jpg Settings.js:89:21
+🎯 Avatar img element: 
+<img id="settings-avatar" src="https://10.0.2.15:3030/a…pepa.jpg?t=1763653468865" alt="">
+Settings.js:92:21
+🔄 Setting new src to: https://10.0.2.15:3030/api/static/database/avatars/1763653468837_zihluiska4_lpepa.jpg?t=1763653468865 Settings.js:95:25
+📝 Full newAvatarUrl: database/avatars/1763653468837_zihluiska4_lpepa.jpg Settings.js:96:25
+🌐 API_BASE_URL: https://10.0.2.15:3030/api Settings.js:97:25
+✨ Avatar src updated to: https://10.0.2.15:3030/api/static/database/avatars/1763653468837_zihluiska4_lpepa.jpg?t=1763653468865 Settings.js:102:29
+🔍 Avatar src attribute: https://10.0.2.15:3030/api/static/database/avatars/1763653468837_zihluiska4_lpepa.jpg?t=1763653468865 Settings.js:103:29
