@@ -3,7 +3,7 @@ import { Op } from 'sequelize'
 export default async function profileRoute(fastify) {
 
 	fastify.get('/profile', async (request, reply) => {
-		const { userName } = request.query ?? {}
+		const userName = fastify.getDataFromToken(request).username
 
 		try {
 			if (!userName) {
@@ -35,7 +35,7 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.delete('/profile', async (request, reply) => {
-		const { userName } = request.body ?? {}
+		const userName = fastify.getDataFromToken(request).username
 
 		//?
 		const isFromAuthService = request.headers['x-auth-service'];
@@ -79,7 +79,7 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.delete('/profile-delete-by-username', async (request, reply) => {
-		const { userName } = request.body ?? {}
+		const userName = fastify.getDataFromToken(request).username
 
 		try {
 			if (!userName) {
@@ -105,9 +105,9 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.post('/displaynameupdate', async (request, reply) => {
-		console.log(request.body);
-		const { userName , dname } = request.body ?? {}
-		// bak -> body içindekiş değişken isimleri
+		const userName = fastify.getDataFromToken(request).username
+		const dname = request.body?.dname
+
 		try {
 			if (!userName) {
 				throw new Error('userName is required')
@@ -223,8 +223,9 @@ export default async function profileRoute(fastify) {
 			if (!userProfile) {
 				return reply.code(404).send({ error: 'User not found' })
 			}
-
+			console.log("Updating avatar for user:", userName, "to", avatarUrlPath);
 			userProfile.avatarUrl = avatarUrlPath
+			console.log("New avatar URL set to:", userProfile.avatarUrl);
 			await userProfile.save()
 			return reply.code(200).send({  message: 'Avatar updated successfully', newAvatarUrl: userProfile.avatarUrl  })
 		} catch (error) {

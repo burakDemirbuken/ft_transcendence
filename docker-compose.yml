@@ -93,7 +93,7 @@ services:
     networks:
       - transcendency
     ports:
-      - 3030:3030
+      - ${NGINX_PORT:-3030}:3030
     depends_on:
       - gateway
 
@@ -108,8 +108,12 @@ services:
     volumes:
       - authentication_src:/app
       - /app/node_modules
+    env_file:
+      - .env
     environment:
       - HOST_IP=${HOST_IP}
+      - JWT_SECRET=${JWT_SECRET}
+      - NODE_ENV=${NODE_ENV:-development}
 
   gateway:
     container_name: gateway
@@ -122,6 +126,12 @@ services:
     volumes:
       - gateway_src:/app
       - /app/node_modules
+    env_file:
+      - .env
+    environment:
+      - HOST_IP=${HOST_IP}
+      - JWT_SECRET=${JWT_SECRET}
+      - NODE_ENV=${NODE_ENV:-development}
 
   email:
     container_name: email
@@ -134,12 +144,17 @@ services:
     volumes:
       - email_src:/app
       - /app/node_modules
+    env_file:
+      - .env
     environment:
-      - EMAIL_SERVICE=gmail
-      - EMAIL_profile=forty2transcendence@gmail.com
-      - EMAIL_PASS=gfyk pfqi gvpm ahtx
-      - EMAIL_PORT=3005
-      - HOST=0.0.0.0
+      - EMAIL_SERVICE=${EMAIL_SERVICE:-gmail}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - EMAIL_FROM=${EMAIL_FROM}
+      - EMAIL_PORT=${EMAIL_PORT:-3005}
+      - HOST=${EMAIL_HOST:-0.0.0.0}
+      - APP_URL=${APP_URL}
+      - NODE_ENV=${NODE_ENV:-development}
 
   gameserver:
     container_name: gameserver
@@ -152,6 +167,10 @@ services:
     volumes:
       - gameServer:/app
       - /app/node_modules
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
     depends_on:
       - room
       - aiserver
@@ -167,6 +186,10 @@ services:
       - /app/node_modules
     networks:
       - transcendency
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
     depends_on:
       - aiserver
 
@@ -181,6 +204,10 @@ services:
       - /app/node_modules
     networks:
       - transcendency
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
 
   friend:
     container_name: friend
@@ -193,6 +220,10 @@ services:
       - /app/node_modules
     networks:
       - transcendency
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
 
   aiserver:
     container_name: ai-server
@@ -204,6 +235,10 @@ services:
       - 3003
     volumes:
       - aiServer_src:/app
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
 
   static:
     container_name: static
@@ -217,3 +252,7 @@ services:
       - static_src:/app
       - /app/node_modules
       - /app/database
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
