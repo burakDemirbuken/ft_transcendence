@@ -527,7 +527,7 @@ class ManagerProfile {
 
 			setTimeout(() => {
 				progressBar.style.transition = 'width 2s ease-in-out';
-				progressBar.style.width = `${targetWidth}%`;
+				progressBar.style.width = `${Number(targetWidth) || 0}%`;
 			}, 500);
 		}
 	}
