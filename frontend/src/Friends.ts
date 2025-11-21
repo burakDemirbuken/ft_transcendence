@@ -22,7 +22,7 @@ function safeSend(msg:string)
 	}
 }
 
-export function connectWebSocket() {
+export function connectFriendsWebSocket() {
 	if (friendSocket !== null)
 		return;
 	friendSocket = new WebSocket(`wss://${window.location.hostname}:3030/ws-friend/friends`);
@@ -53,6 +53,13 @@ export function connectWebSocket() {
 				break;
 		}
 	};
+}
+
+export function disconnectFriendsWebSocket() {
+	if (friendSocket !== null) {
+		friendSocket.close();
+		friendSocket = null;
+	}
 }
 
 let currentFrPage:string = "friends";

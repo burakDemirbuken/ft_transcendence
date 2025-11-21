@@ -2,7 +2,8 @@ import Home from "../dist/Home.js";
 import Profile from "../dist/Profile.js";
 import Play from "../dist/Play.js";
 import Friends from "../dist/Friends.js";
-import { connectWebSocket } from "../dist/Friends.js"
+import { connectFriendsWebSocket } from "../dist/Friends.js"
+import { disconnectFriendsWebSocket } from "../dist/Friends.js"
 import Settings from "../dist/Settings.js";
 import Login from "../dist/Login.js";
 import I18n from './I18n.js';
@@ -36,7 +37,7 @@ const router = async function(page:string) {
 		console.log('User is not authenticated');
 		document.querySelector("#navbar")?.classList.add("logout");
 	} else {
-		connectWebSocket();
+		connectFriendsWebSocket();
 	}
 
 	if (page === "profile" || page === "settings" || page === "friends" || page === "play") {
@@ -73,9 +74,45 @@ const router = async function(page:string) {
 	}
 }
 
-export function navigateTo(page:string, logout = false) {
+export function navigateTo(page:string) {
 	history.pushState({ page }, "", `/${page}`);
-	router(page, logout);
+	router(page);
+}
+
+async function logout() {
+	try
+	{
+		const hasToken = getAuthToken();
+		if (hasToken)
+		{
+			const response = await fetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref") ?? 'eng'}`, {
+				method: "POST",
+				credentials: "include",
+			});
+			const json = await response.json();
+
+			if (response.ok)
+			{
+				disconnectFriendsWebSocket();
+				removeAuthToken();
+				localStorage.removeItem('userName');
+				document.querySelector("#navbar")?.classList.add("logout");
+				showNotification("Logged out successfully.", "success");
+				navigateTo("login");
+			}
+			else {
+				showNotification(`${json.error}`);
+			}
+		}
+		else {
+			navigateTo("login");
+		}
+	}
+	catch(error)
+	{
+		showNotification(`System Error: ${error.message}`);
+		navigateTo("home");
+	}
 }
 
 document.addEventListener("DOMContentLoaded", () =>
@@ -93,41 +130,7 @@ document.addEventListener("DOMContentLoaded", () =>
 				document.querySelector(".selected")?.classList.toggle("selected");
 				e.currentTarget.classList.toggle("selected");
 				if (e.currentTarget.matches("[id='logout']"))
-				{
-					try
-					{
-						const hasToken = getAuthToken();
-						if (hasToken)
-						{
-							const response = await fetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref") ?? 'eng'}`, {
-								method: "POST",
-								credentials: "include",
-							});
-							const json = await response.json();
-
-							if (response.ok)
-							{
-								removeAuthToken();
-								localStorage.removeItem('userName');
-								document.querySelector("#navbar")?.classList.add("logout");
-								showNotification("Logged out successfully.", "success");
-								navigateTo("login");
-							}
-							else {
-								showNotification(`${json.error}`);
-								navigateTo("home");
-							}
-						}
-						else {
-							navigateTo("login");
-						}
-					}
-					catch(error)
-					{
-						showNotification(`System Error: ${error.message}`);
-						navigateTo("home");
-					}
-				}
+					await logout();
 			}
 			else if (e.currentTarget.matches("[id='toggle']"))
 			{
