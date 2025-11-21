@@ -11,21 +11,25 @@ const TEST_USERS = [
     { username: 'diana', email: 'diana@test.com', password: 'password123' },
     { username: 'eve', email: 'eve@test.com', password: 'password123' },
     { username: 'frank', email: 'frank@test.com', password: 'password123' },
-    { username: 'grace', email: 'grace@test.com', password: 'password123' }
+    { username: 'grace', email: 'grace@test.com', password: 'password123' },
+    { username: 'qwe', email: 'qwe@test.com', password: 'qweqweqwe' },
+    { username: '123', email: '123@test.com', password: '123123123' },
+    { username: 'asd', email: 'asd@test.com', password: 'asdasdasd' },
+    { username: 'zxc', email: 'zxc@test.com', password: 'zxczxczxc' }
 ];
 
 async function createTestUsers() {
     try {
         await testConnection();
         console.log('🔧 Creating/checking test users...');
-        
+
         let created = 0;
         let existing = 0;
-        
+
         for (const userData of TEST_USERS) {
             try {
                 const existingUser = await User.findByEmail(userData.email) || await User.findByUsername(userData.username);
-                
+
                 if (!existingUser) {
                     const newUser = await User.create({
                         username: userData.username,
@@ -33,7 +37,7 @@ async function createTestUsers() {
                         password: userData.password,
                         is_active: true // Test kullanıcıları aktif
                     });
-                    
+
                     try {
                         await fetch('http://profile:3006/create', {
                             method: 'POST',
@@ -45,7 +49,7 @@ async function createTestUsers() {
                     } catch (profileError) {
                         console.log(`Profile service error for ${userData.username}:`, profileError.message);
                     }
-                    
+
                     console.log(`✅ Created test user: ${userData.username}`);
                     created++;
                 } else {
@@ -55,10 +59,10 @@ async function createTestUsers() {
                 console.log(`❌ Error creating user ${userData.username}:`, userError.message);
             }
         }
-        
+
         console.log(`🎉 Test users ready: ${created} created, ${existing} already existed`);
         console.log('📝 Test credentials: username/password123 (e.g., testuser1/password123)');
-        
+
     } catch (error) {
         console.log('❌ Test user creation failed:', error.message);
     }

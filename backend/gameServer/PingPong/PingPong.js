@@ -22,12 +22,10 @@ class PingPong extends EventEmitter
 		this.state = {
 			players: [],
 		};
-
-		this.id = null;
-
+		//! NİSAAAA
 		this.settings = {
+			...property,
 			...DEFAULT_GAME_PROPERTIES,
-			...property
 		};
 		this.maxPlayers = 2;
 

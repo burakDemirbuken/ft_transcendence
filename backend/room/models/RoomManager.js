@@ -12,14 +12,14 @@ class RoomManager extends EventEmitter
 		super();
 		this.waitingPlayers = [];
 		this.rooms = new Map();
-/*		setInterval(() => {
+		setInterval(() => {
  			console.log(`Current rooms: ${this.rooms.size}`);
 			this.rooms.forEach((room, roomId) => {
 				console.log(`Room ID: ${roomId}, Name: ${room.name}, Players: ${room.players.length}/${room.maxPlayers}, Status: ${room.status}`);
-				console.log('Players:', room.players.map(p => ({ id: p.id, name: p.name, isReady: p.isReady })));
+				console.log('Players:', room.players.map(p => ({ id: p.id, name: p.name })));
 			});
 		}, 1000); // Log every 1 second
-*/
+
 	}
 
 	async handleClientRoomMessage(action, payload, player)
@@ -38,9 +38,6 @@ class RoomManager extends EventEmitter
 					break;
 				case 'leave':
 					this.leaveRoom(player.id);
-					break;
-				case 'setReady':
-					player.isReady = payload.isReady;
 					break;
 				case 'matchTournament':
 					const room = this._getRoomWithPlayer(player.id).room;
@@ -121,6 +118,7 @@ class RoomManager extends EventEmitter
 				}
 				const {state, players} = room.finishRoom(payload);
 				players.forEach(player => {
+					console.log(`Notifying player ${player.id} of finished room ${payload.roomId}`);
 					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: state }));
 				});
 				this.notifyRoomUpdate(payload.roomId);
@@ -133,7 +131,12 @@ class RoomManager extends EventEmitter
 	createRoom(player, payload)
 	{
 		//this._validateRoomCreation(hostId, properties);
-
+		//! NİSAA
+		//! gameType gerek yok
+		if (payload.gameType === "co-op")
+			payload.gameMode = "local";
+		else if (payload.gameType === "2v2")
+			payload.gameMode = "multiplayer";
 		for (const room of this.rooms.values())
 		{
 			if (room.players.find(p => p.id === player.id))
@@ -164,6 +167,7 @@ class RoomManager extends EventEmitter
 
 	async finishedRoom(data)
 	{
+		data.kickedPlayers.forEach(player => this.leaveRoom(player));
 		let url = 'http://profile:3006/internal/';
 		if (data.matchType === 'local' || data.matchType === 'ai' || data.matchType === 'multiplayer')
 			return;
@@ -185,7 +189,6 @@ class RoomManager extends EventEmitter
 				console.error('❌ Profile service error:', response.status, await response.text());
 			else
 				console.log('✅ Data sent to profile service:', data);
-			data.kickedPlayers.forEach(player => this.leaveRoom(player));
 		}
 		catch (error)
 		{
@@ -260,8 +263,6 @@ class RoomManager extends EventEmitter
 		const {room, roomId} = this._getRoomWithPlayer(playerId);
 		if (!room)
 			throw new Error(`Room with player ID ${playerId} does not exist`);
-		if (!room.allPlayersReady())
-			throw new Error('All players must be ready before starting the game');
 
 		const state = {...room.startGame(playerId), roomId: roomId};
 		this.emit(`create`, state);
@@ -299,7 +300,10 @@ class RoomManager extends EventEmitter
 	{
 		const room = this.getRoom(roomId);
 		if (!room)
-			throw new Error(`Room with ID ${roomId} does not exist`);
+		{
+			console.error(`Cannot notify update for non-existent room ID ${roomId}`);
+			return;
+		}
 		room.players.forEach(player => {
 			player.clientSocket.send(JSON.stringify({ type: 'update', payload: { roomId: roomId, ...room.getState() } }));
 		});

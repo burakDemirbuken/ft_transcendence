@@ -5,7 +5,10 @@ class AIPingPong extends PingPong
 {
 	constructor(parameters)
 	{
+		console.log('🎮 Creating AIPingPong with parameters:', parameters); // DEBUG
 		super(parameters);
+		this.id = null;
+
 		this.gameMode = "ai";
 		this.maxPlayers = 1;
 		this.targetPaddlePosition = { x: 0, y: 0 };
@@ -15,26 +18,23 @@ class AIPingPong extends PingPong
 		this._lastTargetY = null;
 		this._aiDir = 0; // -1 up, 1 down, 0 none
 
-		// DEBUG: ID'yi kontrol et
 		console.log('🎮 AIPingPong created with ID:', this.id);
 	}
 
-	addPlayer(player)
+	addRegisteredPlayer(playerId)
 	{
-		if (this.players.length !== 0)
-			throw new Error("AIPingPong can only have one player");
-		this.players.push(player);
-		this.team.set(1, { playersId: [player.id], score: 0 });
+		this.registeredPlayers.add(playerId);
+		this.team.set(1, { playersId: [playerId], score: 0 });
 		this.team.set(2, { playersId: ["AI"], score: 0 });
-		this.paddles.set(player.id, this.createPaddle(2));
-		this.paddles.set("AI", this.createPaddle(1));
-		this.status = 'ready to start';
+		this.paddles.set(playerId, this.createPaddle(1));
+		this.paddles.set("AI", this.createPaddle(2));
 	}
 
 	paddleControls()
 	{
 		const player = this.players[0];
-		const localPaddle = this.paddles.get(this.players[0].id);
+		if (!player) return;
+		const localPaddle = this.paddles.get(player.id);
 
 		localPaddle.up = player.inputGet('ArrowUp') || player.inputGet('w');
 		localPaddle.down = player.inputGet('ArrowDown') || player.inputGet('s');
@@ -74,11 +74,12 @@ class AIPingPong extends PingPong
 
 	getGameState()
 	{
+		const player = this.players[0];
 		const playerStates = [
 			{
-				id: this.players[0].id,
-				name: this.players[0].name,
-				...this.paddles.get(this.players[0].id).getState(),
+				id: player?.id,
+				name: player?.name,
+				...this.paddles.get(player?.id)?.getState(),
 			},
 			{
 				id: "AI",
@@ -135,7 +136,6 @@ class AIPingPong extends PingPong
 
 		console.log('🎮 Starting AI game with ID:', this.id); // DEBUG
 
-		// AI sunucusunda bu oyun için AI instance'ını başlat
 		try
 		{
 			const difficulty = this.aiSettings?.difficulty || 'medium';
@@ -184,6 +184,8 @@ class AIPingPong extends PingPong
 								ai_scored: this.lastGoal === 'left',
 								human_scored: this.lastGoal === 'right',
 							},
+							scored_for_me: this.lastGoal === 'left',
+							scored_against_me: this.lastGoal === 'right',
 						};
 
 						AiNetwork.sendData(this.id, dataToSend);

@@ -10,7 +10,6 @@ class Player
 	{
 		this.id = id;
 		this.name = name;
-		this.isReady = false;
 		this.inputs = new Map(); // type -> boolean(true: pressed, false: not pressed)
 		this.initialized = false;
 	}
@@ -36,7 +35,6 @@ class Player
 		return {
 			id: this.id,
 			name: this.name,
-			isReady: this.isReady,
 		};
 	}
 }
