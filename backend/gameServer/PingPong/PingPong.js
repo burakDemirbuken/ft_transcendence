@@ -24,8 +24,8 @@ class PingPong extends EventEmitter
 		};
 		//! NİSAAAA
 		this.settings = {
-			...property,
 			...DEFAULT_GAME_PROPERTIES,
+			...property,
 		};
 		this.maxPlayers = 2;
 
