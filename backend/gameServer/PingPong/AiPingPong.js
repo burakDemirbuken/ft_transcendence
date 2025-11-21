@@ -135,17 +135,6 @@ class AIPingPong extends PingPong
 		}
 
 		console.log('🎮 Starting AI game with ID:', this.id); // DEBUG
-
-		try
-		{
-			const difficulty = this.aiSettings?.difficulty || 'medium';
-			console.log('📤 Calling AiNetwork.initGame with:', { difficulty, gameId: this.id }); // DEBUG
-			AiNetwork.initGame(difficulty, this.id, this.aiSettings?.custom_settings || {});
-		}
-		catch (e)
-		{
-			console.error('❌ Failed to init AI game on AI server:', e);
-		}
 		this.status = 'countdown';
 		setTimeout(
 			() =>
