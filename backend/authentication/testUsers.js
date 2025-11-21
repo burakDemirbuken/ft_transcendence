@@ -2,20 +2,26 @@ import User from './models/User.js';
 import { testConnection } from './models/database.js';
 
 const TEST_USERS = [
-    { username: 'testuser1', email: 'testuser1@test.com', password: 'password123' },
-    { username: 'testuser2', email: 'testuser2@test.com', password: 'password123' },
-    { username: 'testuser3', email: 'testuser3@test.com', password: 'password123' },
-    { username: 'alice', email: 'alice@test.com', password: 'password123' },
-    { username: 'bob', email: 'bob@test.com', password: 'password123' },
-    { username: 'charlie', email: 'charlie@test.com', password: 'password123' },
-    { username: 'diana', email: 'diana@test.com', password: 'password123' },
-    { username: 'eve', email: 'eve@test.com', password: 'password123' },
-    { username: 'frank', email: 'frank@test.com', password: 'password123' },
-    { username: 'grace', email: 'grace@test.com', password: 'password123' },
-    { username: 'qwe', email: 'qwe@test.com', password: 'qweqweqwe' },
-    { username: '123', email: '123@test.com', password: '123123123' },
-    { username: 'asd', email: 'asd@test.com', password: 'asdasdasd' },
-    { username: 'zxc', email: 'zxc@test.com', password: 'zxczxczxc' }
+    { username: 'testuser1',  email: 'testuser1@test.com',  password: 'qweqweqwe' },
+    { username: 'testuser2',  email: 'testuser2@test.com',  password: 'qweqweqwe' },
+    { username: 'testuser3',  email: 'testuser3@test.com',  password: 'qweqweqwe' },
+    { username: 'testuser4',  email: 'testuser4@test.com',  password: 'qweqweqwe' },
+    { username: 'testuser5',  email: 'testuser5@test.com',  password: 'qweqweqwe' },
+    { username: 'testuser6',  email: 'testuser6@test.com',  password: 'qweqweqwe' },
+    { username: 'testuser7',  email: 'testuser7@test.com',  password: 'qweqweqwe' },
+    { username: 'testuser8',  email: 'testuser8@test.com',  password: 'qweqweqwe' },
+    { username: 'testuser9',  email: 'testuser9@test.com',  password: 'qweqweqwe' },
+    { username: 'testuser10', email: 'testuser10@test.com', password: 'qweqweqwe' },
+    { username: 'testuser11', email: 'testuser11@test.com', password: 'qweqweqwe' },
+    { username: 'testuser12', email: 'testuser12@test.com', password: 'qweqweqwe' },
+    { username: 'testuser13', email: 'testuser13@test.com', password: 'qweqweqwe' },
+    { username: 'testuser14', email: 'testuser14@test.com', password: 'qweqweqwe' },
+    { username: 'testuser15', email: 'testuser15@test.com', password: 'qweqweqwe' },
+    { username: 'testuser16', email: 'testuser16@test.com', password: 'qweqweqwe' },
+    { username: 'testuser17', email: 'testuser17@test.com', password: 'qweqweqwe' },
+    { username: 'testuser18', email: 'testuser18@test.com', password: 'qweqweqwe' },
+    { username: 'testuser19', email: 'testuser19@test.com', password: 'qweqweqwe' },
+    { username: 'testuser20', email: 'testuser20@test.com', password: 'qweqweqwe' },
 ];
 
 async function createTestUsers() {

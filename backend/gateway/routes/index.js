@@ -95,14 +95,27 @@ export default async function allRoutes(fastify) {
 						body: body
 					});
 
-					// Get the response data
-					const responseData = await response.text();
-					let parsedData;
+					// Check if response is binary (image, video, etc.)
+					const contentType = response.headers.get('content-type') || '';
+					const isBinary = contentType.startsWith('image/') || 
+									 contentType.startsWith('video/') ||
+									 contentType.startsWith('audio/') ||
+									 contentType.includes('octet-stream');
 
-					try {
-						parsedData = JSON.parse(responseData);
-					} catch (e) {
-						parsedData = responseData;
+					// Get the response data
+					let parsedData;
+					if (isBinary) {
+						// For binary data, get as buffer
+						const buffer = await response.arrayBuffer();
+						parsedData = Buffer.from(buffer);
+					} else {
+						// For text/JSON data
+						const responseData = await response.text();
+						try {
+							parsedData = JSON.parse(responseData);
+						} catch (e) {
+							parsedData = responseData;
+						}
 					}
 
 					// Forward the response status and data

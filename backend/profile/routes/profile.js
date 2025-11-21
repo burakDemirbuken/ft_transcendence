@@ -3,7 +3,11 @@ import { Op } from 'sequelize'
 export default async function profileRoute(fastify) {
 
 	fastify.get('/profile', async (request, reply) => {
-		const { userName } = request.query ?? {}
+		let userName;
+		if (request.query?.userName)
+			userName = request.query.userName
+		else
+			userName = fastify.getDataFromToken(request).username
 
 		try {
 			if (!userName) {
@@ -35,7 +39,7 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.delete('/profile', async (request, reply) => {
-		const { userName } = request.body ?? {}
+		const userName = fastify.getDataFromToken(request).username
 
 		//?
 		const isFromAuthService = request.headers['x-auth-service'];
@@ -79,7 +83,7 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.delete('/profile-delete-by-username', async (request, reply) => {
-		const { userName } = request.body ?? {}
+		const userName = fastify.getDataFromToken(request).username
 
 		try {
 			if (!userName) {
@@ -105,8 +109,8 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.post('/displaynameupdate', async (request, reply) => {
-		const { userName , dname } = request.body ?? {}
-
+		const userName = fastify.getDataFromToken(request).username
+		const dname = request.body?.dname
 
 		try {
 			if (!userName) {
@@ -120,13 +124,19 @@ export default async function profileRoute(fastify) {
 			userProfile.displayName = dname ?? userProfile.displayName
 			await userProfile.save()
 
+			fetch('http://friend:3007/internal/notify', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ userName: userName })
+			}).catch(err => fastify.log.error('Error notifying friend service of display name change:', err))
+
 			return reply.code(200).send({
 				message: 'Display name updated successfully',
 				profile: userProfile.displayName
 			})
 
 		} catch (error) {
-			fastify.log.error('Error updating display name:', error)
+			fastify.log.error('Error updating display name:', error.message)
 			return reply.code(500).send({ message: 'Failed to update display name' })
 		}
 	})
@@ -134,7 +144,6 @@ export default async function profileRoute(fastify) {
 	fastify.post('/create', async (request, reply) =>
 	{
 		const { userName } = request.body ?? {}
-
 
 		try {
 			if (!userName) {
@@ -170,11 +179,7 @@ export default async function profileRoute(fastify) {
 			t.rollback();
 			fastify.log.error({
 				msg: 'Error creating user profile',
-				name: error?.name,
 				message: error?.message,
-				errors: error?.errors,
-				parent: error?.parent,
-				sql: error?.sql,
 			})
 			return reply.code(500).send({ message: 'Failed to create user profile' })
 		}
@@ -183,11 +188,10 @@ export default async function profileRoute(fastify) {
 	fastify.post('/internal/friend', async (request, reply) => {
 		const { friends } = request.body ?? {}
 		try {
-			console.log("Received friends request for:", friends);
 			if (!friends || !Array.isArray(friends) || friends.length === 0) {
 				throw new Error('Friends array is required')
 			}
-			console.log("Fetching profiles for friends:", friends);
+
 			const userProfiles = await fastify.sequelize.models.Profile.findAll({
 				where: {
 					userName: {
@@ -196,12 +200,10 @@ export default async function profileRoute(fastify) {
 				},
 				attributes: ['userName', 'displayName', 'avatarUrl']
 			})
-			console.log("Fetched user profiles:", userProfiles);
 			if (!userProfiles) {
 				return reply.code(404).send({ message: 'Users not found' })
 			}
-			console.log("Number of userProfiles found:", userProfiles.length);
-			//console.log("userProfiles found:", userProfiles.map(profile => profile.toJSON()))
+
 			return reply.code(200).send({ users: userProfiles.map(profile => profile.toJSON()) })
 		} catch (error) {
 			fastify.log.error('Error retrieving friends profiles:', { message: error.message,
@@ -211,7 +213,7 @@ export default async function profileRoute(fastify) {
 	})
 
 	fastify.post('/internal/avatar-update', async (request, reply) => {
-		const {userName, avatarUrlPath } = request.body ?? {}
+		const { userName, avatarUrlPath } = request.body ?? {}
 
 		try {
 			if (!userName || !avatarUrlPath) {
@@ -228,7 +230,13 @@ export default async function profileRoute(fastify) {
 
 			userProfile.avatarUrl = avatarUrlPath
 			await userProfile.save()
-			console.log('Avatar updated successfully for user:', avatarUrlPath)
+
+			fetch('http://friend:3007/internal/notify', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ userName: userName })
+			}).catch(err => fastify.log.error('Error notifying friend service of avatar change:', err))
+
 			return reply.code(200).send({  message: 'Avatar updated successfully', newAvatarUrl: userProfile.avatarUrl  })
 		} catch (error) {
 			fastify.log.error('Error updating avatar:', { message: error.message,

@@ -5,7 +5,7 @@ export default fp(async (fastify) => {
 	async function checkAchievements(userId, t) {
 		const { Achievement, Stat } = fastify.sequelize.models
 
-		const [userStat, userAchievement] = await Promise.all([
+		const [ userStat, userAchievement ] = await Promise.all([
 			Stat.findOne({
 				where: { userId: userId },
 				transaction: t
@@ -90,7 +90,6 @@ export default fp(async (fastify) => {
 		const userStat = await Stat.findOne({
 			where: { userId: userId },
 			transaction: t,
-			lock: t.LOCK.UPDATE // Concurrent updates'i önlemek için
 		})
 
 		if (!userStat) {
