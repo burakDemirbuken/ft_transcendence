@@ -1484,6 +1484,13 @@ function formatDuration(seconds) {
 
 async function setTextStats(user: any) {
 	// Title Card
+	if (user?.profile?.avatarUrl) {
+		const avatarImg = document.querySelector('.avatar > img') as HTMLImageElement;
+		if (avatarImg){
+			avatarImg.setAttribute('src', `${API_BASE_URL}/static/${user.profile.avatarUrl}`);
+			avatarImg.style.background ='none';
+		}
+	}
 	document.querySelector(".user-title").textContent = user.profile.displayName;
 	document.querySelector(".username").textContent = "@" + user.profile.userName;
 	document.getElementById("level-value").textContent = user.stats.level;
