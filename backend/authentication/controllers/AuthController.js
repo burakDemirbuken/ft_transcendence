@@ -58,20 +58,22 @@ async function deleteProfile(request, reply)
 				code: 'PERMISSION_DENIED'
 			}));
 		}
+		console.log("geldi")
 		const deletedUserInfo = { username: user.username, email: user.email };
 		await User.destroy({ where: { id: user.id } });
 		const serviceNotifications = [
-			fetch('http://profile:3006/profile', {
+			await fetch('http://friend:3007/internal/list', {
 				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json', 'X-Auth-Service': 'true' },
 				body: JSON.stringify({ userName: deletedUserInfo.username })
-			}).catch(err => console.log('Profile service error:', err)),
-			fetch('http://friend:3007/list', {
+			}).catch(err => console.log('Friend service error:', err)),
+			fetch('http://profile:3006/internal/profile', {
 				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json', 'X-Auth-Service': 'true' },
 				body: JSON.stringify({ userName: deletedUserInfo.username })
-			}).catch(err => console.log('Friend service error:', err))
+			}).catch(err => console.log('Profile service error:', err))
 		];
+		console.log('Notifying other services about account deletion');
 		Promise.all(serviceNotifications);
 		if (utils.tempStorage.has(deletedUserInfo.email))
 			utils.tempStorage.delete(deletedUserInfo.email);

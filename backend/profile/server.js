@@ -11,7 +11,6 @@ const fastify = Fastify({
 	logger: false,
 })
 
-
 fastify.register(overview)
 fastify.register(dbPlugin)
 fastify.register(checkachievement)
