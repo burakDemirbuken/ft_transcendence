@@ -89,7 +89,11 @@ async function sendAvatarChangeReq(e) {
 			body: formData
 		});
 		if (res.ok) {
-			console.log("success");
+			const json = await res.json();
+			let src = "../profile.svg";
+			if (json?.newAvatarUrl)
+				src = `${API_BASE_URL}/static/${json.newAvatarUrl}`;
+			document.getElementById('settings-avatar')?.setAttribute('src', src);
 			showNotification("Avatar changed successfully", "success");
 		}
 		else {

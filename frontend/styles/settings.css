@@ -211,7 +211,6 @@
 .settings-container .avatar {
 	position: relative;
 	aspect-ratio: 1/1;
-	width: clamp(3rem, calc(2rem + 5vw), 5rem);
 	border-radius: 50%;
 
 	background: #000;
@@ -246,7 +245,7 @@
 
 .settings-container img {
 	aspect-ratio: 1/1;
-	width: clamp(4rem, calc(3rem + 7vw), 9rem);
+	width: clamp(3rem, calc(2rem + 5vw), 5rem);
 	border-radius: 50%;
 	object-fit: cover;
 }
