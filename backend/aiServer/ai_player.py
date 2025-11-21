@@ -2,7 +2,7 @@ import math
 import random
 
 class PingPongAI:
-    def __init__(self, difficulty="medium", custom_settings=None):
+    def __init__(self, difficulty, custom_settings=None):
         self.games_played = 0
         self.wins = 0
         self.hits = 0
@@ -11,6 +11,22 @@ class PingPongAI:
         # Zorluk sevixyesi
         self.difficulty = difficulty
         self.custom_settings = custom_settings
+
+        self.reaction_speed = 0.5
+        self.prediction_accuracy = 0.5
+        self.prepare_distance = 300
+        self.freeze_distance = 60
+        self.error_rate = 0.3
+        self.learning_rate = 0.01
+        self.target_win_rate = 0.5
+        self.lose_probability = 0.2
+        self.max_consecutive_wins = 3
+        self.rage_enabled = False
+        self.fatigue_enabled = False
+        self.focus_enabled = False
+        self.adaptive_enabled = False
+        self.prediction_lines = False
+
         self.setup_difficulty()
 
         # Durum takibi
@@ -38,23 +54,43 @@ class PingPongAI:
     def setup_difficulty(self):
         """Zorluk seviyesine göre parametreleri ayarla"""
         if self.difficulty == "custom" and self.custom_settings:
-            # Custom ayarları 10 üzerinden sisteme çevir
-            self.reaction_speed = self.custom_settings['reaction_speed'] / 10.0
-            self.prediction_accuracy = self.custom_settings['prediction_accuracy'] / 10.0
-            self.prepare_distance = 200 + (self.custom_settings['prepare_distance'] * 40)  # 200-600
-            self.freeze_distance = 50 + (self.custom_settings['freeze_distance'] * 15)     # 50-200
-            self.error_rate = 0.5 - (self.custom_settings['accuracy'] * 0.049)  # 0.5-0.01
-            self.learning_rate = self.custom_settings['learning_rate'] / 200.0  # 0.005-0.05
-            self.target_win_rate = self.custom_settings['target_win_rate'] / 10.0
-            self.lose_probability = (10 - self.custom_settings['fairness']) / 20.0  # 0.5-0.0
-            self.max_consecutive_wins = max(1, self.custom_settings['max_consecutive_wins'])
+            # ✅ Frontend'den gelen anahtar adlarını kullan (camelCase)
+            settings = self.custom_settings.get('settings', self.custom_settings)
 
-            # özellikler
-            self.rage_enabled = self.custom_settings['rage_mode']
-            self.fatigue_enabled = self.custom_settings['fatigue_system']
-            self.focus_enabled = self.custom_settings['focus_mode']
-            self.adaptive_enabled = self.custom_settings['adaptive_difficulty']
-            self.prediction_lines = self.custom_settings['show_prediction']
+            # Eğer 'settings' key'i varsa onu kullan, yoksa doğrudan custom_settings'i kullan
+            if 'settings' in self.custom_settings:
+                settings = self.custom_settings['settings']
+            else:
+                settings = self.custom_settings
+
+            # ✅ DOĞRU anahtar adları (camelCase)
+            reaction_speed = settings.get('reactionSpeed', 5) / 10.0
+            prediction_accuracy = settings.get('predictionAccuracy', 5) / 10.0
+            general_accuracy = settings.get('generalAccuracy', 5) / 10.0
+            learning_speed = settings.get('learningSpeed', 5) / 10.0
+            prepare_distance = settings.get('preparationDistance', 5)
+            freeze_distance = settings.get('freezeDistance', 5)
+            target_win_rate = settings.get('targetWinRate', 5) / 10.0
+            fairness = settings.get('fairnessLevel', 5)
+            max_consecutive = settings.get('maxConsecutiveWins', 3)
+
+            # Parametreleri ayarla
+            self.reaction_speed = reaction_speed
+            self.prediction_accuracy = prediction_accuracy
+            self.prepare_distance = 200 + (prepare_distance * 40)  # 200-600
+            self.freeze_distance = 50 + (freeze_distance * 15)     # 50-200
+            self.error_rate = 0.5 - (general_accuracy * 0.049)  # 0.5-0.01
+            self.learning_rate = learning_speed / 200.0  # 0.005-0.05
+            self.target_win_rate = target_win_rate
+            self.lose_probability = (10 - fairness) / 20.0  # 0.5-0.0
+            self.max_consecutive_wins = max(1, max_consecutive)
+
+            # Özellikler
+            self.rage_enabled = settings.get('rageMode', False)
+            self.fatigue_enabled = settings.get('fatigueSystem', False)
+            self.focus_enabled = settings.get('focusMode', False)
+            self.adaptive_enabled = settings.get('adaptiveDifficulty', False)
+            self.prediction_lines = settings.get('show_prediction', False)
 
         else:
             # Varsayılan zorluk seviyeleri
