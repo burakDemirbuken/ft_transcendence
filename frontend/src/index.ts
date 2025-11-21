@@ -1,6 +1,5 @@
 import Home from "../dist/Home.js";
 import Profile from "../dist/Profile.js";
-import { updateChartLanguage } from "./Profile.js";
 import Play from "../dist/Play.js";
 import Friends from "../dist/Friends.js";
 import { connectWebSocket } from "../dist/Friends.js"
@@ -29,7 +28,7 @@ const routes = {
 
 let view = null;
 
-const router = async function(page:string, logout: boolean = false) {
+const router = async function(page:string) {
 	const content = document.querySelector("#content");
 	const hasToken = getAuthToken();
 
@@ -140,7 +139,8 @@ document.addEventListener("DOMContentLoaded", () =>
 			{
 				e.preventDefault();
 				I18n.nextLanguage();
-				updateChartLanguage();
+				if (view)
+					view.updateJsLanguage();
 				document.querySelector(".selected")?.classList.toggle("selected");
 				e.currentTarget.classList.toggle("selected");
 			}

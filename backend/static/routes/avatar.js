@@ -5,26 +5,6 @@ const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg"]
 
 export default async function avatarRoutes(fastify) {
 
-	fastify.get("/avatar", async (request, reply) => {
-		const { userName } = request.query ?? {}
-		
-		try {
-			if (!userName) {
-				throw new Error("userName is required")
-			}
-
-			const response = await fetch(`http://profile:3006/internal/avatar-get?userName=${userName}`)
-			if (!response.ok) {
-				return reply.code(404).send({ message: "Avatar not found" })
-			}
-			
-			const data = await response.json()
-			return reply.code(200).send({ avatarUrl: data.avatarUrl })
-		} catch (error) {
-			return reply.code(500).send({ message: "Failed to retrieve avatar" })
-		}
-	})
-
 	fastify.post("/avatar", async (request, reply) => {
 		/* 
 		  const data = await req.file()
@@ -36,7 +16,7 @@ export default async function avatarRoutes(fastify) {
 			data.encoding
 			data.mimetype
 		*/
-		const { userName } = request.query ?? {}
+		const userName = fastify.getDataFromToken(request).username ?? null
 		if (!userName) {
 			throw new Error("userName is required")
 		}
@@ -66,7 +46,9 @@ export default async function avatarRoutes(fastify) {
 		if (!response.ok) {
 			return reply.code(500).send({ message: "Failed to update avatar in profile service" })
 		}
-		console.log("Avatar updated successfully for user:", response.body.newAvatarUrl)
-		return reply.code(200).send({ newAvatarUrl: response.body.newAvatarUrl })
+		const responseJson = await response.json()
+
+		console.log("Avatar updated successfully for user:", responseJson.newAvatarUrl);
+		return reply.code(200).send({ newAvatarUrl: responseJson.newAvatarUrl  })
 	})
 }

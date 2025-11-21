@@ -156,6 +156,20 @@
 	padding: .4em;
 }
 
+.subpage .friend.list-empty {
+	grid-column: 1 / -1;
+	text-align: center;
+	padding: 2em;
+
+	font-family: "PixeloidSans", sans-serif;
+	font-style: italic;
+	
+	color: #888;
+	background: #00000096;
+	border: none;
+	opacity: .7;
+}
+
 .subpage .friend {
 	background: #111;
 	border-radius: 10px;

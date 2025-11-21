@@ -217,4 +217,46 @@ export default fp(async function friendChanges(fastify) {
 	fastify.decorate('postReject', postReject)
 	fastify.decorate('postAccept', postAccept)
 	fastify.decorate('postSend', postSend)
+
+	async function notifyFriendChanges(userName) {
+		try {
+			const userResult = await fastify.getFriendList(userName) ?? {};
+			if (!userResult || (!userResult.pendingFriends && !userResult.acceptedFriends)) {
+				throw new Error("Failed to retrieve user friends for notification.")
+			}
+
+			const users = [...userResult.pendingFriends.incoming, ...userResult.pendingFriends.outgoing, ...userResult.acceptedFriends]
+
+			const results = await Promise.allSettled(users.map(async (user) => {
+				if (fastify.presence.has(user.userName)) {
+					const friendList = await fastify.getFriendList(user.userName) ?? {};
+					if (!friendList || (!friendList.pendingFriends && !friendList.acceptedFriends)) {
+						throw new Error("Failed to retrieve friend list for notification.")
+					}
+
+					const userConnection = fastify.presence.get(user.userName)
+					if (userConnection && userConnection.socket && userConnection.socket.readyState === userConnection.socket.OPEN) {
+						userConnection.socket.send(JSON.stringify({
+							type: 'update',
+							payload: {
+								friendlist: friendList
+							}
+						}))
+						console.log(`list ${JSON.stringify(friendList)} sent to ${user.userName}`);
+					}
+				}
+			}))
+			const failed = results.map((result, index) => ({ result, user: users[index] })).filter(({ result }) => result.status === 'rejected')
+		
+			if (failed.length > 0) {
+				Promise.all(failed.map(async ({ result, user }) => {
+					fastify.log.error('Failed to notify user:', { user: user.userName, reason: result.reason.message })
+				}))
+			}
+		} catch (error) {
+			fastify.log.error('Error notifying friend changes:', { message: error.message})
+		}
+	}
+
+	fastify.decorate('notifyFriendChanges', notifyFriendChanges)
 })
