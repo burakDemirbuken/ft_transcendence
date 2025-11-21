@@ -133,7 +133,6 @@ class App
 
 		this.webSocketClient.onMessage((data) =>
 		{
-			// Defensive programming: ensure data has the expected structure
 			if (!data || typeof data !== 'object') {
 				console.error('❌ Received invalid message format:', data);
 				return;
@@ -202,11 +201,6 @@ class App
 	startGame(): void
 	{
 		this.webSocketClient.send('startGame', {});
-	}
-
-	readyState(readyState: boolean): void
-	{
-		this.webSocketClient.send('setReady', {isReady: readyState });
 	}
 
 	// ================================
@@ -287,6 +281,7 @@ class App
 
 	destroy(): void
 	{
+		console.log('🧹 App resources cleaned up');
 		this.gameRenderer.reset();
 		this.webSocketClient.disconnect();
 		if (this.inputManager)
@@ -294,7 +289,6 @@ class App
 			this.inputManager.destroy();
 			this.inputManager = null;
 		}
-		console.log('🧹 App resources cleaned up');
 	}
 }
 
