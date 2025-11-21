@@ -34,10 +34,10 @@ export default async function profileRoute(fastify) {
 		}
 	})
 
-	fastify.delete('/profile', async (request, reply) => {
-		const userName = fastify.getDataFromToken(request).username
+	fastify.delete('/internal/profile', async (request, reply) => {
+		const userName = request.body?.userName ?? null;
 
-		//?
+		
 		const isFromAuthService = request.headers['x-auth-service'];
 
 		if (!isFromAuthService) {
@@ -60,14 +60,6 @@ export default async function profileRoute(fastify) {
 				return reply.code(404).send({ error: 'User not found' })
 			}
 
-			Promise.all([
-				fetch('http://friend:3007/list', {
-					method: 'DELETE',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ userName: userName })
-				}).catch(err => fastify.log.error('Error deleting from friend service:', err))
-			])
-
 			return reply.code(200).send({
 				success: true,
 				message: 'Profile deleted successfully'
@@ -75,32 +67,6 @@ export default async function profileRoute(fastify) {
 		} catch (error) {
 			fastify.log.error('Error deleting profile:', error)
 			return reply.code(500).send({ error: 'Failed to delete profile' })
-		}
-	})
-
-	fastify.delete('/profile-delete-by-username', async (request, reply) => {
-		const userName = fastify.getDataFromToken(request).username
-
-		try {
-			if (!userName) {
-				throw new Error('userName is required')
-			}
-
-			const deletedCount = await fastify.sequelize.models.Profile.destroy({
-				where: { userName: userName }
-			})
-
-			if (deletedCount === 0) {
-				return reply.code(404).send({ error: 'User not found' })
-			}
-
-			return reply.code(200).send({
-				success: true,
-				message: 'Profile deleted successfully',
-			})
-		} catch (error) {
-			fastify.log.error('Error deleting profile by username:', error)
-			return reply.code(500).send({ message: 'Failed to delete profile' })
 		}
 	})
 
@@ -238,6 +204,31 @@ export default async function profileRoute(fastify) {
 			fastify.log.error('Error updating avatar:', { message: error.message,
 				details: error.toString() })
 			return reply.code(500).send({ message: 'Failed to update avatar' })
+		}
+	})
+
+	fastify.post('/internal/exists', async (request, reply) => {
+		const { userName } = request.body ?? {}
+
+		try {
+			if (!userName) {
+				throw new Error('userName is required')
+			}
+
+			const userProfile = await fastify.sequelize.models.Profile.findOne({
+				where: { userName: userName },
+				attributes: ['userName']
+			})
+
+			if (userProfile == null) {
+				return reply.code(404).send({ exists: false, message: 'User not found' })
+			}
+
+			return reply.code(200).send({ exists: true, message: 'User exists' })
+		} catch (error) {
+			fastify.log.error('Error checking user existence:', { message: error.message,
+				details: error.toString() })
+			return reply.code(500).send({ message: 'Error checking user existence' })
 		}
 	})
 }

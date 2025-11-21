@@ -33,6 +33,7 @@ export function connectWebSocket() {
 		{
 			case "list":
 				console.warn("LIST RESPONSE: ", payload);
+				
 				try {
 					document.dispatchEvent(new CustomEvent('friends:list', { detail: payload }));
 				} catch (e) {
@@ -47,8 +48,6 @@ export function connectWebSocket() {
 					console.error("Failed to dispatch friends:response event", e);
 				}
 				break;
-			case "update": // herhangi bir değişiklik olduğunda bu type ile geliyo
-				console.warn("UPDATE RESPONSE: ", payload);
 			default:
 				break;
 		}

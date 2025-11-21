@@ -11,7 +11,7 @@ export default fp(async (fastify, opts) => {
 
     const FriendModel = Friend(sequelize, DataTypes, Model) //?
 
-    await sequelize.sync({ alter: true })
+//    await sequelize.sync({ alter: true })
 
     fastify.decorate('sequelize', sequelize)
 
