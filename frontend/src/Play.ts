@@ -838,8 +838,27 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
   } else if (currentGameMode === 'ai') {
     updateParticipants(payload.players, 'ai-participants-grid');
   } else {
+    // ✅ CUSTOM GAME STATUS GÜNCELLEMESI
     const customCount = document.getElementById('custom-players-count');
     if (customCount) customCount.textContent = `${playerCount}/${maxPlayers}`;
+
+    // ✅ Status bilgisini güncelle
+    const customStatusDisplay = document.getElementById('custom-status-display');
+    if (customStatusDisplay) {
+      if (payload.status === 'startable') {
+        customStatusDisplay.textContent = 'Ready';
+        customStatusDisplay.style.color = '#26ff00ff'; // Yeşil
+        customStatusDisplay.style.textShadow = '0 0 10px rgba(13, 255, 0, 0.5)'; // Yeşil
+      } else if (payload.status === 'waiting') {
+        customStatusDisplay.textContent = 'Waiting';
+        customStatusDisplay.style.color = '#0ff'; // Mavi
+		customStatusDisplay.style.textShadow = '0 0 10px rgba(0, 255, 255, 0.5)';
+	} else {
+		customStatusDisplay.textContent = payload.status || 'Preparing';
+        customStatusDisplay.style.color = '#fff'; // Beyaz
+		customStatusDisplay.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
+      }
+    }
 
     if (payload.gameMode === 'multiplayer' || payload.gameMode === '2vs2') {
       updateParticipants(payload.players, 'custom-participants-grid', null, true);
@@ -2663,13 +2682,13 @@ export default class extends AView {
 			// Oyun tipine göre gameMode'u belirle
 			let gameMode: string;
 			switch (gameTypeElement.value) {
-				case '1vs1':
+				case '1v1':
 					gameMode = 'classic';
 					break;
-				case '2vs2':
+				case '2v2':
 					gameMode = 'multiplayer';
 					break;
-				case 'local':
+				case 'co-op':
 					gameMode = 'local';
 					break;
 				default:
@@ -2684,11 +2703,8 @@ export default class extends AView {
 					...gameConfig.gameSettings,
 					paddleHeight: parseInt(paddleHeightEl.value, 10),
 					ballRadius: parseInt(ballRadiusEl.value, 10),
-					ballSpeedIncrease: parseFloat(cornerBoostEl.value),
+					ballSpeedIncrease: parseInt(cornerBoostEl.value),
 					maxScore: parseInt(winningScoreEl.value, 10),
-					ballSpeed: 5, // Varsayılan değer
-					paddleWidth: 15, // Varsayılan değer
-					paddleSpeed: 6, // Varsayılan değer
 				}
 			};
 
@@ -2823,7 +2839,7 @@ private initAIGameListeners(): void {
                     ...gameConfig.gameSettings,
                     paddleHeight: parseInt(paddleHeightEl.value, 10),
                     ballRadius: parseInt(ballRadiusEl.value, 10),
-                    ballSpeedIncrease: parseFloat(cornerBoostEl.value),
+                    ballSpeedIncrease: parseInt(cornerBoostEl.value),
                     maxScore: parseInt(winningScoreEl.value, 10)
                 },
                 aiSettings: baseAISettings
