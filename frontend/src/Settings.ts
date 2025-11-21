@@ -83,7 +83,7 @@ async function sendAvatarChangeReq(e) {
 		const formData = new FormData();
 		formData.append('avatar', e.target.files[0]);
 
-		const res = await fetch(`${API_BASE_URL}/static/avatar?userName=${localStorage.getItem("userName")}`, {
+		const res = await fetch(`${API_BASE_URL}/static/avatar`, {
 			method: 'POST',
 			credentials: 'include',
 			body: formData
