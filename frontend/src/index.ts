@@ -6,10 +6,11 @@ import { connectFriendsWebSocket } from "../dist/Friends.js"
 import { disconnectFriendsWebSocket } from "../dist/Friends.js"
 import Settings from "../dist/Settings.js";
 import Login from "../dist/Login.js";
-import I18n from './I18n.js';
+import I18n from './utils/I18n.js';
 import { getAuthToken } from './utils/auth.js';
 import { removeAuthToken } from './utils/auth.js';
-import { showNotification } from './notification.js';
+import { showNotification } from './utils/notification.js';
+import doubleFetch from "./utils/doubleFetch.js";
 
 // Dynamic API base URL based on current hostname
 export const API_BASE_URL = `https://${window.location.hostname}:3030/api`;
@@ -85,7 +86,7 @@ async function logout() {
 		const hasToken = getAuthToken();
 		if (hasToken)
 		{
-			const response = await fetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref") ?? 'eng'}`, {
+			const response = await doubleFetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref") ?? 'eng'}`, {
 				method: "POST",
 				credentials: "include",
 			});

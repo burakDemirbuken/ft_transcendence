@@ -1,8 +1,8 @@
 import AView from "./AView.js";
 import Profile from "./Profile.js";
 import { onUserProfile } from "./Profile.js";
-import { showNotification } from "./notification.js";
-import { getJsTranslations } from "./I18n.js";
+import { showNotification } from "./utils/notification.js";
+import { getJsTranslations } from "./utils/I18n.js";
 import { API_BASE_URL } from "./index.js";
 
 let friendSocket = null;
