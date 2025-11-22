@@ -28,8 +28,7 @@ export default async function profileRoute(fastify) {
 				stats: userStats
 			})
 		} catch (error) {
-			fastify.log.error('Error retrieving user profile:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error retrieving user profile: ${error.message}`)
 			return reply.code(500).send({ message: 'Error retrieving user profile' })
 		}
 	})
@@ -65,7 +64,7 @@ export default async function profileRoute(fastify) {
 				message: 'Profile deleted successfully'
 			})
 		} catch (error) {
-			fastify.log.error('Error deleting profile:', error)
+			fastify.log.error(`Error deleting profile: ${error.message}`)
 			return reply.code(500).send({ error: 'Failed to delete profile' })
 		}
 	})
@@ -90,7 +89,7 @@ export default async function profileRoute(fastify) {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ userName: userName })
-			}).catch(err => fastify.log.error('Error notifying friend service of display name change:', err))
+			}).catch(err => fastify.log.error(`Error notifying friend service of display name change: ${err.message}`))
 
 			return reply.code(200).send({
 				message: 'Display name updated successfully',
@@ -98,7 +97,7 @@ export default async function profileRoute(fastify) {
 			})
 
 		} catch (error) {
-			fastify.log.error('Error updating display name:', error.message)
+			fastify.log.error(`Error updating display name: ${error.message}`)
 			return reply.code(500).send({ message: 'Failed to update display name' })
 		}
 	})
@@ -168,8 +167,7 @@ export default async function profileRoute(fastify) {
 
 			return reply.code(200).send({ users: userProfiles.map(profile => profile.toJSON()) })
 		} catch (error) {
-			fastify.log.error('Error retrieving friends profiles:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error retrieving friends profiles: ${error.message}`)
 			return reply.code(500).send({ message: 'Failed to retrieve friends profiles' })
 		}
 	})
@@ -201,8 +199,7 @@ export default async function profileRoute(fastify) {
 
 			return reply.code(200).send({  message: 'Avatar updated successfully', newAvatarUrl: userProfile.avatarUrl  })
 		} catch (error) {
-			fastify.log.error('Error updating avatar:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error updating avatar: ${error.message}`)
 			return reply.code(500).send({ message: 'Failed to update avatar' })
 		}
 	})
@@ -226,8 +223,7 @@ export default async function profileRoute(fastify) {
 
 			return reply.code(200).send({ exists: true, message: 'User exists' })
 		} catch (error) {
-			fastify.log.error('Error checking user existence:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error checking user existence: ${error.message}`)
 			return reply.code(500).send({ message: 'Error checking user existence' })
 		}
 	})

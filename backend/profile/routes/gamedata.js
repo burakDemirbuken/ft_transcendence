@@ -226,7 +226,7 @@ export default async function gamedataRoute(fastify) {
 		} = request.body ?? {}
 		const { Profile, Stat, MatchHistory, Team } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
-		console.log('Processing match data:', { team1, team2, winner, matchType, state, time, gameSettings })
+
 		try {
 			if (!team1 || !team2 || !state || !time || !matchType || !winner) {
 				throw new Error('Invalid match data provided')
@@ -342,8 +342,7 @@ export default async function gamedataRoute(fastify) {
 			return reply.status(200).send({ message: 'Match data processed successfully' })
 		} catch (error) {
 			await t.rollback()
-			fastify.log.error('Error saving match data:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error saving match data: ${error.message}`)
 			return reply.status(500).send({ message: 'Error processing match data' })
 		}
 	})
@@ -463,8 +462,7 @@ export default async function gamedataRoute(fastify) {
 			return reply.status(200).send({ message: 'Tournament data processed successfully' })
 		} catch (error) {
 			await t.rollback()
-			fastify.log.error('Error saving tournament data:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error saving tournament data: ${error.message}`)
 			return reply.status(500).send({ message: 'Error processing tournament data' })
 		}
 	})
@@ -480,10 +478,7 @@ export default async function gamedataRoute(fastify) {
 			}
 			return reply.send(result)
 		} catch (error) {
-			fastify.log.error('Error retrieving user match history:', {
-				message: error.message,
-				details: error.toString()
-			})
+			fastify.log.error(`Error retrieving user match history: ${error.message}`)
 			return reply.code(500).send({ message: 'Failed to retrieve match history' })
 		}
 	})
@@ -571,13 +566,11 @@ export default async function gamedataRoute(fastify) {
 						[Op.in]: tournamentIds
 					}
 				}
-			});
-			const userJoinedTournamentsId = usersTournament.map(tournament => tournament.id)
+			})
 
 			return reply.send({ success: true, usersTournament: JSON.parse(JSON.stringify(usersTournament)) })
 		} catch (error) {
-			fastify.log.error('Error retrieving user tournament history:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error retrieving user tournament history: ${error.message}`)
 			return reply.code(500).send({message: 'Failed to retrieve tournament history' })
 		}
 	})

@@ -3,34 +3,24 @@ import gamedataRoute from './routes/gamedata.js'
 import checkachievement from './plugins/checkachievement.js'
 import profileRoute from './routes/profile.js'
 import dbPlugin from './plugins/db.js'
-import overview from 'fastify-overview'
+import utils from './plugins/utils.js'
 import cookie from '@fastify/cookie'
 import jwt from '@fastify/jwt'
+//import overview from 'fastify-overview'
 
 const fastify = Fastify({
 	logger: false,
 })
 
-fastify.register(overview)
+fastify.register(jwt, {
+	secret: process.env.JWT_SECRET
+})
+fastify.register(cookie)
+fastify.register(utils)
 fastify.register(dbPlugin)
 fastify.register(checkachievement)
 fastify.register(gamedataRoute)
 fastify.register(profileRoute)
-fastify.register(cookie)
-fastify.register(jwt, {
-	secret: process.env.JWT_SECRET
-});
-function getDataFromToken(request)
-{
-	const token = request.cookies.accessToken;
-	if (!token)
-		return null;
-	const decoded = fastify.jwt.verify(token);
-	return decoded;
-}
-
-fastify.decorate('getDataFromToken', getDataFromToken);
-
 
 await fastify.ready()
 

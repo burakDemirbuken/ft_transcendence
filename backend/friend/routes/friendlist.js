@@ -10,7 +10,18 @@ export default async function friendListRoutes(fastify) {
 				throw new Error('Username is required')
 			}
 
-			const deletedUserFriends = await fastify.getFriendList(userName)
+			const friendships = await fastify.sequelize.models.Friend.findAll({
+				where: {
+					[Op.or]: [
+						{ userName: userName },
+						{ peerName: userName }
+					]
+				},
+				attributes: ['userName', 'peerName'],
+				raw: true
+			})
+
+			const friendsToNotify = friendships.map(f => f.userName === userName ? f.peerName : f.userName)
 
 			await fastify.presence.get(userName)?.socket.close()
 
@@ -23,17 +34,11 @@ export default async function friendListRoutes(fastify) {
 				}
 			})
 
-			if (deletedUserFriends && (deletedUserFriends.pendingFriends || deletedUserFriends.acceptedFriends)) {
-				const friendsToNotify = [
-					...(deletedUserFriends.pendingFriends?.incoming || []),
-					...(deletedUserFriends.pendingFriends?.outgoing || []),
-					...(deletedUserFriends.acceptedFriends || [])
-				]
-
-				await Promise.allSettled(friendsToNotify.map(async (friend) => {
-					if (fastify.presence.has(friend.userName)) {
-						const friendList = await fastify.getFriendList(friend.userName)
-						const userConnection = fastify.presence.get(friend.userName)
+			if (friendsToNotify.length > 0) {
+				await Promise.allSettled(friendsToNotify.map(async (friendName) => {
+					if (fastify.presence.has(friendName)) {
+						const friendList = await fastify.getFriendList(friendName)
+						const userConnection = fastify.presence.get(friendName)
 						if (userConnection?.socket?.readyState === 1) {
 							userConnection.socket.send(JSON.stringify({
 								type: 'list',
@@ -49,7 +54,7 @@ export default async function friendListRoutes(fastify) {
 
 			return reply.code(200).send({ message: 'All friendships deleted successfully' })
 		} catch (error) {
-			fastify.log.error('Error deleting friendships:', { message: error.message })
+			fastify.log.error(`Error deleting friendships: ${error.message}`)
 			return reply.code(500).send({ error: 'Failed to delete friendships' })
 		}
 	})
@@ -66,7 +71,7 @@ export default async function friendListRoutes(fastify) {
 			console.log(`Notified friends of ${userName} about status change.`)
 			return reply.code(200).send({ message: 'Friends notified successfully' })
 		} catch (error) {
-			fastify.log.error('Error notifying friend changes:', { message: error.message })
+			fastify.log.error(`Error notifying friend changes: ${error.message}`)
 
 			return reply.code(500).send({ error: 'Failed to notify friend changes' })
 		} 
