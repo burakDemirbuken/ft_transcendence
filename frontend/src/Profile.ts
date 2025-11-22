@@ -1,6 +1,7 @@
 import { getAuthToken, getAuthHeaders } from './utils/auth.js';
-import { getJsTranslations } from './I18n.js';
+import { getJsTranslations } from './utils/I18n.js';
 import { API_BASE_URL } from './index.js';
+import doubleFetch from "./utils/doubleFetch.js";
 import AView from "./AView.js";
 declare const Chart: any; // Global Chart.js nesnesini tanımlar
 
@@ -740,7 +741,7 @@ async function showMatchDetails(matchIndex: number) {
         const userName = document.querySelector('.username')?.textContent?.replace('@', '');
         if (!userName) return;
 
-        const response = await fetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
+        const response = await doubleFetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
@@ -1274,7 +1275,7 @@ export default class extends AView {
 
 async function fetchMatchHistory(userName: string) {
 	try {
-		const response = await fetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
+		const response = await doubleFetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
 			credentials: 'include',
 			headers: {
 				'Content-Type': 'application/json',
@@ -1398,7 +1399,7 @@ async function populateRecentMatches(userName: string) {
 
 	try {
 		// Match history'yi çek
-		const response = await fetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
+		const response = await doubleFetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
 			credentials: 'include',
 			headers: {
 				'Content-Type': 'application/json',
@@ -1483,6 +1484,13 @@ function formatDuration(seconds) {
 
 async function setTextStats(user: any) {
 	// Title Card
+	if (user?.profile?.avatarUrl) {
+		const avatarImg = document.querySelector('.avatar > img') as HTMLImageElement;
+		if (avatarImg){
+			avatarImg.setAttribute('src', `${API_BASE_URL}/static/${user.profile.avatarUrl}`);
+			avatarImg.style.background ='none';
+		}
+	}
 	document.querySelector(".user-title").textContent = user.profile.displayName;
 	document.querySelector(".username").textContent = "@" + user.profile.userName;
 	document.getElementById("level-value").textContent = user.stats.level;
@@ -1603,7 +1611,7 @@ async function setAchievementStats(user: any) {
 async function fetchTournamentHistory(userName: string) {
 	try {
 		// Endpoint'i deneyin - hangisi çalışırsa onu kullanın
-		let response = await fetch(
+		let response = await doubleFetch(
 			`${API_BASE_URL}/profile/tournament-history?userName=${encodeURIComponent(userName)}`,
 			{
 				credentials: 'include',
@@ -1616,7 +1624,7 @@ async function fetchTournamentHistory(userName: string) {
 
 		// Eğer 404 ise alternatif endpoint'i deneyin
 		if (response.status === 404) {
-			response = await fetch(
+			response = await doubleFetch(
 				`${API_BASE_URL}/tournaments/user/${encodeURIComponent(userName)}`,
 				{
 					credentials: 'include',
@@ -1780,7 +1788,7 @@ async function onLoad() {
 	}
 
 	try {
-		const Profile = await fetch(
+		const Profile = await doubleFetch(
 			`${API_BASE_URL}/profile/profile`,
 			{
 				credentials: 'include',
@@ -1818,7 +1826,7 @@ async function onLoad() {
 
 export async function onUserProfile(userName: string) {
 	try {
-		const userProfile = await fetch(`${API_BASE_URL}/profile/profile?userName=${userName}`);
+		const userProfile = await doubleFetch(`${API_BASE_URL}/profile/profile?userName=${userName}`);
 
 		if (userProfile.ok) {
 			const user = await userProfile.json();
