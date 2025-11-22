@@ -145,11 +145,14 @@ export default fp(async function friendChanges(fastify) {
 				if (friend.status === 'accepted') {
 					return { user: "Friend request already accepted.", peer: null }
 				}
+
 				if (friend.userName === userName) {
 					return { user: "You cannot accept your own friend request.", peer: null }
 				}
+
 				friend.status = 'accepted'
 				await friend.save()
+
 				return { user: "Friend request accepted.", peer: `${userName} has accepted your friend request.` }
 			} else {
 				return { user: "Friend request not found.", peer: null }
@@ -257,6 +260,7 @@ export default fp(async function friendChanges(fastify) {
 			const users = friendships.map(f => f.userName === userName ? f.peerName : f.userName)
 
 			if (users.length === 0) {
+				console.log(`No friends to notify for user: ${userName}`)
 				return
 			}
 
@@ -283,11 +287,11 @@ export default fp(async function friendChanges(fastify) {
 		
 			if (failed.length > 0) {
 				Promise.all(failed.map(async ({ result, user }) => {
-					fastify.log.error('Failed to notify user:', { user: user, reason: result.reason.message })
+					fastify.log.error(`Failed to notify user: ${user}, reason: ${result.reason.message}`)
 				}))
 			}
 		} catch (error) {
-			fastify.log.error('Error notifying friend changes:', { message: error.message})
+			fastify.log.error(`Error notifying friend changes: ${error.message}`)
 		}
 	}
 

@@ -6,7 +6,6 @@ import dbPlugin from './plugins/db.js'
 import utils from './plugins/utils.js'
 import cookie from '@fastify/cookie'
 import jwt from '@fastify/jwt'
-//import overview from 'fastify-overview'
 
 const fastify = Fastify({
 	logger: false,
@@ -24,12 +23,9 @@ fastify.register(profileRoute)
 
 await fastify.ready()
 
-try
-{
+try {
 	const address = await fastify.listen({ port: 3006, host: '0.0.0.0' })
-}
-catch (err)
-{
+} catch (err) {
 	fastify.log.error(err)
 	process.exit(1)
 }

@@ -16,6 +16,7 @@ export default (sequelize, DataTypes, Model) => {
 		displayName: {
 			type: DataTypes.STRING,
 			allowNull: false,
+			unique: true
 		},
 		avatarUrl: {
 			type: DataTypes.STRING,

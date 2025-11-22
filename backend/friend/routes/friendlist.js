@@ -6,7 +6,7 @@ export default async function friendListRoutes(fastify) {
 		const userName = request.body?.userName ?? null;
 
 		try {
-			if (!userName) {
+			if (userName == null) { // bunu test et
 				throw new Error('Username is required')
 			}
 
@@ -21,9 +21,11 @@ export default async function friendListRoutes(fastify) {
 				raw: true
 			})
 
-			const friendsToNotify = friendships.map(f => f.userName === userName ? f.peerName : f.userName)
+			if (friendships.length === 0 || friendships == null) {
+				return reply.code(200).send({ message: 'No friendships to delete' })
+			}
 
-			await fastify.presence.get(userName)?.socket.close()
+			const friendsToNotify = friendships.map(f => f.userName === userName ? f.peerName : f.userName)
 
 			await fastify.sequelize.models.Friend.destroy({
 				where: {
@@ -35,7 +37,7 @@ export default async function friendListRoutes(fastify) {
 			})
 
 			if (friendsToNotify.length > 0) {
-				await Promise.allSettled(friendsToNotify.map(async (friendName) => {
+				const res = await Promise.allSettled(friendsToNotify.map(async (friendName) => {
 					if (fastify.presence.has(friendName)) {
 						const friendList = await fastify.getFriendList(friendName)
 						const userConnection = fastify.presence.get(friendName)
@@ -49,8 +51,18 @@ export default async function friendListRoutes(fastify) {
 						}
 					}
 				}))
+				
+				const failedNotifications = res.filter(r => r.status === 'rejected')
+				if (failedNotifications.length > 0) {
+					fastify.log.error(`Failed to notify some friends of ${userName} about friendship deletion.`)
+				}
 			}
 
+			const userConnection = fastify.presence.get(userName)
+			if (userConnection) {
+				fastify.presence.delete(userName)
+				await userConnection.socket.close()
+			}
 
 			return reply.code(200).send({ message: 'All friendships deleted successfully' })
 		} catch (error) {
@@ -72,7 +84,6 @@ export default async function friendListRoutes(fastify) {
 			return reply.code(200).send({ message: 'Friends notified successfully' })
 		} catch (error) {
 			fastify.log.error(`Error notifying friend changes: ${error.message}`)
-
 			return reply.code(500).send({ error: 'Failed to notify friend changes' })
 		} 
 	})

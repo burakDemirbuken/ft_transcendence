@@ -11,7 +11,7 @@ export default async function avatarRoutes(fastify) {
 		const userName = userData ? userData.username : null
 
 		if (!userName) {
-			return reply.code(401).send({ message: "Unauthorized: userName is required" })
+			return reply.code(401).send({ message: "Unauthorized: username is required" })
 		}
 
 		const data = await request.file()
@@ -19,7 +19,7 @@ export default async function avatarRoutes(fastify) {
 		if (!data) {
 			return reply.code(400).send({ message: "No file uploaded" })
 		} 
-		
+
 		if (!allowedMimeTypes.includes(data.mimetype)) {
 			await data.file.resume()
 			return reply.code(400).send({ message: "Invalid file type. Only JPG/JPEG and PNG are allowed." })
@@ -57,7 +57,7 @@ export default async function avatarRoutes(fastify) {
 		} catch (err) {
 			await fs.promises.unlink(filePath).catch(err => request.log.error(`Failed to delete orphaned file: ${err.message}`))
 			request.log.error(`Profile service communication failed: ${err.message}`)
-			return reply.code(500).send({ message: "Internal Server Error" })
+			return reply.code(500).send({ message: "Failed to upload avatar" })
 		}
 	})
 }

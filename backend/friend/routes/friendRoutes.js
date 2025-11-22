@@ -72,7 +72,8 @@ export default async function friendRoutes(fastify) {
 		})
 
 		const cleanup = async (situation) => {
-			await presence.delete(userName)
+			if (!(await presence.delete(userName)))
+				return
 			console.log(`Presence connection for ${userName} cleaned up due to:`, situation)
 			await fastify.notifyFriendChanges(userName)
 			fastify.log.info({ userName, situation })
