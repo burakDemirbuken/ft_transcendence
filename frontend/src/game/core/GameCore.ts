@@ -34,7 +34,18 @@ class GameCore
 			throw new Error('BABYLON.js is not loaded. Please ensure the library is included.');
 		}
 
-		this.engine = new BABYLON.Engine(canvas, true);
+		const gl = canvas.getContext("webgl2", { stencil: true }) || canvas.getContext("webgl", { stencil: true });
+
+		if (!gl) {
+			throw new Error("Unable to initialize WebGL. Your browser may not support it.");
+		}
+
+		gl.getExtension("EXT_color_buffer_float");
+		gl.getExtension("WEBGL_color_buffer_float");
+		gl.getExtension("EXT_color_buffer_half_float");
+		gl.getExtension("EXT_float_blend");
+
+		this.engine = new BABYLON.Engine(gl, true);
 		this.scene = new BABYLON.Scene(this.engine);
 
 		this.scene.clearColor = new BABYLON.Color4(0, 0, 0, 0);
