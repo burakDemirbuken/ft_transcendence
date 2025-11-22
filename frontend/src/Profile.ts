@@ -419,7 +419,6 @@ class ManagerProfile {
 	}
 
 	public async updateChartLanguage(): Promise<void> {
-		console.log("🔄 Updating chart languages...");
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
 		let chart = this.showcharts.performance;
@@ -1483,46 +1482,73 @@ function formatDuration(seconds) {
 }
 
 async function setTextStats(user: any) {
+	// Helper function
+	const safeSetText = (selector: string, value: any) => {
+		const el = document.querySelector(selector);
+		if (el) {
+			el.textContent = value;
+		} else {
+			console.warn(`Element bulunamadı: ${selector}`);
+		}
+	};
+
+	const safeSetId = (id: string, value: any) => {
+		const el = document.getElementById(id);
+		if (el) {
+			el.textContent = value;
+		} else {
+			console.warn(`Element bulunamadı: #${id}`);
+		}
+	};
+
 	// Title Card
 	if (user?.profile?.avatarUrl) {
 		const avatarImg = document.querySelector('.avatar > img') as HTMLImageElement;
-		if (avatarImg){
+		if (avatarImg) {
 			avatarImg.setAttribute('src', `${API_BASE_URL}/static/${user.profile.avatarUrl}`);
-			avatarImg.style.background ='none';
+			avatarImg.style.background = 'none';
 		}
 	}
-	document.querySelector(".user-title").textContent = user.profile.displayName;
-	document.querySelector(".username").textContent = "@" + user.profile.userName;
-	document.getElementById("level-value").textContent = user.stats.level;
+
+	// ✅ Güvenli atamalar
+	safeSetText(".user-title", user.profile.displayName);
+	safeSetText(".username", "@" + user.profile.userName);
+	safeSetId("level-value", user.stats.level);
+
 	const levelProgress = document.querySelector(".level-progress") as HTMLElement;
 	if (levelProgress && user.stats.progressRatio !== undefined) {
 		const progressValue = Math.min(100, Math.max(0, user.stats.progressRatio));
-		levelProgress.setAttribute("data-progress", progressValue.toString()); }
-	document.getElementById("current-streak").textContent = user.stats.gameCurrentStreak;
-	document.getElementById("total-games").textContent = user.stats.gamesPlayed;
-	document.getElementById("win-rate").textContent = Math.round(user.stats.winRate) + "%";
+		levelProgress.setAttribute("data-progress", progressValue.toString());
+	}
+
+	safeSetId("current-streak", user.stats.gameCurrentStreak);
+	safeSetId("total-games", user.stats.gamesPlayed);
+	safeSetId("win-rate", Math.round(user.stats.winRate) + "%");
+
 	// Overview
-	document.getElementById("mwon").textContent = user.stats.gamesWon;
-	document.getElementById("mlost").textContent = user.stats.gamesLost;
-	document.getElementById("mdur-average").textContent = formatDuration(user.stats.gameAverageDuration);
-	document.getElementById("total-play-time").textContent = formatDuration(user.stats.gameTotalDuration);
+	safeSetId("mwon", user.stats.gamesWon);
+	safeSetId("mlost", user.stats.gamesLost);
+	safeSetId("mdur-average", formatDuration(user.stats.gameAverageDuration));
+	safeSetId("total-play-time", formatDuration(user.stats.gameTotalDuration));
+
 	// Win Streak
-	document.querySelector(".streak-number").textContent = user.stats.gameCurrentStreak;
-	document.querySelector(".streak-value").textContent = user.stats.gameLongestStreak;
+	safeSetText(".streak-number", user.stats.gameCurrentStreak);
+	safeSetText(".streak-value", user.stats.gameLongestStreak);
+
 	// Last Matches
 	await populateRecentMatches(user.profile.userName);
-	// Detail Statictic
-	document.getElementById("xp_point").textContent = (user.stats.xp || 0).toString();
-	document.getElementById("hit_rate").textContent = Math.round(user.stats.hitRate) + "%";
-	document.getElementById("mfastest").textContent = formatDuration(user.stats.fastestWinDuration);
-	document.getElementById("mlongest").textContent = formatDuration(user.stats.longestMatchDuration);
+
+	// Detail Statistics
+	safeSetId("xp_point", (user.stats.xp || 0).toString());
+	safeSetId("hit_rate", Math.round(user.stats.hitRate) + "%");
+	safeSetId("mfastest", formatDuration(user.stats.fastestWinDuration));
+	safeSetId("mlongest", formatDuration(user.stats.longestMatchDuration));
 }
 
 async function updateWinLossChart(wins: number, losses: number) {
 	const winLossCtx = document.getElementById('winLossChart') as HTMLCanvasElement | null;
 
 	if (!winLossCtx) {
-		console.log("⚠️ Win/Loss chart canvas not found");
 		return;
 	}
 
@@ -1541,8 +1567,6 @@ async function updateWinLossChart(wins: number, losses: number) {
 		chart.data.datasets[0].data = [wins, losses];
 		chart.data.labels = labels;
 		chart.update();
-	} else {
-		console.log("Chart will be created by ManagerProfile");
 	}
 }
 

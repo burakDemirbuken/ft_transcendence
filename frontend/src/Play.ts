@@ -139,7 +139,7 @@ function displayMatchPairs(pairs, participants) {
                 </svg>
             </div>
             <div class="match-player-name">${player1Name}</div>
-            ${pair.winner === pair.players[0] ? '<div class="winner-badge">🏆</div>' : ''}
+            ${pair.winner === pair.players[0] ? '<div class="winner-badge"></div>' : ''}
         `;
 
         // VS yazısı
@@ -157,7 +157,7 @@ function displayMatchPairs(pairs, participants) {
                 </svg>
             </div>
             <div class="match-player-name">${player2Name}</div>
-            ${pair.winner === pair.players[1] ? '<div class="winner-badge">🏆</div>' : ''}
+            ${pair.winner === pair.players[1] ? '<div class="winner-badge"></div>' : ''}
         `;
 
         players.appendChild(player1);
@@ -854,7 +854,7 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
         customStatusDisplay.style.color = '#0ff'; // Mavi
 		customStatusDisplay.style.textShadow = '0 0 10px rgba(0, 255, 255, 0.5)';
 	} else {
-		customStatusDisplay.textContent = payload.status || 'Preparing';
+		customStatusDisplay.textContent = 'Waiting';
         customStatusDisplay.style.color = '#fff'; // Beyaz
 		customStatusDisplay.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
       }
@@ -2042,6 +2042,7 @@ class CanvasOrientationManager {
         };
 
         // Event listener'ı ekle
+		// unset'le
         window.addEventListener('keydown', this.keyboardListener);
         console.log('⌨️ Portrait mode keyboard controls enabled');
     }
@@ -2106,7 +2107,7 @@ class CanvasOrientationManager {
         console.log('💻 DESKTOP MODE - No touch capability detected');
 
         this.updateCanvasLayout();
-        window.addEventListener('resize', () => this.throttledHandleResize());
+        window.addEventListener('resize', () => this.throttledHandleResize()); // unset'le
         this.setupResizeObserver();
     }
 
@@ -2116,8 +2117,8 @@ class CanvasOrientationManager {
         console.log('📱 MOBILE MODE - Touch capability detected');
 
         this.updateCanvasLayout();
-        window.addEventListener('orientationchange', () => this.handleOrientationChange());
-        window.addEventListener('resize', () => this.throttledHandleResize());
+        window.addEventListener('orientationchange', () => this.handleOrientationChange()); //unset'le
+        window.addEventListener('resize', () => this.throttledHandleResize()); //unset'le
         this.setupResizeObserver();
         this.ensureViewportMeta();
         this.createPortraitWarning();
@@ -2659,6 +2660,7 @@ export default class extends AView {
 		}
 
 		// Sayfa yüklendiğinde listener'ları başlat
+		// unset'le
 		document.addEventListener('DOMContentLoaded', this.initGameModeListeners.bind(this));
 	}
 
@@ -2765,7 +2767,6 @@ export default class extends AView {
 		        if (startButton.disabled) {
 		            startButton.disabled = false;
 		            startButton.innerHTML = '🚀 Oyunu Başlat';
-		            showNotification('⚠️ Oyun başlatma zaman aşımına uğradı', 'warning');
 		        }
 		    }, 10000);
 		});
@@ -3316,6 +3317,7 @@ private initAIGameListeners(): void {
 		}
 	}
 
+	// unset'le
 	private initKeyboardListeners(): void {
 		// Add keyboard shortcuts
 		document.addEventListener('keydown', function(e) {
