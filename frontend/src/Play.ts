@@ -1630,7 +1630,7 @@ function connectWebSocket() {
 		console.log(`❌ Disconnected from room server: ${error.code} - ${error.reason}`);
 	});
 
-	roomSocket.onError((error) => {
+	roomSocket.onError((error) => { // odaya giremedi diye ve error geldiğinde notification göster
 		console.error('❌ Room server connection error:', error);
 	});
 
