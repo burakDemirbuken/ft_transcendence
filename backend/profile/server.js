@@ -8,7 +8,7 @@ import cookie from '@fastify/cookie'
 import jwt from '@fastify/jwt'
 
 const fastify = Fastify({
-	logger: false,
+	logger: true,
 })
 
 fastify.register(jwt, {

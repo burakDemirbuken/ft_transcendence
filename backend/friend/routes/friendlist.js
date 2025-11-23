@@ -10,7 +10,6 @@ export default async function friendListRoutes(fastify) {
 		}
 
 		try {
-
 			const friendships = await fastify.sequelize.models.Friend.findAll({
 				where: {
 					[Op.or]: [

@@ -3,7 +3,7 @@ import { Op } from 'sequelize'
 export default async function profileRoute(fastify) {
 
 	fastify.get('/profile', async (request, reply) => {
-		const userName = fastify.getDataFromToken(request).username
+		const userName = request.query?.userName ?? (await fastify.getDataFromToken(request))?.username ?? null
 
 		try {
 			if (!userName) {
@@ -24,8 +24,11 @@ export default async function profileRoute(fastify) {
 				fastify.statCalculate(userProfile.id)
 			])
 
+			const profileData = userProfile.toJSON()
+			delete profileData.id
+			
 			return reply.send({
-				profile: userProfile.toJSON(),
+				profile: profileData,
 				achievements: userAchievementsProgress,
 				stats: userStats
 			})
@@ -36,15 +39,17 @@ export default async function profileRoute(fastify) {
 	})
 	
 	fastify.post('/displaynameupdate', async (request, reply) => {
-		const userName = fastify.getDataFromToken(request).username ?? null
+		const userName = (await fastify.getDataFromToken(request))?.username ?? null
 		const dname = request.body?.dname ?? null
 
 		try {
 			if (!userName) {
+				console.error('userName is missing in token')
 				return reply.code(400).send({ message: 'userName is required' })
 			}
 
 			if (!dname) {
+				console.error('Display name is missing in request body')
 				return reply.code(400).send({ message: 'Display name is required' })
 			}
 
@@ -53,6 +58,7 @@ export default async function profileRoute(fastify) {
 			})
 
 			if (!userProfile) {
+				console.error('User not found for userName:', userName)
 				return reply.code(404).send({ message: 'User not found' })
 			}
 
@@ -66,6 +72,7 @@ export default async function profileRoute(fastify) {
 			})
 
 			if (existingProfile) {
+				console.log('Display name already taken:', dname)
 				return reply.code(409).send({ message: 'Display name is already taken' })
 			}
 

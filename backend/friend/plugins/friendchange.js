@@ -92,7 +92,6 @@ export default fp(async function friendChanges(fastify) {
 				return { user: "Can not send friend request to yourself.", peer: null }
 			}
 
-			// check if peername exists
 			const peerProfileResponse = await fetch("http://profile:3006/internal/exists", {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -100,7 +99,7 @@ export default fp(async function friendChanges(fastify) {
 			})
 			if (!peerProfileResponse.ok) {
 				console.error("Error response from profile service:", peerProfileResponse.status, await peerProfileResponse.text());
-				return { user: "Peer user does not exist.", peer: null }
+				return { user: `${peerName} user does not exist.`, peer: null }
 			}
 
 			const existingFriendship = await fastify.sequelize.models.Friend.findOne({
@@ -110,7 +109,7 @@ export default fp(async function friendChanges(fastify) {
 						{ userName: peerName, peerName: userName }
 					]
 				}
-			}) || null
+			}) ?? null
 			if (existingFriendship) { 
 				if (existingFriendship.status === 'pending') {
 					return { user: "Friend request already pending.", peer: null }

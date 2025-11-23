@@ -7,8 +7,7 @@ const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg"]
 export default async function avatarRoutes(fastify) {
 
 	fastify.post("/avatar", async (request, reply) => {
-		const userData = await fastify.getDataFromToken(request)
-		const userName = userData ? userData.username : null
+		const userName = (await fastify.getDataFromToken(request))?.username ?? null
 
 		if (!userName) {
 			return reply.code(401).send({ message: "Unauthorized: username is required" })

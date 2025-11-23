@@ -469,7 +469,7 @@ export default async function gamedataRoute(fastify) {
 
 	fastify.get('/match-history', async (request, reply) => {
 
-		const userName = fastify.getDataFromToken(request).username
+		const userName = fastify.getDataFromToken(request)?.username ?? request.query?.userName ?? null
 
 		try {
 			const result = await getUserMatchHistory(fastify, userName)
@@ -484,7 +484,7 @@ export default async function gamedataRoute(fastify) {
 	})
 
 	fastify.get('/tournament-history', async (request, reply) => {
-		const userName = fastify.getDataFromToken(request).username
+		const userName = fastify.getDataFromToken(request)?.username ?? request.query?.userName ?? null
 
 		try {
 
