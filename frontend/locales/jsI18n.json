@@ -44,6 +44,13 @@
 			"thistory": {
 				"nomatch": "No tournament history yet"
 			}
+		},
+		"friends": {
+			"emptyList": {
+				"friend": "You have no friends for now...",
+				"request": "You have no requests for now...",
+				"invite": "You have no invites for now..."
+			}
 		}
 	},
 	"tur": {
@@ -86,6 +93,13 @@
 			"thistory": {
 				"nomatch": "Henüz turnuva geçmişi bulunmuyor"
 			}
+		},
+		"friends": {
+			"emptyList": {
+				"friend": "Şimdilik hiç arkadaşın yok...",
+				"request": "Şimdilik hiç isteğin yok...",
+				"invite": "Şimdilik hiç davetin yok..."
+			}
 		}
 	},
 	"deu": {
@@ -127,6 +141,13 @@
 			},
 			"thistory": {
 				"nomatch": "Noch keine Turnierhistorie"
+			}
+		},
+		"friends": {
+			"emptyList": {
+				"friend": "Du hast vorerst keine Freunde...",
+				"request": "Du hast vorerst keine Anfragen...",
+				"invite": "Du hast vorerst keine Einladungen..."
 			}
 		}
 	}

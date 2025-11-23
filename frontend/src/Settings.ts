@@ -334,6 +334,18 @@ export default class extends AView {
 		document.querySelector(".pass")?.addEventListener("click", sendPassChangeReq);
 		document.querySelector(".validation-form")?.addEventListener("submit", confirm2FACode);
 		document.getElementById("card-exit")?.addEventListener("click", hideSettingsOverlay);
+		document.querySelectorAll(".part-expand").forEach((btn) => {
+			btn.addEventListener("click", function (e) {
+				const clicked = e.currentTarget as HTMLElement;
+				const partHeader = clicked.closest('.part-header');
+				const part = partHeader?.parentElement;
+				const formContainer = part?.querySelector('.form-container') as HTMLElement | null;
+				if (!formContainer)
+					return;
+				formContainer.hidden = !formContainer.hidden;
+				btn.classList.toggle('rotated', !formContainer.hidden);
+			});
+		});
 		onLoad();
 	}
 
@@ -381,7 +393,9 @@ async function onLoad()
 		if (meReq.ok) {
 			const profileData = await meReq.json();
 			console.log(profileData);
-			document.querySelector('input[name="uname"]')?.setAttribute('value', profileData?.user?.username ?? '');
+			const uname = document.querySelector(".settings-uname");
+			if (uname && profileData?.user?.username)
+				uname.textContent = "@" + profileData.user.username;
 			document.querySelector('input[name="current-email"]')?.setAttribute('value', profileData?.user?.email ?? '');
 
 			const profileReq = await fetch(`${API_BASE_URL}/profile/profile?userName=${profileData?.user?.username}`, {

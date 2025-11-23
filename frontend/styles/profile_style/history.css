@@ -4,7 +4,6 @@
     src: url('../../fonts/Audiowide.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
-    letter-spacing: 1px;
 }
 
 /* Matches Tab */
@@ -142,11 +141,11 @@
 }
 
 .match-card {
-    width: clamp(270px, 70% + 80px, 2400px);
+    width: clamp(270px, calc(70% + 80px), 2400px);
     height: 90%;
     border: 2px solid #0cce;
     border-radius: 10px;
-    padding: clamp(2px, 3vw + 1px, 20px);
+    padding: clamp(2px, calc(3vw + 1px), 20px);
     overflow-y: auto;
     background: var(--bg-secondary);
     max-height: 90vh;
@@ -181,7 +180,7 @@
     border-radius: 10px;
 }
 
-.match-card::-webkit-scrollbar-thumb:hover {
+.match-card:hover::-webkit-scrollbar-thumb{
     background: linear-gradient(180deg, #00cccc, #cc00cc);
 }
 
@@ -579,7 +578,8 @@
     justify-content: space-around;
 
     background: #666a;
-    text-shadow: 0 0 10px #111;border-radius: 5px;
+    text-shadow: 0 0 10px #111;
+    border-radius: 5px;
 }
 
 .match-player {

@@ -46,8 +46,6 @@ export default class Room extends EventEmitter
 	{
 		if (this.host !== playerId)
 			throw new Error('Only the host can start the game');
-		if (this.allPlayersReady() === false)
-			throw new Error('Cannot start game, not all players are ready or room is not full');
 		if (this.players.length !== this.maxPlayers)
 			throw new Error('Room is not full');
 
@@ -59,18 +57,18 @@ export default class Room extends EventEmitter
 		};
 	}
 
-	allPlayersReady()
-	{
-		return this.players.every(p => p.isReady);
-	}
-
 	finishRoom(payload)
 	{
 		this.status = 'finished';
-		this.emit('finished', { ...payload, gameSettings: this.gameSettings });
-		return { state: payload, players: this.players };
+		const players = [...this.players];
+		this.emit('finished', {
+			...payload,
+			gameSettings: this.gameSettings,
+			kickedPlayers: [...this.players.map(p => p.id)],
+		});
+		return { state: payload, players: players };
 	}
-
+1
 	getState()
 	{
 		return {

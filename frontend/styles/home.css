@@ -325,6 +325,9 @@ body {
     text-align: center;
     background: linear-gradient(45deg, #00ffff, #ff00ff, #00ffff);
     background-size: 200% 200%;
+    /* Standart özellik */
+    background-clip: text;
+    /* Webkit uyumluluğu */
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: gradientShift 4s ease-in-out infinite;

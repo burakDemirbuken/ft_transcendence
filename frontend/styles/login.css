@@ -96,7 +96,7 @@
 
 #rme {
 	position: absolute;
-	top: clamp(.4rem, 2vh + .1rem, 1.5em);
+	top: clamp(.4rem, calc(2vh + .1rem), 1.5em);
 	left: 1.5em;
 	color: #bbb;
 	background: none;
@@ -138,7 +138,7 @@
 	border: 2px solid #ddd;
 	border-image: linear-gradient(45deg, #c0c, #0cc) 1;
 	font-family: inherit;
-	font-size: clamp(1rem, 2vmin + .8rem, 2rem);
+	font-size: clamp(1rem, calc(2vmin + .8rem), 2rem);
 
 	padding: 0;
 	width: 3em;
@@ -166,7 +166,7 @@
 
 .field {
 	position: absolute;
-	font-size: clamp(1.8rem, 5vmin + .4rem, 5rem);
+	font-size: clamp(1.8rem, calc(5vmin + .4rem), 5rem);
 	opacity: 0;
 	transition: opacity 0.3s ease-in-out;
 	pointer-events: none;

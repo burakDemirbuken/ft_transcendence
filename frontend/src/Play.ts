@@ -838,8 +838,27 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
   } else if (currentGameMode === 'ai') {
     updateParticipants(payload.players, 'ai-participants-grid');
   } else {
+    // ✅ CUSTOM GAME STATUS GÜNCELLEMESI
     const customCount = document.getElementById('custom-players-count');
     if (customCount) customCount.textContent = `${playerCount}/${maxPlayers}`;
+
+    // ✅ Status bilgisini güncelle
+    const customStatusDisplay = document.getElementById('custom-status-display');
+    if (customStatusDisplay) {
+      if (payload.status === 'startable') {
+        customStatusDisplay.textContent = 'Ready';
+        customStatusDisplay.style.color = '#26ff00ff'; // Yeşil
+        customStatusDisplay.style.textShadow = '0 0 10px rgba(13, 255, 0, 0.5)'; // Yeşil
+      } else if (payload.status === 'waiting') {
+        customStatusDisplay.textContent = 'Waiting';
+        customStatusDisplay.style.color = '#0ff'; // Mavi
+		customStatusDisplay.style.textShadow = '0 0 10px rgba(0, 255, 255, 0.5)';
+	} else {
+		customStatusDisplay.textContent = payload.status || 'Preparing';
+        customStatusDisplay.style.color = '#fff'; // Beyaz
+		customStatusDisplay.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
+      }
+    }
 
     if (payload.gameMode === 'multiplayer' || payload.gameMode === '2vs2') {
       updateParticipants(payload.players, 'custom-participants-grid', null, true);
@@ -2663,13 +2682,13 @@ export default class extends AView {
 			// Oyun tipine göre gameMode'u belirle
 			let gameMode: string;
 			switch (gameTypeElement.value) {
-				case '1vs1':
+				case '1v1':
 					gameMode = 'classic';
 					break;
-				case '2vs2':
+				case '2v2':
 					gameMode = 'multiplayer';
 					break;
-				case 'local':
+				case 'co-op':
 					gameMode = 'local';
 					break;
 				default:
@@ -2684,11 +2703,8 @@ export default class extends AView {
 					...gameConfig.gameSettings,
 					paddleHeight: parseInt(paddleHeightEl.value, 10),
 					ballRadius: parseInt(ballRadiusEl.value, 10),
-					ballSpeedIncrease: parseFloat(cornerBoostEl.value),
+					ballSpeedIncrease: parseInt(cornerBoostEl.value),
 					maxScore: parseInt(winningScoreEl.value, 10),
-					ballSpeed: 5, // Varsayılan değer
-					paddleWidth: 15, // Varsayılan değer
-					paddleSpeed: 6, // Varsayılan değer
 				}
 			};
 
@@ -2756,59 +2772,181 @@ export default class extends AView {
 
 	}
 
-	private initAIGameListeners(): void {
-		document.getElementById('ai-start-game-btn')?.addEventListener('click', function() {
-			roomSocket.send("start", {});
-			showNotification('Oyun başlatılıyor...', 'info');
-		});
+private initAIGameListeners(): void {
+    const aiStartBtn = document.getElementById('ai-start-btn');
 
-		// AI Difficulty - Custom Option
-		document.querySelectorAll('input[name="ai-difficulty"]').forEach((radio: Element) => {
-			radio.addEventListener('change', function() {
-				// Type assertion ile input elementini al
-				const radioInput = this as HTMLInputElement;
+    if (aiStartBtn) {
+        aiStartBtn.addEventListener('click', () => {
+            const difficultyRadio = document.querySelector('input[name="ai-difficulty"]:checked') as HTMLInputElement;
 
-				// Custom settings elementini al
-				const customSettings = document.getElementById('ai-custom-settings');
+            if (!difficultyRadio) {
+                showNotification('Lütfen zorluk seviyesi seçin!', 'error');
+                return;
+            }
 
-				if (radioInput.value === 'custom') {
-					customSettings?.classList.add('active');
-				} else {
-					customSettings?.classList.remove('active');
-				}
-			});
-		});
+            const difficulty = difficultyRadio.value;
 
-		// Fast Game Mode Button
-		const fastGameBtn = document.getElementById('fast-game-mode');
-		if (fastGameBtn) {
-			fastGameBtn.addEventListener('click', () => {
-				showNotification('Hızlı oyun başlatılıyor...', 'success');
+            const paddleHeightEl = document.getElementById('ai-paddle-height') as HTMLInputElement;
+            const ballRadiusEl = document.getElementById('ai-ball-radius') as HTMLInputElement;
+            const cornerBoostEl = document.getElementById('ai-corner-boost') as HTMLInputElement;
+            const winningScoreEl = document.getElementById('ai-winning-score') as HTMLInputElement;
 
-				const loadingScreen = document.getElementById('loading-screen');
-				const gamePage = document.getElementById('game-page');
+            if (!paddleHeightEl || !ballRadiusEl || !cornerBoostEl || !winningScoreEl) {
+                showNotification('Oyun ayarları yüklenemedi!', 'error');
+                return;
+            }
 
-				if (gamePage) gamePage.classList.add('hidden');
-				if (loadingScreen) loadingScreen.classList.add('active');
+            // Base AI settings
+            const baseAISettings: AISettings = {
+                difficulty: difficulty as AIDifficulty
+            };
 
-				roomSocket.send('quickMatch');
-			});
-		}
+            // Custom AI settings
+            if (difficulty === 'custom') {
+                const reactionEl = document.getElementById('ai-reaction-time') as HTMLInputElement;
+                const predictionEl = document.getElementById('ai-prediction-accuracy') as HTMLInputElement;
+                const accuracyEl = document.getElementById('ai-general-accuracy') as HTMLInputElement;
+                const learningEl = document.getElementById('ai-learning-speed') as HTMLInputElement;
+                const prepDistEl = document.getElementById('ai-preparation-distance') as HTMLInputElement;
+                const freezeDistEl = document.getElementById('ai-freeze-distance') as HTMLInputElement;
+                const targetWinEl = document.getElementById('ai-target-win-rate') as HTMLInputElement;
+                const fairnessEl = document.getElementById('ai-fairness-level') as HTMLInputElement;
+                const consecutiveEl = document.getElementById('ai-max-consecutive-wins') as HTMLInputElement;
+                const rageModeEl = document.getElementById('ai-rage-mode') as HTMLInputElement;
+                const fatigueEl = document.getElementById('ai-fatigue-system') as HTMLInputElement;
+                const focusEl = document.getElementById('ai-focus-mode') as HTMLInputElement;
+                const adaptiveEl = document.getElementById('ai-adaptive-difficulty') as HTMLInputElement;
 
-		// Loading Back Arrow
-		const loadingBackArrow = document.getElementById('loading-back-arrow');
-		if (loadingBackArrow) {
-			loadingBackArrow.addEventListener('click', () => {
-				const loadingScreen = document.getElementById('loading-screen');
-				const gamePage = document.getElementById('game-page');
+                baseAISettings.reactionSpeed = reactionEl ? parseInt(reactionEl.value, 10) : 5;
+                baseAISettings.predictionAccuracy = predictionEl ? parseInt(predictionEl.value, 10) : 5;
+                baseAISettings.generalAccuracy = accuracyEl ? parseInt(accuracyEl.value, 10) : 5;
+                baseAISettings.learningSpeed = learningEl ? parseInt(learningEl.value, 10) : 5;
+                baseAISettings.preparationDistance = prepDistEl ? parseInt(prepDistEl.value, 10) : 5;
+                baseAISettings.freezeDistance = freezeDistEl ? parseInt(freezeDistEl.value, 10) : 5;
+                baseAISettings.targetWinRate = targetWinEl ? parseInt(targetWinEl.value, 10) : 50;
+                baseAISettings.fairnessLevel = fairnessEl ? parseInt(fairnessEl.value, 10) : 5;
+                baseAISettings.maxConsecutiveWins = consecutiveEl ? parseInt(consecutiveEl.value, 10) : 3;
+                baseAISettings.rageMode = rageModeEl ? rageModeEl.checked : false;
+                baseAISettings.fatigueSystem = fatigueEl ? fatigueEl.checked : false;
+                baseAISettings.focusMode = focusEl ? focusEl.checked : false;
+                baseAISettings.adaptiveDifficulty = adaptiveEl ? adaptiveEl.checked : false;
+            }
 
-				if (loadingScreen) loadingScreen.classList.remove('active');
-				if (gamePage) gamePage.classList.remove('hidden');
+            const data = {
+                name: `${currentUserName}'s AI Room`,
+                gameMode: "ai",
+                gameSettings: {
+                    ...gameConfig.gameSettings,
+                    paddleHeight: parseInt(paddleHeightEl.value, 10),
+                    ballRadius: parseInt(ballRadiusEl.value, 10),
+                    ballSpeedIncrease: parseInt(cornerBoostEl.value),
+                    maxScore: parseInt(winningScoreEl.value, 10)
+                },
+                aiSettings: baseAISettings
+            };
 
-				showNotification('Hızlı oyun iptal edildi', 'info');
-			});
-		}
-	}
+            currentGameMode = 'ai';
+
+            if (!roomSocket) {
+                showNotification('WebSocket bağlantısı yok!', 'error');
+                return;
+            }
+
+            const startBtn = aiStartBtn as HTMLButtonElement;
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<div class="loading"></div> Başlatılıyor...';
+
+            roomSocket.send("create", data);
+            showNotification('🤖 AI oyunu oluşturuluyor...', 'info');
+
+            setTimeout(() => {
+                if (startBtn.disabled) {
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = '🚀 AI ile Oyuna Başla';
+                }
+            }, 10000);
+        });
+    } else {
+        console.error('❌ AI start button not found!');
+    }
+
+    // ✅ WAITING ROOM'DAKİ BUTON - Oyunu başlatmak için
+    const aiStartGameBtn = document.getElementById('ai-start-game-btn');
+    if (aiStartGameBtn) {
+        aiStartGameBtn.addEventListener('click', function() {
+            if (!currentRoomId || !roomSocket) {
+                showNotification('Bağlantı hatası!', 'error');
+                return;
+            }
+
+            const startButton = this as HTMLButtonElement;
+            startButton.disabled = true;
+            startButton.innerHTML = '<div class="loading"></div> Başlatılıyor...';
+
+            roomSocket.send("start", {
+                roomId: currentRoomId,
+                gameMode: 'ai'
+            });
+
+            console.log(`AI game start message sent for room: ${currentRoomId}`);
+            showNotification('🚀 AI oyunu başlatılıyor!', 'success');
+
+            setTimeout(() => {
+                if (startButton.disabled) {
+                    startButton.disabled = false;
+                    startButton.innerHTML = '🚀 Start AI Game';
+                }
+            }, 10000);
+        });
+    }
+
+    // AI Difficulty - Custom Option
+    document.querySelectorAll('input[name="ai-difficulty"]').forEach((radio: Element) => {
+        radio.addEventListener('change', function() {
+            const radioInput = this as HTMLInputElement;
+            const customSettings = document.getElementById('ai-custom-settings');
+
+            if (radioInput.value === 'custom') {
+                customSettings?.classList.add('active');
+            } else {
+                customSettings?.classList.remove('active');
+            }
+        });
+    });
+
+    // Fast Game Mode Button
+    const fastGameBtn = document.getElementById('fast-game-mode');
+    if (fastGameBtn) {
+        fastGameBtn.addEventListener('click', () => {
+            showNotification('Hızlı oyun başlatılıyor...', 'success');
+
+            const loadingScreen = document.getElementById('loading-screen');
+            const gamePage = document.getElementById('game-page');
+
+            if (gamePage) gamePage.classList.add('hidden');
+            if (loadingScreen) loadingScreen.classList.add('active');
+
+            if (roomSocket) {
+                roomSocket.send('quickMatch');
+            }
+        });
+    }
+
+    // Loading Back Arrow
+    const loadingBackArrow = document.getElementById('loading-back-arrow');
+    if (loadingBackArrow) {
+        loadingBackArrow.addEventListener('click', () => {
+            const loadingScreen = document.getElementById('loading-screen');
+            const gamePage = document.getElementById('game-page');
+
+            if (loadingScreen) loadingScreen.classList.remove('active');
+            if (gamePage) gamePage.classList.remove('hidden');
+
+            showNotification('Hızlı oyun iptal edildi', 'info');
+        });
+    }
+}
+
 
 	private initTournamentListeners(): void {
 		// Tournament Create Event Listener

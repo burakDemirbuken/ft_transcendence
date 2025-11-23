@@ -63,7 +63,7 @@
 
 .streak-number {
     display: block;
-    font-size: clamp(2rem, 6vw + .8rem, 4rem);
+    font-size: clamp(2rem, calc(6vw + .8rem), 4rem);
     font-weight: 900;
     color: var(--color-streak);
     text-shadow: 0 0 20px var(--color-streak);
@@ -132,7 +132,7 @@
     align-items: center;
     /* gap: 15px; */
     padding: .5rem;
-    padding: clamp(.5rem, 1vw + .2rem, .8rem);
+    padding: clamp(.5rem, calc(1vw + .2rem), .8rem);
     background: var(--bg-overlay-dark);
     border-radius: 8px;
     border-left: 4px solid transparent;
@@ -203,7 +203,7 @@
     background: var(--bg-secondary);
     border: 2px solid var(--border-light);
     border-radius: 15px;
-    padding: clamp(.6rem, 2vw + .4rem, 2rem);
+    padding: clamp(.6rem, calc(2vw + .4rem), 2rem);
     backdrop-filter: blur(10px);
     transition: all 0.2s ease-out;
     transform-style: preserve-3d;
@@ -212,15 +212,15 @@
 }
 
 .stat-card h3 i {
-    font-size: clamp(1rem, 1vw + .6rem, 1.3rem);
+    font-size: clamp(1rem, calc(1vw + .6rem), 1.3rem);
     color: var(--color-primary);
 }
 
 .stat-card h3 {
     color: var(--color-primary);
     text-shadow: 0 0 10px var(--color-primary);
-    margin-bottom: clamp(.8rem, 2vw + .4rem, 1.25rem);
-    font-size: clamp(1rem, 1vw + .6rem, 1.3rem);
+    margin-bottom: clamp(.8rem, calc(2vw + .4rem), 1.25rem);
+    font-size: clamp(1rem, calc(1vw + .6rem), 1.3rem);
 }
 
 .glow-btn {
@@ -285,7 +285,7 @@
 
 .stats-value {
     display: block;
-    font-size: clamp(.8rem, 2vw + .6rem, 1.6rem);
+    font-size: clamp(.8rem, calc(2vw + .6rem), 1.6rem);
     font-weight: 700;
     color: var(--color-primary);
     text-shadow: 0 0 15px var(--color-primary);

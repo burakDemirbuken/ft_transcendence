@@ -19,7 +19,7 @@ class GameAIManager:
             return game_id
 
         # AI'ı oluştur
-        difficulty = ai_config.get('difficulty', 'medium')
+        difficulty = ai_config.get('difficulty')
 
         if difficulty == 'custom':
             custom_settings = ai_config.get('custom_settings', {})
@@ -190,10 +190,30 @@ async def handle_init_game(websocket, client_id: str, data: dict):
         ai_manager.create_game_ai(game_id, ai_config)
         ai_manager.assign_client_to_game(client_id, game_id)
 
+        print("\n" + "="*80)
+        print(f"📥 GELEN OYUN VERİSİ - Client: {client_id}")
+        print("="*80)
+        print(json.dumps(data, indent=2, ensure_ascii=False))
+        print("="*80 + "\n")
+
+        # AI Config varsa göster
+        ai_config = data.get('ai_config', {})
+        if ai_config:
+            print("🔧 AI KONFIGÜRASYONU:")
+            print(json.dumps(ai_config, indent=2, ensure_ascii=False))
+            print()
+
+        # Custom settings varsa göster
+        custom_settings = data.get('custom_settings', {})
+        if custom_settings:
+            print("⚙️ CUSTOM AYARLAR:")
+            print(json.dumps(custom_settings, indent=2, ensure_ascii=False))
+            print()
+
         response = {
             "type": "game_initialized",
             "game_id": game_id,
-            "ai_difficulty": ai_config.get('difficulty', 'medium'),
+            "ai_difficulty": ai_config.get('difficulty'),
             "success": True
         }
 
@@ -238,31 +258,46 @@ async def handle_join_game(websocket, client_id: str, data: dict):
 async def handle_game_data(websocket, client_id: str, data: dict):
     """Oyun verisini işle ve AI kararını döndür"""
     try:
-        # 1) AI instance'ını bul (önce game_id ile, yoksa client eşleşmesi ile)
         game_id = data.get('game_id')
         print(f"Handling game data for client {client_id} with game_id {game_id}")
+
+        print("\n" + "="*80)
+        print(f"📥 GELEN OYUN VERİSİ - Client: {client_id}")
+        print("="*80)
+        print(json.dumps(data, indent=2, ensure_ascii=False))
+        print("="*80 + "\n")
+
         ai_player = None
 
-        if game_id:
-            ai_player = ai_manager.game_ais.get(game_id)
-            if not ai_player:
-                # Bu game_id için AI yoksa otomatik oluştur ve client'ı ata
-                ai_manager.create_game_ai(str(game_id), {"difficulty": "medium"})
+        # ✅ ÖNCE VAR OLAN AI'YI KONTROL ET
+        if game_id and game_id in ai_manager.game_ais:
+            # AI zaten var, kullan
+            ai_player = ai_manager.game_ais[game_id]
+            print(f"✅ Mevcut AI kullanılıyor: {game_id}")
+
+        # ✅ EĞER AI YOKSA VE game_id VARSA, OLUŞTUR
+        elif game_id:
+            ai_config = data.get('ai_config', {})
+            if ai_config:
+                print(f"🆕 Yeni AI oluşturuluyor: {game_id}")
+                ai_manager.create_game_ai(str(game_id), ai_config)
                 ai_manager.assign_client_to_game(client_id, str(game_id))
                 ai_player = ai_manager.game_ais.get(str(game_id))
                 game_id = str(game_id)
+
+        # ✅ EĞER game_id YOKSA, CLIENT EŞLEŞMESİNDEN BULA
         else:
             ai_player = ai_manager.get_ai_for_client(client_id)
             game_id = ai_manager.get_client_game_id(client_id)
             if not ai_player:
                 # Client için bir oyun ve AI yoksa otomatik oluştur
                 auto_game_id = str(uuid.uuid4())[:8]
-                ai_manager.create_game_ai(auto_game_id, {"difficulty": "medium"})
+                ai_manager.create_game_ai(auto_game_id, ai_config)
                 ai_manager.assign_client_to_game(client_id, auto_game_id)
                 ai_player = ai_manager.get_ai_for_client(client_id)
                 game_id = auto_game_id
 
-        # 2) AI kararını al (eksik anahtarlar için güvenli okuma, target_y korunur)
+        # 2) AI kararını al
         ball = data.get('ball') or {}
         paddle = data.get('paddle') or {}
         game_area = data.get('game_area') or {}
@@ -272,11 +307,9 @@ async def handle_game_data(websocket, client_id: str, data: dict):
         bvx = ball.get('speed_x')
         bvy = ball.get('speed_y')
         ai_y = paddle.get('ai_y')
-        # Sunucudan paddle yüksekliği gelmiyor; oyun ayarlarına göre tahmin
         paddle_h = paddle.get('height', 100)
         area_h = game_area.get('height', 600)
 
-        # Zorunlu alanlar yoksa önceki hedefi koru (AI sınıfında yoksa None döner)
         can_compute = all(v is not None for v in [bx, by, bvx, bvy, ai_y])
 
         if can_compute:
@@ -287,7 +320,6 @@ async def handle_game_data(websocket, client_id: str, data: dict):
                 ai_y, paddle_h, area_h,
                 data.get('scored_for_me', False), data.get('scored_against_me', False)
             )
-            # Eğer hesaplanan sonuç anormal derecede 0 ise basit bir takip fallback'i uygula
             try:
                 is_zeroish = abs(float(target_y)) < 1e-6
             except Exception:
@@ -300,31 +332,26 @@ async def handle_game_data(websocket, client_id: str, data: dict):
             else:
                 print(f"[AI OUTPUT] target_y={target_y:.2f}")
         else:
-            # Hesaplanamıyorsa mevcut hedefi koru: paddle merkezini hedefle
             target_y = (ai_y or 0)
             try:
                 print(f"[AI OUTPUT-NOCOMPUTE] target_y={float(target_y):.2f}")
             except Exception:
                 print(f"[AI OUTPUT-NOCOMPUTE] target_y={target_y}")
 
-        # 3) Log
         import time
-        print(f"[{time.strftime('%H:%M:%S')}] Oyun {game_id} - AI karar verdi<: Hedef Y = {target_y:.2f}")
+        print(f"[{time.strftime('%H:%M:%S')}] Oyun {game_id} - AI karar verdi: Hedef Y = {target_y:.2f}")
         if can_compute:
             print(f"  Top: ({bx:.1f}, {by:.1f}), Hız: ({bvx:.1f}, {bvy:.1f})")
             print(f"  Raket: Y = {ai_y:.1f}")
         else:
             print("  Eksik alan(lar) nedeniyle önceki target_y korundu")
 
-        # 4) Yanıtı gönder (frontend beklediği formatta)
-        # Yanıtı oluştur
         response = {
             "type": "ai_decision",
             "target_y": target_y,
             "game_id": game_id
         }
 
-        # Nihai karar bilgisini her durumda yazdır
         try:
             print(f"[AI DECISION] game_id={game_id} target_y={float(target_y):.2f}")
         except Exception:

@@ -447,13 +447,6 @@ body::before {
     transition: all 0.3s ease;
 }
 
-.slider::-webkit-slider-thumb:hover {
-    transform: scale(1.1);
-    box-shadow:
-        0 4px 16px rgba(0, 255, 255, 0.6),
-        0 8px 24px rgba(0, 0, 0, 0.4);
-}
-
 .slider::-moz-range-thumb {
     width: 24px;
     height: 24px;
@@ -1367,7 +1360,6 @@ html {
     font-size: 20px;
     font-weight: bold;
     color: #00ffff;
-    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
 /* Participants Section */

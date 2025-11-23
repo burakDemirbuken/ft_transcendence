@@ -12,7 +12,8 @@
 }
 
 #settings-box {
-	width: max(16rem, 75% + 5rem);
+	width: max(260px, 75% + 5rem);
+	flex-shrink: 0;
 
 	background: #111;
 	border-radius: 15px;
@@ -84,6 +85,10 @@
 	color: #ccc;
 }
 
+.settings-content .delete-part .part-title svg {
+	fill: #e20;
+}
+
 .settings-container #delete-account {
 	max-width: 150px;
 	position: relative;
@@ -120,11 +125,11 @@
 }
 
 .settings-content > * {
-	padding: .8em;
+	padding: .9em;
 
 	display: flex;
 	flex-direction: column;
-	gap: .5em;
+	gap: .8em;
 }
 
 .settings-content .part-header {
@@ -133,24 +138,38 @@
 	align-items: center;
 }
 
+.settings-content .part-header button {
+	border: 1px solid #0666;
+	border-radius: 5px;
+	background: #1443;
+}
+
 .settings-content .part-title {
 	display: flex;
 	align-items: center;
-	gap: .5em;
+	gap: .8em;
 }
 
 .settings-content .part-title svg {
-	width: 1.2rem;
+	width: 1.4rem;
 	aspect-ratio: 1/1;
-	fill: #0cc;
+	fill: #0bb;
 	vertical-align: middle;
 }
 
 .settings-content button svg {
 	width: 1.2rem;
 	aspect-ratio: 1/1;
-	fill: #0cc;
+	fill: #3cc9;
 	vertical-align: middle;
+}
+
+.part-expand svg {
+	transition: rotate .3s ease;
+}
+
+.part-expand.rotated svg {
+	rotate: 180deg;
 }
 
 .settings-container span {
@@ -192,8 +211,7 @@
 .settings-container .avatar {
 	position: relative;
 	aspect-ratio: 1/1;
-	/* width: clamp(5rem, 4rem + 7vw, 10rem); */
-	width: clamp(3rem, 2rem + 5vw, 5rem);
+	width: clamp(3rem, calc(2rem + 5vw), 5rem);
 	border-radius: 50%;
 
 	background: #000;
@@ -211,7 +229,7 @@
 	content: "";
 
 	aspect-ratio: 1/1;
-	width: clamp(3rem, 2rem + 5vw, 5rem);
+	width: clamp(3rem, calc(2rem + 5vw), 5rem);
 
 	border: 2px solid #444;
 	border-radius: 50%;
@@ -222,13 +240,13 @@
 	position: absolute;
 	content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 640'%3E%3Cpath fill='%23ccc' width='10' height='10' d='M213.1 128.8L202.7 160L128 160C92.7 160 64 188.7 64 224L64 480C64 515.3 92.7 544 128 544L512 544C547.3 544 576 515.3 576 480L576 224C576 188.7 547.3 160 512 160L437.3 160L426.9 128.8C420.4 109.2 402.1 96 381.4 96L258.6 96C237.9 96 219.6 109.2 213.1 128.8zM320 256C373 256 416 299 416 352C416 405 373 448 320 448C267 448 224 405 224 352C224 299 267 256 320 256z'/%3E%3C/svg%3E");
 	aspect-ratio: 1/1;
-	width: clamp(2rem, .6rem + 8vw, 3rem);
+	width: clamp(2rem, calc(.6rem + 8vw), 3rem);
 	border-radius: 50%;
 }
 
 .settings-container img {
 	aspect-ratio: 1/1;
-	width: clamp(4rem, 3rem + 7vw, 9rem);
+	width: clamp(4rem, calc(3rem + 7vw), 9rem);
 	border-radius: 50%;
 	object-fit: cover;
 }
@@ -239,14 +257,12 @@
 	flex-direction: row;
 	align-items: center;
 	gap: .5em;
+}
 
-	background:
-		repeating-linear-gradient(
-			transparent 0px,
-			transparent 8px,
-			#444 8px,
-			#444 16px
-		);
+.settings-uname {
+	color: #0ff;
+	text-shadow: 0 0 10px #0cc;
+	font-family: "Orbitron", monospace;
 }
 
 .overlay {
@@ -274,19 +290,17 @@
 
 .card {
 	position: relative;
-	width: clamp(270px, 70% + 80px, 400px);
+	width: clamp(270px, calc(70% + 80px), 400px);
 	height: 300px;
 	border: 2px solid #0cce;
 	border-radius: 10px;
-	padding: clamp(2px, 3% + 1px,20px);
+		padding: clamp(2px, calc(3% + 1px),20px);
 	overflow-y: auto;
 	background: rgb(10, 10, 10);
 }
 
 #card-exit {
 	position: absolute;
-	/* top: calc(5% + 5px);
-	right: calc(15% - 30px); */
 	top: 5px;
 	right: 5px;
 	cursor: pointer;
@@ -315,17 +329,17 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: flex-start;
-	gap: clamp(.5rem, 10% + 1vw, 1.5rem);
+	gap: clamp(.5rem, calc(10% + 1vw), 1.5rem);
 	color: #ccc;
 }
 
 .validation-label span {
-	font-size: clamp(1rem, .8rem + 2vw, 1.8rem);
+	font-size: clamp(1rem, calc(.8rem + 2vw), 1.8rem);
 	font-family: "Orbitron", monospace;
 }
 
 .validation-label input {
-	font-size: clamp(.6rem, .5rem + 2vw, 1.2rem);
+	font-size: clamp(.6rem, calc(.5rem + 2vw), 1.2rem);
 	background: none;
 	color: #ccc;
 	padding: .2em .5em;
@@ -353,7 +367,7 @@
 .validation-label button {
 	width: 90%;
 	padding: .4em 1em;
-	font-size: clamp(.8rem, .6rem + 2vw, 1.2rem);
+	font-size: clamp(.8rem, calc(.6rem + 2vw), 1.2rem);
 
 	border-radius: 5px;
 	border: 2px solid #0666;

@@ -25,7 +25,9 @@ class InputManager
 		document.addEventListener('keydown',
 			(e: KeyboardEvent) =>
 			{
-				const key = e.key.toLowerCase();
+				let key = e.key
+				if (key.length === 1)
+					key = key.toLowerCase();
 				if (this.pressedKeys.has(key))
 				{
 					if (this.isRegisteredKey(key))

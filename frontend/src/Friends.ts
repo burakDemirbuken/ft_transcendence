@@ -1,6 +1,8 @@
 import AView from "./AView.js";
 import Profile from "./Profile.js";
+import { onUserProfile } from "./Profile.js";
 import { showNotification } from "./notification.js";
+import { getJsTranslations } from "./I18n.js";
 
 let friendSocket = null;
 
@@ -45,6 +47,8 @@ export function connectWebSocket() {
 					console.error("Failed to dispatch friends:response event", e);
 				}
 				break;
+			case "update": // herhangi bir değişiklik olduğunda bu type ile geliyo
+				console.warn("UPDATE RESPONSE: ", payload);
 			default:
 				break;
 		}
@@ -56,7 +60,9 @@ let currentFrPage:string = "friends";
 function handleOverlay(e) {
 	if (e.target.classList.contains("prof")) {
 		document.querySelector(".overlay")?.classList.remove("hide-away");
-		// Add user profile to overlay
+		const userName = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1) ?? "";
+		if (userName)
+			onUserProfile(userName);
 	}
 	else if (e.currentTarget.id === "card-exit") {
 		document.querySelector(".overlay")?.classList.add("hide-away");
@@ -107,7 +113,7 @@ async function createOverlay() {
 		document.head.appendChild(link);
 
 		const profileInstance = new Profile();
-		profileInstance.setEventHandlers();
+		profileInstance.setFriendsEventHandlers();
 
 		let rows = document.querySelectorAll(".tournament-row");
 		for (const row of rows)
@@ -193,12 +199,12 @@ function removeUsers(set:Set<string>, domContainer:HTMLElement) {
 	console.log("CURRENT USERS", domContainer);
 	console.log("NEW USERS", set);
 	domContainer.querySelectorAll(".friend").forEach((element: HTMLElement) => {
-		const username = (element.dataset && element.dataset.username) ?? "";
+		const username = (element?.dataset && element?.dataset?.username) ?? "";
 		if (!set.has(username)) {
 			element.remove();
 		}
-	});
-}
+	});		
+}	
 
 function createUser(user: any, type: "friend" | "request" | "invite"): HTMLElement {
 	const div = document.createElement("div");
@@ -259,13 +265,24 @@ function updateUser(currentUser, newUser, type: "friend" | "request" | "invite")
 	console.log("USER", newUser.userName, "ALREADY EXISTS");
 }
 
-function updateUserList(list, domContainer, type: "friend" | "request" | "invite") {
+async function updateUserList(list, domContainer, type: "friend" | "request" | "invite") {
 	if (!domContainer || !list)
 		return console.warn("No domContainer or list to update user list", type);
 
 	console.info("RECIEVED USER LIST: ", list)
 	const newUserList = new Set<string>(list.map(user => user.userName));
 	removeUsers(newUserList, domContainer);
+
+	if (list.length === 0) {
+		const translations = await getJsTranslations(localStorage.getItem("langPref"));
+		const emptyCard = document.createElement('div');
+		emptyCard.className = 'friend list-empty';
+		const emptyListText = translations?.friends?.emptyList?.[type] ?? `You have no ${type}s for now...`;
+		emptyCard.innerHTML = `<span data-i18n="friends.emptyList.${type}">${emptyListText}</span>`;
+		domContainer.appendChild(emptyCard);
+		return;
+	}
+
 
 	list?.forEach(listUser => {
 		// select the root `.friend` element that has the data-username attribute
@@ -357,5 +374,8 @@ export default class extends AView {
 		document.head.removeChild(link);
 		link = document.querySelector("link[href='styles/profile.css']");
 		document.head.removeChild(link);
+	}
+
+	async updateJsLanguage() {
 	}
 }
