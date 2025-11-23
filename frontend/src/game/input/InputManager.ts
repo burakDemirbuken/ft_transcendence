@@ -49,7 +49,10 @@ class InputManager
 		document.addEventListener('keyup',
 			(e: KeyboardEvent) =>
 			{
-				const key = e.key.toLowerCase();
+
+				let key = e.key;
+				if (key.length === 1)
+					key = key.toLowerCase();
 				this.pressedKeys.delete(key);
 				const callback = this.keyUpCallbacks.get(key);
 				if (callback)

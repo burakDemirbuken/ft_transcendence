@@ -18,6 +18,8 @@ export default class Room extends EventEmitter
 
 	addPlayer(player)
 	{
+		if (this.status !== 'waiting')
+			throw new Error('Match has already started');
 		if (this.players.length >= this.maxPlayers)
 			throw new Error('Room is full');
 		if (this.players.length === 0)
