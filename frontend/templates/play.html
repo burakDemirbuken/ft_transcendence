@@ -9,11 +9,11 @@
 	            <div class="room-info-grid">
 	                <div class="room-info-card">
 	                    <span class="info-label">ROOM CODE</span>
-	                    <span class="info-value" id="room-code-display">TOUR-XXXXX</span>
+	                    <span class="info-value" id="room-code-display">XXXXXX</span>
 	                </div>
 	                <div class="room-info-card">
 	                    <span class="info-label">PLAYERS</span>
-	                    <span class="info-value" id="players-count">0/8</span>
+	                    <span class="info-value" id="players-count">0/0</span>
 	                </div>
 	                <div class="room-info-card">
 	                    <span class="info-label">FORMAT</span>
@@ -43,15 +43,15 @@
 	        <div class="room-actions">
 	            <button id="waiting-players-btn" class="btn btn-secondary btn-large" disabled>
 	                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M160 64C142.3 64 128 78.3 128 96C128 113.7 142.3 128 160 128L160 139C160 181.4 176.9 222.1 206.9 252.1L274.8 320L206.9 387.9C176.9 417.9 160 458.6 160 501L160 512C142.3 512 128 526.3 128 544C128 561.7 142.3 576 160 576L480 576C497.7 576 512 561.7 512 544C512 526.3 497.7 512 480 512L480 501C480 458.6 463.1 417.9 433.1 387.9L365.2 320L433.1 252.1C463.1 222.1 480 181.4 480 139L480 128C497.7 128 512 113.7 512 96C512 78.3 497.7 64 480 64L160 64zM416 501L416 512L224 512L224 501C224 475.5 234.1 451.1 252.1 433.1L320 365.2L387.9 433.1C405.9 451.1 416 475.5 416 501z"/></svg>
-					<span>Oyuncular Bekleniyor...</span>
+					<span>Players are awaited...</span>
 	            </button>
 	            <button id="match-players-btn" class="btn btn-primary btn-large" style="display: none;">
 	                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M205.4 66.3C167 56 127.5 78.8 117.3 117.2L66.5 306.7C56.2 345.1 79 384.6 117.4 394.9L306.9 445.7C345.3 456 384.8 433.2 395.1 394.8L445.9 205.3C456.2 166.9 433.4 127.4 395 117.1L205.4 66.3zM228.4 272C222.3 262.1 222.1 249.6 227.8 239.5C233.5 229.4 244.3 223.2 256 223.3C267.6 223.4 278.2 229.8 283.8 240C289.9 249.9 290.1 262.4 284.4 272.5C278.7 282.6 267.9 288.8 256.2 288.7C244.6 288.6 234 282.2 228.4 272zM143.2 284.3C153.1 278.2 165.6 278 175.7 283.7C185.8 289.4 192 300.2 191.9 311.9C191.8 323.5 185.4 334.1 175.2 339.7C165.3 345.8 152.8 346 142.7 340.3C132.6 334.6 126.4 323.8 126.5 312.1C126.6 300.5 133 289.9 143.2 284.3zM328.2 380.7C318.3 386.8 305.8 387 295.7 381.3C285.6 375.6 279.4 364.8 279.5 353.1C279.6 341.5 286 330.9 296.2 325.3C306.1 319.2 318.6 319 328.7 324.7C338.8 330.4 345 341.2 344.9 352.9C344.8 364.5 338.4 375.1 328.2 380.7zM337.2 172.3C347.1 166.2 359.6 166 369.7 171.7C379.8 177.4 386 188.2 385.9 199.9C385.8 211.5 379.4 222.1 369.2 227.7C359.3 233.8 346.8 234 336.7 228.3C326.6 222.6 320.4 211.8 320.5 200.1C320.6 188.5 327 177.9 337.2 172.3zM216.2 186.7C206.3 192.8 193.8 193 183.7 187.3C173.6 181.6 167.4 170.8 167.5 159.1C167.6 147.5 174 136.9 184.2 131.3C194.1 125.2 206.6 125 216.7 130.7C226.8 136.4 233 147.2 232.9 158.9C232.8 170.5 226.4 181.1 216.2 186.7zM482 256L441.4 407.2C424.2 471.2 358.4 509.2 294.4 492.1L256.1 481.8L256.1 512C256.1 547.3 284.8 576 320.1 576L512.1 576C547.4 576 576.1 547.3 576.1 512L576.1 320C576.1 284.7 547.4 256 512.1 256L482 256z"/></svg>
-					<span>Eşleştirmeleri Yap</span>
+					<span>Make Matches</span>
 	            </button>
 	            <button id="start-tournament-btn" class="btn btn-primary btn-large" style="display: none;">
 	                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M192 384L88.5 384C63.6 384 48.3 356.9 61.1 335.5L114 247.3C122.7 232.8 138.3 224 155.2 224L250.2 224C326.3 95.1 439.8 88.6 515.7 99.7C528.5 101.6 538.5 111.6 540.3 124.3C551.4 200.2 544.9 313.7 416 389.8L416 484.8C416 501.7 407.2 517.3 392.7 526L304.5 578.9C283.2 591.7 256 576.3 256 551.5L256 448C256 412.7 227.3 384 192 384L191.9 384zM464 224C464 197.5 442.5 176 416 176C389.5 176 368 197.5 368 224C368 250.5 389.5 272 416 272C442.5 272 464 250.5 464 224z"/></svg>
-					<span>Turnuvayı Başlat</span>
+					<span>Start the Tournament</span>
 	            </button>
 	        </div>
 	    </div>
@@ -124,7 +124,7 @@
 	            <div class="room-info-grid">
 	                <div class="room-info-card">
 	                    <span class="info-label">ROOM CODE</span>
-	                    <span class="info-value" id="custom-room-code-display">GAME-XXXXX</span>
+	                    <span class="info-value" id="custom-room-code-display">XXXXXX</span>
 	                </div>
 	                <div class="room-info-card">
 	                    <span class="info-label">PLAYERS</span>
@@ -161,7 +161,7 @@
 	                </div>
 	                <div class="room-info-card">
 	                    <span class="info-label">CORNER BOOST</span>
-	                    <span class="info-value" id="custom-corner-display">1.0x</span>
+	                    <span class="info-value" id="custom-corner-display">100</span>
 	                </div>
 	                <div class="room-info-card">
 	                    <span class="info-label">WINNING SCORE</span>
@@ -172,10 +172,10 @@
 	        <!-- Action Buttons -->
 			<div class="room-actions">
 			    <button class="btn btn-secondary btn-large" id="custom-waiting-players-btn" disabled>
-			        ⏳ Kullanıcılar Bekleniyor...
+			        ⏳ Users are waiting...
 			    </button>
 			    <button class="btn btn-primary btn-large" id="custom-start-game-btn" style="display: none;">
-			        🚀 Oyunu Başlat
+			        🚀 Start the Game
 			    </button>
 			</div>
 	    </div>
@@ -226,7 +226,7 @@
 	                </div>
 	                <div class="room-info-card">
 	                    <span class="info-label">CORNER BOOST</span>
-	                    <span class="info-value" id="ai-corner-display">1.0x</span>
+	                    <span class="info-value" id="ai-corner-display">100</span>
 	                </div>
 	                <div class="room-info-card">
 	                    <span class="info-label">WINNING SCORE</span>
@@ -282,32 +282,32 @@
 	</div>
 	<div class="game-page" id="game-page">
         <div class="header">
-    	    <h1 class="title">PLAY MODE</h1>
-    	    <p class="subtitle">Oyun Modunu Seçin ve Ayarlarınızı Yapın</p>
+    	    <h1 class="title">PLAY</h1>
+    	    <p class="subtitle">Select Game Mode and Adjust Your Settings</p>
     	</div>
         <div class="game-modes">
             <div class="game-mode-card" id="custom-mode">
                 <div class="mode-icon no-select">🏓</div>
-                <h3 class="mode-title">Oyun</h3>
-                <p class="mode-description">Kendi kurallarınla özel oyun modları oluştur. Tüm ayarları özelleştir.</p>
+                <h3 class="mode-title">Game</h3>
+                <p class="mode-description">Create custom game modes with your own rules. Customize all settings.</p>
             </div>
             <div class="game-mode-card" id="tournament-mode">
                 <div class="mode-icon no-select">🏆</div>
-                <h3 class="mode-title">Turnuva</h3>
-                <p class="mode-description">Turnuva oluştur veya katıl. Birden fazla oyuncuyla rekabet et.</p>
+                <h3 class="mode-title">Tournament</h3>
+                <p class="mode-description">Create or join a tournament. Compete with multiple players.</p>
             </div>
             <div class="game-mode-card" id="ai-mode">
                 <div class="mode-icon no-select">🤖</div>
-                <h3 class="mode-title">AI ile Oyun</h3>
-                <p class="mode-description">Yapay zeka ile farklı zorluk seviyelerinde oyna. AI'ı özelleştir.</p>
+                <h3 class="mode-title">Gaming with AI</h3>
+                <p class="mode-description">Play with AI at different difficulty levels. Customize AI.</p>
             </div>
         </div>
         <!-- Custom Game Settings -->
         <div class="settings-panel" id="custom-settings">
-            <h2 class="settings-title">Oyun Ayarları</h2>
+            <h2 class="settings-title">Game Settings</h2>
             <div class="settings-grid">
                 <div class="setting-group">
-                    <label class="setting-label">Oyun Tipi</label>
+                    <label class="setting-label">Game Type</label>
                     <div class="radio-group">
                         <label class="radio-option">
                             <input type="radio" name="custom-game-type" value="1v1" checked>
@@ -324,7 +324,7 @@
                     </div>
                 </div>
                 <div class="setting-group">
-                    <label class="setting-label">Paddle Yüksekliği</label>
+                    <label class="setting-label">Paddle Height</label>
                     <div class="slider-container">
                         <input type="range" min="50" max="200" value="100" class="slider" id="custom-paddle-height">
                         <div class="slider-value">
@@ -335,7 +335,7 @@
                     </div>
                 </div>
                 <div class="setting-group">
-                    <label class="setting-label">Top Yarı Çapı</label>
+                    <label class="setting-label">Ball Radius</label>
                     <div class="slider-container">
                         <input type="range" min="5" max="25" value="10" class="slider" id="custom-ball-radius">
                         <div class="slider-value">
@@ -346,86 +346,86 @@
                     </div>
                 </div>
                 <div class="setting-group">
-                    <label class="setting-label">Köşe Çarpma Hızlanması</label>
+                    <label class="setting-label">Corner Collision Acceleration</label>
                     <div class="slider-container">
                         <input type="range" min="0" max="150" value="100" class="slider" id="custom-corner-boost">
                         <div class="slider-value">
-                            <span>Yok</span>
+                            <span>None</span>
                             <span class="current-value" id="custom-corner-boost-value">100</span>
                             <span>150</span>
                         </div>
                     </div>
                 </div>
                 <div class="setting-group">
-                    <label class="setting-label">Bitiş Skoru</label>
-                    <input type="number" min="1" max="50" value="11" class="input-field" id="custom-winning-score" placeholder="Kazanmak için gereken skor">
+                    <label class="setting-label">Final Score</label>
+                    <input type="number" min="1" max="50" value="11" class="input-field" id="custom-winning-score" placeholder="Score required to win">
                 </div>
 				<div class="setting-group fast-game-mode-card" id="fast-game-mode">
 					<label class="fast-label"></label>
 					<div class="fast-mode-icon no-select"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><path d="M557.7 64.9L363.5 139.6L365.8 110.3C366.8 97.5 353 88.8 341.8 95.2L165.3 197.4C102.6 233.7 64 300.6 64 373C64 485.1 154.9 576 267 576C339.4 576 406.3 537.4 442.6 474.7L544.8 298.3C551.3 287.2 542.6 273.3 529.7 274.3L500.4 276.6L575.1 82.4C575.7 80.9 576 79.2 576 77.6C576 70.1 570 64.1 562.5 64.1C560.8 64.1 559.2 64.4 557.7 65zM256 256C326.7 256 384 313.3 384 384C384 454.7 326.7 512 256 512C185.3 512 128 454.7 128 384C128 313.3 185.3 256 256 256zM256 352C256 334.3 241.7 320 224 320C206.3 320 192 334.3 192 352C192 369.7 206.3 384 224 384C241.7 384 256 369.7 256 352zM272 448C280.8 448 288 440.8 288 432C288 423.2 280.8 416 272 416C263.2 416 256 423.2 256 432C256 440.8 263.2 448 272 448z"/></svg></div>
-					<span class="fast-mode-title">Hızlı Oyun</span>
+					<span class="fast-mode-title">Quick Game</span>
 				</div>
 			</div>
             <div class="join-room-section">
-                <label class="setting-label">Mevcut Odaya Katıl</label>
+                <label class="setting-label">Join Existing Room</label>
                 <div class="input-group">
-                    <input type="text" class="input-field" id="custom-room-code" placeholder="Oda kodunu girin..." maxlength="6">
-                    <button class="btn btn-secondary" id="custom-join-btn">Odaya Katıl</button>
+                    <input type="text" class="input-field" id="custom-room-code" placeholder="Enter room code..." maxlength="6">
+                    <button class="btn btn-secondary" id="custom-join-btn">Join the Room</button>
                 </div>
             </div>
             <div class="action-buttons">
-                <button class="btn btn-primary" id="custom-create-btn">Oda Oluştur</button>
+                <button class="btn btn-primary" id="custom-create-btn">Create a Room</button>
             </div>
         </div>
         <!-- Tournament Settings -->
         <div class="settings-panel" id="tournament-settings">
-            <h2 class="settings-title">Turnuva Ayarları</h2>
+            <h2 class="settings-title">Tournament Settings</h2>
             <div class="settings-grid">
                 <div class="setting-group">
-                    <label class="setting-label">Turnuva İsmi</label>
-                    <input type="text" class="input-field" id="tournament-name" placeholder="Turnuva ismini girin..." maxlength="50">
+                    <label class="setting-label">Tournament Name</label>
+                    <input type="text" class="input-field" id="tournament-name" placeholder="Enter tournament name..." maxlength="50">
                 </div>
                 <div class="setting-group">
-                    <label class="setting-label">Kişi Sayısı</label>
+                    <label class="setting-label">Number of People</label>
                     <div class="radio-group">
                         <label class="radio-option">
                             <input type="radio" name="tournament-size" value="4" checked>
-                            <span class="radio-label">4 Kişi                        </span>
+                            <span class="radio-label">4 People</span>
                         </label>
                         <label class="radio-option">
                             <input type="radio" name="tournament-size" value="8">
-                            <span class="radio-label">8 Kişi</span>
+                            <span class="radio-label">8 People</span>
                         </label>
                         <label class="radio-option">
                             <input type="radio" name="tournament-size" value="16">
-                            <span class="radio-label">16 Kişi</span>
+                            <span class="radio-label">16 People</span>
                         </label>
                         <label class="radio-option">
                             <input type="radio" name="tournament-size" value="custom">
-                            <span class="radio-label">Özel</span>
+                            <span class="radio-label">Special</span>
                         </label>
                     </div>
-                    <input type="number" min="4" class="input-field" id="custom-tournament-size" placeholder="Özel kişi sayısı" style="display: none;">
+                    <input type="number" min="4" class="input-field" id="custom-tournament-size" placeholder="Number of special persons" style="display: none;">
                 </div>
             </div>
             <div class="join-room-section">
-                <label class="setting-label">Mevcut Turnuvaya Katıl</label>
+                <label class="setting-label">Join Current Tournament</label>
                 <div class="input-group">
-                    <input type="text" class="input-field" id="tournament-code" placeholder="Turnuva kodunu girin..." maxlength="6">
-                    <button class="btn btn-secondary" id="tournament-join-btn">Odaya Katıl</button>
+                    <input type="text" class="input-field" id="tournament-code" placeholder="Enter tournament code..." maxlength="6">
+                    <button class="btn btn-secondary" id="tournament-join-btn">Join the Room</button>
                 </div>
             </div>
             <div class="action-buttons">
-                <button class="btn btn-primary" id="tournament-create-btn">Turnuva Odası Oluştur</button>
+                <button class="btn btn-primary" id="tournament-create-btn">Create Tournament Room</button>
             </div>
 		</div>
         <!-- AI Game Settings -->
         <div class="settings-panel" id="ai-settings">
-            <h2 class="settings-title">AI ile Oyun Ayarları</h2>
+            <h2 class="settings-title">Game Settings with AI</h2>
             <div class="settings-grid">
                 <!-- Game Type -->
                 <div class="setting-group">
-                    <label class="setting-label">Oyun Tipi</label>
+                    <label class="setting-label">Game Type</label>
                     <div class="radio-group">
                         <label class="radio-option">
                             <input type="radio" name="ai-game-type" value="1v1" checked>
@@ -435,38 +435,38 @@
                 </div>
                 <!-- AI Difficulty -->
                 <div class="setting-group">
-                    <label class="setting-label">AI Zorluk Seviyesi</label>
+                    <label class="setting-label">AI Difficulty Level</label>
                     <div class="radio-group">
                         <label class="radio-option difficulty-option">
                             <input type="radio" name="ai-difficulty" value="easy" checked>
-                            <span class="radio-label">Kolay</span>
-                            <div class="difficulty-tooltip">AI çoğu zaman kaybeder - Rahat Oyun</div>
+                            <span class="radio-label">Easy</span>
+                            <div class="difficulty-tooltip">AI loses most of the time - Easy Game</div>
                         </label>
                         <label class="radio-option difficulty-option">
                             <input type="radio" name="ai-difficulty" value="medium">
-                            <span class="radio-label">Orta</span>
-                            <div class="difficulty-tooltip">Dengeli mücadele - Eşit Şans</div>
+                            <span class="radio-label">Medium</span>
+                            <div class="difficulty-tooltip">Balanced fight - Equal Chance</div>
                         </label>
                         <label class="radio-option difficulty-option">
                             <input type="radio" name="ai-difficulty" value="hard">
-                            <span class="radio-label">Zor</span>
-                            <div class="difficulty-tooltip">AI çoğunlukla kazanır - Zorlayıcı</div>
+                            <span class="radio-label">Hard</span>
+                            <div class="difficulty-tooltip">AI wins most of the time – Challenging</div>
                         </label>
                         <label class="radio-option difficulty-option">
                             <input type="radio" name="ai-difficulty" value="impossible">
-                            <span class="radio-label">İmkansız</span>
-                            <div class="difficulty-tooltip">AI neredeyse hep kazanır - İmkansız</div>
+                            <span class="radio-label">Impossible</span>
+                            <div class="difficulty-tooltip">AI almost always wins - Impossible</div>
                         </label>
                         <label class="radio-option difficulty-option">
                             <input type="radio" name="ai-difficulty" value="custom">
                             <span class="radio-label">Frankestein</span>
-                            <div class="difficulty-tooltip">AI yeteneklerini özelleştirebilirsiniz!</div>
+                            <div class="difficulty-tooltip">You can customize AI abilities!</div>
                         </label>
                     </div>
                 </div>
                 <!-- Custom Game Settings -->
                 <div class="setting-group">
-                    <label class="setting-label">Paddle Yüksekliği</label>
+                    <label class="setting-label">Paddle Height</label>
                     <div class="slider-container">
                         <input type="range" min="50" max="200" value="100" class="slider" id="ai-paddle-height">
                         <div class="slider-value">
@@ -477,7 +477,7 @@
                     </div>
                 </div>
                 <div class="setting-group">
-                    <label class="setting-label">Top Yarı Çapı</label>
+                    <label class="setting-label">Ball Radius</label>
                     <div class="slider-container">
                         <input type="range" min="5" max="25" value="10" class="slider" id="ai-ball-radius">
                         <div class="slider-value">
@@ -488,93 +488,93 @@
                     </div>
                 </div>
                 <div class="setting-group">
-                    <label class="setting-label">Köşe Çarpma Hızlanması</label>
+                    <label class="setting-label">Corner Collision Acceleration</label>
                     <div class="slider-container">
-                        <input type="range" min="1" max="5" value="2" step="0.1" class="slider" id="ai-corner-boost">
+                        <input type="range" min="0" max="150" value="100" class="slider" id="ai-corner-boost">
                         <div class="slider-value">
-                            <span>Yok</span>
-                            <span class="current-value" id="ai-corner-boost-value">2.0x</span>
-                            <span>5x</span>
+                            <span>None</span>
+                            <span class="current-value" id="ai-corner-boost-value">100</span>
+                            <span>150</span>
                         </div>
                     </div>
                 </div>
                 <div class="setting-group">
-                    <label class="setting-label">Bitiş Skoru</label>
-                    <input type="number" min="1" max="50" value="11" class="input-field" id="ai-winning-score" placeholder="Kazanmak için gereken skor">
+                    <label class="setting-label">Final Score</label>
+                    <input type="number" min="1" max="50" value="11" class="input-field" id="ai-winning-score" placeholder="Score required to win">
                 </div>
             </div>
             <!-- Custom AI Settings -->
             <div class="ai-special-settings" id="ai-custom-settings">
-                <h3 style="color: #667eea; margin-bottom: 25px; text-align: center; font-size: 1.5rem; font-weight: 700;">🤖 Özel AI Ayarları</h3>
+                <h3 style="color: #667eea; margin-bottom: 25px; text-align: center; font-size: 1.5rem; font-weight: 700;">🤖 Custom AI Settings</h3>
                 <div class="settings-grid">
                     <div class="setting-group">
-                        <label class="setting-label">Reaksiyon Hızı</label>
+                        <label class="setting-label">Reaction Speed</label>
                         <div class="slider-container">
                             <input type="range" min="1" max="10" value="5" class="slider" id="ai-reaction-time">
                             <div class="slider-value">
-                                <span>Çok Yavaş</span>
+                                <span>Very Slow</span>
                                 <span class="current-value" id="ai-reaction-time-value">5</span>
-                                <span>Anında</span>
+                                <span>Instantly</span>
                             </div>
                         </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Tahmin Doğruluğu</label>
+                        <label class="setting-label">Prediction Accuracy</label>
                         <div class="slider-container">
                             <input type="range" min="1" max="10" value="5" class="slider" id="ai-prediction-accuracy">
                             <div class="slider-value">
-                                <span>Kötü</span>
+                                <span>Bad</span>
                                 <span class="current-value" id="ai-prediction-accuracy-value">5</span>
-                                <span>Mükemmel</span>
+                                <span>Perfect</span>
                             </div>
                         </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Genel Doğruluk</label>
+                        <label class="setting-label">General Accuracy</label>
                         <div class="slider-container">
                             <input type="range" min="1" max="10" value="5" class="slider" id="ai-general-accuracy">
                             <div class="slider-value">
-                                <span>Düşük</span>
+                                <span>Low</span>
                                 <span class="current-value" id="ai-general-accuracy-value">5</span>
-                                <span>Yüksek</span>
+                                <span>High</span>
                             </div>
                         </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Öğrenme Hızı</label>
+                        <label class="setting-label">Learning Speed</label>
                         <div class="slider-container">
                             <input type="range" min="1" max="10" value="5" class="slider" id="ai-learning-speed">
                             <div class="slider-value">
-                                <span>Yavaş</span>
+                                <span>Slow</span>
                                 <span class="current-value" id="ai-learning-speed-value">5</span>
-                                <span>Hızlı</span>
+                                <span>Fast</span>
                             </div>
                         </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Hazırlık Mesafesi</label>
+                        <label class="setting-label">Preparation Distance</label>
                         <div class="slider-container">
                             <input type="range" min="1" max="10" value="5" class="slider" id="ai-preparation-distance">
                             <div class="slider-value">
-                                <span>Yakın</span>
+                                <span>Close</span>
                                 <span class="current-value" id="ai-preparation-distance-value">5</span>
-                                <span>Uzak</span>
+                                <span>Far</span>
                             </div>
                         </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Donma Mesafesi</label>
+                        <label class="setting-label">Freezing Distance</label>
                         <div class="slider-container">
                             <input type="range" min="1" max="10" value="5" class="slider" id="ai-freeze-distance">
                             <div class="slider-value">
-                                <span>Yakın</span>
+                                <span>Close</span>
                                 <span class="current-value" id="ai-freeze-distance-value">5</span>
-                                <span>Uzak</span>
+                                <span>Far</span>
                             </div>
                         </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Hedef Kazanma Oranı</label>
+                        <label class="setting-label">Target Win Rate</label>
                         <div class="slider-container">
                             <input type="range" min="1" max="10" value="5" class="slider" id="ai-target-win-rate">
                             <div class="slider-value">
@@ -585,18 +585,18 @@
                         </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Adalet Seviyesi</label>
+                        <label class="setting-label">Level of Justice</label>
                         <div class="slider-container">
                             <input type="range" min="1" max="10" value="5" class="slider" id="ai-fairness-level">
                             <div class="slider-value">
-                                <span>Acımasız</span>
+                                <span>Cruel</span>
                                 <span class="current-value" id="ai-fairness-level-value">5</span>
-                                <span>Çok Adil</span>
+                                <span>Very Fair</span>
                             </div>
                         </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Max Üst Üste Kazanma</label>
+                        <label class="setting-label">Max Consecutive Wins</label>
                         <div class="slider-container">
                             <input type="range" min="1" max="10" value="3" class="slider" id="ai-max-consecutive-wins">
                             <div class="slider-value">
@@ -608,62 +608,62 @@
                     </div>
                     <!-- AI Special Features -->
                     <div class="setting-group">
-                        <label class="setting-label">Öfke Modu</label>
+                        <label class="setting-label">Rage Mode</label>
                         <div class="toggle-container">
                             <label class="toggle-switch">
                                 <input type="checkbox" id="ai-rage-mode">
                                 <span class="toggle-slider"></span>
                             </label>
-                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Ard arda kaybedince öfkelenir ve daha güçlü olur</span>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">When it loses repeatedly, it gets angry and stronger</span>
                         </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Yorgunluk Sistemi</label>
+                        <label class="setting-label">Fatigue System</label>
                         <div class="toggle-container">
                             <label class="toggle-switch">
                                 <input type="checkbox" id="ai-fatigue-system">
                                 <span class="toggle-slider"></span>
                             </label>
-                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Çok oynayınca yorulur ve performansı düşer</span>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">When you play too much, you get tired and your performance decreases</span>
                         </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Odaklanma Modu</label>
+                        <label class="setting-label">Focus Mode</label>
                         <div class="toggle-container">
                             <label class="toggle-switch">
                                 <input type="checkbox" id="ai-focus-mode">
                                 <span class="toggle-slider"></span>
                             </label>
-                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Bazen süper odaklanır ve mükemmel oynar</span>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Sometimes it is super focused and plays perfectly</span>
                         </div>
                     </div>
                     <div class="setting-group">
-                        <label class="setting-label">Adaptif Zorluk</label>
+                        <label class="setting-label">Adaptive Difficulty</label>
                         <div class="toggle-container">
                             <label class="toggle-switch">
                                 <input type="checkbox" id="ai-adaptive-difficulty">
                                 <span class="toggle-slider"></span>
                             </label>
-                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Oyuncunun seviyesine göre kendini ayarlar</span>
+                            <span style="color: var(--text-secondary); font-size: 0.9rem;">Adjusts itself according to the player's level</span>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="action-buttons">
-                <button class="btn btn-primary" id="ai-start-btn">AI ile Oyuna Başla</button>
+                <button class="btn btn-primary" id="ai-start-btn">Start the Game with AI</button>
             </div>
         </div>
     </div>
 	<div class="game-container" id="gameContainer">
-		<!-- <div id="loadingScreen">
+		<div id="loadingScreen">
 		    <div class="game-loading-content">
 		        <div class="game-loading-spinner"></div>
-		        <div class="game-loading-text">Yükleniyor...</div>
+		        <div class="game-loading-text">Loading...</div>
 		        <div id="loadingBar">
 		            <div id="loadingProgress"></div>
 		        </div>
 		    </div>
-		</div> -->ş
+		</div>
 		<canvas id="renderCanvas"></canvas>
 	</div>
 </div>

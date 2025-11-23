@@ -1,8 +1,9 @@
 import AView from "./AView.js";
 import Profile from "./Profile.js";
 import { onUserProfile } from "./Profile.js";
-import { showNotification } from "./notification.js";
-import { getJsTranslations } from "./I18n.js";
+import { showNotification } from "./utils/notification.js";
+import { getJsTranslations } from "./utils/I18n.js";
+import { API_BASE_URL } from "./index.js";
 
 let friendSocket = null;
 
@@ -21,10 +22,10 @@ function safeSend(msg:string)
 	}
 }
 
-export function connectWebSocket() {
+export function connectFriendsWebSocket() {
 	if (friendSocket !== null)
 		return;
-	friendSocket = new WebSocket(`wss://${window.location.hostname}:3030/ws-friend/friends?` + new URLSearchParams({ userName: localStorage.getItem("userName") }).toString());
+	friendSocket = new WebSocket(`wss://${window.location.hostname}:3030/ws-friend/friends`);
 
 	friendSocket.onmessage = (event) => {
 		const data = JSON.parse(event.data);
@@ -33,6 +34,7 @@ export function connectWebSocket() {
 		{
 			case "list":
 				console.warn("LIST RESPONSE: ", payload);
+
 				try {
 					document.dispatchEvent(new CustomEvent('friends:list', { detail: payload }));
 				} catch (e) {
@@ -47,12 +49,17 @@ export function connectWebSocket() {
 					console.error("Failed to dispatch friends:response event", e);
 				}
 				break;
-			case "update": // herhangi bir değişiklik olduğunda bu type ile geliyo
-				console.warn("UPDATE RESPONSE: ", payload);
 			default:
 				break;
 		}
 	};
+}
+
+export function disconnectFriendsWebSocket() {
+	if (friendSocket !== null) {
+		friendSocket.close();
+		friendSocket = null;
+	}
 }
 
 let currentFrPage:string = "friends";
@@ -134,6 +141,7 @@ async function request(e) {
 	e.preventDefault();
 
 	const formData = new FormData(e.currentTarget as HTMLFormElement);
+	console.log("REQUEST CLICKED, SENDING TO:", formData.get("req-user"));
 	try {
 		safeSend(JSON.stringify({ type: "send", payload: { peerName: formData.get("req-user") } }));
 		console.log("Friend request sent to:", formData.get("req-user"));
@@ -203,8 +211,8 @@ function removeUsers(set:Set<string>, domContainer:HTMLElement) {
 		if (!set.has(username)) {
 			element.remove();
 		}
-	});		
-}	
+	});
+}
 
 function createUser(user: any, type: "friend" | "request" | "invite"): HTMLElement {
 	const div = document.createElement("div");
@@ -261,8 +269,23 @@ function addUser(user: any, domContainer: HTMLElement, type: "friend" | "request
 	domContainer.appendChild(div);
 }
 
-function updateUser(currentUser, newUser, type: "friend" | "request" | "invite") {
+function updateUser(currentUser, newUser) {
 	console.log("USER", newUser.userName, "ALREADY EXISTS");
+	if (!currentUser || !newUser)
+		return console.warn("No currentUser or newUser to update");
+
+	const avatarElem = currentUser.querySelector(".friend-user-avatar img");
+	let newAvatarSrc = "../profile.svg";
+	if(newUser?.avatarUrl)
+		newAvatarSrc = `${API_BASE_URL}/static${newUser?.avatarUrl}`;
+	if (avatarElem && avatarElem.getAttribute("src") !== newAvatarSrc) {
+		avatarElem.setAttribute("src", newAvatarSrc);
+	}
+
+	const displayNameElem = currentUser.querySelector(".dname");
+	if (displayNameElem && displayNameElem.textContent !== (newUser?.displayName ?? newUser?.userName)) {
+		displayNameElem.textContent = newUser?.displayName ?? newUser?.userName;
+	}
 }
 
 async function updateUserList(list, domContainer, type: "friend" | "request" | "invite") {
@@ -289,7 +312,7 @@ async function updateUserList(list, domContainer, type: "friend" | "request" | "
 		const domUser = domContainer.querySelector(`.friend[data-username="${CSS.escape(listUser.userName)}"]`);
 		if (domUser) {
 			console.log("USER", listUser.userName, "FOUND IN DOM, UPDATING");
-			updateUser(domUser, listUser, type);
+			updateUser(domUser, listUser);
 		} else {
 			console.log("USER", listUser.userName, "NOT FOUND IN DOM, ADDING");
 			addUser(listUser, domContainer, type);

@@ -5,7 +5,7 @@ export default fp(async function friendChanges(fastify) {
 
 	async function getFriendList(userName) {
 		try {
-			if (!userName) {
+			if (userName == null) {
 				throw new Error("userName is required.")
 			}
 			const friendships = await fastify.sequelize.models.Friend.findAll({
@@ -18,6 +18,7 @@ export default fp(async function friendChanges(fastify) {
 				attributes: ['userName', 'peerName', 'status'],
 				raw: true
 			})
+			console.log(`Friendships for ${userName}:`, friendships)
 			const [incomingPending, outgoingPending, accepted] = friendships.reduce((acc, friendship) => {
 				const isUserInitiator = friendship.userName === userName
 				if (friendship.status === 'pending') {
@@ -52,6 +53,7 @@ export default fp(async function friendChanges(fastify) {
 				throw new Error(`Failed to fetch friend profiles: ${friendsProfiles.status} ${await friendsProfiles.text()}`)
 			}
 			const { users } =  await friendsProfiles.json()
+			console.log(`Fetched profiles for friends of ${userName}:`, users)
 			const [incomingProfiles, outgoingProfiles, acceptedProfiles] = users.reduce((acc, profile) => {
 				const baseProfile = {
 					isOnline: fastify.presence.has(profile.userName),
@@ -75,8 +77,7 @@ export default fp(async function friendChanges(fastify) {
 				acceptedFriends: acceptedProfiles
 			})
 		} catch (error) {
-			fastify.log.error('Error retrieving user friends:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error retrieving friend list for ${userName}: ${error.message}`)
 			return { message: 'Failed to retrieve user friends' }
 		}
 	}
@@ -85,10 +86,21 @@ export default fp(async function friendChanges(fastify) {
 		try {
 			if (!userName || !peerName) {
 				throw new Error("userName and peerName are required.")
-			}
-			if (userName === peerName) {
+			} else if (userName === peerName) {
 				return { user: "Can not send friend request to yourself.", peer: null }
 			}
+
+			// check if peername exists
+			const peerProfileResponse = await fetch("http://profile:3006/internal/exists", {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ userName: peerName })
+			})
+			if (!peerProfileResponse.ok) {
+				console.error("Error response from profile service:", peerProfileResponse.status, await peerProfileResponse.text());
+				return { user: "Peer user does not exist.", peer: null }
+			}
+
 			const existingFriendship = await fastify.sequelize.models.Friend.findOne({
 				where: {
 					[Op.or]: [
@@ -97,7 +109,7 @@ export default fp(async function friendChanges(fastify) {
 					]
 				}
 			}) || null
-			if (existingFriendship) {
+			if (existingFriendship) { 
 				if (existingFriendship.status === 'pending') {
 					return { user: "Friend request already pending.", peer: null }
 				} else if (existingFriendship.status === 'accepted') {
@@ -221,6 +233,7 @@ export default fp(async function friendChanges(fastify) {
 	async function notifyFriendChanges(userName) {
 		try {
 			const userResult = await fastify.getFriendList(userName) ?? {};
+			console.log(`Notifying friends of ${userName}: ${JSON.stringify(userResult)}`);
 			if (!userResult || (!userResult.pendingFriends && !userResult.acceptedFriends)) {
 				throw new Error("Failed to retrieve user friends for notification.")
 			}
@@ -237,7 +250,7 @@ export default fp(async function friendChanges(fastify) {
 					const userConnection = fastify.presence.get(user.userName)
 					if (userConnection && userConnection.socket && userConnection.socket.readyState === userConnection.socket.OPEN) {
 						userConnection.socket.send(JSON.stringify({
-							type: 'update',
+							type: 'list',
 							payload: {
 								friendlist: friendList
 							}

@@ -1731,10 +1731,10 @@ html {
 #loadingScreen {
   position: absolute;
   inset: 0;
-  background-image: url('../arcadeMachine.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0, 65, 65, 0.324) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(65, 0, 65, 0.435) 0%, transparent 50%),
+    linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1745,6 +1745,20 @@ html {
   z-index: 10;
   text-align: center;
   padding: 0 20px;
+  visibility: visible;
+  opacity: 1;
+}
+
+#loadingScreen.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  display: none !important;
+}
+
+#renderCanvas {
+  position: relative;
+  z-index: 5;
 }
 
 .loading-content {
@@ -1762,13 +1776,6 @@ html {
   color: #ffffffcc;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
   letter-spacing: 1px;
-}
-
-#loadingScreen.hidden {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-  display: none !important;
 }
 
 #loadingBar {

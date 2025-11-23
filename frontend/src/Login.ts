@@ -1,7 +1,8 @@
 import { getAuthToken } from './utils/auth.js';
-import { getJsTranslations } from './I18n.js';
+import { getJsTranslations } from './utils/I18n.js';
 import { navigateTo, API_BASE_URL } from './index.js';
-import { showNotification } from './notification.js';
+import { showNotification } from './utils/notification.js';
+import doubleFetch from "./utils/doubleFetch.js";
 import AView from "./AView.js";
 let currentStep:string = "welcome";
 let userRegistered:boolean;
@@ -37,7 +38,7 @@ async function username() {
 
 	const address = `${API_BASE_URL}/auth/check-username?username=${username}&lang=${localStorage.getItem("langPref")}`;
 	try {
-		const response = await fetch(address);
+		const response = await doubleFetch(address, { method: "GET" });
 		const json = await response.json();
 		if (response.ok) {
 			if(json.exists) {
@@ -99,7 +100,7 @@ async function login() {
 	});
 
 	try {
-		const response = await fetch(request);
+		const response = await doubleFetch(request);
 		const json = await response.json();
 		if (response.ok) {
 			showNotification(json.message, "info");
@@ -138,7 +139,7 @@ async function register() {
 	});
 
 	try {
-		const response = await fetch(request);
+		const response = await doubleFetch(request);
 		const json = await response.json();
 		if (response.ok) {
 			showNotification(json.message, "info");
@@ -170,7 +171,7 @@ async function verify() {
 		};
 
 		try {
-			const response = await fetch(`${API_BASE_URL}/auth/verify-2fa?lang=${localStorage.getItem("langPref")}`, {
+			const response = await doubleFetch(`${API_BASE_URL}/auth/verify-2fa?lang=${localStorage.getItem("langPref")}`, {
 				method: "POST",
 				headers: new Headers({ "Content-Type": "application/json" }),
 				body: JSON.stringify(obj),
