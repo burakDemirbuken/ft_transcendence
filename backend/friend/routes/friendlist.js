@@ -3,12 +3,13 @@ import { Op } from 'sequelize'
 export default async function friendListRoutes(fastify) {
 
 	fastify.delete('/internal/list', async (request, reply) => {
-		const userName = request.body?.userName ?? null;
+		const userName = request.body?.userName ?? null
+
+		if (!userName) {
+			return reply.code(400).send({ error: 'Username is required' })
+		}
 
 		try {
-			if (userName == null) { // bunu test et
-				throw new Error('Username is required')
-			}
 
 			const friendships = await fastify.sequelize.models.Friend.findAll({
 				where: {
@@ -21,8 +22,8 @@ export default async function friendListRoutes(fastify) {
 				raw: true
 			})
 
-			if (friendships.length === 0 || friendships == null) {
-				return reply.code(200).send({ message: 'No friendships to delete' })
+			if (!Array.isArray(friendships) || friendships.length === 0) {
+				return reply.code(404).send({ error: 'No friendships found for user' })
 			}
 
 			const friendsToNotify = friendships.map(f => f.userName === userName ? f.peerName : f.userName)
@@ -74,11 +75,11 @@ export default async function friendListRoutes(fastify) {
 	fastify.post('/internal/notify', async (request, reply) => {
 		const { userName } = request.body ?? {}
 
-		try {
-			if (!userName) {
-				throw new Error('Username is required')
-			}
+		if (!userName) {
+			return reply.code(400).send({ error: 'Username is required' })
+		}
 
+		try {
 			await fastify.notifyFriendChanges(userName)	
 			console.log(`Notified friends of ${userName} about status change.`)
 			return reply.code(200).send({ message: 'Friends notified successfully' })

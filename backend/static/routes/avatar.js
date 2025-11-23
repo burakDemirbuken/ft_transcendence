@@ -22,7 +22,7 @@ export default async function avatarRoutes(fastify) {
 
 		if (!allowedMimeTypes.includes(data.mimetype)) {
 			await data.file.resume()
-			return reply.code(400).send({ message: "Invalid file type. Only JPG/JPEG and PNG are allowed." })
+			return reply.code(415).send({ message: "Unsupported media type. Only JPG/JPEG and PNG are allowed." })
 		}
 
 		const randomNamefromFileName = await fastify.renameFile(data.filename)
@@ -47,17 +47,17 @@ export default async function avatarRoutes(fastify) {
 
 			if (!response.ok) {
 				await fs.promises.unlink(filePath).catch(err => request.log.error(`Failed to delete orphaned file: ${err.message}`))
-				return reply.code(500).send({ message: "Failed to update avatar in profile service" })
+				return reply.code(502).send({ message: "Upstream profile service rejected avatar update" })
 			}
 
 			const responseJson = await response.json()
 			request.log.info(`Avatar updated successfully for user: ${userName}`)
-			return reply.code(200).send({ newAvatarUrl: responseJson.newAvatarUrl  })
+			return reply.code(201).send({ newAvatarUrl: responseJson.newAvatarUrl  })
 
 		} catch (err) {
 			await fs.promises.unlink(filePath).catch(err => request.log.error(`Failed to delete orphaned file: ${err.message}`))
 			request.log.error(`Profile service communication failed: ${err.message}`)
-			return reply.code(500).send({ message: "Failed to upload avatar" })
+			return reply.code(502).send({ message: "Failed to communicate with profile service" })
 		}
 	})
 }

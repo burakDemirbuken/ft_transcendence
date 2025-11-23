@@ -83,6 +83,8 @@ export default fp(async function friendChanges(fastify) {
 	}
 
 	async function postSend(userName, peerName) {
+		
+		// userName = undefined
 		try {
 			if (!userName || !peerName) {
 				throw new Error("userName and peerName are required.")

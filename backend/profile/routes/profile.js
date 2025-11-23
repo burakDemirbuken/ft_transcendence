@@ -7,7 +7,7 @@ export default async function profileRoute(fastify) {
 
 		try {
 			if (!userName) {
-				throw new Error('userName is required')
+				return reply.code(400).send({ message: 'userName is required' })
 			}
 
 			const userProfile = await fastify.sequelize.models.Profile.findOne({
@@ -41,7 +41,7 @@ export default async function profileRoute(fastify) {
 
 		try {
 			if (!userName) {
-				throw new Error('userName is required')
+				return reply.code(400).send({ message: 'userName is required' })
 			}
 
 			if (!dname) {
@@ -102,7 +102,7 @@ export default async function profileRoute(fastify) {
 		}
 
 		if (!userName) {
-			return reply.code(400).send({ error: 'userName is required' })
+			return reply.code(400).send({ message: 'userName is required' })
 		}
 
 		try {
@@ -111,16 +111,13 @@ export default async function profileRoute(fastify) {
 			})
 
 			if (deletedCount === 0) {
-				return reply.code(404).send({ error: 'User not found' })
+				return reply.code(404).send({ message: 'User not found' })
 			}
 
-			return reply.code(200).send({
-				success: true,
-				message: 'Profile deleted successfully'
-			})
+			return reply.code(204).send()
 		} catch (error) {
 			fastify.log.error(`Error deleting profile: ${error.message}`)
-			return reply.code(500).send({ error: 'Failed to delete profile' })
+			return reply.code(500).send({ message: 'Failed to delete profile' })
 		}
 	})
 
@@ -131,7 +128,7 @@ export default async function profileRoute(fastify) {
 
 		try {
 			if (!userName) {
-				throw new Error('userName is required')
+				return reply.code(400).send({ message: 'userName is required' })
 			}
 
 			const existingProfile = await fastify.sequelize.models.Profile.findOne({
@@ -187,7 +184,7 @@ export default async function profileRoute(fastify) {
 
 		try {
 			if (!friends || !Array.isArray(friends) || friends.length === 0) {
-				throw new Error('Friends array is required')
+				return reply.code(400).send({ message: 'Friends array is required' })
 			}
 
 			const userProfiles = await fastify.sequelize.models.Profile.findAll({
@@ -215,7 +212,7 @@ export default async function profileRoute(fastify) {
 
 		try {
 			if (!userName || !avatarUrlPath) {
-				throw new Error('userName and avatarUrlPath are required')
+				return reply.code(400).send({ message: 'userName and avatarUrlPath are required' })
 			}
 
 			const userProfile = await fastify.sequelize.models.Profile.findOne({
@@ -223,7 +220,7 @@ export default async function profileRoute(fastify) {
 			})
 
 			if (!userProfile) {
-				return reply.code(404).send({ error: 'User not found' })
+				return reply.code(404).send({ message: 'User not found' })
 			}
 
 			userProfile.avatarUrl = avatarUrlPath
@@ -247,7 +244,7 @@ export default async function profileRoute(fastify) {
 
 		try {
 			if (!userName) {
-				throw new Error('userName is required')
+				return reply.code(400).send({ message: 'userName is required' })
 			}
 
 			const userProfile = await fastify.sequelize.models.Profile.findOne({
