@@ -1725,11 +1725,34 @@ async function populateTournamentHistory(userName: string) {
 			minute: '2-digit'
 		});
 
+		// Winner bilgisini al
+		let winnerName = 'N/A';
+		if (tournament?.winnerPlayer) {
+			// Kazananın adını bul
+			if (tournament.Rounds && tournament.Rounds.length > 0) {
+				for (const round of tournament.Rounds) {
+					if (!round.RoundMatches) continue;
+					for (const match of round.RoundMatches) {
+						if (match.playerOneID === tournament.winnerPlayer) {
+							winnerName = match.playerOne?.displayName || 'Unknown';
+							break;
+						}
+						if (match.playerTwoID === tournament.winnerPlayer) {
+							winnerName = match.playerTwo?.displayName || 'Unknown';
+							break;
+						}
+					}
+					if (winnerName !== 'N/A') break;
+				}
+			}
+		}
+
 		tournamentRow.innerHTML = `
 			<span class="tournament-name">${tournament.name || 'Unnamed Tournament'}</span>
 			<span class="tournament-date">${startDateStr} ${startTimeStr}</span>
 			<span class="tournament-end-date">${endDateStr} ${endTimeStr}</span>
 			<span class="tournament-matches">${tournament.Rounds?.length || 0}</span>
+			<span class="tournament-winner">${winnerName}</span>
 		`;
 
 		tournamentTable.appendChild(tournamentRow);

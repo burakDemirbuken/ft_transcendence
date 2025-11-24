@@ -3062,7 +3062,6 @@ private initAIGameListeners(): void {
                 if (startButton.disabled) {
                     startButton.disabled = false;
                     startButton.innerHTML = '🚀 Start the Tournament';
-                    showNotification('⚠️ Tournament start timed out', 'warning');
                 }
             }, 10000);
         });
