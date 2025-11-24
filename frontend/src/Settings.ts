@@ -1,8 +1,9 @@
 import AView from "./AView.js";
 import { getAuthToken, getAuthHeaders } from './utils/auth.js';
 import { API_BASE_URL, navigateTo } from './index.js';
-import { showNotification } from "./notification.js";
-import tokenManager from './tokenManager.js';
+import { showNotification } from "./utils/notification.js";
+import tokenManager from './utils/tokenManager.js';
+import doubleFetch from "./utils/doubleFetch.js";
 
 let currentUserName = null;
 let pendingAction = null; // 'password' veya 'email'
@@ -56,7 +57,7 @@ async function confirm2FACode(e) {
 			return;
 		}
 
-		const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+		const response = await doubleFetch(`${API_BASE_URL}${endpoint}`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: {
@@ -111,7 +112,7 @@ async function deleteAccount(e) {
 	const isConfirmed = confirm("Are you sure you want to delete your account? This action cannot be undone");
 	if (isConfirmed) {
 		try {
-			const res = await fetch(`${API_BASE_URL}/auth/profile`, {
+			const res = await doubleFetch(`${API_BASE_URL}/auth/profile`, {
 				method: 'DELETE',
 				credentials: 'include',
 			});
@@ -141,13 +142,17 @@ async function sendAvatarChangeReq(e) {
 		const formData = new FormData();
 		formData.append('avatar', e.target.files[0]);
 
-		const res = await fetch(`${API_BASE_URL}/static/avatar?userName=${localStorage.getItem("userName")}`, {
+		const res = await doubleFetch(`${API_BASE_URL}/static/avatar`, {
 			method: 'POST',
 			credentials: 'include',
 			body: formData
 		});
 		if (res.ok) {
-			console.log("success");
+			const json = await res.json();
+			let src = "../profile.svg";
+			if (json?.newAvatarUrl)
+				src = `${API_BASE_URL}/static/${json.newAvatarUrl}`;
+			document.getElementById('settings-avatar')?.setAttribute('src', src);
 			showNotification("Avatar changed successfully", "success");
 		}
 		else {
@@ -169,7 +174,7 @@ async function sendDNameChangeReq(e) {
 	const dname = formData.get('dname') as string;
 
 	try {
-		const getProfileDatas = await fetch(`${API_BASE_URL}/profile/displaynameupdate`, {
+		const getProfileDatas = await doubleFetch(`${API_BASE_URL}/profile/displaynameupdate`, {
 			method: "POST",
 			credentials: 'include',
 			headers: {
@@ -213,7 +218,7 @@ async function sendEmailChangeReq(e) {
 	submitBtn.style.cursor = 'not-allowed';
 
 	try {
-		const response = await fetch(`${API_BASE_URL}/auth/init-email-change`, {
+		const response = await doubleFetch(`${API_BASE_URL}/auth/init-email-change`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: {
@@ -278,7 +283,7 @@ async function sendPassChangeReq(e) {
 	submitBtn.style.cursor = 'not-allowed';
 
 	try {
-		const response = await fetch(`${API_BASE_URL}/auth/init-password-change`, {
+		const response = await doubleFetch(`${API_BASE_URL}/auth/init-password-change`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: {
@@ -381,7 +386,7 @@ async function onLoad()
 		return navigateTo('login');
 
 	try {
-		const meReq = await fetch(`${API_BASE_URL}/auth/me`, {
+		const meReq = await doubleFetch(`${API_BASE_URL}/auth/me`, {
 			credentials: 'include',
 			headers:
 			{
@@ -398,7 +403,7 @@ async function onLoad()
 				uname.textContent = "@" + profileData.user.username;
 			document.querySelector('input[name="current-email"]')?.setAttribute('value', profileData?.user?.email ?? '');
 
-			const profileReq = await fetch(`${API_BASE_URL}/profile/profile?userName=${profileData?.user?.username}`, {
+			const profileReq = await doubleFetch(`${API_BASE_URL}/profile/profile?userName=${profileData?.user?.username}`, {
 				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json',

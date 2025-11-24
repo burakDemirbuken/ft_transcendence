@@ -122,6 +122,7 @@
 .search-bar form {
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	gap: .5em;
 }
 
@@ -129,12 +130,14 @@
 	background: #111;
 
 	height: 2rem;
-	width: 250px;
+	width: clamp(220px, calc(15vw + 7rem), 360px);
+
 	border: 2px solid #333;
 	border-radius: 3px;
 
 	color: #c0c;
 	padding-left: .4em;
+	flex-shrink: 0;
 }
 
 .search-bar input::placeholder {
@@ -148,6 +151,7 @@
 
 	border: 2px solid #333;
 	background: #000;
+	flex-shrink: 0;
 }
 
 .search-bar svg {
@@ -163,7 +167,7 @@
 
 	font-family: "PixeloidSans", sans-serif;
 	font-style: italic;
-	
+
 	color: #888;
 	background: #00000096;
 	border: none;

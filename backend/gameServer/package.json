@@ -15,7 +15,9 @@
   "dependencies":
   {
     "fastify": "^5.4.0",
-    "@fastify/websocket": "^7.0.0"
+    "@fastify/websocket": "^7.0.0",
+    "@fastify/cookie": "^9.4.0",
+    "@fastify/jwt": "^8.0.1"
   },
   "devDependencies":
   {
