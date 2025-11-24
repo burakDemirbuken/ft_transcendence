@@ -27,7 +27,7 @@ class GameService
 		this.tournamentManager.start();
 		this.setupRoomNetwork();
 
-/* 		setInterval(
+		setInterval(
 			() =>
 			{
 				console.log('--- Connected Players ---');
@@ -63,7 +63,7 @@ class GameService
 				console.log('');
 			},
 			5000
-		); */
+		);
 	}
 
 	setupRoomNetwork()

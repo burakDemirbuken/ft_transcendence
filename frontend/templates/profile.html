@@ -45,49 +45,49 @@
     </header>
     <!-- Navigation -->
     <div class="profile-nav">
-        <button class="tab-btn" data-tab="overview"><i class="fa-solid fa-grip-vertical"></i> <span data-i18n="profile.sections.dashboard">Dashboard</span> <span class="btn-glow"></span></button>
-        <button class="tab-btn" data-tab="performance"><i class="fa-solid fa-chart-line"></i> <span data-i18n="profile.sections.performance">Performans</span> <span class="btn-glow"></span></button>
-        <button class="tab-btn active" data-tab="tournaments"><i class="fa-solid fa-trophy"></i> <span data-i18n="profile.sections.thishtory">Turnuva Geçmişi</span> <span class="btn-glow"></span></button>
-        <button class="tab-btn" data-tab="match_history"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="profile.sections.mhistory">Maç Geçmişi</span> <span class="btn-glow"></span></button>
+        <button class="tab-btn active" data-tab="overview"><i class="fa-solid fa-grip-vertical"></i> <span data-i18n="profile.sections.dashboard">Dashboard</span> <span class="btn-glow"></span></button>
+        <button class="tab-btn" data-tab="performance"><i class="fa-solid fa-chart-line"></i> <span data-i18n="profile.sections.performance">Performance</span> <span class="btn-glow"></span></button>
+        <button class="tab-btn" data-tab="tournaments"><i class="fa-solid fa-trophy"></i> <span data-i18n="profile.sections.thishtory">Tournament History</span> <span class="btn-glow"></span></button>
+        <button class="tab-btn" data-tab="match_history"><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="profile.sections.mhistory">Match History</span> <span class="btn-glow"></span></button>
         <button class="tab-btn" data-tab="achievements"><i class="fa-solid fa-star"></i> <span data-i18n="profile.sections.achievements">Achievements</span> <span class="btn-glow"></span></button>
     </div>
     <!-- Content Tabs -->
     <main class="profile-content">
         <!-- Overview Tab -->
-        <section id="overview" class="tab-content">
+        <section id="overview" class="tab-content active">
             <div class="stats-grid">
                 <!-- Performance Cards -->
                 <div class="stat-card performance-card">
-                    <h3><i class="fa-solid fa-bullseye"></i> <span data-i18n="profile.dash.psum.title">Performans Özeti</span></h3>
+                    <h3><i class="fa-solid fa-bullseye"></i> <span data-i18n="profile.dash.psum.title">Performance Overview</span></h3>
                     <div class="performance-stats">
                         <div class="perf-item">
-                            <span class="perf-label" data-i18n="profile.dash.psum.mwon">Kazanılan Maçlar</span>
+                            <span class="perf-label" data-i18n="profile.dash.psum.mwon">Matches Won</span>
                             <span id="mwon" class="perf-value win">0</span>
                         </div>
                         <div class="perf-item">
-                            <span class="perf-label" data-i18n="profile.dash.psum.mlose">Kaybedilen Maçlar</span>
+                            <span class="perf-label" data-i18n="profile.dash.psum.mlose">Matches Lost</span>
                             <span id="mlost" class="perf-value loss">0</span>
                         </div>
                         <div class="perf-item">
-                            <span class="perf-label" data-i18n="profile.dash.psum.mdur">Ortalama Maç Süresi</span>
-                            <span id="mdur-average" class="perf-value">0:0</span>
+                            <span class="perf-label" data-i18n="profile.dash.psum.mdur">Match Duration Avarage</span>
+                            <span id="mdur-average" class="perf-value">0:00</span>
                         </div>
                         <div class="perf-item">
-                            <span class="perf-label" data-i18n="profile.dash.psum.gdur">Toplam Oyun Süresi</span>
-                            <span id="total-play-time" class="perf-value">0:0</span>
+                            <span class="perf-label" data-i18n="profile.dash.psum.gdur">Total Play Game</span>
+                            <span id="total-play-time" class="perf-value">0:00</span>
                         </div>
                     </div>
                 </div>
                 <!-- Streak Card -->
                 <div class="stat-card streak-card">
-                    <h3><i class="fa-solid fa-fire"></i> <span data-i18n="profile.dash.streak.title">Streak Bilgileri</span></h3>
+                    <h3><i class="fa-solid fa-fire"></i> <span data-i18n="profile.dash.streak.title">Win Streak</span></h3>
                     <div class="streak-display">
                         <div class="streak-current">
                             <span class="streak-number">0</span>
-                            <span class="streak-text" data-i18n="profile.dash.streak.curr">Mevcut Seri</span>
+                            <span class="streak-text" data-i18n="profile.dash.streak.curr">Current Streak</span>
                         </div>
                         <div class="streak-best">
-                            <span class="streak-label" data-i18n="profile.dash.streak.best">En İyi Seri:</span>
+                            <span class="streak-label" data-i18n="profile.dash.streak.best">Best Streak</span>
                             <span class="streak-value">0</span>
                         </div>
                         <div class="streak-visual">
@@ -101,12 +101,12 @@
                 </div>
                 <!-- Recent Matches -->
                 <div class="stat-card recent-matches">
-                    <h3><i class="fa-solid fa-clock"></i><span data-i18n="profile.dash.mlast.title">Son Maçlar</span></h3>
+                    <h3><i class="fa-solid fa-clock"></i><span data-i18n="profile.dash.mlast.title">Last Matches</span></h3>
                     <div class="matches-list"></div>
                 </div>
                 <!-- Performance Chart -->
                 <div class="stat-card chart-card">
-                    <h3><i class="fa-solid fa-cubes"></i><span data-i18n="profile.dash.wperf.title">Haftalık Performans</span></h3>
+                    <h3><i class="fa-solid fa-cubes"></i><span data-i18n="profile.dash.wperf.title">Weekly Performance</span></h3>
                     <canvas id="performanceChart"></canvas>
                 </div>
             </div>
@@ -116,37 +116,37 @@
             <div class="stats-grid">
                 <!-- Win/Loss Pie Chart -->
                 <div class="stat-card">
-                    <h3><i class="fa-solid fa-chart-pie"></i> <span data-i18n="profile.perf.winlose.title">Kazanma/Kaybetme Oranı</span></h3>
+                    <h3><i class="fa-solid fa-chart-pie"></i> <span data-i18n="profile.perf.winlose.title">Win/Lose Rate</span></h3>
                     <canvas id="winLossChart" width="300" height="300"></canvas>
                 </div>
                 <!-- Performance Radar -->
                 <div class="stat-card">
-                    <h3><i class="fa-solid fa-gem"></i> <span data-i18n="profile.perf.skills.title">Beceri Analizi</span></h3>
+                    <h3><i class="fa-solid fa-gem"></i> <span data-i18n="profile.perf.skills.title">Skills</span></h3>
                     <canvas id="skillRadar" width="300" height="300"></canvas>
                 </div>
                 <!-- Monthly Progress -->
                 <div class="stat-card">
-                    <h3><i class="fa-solid fa-chart-simple"></i> <span data-i18n="profile.perf.mprog.title">Top İstatistikleri</span></h3>
+                    <h3><i class="fa-solid fa-chart-simple"></i> <span data-i18n="profile.perf.mprog.title">Ball Hit Statictics</span></h3>
                     <canvas id="monthlyChart" width="200" height="200"></canvas>
                 </div>
                 <!-- Detailed Stats -->
                 <div class="stat-card detailed-stats">
-                    <h3><i class="fa-solid fa-magnifying-glass-chart"></i> <span data-i18n="profile.perf.dstats.title">Detaylı İstatistikler</span></h3>
+                    <h3><i class="fa-solid fa-magnifying-glass-chart"></i> <span data-i18n="profile.perf.dstats.title">Detailed Statistics</span></h3>
                     <div class="stats-table">
                         <div class="stat-row">
-                            <span class="stat-name" data-i18n="profile.perf.dstats.tpts">Toplam Puan</span>
+                            <span class="stat-name" data-i18n="profile.perf.dstats.tpts">Total Points</span>
                             <span id="xp_point" class="stats-value">0</span>
                         </div>
                         <div class="stat-row">
-                            <span class="stat-name" data-i18n="profile.perf.dstats.ascore">İsabet Oranı</span>
-                            <span id="hit_rate" class="stats-value">0</span>
+                            <span class="stat-name" data-i18n="profile.perf.dstats.ascore">Hit Rate</span>
+                            <span id="hit_rate" class="stats-value">0%</span>
                         </div>
                         <div class="stat-row">
-                            <span class="stat-name" data-i18n="profile.perf.dstats.mfastest">En Hızlı Galibiyet</span>
+                            <span class="stat-name" data-i18n="profile.perf.dstats.mfastest">Fastest Win</span>
                             <span id="mfastest" class="stats-value">0:00</span>
                         </div>
                         <div class="stat-row">
-                            <span class="stat-name" data-i18n="profile.perf.dstats.mlongest">En Uzun Maç</span>
+                            <span class="stat-name" data-i18n="profile.perf.dstats.mlongest">Longest Match</span>
                             <span id="mlongest" class="stats-value">0:00</span>
                         </div>
                     </div>
@@ -154,62 +154,25 @@
             </div>
         </section>
         <!-- Tournaments Tab -->
-        <section id="tournaments" class="tab-content active">
+        <section id="tournaments" class="tab-content">
             <div class="tournaments-header">
-                <h3><i class="fa-solid fa-trophy"></i> <span data-i18n="profile.thistory.title">Turnuva Geçmişi</span></h3>
+                <h3><i class="fa-solid fa-trophy"></i> <span data-i18n="profile.thistory.title">Tournament History</span></h3>
                 <div class="tournaments-filters">
                     <select id="tournament-year-filter">
-                        <option value="all" selected data-i18n="profile.thistory.allyears">Tüm Yıllar</option>
+                        <option value="all" selected data-i18n="profile.thistory.allyears">All Years</option>
                         <option value="2025">2025</option>
                         <option value="2024">2024</option>
-                        <option value="2023">2023</option>
-                        <option value="2022">2022</option>
                     </select>
                 </div>
             </div>
             <div class="tournament-table" id="tournament-table">
                 <div class="tournament-row header">
-                    <span data-i18n="profile.thistory.header.tname">Turnuva Adı</span>
-                    <span data-i18n="profile.thistory.header.tstart">Başlangıç</span>
-                    <span data-i18n="profile.thistory.header.tend">Bitiş</span>
-                    <span data-i18n="profile.thistory.header.trounds">Tur Sayısı</span>
+                    <span data-i18n="profile.thistory.header.tname">Tournament Name</span>
+                    <span data-i18n="profile.thistory.header.tstart">Start</span>
+                    <span data-i18n="profile.thistory.header.tend">End</span>
+                    <span data-i18n="profile.thistory.header.trounds">Rounds Number</span>
+					<span data-i18n="profile.thistory.header.winner">Winner</span>
                 </div>
-                <!-- <div class="tournament-row"
-                     data-name="Yaz Turnuvası"
-                     data-start="2025-07-01"
-                     data-end="2025-07-15"
-                     data-matches="12"
-                     data-players='[
-                       {"etap":0, "kutu":1, "kazanan":true, "skor":11, "text":"Oyuncu 1"},
-                       {"etap":0, "kutu":2, "kazanan":false, "skor":1, "text":"Oyuncu 2"},
-                       {"etap":0, "kutu":3, "kazanan":true, "skor":11, "text":"Oyuncu 3"},
-                       {"etap":0, "kutu":4, "kazanan":false, "skor":0, "text":"Oyuncu 4"},
-                       {"etap":1, "kutu":1, "kazanan":null, "text":"Oyuncu 1"},
-                       {"etap":1, "kutu":2, "kazanan":null, "text":"Oyuncu 2"},
-                     ]'>
-                    <span>Yaz Turnuvası</span><span>01.07.2025</span><span>15.07.2025</span><span>12</span>
-                </div>
-                <div class="tournament-row"
-                     data-name="Bahar Turnuvası"
-                     data-start="2025-05-20"
-                     data-end="2025-06-01"
-                     data-matches="33"
-                     data-players='[
-                       {"etap":0, "kutu":1, "kazanan":true, "skor":11, "text":"Oyuncu 1"},
-                       {"etap":0, "kutu":2, "kazanan":false, "skor":1, "text":"Oyuncu 2"},
-                       {"etap":0, "kutu":3, "kazanan":true, "skor":11, "text":"Oyuncu 3"},
-                       {"etap":0, "kutu":4, "kazanan":false, "skor":0, "text":"Oyuncu 4"},
-                       {"etap":0, "kutu":5, "kazanan":false, "skor":0, "text":"Oyuncu 5"},
-                       {"etap":0, "kutu":6, "kazanan":true, "skor":0, "text":"Oyuncu 6"},
-                       {"etap":0, "kutu":7, "kazanan":false, "skor":0, "text":"Oyuncu 7"},
-                       {"etap":0, "kutu":8, "kazanan":true, "skor":0, "text":"Oyuncu 8"},
-                       {"etap":1, "kutu":1, "kazanan":null, "text":"Oyuncu 1"},
-                       {"etap":1, "kutu":2, "kazanan":null, "text":"Oyuncu 2"},
-                       {"etap":1, "kutu":3, "kazanan":null, "text":"Oyuncu 3"},
-                       {"etap":1, "kutu":4, "kazanan":null, "text":"Oyuncu 4"}
-                     ]'>
-                    <span>Kış Turnuvası</span><span>20.05.2025</span><span>01.06.2025</span><span>33</span>
-                </div> -->
             </div>
 			<div id="overlay">
                 <div id="turnuva-wrapper">
@@ -221,22 +184,22 @@
         <!-- Matches Tab (Birleştirilmiş Maç Geçmişi ve Analizi) -->
         <section id="match_history" class="tab-content">
             <div class="tournaments-header">
-                <h3><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="profile.mhistory.title">Maç Geçmişi ve Analizi</span></h3>
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="profile.mhistory.title">Match History and Analysis</span></h3>
                 <div class="matches-filters">
                     <select id="result-filter">
-                        <option value="all" data-i18n="profile.mhistory.opts.alltimes">Tüm Sonuçlar</option>
-                        <option value="win" data-i18n="profile.mhistory.opts.onlywon">Sadece Galibiyetler</option>
-                        <option value="loss" data-i18n="profile.mhistory.opts.onlylost">Sadece Mağlubiyetler</option>
+                        <option value="all" data-i18n="profile.mhistory.opts.alltimes">All Times</option>
+                        <option value="win" data-i18n="profile.mhistory.opts.onlywon">Only Wins</option>
+                        <option value="loss" data-i18n="profile.mhistory.opts.onlylost">Only Losses</option>
                     </select>
                 </div>
             </div>
             <div class="match-table">
                 <div class="match-row header">
-                    <span data-i18n="profile.mhistory.table.date">Tarih</span>
-                    <span data-i18n="profile.mhistory.table.match">Rakip</span>
-                    <span data-i18n="profile.mhistory.table.score">Skor</span>
-                    <span data-i18n="profile.mhistory.table.time">Süre</span>
-                    <span data-i18n="profile.mhistory.table.result">Sonuç</span>
+                    <span data-i18n="profile.mhistory.table.date">Date</span>
+                    <span data-i18n="profile.mhistory.table.match">Match</span>
+                    <span data-i18n="profile.mhistory.table.score">Score</span>
+                    <span data-i18n="profile.mhistory.table.time">Duration</span>
+                    <span data-i18n="profile.mhistory.table.result">Result</span>
                 </div>
             </div>
 
@@ -249,7 +212,7 @@
                     <div class="match-overlay-content">
                         <!-- Header -->
                         <div class="match-details-header">
-                            <h2 class="match-details-title" data-i18n="profile.mhistory.overlay.title">Maç Detayları</h2>
+                            <h2 class="match-details-title" data-i18n="profile.mhistory.overlay.title">Match Analysis</h2>
                             <div class="match-meta">
                                 <span class="match-date"></span>
                                 <span class="match-time"></span>
@@ -261,11 +224,11 @@
                             <!-- Team One (User) -->
                             <div class="team-section team-one">
                                 <div class="team-header">
-                                    <h3 data-i18n="profile.mhistory.overlay.yourteam">Siz</h3>
+                                    <h3 data-i18n="profile.mhistory.overlay.yourteam">Your</h3>
                                 </div>
                                 <div class="team-players"></div>
                                 <div class="team-score">
-                                    <span class="score-label" data-i18n="profile.mhistory.overlay.score">Skor</span>
+                                    <span class="score-label" data-i18n="profile.mhistory.overlay.score">Score</span>
                                     <span class="score-value">0</span>
                                 </div>
                             </div>
@@ -278,11 +241,11 @@
                             <!-- Team Two (Opponent) -->
                             <div class="team-section team-two">
                                 <div class="team-header">
-                                    <h3 data-i18n="profile.mhistory.overlay.opponent">Rakip</h3>
+                                    <h3 data-i18n="profile.mhistory.overlay.opponent">Oppenent</h3>
                                 </div>
                                 <div class="team-players"></div>
                                 <div class="team-score">
-                                    <span class="score-label" data-i18n="profile.mhistory.overlay.score">Skor</span>
+                                    <span class="score-label" data-i18n="profile.mhistory.overlay.score">Score</span>
                                     <span class="score-value">0</span>
                                 </div>
                             </div>
@@ -305,7 +268,7 @@
                                     </svg>
                                 </div>
                                 <div class="stat-info">
-                                    <span class="stat-label" data-i18n="profile.mhistory.overlay.duration">Süre</span>
+                                    <span class="stat-label" data-i18n="profile.mhistory.overlay.duration">Duration</span>
                                     <span class="status-value match-duration">0:00</span>
                                 </div>
                             </div>
@@ -318,7 +281,7 @@
                                     </svg>
                                 </div>
                                 <div class="stat-info">
-                                    <span class="stat-label" data-i18n="profile.mhistory.overlay.gamemode">Oyun Modu</span>
+                                    <span class="stat-label" data-i18n="profile.mhistory.overlay.gamemode">Game Mode</span>
                                     <span class="status-value match-type-text" data-i18n="profile.mhistory.overlay.gametype">Classic</span>
                                 </div>
                             </div>
@@ -331,7 +294,7 @@
                                     </svg>
                                 </div>
                                 <div class="stat-info">
-                                    <span class="stat-label" data-i18n="profile.mhistory.overlay.ballhit">Topa Vurma</span>
+                                    <span class="stat-label" data-i18n="profile.mhistory.overlay.ballhit">Ball Hit</span>
                                     <span class="status-value ball-hit">0</span>
                                 </div>
                             </div>
@@ -344,7 +307,7 @@
                                     </svg>
                                 </div>
                                 <div class="stat-info">
-                                    <span class="stat-label" data-i18n="profile.mhistory.overlay.ballmiss">Iskalama</span>
+                                    <span class="stat-label" data-i18n="profile.mhistory.overlay.ballmiss">Ball Miss</span>
                                     <span class="status-value ball-miss">0</span>
                                 </div>
                             </div>
@@ -352,22 +315,22 @@
 
                         <!-- Match Settings -->
                         <div class="match-settings-section">
-                            <h3 class="settings-title" data-i18n="profile.mhistory.overlay.settings">Maç Ayarları</h3>
+                            <h3 class="settings-title" data-i18n="profile.mhistory.overlay.settings">Match Settings</h3>
                             <div class="settings-grid">
                                 <div class="setting-item">
-                                    <span class="setting-label" data-i18n="profile.mhistory.overlay.ballradius">Top Yarıçapı</span>
+                                    <span class="setting-label" data-i18n="profile.mhistory.overlay.ballradius">Ball Radius</span>
                                     <span class="setting-value ball-radius">-</span>
                                 </div>
                                 <div class="setting-item">
-                                    <span class="setting-label" data-i18n="profile.mhistory.overlay.paddleheight">Raket Yüksekliği</span>
+                                    <span class="setting-label" data-i18n="profile.mhistory.overlay.paddleheight">Paddle Height</span>
                                     <span class="setting-value paddle-height">-</span>
                                 </div>
                                 <div class="setting-item">
-                                    <span class="setting-label" data-i18n="profile.mhistory.overlay.cornerspeed">Köşe Çarpma Hızlanması</span>
+                                    <span class="setting-label" data-i18n="profile.mhistory.overlay.cornerspeed">Corner Speed</span>
                                     <span class="setting-value ball-speed">-</span>
                                 </div>
                                 <div class="setting-item">
-                                    <span class="setting-label" data-i18n="profile.mhistory.overlay.winningscore">Bitiş Skoru</span>
+                                    <span class="setting-label" data-i18n="profile.mhistory.overlay.winningscore">Winning Score</span>
                                     <span class="setting-value max-score">-</span>
                                 </div>
                             </div>
@@ -381,7 +344,7 @@
             <div class="achievements-grid" class="stats-grid">
                 <div class="achievement-card locked" data-achievement="firstWin">
                     <div class="achievement-icon">🏆</div>
-                    <h4 data-i18n="profile.achiev.fwin.title">İlk Galibiyet</h4>
+                    <h4 data-i18n="profile.achiev.fwin.title">First Victory</h4>
                     <p class="passive" data-i18n="profile.achiev.fwin.passive">Win your first match</p>
                     <p class="active" data-i18n="profile.achiev.fwin.active">You won your first match!</p>
                     <div class="achievement-date"></div>
@@ -395,28 +358,28 @@
                 </div>
                 <div class="achievement-card locked" data-achievement="lessThanThreeMin">
                     <div class="achievement-icon">⚡</div>
-                    <h4 data-i18n="profile.achiev.swin.title">Hızlı Galibiyet</h4>
+                    <h4 data-i18n="profile.achiev.swin.title">Fast Victory</h4>
                     <p class="passive" data-i18n="profile.achiev.swin.passive">Win in less than 3 minutes</p>
                     <p class="active" data-i18n="profile.achiev.swin.active">You won in less than 3 minutes!</p>
                     <div class="achievement-date"></div>
                 </div>
                 <div class="achievement-card locked" data-achievement="hundredWins">
                     <div class="achievement-icon">👑</div>
-                    <h4 data-i18n="profile.achiev.nking.title">Neon Kralı</h4>
+                    <h4 data-i18n="profile.achiev.nking.title">Neon King</h4>
                     <p class="passive" data-i18n="profile.achiev.nking.passive">Win 100 matches</p>
                     <p class="active" data-i18n="profile.achiev.nking.active">You won 100 matches!</p>
                     <div class="achievement-date"></div>
                 </div>
                 <div class="achievement-card locked" data-achievement="twentyFiveTenStreak">
                     <div class="achievement-icon">🎯</div>
-                    <h4 data-i18n="profile.achiev.pserie.title">Mükemmel Seri</h4>
+                    <h4 data-i18n="profile.achiev.pserie.title">Perfect Series</h4>
                     <p class="passive" data-i18n="profile.achiev.pserie.passive">Win 25 matches in a row</p>
                     <p class="active" data-i18n="profile.achiev.pserie.active">You won 25 matches in a row!</p>
                     <div class="achievement-date"></div>
                 </div>
                 <div class="achievement-card locked" data-achievement="fiveHundredWins">
                     <div class="achievement-icon">💎</div>
-                    <h4 data-i18n="profile.achiev.lplayer.title">Efsane Oyuncu</h4>
+                    <h4 data-i18n="profile.achiev.lplayer.title">Legendary Player</h4>
                     <p class="passive" data-i18n="profile.achiev.lplayer.passive">Play 500 matches</p>
                     <p class="active" data-i18n="profile.achiev.lplayer.active">You played 500 matches!</p>
                     <div class="achievement-date"></div>

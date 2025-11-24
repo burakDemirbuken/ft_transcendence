@@ -230,10 +230,13 @@ function createUser(user: any, type: "friend" | "request" | "invite"): HTMLEleme
 	};
 
 	const opt = config[type].html;
+	let newAvatarSrc = "../profile.svg";
+	if(user?.avatarUrl)
+		newAvatarSrc = `${API_BASE_URL}/static/${user?.avatarUrl}`;
 	div.innerHTML = `
 		<div class="user-profile">
 			<div class="friend-user-avatar">
-				<img src="${user?.avatarUrl ?? "../profile.svg"}" alt="">
+				<img src="${newAvatarSrc}" alt="">
 			</div>
 			<div class="friends-user-info">
 				<span class="dname">${user?.displayName ?? user?.userName}</span>
@@ -250,7 +253,6 @@ function createUser(user: any, type: "friend" | "request" | "invite"): HTMLEleme
 			</div>
 		</div>
 	`;
-
 	div.classList.add("friend");
 	// store username on the root element for reliable lookups later
 	// use `data-username` (accessed as `dataset.username`) to keep the attribute simple
@@ -278,7 +280,7 @@ function updateUser(currentUser, newUser) {
 	const avatarElem = currentUser.querySelector(".friend-user-avatar img");
 	let newAvatarSrc = "../profile.svg";
 	if(newUser?.avatarUrl)
-		newAvatarSrc = `${API_BASE_URL}/static${newUser?.avatarUrl}`;
+		newAvatarSrc = `${API_BASE_URL}/static/${newUser?.avatarUrl}`;
 	if (avatarElem && avatarElem.getAttribute("src") !== newAvatarSrc) {
 		avatarElem.setAttribute("src", newAvatarSrc);
 	}

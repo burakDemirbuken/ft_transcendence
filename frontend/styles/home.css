@@ -108,7 +108,7 @@ body {
 }
 
 .hero h1 {
-    font-size: clamp(2rem, 8vw, 8rem);
+    font-size: clamp(1.5rem, 5vw, 4rem);
     line-height: 1.1;
 }
 
@@ -131,6 +131,7 @@ body {
     display: flex;
     justify-content: center;
     transition: all 0.8s ease;
+    font-size: clamp(1.8rem, 8vw, 5rem);
 }
 
 .group-name.hidden {
@@ -305,7 +306,7 @@ body {
     transform: translateY(100px);
     transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
-    padding: 50px;
+    padding: clamp(1rem, 3vw, 3rem);
     overflow-y: auto;
     cursor: pointer;
 }
@@ -319,15 +320,13 @@ body {
 
 .team-title {
     margin-bottom: 50px;
-	font-family: "RocketClouds";
+    font-family: "RocketClouds";
     font-weight: 600;
-    font-size: clamp(2rem, 5vw, 2.6rem);
+    font-size: clamp(1.4rem, 4vw, 2.6rem);
     text-align: center;
     background: linear-gradient(45deg, #00ffff, #ff00ff, #00ffff);
     background-size: 200% 200%;
-    /* Standart özellik */
     background-clip: text;
-    /* Webkit uyumluluğu */
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: gradientShift 4s ease-in-out infinite;
@@ -344,26 +343,24 @@ body {
 .team-grid {
     display: flex;
     justify-content: center;
-    gap: 7rem;
+    gap: clamp(1rem, 3vw, 7rem);
     max-width: 1200px;
     flex-wrap: wrap;
     align-items: flex-start;
-    margin-bottom: 60px;
     margin: 0 auto 60px auto;
-    padding: 0 3rem;
-    justify-items: center;
+    padding: 0 clamp(0.5rem, 2vw, 3rem);
     width: 100%;
 }
 
 .team-member {
     background: rgb(16, 16, 16);
     border-radius: 20px;
-    padding: 25px;
+    padding: clamp(1rem, 3vw, 1.5rem);
     text-align: center;
     position: relative;
     transition: all 0.4s ease;
-    width: 220px;
-    height: 300px;
+    width: clamp(260px, 90vw, 220px);
+    height: clamp(280px, auto, 300px);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -371,7 +368,7 @@ body {
     transform: translateY(50px) scale(0.8);
     cursor: pointer;
     overflow: hidden;
-    flex-shrink: 0; /* Kartların küçülmesini engeller */
+    flex-shrink: 0;
 }
 
 .team-content.active .team-member {
@@ -421,14 +418,14 @@ body {
 }
 
 .member-avatar {
-    width: 80px;
-    height: 80px;
+    width: clamp(60px, 15vw, 80px);
+    height: clamp(60px, 15vw, 80px);
     border-radius: 50%;
-    margin: 0 auto 15px;
+    margin: 0 auto clamp(0.8rem, 2vw, 1rem);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
     font-weight: 800;
     color: white;
     transition: all 0.3s ease;
@@ -474,19 +471,19 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 8px;
+    gap: clamp(0.4rem, 1vw, 0.8rem);
 }
 
 .member-info h3 {
-    font-size: 1.1rem;
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
     margin-bottom: 2px;
     color: #ffffff;
     font-weight: 600;
 }
 
 .member-info .surname {
-    font-size: 1.1rem;
-    margin-bottom: 8px;
+    font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+    margin-bottom: clamp(0.4rem, 1vw, 0.8rem);
     color: #cccccc;
     font-weight: 400;
 }
@@ -496,15 +493,15 @@ body {
     background: linear-gradient(45deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
     border: 1px solid rgba(0, 255, 255, 0.3);
     border-radius: 15px;
-    padding: 6px 12px;
-    font-size: 0.75rem;
+    padding: clamp(0.4rem, 1vw, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
+    font-size: clamp(0.65rem, 1.5vw, 0.75rem);
     font-weight: 500;
     color: #00ffff;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 8px;
-    position: relative; /* pseudo-element için gerekli */
-    overflow: hidden;   /* efekt dışarı taşmasın */
+    margin-bottom: clamp(0.4rem, 1vw, 0.8rem);
+    position: relative;
+    overflow: hidden;
 }
 
 .role::before {
@@ -555,12 +552,12 @@ body {
 
 /* Member Username Styles */
 .member-username {
-    font-size: 0.9rem;
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
     font-weight: 600;
     border-radius: 15px;
     position: relative;
     overflow: hidden;
-    margin-bottom: 8px;
+    margin-bottom: clamp(0.4rem, 1vw, 0.8rem);
 }
 
 /* Her üye için özel renkler */
@@ -620,7 +617,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 30px;
+    gap: clamp(1.5rem, 4vw, 2rem);
     opacity: 0;
     visibility: hidden;
     transform: scale(0.8);
@@ -635,15 +632,15 @@ body {
 }
 
 .social-link {
-    width: 60px;
-    height: 60px;
+    width: clamp(45px, 10vw, 60px);
+    height: clamp(45px, 10vw, 60px);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     text-decoration: none;
     color: white;
-    font-size: 1.5rem;
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border: 2px solid rgba(54, 54, 54, 0.674);
     backdrop-filter: blur(10px);
@@ -796,10 +793,11 @@ body {
 /* Thanks Section */
 .thanks-section {
     text-align: center;
-    margin-top: 40px;
+    margin-top: clamp(2rem, 5vw, 3rem);
     opacity: 0;
     transform: translateY(30px);
     transition: all 0.8s ease 1.5s;
+    padding: 0 clamp(0.5rem, 2vw, 1rem);
 }
 
 .team-content.active .thanks-section {
@@ -810,17 +808,17 @@ body {
 .thanks-list {
     display: flex;
     justify-content: center;
-    gap: 25px;
+    gap: clamp(1rem, 3vw, 1.5rem);
     flex-wrap: wrap;
 }
 
 .thanks-person {
     background: rgba(255, 255, 255, 0.05);
-    padding: 12px 20px;
+    padding: clamp(0.8rem, 2vw, 1.2rem) clamp(1rem, 3vw, 1.5rem);
     border-radius: 20px;
     border: 1px solid rgba(255, 0, 255, 0.3);
     transition: all 0.3s ease;
-    font-size: 1.1rem;
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
 }
 
 .thanks-person:hover {
@@ -968,8 +966,8 @@ body {
 /* Optimized Custom Cursor Indicator */
 .cursor-indicator {
     position: fixed;
-    width: 60px;
-    height: 60px;
+    width: clamp(45px, 8vw, 60px);
+    height: clamp(45px, 8vw, 60px);
     border-radius: 50%;
     background: rgba(0, 255, 255, 0.1);
     border: 2px solid rgba(0, 255, 255, 0.5);
@@ -977,7 +975,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: clamp(0.6rem, 1.5vw, 0.75rem);
     font-weight: 600;
     color: #00ffff;
     pointer-events: none;
@@ -1022,3 +1020,137 @@ body {
 @media (hover: none) {
     .cursor-indicator { display: none; }
 }
+
+/* Responsive Breakpoints */
+@media (max-width: 1200px) {
+    .team-grid {
+        max-width: 900px;
+    }
+}
+
+@media (max-width: 900px) {
+    .team-grid {
+        max-width: 600px;
+        gap: clamp(1rem, 2vw, 3rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .team-content {
+        padding: clamp(1rem, 3vw, 1.5rem);
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+
+    .team-grid {
+        gap: clamp(0.8rem, 2vw, 1.5rem);
+        max-width: 100%;
+        padding: 0 clamp(0.5rem, 2vw, 1rem);
+    }
+
+    .team-member {
+        width: clamp(260px, 85vw, 280px);
+        height: auto;
+        min-height: 300px;
+    }
+
+    .thanks-list {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .team-grid {
+        flex-direction: column;
+        align-items: center;
+        gap: clamp(1rem, 3vw, 1.5rem);
+    }
+
+    .team-member {
+        width: clamp(260px, 90vw, 300px);
+        height: auto;
+        min-height: 280px;
+    }
+
+    .team-title {
+        font-size: clamp(1.2rem, 3.5vw, 1.8rem);
+        margin-bottom: clamp(1.5rem, 3vw, 2rem);
+    }
+}
+
+@media (max-width: 480px) {
+    .team-content {
+        padding: clamp(0.8rem, 2vw, 1rem);
+    }
+
+    .team-grid {
+        gap: clamp(0.8rem, 2vw, 1rem);
+        padding: 0 clamp(0.3rem, 1vw, 0.5rem);
+    }
+
+    .team-member {
+        width: clamp(260px, 92vw, 300px);
+        height: auto;
+        min-height: 270px;
+        padding: clamp(0.8rem, 2vw, 1.2rem);
+    }
+
+    .team-title {
+        font-size: clamp(1.1rem, 3vw, 1.6rem);
+        margin-bottom: clamp(1rem, 2vw, 1.5rem);
+    }
+
+    .member-avatar {
+        width: clamp(55px, 12vw, 70px);
+        height: clamp(55px, 12vw, 70px);
+        font-size: clamp(1rem, 2.5vw, 1.5rem);
+    }
+
+    .member-info h3 {
+        font-size: clamp(0.85rem, 2vw, 1rem);
+    }
+
+    .member-info .surname {
+        font-size: clamp(0.8rem, 2vw, 0.95rem);
+    }
+
+    .group-name {
+        font-size: clamp(1.5rem, 6vw, 3rem);
+    }
+}
+
+@media (max-width: 360px) {
+    .team-member {
+        width: clamp(260px, 95vw, 290px);
+        min-height: 260px;
+        padding: clamp(0.7rem, 1.5vw, 1rem);
+    }
+
+    .member-avatar {
+        width: clamp(50px, 10vw, 60px);
+        height: clamp(50px, 10vw, 60px);
+        font-size: clamp(0.9rem, 2vw, 1.2rem);
+        margin-bottom: clamp(0.5rem, 1vw, 0.8rem);
+    }
+
+    .role {
+        padding: clamp(0.3rem, 0.8vw, 0.5rem) clamp(0.6rem, 1.5vw, 1rem);
+        font-size: clamp(0.6rem, 1.2vw, 0.7rem);
+    }
+
+    .team-title {
+        font-size: clamp(1rem, 2.5vw, 1.4rem);
+    }
+
+    .group-name {
+        font-size: clamp(1.3rem, 5vw, 2.5rem);
+    }
+}
+
+@media (hover: none) {
+    .cursor-indicator { 
+        display: none; 
+    }
+}
+

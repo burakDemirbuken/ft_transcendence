@@ -23,7 +23,7 @@ class ManagerProfile {
 	private monthChartData: { label0: string, label1: string, labels: string[], data1: number[], data2: number[] } = {
 		label0: "Total Matches",
 		label1: "Matches Won",
-		labels: ["Vuruşlar"],
+		labels: ["Hits"],
 		data1: [],
 		data2: []
 	};
@@ -43,7 +43,7 @@ class ManagerProfile {
 		setTimeout(() => {
 			this.avatarStatus = document.querySelector('.avatar') as HTMLElement;
 			if (!this.avatarStatus) {
-				console.error("avatar elemanı bulunamadı!");
+				showNotification("Avatar element not found!", "error");
 			} else {
 				this.initConnectionStatus(); // Bağlantı durumunu başlat
 			}
@@ -344,9 +344,9 @@ class ManagerProfile {
 		if (!monthlyCtx) return;
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
-		const hitLabel = translations?.profile?.monthly?.hitCount ?? 'Topa Vurma Sayısı';
-		const missLabel = translations?.profile?.monthly?.missCount ?? 'Iskalamalar';
-		const Label = translations?.profile?.monthly?.label ?? 'Vuruşlar';
+		const hitLabel = translations?.profile?.monthly?.hitCount ?? 'Ball Hits';
+		const missLabel = translations?.profile?.monthly?.missCount ?? 'Ball Misses';
+		const Label = translations?.profile?.monthly?.label ?? 'Hits';
 
 		this.charts.monthly = new Chart(monthlyCtx, {
 			type: 'bar',
@@ -431,9 +431,9 @@ class ManagerProfile {
 		chart.update();
 
 		chart = this.charts.monthly;
-		const hitLabel = translations?.profile?.monthly?.hitCount ?? 'Topa Vurma Sayısı';
-		const missLabel = translations?.profile?.monthly?.missCount ?? 'İskalamalar';
-		const chartTitle = translations?.profile?.monthly?.label ?? 'Vuruşlar';
+		const hitLabel = translations?.profile?.monthly?.hitCount ?? 'Ball Hits';
+		const missLabel = translations?.profile?.monthly?.missCount ?? 'Ball Misses';
+		const chartTitle = translations?.profile?.monthly?.label ?? 'Hits';
 		chart.data.labels = [chartTitle];
 		chart.data.datasets[0].label = hitLabel;
 		chart.data.datasets[1].label = missLabel;
@@ -670,11 +670,6 @@ function tabClickHandler (e: Event) {
 	}
 };
 
-function timeFilterChangeHandler (e: Event) {
-	const target = e.target as HTMLSelectElement;
-	profileManager.filterMatches('time', target.value);
-};
-
 function resultFilterChangeHandler (e: Event) {
 	const target = e.target as HTMLSelectElement;
 	profileManager.filterMatches('result', target.value);
@@ -846,8 +841,8 @@ async function showMatchDetails(matchIndex: number) {
 
         // Çeviriden sonuç metni al
         const resultText = isWin ?
-            (translations?.profile?.mhistory?.win || 'GALİBİYET') :
-            (translations?.profile?.mhistory?.lose || 'MAĞLUBİYET');
+            (translations?.profile?.mhistory?.win || 'VICTORY') :
+            (translations?.profile?.mhistory?.lose || 'DEFEAT');
 
         resultBadge.innerHTML = `
             <span class="result-text">${resultText}</span>
@@ -877,7 +872,7 @@ async function showMatchDetails(matchIndex: number) {
         }
 
         // Overlay'i göster
-        overlay.classList.remove('hide-away');
+        overlay?.classList.remove('hide-away');
 
     } catch (error) {
         console.error("❌ Error showing match details:", error);
@@ -886,7 +881,7 @@ async function showMatchDetails(matchIndex: number) {
 
 function hideMatchOverlay() {
     const overlay = document.getElementById('match-overlay') as HTMLDivElement;
-    overlay.classList.add('hide-away');
+    overlay?.classList.add('hide-away');
 }
 
 // API verilerini bracket formatına dönüştür
@@ -1324,7 +1319,7 @@ async function populateMatchHistory(userName: string) {
 		emptyRow.style.gridColumn = '1 / -1';
 		emptyRow.style.textAlign = 'center';
 		emptyRow.style.padding = '2rem';
-		const nomatchText = translations?.profile?.mhistory?.nomatch || 'Henüz maç geçmişi bulunmuyor';
+		const nomatchText = translations?.profile?.mhistory?.nomatch || 'No match history yet';
 		emptyRow.innerHTML = `<span>${nomatchText}</span>`;
 		matchTable.appendChild(emptyRow);
 		return;
@@ -1332,8 +1327,8 @@ async function populateMatchHistory(userName: string) {
 
 	// Çeviriyi bir kez al
 	const translations = await getJsTranslations(localStorage.getItem("langPref"));
-	const winText = translations?.profile?.mhistory?.win || 'Galibiyet';
-	const loseText = translations?.profile?.mhistory?.lose || 'Mağlubiyet';
+	const winText = translations?.profile?.mhistory?.win || 'Victory';
+	const loseText = translations?.profile?.mhistory?.lose || 'Defeat';
 
 	// Her maç için satır oluştur
 	matches.forEach((match: any, index: number) => {
@@ -1420,7 +1415,7 @@ async function populateRecentMatches(userName: string) {
 
 		if (matches.length === 0) {
 			const translations = await getJsTranslations(localStorage.getItem("langPref"));
-			matchesList.innerHTML = `<p style="text-align: center; color: var(--color-muted);">${translations?.profile?.mhistory?.nomatch || 'Henüz maç geçmişi bulunmuyor'}</p>`;
+			matchesList.innerHTML = `<p style="text-align: center; color: var(--color-muted);">${translations?.profile?.mhistory?.nomatch || 'No match history yet'}</p>`;
 			return;
 		}
 
@@ -1489,7 +1484,7 @@ async function setTextStats(user: any) {
 		if (el) {
 			el.textContent = value;
 		} else {
-			console.warn(`Element bulunamadı: ${selector}`);
+			console.warn(`Element not found: ${selector}`);
 		}
 	};
 
@@ -1498,7 +1493,7 @@ async function setTextStats(user: any) {
 		if (el) {
 			el.textContent = value;
 		} else {
-			console.warn(`Element bulunamadı: #${id}`);
+			console.warn(`Element not found: #${id}`);
 		}
 	};
 
@@ -1580,7 +1575,7 @@ async function setChartStats(user: any) {
 		// Son 7 günü sırayla al (bugünden 6 gün geriye)
 		const labels: string[] = [];
 		const data: number[] = [];
-		const dayNames = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+		const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 		for (let i = 6; i >= 0; i--) {
 			const date = new Date();
@@ -1698,7 +1693,7 @@ async function populateTournamentHistory(userName: string) {
 		emptyRow.style.gridColumn = '1 / -1';
 		emptyRow.style.textAlign = 'center';
 		emptyRow.style.padding = '2rem';
-		emptyRow.innerHTML = `<span data-i18n="profile.thistory.nomatch">${translations?.profile?.thistory?.nomatch || 'Henüz turnuva geçmişi bulunmuyor'}</span>`;
+		emptyRow.innerHTML = `<span data-i18n="profile.thistory.nomatch">${translations?.profile?.thistory?.nomatch || 'No tournament history yet'}</span>`;
 		tournamentTable.appendChild(emptyRow);
 		return;
 	}
@@ -1730,11 +1725,34 @@ async function populateTournamentHistory(userName: string) {
 			minute: '2-digit'
 		});
 
+		// Winner bilgisini al
+		let winnerName = 'N/A';
+		if (tournament?.winnerPlayer) {
+			// Kazananın adını bul
+			if (tournament.Rounds && tournament.Rounds.length > 0) {
+				for (const round of tournament.Rounds) {
+					if (!round.RoundMatches) continue;
+					for (const match of round.RoundMatches) {
+						if (match.playerOneID === tournament.winnerPlayer) {
+							winnerName = match.playerOne?.displayName || 'Unknown';
+							break;
+						}
+						if (match.playerTwoID === tournament.winnerPlayer) {
+							winnerName = match.playerTwo?.displayName || 'Unknown';
+							break;
+						}
+					}
+					if (winnerName !== 'N/A') break;
+				}
+			}
+		}
+
 		tournamentRow.innerHTML = `
 			<span class="tournament-name">${tournament.name || 'Unnamed Tournament'}</span>
 			<span class="tournament-date">${startDateStr} ${startTimeStr}</span>
 			<span class="tournament-end-date">${endDateStr} ${endTimeStr}</span>
 			<span class="tournament-matches">${tournament.Rounds?.length || 0}</span>
+			<span class="tournament-winner">${winnerName}</span>
 		`;
 
 		tournamentTable.appendChild(tournamentRow);

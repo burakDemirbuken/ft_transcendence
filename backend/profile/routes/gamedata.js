@@ -261,7 +261,7 @@ export default async function gamedataRoute(fastify) {
 							gameTotalDuration: time.duration,
 							gameCurrentStreak: 1
 						}, { transaction: t })
-						
+
 						await player.Stat.update({
 							gameLongestStreak: player.Stat.gameCurrentStreak + 1 > player.Stat.gameLongestStreak ?
 								player.Stat.gameCurrentStreak + 1 : player.Stat.gameLongestStreak,
@@ -454,7 +454,8 @@ export default async function gamedataRoute(fastify) {
 	})
 
 	fastify.get('/match-history', async (request, reply) => {
-		const userName = request.query?.userName ?? fastify.getDataFromToken(request)?.username ?? null
+
+		const userName = fastify.getDataFromToken(request)?.username ?? request.query?.userName ?? null
 
 		try {
 			const result = await getUserMatchHistory(fastify, userName)

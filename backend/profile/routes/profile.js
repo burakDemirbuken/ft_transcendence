@@ -26,7 +26,7 @@ export default async function profileRoute(fastify) {
 
 			const profileData = userProfile.toJSON()
 			delete profileData.id
-			
+
 			return reply.send({
 				profile: profileData,
 				achievements: userAchievementsProgress,
@@ -37,7 +37,7 @@ export default async function profileRoute(fastify) {
 			return reply.code(500).send({ message: 'Error retrieving user profile' })
 		}
 	})
-	
+
 	fastify.post('/displaynameupdate', async (request, reply) => {
 		const userName = (await fastify.getDataFromToken(request))?.username ?? null
 		const dname = request.body?.dname ?? null
@@ -63,7 +63,7 @@ export default async function profileRoute(fastify) {
 			}
 
 			const existingProfile = await fastify.sequelize.models.Profile.findOne({
-				where: { 
+				where: {
 					displayName: dname,
 					userName: {
 						[Op.ne]: userName
@@ -181,7 +181,7 @@ export default async function profileRoute(fastify) {
 				msg: 'Error creating user profile',
 				message: error?.message,
 			})
-	
+
 			return reply.code(500).send({ message: 'Failed to create user profile' })
 		}
 	})
