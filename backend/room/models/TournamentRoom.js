@@ -183,8 +183,6 @@ export default class TournamentRoom extends Room
 	{
 		if (this.host !== playerId)
 			throw new Error('Only the host can start the game');
-		if (this.allPlayersReady() === false)
-			throw new Error('Cannot start game, not all players are ready or room is not full');
 
 		this.status = 'in_game';
 

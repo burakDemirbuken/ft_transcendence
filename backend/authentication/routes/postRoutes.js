@@ -264,139 +264,70 @@ export async function postRoutes(fastify, options)
 		}
 	}, postController.autoRefreshToken);
 
-    fastify.post('/request-email-change',
-    {
-        schema:
-        {
-            querystring:
-            {
-                type: 'object',
-                properties:
-                {
-                    lang:
-                    {
-                        type: 'string'
-                    }
-                }
-            }
-        }
-    }, postController.requestEmailChange);
+	fastify.post('/init-password-change', {
+		schema: {
+			body: {
+				type: 'object',
+				required: ['currentPassword', 'newPassword'],
+				properties: {
+					currentPassword: { 
+						type: 'string',
+						minLength: 6
+					},
+					newPassword: { 
+						type: 'string', 
+						minLength: 6 
+					}
+				}
+			}
+		}
+	}, postController.initPasswordChange);
 
-    fastify.post('/process-email-change',
-    {
-        schema:
-        {
-            body:
-            {
-                type: 'object',
-                required:
-                [
-                    'token',
-                    'newEmail',
-                    'oldEmail',
-                    'password'
-                ],
-                properties:
-                {
-                    token:
-                    {
-                        type: 'string',
-                        minLength: 32,
-                        maxLength: 64
-                    },
-                    newEmail:
-                    {
-                        type: 'string',
-                        format: 'email'
-                    },
-                    oldEmail:
-                    {
-                        type: 'string',
-                        format: 'email'
-                    },
-                    password:
-                    {
-                        type: 'string',
-                        minLength: 6
-                    }
-                }
-            },
-            querystring:
-            {
-                type: 'object',
-                properties:
-                {
-                    lang:
-                    {
-                        type: 'string'
-                    }
-                }
-            }
-        }
-    }, postController.processEmailChange);
+	// Şifre değiştirme onayla - 2FA kodunu doğrula
+	fastify.post('/confirm-password-change', {
+		schema: {
+			body: {
+				type: 'object',
+				required: ['code'],
+				properties: {
+					code: { 
+						type: 'string',
+						pattern: '^[0-9]{6}$'
+					}
+				}
+			}
+		}
+	}, postController.confirmPasswordChange);
 
-    fastify.post('/request-password-change',
-    {
-        schema:
-        {
-            querystring:
-            {
-                type: 'object',
-                properties:
-                {
-                    lang:
-                    {
-                        type: 'string'
-                    }
-                }
-            }
-        }
-    }, postController.requestPasswordChange);
+	// Hesap silme başlat - 2FA kodu gönder
+	fastify.post('/init-delete-account', {
+		schema: {
+			body: {
+				type: 'object',
+				required: ['password'],
+				properties: {
+					password: { 
+						type: 'string',
+						minLength: 6
+					}
+				}
+			}
+		}
+	}, postController.initDeleteAccount);
 
-    fastify.post('/process-password-change',
-    {
-        schema:
-        {
-            body:
-            {
-                type: 'object',
-                required:
-                [
-                    'token',
-                    'currentPassword',
-                    'newPassword'
-                ],
-                properties:
-                {
-                    token:
-                    {
-                        type: 'string',
-                        minLength: 32,
-                        maxLength: 64
-                    },
-                    currentPassword:
-                    {
-                        type: 'string',
-                        minLength: 6
-                    },
-                    newPassword:
-                    {
-                        type: 'string',
-                        minLength: 8
-                    }
-                }
-            },
-            querystring:
-            {
-                type: 'object',
-                properties:
-                {
-                    lang:
-                    {
-                        type: 'string'
-                    }
-                }
-            }
-        }
-    }, postController.processPasswordChange);
+	// Hesap silme onayla - 2FA kodunu doğrula
+	fastify.post('/confirm-delete-account', {
+		schema: {
+			body: {
+				type: 'object',
+				required: ['code'],
+				properties: {
+					code: { 
+						type: 'string',
+						pattern: '^[0-9]{6}$'
+					}
+				}
+			}
+		}
+	}, postController.confirmDeleteAccount);
 }

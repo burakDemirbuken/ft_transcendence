@@ -10,23 +10,20 @@ class LocalPingPong extends PingPong
 		console.log(`🎮 LocalPingPong created with mode: ${this.gameMode}`);
 	}
 
-	addPlayer(player)
+	addRegisteredPlayer(playerId)
 	{
-		if (this.players.length !== 0)
-			throw new Error("LocalPingPong can only have one player");
-		this.players.push(player);
-		this.team.set(2, { playersId: [player.id], score: 0 });
+		this.registeredPlayers.add(playerId);
+		this.team.set(2, { playersId: [playerId], score: 0 });
 		this.team.set(1, { playersId: ["Player2"], score: 0 });
-		this.paddles.set(player.id, this.createPaddle(1));
+		this.paddles.set(playerId, this.createPaddle(1));
 		this.paddles.set("Player2", this.createPaddle(2));
-		console.log(`👤 Player ${player.id} added to LocalPingPong`);
-		this.status = 'ready to start';
 	}
 
 	paddleControls()
 	{
 		const player = this.players[0];
-		const localPlayer = this.paddles.get(this.players[0].id);
+		if (!player) return;
+		const localPlayer = this.paddles.get(player.id);
 		const localPaddle = this.paddles.get("Player2");
 
 		localPaddle.up = player.inputGet('ArrowUp');
@@ -38,11 +35,13 @@ class LocalPingPong extends PingPong
 
 	getGameState()
 	{
+		const player = this.players[0];
+
 		const playerStates = [
 			{
-				id: this.players[0].id,
-				name: this.players[0].name,
-				...this.paddles.get(this.players[0].id).getState(),
+				id: player?.id,
+				name: player?.name,
+				...this.paddles.get(player?.id)?.getState(),
 			},
 			{
 				id: "Player2",

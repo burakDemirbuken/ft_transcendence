@@ -10,8 +10,6 @@ class Player
 	{
 		this.id = id;
 		this.name = name;
-		// testing için her zaman true
-		this.isReady = true;
 		this.clientSocket = socket;
 	}
 

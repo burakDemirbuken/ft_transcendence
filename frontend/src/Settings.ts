@@ -2,8 +2,11 @@ import AView from "./AView.js";
 import { getAuthToken, getAuthHeaders } from './utils/auth.js';
 import { API_BASE_URL, navigateTo } from './index.js';
 import { showNotification } from "./notification.js";
+import tokenManager from './tokenManager.js';
 
 let currentUserName = null;
+let pendingAction = null; // 'password' veya 'email'
+let pendingData = null; // İlgili data
 
 async function hideSettingsOverlay() {
 	console.log("HIDE SETTINGS OVERLAY");
@@ -11,6 +14,8 @@ async function hideSettingsOverlay() {
 	const input = document.querySelector(".card input") as HTMLInputElement;
 	if (input)
 		input.value = "";
+	pendingAction = null;
+	pendingData = null;
 }
 
 async function showSettingsOverlay() {
@@ -18,31 +23,84 @@ async function showSettingsOverlay() {
 	document.querySelector(".overlay")?.classList.remove("hide-away");
 }
 
-async function send2FACode(e) {
+async function confirm2FACode(e) {
 	e.preventDefault();
-	console.log("SEND 2FA CODE REQ");
+	console.log("CONFIRM 2FA CODE");
 
 	const form = e.target.closest('form');
+	const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
 	const formData = new FormData(form);
-	const inputs = Object.fromEntries(formData);
+	const code = formData.get('code') as string;
+
+	if (!code || code.length !== 6) {
+		showNotification("Please enter 6-digit code", "error");
+		return;
+	}
+
+	// Butonu disable et
+	submitBtn.disabled = true;
+	submitBtn.style.opacity = '0.6';
+	submitBtn.style.cursor = 'not-allowed';
 
 	try {
-		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/verify-2fa`, {
+		let endpoint = '';
+		if (pendingAction === 'password') {
+			endpoint = '/auth/confirm-password-change';
+		} else if (pendingAction === 'email') {
+			endpoint = '/auth/confirm-email-change';
+		} else {
+			showNotification("Invalid action", "error");
+			submitBtn.disabled = false;
+			submitBtn.style.opacity = '1';
+			submitBtn.style.cursor = 'pointer';
+			return;
+		}
+
+		const response = await fetch(`${API_BASE_URL}${endpoint}`, {
 			method: 'POST',
 			credentials: 'include',
-			body: JSON.stringify({...inputs})
+			headers: {
+				'Content-Type': 'application/json',
+				...getAuthHeaders()
+			},
+			body: JSON.stringify({ code })
 		});
-		if (getProfileDatas.ok) {
-			console.log("success");
-			showNotification("2FA code sent to your email", "success");
-		}
-		else {
-			console.log(getProfileDatas.statusText);
-			showNotification("Failed to send 2FA code", "error");
+
+		const result = await response.json();
+
+		if (response.ok) {
+			showNotification(result.message || "Change successful!", "success");
+			hideSettingsOverlay();
+			
+			// Şifre değiştiyse ve logout gerekliyse
+			if (pendingAction === 'password' && result.logout) {
+				showNotification("Password changed! Logging out...", "success");
+				// TokenManager ile logout yap (cookie'leri temizler)
+				await tokenManager.logout();
+				setTimeout(() => {
+					navigateTo('login');
+				}, 1500);
+			}
+			// Email değiştiyse sayfayı yenile
+			else if (pendingAction === 'email') {
+				setTimeout(() => {
+					window.location.reload();
+				}, 1500);
+			}
+		} else {
+			showNotification(result.error || "Verification failed", "error");
+			// Hata durumunda butonu tekrar aktif et
+			submitBtn.disabled = false;
+			submitBtn.style.opacity = '1';
+			submitBtn.style.cursor = 'pointer';
 		}
 	} catch (error) {
-		console.error("❌ Error during 2FA code request:", error);
+		console.error("❌ Error during 2FA confirmation:", error);
 		showNotification(`System Error: ${error.message}`, "error");
+		// Hata durumunda butonu tekrar aktif et
+		submitBtn.disabled = false;
+		submitBtn.style.opacity = '1';
+		submitBtn.style.cursor = 'pointer';
 	}
 
 	form.querySelectorAll('input').forEach((input: HTMLInputElement) => input.value = '');
@@ -108,7 +166,7 @@ async function sendDNameChangeReq(e) {
 
 	const form = e.target.closest('form');
 	const formData = new FormData(form);
-	const inputs = Object.fromEntries(formData);
+	const dname = formData.get('dname') as string;
 
 	try {
 		const getProfileDatas = await fetch(`${API_BASE_URL}/profile/displaynameupdate`, {
@@ -118,7 +176,7 @@ async function sendDNameChangeReq(e) {
 				'Content-Type': 'application/json',
 				...getAuthHeaders()
 			},
-			body: JSON.stringify({userName: currentUserName, ...inputs})
+			body: JSON.stringify({userName: currentUserName, dname})
 		});
 		if (getProfileDatas.ok) {
 			console.log(await getProfileDatas.json());
@@ -131,74 +189,126 @@ async function sendDNameChangeReq(e) {
 		console.error("❌ Error during profile update:", error);
 		showNotification(`System Error: ${error.message}`, "error");
 	}
+
+	form.querySelectorAll('input').forEach((input: HTMLInputElement) => input.value = '');
 }
 
-// body: JSON.stringify({...inputs}) : formdaki inputları olduğu gibi alıp yollar.
-// Değişken isimlerin için name="" baz alır.
-// Örn.:
-// 	html: <input name="current-email" value="kullanıcı-inputu">
-// 	body: { "current-email": "kulanıcı-inputu"}
 async function sendEmailChangeReq(e) {
 	e.preventDefault();
-	console.log("SEND EMAIL CHANGE REQ");
-
-	try {
-		const form = e.target.closest('form');
-		const formData = new FormData(form);
-		const inputs = Object.fromEntries(formData);
-
-		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/request-email-change`, {
-			method: 'POST',
-			credentials: 'include',
-			body: JSON.stringify({...inputs})
-		});
-		if (getProfileDatas.ok) {
-			console.log("success");
-			showNotification("Email change link sent to your email", "success");
-			showSettingsOverlay();
-		}
-		else {
-			console.log(getProfileDatas.statusText);
-			showNotification("Failed to send email change link", "error");
-		}
-	} catch (error) {
-		console.error("❌ Error during email change request:", error);
-		showNotification(`System Error: ${error.message}`, "error");
-	}
-}
-
-// body: JSON.stringify({...inputs}) : formdaki inputları olduğu gibi alıp yollar.
-// Değişken isimlerin için name="" baz alır.
-// Örn.:
-// 	html: <input name="current-email" value="kullanıcı-inputu">
-// 	body: { "current-email": "kulanıcı-inputu"}
-async function sendPassChangeReq(e) {
-	e.preventDefault();
-	console.log("SEND PASS CHANGE REQ");
+	console.log("INIT EMAIL CHANGE");
 
 	const form = e.target.closest('form');
+	const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
 	const formData = new FormData(form);
-	const inputs = Object.fromEntries(formData);
+	const newEmail = formData.get('new-email') as string;
+
+	if (!newEmail) {
+		showNotification("Please enter new email", "error");
+		return;
+	}
+
+	// Butonu disable et
+	submitBtn.disabled = true;
+	submitBtn.style.opacity = '0.6';
+	submitBtn.style.cursor = 'not-allowed';
 
 	try {
-		const getProfileDatas = await fetch(`${API_BASE_URL}/auth/request-password-change`, {
+		const response = await fetch(`${API_BASE_URL}/auth/init-email-change`, {
 			method: 'POST',
 			credentials: 'include',
-			body: JSON.stringify({...inputs})
+			headers: {
+				'Content-Type': 'application/json',
+				...getAuthHeaders()
+			},
+			body: JSON.stringify({ newEmail })
 		});
-		if (getProfileDatas.ok) {
-			console.log("success");
-			showNotification("Password change link sent to your email", "success");
+
+		const result = await response.json();
+
+		if (response.ok) {
+			pendingAction = 'email';
+			pendingData = { newEmail };
+			showNotification(result.message || "2FA code sent to your email", "success");
 			showSettingsOverlay();
-		}
-		else {
-			console.log(getProfileDatas.statusText);
-			showNotification("Failed to send password change link", "error");
+		} else {
+			showNotification(result.error || "Failed to initiate email change", "error");
 		}
 	} catch (error) {
-		console.error("❌ Error during password change request:", error);
+		console.error("❌ Error during email change init:", error);
 		showNotification(`System Error: ${error.message}`, "error");
+	} finally {
+		// Butonu tekrar aktif et
+		submitBtn.disabled = false;
+		submitBtn.style.opacity = '1';
+		submitBtn.style.cursor = 'pointer';
 	}
+
+	form.querySelectorAll('input').forEach((input: HTMLInputElement) => input.value = '');
+}
+
+async function sendPassChangeReq(e) {
+	e.preventDefault();
+	console.log("INIT PASSWORD CHANGE");
+
+	const form = e.target.closest('form');
+	const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+	const formData = new FormData(form);
+	const currentPassword = formData.get('current-password') as string;
+	const newPassword = formData.get('new-password') as string;
+	const confirmPassword = formData.get('confirm-password') as string;
+
+	if (!currentPassword || !newPassword || !confirmPassword) {
+		showNotification("All fields are required", "error");
+		return;
+	}
+
+	if (newPassword !== confirmPassword) {
+		showNotification("New passwords do not match", "error");
+		return;
+	}
+
+	if (newPassword.length < 6) {
+		showNotification("Password must be at least 6 characters", "error");
+		return;
+	}
+
+	// Butonu disable et
+	submitBtn.disabled = true;
+	submitBtn.style.opacity = '0.6';
+	submitBtn.style.cursor = 'not-allowed';
+
+	try {
+		const response = await fetch(`${API_BASE_URL}/auth/init-password-change`, {
+			method: 'POST',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				...getAuthHeaders()
+			},
+			body: JSON.stringify({ currentPassword, newPassword })
+		});
+
+		const result = await response.json();
+
+		if (response.ok) {
+			pendingAction = 'password';
+			pendingData = { currentPassword, newPassword };
+			showNotification(result.message || "2FA code sent to your email", "success");
+			showSettingsOverlay();
+		} else {
+			showNotification(result.error || "Failed to initiate password change", "error");
+		}
+	} catch (error) {
+		console.error("❌ Error during password change init:", error);
+		showNotification(`System Error: ${error.message}`, "error");
+	} finally {
+		// Butonu tekrar aktif et
+		submitBtn.disabled = false;
+		submitBtn.style.opacity = '1';
+		submitBtn.style.cursor = 'pointer';
+	}
+
+	form.querySelectorAll('input').forEach((input: HTMLInputElement) => input.value = '');
 }
 
 export default class extends AView {
@@ -222,7 +332,7 @@ export default class extends AView {
 		document.querySelector(".email")?.addEventListener("click", sendEmailChangeReq);
 		document.querySelector(".dname")?.addEventListener("click", sendDNameChangeReq);
 		document.querySelector(".pass")?.addEventListener("click", sendPassChangeReq);
-		document.querySelector(".validation-form")?.addEventListener("submit", send2FACode);
+		document.querySelector(".validation-form")?.addEventListener("submit", confirm2FACode);
 		document.getElementById("card-exit")?.addEventListener("click", hideSettingsOverlay);
 		document.querySelectorAll(".part-expand").forEach((btn) => {
 			btn.addEventListener("click", function (e) {

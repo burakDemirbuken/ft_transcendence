@@ -12,8 +12,9 @@ export default class AIRoom extends Room
 		this.id = id;
 		this.maxPlayers = 1;
 		this.aiSettings = { difficulty: aiSettings.difficulty, custom: {...aiSettings}};
-		console.log('🤖 AI Settings:', this.aiSettings); // DEBUG
+		aiNetwork.initGame(this.aiSettings.difficulty, this.id, this.aiSettings.custom);
 		this.createdAt = Date.now();
+
 	}
 
 	getState()
@@ -25,11 +26,4 @@ export default class AIRoom extends Room
 		};
 	}
 
-	startGame(playerId)
-	{
-		if (!this.aiSettings)
-			throw new Error('AI settings are missing, cannot start AI game');
-		aiNetwork.initGame(this.aiSettings.difficulty, this.id, this.aiSettings.custom);
-		return super.startGame(playerId);
-	}
 }

@@ -64,9 +64,9 @@
 						</div>
 						<div class="form-container" hidden="">
 							<form action="">
-								<input type="password" name="new-pass" placeholder="New Password">
-								<input type="password" name="new-pass-again" placeholder="New Password Again">
-								<input type="password" name="current-pass" placeholder="Current Password">
+								<input type="password" name="current-password" placeholder="Current Password">
+								<input type="password" name="new-password" placeholder="New Password">
+								<input type="password" name="confirm-password" placeholder="New Password Again">
 								<button class="submit pass" type="submit">
 									<span>Change Password</span>
 								</button>
@@ -98,7 +98,7 @@
 			<label class="validation-label">
 				<div class="enter-code">
 					<span>ENTER CODE</span>
-					<input type="number" name="validation" placeholder="2FA Code">
+					<input type="text" name="code" placeholder="2FA Code" maxlength="6" pattern="[0-9]{6}">
 				</div>
 				<button type="submit">Validate</button>
 			</label>

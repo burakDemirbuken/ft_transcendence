@@ -1,12 +1,14 @@
 import WebSocketClient from './WebSocketClient.js';
+import EventEmitter from 'events';
 
-class AiNetworkManager
+class AiNetworkManager extends EventEmitter
 {
 	constructor()
 	{
+		super();
 		try
 		{
-			this.socket = new WebSocketClient('wss:', 'ai-server', 3003);
+			this.socket = new WebSocketClient('ws:', 'ai-server', 3003);
 
 			this.socket.onConnect(() => {
 				console.log('🤖 Connected to AI server');
