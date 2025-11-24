@@ -1,6 +1,6 @@
 import websocket from '@fastify/websocket'
 import Fastify from 'fastify';
-
+import { getDataFromToken } from '../../plugins/utils.js';
 class NetworkManager
 {
 	constructor(logger = false)
@@ -42,7 +42,7 @@ class NetworkManager
 						const client = connection.socket;
 						const connectionId = this._generateConnectionId();
 						this.connections.set(connectionId, client);
-						onConnect(connectionId, req.query);
+						onConnect(connectionId, (getDataFromToken(req)?.username ?? null), req.query);
 
 						client.on('message', (message) =>
 							{
