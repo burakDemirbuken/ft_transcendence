@@ -3,6 +3,7 @@ import { getJsTranslations } from './utils/I18n.js';
 import { API_BASE_URL } from './index.js';
 import doubleFetch from "./utils/doubleFetch.js";
 import AView from "./AView.js";
+import { showNotification } from './utils/notification.js';
 declare const Chart: any; // Global Chart.js nesnesini tanımlar
 
 function getCSSVar(name: string): string {
@@ -1502,13 +1503,14 @@ async function setTextStats(user: any) {
 	};
 
 	// Title Card
+	const avatarImg = document.querySelector('.avatar > img') as HTMLImageElement;
 	if (user?.profile?.avatarUrl) {
-		const avatarImg = document.querySelector('.avatar > img') as HTMLImageElement;
-		if (avatarImg) {
+		if (avatarImg){
 			avatarImg.setAttribute('src', `${API_BASE_URL}/static/${user.profile.avatarUrl}`);
 			avatarImg.style.background = 'none';
 		}
-	}
+	} else
+		avatarImg.setAttribute('src', `../profile.svg`);
 
 	// ✅ Güvenli atamalar
 	safeSetText(".user-title", user.profile.displayName);
@@ -1848,7 +1850,7 @@ async function onLoad() {
 	}
 }
 
-export async function onUserProfile(userName: string) {
+export async function onUserProfile(userName: string): Promise<boolean> {
 	try {
 		const userProfile = await doubleFetch(`${API_BASE_URL}/profile/profile?userName=${userName}`);
 
@@ -1865,10 +1867,15 @@ export async function onUserProfile(userName: string) {
 			setTimeout(() => {
 				profileManager.animateLevelProgress();
 			}, 100);
+			return true;
 		} else {
+			showNotification("Error while loading user profile", "error");
 			console.error("❌ Failed to fetch profile data:", userProfile.statusText);
+			return false;
 		}
 	} catch (error) {
+		showNotification("Error while loading user profile", "error");
 		console.error("ERROR LOADING OVERLAY", error);
+		return false;
 	}
 }

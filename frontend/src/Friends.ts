@@ -64,12 +64,13 @@ export function disconnectFriendsWebSocket() {
 
 let currentFrPage:string = "friends";
 
-function handleOverlay(e) {
+async function handleOverlay(e) {
 	if (e.target.classList.contains("prof")) {
-		document.querySelector(".overlay")?.classList.remove("hide-away");
 		const userName = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1) ?? "";
-		if (userName)
-			onUserProfile(userName);
+		if (userName) {
+			if (await onUserProfile(userName))
+				document.querySelector(".overlay")?.classList.remove("hide-away");
+		}
 	}
 	else if (e.currentTarget.id === "card-exit") {
 		document.querySelector(".overlay")?.classList.add("hide-away");

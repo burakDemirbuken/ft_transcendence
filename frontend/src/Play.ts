@@ -2,7 +2,7 @@
 // IMPORTS
 // ============================================================================
 import AView from "./AView.js";
-import { showNotification } from '../dist/notification.js';
+import { showNotification } from '../dist/utils/notification.js';
 import App from '../dist/game/App.js';
 import WebSocketClient from '../dist/game/network/WebSocketClient.js';
 import gameConfig from '../dist/game/json/GameConfig.js';

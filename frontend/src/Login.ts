@@ -24,6 +24,8 @@ async function username() {
 	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
 
 	const form = document.querySelector("#loginForm") as HTMLFormElement;
+	if (!form)
+		return showNotification(trlt.system, "error");
 	const formData = new FormData(form);
 	const username:string = formData.get("username");
 
@@ -60,6 +62,8 @@ async function email() {
 	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
 
 	const form = document.querySelector("#loginForm") as HTMLFormElement;
+	if (!form)
+		return showNotification(trlt.system, "error");
 	const formData = new FormData(form);
 	const email:string = formData.get("email");
 
@@ -79,6 +83,8 @@ async function login() {
 	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
 
 	const form = document.querySelector("#loginForm") as HTMLFormElement;
+	if (!form)
+		return showNotification(trlt.system, "error");
 	const formData = new FormData(form);
 	const password:string = formData.get("password");
 
@@ -117,6 +123,8 @@ async function register() {
 	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
 
 	const form = document.querySelector("#loginForm") as HTMLFormElement;
+	if (!form)
+		return showNotification(trlt.system, "error");
 	const formData = new FormData(form);
 	const password:string = formData.get("password");
 
@@ -156,6 +164,8 @@ async function verify() {
 	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
 
 	const form = document.querySelector("#loginForm") as HTMLFormElement;
+	if (!form)
+		return showNotification(trlt.system, "error");
 	const formData = new FormData(form);
 	const code:string = formData.get("code");
 
@@ -204,6 +214,12 @@ async function verify() {
 	}
 	else
 		goToNextField("password");
+}
+
+function enterPress(e) {
+	if (e.key === "Enter") {
+		enter();
+	}
 }
 
 async function enter() {
@@ -290,16 +306,13 @@ export default class extends AView {
 		currentStep = "welcome";
 		document.addEventListener("click", move);
 		document.addEventListener("input", growInput);
-		document.addEventListener("keydown", (e) => {
-			if (e.key === "Enter") {
-				enter();
-			}
-		});
+		document.addEventListener("keydown", enterPress);
 	}
 
 	async unsetEventHandlers() {
 		document.removeEventListener("click", move);
 		document.removeEventListener("input", growInput);
+		document.removeEventListener("keydown", enterPress);
 	}
 
 	async setStylesheet() {
