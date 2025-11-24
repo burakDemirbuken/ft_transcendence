@@ -129,24 +129,6 @@ export async function getRoutes(fastify, options)
         }
     }, verifyEmail);
 
-    fastify.get('/me',
-    {
-        schema:
-        {
-            querystring:
-            {
-                type: 'object',
-                properties:
-                {
-                    lang:
-                    {
-                        type: 'string'
-                    }
-                }
-            }
-        }
-    }, getController.getProfile);
-
     fastify.get('/profile',
     {
         schema:
