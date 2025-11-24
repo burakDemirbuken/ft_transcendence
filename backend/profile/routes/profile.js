@@ -38,11 +38,7 @@ export default async function profileRoute(fastify) {
 				fastify.getAchievementProgress(profileData.Achievement),
 				fastify.statCalculate(userProfile.id)
 			])
-
-			const profileData = userProfile.toJSON()
 			delete profileData.id
-
-
 			console.log('Retrieved profile for userName:', profileData)
 			return reply.send({
 				profile: profileData,
