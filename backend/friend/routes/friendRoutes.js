@@ -2,9 +2,7 @@ export default async function friendRoutes(fastify) {
 	const presence = fastify.presence
 
 	fastify.get("/ws-friend/friends", { websocket: true }, async (socket, req) => {
-		// cookie'den gelicek
-		// url: ws://.../ws-friend/friends?userName=...
-		const userName  = fastify.getDataFromToken(req)?.username ?? null
+		const userName  = (await fastify.getDataFromToken(req))?.username ?? null
 
 		if (!userName) {
 			console.error('Missing userName in presence connection')
@@ -72,8 +70,10 @@ export default async function friendRoutes(fastify) {
 		})
 
 		const cleanup = async (situation) => {
-			presence.delete(userName)
-			fastify.notifyFriendChanges(userName)
+			if (!(await presence.delete(userName)))
+				return
+			console.log(`Presence connection for ${userName} cleaned up due to:`, situation)
+			await fastify.notifyFriendChanges(userName)
 			fastify.log.info({ userName, situation })
 		}
 

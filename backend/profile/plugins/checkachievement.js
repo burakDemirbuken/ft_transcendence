@@ -44,18 +44,18 @@ export default fp(async (fastify) => {
 		if (Object.keys(updates).length > 0) {
 			await userAchievement.update(updates, { transaction: t })
 		}
-
 	}
+
 	async function getAchievementProgress(userId) {
 		const { Achievement, Stat } = fastify.sequelize.models
 
-		const [stats, achievements] = await Promise.all([
+		const [ stats, achievements ] = await Promise.all([
 			Stat.findOne({
 				where: { userId: userId }
-			}),
+			}) ?? null,
 			Achievement.findOne({
 				where: { userId: userId }
-			})
+			}) ?? null
 		])
 
 		if (!stats || !achievements) {
@@ -84,43 +84,8 @@ export default fp(async (fastify) => {
 		})
 	}
 
-	async function updateGameStreak(userId, isWin, t) {
-		const { Stat } = fastify.sequelize.models
-
-		const userStat = await Stat.findOne({
-			where: { userId: userId },
-			transaction: t,
-		})
-
-		if (!userStat) {
-			throw new Error('Stat not found for user')
-		}
-
-		let newStreak = userStat.gameCurrentStreak || 0
-
-		if (isWin) {
-			newStreak += 1
-		} else {
-			newStreak = 0
-		}
-
-		// En uzun streak'i güncelle
-		const longestStreak = Math.max(
-			userStat.gameLongestStreak || 0,
-			newStreak
-		)
-
-		await userStat.update({
-			gameCurrentStreak: newStreak,
-			gameLongestStreak: longestStreak
-		}, { transaction: t })
-
-		return { gameCurrentStreak: newStreak, gameLongestStreak: longestStreak }
-	}
-
 	fastify.decorate('checkAchievements', checkAchievements)
 	fastify.decorate('getAchievementProgress', getAchievementProgress)
-	fastify.decorate('updateGameStreak', updateGameStreak)
 
 	function nRealcalculate(xp, baseXP = 100, growthFactor = 1.25) {
 		if (xp < 0)

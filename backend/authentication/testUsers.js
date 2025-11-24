@@ -45,7 +45,7 @@ async function createTestUsers() {
                     });
 
                     try {
-                        await fetch('http://profile:3006/create', {
+                        await fetch('http://profile:3006/internal/create', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({

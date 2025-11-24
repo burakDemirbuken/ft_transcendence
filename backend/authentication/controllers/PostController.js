@@ -29,7 +29,7 @@ async function register(request, reply)
 
             // Profile servisi çağır
             try {
-                await fetch('http://profile:3006/create', {
+                await fetch('http://profile:3006/internal/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -167,7 +167,7 @@ export async function verifyEmail(request, reply)
         await user.save();
         utils.tempStorage.delete(userEmail);
         try {
-            await fetch('http://profile:3006/create', {
+            await fetch('http://profile:3006/internal/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -279,7 +279,7 @@ async function verify2FA(request, reply) {
         });
         // Profile servisi çağrısı - ilk login'de profil oluştur
         try {
-            await fetch('http://profile:3006/create', {
+            await fetch('http://profile:3006/internal/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

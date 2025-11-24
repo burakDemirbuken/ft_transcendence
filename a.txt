@@ -1,5 +1,0 @@
- curl -i "http://friend:3007/send" -d '{"userName": "test3", "peerName": "test0"}' -H "Content-Type: application/json"
-
- curl -i "http://friend:3007/remove" -d '{"userName":"test0", "peerName": "test1"}' -H "Content-Type: application/json"
-
- curl -i "http://friend:3007/accept" -d '{"userName":"test0", "peerName": "test1"}' -H "Content-Type: application/json"

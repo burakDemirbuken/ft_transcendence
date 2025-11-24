@@ -5,7 +5,7 @@ export default fp(async function friendChanges(fastify) {
 
 	async function getFriendList(userName) {
 		try {
-			if (!userName) {
+			if (userName == null) {
 				throw new Error("userName is required.")
 			}
 			const friendships = await fastify.sequelize.models.Friend.findAll({
@@ -18,6 +18,7 @@ export default fp(async function friendChanges(fastify) {
 				attributes: ['userName', 'peerName', 'status'],
 				raw: true
 			})
+			console.log(`Friendships for ${userName}:`, friendships)
 			const [incomingPending, outgoingPending, accepted] = friendships.reduce((acc, friendship) => {
 				const isUserInitiator = friendship.userName === userName
 				if (friendship.status === 'pending') {
@@ -52,6 +53,7 @@ export default fp(async function friendChanges(fastify) {
 				throw new Error(`Failed to fetch friend profiles: ${friendsProfiles.status} ${await friendsProfiles.text()}`)
 			}
 			const { users } =  await friendsProfiles.json()
+			console.log(`Fetched profiles for friends of ${userName}:`, users)
 			const [incomingProfiles, outgoingProfiles, acceptedProfiles] = users.reduce((acc, profile) => {
 				const baseProfile = {
 					isOnline: fastify.presence.has(profile.userName),
@@ -75,20 +77,31 @@ export default fp(async function friendChanges(fastify) {
 				acceptedFriends: acceptedProfiles
 			})
 		} catch (error) {
-			fastify.log.error('Error retrieving user friends:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error retrieving friend list for ${userName}: ${error.message}`)
 			return { message: 'Failed to retrieve user friends' }
 		}
 	}
 
 	async function postSend(userName, peerName) {
+		
+		// userName = undefined
 		try {
 			if (!userName || !peerName) {
 				throw new Error("userName and peerName are required.")
-			}
-			if (userName === peerName) {
+			} else if (userName === peerName) {
 				return { user: "Can not send friend request to yourself.", peer: null }
 			}
+
+			const peerProfileResponse = await fetch("http://profile:3006/internal/exists", {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ userName: peerName })
+			})
+			if (!peerProfileResponse.ok) {
+				console.error("Error response from profile service:", peerProfileResponse.status, await peerProfileResponse.text());
+				return { user: `${peerName} user does not exist.`, peer: null }
+			}
+
 			const existingFriendship = await fastify.sequelize.models.Friend.findOne({
 				where: {
 					[Op.or]: [
@@ -96,8 +109,8 @@ export default fp(async function friendChanges(fastify) {
 						{ userName: peerName, peerName: userName }
 					]
 				}
-			}) || null
-			if (existingFriendship) {
+			}) ?? null
+			if (existingFriendship) { 
 				if (existingFriendship.status === 'pending') {
 					return { user: "Friend request already pending.", peer: null }
 				} else if (existingFriendship.status === 'accepted') {
@@ -133,8 +146,14 @@ export default fp(async function friendChanges(fastify) {
 				if (friend.status === 'accepted') {
 					return { user: "Friend request already accepted.", peer: null }
 				}
+
+				if (friend.userName === userName) {
+					return { user: "You cannot accept your own friend request.", peer: null }
+				}
+
 				friend.status = 'accepted'
 				await friend.save()
+
 				return { user: "Friend request accepted.", peer: `${userName} has accepted your friend request.` }
 			} else {
 				return { user: "Friend request not found.", peer: null }
@@ -165,6 +184,9 @@ export default fp(async function friendChanges(fastify) {
 				if (pendingRequest.status !== 'pending') {
 					return { user: "No pending friend request to reject.", peer: null }
 				}
+				
+				const isRecipient = pendingRequest.peerName === userName
+
 				await fastify.sequelize.models.Friend.destroy({
 					where: {
 						[Op.or]: [
@@ -173,7 +195,12 @@ export default fp(async function friendChanges(fastify) {
 						]
 					}
 				})
-				return { user: "Friend request rejected.", peer: `${userName} has rejected your friend request.` }
+
+				if (isRecipient) {
+					return { user: "Friend request rejected.", peer: `${userName} has rejected your friend request.` }
+				} else {
+					return { user: "Friend request cancelled.", peer: "Friend request cancelled." }
+				}
 			} else {
 				return { user: "Friend request not found.", peer: null }
 			}
@@ -220,29 +247,40 @@ export default fp(async function friendChanges(fastify) {
 
 	async function notifyFriendChanges(userName) {
 		try {
-			const userResult = await fastify.getFriendList(userName) ?? {};
-			if (!userResult || (!userResult.pendingFriends && !userResult.acceptedFriends)) {
-				throw new Error("Failed to retrieve user friends for notification.")
+			const friendships = await fastify.sequelize.models.Friend.findAll({
+				where: {
+					[Op.or]: [
+						{ userName: userName},
+						{ peerName: userName }
+					]
+				},
+				attributes: ['userName', 'peerName'],
+				raw: true
+			})
+
+			const users = friendships.map(f => f.userName === userName ? f.peerName : f.userName)
+
+			if (users.length === 0) {
+				console.log(`No friends to notify for user: ${userName}`)
+				return
 			}
 
-			const users = [...userResult.pendingFriends.incoming, ...userResult.pendingFriends.outgoing, ...userResult.acceptedFriends]
-
-			const results = await Promise.allSettled(users.map(async (user) => {
-				if (fastify.presence.has(user.userName)) {
-					const friendList = await fastify.getFriendList(user.userName) ?? {};
+			const results = await Promise.allSettled(users.map(async (friendName) => {
+				if (fastify.presence.has(friendName)) {
+					const friendList = await fastify.getFriendList(friendName) ?? {};
 					if (!friendList || (!friendList.pendingFriends && !friendList.acceptedFriends)) {
 						throw new Error("Failed to retrieve friend list for notification.")
 					}
 
-					const userConnection = fastify.presence.get(user.userName)
+					const userConnection = fastify.presence.get(friendName)
 					if (userConnection && userConnection.socket && userConnection.socket.readyState === userConnection.socket.OPEN) {
 						userConnection.socket.send(JSON.stringify({
-							type: 'update',
+							type: 'list',
 							payload: {
 								friendlist: friendList
 							}
 						}))
-						console.log(`list ${JSON.stringify(friendList)} sent to ${user.userName}`);
+						console.log(`list ${JSON.stringify(friendList)} sent to ${friendName}`);
 					}
 				}
 			}))
@@ -250,11 +288,11 @@ export default fp(async function friendChanges(fastify) {
 		
 			if (failed.length > 0) {
 				Promise.all(failed.map(async ({ result, user }) => {
-					fastify.log.error('Failed to notify user:', { user: user.userName, reason: result.reason.message })
+					fastify.log.error(`Failed to notify user: ${user}, reason: ${result.reason.message}`)
 				}))
 			}
 		} catch (error) {
-			fastify.log.error('Error notifying friend changes:', { message: error.message})
+			fastify.log.error(`Error notifying friend changes: ${error.message}`)
 		}
 	}
 
