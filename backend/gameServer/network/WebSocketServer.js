@@ -1,6 +1,6 @@
 import websocket from '@fastify/websocket'
 import Fastify from 'fastify';
-import { getDataFromToken } from '../../plugins/utils.js';
+import  getDataFromToken from '../utils/token.js';
 class NetworkManager
 {
 	constructor(logger = false)
