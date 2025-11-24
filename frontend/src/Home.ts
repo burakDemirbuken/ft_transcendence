@@ -80,7 +80,7 @@ function mainClickTransition(e: MouseEvent): void {
 
     // Sidebar veya dar ekranlarda devre dışı
     const sidebar = document.querySelector('.sidebar') as HTMLElement | null;
-    if (sidebar?.classList.contains('active') || window.innerWidth < 640) return;
+    if (sidebar?.classList.contains('active')) return;
 
     if (mainContainer.dataset.transitioned === "true") return;
     mainContainer.dataset.transitioned = "true";

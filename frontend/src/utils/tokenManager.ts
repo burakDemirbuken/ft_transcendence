@@ -61,7 +61,7 @@ class TokenManager {
 		this.refreshPromise = this.performTokenCheck();
 		const result = await this.refreshPromise;
 		this.refreshPromise = null;
-		
+
 		return result;
 	}
 
@@ -191,7 +191,7 @@ class TokenManager {
 	public async apiCall(url: string, options: RequestInit = {}): Promise<Response> {
 		// Ensure token is valid before making request
 		const tokenValid = await this.checkAndRefreshToken();
-		
+
 		if (!tokenValid) {
 			throw new Error('Authentication required');
 		}
@@ -209,7 +209,7 @@ class TokenManager {
 		// If unauthorized, try to refresh token once
 		if (response.status === 401) {
 			const refreshSuccess = await this.checkAndRefreshToken();
-			
+
 			if (refreshSuccess) {
 				// Retry the original request
 				return fetch(url, {

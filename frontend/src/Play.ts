@@ -2,7 +2,7 @@
 // IMPORTS
 // ============================================================================
 import AView from "./AView.js";
-import { showNotification } from '../dist/notification.js';
+import { showNotification } from '../dist/utils/notification.js';
 import App from '../dist/game/App.js';
 import WebSocketClient from '../dist/game/network/WebSocketClient.js';
 import gameConfig from '../dist/game/json/GameConfig.js';
@@ -30,21 +30,6 @@ declare global {
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
-
-// Generate random user ID for testing
-function generateRandomId() {
-    return Math.random().toString(36).substr(2, 9);
-}
-
-// Generate random user name for testing
-function generateRandomName() {
-    const names = ['Ali', 'Ayşe', 'Mehmet', 'Fatma', 'Ahmet', 'Zeynep', 'Can', 'Elif', 'Burak', 'Selin',
-                   'Ali1', 'Ayşe1', 'Mehmet1', 'Fatma1', 'Ahmet1', 'Zeynep1', 'Can1', 'Elif1', 'Burak1', 'Selin1',
-                   'Ali2', 'Ayşe2', 'Mehmet2', 'Fatma2', 'Ahmet2', 'Zeynep2', 'Can2', 'Elif2', 'Burak2', 'Selin2',
-                   'Ali3', 'Ayşe3', 'Mehmet3', 'Fatma3', 'Ahmet3', 'Zeynep3', 'Can3', 'Elif3', 'Burak3', 'Selin3'
-	];
-    return names[Math.floor(Math.random() * names.length)];
-}
 
 // displayMatchPairs fonksiyonunu güncelle
 function displayMatchPairs(pairs, participants) {
@@ -139,7 +124,7 @@ function displayMatchPairs(pairs, participants) {
                 </svg>
             </div>
             <div class="match-player-name">${player1Name}</div>
-            ${pair.winner === pair.players[0] ? '<div class="winner-badge">🏆</div>' : ''}
+            ${pair.winner === pair.players[0] ? '<div class="winner-badge"></div>' : ''}
         `;
 
         // VS yazısı
@@ -157,7 +142,7 @@ function displayMatchPairs(pairs, participants) {
                 </svg>
             </div>
             <div class="match-player-name">${player2Name}</div>
-            ${pair.winner === pair.players[1] ? '<div class="winner-badge">🏆</div>' : ''}
+            ${pair.winner === pair.players[1] ? '<div class="winner-badge"></div>' : ''}
         `;
 
         players.appendChild(player1);
@@ -301,7 +286,7 @@ function updateParticipants(
             // Add a tooltip for the crown
             const tooltip = document.createElement('span');
             tooltip.className = 'host-tooltip';
-            tooltip.textContent = 'Oda Sahibi';
+            tooltip.textContent = 'Room Owner';
             tooltip.style.cssText = `
                 position: absolute;
                 background: rgba(0, 0, 0, 0.8);
@@ -367,8 +352,6 @@ function handleWebSocketMessage(message) {
             break;
 
         case "finished":
-            // Tüm finished mesajları handleGameFinished'e gider
-            // O fonksiyon içinde tournament kontrolü yapılır
             handleGameFinished(message.payload);
             break;
 
@@ -393,7 +376,7 @@ function handleMatchReady(payload) {
 
     if (!payload.matchPairs || !Array.isArray(payload.matchPairs) || payload.matchPairs.length === 0) {
         console.error('Invalid match pairs data:', payload);
-        showNotification('Eşleştirme verisi geçersiz!', 'error');
+        showNotification('The matching data is invalid!', 'error');
         return;
     }
 
@@ -401,7 +384,7 @@ function handleMatchReady(payload) {
 
     const statusDisplay = document.getElementById('tournament-status-display') as HTMLElement;
     if (statusDisplay) {
-        statusDisplay.textContent = payload.tournamentStatus || 'Eşleşmeler Hazır';
+        statusDisplay.textContent = payload.tournamentStatus || 'Matches Ready';
     }
 
     const isHost = payload.players && payload.players.some(player => player.id === currentUserId && player.isHost);
@@ -454,7 +437,7 @@ function handleMatchReady(payload) {
         }
     }
 
-    showNotification('Eşleştirmeler tamamlandı!', 'success');
+    showNotification('Matchmaking completed!', 'success');
 }
 
 // transformMatchmakingData
@@ -511,7 +494,7 @@ export function transformMatchmakingData(data: MatchmakingData | null | undefine
 
   if (!data) {
     console.error('No data provided');
-    return { matchPairs: [], players: [], tournamentStatus: 'Hazırlanıyor' };
+    return { matchPairs: [], players: [], tournamentStatus: 'Getting Ready' };
   }
 
   // Match dizisini al
@@ -528,7 +511,7 @@ export function transformMatchmakingData(data: MatchmakingData | null | undefine
 
   if (!matches || matches.length === 0) {
     console.error('No matches found in data');
-    return { matchPairs: [], players: [], tournamentStatus: 'Hazırlanıyor' };
+    return { matchPairs: [], players: [], tournamentStatus: 'Getting Ready' };
   }
 
   // Tüm oyuncuları topla
@@ -598,7 +581,7 @@ export function transformMatchmakingData(data: MatchmakingData | null | undefine
     matchPairs,
     players: allPlayers,
     tournamentStatus:
-      data.status === 'ready2start' ? 'Eşleşmeler Hazır' : 'Hazırlanıyor',
+      data.status === 'ready2start' ? 'Matches Ready' : 'Getting Ready',
   };
 }
 
@@ -606,7 +589,7 @@ function handleRoomCreated(payload) {
     console.log('Room created:', payload);
     currentRoomId = payload.roomId;
 
-    showNotification(`Oda oluşturuldu: ${payload.roomId}`, 'success');
+    showNotification(`Room created: ${payload.roomId}`, 'success');
 
     // Show appropriate waiting room
     if (currentGameMode === 'tournament') {
@@ -620,7 +603,7 @@ function handleRoomCreated(payload) {
 
 function handleRoomJoined(payload) {
     currentRoomId = payload.roomId;
-    showNotification(`Odaya katıldınız: ${payload.roomId}`, 'success');
+    showNotification(`You joined the room: ${payload.roomId}`, 'success');
 
     // Show appropriate waiting room
     if (payload.gameMode === 'tournament') {
@@ -703,7 +686,7 @@ function updateRoundWaitingRoomButtons(players: any[]): void {
     if (roundWaitingBtn) {
       roundWaitingBtn.style.cssText = 'display: block !important;';
       roundWaitingBtn.classList.add('active');
-      roundWaitingBtn.textContent = '⏳ Host Bekleniyor...';
+      roundWaitingBtn.textContent = '⏳ Waiting for Host...';
     }
   }
 }
@@ -774,13 +757,13 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
       } else {
         if (waitingBtn) {
           waitingBtn.style.display = 'block';
-          waitingBtn.textContent = '⏳ Turnuva Başlatılıyor...';
+          waitingBtn.textContent = '⏳ Tournament Starting...';
         }
         if (matchBtn) matchBtn.style.display = 'none';
         if (startBtn) startBtn.style.display = 'none';
       }
 
-      showNotification('Eşleştirmeler tamamlandı!', 'success');
+      showNotification('Matchmaking completed!', 'success');
     } else {
       // Henüz eşleştirme yapılmamış
       updateParticipants(payload.players, 'participants-grid');
@@ -808,14 +791,14 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
             matchBtn.disabled = false;
           }
           if (startBtn) startBtn.style.display = 'none';
-          if (statusDisplay) statusDisplay.textContent = 'Eşleştirme Bekleniyor';
+          if (statusDisplay) statusDisplay.textContent = 'Waiting for Matchmaking';
         } else {
           // Mesajı dinamik yap
           let message = '';
           if (playerCount < maxPlayers) {
-            message = `Daha ${maxPlayers - playerCount} oyuncu gerekli`;
+            message = `${maxPlayers - playerCount} more players required`;
           } else if (playerCount % 2 !== 0) {
-            message = 'Çift sayıda oyuncu gerekli';
+            message = 'An even number of players are required';
           }
 
           if (waitingBtn) {
@@ -824,12 +807,12 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
           }
           if (matchBtn) matchBtn.style.display = 'none';
           if (startBtn) startBtn.style.display = 'none';
-          if (statusDisplay) statusDisplay.textContent = 'Oyuncular Bekleniyor';
+          if (statusDisplay) statusDisplay.textContent = 'Players Awaited';
         }
       } else {
         if (waitingBtn) {
           waitingBtn.style.display = 'block';
-          waitingBtn.textContent = '⏳ Eşleştirmeler Bekleniyor...';
+          waitingBtn.textContent = '⏳ Waiting for Matchmaking...';
         }
         if (matchBtn) matchBtn.style.display = 'none';
         if (startBtn) startBtn.style.display = 'none';
@@ -854,7 +837,7 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
         customStatusDisplay.style.color = '#0ff'; // Mavi
 		customStatusDisplay.style.textShadow = '0 0 10px rgba(0, 255, 255, 0.5)';
 	} else {
-		customStatusDisplay.textContent = payload.status || 'Preparing';
+		customStatusDisplay.textContent = 'Waiting';
         customStatusDisplay.style.color = '#fff'; // Beyaz
 		customStatusDisplay.style.textShadow = '0 0 10px rgba(255, 255, 255, 0.5)';
       }
@@ -901,7 +884,7 @@ interface GameStartPayload {
 function handleGameStarted(payload: GameStartPayload): void {
     console.log('Payload gameSettings:', payload.gameSettings);
     console.log('Payload keys:', Object.keys(payload));
-    showNotification('Oyun başlıyor!', 'success');
+    showNotification('The game begins!', 'success');
 
     // Non-null assertion operator kullanarak kesin var olduğunu belirtiyoruz
     const waitingRoom = document.getElementById('waiting-room');
@@ -1005,13 +988,13 @@ function handleGameFinished(payload: GameFinishPayload): void {
         // Status 'finished' veya isFinal true ise turnuva bitti demektir
         if (payload.status === 'finished' || payload.isFinal === true) {
             console.log('🏆 TOURNAMENT COMPLETED!');
-            showNotification('🏆 Turnuva tamamlandı!', 'success');
+            showNotification('🏆 The tournament is over!', 'success');
 
             // Kazananı göster
             if (payload.winner) {
-                showNotification(`🎉 Kazanan: ${payload.winner.name}`, 'success');
+                showNotification(`🎉 Winner: ${payload.winner.name}`, 'success');
             } else if (payload.players && payload.players.length === 1) {
-                showNotification(`🎉 Kazanan: ${payload.players[0].name}`, 'success');
+                showNotification(`🎉 Winner: ${payload.players[0].name}`, 'success');
             }
 
             // Tüm butonları gizle ve waiting room'u kapat
@@ -1049,7 +1032,7 @@ function handleGameFinished(payload: GameFinishPayload): void {
     }
 
     // Normal oyun bitişi
-    showNotification('Oyun bitti!', 'info');
+    showNotification('Game over!', 'info');
 
     // Reset room state
     currentRoomId = null;
@@ -1063,7 +1046,7 @@ function handleGameFinished(payload: GameFinishPayload): void {
 
 function handleError(payload) {
     console.error('❌ Error:', payload);
-    const errorMessage = payload.message || payload.error || 'Bir hata oluştu';
+    const errorMessage = payload.message || payload.error || 'An error occurred';
     showNotification(errorMessage, 'error');
 }
 
@@ -1115,7 +1098,7 @@ function showTournamentWaitingRoom(data: TournamentData): void {
 
     // Room code display
     if (roomCodeDisplay) {
-        roomCodeDisplay.textContent = data.roomId || 'TOUR-XXXXX';
+        roomCodeDisplay.textContent = data.roomId || 'XXXXXX';
     }
 
     const playerCount = data.players?.length || 0;
@@ -1128,7 +1111,7 @@ function showTournamentWaitingRoom(data: TournamentData): void {
 
     // Tournament status
     if (tournamentStatusDisplay) {
-        const statusText = data.status === 'ready2start' ? 'Eşleştirmeler Hazır' : 'Oyuncular Bekleniyor';
+        const statusText = data.status === 'ready2start' ? 'Matches Ready' : 'Players Awaited';
         tournamentStatusDisplay.textContent = statusText;
     }
 
@@ -1155,7 +1138,7 @@ function showTournamentWaitingRoom(data: TournamentData): void {
             } else {
                 if (waitingPlayersBtn) {
                     waitingPlayersBtn.style.display = 'block';
-                    waitingPlayersBtn.textContent = '⏳ Turnuva Başlatılıyor...';
+                    waitingPlayersBtn.textContent = '⏳ Tournament Starting...';
                 }
                 if (matchPlayersBtn) matchPlayersBtn.style.display = 'none';
                 if (startTournamentBtn) startTournamentBtn.style.display = 'none';
@@ -1178,14 +1161,14 @@ function showTournamentWaitingRoom(data: TournamentData): void {
                         matchPlayersBtn.disabled = false;
                     }
                     if (startTournamentBtn) startTournamentBtn.style.display = 'none';
-                    if (tournamentStatusDisplay) tournamentStatusDisplay.textContent = 'Eşleştirme Bekleniyor';
+                    if (tournamentStatusDisplay) tournamentStatusDisplay.textContent = 'Waiting for Matchmaking';
                 } else {
                     // Mesajı dinamik yap
                     let message = '';
                     if (playerCount < maxPlayers) {
-                        message = `En az ${maxPlayers - playerCount} oyuncu daha gerekli`;
+                        message = `At least ${maxPlayers - playerCount} more players required`;
                     } else if (playerCount % 2 !== 0) {
-                        message = 'Çift sayıda oyuncu gerekli';
+                        message = 'An even number of players are required';
                     }
 
                     if (waitingPlayersBtn) {
@@ -1194,12 +1177,12 @@ function showTournamentWaitingRoom(data: TournamentData): void {
                     }
                     if (matchPlayersBtn) matchPlayersBtn.style.display = 'none';
                     if (startTournamentBtn) startTournamentBtn.style.display = 'none';
-                    if (tournamentStatusDisplay) tournamentStatusDisplay.textContent = 'Oyuncular Bekleniyor';
+                    if (tournamentStatusDisplay) tournamentStatusDisplay.textContent = 'Players Awaited';
                 }
             } else {
                 if (waitingPlayersBtn) {
                     waitingPlayersBtn.style.display = 'block';
-                    waitingPlayersBtn.textContent = '⏳ Eşleştirmeler Bekleniyor...';
+                    waitingPlayersBtn.textContent = '⏳ Waiting for Matchmaking...';
                 }
                 if (matchPlayersBtn) matchPlayersBtn.style.display = 'none';
                 if (startTournamentBtn) startTournamentBtn.style.display = 'none';
@@ -1275,9 +1258,9 @@ function showCustomWaitingRoom(data: CustomRoomData): void {
             ballDisplay.textContent = `${data.gameSettings.ballRadius || 0}px`;
         }
 
-        const cornerBoost = data.gameSettings.cornerBoost || data.gameSettings.ballSpeedIncrease || 1.0;
+        const cornerBoost = data.gameSettings.cornerBoost || data.gameSettings.ballSpeedIncrease || 100;
         if (cornerDisplay) {
-            cornerDisplay.textContent = `${parseFloat(cornerBoost.toString()).toFixed(1)}x`;
+            cornerDisplay.textContent = `${cornerBoost}`;
         }
 
         if (scoreDisplay) {
@@ -1308,7 +1291,7 @@ function showCustomWaitingRoom(data: CustomRoomData): void {
     } else {
         if (waitingPlayersBtn) {
             waitingPlayersBtn.style.display = 'block';
-            waitingPlayersBtn.textContent = '⏳ Oda Sahibi Bekleniyor...';
+            waitingPlayersBtn.textContent = '⏳ Waiting for the Room Owner...';
         }
         if (startGameBtn) startGameBtn.style.display = 'none';
     }
@@ -1359,11 +1342,11 @@ function showAIWaitingRoom(data: AIWaitingRoomData): void {
 
     // Zorluk seviyesi haritası
     const difficultyMap: Record<string, string> = {
-        'easy': 'Kolay',
-        'medium': 'Orta',
-        'hard': 'Zor',
-        'impossible': 'İmkansız',
-        'custom': 'Özel'
+        'easy': 'Easy',
+        'medium': 'Medium',
+        'hard': 'Hard',
+        'impossible': 'Impossible',
+        'custom': 'Custom'
     };
 
     // Zorluk seviyesi için güvenli erişim
@@ -1375,7 +1358,7 @@ function showAIWaitingRoom(data: AIWaitingRoomData): void {
     }
 
     if (aiTypeDisplay) {
-        aiTypeDisplay.textContent = difficulty === 'custom' ? 'Özelleştirilmiş' : 'Standart';
+        aiTypeDisplay.textContent = difficulty === 'custom' ? 'Customized' : 'Standard';
     }
 
     // Oyun ayarları için güvenli güncelleme
@@ -1389,12 +1372,10 @@ function showAIWaitingRoom(data: AIWaitingRoomData): void {
         }
 
         // Corner boost için güvenli hesaplama
-        const cornerBoost = data.gameSettings.cornerBoost ||
-                            data.gameSettings.ballSpeedIncrease ||
-                            1.0;
+        const cornerBoost = data.gameSettings.cornerBoost || data.gameSettings.ballSpeedIncrease || 100;
 
         if (aiCornerDisplay) {
-            aiCornerDisplay.textContent = `${parseFloat(cornerBoost.toString()).toFixed(1)}x`;
+            aiCornerDisplay.textContent = `${cornerBoost}`;
         }
 
         if (aiScoreDisplay) {
@@ -1555,7 +1536,7 @@ function updateSliderValue(sliderId: string, valueId: string, suffix: string = '
 
         if (sliderId.includes('corner-boost')) {
             if (sliderId.includes('ai-')) {
-                value = parseFloat(value).toFixed(1) + 'x';
+                value = parseInt(value);
             } else {
                 value = value.toString();
             }
@@ -1641,7 +1622,7 @@ function connectWebSocket() {
 			handleWebSocketMessage(message);
 		} catch (error) {
 			console.error('Error processing WebSocket message:', error);
-			showNotification('Mesaj işlenirken hata oluştu', 'error');
+			showNotification('An error occurred while processing the message', 'error');
 		}
 	});
 
@@ -1649,7 +1630,7 @@ function connectWebSocket() {
 		console.log(`❌ Disconnected from room server: ${error.code} - ${error.reason}`);
 	});
 
-	roomSocket.onError((error) => {
+	roomSocket.onError((error) => { // odaya giremedi diye ve error geldiğinde notification göster
 		console.error('❌ Room server connection error:', error);
 	});
 
@@ -1837,7 +1818,7 @@ function showRoundWaitingRoom(data) {
         // Turnuva bitti mi kontrol et
         if (currentRound >= totalRounds) {
             console.log('🏆 Tournament completed - no buttons shown');
-            showNotification('🏆 Turnuva tamamlandı!', 'success');
+            showNotification('🏆 The tournament is over!', 'success');
             if (nextRoundBtn) nextRoundBtn.style.display = 'none';
             if (finalRoundBtn) finalRoundBtn.style.display = 'none';
             return;
@@ -1899,7 +1880,7 @@ function showRoundWaitingRoom(data) {
         if (roundWaitingBtn) {
             roundWaitingBtn.style.cssText = 'display: block !important;';
             roundWaitingBtn.classList.add('active');
-            roundWaitingBtn.textContent = '⏳ Host Bekleniyor...';
+            roundWaitingBtn.textContent = '⏳ Waiting for Host...';
             console.log('Waiting button display:', window.getComputedStyle(roundWaitingBtn).display);
         }
     }
@@ -1923,7 +1904,7 @@ function handleRoundFinished(payload: RoundFinishedPayload): void {
 
     if (!payload) {
         console.error('Invalid round data: payload is null');
-        showNotification('Round verisi geçersiz!', 'error');
+        showNotification('Round data is invalid!', 'error');
         return;
     }
 
@@ -1969,7 +1950,7 @@ function handleRoundFinished(payload: RoundFinishedPayload): void {
     // Round arası bekleme odasını göster
     showRoundWaitingRoom(tournamentData);
 
-    showNotification(`Round ${currentRound} tamamlandı!`, 'success');
+    showNotification(`Round ${currentRound} completed!`, 'success');
 }
 
 // ============================================================================
@@ -2042,6 +2023,7 @@ class CanvasOrientationManager {
         };
 
         // Event listener'ı ekle
+		// unset'le
         window.addEventListener('keydown', this.keyboardListener);
         console.log('⌨️ Portrait mode keyboard controls enabled');
     }
@@ -2106,7 +2088,7 @@ class CanvasOrientationManager {
         console.log('💻 DESKTOP MODE - No touch capability detected');
 
         this.updateCanvasLayout();
-        window.addEventListener('resize', () => this.throttledHandleResize());
+        window.addEventListener('resize', () => this.throttledHandleResize()); // unset'le
         this.setupResizeObserver();
     }
 
@@ -2116,8 +2098,8 @@ class CanvasOrientationManager {
         console.log('📱 MOBILE MODE - Touch capability detected');
 
         this.updateCanvasLayout();
-        window.addEventListener('orientationchange', () => this.handleOrientationChange());
-        window.addEventListener('resize', () => this.throttledHandleResize());
+        window.addEventListener('orientationchange', () => this.handleOrientationChange()); //unset'le
+        window.addEventListener('resize', () => this.throttledHandleResize()); //unset'le
         this.setupResizeObserver();
         this.ensureViewportMeta();
         this.createPortraitWarning();
@@ -2187,8 +2169,8 @@ class CanvasOrientationManager {
                     <path d="M20.49 9A9 9 0 0 0 5.64 5.64"></path>
                     <path d="M3.51 15A9 9 0 0 0 18.36 18.36"></path>
                 </svg>
-                <h2>Lütfen Cihazınızı Döndürün</h2>
-                <p>Bu oyun yatay (landscape) modda oynanmalıdır</p>
+                <h2>Please Rotate Your Device</h2>
+                <p>This game must be played in landscape mode</p>
                 <div class="device-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -2659,6 +2641,7 @@ export default class extends AView {
 		}
 
 		// Sayfa yüklendiğinde listener'ları başlat
+		// unset'le
 		document.addEventListener('DOMContentLoaded', this.initGameModeListeners.bind(this));
 	}
 
@@ -2669,7 +2652,7 @@ export default class extends AView {
 			const gameTypeElement = document.querySelector('input[name="custom-game-type"]:checked') as HTMLInputElement;
 
 			if (!gameTypeElement) {
-				showNotification('Lütfen oyun türünü seçin!', 'error');
+				showNotification('Please choose your game type!', 'error');
 				return;
 			}
 
@@ -2709,7 +2692,7 @@ export default class extends AView {
 			};
 
 			roomSocket.send("create", data);
-			showNotification('Oda oluşturuluyor...', 'info');
+			showNotification('Creating room...', 'info');
 		});
 
 		document.getElementById('custom-winning-score')?.addEventListener('keypress', function(e) {
@@ -2731,41 +2714,40 @@ export default class extends AView {
 			const roomCode = roomCodeEl.value.trim().toUpperCase();
 
 			if (!roomCode) {
-				showNotification('Lütfen oda kodunu girin!', 'error');
+				showNotification('Please enter your room code!', 'error');
 				return;
 			}
 
 			if (roomCode.length !== 6) {
-				showNotification('Oda kodu 6 karakter olmalıdır!', 'error');
+				showNotification('Room code must be 6 characters!', 'error');
 				return;
 			}
 
 			currentGameMode = 'custom';
 			roomSocket.send("join", { roomId: roomCode, gameMode: 'classic' });
-			showNotification(`${roomCode} kodlu odaya katılıyorsunuz...`, 'info');
+			showNotification(`You are joining the room with code ${roomCode}...`, 'info');
 		});
 
 		// Custom Game - Start Game
 		document.getElementById('custom-start-game-btn')?.addEventListener('click', function() {
 		    if (!currentRoomId || !roomSocket) {
-		        showNotification('Bağlantı hatası!', 'error');
+		        showNotification('Connection error!', 'error');
 		        return;
 		    }
 		    const startButton = this as HTMLButtonElement;
 		    startButton.disabled = true;
-		    startButton.innerHTML = '<div class="loading"></div> Başlatılıyor...';
+		    startButton.innerHTML = '<div class="loading"></div> Starting...';
 		    roomSocket.send("start", {
 		        roomId: currentRoomId,
 		        gameMode: 'classic'
 		    });
 		    console.log(`Start message sent for room: ${currentRoomId}`);
-		    showNotification('🚀 Oyun başlatılıyor!', 'success');
+		    showNotification('🚀 The game is starting!', 'success');
 		    // Timeout - eğer yanıt gelmezse butonu tekrar etkinleştir
 		    setTimeout(() => {
 		        if (startButton.disabled) {
 		            startButton.disabled = false;
 		            startButton.innerHTML = '🚀 Oyunu Başlat';
-		            showNotification('⚠️ Oyun başlatma zaman aşımına uğradı', 'warning');
 		        }
 		    }, 10000);
 		});
@@ -2780,7 +2762,7 @@ private initAIGameListeners(): void {
             const difficultyRadio = document.querySelector('input[name="ai-difficulty"]:checked') as HTMLInputElement;
 
             if (!difficultyRadio) {
-                showNotification('Lütfen zorluk seviyesi seçin!', 'error');
+                showNotification('Please choose a difficulty level!', 'error');
                 return;
             }
 
@@ -2792,7 +2774,7 @@ private initAIGameListeners(): void {
             const winningScoreEl = document.getElementById('ai-winning-score') as HTMLInputElement;
 
             if (!paddleHeightEl || !ballRadiusEl || !cornerBoostEl || !winningScoreEl) {
-                showNotification('Oyun ayarları yüklenemedi!', 'error');
+                showNotification('Failed to load game settings!', 'error');
                 return;
             }
 
@@ -2848,21 +2830,21 @@ private initAIGameListeners(): void {
             currentGameMode = 'ai';
 
             if (!roomSocket) {
-                showNotification('WebSocket bağlantısı yok!', 'error');
+                showNotification('No WebSocket connection!', 'error');
                 return;
             }
 
             const startBtn = aiStartBtn as HTMLButtonElement;
             startBtn.disabled = true;
-            startBtn.innerHTML = '<div class="loading"></div> Başlatılıyor...';
+            startBtn.innerHTML = '<div class="loading"></div> Starting...';
 
             roomSocket.send("create", data);
-            showNotification('🤖 AI oyunu oluşturuluyor...', 'info');
+            showNotification('🤖 Creating an AI game...', 'info');
 
             setTimeout(() => {
                 if (startBtn.disabled) {
                     startBtn.disabled = false;
-                    startBtn.innerHTML = '🚀 AI ile Oyuna Başla';
+                    startBtn.innerHTML = '🚀 Start AI Game';
                 }
             }, 10000);
         });
@@ -2875,13 +2857,13 @@ private initAIGameListeners(): void {
     if (aiStartGameBtn) {
         aiStartGameBtn.addEventListener('click', function() {
             if (!currentRoomId || !roomSocket) {
-                showNotification('Bağlantı hatası!', 'error');
+                showNotification('Connection error!', 'error');
                 return;
             }
 
             const startButton = this as HTMLButtonElement;
             startButton.disabled = true;
-            startButton.innerHTML = '<div class="loading"></div> Başlatılıyor...';
+            startButton.innerHTML = '<div class="loading"></div> Starting...';
 
             roomSocket.send("start", {
                 roomId: currentRoomId,
@@ -2889,7 +2871,7 @@ private initAIGameListeners(): void {
             });
 
             console.log(`AI game start message sent for room: ${currentRoomId}`);
-            showNotification('🚀 AI oyunu başlatılıyor!', 'success');
+            showNotification('🚀 AI game starting!', 'success');
 
             setTimeout(() => {
                 if (startButton.disabled) {
@@ -2918,7 +2900,7 @@ private initAIGameListeners(): void {
     const fastGameBtn = document.getElementById('fast-game-mode');
     if (fastGameBtn) {
         fastGameBtn.addEventListener('click', () => {
-            showNotification('Hızlı oyun başlatılıyor...', 'success');
+            showNotification('Starting quick game...', 'success');
 
             const loadingScreen = document.getElementById('loading-screen');
             const gamePage = document.getElementById('game-page');
@@ -2942,7 +2924,7 @@ private initAIGameListeners(): void {
             if (loadingScreen) loadingScreen.classList.remove('active');
             if (gamePage) gamePage.classList.remove('hidden');
 
-            showNotification('Hızlı oyun iptal edildi', 'info');
+            showNotification('Quick play cancelled', 'info');
         });
     }
 }
@@ -2958,7 +2940,7 @@ private initAIGameListeners(): void {
 			const tournamentSizeElement = document.querySelector('input[name="tournament-size"]:checked') as HTMLInputElement;
 
 			if (!tournamentSizeElement) {
-				showNotification('Lütfen turnuva boyutu seçin!', 'error');
+				showNotification('Please select tournament size!', 'error');
 				return;
 			}
 
@@ -2967,11 +2949,11 @@ private initAIGameListeners(): void {
 				const customSizeElement = document.getElementById('custom-tournament-size') as HTMLInputElement;
 				const customSize = parseInt(customSizeElement.value, 10);
 				if (!customSize || customSize < 4 || customSize > 64) {
-					showNotification('Geçerli bir turnuva boyutu girin (4-64 arası)!', 'error');
+					showNotification('Enter a valid tournament size (between 4-64)!', 'error');
 					return;
 				}
 				if (customSize & (customSize - 1)) {
-					showNotification('Turnuva boyutu 2\'nin kuvveti olmalıdır (4, 8, 16, 32, 64)!', 'error');
+					showNotification('Tournament size must be a power of 2 (4, 8, 16, 32, 64)!', 'error');
 					return;
 				}
 				tournamentSize = customSize;
@@ -2980,7 +2962,7 @@ private initAIGameListeners(): void {
 			}
 
 			if (!tournamentName) {
-				showNotification('Lütfen turnuva adını girin!', 'error');
+				showNotification('Please enter the tournament name!', 'error');
 				return;
 			}
 
@@ -3001,9 +2983,9 @@ private initAIGameListeners(): void {
 			if (roomSocket) {
 				console.log(`🏆 Creating tournament: "${tournamentName}" with ${tournamentSize} players`);
 				roomSocket.send("create", data);
-				showNotification(`"${tournamentName}" turnuvası oluşturuluyor...`, 'info');
+				showNotification(`Creating tournament "${tournamentName}"...`, 'info');
 			} else {
-				showNotification('Soket bağlantısı hatası!', 'error');
+				showNotification('Socket connection error!', 'error');
 			}
 		});
 
@@ -3020,7 +3002,7 @@ private initAIGameListeners(): void {
 			const tournamentCode = tournamentCodeElement.value.trim().toUpperCase();
 
 			if (!tournamentCode) {
-				showNotification('Lütfen turnuva kodunu girin!', 'error');
+				showNotification('Please enter the tournament code!', 'error');
 				return;
 			}
 
@@ -3033,9 +3015,9 @@ private initAIGameListeners(): void {
 					roomId: tournamentCode,
 					gameMode: 'tournament'
 				});
-				showNotification(`${tournamentCode} kodlu turnuvaya katılıyorsunuz...`, 'info');
+				showNotification(`You are participating in the tournament with code ${tournamentCode}...`, 'info');
 			} else {
-				showNotification('Soket bağlantısı hatası!', 'error');
+				showNotification('Socket connection error!', 'error');
 			}
 		});
 
@@ -3053,18 +3035,18 @@ private initAIGameListeners(): void {
 
             // Null kontrolü
             if (!currentRoomId) {
-                showNotification('Oda ID\'si bulunamadı!', 'error');
+                showNotification('Room ID not found!', 'error');
                 return;
             }
 
             if (!roomSocket) {
-                showNotification('WebSocket bağlantısı yok!', 'error');
+                showNotification('No WebSocket connection!', 'error');
                 return;
             }
 
             // Butonu devre dışı bırak
             startButton.disabled = true;
-            startButton.innerHTML = '<div class="loading"></div> Başlatılıyor...';
+            startButton.innerHTML = '<div class="loading"></div> Starting...';
 
             // WebSocket mesajı gönder - roomId'yi ekle
             roomSocket.send("start", {
@@ -3073,14 +3055,14 @@ private initAIGameListeners(): void {
             });
 
             console.log(`Start message sent for room: ${currentRoomId}`);
-            showNotification('🚀 Turnuva başlatılıyor!', 'success');
+            showNotification('🚀 The tournament is starting!', 'success');
 
             // Timeout - eğer yanıt gelmezse butonu tekrar etkinleştir
             setTimeout(() => {
                 if (startButton.disabled) {
                     startButton.disabled = false;
-                    startButton.innerHTML = '🚀 Turnuvayı Başlat';
-                    showNotification('⚠️ Turnuva başlatma zaman aşımına uğradı', 'warning');
+                    startButton.innerHTML = '🚀 Start the Tournament';
+                    showNotification('⚠️ Tournament start timed out', 'warning');
                 }
             }, 10000);
         });
@@ -3092,17 +3074,17 @@ private initAIGameListeners(): void {
             const nextRoundBtn = this as HTMLButtonElement;
 
             if (!currentRoomId) {
-                showNotification('Oda ID\'si bulunamadı!', 'error');
+                showNotification('Room ID not found!', 'error');
                 return;
             }
 
             if (!roomSocket) {
-                showNotification('WebSocket bağlantısı yok!', 'error');
+                showNotification('No WebSocket connection!', 'error');
                 return;
             }
 
             nextRoundBtn.disabled = true;
-            nextRoundBtn.innerHTML = '<div class="loading"></div> Başlatılıyor...';
+            nextRoundBtn.innerHTML = '<div class="loading"></div> Starting...';
 
             const currentRound = tournamentData?.currentRoundNumber ?? 1;
 
@@ -3112,7 +3094,7 @@ private initAIGameListeners(): void {
                 gameMode: 'tournament'
             });
 
-            showNotification('🎮 Sonraki round başlatılıyor!', 'success');
+            showNotification('🎮 The next round is starting!', 'success');
 
             setTimeout(() => {
                 if (nextRoundBtn.disabled) {
@@ -3133,12 +3115,12 @@ private initAIGameListeners(): void {
         if (finalRoundBtn) {
             finalRoundBtn.addEventListener('click', () => {
                 if (!currentRoomId || !roomSocket) {
-                    showNotification('Bağlantı hatası!', 'error');
+                    showNotification('Connection error!', 'error');
                     return;
                 }
 
                 finalRoundBtn.disabled = true;
-                finalRoundBtn.innerHTML = '<div class="loading"></div> Başlatılıyor...';
+                finalRoundBtn.innerHTML = '<div class="loading"></div> Starting...';
 
                 const currentRound = tournamentData?.currentRoundNumber ?? 1;
 
@@ -3148,12 +3130,12 @@ private initAIGameListeners(): void {
                     isFinal: true,
                     gameMode: 'tournament'
                 });
-                showNotification('🏆 Final round başlatılıyor!', 'success');
+                showNotification('🏆 The final round is starting!', 'success');
 
                 setTimeout(() => {
                     if (finalRoundBtn.disabled) {
                         finalRoundBtn.disabled = false;
-                        finalRoundBtn.innerHTML = '🏆 Final Turunu Başlat';
+                        finalRoundBtn.innerHTML = '🏆 Start Final Round';
                     }
                 }, 10000);
             });
@@ -3173,13 +3155,13 @@ private initAIGameListeners(): void {
         // Kişileri eşleştir butonu
         document.getElementById('match-players-btn')?.addEventListener('click', function() {
             if (!currentRoomId || !roomSocket) {
-                showNotification('Bağlantı hatası!', 'error');
+                showNotification('Connection error!', 'error');
                 return;
             }
 
             console.log(`🎲 Matching players for room: ${currentRoomId}`);
             roomSocket.send("matchTournament", { roomId: currentRoomId });
-            showNotification('Eşleştirmeler yapılıyor...', 'info');
+            showNotification('Matchmaking is underway...', 'info');
         });
 
 		// Tournament Size - Custom Option
@@ -3231,7 +3213,7 @@ private initAIGameListeners(): void {
 				backArrowBtn.classList.remove('active');
 				// Reset tournament data
 				tournamentData = null;
-				showNotification('Odadan ayrıldınız', 'info');
+				showNotification('You left the room', 'info');
 			});
 		} else {
 			console.error('❌ Back arrow button not found!');
@@ -3261,7 +3243,7 @@ private initAIGameListeners(): void {
 	    // AI Game Sliders
 	    updateSliderDisplay('ai-paddle-height', 'ai-paddle-height-value', (value) => `${value}px`);
 	    updateSliderDisplay('ai-ball-radius', 'ai-ball-radius-value', (value) => `${value}px`);
-	    updateSliderDisplay('ai-corner-boost', 'ai-corner-boost-value', (value) => `${parseFloat(value).toFixed(1)}x`);
+	    updateSliderDisplay('ai-corner-boost', 'ai-corner-boost-value', (value) => `${value}`);
 
 	    // AI Custom Settings Sliders
 	    this.setupAICustomSliderDisplay('ai-paddle-speed', 'ai-paddle-speed-value');
@@ -3316,6 +3298,7 @@ private initAIGameListeners(): void {
 		}
 	}
 
+	// unset'le
 	private initKeyboardListeners(): void {
 		// Add keyboard shortcuts
 		document.addEventListener('keydown', function(e) {
