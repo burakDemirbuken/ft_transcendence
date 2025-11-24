@@ -1,14 +1,16 @@
 import websocket from '@fastify/websocket'
 import Fastify from 'fastify';
-import  getDataFromToken from '../utils/token.js';
+import cookie from '@fastify/cookie'
+import jwt from '@fastify/jwt'
+import getDataFromToken from '../utils/token.js';
 class NetworkManager
 {
 	constructor(logger = false)
 	{
-		this.fastify = Fastify({ logger: logger});
-		this.fastify.addHook('onRequest', async (request) => {
-			console.log(`--> ${request.method} ${request.url}`);
-		});
+		this.fastify = Fastify({ logger: true});
+		this.fastify.register(cookie);
+		this.fastify.register(jwt, { secret: process.env.JWT_SECRET });
+
 		this.connections = new Map(); // connectionId -> WebSocket
 
 		this.callbacks = {
@@ -39,10 +41,17 @@ class NetworkManager
 				fastify.get('/ws-game', { websocket: true },
 					(connection, req) =>
 					{
+						const dataFromToken = getDataFromToken(req, fastify);
+						if (!dataFromToken)
+						{
+							console.error('❌ Unauthorized WebSocket connection attempt. Closing connection.');
+							client.close(1008, 'Unauthorized'); // 1008: Policy Violation
+							return;
+						}
 						const client = connection.socket;
 						const connectionId = this._generateConnectionId();
 						this.connections.set(connectionId, client);
-						onConnect(connectionId, (getDataFromToken(req)?.username ?? null), req.query);
+						onConnect(connectionId, dataFromToken.username, req.query);
 
 						client.on('message', (message) =>
 							{

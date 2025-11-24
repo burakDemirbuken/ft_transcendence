@@ -1,4 +1,4 @@
-export default function getDataFromToken(request)
+export default function getDataFromToken(request, fastify)
 {
 	const token = request.cookies.accessToken
 	if (!token)
