@@ -1,4 +1,3 @@
-import { getAuthToken } from './utils/auth.js';
 import { getJsTranslations } from './utils/I18n.js';
 import { navigateTo, API_BASE_URL } from './index.js';
 import { showNotification } from './utils/notification.js';
@@ -38,9 +37,8 @@ async function username() {
 	if (!/^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username))
 		return showNotification(trlt.login.uname.invalid, "error")
 
-	const address = `${API_BASE_URL}/auth/check-username?username=${username}&lang=${localStorage.getItem("langPref")}`;
 	try {
-		const response = await doubleFetch(address, { method: "GET" });
+		const response = await doubleFetch(`${API_BASE_URL}/auth/check-username?username=${username}&lang=${localStorage.getItem("langPref")}`,{ method: "GET" });
 		const json = await response.json();
 		if (response.ok) {
 			if(json.exists) {
@@ -99,14 +97,12 @@ async function login() {
 		"password": formData.get("password")
 	};
 
-	const request = new Request(`${API_BASE_URL}/auth/login?lang=${localStorage.getItem("langPref") ?? 'eng'}`, {
-		method: "POST",
-		headers: new Headers({ "Content-Type": "application/json" }),
-		body: JSON.stringify(user),
-	});
-
 	try {
-		const response = await doubleFetch(request);
+		const response = await doubleFetch(`${API_BASE_URL}/auth/login?lang=${localStorage.getItem("langPref") ?? 'eng'}`, {
+			method: "POST",
+			headers: new Headers({ "Content-Type": "application/json" }),
+			body: JSON.stringify(user),
+		});
 		const json = await response.json();
 		if (response.ok) {
 			showNotification(json.message, "info");
@@ -140,17 +136,16 @@ async function register() {
 		"password": formData.get("password")
 	};
 
-	const request = new Request(`${API_BASE_URL}/auth/register?lang=${localStorage.getItem("langPref")}`, {
-		method: "POST",
-		headers: new Headers({ "Content-Type": "application/json" }),
-		body: JSON.stringify(obj),
-	});
-
 	try {
-		const response = await doubleFetch(request);
+		const response = await doubleFetch(`${API_BASE_URL}/auth/register?lang=${localStorage.getItem("langPref") ?? "eng"}`, {
+			method: "POST",
+			headers: new Headers({ "Content-Type": "application/json" }),
+			body: JSON.stringify(obj),
+		});
 		const json = await response.json();
 		if (response.ok) {
 			showNotification(json.message, "info");
+			form?.reset();
 			goToNextField("welcome");
 		}
 		else
@@ -181,7 +176,7 @@ async function verify() {
 		};
 
 		try {
-			const response = await doubleFetch(`${API_BASE_URL}/auth/verify-2fa?lang=${localStorage.getItem("langPref")}`, {
+			const response = await doubleFetch(`${API_BASE_URL}/auth/verify-2fa?lang=${localStorage.getItem("langPref") ?? "eng"}`, {
 				method: "POST",
 				headers: new Headers({ "Content-Type": "application/json" }),
 				body: JSON.stringify(obj),
@@ -189,27 +184,18 @@ async function verify() {
 			});
 			const json = await response.json();
 			if (response.ok) {
-				console.log("🎉 2FA verification successful!");
-				console.log("🍪 Cookies after login:", document.cookie);
-
-				// Token'ı response'tan al ve localStorage'a kaydet
-				console.info("SAVING TOKEN TO LOCAL STORAGE!!", json);
-				if (json?.accessToken) {
-					console.log("💾 Saving token to localStorage:", json.accessToken);
-					localStorage.setItem('authToken', json.accessToken);
-					console.log("🔑 Auth token after saving:", getAuthToken());
-				}
 				console.info("SAVING USERNAME TO LOCAL STORAGE!!", json?.user?.username);
 				if (json?.user?.username) {
 					localStorage.setItem('userName', json.user.username);
 				}
+				showNotification("Successfully logged in!", "success");
 				document.querySelector("#navbar")?.classList.remove("logout");
 				navigateTo("home");
 			} else {
 				showNotification(json.error, "error");
 			}
 		} catch {
-			showNotification(trlt.system, "error");
+			showNotification(trlt?.system ?? "System error, please try again later", "error");
 		}
 	}
 	else
