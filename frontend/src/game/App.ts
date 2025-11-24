@@ -86,28 +86,23 @@ class App
 		this.inputManager!.onKey("w",
 			() =>
 			{
-				// this.gameRenderer.joystickMove(1, 'up');
 				this.webSocketClient.send('player/playerAction', {key: "w", action: true});
 			},
 			() =>
 			{
-				// this.gameRenderer.joystickMove(1, 'neutral');
 				this.webSocketClient.send('player/playerAction', {key: "w", action: false});
 			}
 		);
 		this.inputManager!.onKey("s",
 			() =>
 			{
-				// this.gameRenderer.joystickMove(1, 'down');
 				this.webSocketClient.send('player/playerAction', {key: "s", action: true});
 			},
 			() =>
 			{
-				// this.gameRenderer.joystickMove(1, 'neutral');
 				this.webSocketClient.send('player/playerAction', {key: "s", action: false});
 			}
 		);
-		// Arrow keys for same player (alternative controls)
 		this.inputManager!.onKey("ArrowUp",
 			() => this.webSocketClient.send('player/playerAction', {key: "ArrowUp", action: true}),
 			() => this.webSocketClient.send('player/playerAction', {key: "ArrowUp", action: false})

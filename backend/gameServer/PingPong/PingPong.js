@@ -9,7 +9,7 @@ class PingPong extends EventEmitter
 	constructor(property)
 	{
 		super();
-		this.status = 'not initialized'; // 'waiting', 'playing', 'paused', 'finished', 'not initialized'
+		this.status = 'not initialized'; // 'waiting', 'countdown', 'playing', 'finished', 'not initialized'
 		this.gameMode = "classic"; // 'local', 'online', 'tournament', 'ai'
 
 		this.lastUpdateTime = 0;
@@ -22,7 +22,6 @@ class PingPong extends EventEmitter
 		this.state = {
 			players: [],
 		};
-		//! NİSAAAA
 		this.settings = {
 			...DEFAULT_GAME_PROPERTIES,
 			...property,
@@ -290,8 +289,6 @@ class PingPong extends EventEmitter
 				},
 			}
 		);
-		console.log(`winner: ${this.getWinnerTeam().playersId}, loser: ${this.getLoserTeam().playersId}`);
-		console.log(`🏁 Game finished! Final Score - team1: ${this.team.get(1).score}, team2: ${this.team.get(2).score}`);
 	}
 
 	finishedControls()
@@ -412,20 +409,9 @@ class PingPong extends EventEmitter
 		this.status = 'countdown';
 		setTimeout(() =>
 		{
-			this.status = 'playing';
+			if (this.status === 'countdown')
+				this.status = 'playing';
 		}, 2000);
-	}
-
-	pause()
-	{
-		this.status = 'paused';
-		console.log(`⏸️ Game paused`);
-	}
-
-	resume()
-	{
-		this.status = 'playing';
-		console.log(`▶️ Game resumed`);
 	}
 
 	isRunning()

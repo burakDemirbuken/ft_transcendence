@@ -145,18 +145,6 @@ class GameManager extends EventEmitter
 		this.updateInterval = setInterval(() => this.update(), TICK_RATE);
 	}
 
-	pause(gameId)
-	{
-		if (this.games.has(gameId))
-		{
-			const game = this.games.get(gameId);
-			if (game.status === 'playing')
-				game.pause();
-			else if (game.status === 'paused')
-				game.resume();
-		}
-	}
-
 	update()
 	{
 		const currentTime = Date.now();

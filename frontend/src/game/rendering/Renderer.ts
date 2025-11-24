@@ -83,7 +83,6 @@ class Renderer
 	constructor()
 	{
 		this.lang = getJsTranslations("en");
-		console.log('🎮 Game Renderer initialized with language:', {});
 		this.screenSize = constants.SCREEN_SIZE;
 		this.paddleSize = null;
 		this.ballSize = null;

@@ -57,10 +57,8 @@ class Tournament extends EventEmitter
 
 	update(deltaTime)
 	{
-		if (this.status !== 'running')
+		if (this.status !== 'running' && this.status !== 'finished')
 		{
-			if (this.status === 'finished')
-				return;
 			let counter = 0;
 			this.currentMatches.forEach(
 				(match) =>
@@ -75,7 +73,7 @@ class Tournament extends EventEmitter
 				return;
 		}
 
-		if (this.finishedMatchesCount === this.currentMatches.length)
+		if (this.finishedMatchesCount === this.currentMatches.length && this.status !== 'finished')
 		{
 			this.emit('finished',
 				{
@@ -100,8 +98,6 @@ class Tournament extends EventEmitter
 		this.currentMatches.forEach(
 			(match) =>
 			{
-				if (match.game.isFinished())
-					return;
 				match.game.update(deltaTime);
 				match.state = match.game.getGameState();
 				match.score = match.game.getScore();
@@ -133,9 +129,14 @@ class Tournament extends EventEmitter
 	{
 		const index = this.players.findIndex(p => p.id === playerId);
 		if (index !== -1)
+		{
 			this.players.splice(index, 1);
-		else
-			this.emit('error', new Error(`Player with ID ${playerId} is not in the tournament`));
+
+			this.currentMatches.forEach((match) => {
+				if (match.game.registeredPlayers.has(playerId))
+					match.game.removePlayer(playerId);
+			});
+		}
 	}
 
 	isFull()
@@ -179,11 +180,11 @@ class Tournament extends EventEmitter
 				matchNumber: match.matchNumber,
 				player1:
 				{
-					name: match.player1.name,
+					name: match.player1?.name,
 				},
 				player2:
 				{
-					name: match.player2.name,
+					name: match.player2?.name,
 				},
 				gameState: match.state,
 			})),

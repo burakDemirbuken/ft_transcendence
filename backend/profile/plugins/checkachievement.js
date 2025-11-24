@@ -44,8 +44,8 @@ export default fp(async (fastify) => {
 		if (Object.keys(updates).length > 0) {
 			await userAchievement.update(updates, { transaction: t })
 		}
-
 	}
+
 	async function getAchievementProgress(userId) {
 		const { Achievement, Stat } = fastify.sequelize.models
 

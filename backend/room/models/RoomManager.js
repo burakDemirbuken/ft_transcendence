@@ -18,7 +18,7 @@ class RoomManager extends EventEmitter
 				console.log(`Room ID: ${roomId}, Name: ${room.name}, Players: ${room.players.length}/${room.maxPlayers}, Status: ${room.status}`);
 				console.log('Players:', room.players.map(p => ({ id: p.id, name: p.name })));
 			});
-		}, 1000); // Log every 1 second
+		}, 5000); // Log every 1 second
 
 	}
 
@@ -130,13 +130,6 @@ class RoomManager extends EventEmitter
 
 	createRoom(player, payload)
 	{
-		//this._validateRoomCreation(hostId, properties);
-		//! NİSAA
-		//! gameType gerek yok
-		if (payload.gameType === "co-op")
-			payload.gameMode = "local";
-		else if (payload.gameType === "2v2")
-			payload.gameMode = "multiplayer";
 		for (const room of this.rooms.values())
 		{
 			if (room.players.find(p => p.id === player.id))
@@ -167,33 +160,35 @@ class RoomManager extends EventEmitter
 
 	async finishedRoom(data)
 	{
-		data.kickedPlayers.forEach(player => this.leaveRoom(player));
-		let url = 'http://profile:3006/internal/';
-		if (data.matchType === 'local' || data.matchType === 'ai' || data.matchType === 'multiplayer')
-			return;
-		try
+		if (!(data.matchType === 'local' || data.matchType === 'ai' || data.matchType === 'multiplayer'))
 		{
-			if (data.matchType === 'tournament')
-				url += 'tournament';
-			else
-				url += 'match';
-			const response = await fetch(url, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(data)
-			});
+			let url = 'http://profile:3006/internal/';
+			try
+			{
+				if (data.matchType === 'tournament')
+					url += 'tournament';
+				else
+					url += 'match';
+				const response = await fetch(url, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify(data)
+				});
 
-			if (!response.ok)
-				console.error('❌ Profile service error:', response.status, await response.text());
-			else
-				console.log('✅ Data sent to profile service:', data);
+				if (!response.ok)
+					console.error('❌ Profile service error:', response.status, await response.text());
+				else
+					console.log('✅ Data sent to profile service:', data);
+			}
+			catch (error)
+			{
+				console.error('❌ Error sending data to profile service:', error);
+			}
 		}
-		catch (error)
-		{
-			console.error('❌ Error sending data to profile service:', error);
-		}
+		data.kickedPlayers.forEach(player => this.leaveRoom(player));
+		this.deleteRoom(data.roomId);
 	}
 
 	getRoom(roomId)
@@ -205,10 +200,9 @@ class RoomManager extends EventEmitter
 	{
 		if (this.rooms.has(roomId))
 		{
+			console.log(`Deleting room with ID ${roomId}`);
 			this.rooms.delete(roomId);
-			return true;
 		}
-		return false;
 	}
 
 	joinRoom(payload, player)
