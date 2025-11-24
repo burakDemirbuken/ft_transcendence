@@ -259,7 +259,7 @@ export default async function gamedataRoute(fastify) {
 							ballHitCount: playerState?.kickBall ?? 0,
 							ballMissCount: playerState?.missedBall ?? 0,
 							gameTotalDuration: time.duration,
-							gameCurrentStreak: 1,
+							gameCurrentStreak: 1
 						}, { transaction: t })
 						
 						await player.Stat.update({
