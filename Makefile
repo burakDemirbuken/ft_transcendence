@@ -130,7 +130,7 @@ fclean: clean clean-db
 	@echo "$(RED)Performing full cleanup...$(NC)"
 	@$(COMPOSE_CMD) down --remove-orphans --volumes --rmi --rm all 2>/dev/null || true
 	@docker system prune -a --volumes -f
-	@docker volume prune -f
+	@docker volume rm $(docker volume ls -q)
 	@docker network prune -f
 re: fclean all
 

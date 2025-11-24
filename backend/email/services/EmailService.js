@@ -97,26 +97,67 @@ class EmailService {
     }
   }
 
-  async send2FACode(email, code, username = null) {
+  async send2FACode(email, code, username = null, type = 'login') {
     try {
+      // Type'a göre farklı email içerikleri
+      const emailContents = {
+        login: {
+          icon: '🔐',
+          subject: '🔐 Giriş Doğrulama Kodu - ft_transcendence',
+          title: '🔐 Giriş Doğrulama Kodu',
+          message: 'ft_transcendence hesabınıza giriş yapmak için aşağıdaki doğrulama kodunu kullanın:',
+          warning: 'Bu giriş talebini siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.'
+        },
+        password_change: {
+          icon: '🔑',
+          subject: '🔑 Şifre Değişimi Doğrulama Kodu - ft_transcendence',
+          title: '🔑 Şifre Değişimi Doğrulaması',
+          message: 'Şifrenizi değiştirmek için aşağıdaki doğrulama kodunu kullanın:',
+          warning: 'Bu şifre değişimi talebini siz yapmadıysanız, derhal hesap güvenliğinizi kontrol edin.'
+        },
+        email_change: {
+          icon: '✉️',
+          subject: '✉️ Email Değişimi Doğrulama Kodu - ft_transcendence',
+          title: '✉️ Email Değişimi Doğrulaması',
+          message: 'Email adresinizi değiştirmek için aşağıdaki doğrulama kodunu kullanın:',
+          warning: 'Bu email değişimi talebini siz yapmadıysanız, derhal hesap güvenliğinizi kontrol edin.'
+        },
+        password_reset: {
+          icon: '🔄',
+          subject: '🔄 Şifre Sıfırlama Kodu - ft_transcendence',
+          title: '🔄 Şifre Sıfırlama',
+          message: 'Şifrenizi sıfırlamak için aşağıdaki doğrulama kodunu kullanın:',
+          warning: 'Bu şifre sıfırlama talebini siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.'
+        },
+        delete_account: {
+          icon: '⚠️',
+          subject: '⚠️ Hesap Silme Doğrulama Kodu - ft_transcendence',
+          title: '⚠️ Hesap Silme Onayı',
+          message: 'Hesabınızı silmek için aşağıdaki doğrulama kodunu kullanın:',
+          warning: 'Bu hesap silme talebini siz yapmadıysanız, derhal hesap güvenliğinizi kontrol edin ve şifrenizi değiştirin!'
+        }
+      }
+
+      const content = emailContents[type] || emailContents.login
+
       const mailOptions = {
         from: config.email.from,
         to: email,
-        subject: '🔐 Giriş Doğrulama Kodu - ft_transcendence',
+        subject: content.subject,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #333; text-align: center;">🔐 Giriş Doğrulama Kodu</h2>
+            <h2 style="color: #333; text-align: center;">${content.title}</h2>
             ${username ? `<p>Merhaba <strong>${username}</strong>,</p>` : '<p>Merhaba,</p>'}
-            <p>ft_transcendence hesabınıza giriş yapmak için aşağıdaki doğrulama kodunu kullanın:</p>
+            <p>${content.message}</p>
             
             <div style="background-color: #f4f4f4; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px;">
               <h1 style="color: #007bff; font-size: 32px; margin: 0; letter-spacing: 8px;">${code}</h1>
             </div>
             
-            <p><strong>Bu kod 5 dakika süreyle geçerlidir.</strong></p>
+            <p><strong>Bu kod 10 dakika süreyle geçerlidir.</strong></p>
             
-            <p style="color: #666; font-size: 12px;">
-              Bu giriş talebini siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.
+            <p style="color: #ff6b35; font-size: 14px; font-weight: bold;">
+              ${content.warning}
             </p>
             
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
@@ -129,7 +170,7 @@ class EmailService {
       }
 
       const info = await this.transporter.sendMail(mailOptions)
-      console.log(`✅ 2FA kodu gönderildi: ${email} - MessageId: ${info.messageId}`)
+      console.log(`✅ 2FA kodu gönderildi (${type}): ${email} - MessageId: ${info.messageId}`)
       
       return {
         success: true,

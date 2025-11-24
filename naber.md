@@ -1,1 +1,0 @@
-- eşleşme yapıldıktan sonra oyuncular çıkarsa katılımcılar listesi güncellenmiyor.

@@ -45,6 +45,7 @@ export default async function allRoutes(fastify) {
 						headers['x-user-id'] = request.user.userId;
 						headers['x-user-username'] = request.user.username;
 						headers['x-user-email'] = request.user.email;
+						headers['user-agent'] = request.headers['user-agent'] || '';
 						if (request.user.role) {
 							headers['x-user-role'] = request.user.role;
 						}
