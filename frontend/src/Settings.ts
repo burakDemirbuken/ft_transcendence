@@ -1,8 +1,9 @@
 import AView from "./AView.js";
 import { getAuthToken, getAuthHeaders } from './utils/auth.js';
 import { API_BASE_URL, navigateTo } from './index.js';
-import { showNotification } from "./notification.js";
-import tokenManager from './tokenManager.js';
+import { showNotification } from "./utils/notification.js";
+import tokenManager from './utils/tokenManager.js';
+import doubleFetch from "./utils/doubleFetch.js";
 
 let currentUserName = null;
 let pendingAction = null; // 'password' veya 'email'
@@ -56,7 +57,7 @@ async function confirm2FACode(e) {
 			return;
 		}
 
-		const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+		const response = await doubleFetch(`${API_BASE_URL}${endpoint}`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: {
@@ -217,7 +218,7 @@ async function sendEmailChangeReq(e) {
 	submitBtn.style.cursor = 'not-allowed';
 
 	try {
-		const response = await fetch(`${API_BASE_URL}/auth/init-email-change`, {
+		const response = await doubleFetch(`${API_BASE_URL}/auth/init-email-change`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: {
@@ -282,7 +283,7 @@ async function sendPassChangeReq(e) {
 	submitBtn.style.cursor = 'not-allowed';
 
 	try {
-		const response = await fetch(`${API_BASE_URL}/auth/init-password-change`, {
+		const response = await doubleFetch(`${API_BASE_URL}/auth/init-password-change`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: {
