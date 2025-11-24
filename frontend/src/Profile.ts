@@ -877,7 +877,7 @@ async function showMatchDetails(matchIndex: number) {
         }
 
         // Overlay'i göster
-        overlay.classList.remove('hide-away');
+        overlay?.classList.remove('hide-away');
 
     } catch (error) {
         console.error("❌ Error showing match details:", error);
@@ -886,7 +886,7 @@ async function showMatchDetails(matchIndex: number) {
 
 function hideMatchOverlay() {
     const overlay = document.getElementById('match-overlay') as HTMLDivElement;
-    overlay.classList.add('hide-away');
+    overlay?.classList.add('hide-away');
 }
 
 // API verilerini bracket formatına dönüştür

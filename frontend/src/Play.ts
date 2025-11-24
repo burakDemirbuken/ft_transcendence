@@ -2003,7 +2003,7 @@ class CanvasOrientationManager {
         if (this.keyboardListener) return; // Zaten kuruluysa tekrar kurma
 
         this.keyboardListener = (e: KeyboardEvent) => {
-            const isPortrait = window.innerHeight > window.innerWidth;
+            const isPortrait = 480 < window.innerWidth;
 
             // Sadece portrait modda ve touch cihazda çalış
             if (!isPortrait || !this.hasTouchCapability) return;
@@ -2144,7 +2144,7 @@ class CanvasOrientationManager {
             return;
         }
 
-        const isPortrait = window.innerHeight > window.innerWidth;
+        const isPortrait = 480 > window.innerWidth;
 
         console.log(`📐 Mobile Orientation: ${isPortrait ? 'PORTRAIT' : 'LANDSCAPE'}`);
 
