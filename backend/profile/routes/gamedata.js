@@ -215,20 +215,13 @@ export async function getLastSevenDaysMatches(fastify, userName) {
 
 export default async function gamedataRoute(fastify) {
 	fastify.post('/internal/match', async (request, reply) => {
-		const {
-			team1,
-			team2,
-			winner,
-			matchType,
-			state,
-			time,
-			gameSettings
-		} = request.body ?? {}
-		const { Profile, Stat, MatchHistory, Team } = fastify.sequelize.models
+		const { team1, team2, winner, matchType, state, time, gameSettings } = request.body ?? {}
+		const { Profile, Stat, Achievement, MatchHistory, Team } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
 
 		try {
 			if (!team1 || !team2 || !state || !time || !matchType || !winner) {
+				console.error(request.body)
 				throw new Error('Invalid match data provided')
 			} else if (!Profile || !Stat || !MatchHistory || !Team) {
 				throw new Error('Database models are not properly initialized')
@@ -237,15 +230,42 @@ export default async function gamedataRoute(fastify) {
 			const [teamOnePlayers, teamTwoPlayers] = await Promise.all([
 				Profile.findAll({
 					where: { userName: team1.playersId },
-					include: [{ model: Stat }],
+					include: [
+						{
+							model: Stat,
+							attributes: {
+								exclude: [ 'createdAt', 'updatedAt']
+							}
+						},
+						{
+							model: Achievement,
+							attributes: {
+								exclude: [ 'createdAt', 'updatedAt']
+							}
+						}
+					],
 					transaction: t
 				}),
 				Profile.findAll({
 					where: { userName: team2.playersId },
-					include: [{ model: Stat }],
+					include: [
+						{
+							model: Stat,
+							attributes: {
+								exclude: [ 'createdAt', 'updatedAt']
+							}
+						},
+						{
+							model: Achievement,
+							attributes: {
+								exclude: [ 'createdAt', 'updatedAt']
+							}
+						}
+					],
 					transaction: t
 				})
 			])
+
 			const winnerTeam = winner?.team ?
 				(winner.team.playersId[0] === team1.playersId[0] ? teamOnePlayers : teamTwoPlayers)
 				: null
@@ -253,53 +273,40 @@ export default async function gamedataRoute(fastify) {
 				(winner.team.playersId[0] === team1.playersId[0] ? teamTwoPlayers : teamOnePlayers)
 				: null
 
-			if (winnerTeam) {
-				// ✅ KAZANANLAR
-				await Promise.all([
-					...winnerTeam.map(async (player) => {
-						const playerState = state.players.find(p => p.id === player.userName)
-
-						// Streak'i doğru şekilde hesapla
-						const currentStreak = (player.Stat.gameCurrentStreak || 0) + 1
-						const longestStreak = Math.max(
-							player.Stat.gameLongestStreak || 0,
-							currentStreak
-						)
-
-						await player.Stat.increment({
-							gamesPlayed: 1,
-							gamesWon: 1,
-							xp: 70,
-							ballHitCount: playerState?.kickBall ?? 0,
-							ballMissCount: playerState?.missedBall ?? 0,
-							gameTotalDuration: time.duration
-						}, { transaction: t })
-
-						await player.Stat.update({
-							gameCurrentStreak: currentStreak,
-							gameLongestStreak: longestStreak,
-							gameMinDuration: time.duration < player.Stat.gameMinDuration ? time.duration : player.Stat.gameMinDuration
-						}, { transaction: t })
-					}),
-					...loserTeam.map(async (player) => {
-						const playerState = state.players.find(p => p.id === player.userName)
-
-						await player.Stat.increment({
-							gamesPlayed: 1,
-							gamesLost: 1,
-							xp: 10,
-							gameTotalDuration: time.duration,
-							ballHitCount: playerState?.kickBall ?? 0,
-							ballMissCount: playerState?.missedBall ?? 0
-						}, { transaction: t })
-
-						await player.Stat.update({
-							gameCurrentStreak: 0,
-							gameMinDuration: time.duration < player.Stat.gameMinDuration ? time.duration : player.Stat.gameMinDuration
-						}, { transaction: t })
-					})
-				])
-			}
+			await Promise.all([
+				...winnerTeam.map(async (player) => {
+					const playerState = state.players.find(p => p.id === player.userName)
+					await player.Stat.increment({
+						gamesPlayed: 1,
+						gamesWon: 1,
+						xp: 70,
+						ballHitCount: playerState?.kickBall ?? 0,
+						ballMissCount: playerState?.missedBall ?? 0,
+						gameTotalDuration: time.duration,
+						gameCurrentStreak: 1
+					}, { transaction: t })
+					await player.Stat.update({
+						gameLongestStreak: player.Stat.gameCurrentStreak + 1 > player.Stat.gameLongestStreak ?
+							player.Stat.gameCurrentStreak + 1 : player.Stat.gameLongestStreak,
+						gameMinDuration: time.duration < player.Stat.gameMinDuration ? time.duration : player.Stat.gameMinDuration
+					}, { transaction: t })
+				}),
+				...loserTeam.map(async (player) => {
+					const playerState = state.players.find(p => p.id === player.userName)
+					await player.Stat.increment({
+						gamesPlayed: 1,
+						gamesLost: 1,
+						xp: 10,
+						gameTotalDuration: time.duration,
+						ballHitCount: playerState?.kickBall ?? 0,
+						ballMissCount: playerState?.missedBall ?? 0
+					}, { transaction: t })
+					await player.Stat.update({
+						gameCurrentStreak: 0,
+						gameMinDuration: time.duration < player.Stat.gameMinDuration ? time.duration : player.Stat.gameMinDuration
+					}, { transaction: t })
+				})
+			])
 
 			const [teamOne, teamTwo] = await Promise.all([
 				Team.create({
@@ -324,16 +331,15 @@ export default async function gamedataRoute(fastify) {
 				matchSettings: gameSettings,
 				matchState: state
 			}, { transaction: t })
-
 			await Promise.all([
 				...teamOnePlayers.map(async (player) => {
 					if (player && player.id) {
-						await fastify.checkAchievements(player.id, t)
+						await player.Achievement.update(await fastify.checkAchievements(player), { transaction: t })
 					}
 				}),
 				...teamTwoPlayers.map(async (player) => {
 					if (player && player.id) {
-						await fastify.checkAchievements(player.id, t)
+						await player.Achievement.update(await fastify.checkAchievements(player), { transaction: t })
 					}
 				})
 			])
@@ -342,7 +348,7 @@ export default async function gamedataRoute(fastify) {
 			return reply.status(200).send({ message: 'Match data processed successfully' })
 		} catch (error) {
 			await t.rollback()
-			fastify.log.error(`Error saving match data: ${error.message}`)
+			fastify.log.error(`Error saving match data: ${error.message} -> ${error}`)
 			return reply.status(500).send({ message: 'Error processing match data' })
 		}
 	})
@@ -352,10 +358,9 @@ export default async function gamedataRoute(fastify) {
 		const { Profile, Stat, RoundMatch, Round, TournamentHistory } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
 
-		console.log(JSON.stringify(request.body, null, 2))
 		try {
-
 			if (!name || !rounds || !Array.isArray(rounds) || rounds.length === 0) {
+				console.error(request.body)
 				throw new Error('Invalid tournament data provided')
 			} else if (!Profile || !Stat || !RoundMatch || !Round || !TournamentHistory) {
 				throw new Error('Database models are not properly initialized')
@@ -407,7 +412,7 @@ export default async function gamedataRoute(fastify) {
 							(matchData.loser === playerTwoProfile?.userName ? playerTwoProfile : null)
 					])
 
-					const match = await RoundMatch.create({
+					await RoundMatch.create({
 						roundId: round.id,
 						roundNumber: roundData.round,
 						matchNumber: matchData.matchNumber,
@@ -468,8 +473,7 @@ export default async function gamedataRoute(fastify) {
 	})
 
 	fastify.get('/match-history', async (request, reply) => {
-
-		const userName = fastify.getDataFromToken(request)?.username ?? request.query?.userName ?? null
+		const userName = request.query?.userName ?? fastify.getDataFromToken(request)?.username ?? null
 
 		try {
 			const result = await getUserMatchHistory(fastify, userName)
@@ -568,7 +572,7 @@ export default async function gamedataRoute(fastify) {
 				}
 			})
 
-			return reply.send({ success: true, usersTournament: JSON.parse(JSON.stringify(usersTournament)) })
+			return reply.code(200).send({ usersTournament: JSON.parse(JSON.stringify(usersTournament)) })
 		} catch (error) {
 			fastify.log.error(`Error retrieving user tournament history: ${error.message}`)
 			return reply.code(500).send({message: 'Failed to retrieve tournament history' })

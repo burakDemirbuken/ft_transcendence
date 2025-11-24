@@ -1,4 +1,3 @@
-// for frontend websocket
 import Player from '../models/Player.js';
 
 export default async function clientConnectionSocket(fastify) {
@@ -10,11 +9,8 @@ export default async function clientConnectionSocket(fastify) {
 		websocket: true
 	},
 	(connection, req) => {
-		if (req.query.userID === undefined) {
-			connection.socket.close(1008, 'userID query parameter is required');
-			return;
-		}
-		const currentPlayer = new Player(req.query.userID, connection.socket, req.query.userName || 'Anonymous');
+		const userID = fastify.getDataFromToken(req)?.username ?? null;
+		const currentPlayer = new Player(userID, connection.socket, req.query.userName || 'Anonymous');
 		console.log('New client connected', {
 			ip: req.ip,
 			protocol: connection.socket.protocol,

@@ -110,10 +110,6 @@ services:
       - /app/node_modules
     env_file:
       - .env
-    environment:
-      - HOST_IP=${HOST_IP}
-      - JWT_SECRET=${JWT_SECRET}
-      - NODE_ENV=${NODE_ENV:-development}
 
   gateway:
     container_name: gateway
@@ -128,10 +124,6 @@ services:
       - /app/node_modules
     env_file:
       - .env
-    environment:
-      - HOST_IP=${HOST_IP}
-      - JWT_SECRET=${JWT_SECRET}
-      - NODE_ENV=${NODE_ENV:-development}
 
   email:
     container_name: email
@@ -146,15 +138,6 @@ services:
       - /app/node_modules
     env_file:
       - .env
-    environment:
-      - EMAIL_SERVICE=${EMAIL_SERVICE:-gmail}
-      - EMAIL_USER=${EMAIL_USER}
-      - EMAIL_PASS=${EMAIL_PASS}
-      - EMAIL_FROM=${EMAIL_FROM}
-      - EMAIL_PORT=${EMAIL_PORT:-3005}
-      - HOST=${EMAIL_HOST:-0.0.0.0}
-      - APP_URL=${APP_URL}
-      - NODE_ENV=${NODE_ENV:-development}
 
   gameserver:
     container_name: gameserver
@@ -169,8 +152,6 @@ services:
       - /app/node_modules
     env_file:
       - .env
-    environment:
-      - NODE_ENV=${NODE_ENV:-development}
     depends_on:
       - room
       - aiserver
@@ -188,8 +169,6 @@ services:
       - transcendency
     env_file:
       - .env
-    environment:
-      - NODE_ENV=${NODE_ENV:-development}
     depends_on:
       - aiserver
 
@@ -206,8 +185,6 @@ services:
       - transcendency
     env_file:
       - .env
-    environment:
-      - NODE_ENV=${NODE_ENV:-development}
 
   friend:
     container_name: friend
@@ -222,8 +199,6 @@ services:
       - transcendency
     env_file:
       - .env
-    environment:
-      - NODE_ENV=${NODE_ENV:-development}
 
   aiserver:
     container_name: ai-server
@@ -237,8 +212,6 @@ services:
       - aiServer_src:/app
     env_file:
       - .env
-    environment:
-      - NODE_ENV=${NODE_ENV:-development}
 
   static:
     container_name: static
@@ -254,5 +227,4 @@ services:
       - /app/database
     env_file:
       - .env
-    environment:
-      - NODE_ENV=${NODE_ENV:-development}
+

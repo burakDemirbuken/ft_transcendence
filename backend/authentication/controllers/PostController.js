@@ -101,7 +101,7 @@ async function login(request, reply) {
 
         // 2FA kodu oluştur (hem normal hem test kullanıcı için)
         const isTestUser = user.email.endsWith('@test.com');
-        const twoFACode = isTestUser ? '123123' : utils.storeVerificationCode(user.email, '2fa');
+        const twoFACode = isTestUser ? '123123' : utils.storeVerificationCode(user.email, { type: '2fa' });
         const userIP = request.headers['x-forwarded-for'] || request.headers['x-real-ip'] || request.socket.remoteAddress || 'Unknown';
 
         // Test kullanıcıları için email gönderme - asenkron
@@ -567,12 +567,35 @@ async function blacklistTokens(request, reply)
 	}
 }
 
-async function requestEmailChange(request, reply)
-{
-	const trlt = getTranslations(request.query.lang || "eng");
-	try
-	{
-		// Cookie'den veya header'dan kullanıcı bilgisini al
+// ============================================
+// ŞİFRE DEĞİŞTİRME - 2FA İLE
+// ============================================
+
+/**
+ * Adım 1: Şifre değiştirme isteği - 2FA kodu gönder
+ * Body: { currentPassword, newPassword }
+ * Response: { success: true, message: "2FA kodu email'inize gönderildi" }
+ */
+async function initPasswordChange(request, reply) {
+	try {
+		const { currentPassword, newPassword } = request.body;
+
+		if (!currentPassword || !newPassword) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Current password and new password are required'
+			});
+		}
+
+		// Yeni şifre validasyonu
+		if (newPassword.length < 6) {
+			return reply.status(400).send({
+				success: false,
+				error: 'New password must be at least 6 characters'
+			});
+		}
+
+		// JWT'den kullanıcıyı al
 		const cookieToken = request.cookies?.accessToken;
 		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
 		const token = cookieToken || headerToken;
@@ -580,466 +603,13 @@ async function requestEmailChange(request, reply)
 		if (!token) {
 			return reply.status(401).send({
 				success: false,
-				error: 'Authentication required - provide cookie or Authorization header',
-				code: 'NO_TOKEN'
-			});
-		}
-
-		let userId, username, currentEmail;
-		try {
-			const decoded = request.server.jwt.verify(token);
-			console.log("Decoded JWT token:", JSON.stringify(decoded, null, 2));
-			userId = decoded.userId;
-			username = decoded.username;
-			currentEmail = decoded.email;
-			console.log("Extracted values - userId:", userId, "username:", username, "currentEmail:", currentEmail);
-		} catch (error) {
-			console.log("JWT verify error:", error.message);
-			return reply.status(401).send({
-				success: false,
-				error: 'Invalid token',
-				code: 'INVALID_TOKEN'
-			});
-		}
-
-		// Kullanıcıyı veritabanından getir
-		const user = await User.findByPk(userId);
-		if (!user) {
-			return reply.status(404).send({
-				success: false,
-				error: trlt.unotFound || 'User not found'
-			});
-		}
-			console.log("User from database:", {
-			id: user.id,
-			username: user.username,
-			email: user.email,
-			is_active: user.is_active
-		});
-		console.log("Current email from JWT vs DB:", currentEmail, "vs", user.email);
-
-		// JWT token'da email boşsa database'den al
-		const actualEmail = currentEmail || user.email;
-		if (!actualEmail) {
-			return reply.status(400).send({
-				success: false,
-				error: 'User email not found'
-			});
-		}
-
-		// Email değiştirme token'ı oluştur
-		const changeToken = utils.storeVerificationToken(actualEmail, 'email_change');
-		console.log("Using email for change request:", actualEmail, "(from:", currentEmail ? "JWT" : "DB", ")");
-		try {
-			await utils.sendEmailChangeRequest(actualEmail, username, changeToken);
-			return reply.send({
-				success: true,
-				message: 'Email change request sent. Please check your current email.',
-				next_step: 'check_email'
-			});
-		} catch (emailError) {
-			console.log("Email service error:", emailError);
-			utils.tempStorage.delete(actualEmail);
-			return reply.status(500).send({
-				success: false,
-				error: 'Failed to send email change request'
-			});
-		}
-	}
-	catch (error)
-	{
-		console.log('Request email change error:', error);
-		return reply.status(500).send({
-			success: false,
-			error: 'Internal server error'
-		});
-	}
-}
-
-async function processEmailChange(request, reply)
-{
-    console.log("Processing email change request...");
-	const trlt = getTranslations(request.query.lang || "eng");
-	try
-	{
-		const { token, newEmail, oldEmail, password } = request.body;
-
-		if (!token || !newEmail || !oldEmail || !password) {
-			return reply.status(400).send({
-				success: false,
-				error: 'Missing required fields'
-			});
-		}
-
-		// Token'ı kontrol et
-		const storedData = utils.tempStorage.get(oldEmail);
-		if (!storedData || storedData.type !== 'email_change') {
-			return reply.status(400).send({
-				success: false,
-				error: 'Invalid or expired token'
-			});
-		}
-
-		if (storedData.expires < new Date()) {
-			utils.tempStorage.delete(oldEmail);
-			return reply.status(400).send({
-				success: false,
-				error: 'Token has expired'
-			});
-		}
-
-		if (storedData.token !== token) {
-			return reply.status(400).send({
-				success: false,
-				error: 'Invalid token'
-			});
-		}
-
-		// Kullanıcıyı eski email ile bul
-		const user = await User.findByEmail(oldEmail);
-		if (!user) {
-			return reply.status(404).send({
-				success: false,
-				error: 'User not found'
-			});
-		}
-
-		// Şifreyi kontrol et
-		const isPasswordValid = await user.validatePassword(password);
-		if (!isPasswordValid) {
-			return reply.status(400).send({
-				success: false,
-				error: 'Invalid password'
-			});
-		}
-
-		// Yeni email'in başka kullanıcı tarafından kullanılmadığını kontrol et
-		const existingUser = await User.findByEmail(newEmail);
-		if (existingUser && existingUser.id !== user.id) {
-			return reply.status(409).send({
-				success: false,
-				error: 'Email already in use'
-			});
-		}
-
-		// Eski token'ı temizle
-		utils.tempStorage.delete(oldEmail);
-
-		// Yeni email için doğrulama token'ı oluştur
-		const verificationToken = utils.storeVerificationToken(newEmail, 'new_email_verification');
-
-		// Eski email bilgilerini yeni email verification ile birlikte sakla
-		utils.tempStorage.set(`change_${newEmail}`, {
-			userId: user.id,
-			oldEmail: oldEmail,
-			newEmail: newEmail,
-			expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 saat
-			type: 'email_change_pending'
-		});
-
-		try {
-			await utils.sendNewEmailVerification(newEmail, user.username, verificationToken);
-
-			// Cookie'leri temizle
-			reply.clearCookie('accessToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
-			reply.clearCookie('refreshToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
-			reply.clearCookie('authStatus', { path: '/', secure: true, sameSite: 'lax' });
-
-			return reply.send({
-				success: true,
-				message: 'Verification email sent to your new email address. Please check and verify.',
-				newEmail: newEmail,
-				next_step: 'verify_new_email',
-				logout: true // Frontend'e logout yapması gerektiğini belirt
-			});
-		} catch (emailError) {
-			utils.tempStorage.delete(newEmail);
-			utils.tempStorage.delete(`change_${newEmail}`);
-			return reply.status(500).send({
-				success: false,
-				error: 'Failed to send verification email'
-			});
-		}
-	}
-	catch (error)
-	{
-		console.log('Process email change error:', error);
-		return reply.status(500).send({
-			success: false,
-			error: 'Internal server error'
-		});
-	}
-}
-
-async function verifyNewEmail(request, reply)
-{
-	const trlt = getTranslations(request.query.lang || "eng");
-	try
-	{
-		const { token } = request.query;
-
-		if (!token) {
-			return reply.status(400).send({
-				success: false,
-				error: 'Verification token is required'
-			});
-		}
-
-		// Token'ı bul
-		let newEmail = null;
-		for (const [email, data] of utils.tempStorage.entries()) {
-			if (data.type === 'new_email_verification' && data.token === token) {
-				if (data.expires > new Date()) {
-					newEmail = email;
-					break;
-				} else {
-					utils.tempStorage.delete(email);
-				}
-			}
-		}
-
-		if (!newEmail) {
-			return reply.type('text/html').code(400).send(`
-				<!DOCTYPE html>
-				<html>
-				<head>
-					<title>Email Verification - Invalid Token</title>
-					<meta charset="UTF-8">
-					<style>
-						body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
-						.error { color: #d32f2f; text-align: center; }
-					</style>
-				</head>
-				<body>
-					<div class="error">
-						<h2>Invalid or Expired Token</h2>
-						<p>The email verification link is invalid or has expired.</p>
-					</div>
-				</body>
-				</html>
-			`);
-		}
-
-		// Email değişiklik bilgilerini al
-		const changeData = utils.tempStorage.get(`change_${newEmail}`);
-		if (!changeData || changeData.type !== 'email_change_pending') {
-			return reply.type('text/html').code(400).send(`
-				<!DOCTYPE html>
-				<html>
-				<head>
-					<title>Email Change - Error</title>
-					<meta charset="UTF-8">
-					<style>
-						body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
-						.error { color: #d32f2f; text-align: center; }
-					</style>
-				</head>
-				<body>
-					<div class="error">
-						<h2>Email Change Data Not Found</h2>
-						<p>Email change request has expired or is invalid.</p>
-					</div>
-				</body>
-				</html>
-			`);
-		}
-
-		// Kullanıcıyı bul ve email'i güncelle
-		const user = await User.findByPk(changeData.userId);
-		if (!user) {
-			return reply.type('text/html').code(404).send(`
-				<!DOCTYPE html>
-				<html>
-				<head>
-					<title>Email Change - User Not Found</title>
-					<meta charset="UTF-8">
-					<style>
-						body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
-						.error { color: #d32f2f; text-align: center; }
-					</style>
-				</head>
-				<body>
-					<div class="error">
-						<h2>User Not Found</h2>
-						<p>The user account could not be found.</p>
-					</div>
-				</body>
-				</html>
-			`);
-		}
-
-		// Email'i güncelle
-		await user.update({ email: newEmail.toLowerCase() });
-
-		// Tüm temp data'yı temizle
-		utils.tempStorage.delete(newEmail);
-		utils.tempStorage.delete(`change_${newEmail}`);
-
-		// Kullanıcının tüm token'larını blacklist'e ekle (yeniden login zorla)
-		// Not: Bu noktada kullanıcının aktif token'larına erişimimiz yok
-		// Bu yüzden sadece veritabanındaki refresh token'ı temizleyelim
-		await user.clearRefreshToken();
-
-		return reply.type('text/html').send(`
-			<!DOCTYPE html>
-			<html>
-			<head>
-				<title>Email Successfully Changed</title>
-				<meta charset="UTF-8">
-				<style>
-					body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
-					.success { color: #2e7d32; text-align: center; }
-					.info { background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; }
-				</style>
-			</head>
-			<body>
-				<div class="success">
-					<h2>✅ Email Successfully Changed!</h2>
-					<p>Your email has been updated from:</p>
-					<p><strong>${changeData.oldEmail}</strong></p>
-					<p>to:</p>
-					<p><strong>${newEmail}</strong></p>
-				</div>
-				<div class="info">
-					<p><strong>Next Step:</strong> Please login again with your new email address.</p>
-					<p>For security reasons, you have been logged out from all devices.</p>
-				</div>
-				<div style="text-align: center;">
-					<a href="https://${process.env.HOST_IP}:3030" style="background-color: #2e7d32; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Login</a>
-				</div>
-			</body>
-			</html>
-		`);
-	}
-	catch (error)
-	{
-		console.log('Verify new email error:', error);
-		return reply.type('text/html').code(500).send(`
-			<!DOCTYPE html>
-			<html>
-			<head>
-				<title>Email Verification - Error</title>
-				<meta charset="UTF-8">
-			</head>
-			<body>
-				<h2>Error</h2>
-				<p>An error occurred while processing your email verification.</p>
-			</body>
-			</html>
-		`);
-	}
-}
-
-async function requestPasswordChange(request, reply)
-{
-	const trlt = getTranslations(request.query.lang || "eng");
-	try
-	{
-		// JWT token'dan kullanıcıyı al
-		const cookieToken = request.cookies?.accessToken;
-		if (!cookieToken) {
-			return reply.status(401).send({
-				success: false,
 				error: 'Authentication required'
 			});
 		}
 
-		let userId, username, currentEmail;
-		try {
-			const decoded = request.server.jwt.verify(cookieToken);
-			userId = decoded.userId;
-			username = decoded.username;
-			currentEmail = decoded.email;
-		} catch (error) {
-			return reply.status(401).send({
-				success: false,
-				error: 'Invalid authentication token'
-			});
-		}
+		const decoded = request.server.jwt.verify(token);
+		const user = await User.findByPk(decoded.userId);
 
-		// Kullanıcıyı database'den al
-		const user = await User.findByPk(userId);
-		if (!user) {
-			return reply.status(404).send({
-				success: false,
-				error: 'User not found'
-			});
-		}
-
-		// Email'i al (JWT'den veya DB'den)
-		const actualEmail = currentEmail || user.email;
-		if (!actualEmail) {
-			return reply.status(400).send({
-				success: false,
-				error: 'User email not found'
-			});
-		}
-
-		// Password değiştirme token'ı oluştur
-		const changeToken = utils.storeVerificationToken(actualEmail, 'password_change');
-
-		try {
-			await utils.sendPasswordChangeRequest(actualEmail, username, changeToken);
-			return reply.send({
-				success: true,
-				message: 'Password change request sent. Please check your email.',
-				next_step: 'check_email'
-			});
-		} catch (emailError) {
-			console.log("Email service error:", emailError);
-			utils.tempStorage.delete(actualEmail);
-			return reply.status(500).send({
-				success: false,
-				error: 'Failed to send password change request'
-			});
-		}
-	}
-	catch (error)
-	{
-		console.log('Request password change error:', error);
-		return reply.status(500).send({
-			success: false,
-			error: 'Internal server error'
-		});
-	}
-}
-
-async function processPasswordChange(request, reply)
-{
-	const trlt = getTranslations(request.query.lang || "eng");
-	try
-	{
-		const { token, currentPassword, newPassword } = request.body;
-
-		if (!token || !currentPassword || !newPassword) {
-			return reply.status(400).send({
-				success: false,
-				error: 'Missing required fields'
-			});
-		}
-
-		// Token'ı kontrol et
-		let userEmail = null;
-		for (const [email, data] of utils.tempStorage.entries()) {
-			if (data.type === 'password_change' && data.token === token) {
-				if (data.expires > new Date()) {
-					userEmail = email;
-					break;
-				} else {
-					utils.tempStorage.delete(email);
-				}
-			}
-		}
-
-		if (!userEmail) {
-			return reply.status(400).send({
-				success: false,
-				error: 'Invalid or expired token'
-			});
-		}
-
-		// Kullanıcıyı email ile bul
-		const user = await User.findByEmail(userEmail);
 		if (!user) {
 			return reply.status(404).send({
 				success: false,
@@ -1056,40 +626,568 @@ async function processPasswordChange(request, reply)
 			});
 		}
 
-		// Yeni şifrenin eski şifreyle aynı olmadığını kontrol et
-		const isSamePassword = await user.validatePassword(newPassword);
-		if (isSamePassword) {
-			return reply.status(400).send({
+		// 6 haneli 2FA kodu oluştur ve sakla
+		const code = utils.storeVerificationCode(user.email, {
+			type: 'password_change',
+			newPassword: newPassword,
+			userId: user.id
+		});
+
+		// Email'e 2FA kodunu gönder
+		try {
+			await utils.send2FAEmail(user.email, user.username, code);
+			
+			return reply.send({
+				success: true,
+				message: '2FA code sent to your email',
+				expiresIn: '10 minutes'
+			});
+		} catch (emailError) {
+			console.error('Failed to send 2FA email:', emailError);
+			utils.tempStorage.delete(user.email);
+			return reply.status(500).send({
 				success: false,
-				error: 'New password must be different from current password'
+				error: 'Failed to send verification code'
 			});
 		}
 
-		// Şifreyi güncelle
-		user.password = newPassword;
+	} catch (error) {
+		console.error('Init password change error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
+}
+
+/**
+ * Adım 2: 2FA kodunu doğrula ve şifreyi değiştir
+ * Body: { code }
+ * Response: { success: true, message: "Password changed successfully" }
+ */
+async function confirmPasswordChange(request, reply) {
+	try {
+		const { code } = request.body;
+
+		if (!code) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Verification code is required'
+			});
+		}
+
+		// JWT'den kullanıcıyı al
+		const cookieToken = request.cookies?.accessToken;
+		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
+		const token = cookieToken || headerToken;
+
+		if (!token) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Authentication required'
+			});
+		}
+
+		const decoded = request.server.jwt.verify(token);
+		const user = await User.findByPk(decoded.userId);
+
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: 'User not found'
+			});
+		}
+
+		// 2FA kodunu kontrol et
+		const storedData = utils.tempStorage.get(user.email);
+		
+		if (!storedData || storedData.type !== 'password_change') {
+			return reply.status(400).send({
+				success: false,
+				error: 'No pending password change request'
+			});
+		}
+
+		if (storedData.code !== code) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Invalid verification code'
+			});
+		}
+
+		if (storedData.expires < new Date()) {
+			utils.tempStorage.delete(user.email);
+			return reply.status(400).send({
+				success: false,
+				error: 'Verification code has expired'
+			});
+		}
+
+		// Şifreyi değiştir
+		user.password = storedData.newPassword;
 		await user.save();
 
-		// Token'ı temizle
-		utils.tempStorage.delete(userEmail);
+		// Temp storage'ı temizle
+		utils.tempStorage.delete(user.email);
 
-		// Tüm refresh token'ları temizle (güvenlik için)
+		// Kullanıcının refresh token'ını temizle (güvenlik için)
 		await user.clearRefreshToken();
 
-		// Cookie'leri temizle
-		reply.clearCookie('accessToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
-		reply.clearCookie('refreshToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
-		reply.clearCookie('authStatus', { path: '/', secure: true, sameSite: 'lax' });
+		// Cookie'leri temizle - kullanıcıyı logout yap
+		reply.clearCookie('accessToken', { 
+			path: '/', 
+			httpOnly: true, 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+		reply.clearCookie('refreshToken', { 
+			path: '/', 
+			httpOnly: true, 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+		reply.clearCookie('authStatus', { 
+			path: '/', 
+			secure: true, 
+			sameSite: 'lax' 
+		});
 
 		return reply.send({
 			success: true,
-			message: 'Password successfully changed. Please login with your new password.',
-			next_step: 'login',
-			logout: true // Frontend'e logout yapması gerektiğini belirt
+			message: 'Password changed successfully',
+			logout: true  // Frontend'e logout olduğunu bildir
+		});
+
+	} catch (error) {
+		console.error('Confirm password change error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
 		});
 	}
-	catch (error)
-	{
-		console.log('Process password change error:', error);
+}
+
+/**
+ * Adım 1: Email değiştirme isteği başlat
+ * Body: { newEmail, password }
+ * Response: { success: true, message: "2FA code sent to new email" }
+ */
+async function initEmailChange(request, reply) {
+	try {
+		const { newEmail, password } = request.body;
+
+		if (!newEmail || !password) {
+			return reply.status(400).send({
+				success: false,
+				error: 'New email and password are required'
+			});
+		}
+
+		// Email formatı kontrolü
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(newEmail)) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Invalid email format'
+			});
+		}
+
+		// JWT'den kullanıcıyı al
+		const cookieToken = request.cookies?.accessToken;
+		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
+		const token = cookieToken || headerToken;
+
+		if (!token) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Authentication required'
+			});
+		}
+
+		const decoded = request.server.jwt.verify(token);
+		const user = await User.findByPk(decoded.userId);
+
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: 'User not found'
+			});
+		}
+
+		// Mevcut şifreyi kontrol et
+		const isPasswordValid = await user.validatePassword(password);
+		if (!isPasswordValid) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Password is incorrect'
+			});
+		}
+
+		// Yeni email'in zaten kullanılıp kullanılmadığını kontrol et
+		const existingUser = await User.findOne({ where: { email: newEmail } });
+		if (existingUser) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Email already in use'
+			});
+		}
+
+		// Kullanıcının eski email'ini kontrol et (aynı email girilmişse)
+		if (user.email === newEmail) {
+			return reply.status(400).send({
+				success: false,
+				error: 'New email cannot be the same as current email'
+			});
+		}
+
+		// 6 haneli 2FA kodu oluştur ve sakla (yeni email'e gönderilecek)
+		const code = utils.storeVerificationCode(newEmail, {
+			type: 'email_change',
+			newEmail: newEmail,
+			userId: user.id,
+			oldEmail: user.email
+		});
+
+		// YENİ email adresine 2FA kodunu gönder
+		try {
+			await utils.send2FAEmail(newEmail, user.username, code);
+			
+			return reply.send({
+				success: true,
+				message: '2FA code sent to your new email address',
+				expiresIn: '10 minutes'
+			});
+		} catch (emailError) {
+			console.error('Failed to send 2FA email:', emailError);
+			utils.tempStorage.delete(newEmail);
+			return reply.status(500).send({
+				success: false,
+				error: 'Failed to send verification code'
+			});
+		}
+
+	} catch (error) {
+		console.error('Init email change error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
+}
+
+/**
+ * Adım 2: 2FA kodunu doğrula ve email'i değiştir
+ * Body: { code }
+ * Response: { success: true, message: "Email changed successfully" }
+ */
+async function confirmEmailChange(request, reply) {
+	try {
+		const { code } = request.body;
+
+		if (!code) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Verification code is required'
+			});
+		}
+
+		// JWT'den kullanıcıyı al
+		const cookieToken = request.cookies?.accessToken;
+		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
+		const token = cookieToken || headerToken;
+
+		if (!token) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Authentication required'
+			});
+		}
+
+		const decoded = request.server.jwt.verify(token);
+		const user = await User.findByPk(decoded.userId);
+
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: 'User not found'
+			});
+		}
+
+		// 2FA kodunu kontrol et - YENİ EMAIL'de saklı
+		let storedData = null;
+		let newEmail = null;
+
+		// tempStorage'da kullanıcının yeni email'ini ara
+		for (const [email, data] of utils.tempStorage.entries()) {
+			if (data.type === 'email_change' && data.userId === user.id) {
+				storedData = data;
+				newEmail = email;
+				break;
+			}
+		}
+
+		if (!storedData) {
+			return reply.status(400).send({
+				success: false,
+				error: 'No pending email change request'
+			});
+		}
+
+		if (storedData.code !== code) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Invalid verification code'
+			});
+		}
+
+		if (storedData.expires < new Date()) {
+			utils.tempStorage.delete(newEmail);
+			return reply.status(400).send({
+				success: false,
+				error: 'Verification code has expired'
+			});
+		}
+
+		// Email'i değiştir
+		user.email = storedData.newEmail;
+		await user.save();
+
+		// Temp storage'ı temizle
+		utils.tempStorage.delete(newEmail);
+
+		// Kullanıcının refresh token'ını temizle (güvenlik için)
+		await user.clearRefreshToken();
+
+		// Cookie'leri temizle - kullanıcıyı logout yap
+		reply.clearCookie('accessToken', { 
+			path: '/', 
+			httpOnly: true, 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+		reply.clearCookie('refreshToken', { 
+			path: '/', 
+			httpOnly: true, 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+		reply.clearCookie('authStatus', { 
+			path: '/', 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+
+		return reply.send({
+			success: true,
+			message: 'Email changed successfully',
+			logout: true  // Frontend'e logout olduğunu bildir
+		});
+
+	} catch (error) {
+		console.error('Confirm email change error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
+}
+
+/**
+ * Adım 1: Hesap silme isteği başlat
+ * Body: { password }
+ * Response: { success: true, message: "2FA code sent to your email" }
+ */
+async function initDeleteAccount(request, reply) {
+	try {
+		const { password } = request.body;
+
+		if (!password) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Password is required'
+			});
+		}
+
+		// JWT'den kullanıcıyı al
+		const cookieToken = request.cookies?.accessToken;
+		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
+		const token = cookieToken || headerToken;
+
+		if (!token) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Authentication required'
+			});
+		}
+
+		const decoded = request.server.jwt.verify(token);
+		const user = await User.findByPk(decoded.userId);
+
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: 'User not found'
+			});
+		}
+
+		// Mevcut şifreyi kontrol et
+		const isPasswordValid = await user.validatePassword(password);
+		if (!isPasswordValid) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Password is incorrect'
+			});
+		}
+
+		// 6 haneli 2FA kodu oluştur ve sakla
+		const code = utils.storeVerificationCode(user.email, {
+			type: 'delete_account',
+			userId: user.id
+		});
+
+		// 2FA kodunu email ile gönder
+		await utils.send2FAEmail(user.email, user.username, code);
+
+		return reply.send({
+			success: true,
+			message: '2FA code sent to your email'
+		});
+
+	} catch (error) {
+		console.error('Init delete account error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
+}
+
+/**
+ * Adım 2: 2FA kodu ile hesap silme işlemini onayla
+ * Body: { code }
+ * Response: { success: true, message: "Account deleted successfully" }
+ */
+async function confirmDeleteAccount(request, reply) {
+	try {
+		const { code } = request.body;
+
+		if (!code) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Verification code is required'
+			});
+		}
+
+		// JWT'den kullanıcıyı al
+		const cookieToken = request.cookies?.accessToken;
+		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
+		const token = cookieToken || headerToken;
+
+		if (!token) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Authentication required'
+			});
+		}
+
+		const decoded = request.server.jwt.verify(token);
+		const user = await User.findByPk(decoded.userId);
+
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: 'User not found'
+			});
+		}
+
+		// Temp storage'dan verileri al
+		const storedData = utils.tempStorage.get(user.email);
+		if (!storedData || storedData.type !== 'delete_account') {
+			return reply.status(400).send({
+				success: false,
+				error: 'No pending account deletion request found'
+			});
+		}
+
+		// Kodun süresini kontrol et
+		if (Date.now() > storedData.expires) {
+			utils.tempStorage.delete(user.email);
+			return reply.status(400).send({
+				success: false,
+				error: 'Verification code expired'
+			});
+		}
+
+		// Kodu doğrula
+		if (storedData.code !== code) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Invalid verification code'
+			});
+		}
+
+		// Kullanıcı bilgilerini sakla (silme işleminden önce)
+		const deletedUserInfo = { 
+			username: user.username, 
+			email: user.email,
+			id: user.id
+		};
+
+		// Diğer servislere bildirim gönder
+		const serviceNotifications = [
+			fetch('http://profile:3006/profile', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json', 'X-Auth-Service': 'true' },
+				body: JSON.stringify({ userName: deletedUserInfo.username })
+			}).catch(err => console.log('Profile service error:', err)),
+			fetch('http://friend:3007/list', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json', 'X-Auth-Service': 'true' },
+				body: JSON.stringify({ userName: deletedUserInfo.username })
+			}).catch(err => console.log('Friend service error:', err))
+		];
+		
+		await Promise.all(serviceNotifications);
+
+		// Kullanıcıyı sil
+		await User.destroy({ where: { id: user.id } });
+
+		// Temp storage'ı temizle
+		utils.tempStorage.delete(user.email);
+
+		// Token'ları blacklist'e ekle
+		const accessToken = request.cookies?.accessToken;
+		const refreshToken = request.cookies?.refreshToken;
+		if (accessToken) utils.blacklistToken(accessToken);
+		if (refreshToken) utils.blacklistToken(refreshToken);
+
+		// Cookie'leri temizle
+		reply.clearCookie('accessToken', { 
+			path: '/', 
+			httpOnly: true, 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+		reply.clearCookie('refreshToken', { 
+			path: '/', 
+			httpOnly: true, 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+		reply.clearCookie('authStatus', { 
+			path: '/', 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+
+		return reply.send({
+			success: true,
+			message: 'Account deleted successfully',
+			deleted_user: deletedUserInfo
+		});
+
+	} catch (error) {
+		console.error('Confirm delete account error:', error);
 		return reply.status(500).send({
 			success: false,
 			error: 'Internal server error'
@@ -1107,9 +1205,10 @@ export default {
     checkTokenBlacklist,
     autoRefreshToken,
     blacklistTokens,
-    requestEmailChange,
-    processEmailChange,
-    verifyNewEmail,
-    requestPasswordChange,
-    processPasswordChange
+    initPasswordChange,
+    confirmPasswordChange,
+    initEmailChange,
+    confirmEmailChange,
+    initDeleteAccount,
+    confirmDeleteAccount
 };

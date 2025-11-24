@@ -22,8 +22,8 @@ const start = async () =>
     		fs.mkdirSync('./data', { recursive: true });
     	await testConnection();
     	await sequelize.sync({ force: false });
-    	
-    	// Test kullanıcıları oluştur (development için)
+
+    	// Test kullanıcıları oluştur
     	await createTestUsers();
     	
     	await fastify.listen

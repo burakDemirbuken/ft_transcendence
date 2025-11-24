@@ -41,6 +41,14 @@ export default (sequelize, DataTypes, Model) => {
 			type: DataTypes.BIGINT,
 			defaultValue: 0
 		},
+		fastestWinDuration: {
+			type: DataTypes.BIGINT,
+			defaultValue: 0
+		},
+		longestMatchDuration: {
+			type: DataTypes.BIGINT,
+			defaultValue: 0
+		},
 		gameMinDuration: {
 			type: DataTypes.BIGINT,
 			defaultValue: 0
