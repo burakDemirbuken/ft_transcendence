@@ -767,6 +767,434 @@ async function confirmPasswordChange(request, reply) {
 	}
 }
 
+/**
+ * Adım 1: Email değiştirme isteği başlat
+ * Body: { newEmail, password }
+ * Response: { success: true, message: "2FA code sent to new email" }
+ */
+async function initEmailChange(request, reply) {
+	try {
+		const { newEmail, password } = request.body;
+
+		if (!newEmail || !password) {
+			return reply.status(400).send({
+				success: false,
+				error: 'New email and password are required'
+			});
+		}
+
+		// Email formatı kontrolü
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(newEmail)) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Invalid email format'
+			});
+		}
+
+		// JWT'den kullanıcıyı al
+		const cookieToken = request.cookies?.accessToken;
+		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
+		const token = cookieToken || headerToken;
+
+		if (!token) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Authentication required'
+			});
+		}
+
+		const decoded = request.server.jwt.verify(token);
+		const user = await User.findByPk(decoded.userId);
+
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: 'User not found'
+			});
+		}
+
+		// Mevcut şifreyi kontrol et
+		const isPasswordValid = await user.validatePassword(password);
+		if (!isPasswordValid) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Password is incorrect'
+			});
+		}
+
+		// Yeni email'in zaten kullanılıp kullanılmadığını kontrol et
+		const existingUser = await User.findOne({ where: { email: newEmail } });
+		if (existingUser) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Email already in use'
+			});
+		}
+
+		// Kullanıcının eski email'ini kontrol et (aynı email girilmişse)
+		if (user.email === newEmail) {
+			return reply.status(400).send({
+				success: false,
+				error: 'New email cannot be the same as current email'
+			});
+		}
+
+		// 6 haneli 2FA kodu oluştur ve sakla (yeni email'e gönderilecek)
+		const code = utils.storeVerificationCode(newEmail, {
+			type: 'email_change',
+			newEmail: newEmail,
+			userId: user.id,
+			oldEmail: user.email
+		});
+
+		// YENİ email adresine 2FA kodunu gönder
+		try {
+			await utils.send2FAEmail(newEmail, user.username, code);
+			
+			return reply.send({
+				success: true,
+				message: '2FA code sent to your new email address',
+				expiresIn: '10 minutes'
+			});
+		} catch (emailError) {
+			console.error('Failed to send 2FA email:', emailError);
+			utils.tempStorage.delete(newEmail);
+			return reply.status(500).send({
+				success: false,
+				error: 'Failed to send verification code'
+			});
+		}
+
+	} catch (error) {
+		console.error('Init email change error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
+}
+
+/**
+ * Adım 2: 2FA kodunu doğrula ve email'i değiştir
+ * Body: { code }
+ * Response: { success: true, message: "Email changed successfully" }
+ */
+async function confirmEmailChange(request, reply) {
+	try {
+		const { code } = request.body;
+
+		if (!code) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Verification code is required'
+			});
+		}
+
+		// JWT'den kullanıcıyı al
+		const cookieToken = request.cookies?.accessToken;
+		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
+		const token = cookieToken || headerToken;
+
+		if (!token) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Authentication required'
+			});
+		}
+
+		const decoded = request.server.jwt.verify(token);
+		const user = await User.findByPk(decoded.userId);
+
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: 'User not found'
+			});
+		}
+
+		// 2FA kodunu kontrol et - YENİ EMAIL'de saklı
+		let storedData = null;
+		let newEmail = null;
+
+		// tempStorage'da kullanıcının yeni email'ini ara
+		for (const [email, data] of utils.tempStorage.entries()) {
+			if (data.type === 'email_change' && data.userId === user.id) {
+				storedData = data;
+				newEmail = email;
+				break;
+			}
+		}
+
+		if (!storedData) {
+			return reply.status(400).send({
+				success: false,
+				error: 'No pending email change request'
+			});
+		}
+
+		if (storedData.code !== code) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Invalid verification code'
+			});
+		}
+
+		if (storedData.expires < new Date()) {
+			utils.tempStorage.delete(newEmail);
+			return reply.status(400).send({
+				success: false,
+				error: 'Verification code has expired'
+			});
+		}
+
+		// Email'i değiştir
+		user.email = storedData.newEmail;
+		await user.save();
+
+		// Temp storage'ı temizle
+		utils.tempStorage.delete(newEmail);
+
+		// Kullanıcının refresh token'ını temizle (güvenlik için)
+		await user.clearRefreshToken();
+
+		// Cookie'leri temizle - kullanıcıyı logout yap
+		reply.clearCookie('accessToken', { 
+			path: '/', 
+			httpOnly: true, 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+		reply.clearCookie('refreshToken', { 
+			path: '/', 
+			httpOnly: true, 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+		reply.clearCookie('authStatus', { 
+			path: '/', 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+
+		return reply.send({
+			success: true,
+			message: 'Email changed successfully',
+			logout: true  // Frontend'e logout olduğunu bildir
+		});
+
+	} catch (error) {
+		console.error('Confirm email change error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
+}
+
+/**
+ * Adım 1: Hesap silme isteği başlat
+ * Body: { password }
+ * Response: { success: true, message: "2FA code sent to your email" }
+ */
+async function initDeleteAccount(request, reply) {
+	try {
+		const { password } = request.body;
+
+		if (!password) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Password is required'
+			});
+		}
+
+		// JWT'den kullanıcıyı al
+		const cookieToken = request.cookies?.accessToken;
+		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
+		const token = cookieToken || headerToken;
+
+		if (!token) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Authentication required'
+			});
+		}
+
+		const decoded = request.server.jwt.verify(token);
+		const user = await User.findByPk(decoded.userId);
+
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: 'User not found'
+			});
+		}
+
+		// Mevcut şifreyi kontrol et
+		const isPasswordValid = await user.validatePassword(password);
+		if (!isPasswordValid) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Password is incorrect'
+			});
+		}
+
+		// 6 haneli 2FA kodu oluştur ve sakla
+		const code = utils.storeVerificationCode(user.email, {
+			type: 'delete_account',
+			userId: user.id
+		});
+
+		// 2FA kodunu email ile gönder
+		await utils.send2FAEmail(user.email, user.username, code);
+
+		return reply.send({
+			success: true,
+			message: '2FA code sent to your email'
+		});
+
+	} catch (error) {
+		console.error('Init delete account error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
+}
+
+/**
+ * Adım 2: 2FA kodu ile hesap silme işlemini onayla
+ * Body: { code }
+ * Response: { success: true, message: "Account deleted successfully" }
+ */
+async function confirmDeleteAccount(request, reply) {
+	try {
+		const { code } = request.body;
+
+		if (!code) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Verification code is required'
+			});
+		}
+
+		// JWT'den kullanıcıyı al
+		const cookieToken = request.cookies?.accessToken;
+		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
+		const token = cookieToken || headerToken;
+
+		if (!token) {
+			return reply.status(401).send({
+				success: false,
+				error: 'Authentication required'
+			});
+		}
+
+		const decoded = request.server.jwt.verify(token);
+		const user = await User.findByPk(decoded.userId);
+
+		if (!user) {
+			return reply.status(404).send({
+				success: false,
+				error: 'User not found'
+			});
+		}
+
+		// Temp storage'dan verileri al
+		const storedData = utils.tempStorage.get(user.email);
+		if (!storedData || storedData.type !== 'delete_account') {
+			return reply.status(400).send({
+				success: false,
+				error: 'No pending account deletion request found'
+			});
+		}
+
+		// Kodun süresini kontrol et
+		if (Date.now() > storedData.expires) {
+			utils.tempStorage.delete(user.email);
+			return reply.status(400).send({
+				success: false,
+				error: 'Verification code expired'
+			});
+		}
+
+		// Kodu doğrula
+		if (storedData.code !== code) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Invalid verification code'
+			});
+		}
+
+		// Kullanıcı bilgilerini sakla (silme işleminden önce)
+		const deletedUserInfo = { 
+			username: user.username, 
+			email: user.email,
+			id: user.id
+		};
+
+		// Diğer servislere bildirim gönder
+		const serviceNotifications = [
+			fetch('http://profile:3006/profile', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json', 'X-Auth-Service': 'true' },
+				body: JSON.stringify({ userName: deletedUserInfo.username })
+			}).catch(err => console.log('Profile service error:', err)),
+			fetch('http://friend:3007/list', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json', 'X-Auth-Service': 'true' },
+				body: JSON.stringify({ userName: deletedUserInfo.username })
+			}).catch(err => console.log('Friend service error:', err))
+		];
+		
+		await Promise.all(serviceNotifications);
+
+		// Kullanıcıyı sil
+		await User.destroy({ where: { id: user.id } });
+
+		// Temp storage'ı temizle
+		utils.tempStorage.delete(user.email);
+
+		// Token'ları blacklist'e ekle
+		const accessToken = request.cookies?.accessToken;
+		const refreshToken = request.cookies?.refreshToken;
+		if (accessToken) utils.blacklistToken(accessToken);
+		if (refreshToken) utils.blacklistToken(refreshToken);
+
+		// Cookie'leri temizle
+		reply.clearCookie('accessToken', { 
+			path: '/', 
+			httpOnly: true, 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+		reply.clearCookie('refreshToken', { 
+			path: '/', 
+			httpOnly: true, 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+		reply.clearCookie('authStatus', { 
+			path: '/', 
+			secure: true, 
+			sameSite: 'lax' 
+		});
+
+		return reply.send({
+			success: true,
+			message: 'Account deleted successfully',
+			deleted_user: deletedUserInfo
+		});
+
+	} catch (error) {
+		console.error('Confirm delete account error:', error);
+		return reply.status(500).send({
+			success: false,
+			error: 'Internal server error'
+		});
+	}
+}
+
 export default {
     register,
     login,
@@ -778,5 +1206,9 @@ export default {
     autoRefreshToken,
     blacklistTokens,
     initPasswordChange,
-    confirmPasswordChange
+    confirmPasswordChange,
+    initEmailChange,
+    confirmEmailChange,
+    initDeleteAccount,
+    confirmDeleteAccount
 };

@@ -298,4 +298,36 @@ export async function postRoutes(fastify, options)
 			}
 		}
 	}, postController.confirmPasswordChange);
+
+	// Hesap silme başlat - 2FA kodu gönder
+	fastify.post('/init-delete-account', {
+		schema: {
+			body: {
+				type: 'object',
+				required: ['password'],
+				properties: {
+					password: { 
+						type: 'string',
+						minLength: 6
+					}
+				}
+			}
+		}
+	}, postController.initDeleteAccount);
+
+	// Hesap silme onayla - 2FA kodunu doğrula
+	fastify.post('/confirm-delete-account', {
+		schema: {
+			body: {
+				type: 'object',
+				required: ['code'],
+				properties: {
+					code: { 
+						type: 'string',
+						pattern: '^[0-9]{6}$'
+					}
+				}
+			}
+		}
+	}, postController.confirmDeleteAccount);
 }
