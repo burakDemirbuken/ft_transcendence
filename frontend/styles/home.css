@@ -16,12 +16,16 @@ body {
     min-height: 100vh;
 }
 
+#content {
+    position: relative;
+}
+
 /* Global Particles */
 .global-particles {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     overflow: hidden;
     z-index: 0;
@@ -255,10 +259,10 @@ body {
 
 /* Ripple Effect */
 .ripple-overlay {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     z-index: 5;
     pointer-events: none;
@@ -291,10 +295,10 @@ body {
 
 /* Team Content */
 .team-content {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
     z-index: 6;
     display: flex;
@@ -827,122 +831,6 @@ body {
     box-shadow: 0 8px 16px rgba(255, 0, 255, 0.2);
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-    .team-grid {
-        max-width: 900px;
-    }
-}
-
-@media (max-width: 900px) {
-    .team-grid {
-        max-width: 600px;
-    }
-}
-
-@media (max-width: 768px) {
-    .team-content {
-        padding: 1.5rem 1rem;
-        max-height: 100vh;
-        overflow-y: auto;
-    }
-
-    .team-grid {
-        gap: 1rem;
-        max-width: 100%;
-        justify-content: center;
-    }
-
-    .team-member {
-        width: 280px;
-        height: 300px;
-    }
-
-    .team-title {
-        font-size: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .thanks-section {
-        margin-top: 2rem;
-        padding-top: 2rem;
-    }
-
-    .group-name {
-        font-size: clamp(6rem, 20vw, 15rem);
-    }
-
-    .thanks-list {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .social-links {
-        gap: 20px;
-    }
-
-    .social-link {
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
-    }
-
-    .member-avatar {
-        width: 70px;
-        height: 70px;
-        font-size: 1.8rem;
-    }
-}
-
-@media (max-width: 600px) {
-    .team-grid {
-        flex-direction: column;
-        align-items: center;
-        gap: 1.5rem;
-    }
-
-    .team-member {
-        width: min(320px, 90vw);
-        height: 320px;
-    }
-}
-
-@media (max-width: 480px) {
-    .team-content {
-        padding: 1rem 0.5rem;
-    }
-
-    .team-grid {
-        gap: 1rem;
-        padding: 0 0.5rem;
-    }
-
-    .team-member {
-        width: min(300px, 85vw);
-        height: 300px;
-        padding: 1.5rem;
-    }
-
-    .team-title {
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .member-avatar {
-        width: 70px;
-        height: 70px;
-        font-size: 1.8rem;
-    }
-
-    .member-info h3 {
-        font-size: 1.3rem;
-    }
-
-    .member-info .surname {
-        font-size: 1.1rem;
-    }
-}
-
 /* Ensure scrolling works properly */
 .team-content.active {
     display: block;
@@ -1036,6 +924,36 @@ body {
 }
 
 @media (max-width: 768px) {
+    .team-title {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .thanks-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+    }
+
+    .group-name {
+        font-size: clamp(6rem, 20vw, 15rem);
+    }
+
+    .social-links {
+        gap: 20px;
+    }
+
+    .social-link {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    .member-avatar {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8rem;
+    }
+
     .team-content {
         padding: clamp(1rem, 3vw, 1.5rem);
         max-height: 100vh;
@@ -1045,6 +963,7 @@ body {
     .team-grid {
         gap: clamp(0.8rem, 2vw, 1.5rem);
         max-width: 100%;
+        justify-content: center;
         padding: 0 clamp(0.5rem, 2vw, 1rem);
     }
 
@@ -1149,8 +1068,8 @@ body {
 }
 
 @media (hover: none) {
-    .cursor-indicator { 
-        display: none; 
+    .cursor-indicator {
+        display: none;
     }
 }
 
