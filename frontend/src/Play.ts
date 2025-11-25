@@ -8,6 +8,9 @@ import WebSocketClient from '../dist/game/network/WebSocketClient.js';
 import gameConfig from '../dist/game/json/GameConfig.js';
 import aiConfig from '../dist/game/json/AiConfig.js';
 import tournamentConfig from '../dist/game/json/TournamentConfig.js';
+import doubleFetch from "./utils/doubleFetch.js";
+import { getAuthToken, getAuthHeaders } from './utils/auth.js';
+import { API_BASE_URL } from "./index.js";
 
 // ============================================================================
 // GLOBAL VARIABLES
@@ -16,6 +19,7 @@ let app: App | null = null;
 let roomSocket: any = null;
 let currentUserId: string | null = null;
 let currentUserName: string | null = null;
+let currentDisplayName: string | null = null;
 let canvasManager: CanvasOrientationManager | null = null;
 
 // Window interface'ini genişletin
@@ -1595,12 +1599,39 @@ const aiCustomSliderConfigs = [
 // INITIALIZATION
 // ============================================================================
 
-function connectWebSocket() {
-	// Generate user credentials
-	currentUserId = localStorage.getItem("userName") ?? "Player";
-	// currentUserName = generateRandomName();
-    // displayname gelicek VVVVVVVV
-	currentUserName = localStorage.getItem("userName") ?? "Player";
+async function connectWebSocket() {
+	try {
+		// Fetch user profile data
+		const profileResponse = await doubleFetch(
+			`${API_BASE_URL}/profile/profile`,
+			{
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+					...getAuthHeaders()
+				}
+			}
+		);
+
+		if (!profileResponse.ok) {
+			throw new Error(`Failed to fetch profile: ${profileResponse.statusText}`);
+		}
+
+		const profileData = await profileResponse.json();
+		console.log("Profile data:", profileData);
+
+		// Extract user information
+		currentUserId = profileData.profile.userName; // ID varsa: profileData.profile.id
+		currentUserName = profileData.profile.userName;
+		currentDisplayName = profileData.profile.displayName;
+
+		console.log(`User ID: ${currentUserId}, User Name: ${currentUserName}, Display Name: ${currentDisplayName}`);
+
+	} catch (error) {
+		console.error('❌ Error fetching profile:', error);
+		showNotification('Failed to load profile data', 'error');
+		return; // WebSocket bağlantısını yapma
+	}
 
 	// Initialize WebSocket
 	roomSocket = new WebSocketClient(window.location.hostname, 3030);
@@ -1637,7 +1668,8 @@ function connectWebSocket() {
 	// Connect to server
 	roomSocket.connect("ws-room/client", {
 		userID: currentUserId,
-		userName: currentUserName
+		userName: currentUserName,
+		displayName: currentDisplayName
 	});
 
 	// Export for debugging
