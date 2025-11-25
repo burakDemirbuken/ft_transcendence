@@ -41,14 +41,6 @@ export function connectFriendsWebSocket() {
 					console.error("Failed to dispatch friends:list event", e);
 				}
 				break;
-			case "response":
-				console.warn("NORMAL RESPONSE: ", payload);
-				try {
-					document.dispatchEvent(new CustomEvent('friends:response', { detail: payload }));
-				} catch (e) {
-					console.error("Failed to dispatch friends:response event", e);
-				}
-				break;
 			default:
 				break;
 		}
@@ -254,6 +246,9 @@ function createUser(user: any, type: "friend" | "request" | "invite"): HTMLEleme
 		</div>
 	`;
 	div.classList.add("friend");
+	if (user?.isOnline)
+		div.classList.add("online")
+
 	// store username on the root element for reliable lookups later
 	// use `data-username` (accessed as `dataset.username`) to keep the attribute simple
 	div.dataset.username = user?.userName ?? "";
@@ -276,6 +271,11 @@ function updateUser(currentUser, newUser) {
 	console.log("USER", newUser.userName, "ALREADY EXISTS");
 	if (!currentUser || !newUser)
 		return console.warn("No currentUser or newUser to update");
+
+	if (currentUser.classList.contains("online") && !newUser.isOnline)
+		currentUser.classList.remove("online");
+	else if (!currentUser.classList.contains("online") && newUser.isOnline)
+		currentUser.classList.add("online");
 
 	const avatarElem = currentUser.querySelector(".friend-user-avatar img");
 	let newAvatarSrc = "../profile.svg";
@@ -346,16 +346,6 @@ export default class extends AView {
 				console.error('friends:list handler failed', e);
 			}
 		};
-
-		this._onFriendsResponse = (ev: Event) => {
-			try {
-				const detail = (ev as CustomEvent).detail;
-				console.log('friends:response event received', detail);
-				update(detail);
-			} catch (e) {
-				console.error('friends:response handler failed', e);
-			}
-		};
 	}
 
 	async getHtml(): Promise<string> {
@@ -373,7 +363,6 @@ export default class extends AView {
 		document.addEventListener("keydown", esc);
 		document.querySelector(".friend-nav")?.addEventListener("click", subpageSwitch);
 		document.addEventListener('friends:list', this._onFriendsList as EventListener);
-		document.addEventListener('friends:response', this._onFriendsResponse as EventListener);
 		document.querySelector(".search-bar form")?.addEventListener("submit", request);
 		safeSend(JSON.stringify({ type: "list", payload: {} }));
 	}
@@ -384,7 +373,6 @@ export default class extends AView {
 		document.removeEventListener("keydown", esc);
 		document.querySelector(".friend-nav")?.removeEventListener("click", subpageSwitch);
 		document.removeEventListener('friends:list', this._onFriendsList as EventListener);
-		document.removeEventListener('friends:response', this._onFriendsResponse as EventListener);
 		document.querySelector(".search-bar form")?.removeEventListener("submit", request);
 	}
 

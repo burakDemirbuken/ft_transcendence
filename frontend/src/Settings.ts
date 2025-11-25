@@ -12,6 +12,7 @@ let pendingData = null; // İlgili data
 async function hideSettingsOverlay() {
 	console.log("HIDE SETTINGS OVERLAY");
 	document.querySelector(".overlay")?.classList.add("hide-away");
+	document.querySelector(".settings-container")?.removeAttribute("inert");
 	const input = document.querySelector(".card input") as HTMLInputElement;
 	if (input)
 		input.value = "";
@@ -22,6 +23,7 @@ async function hideSettingsOverlay() {
 async function showSettingsOverlay() {
 	console.log("SHOW SETTINGS OVERLAY");
 	document.querySelector(".overlay")?.classList.remove("hide-away");
+	document.querySelector(".settings-container")?.setAttribute("inert", "");
 }
 
 async function confirm2FACode(e) {
@@ -374,6 +376,7 @@ export default class extends AView {
 		document.querySelector(".pass")?.addEventListener("click", sendPassChangeReq);
 		document.querySelector(".validation-form")?.addEventListener("submit", confirm2FACode);
 		document.getElementById("card-exit")?.addEventListener("click", hideSettingsOverlay);
+		document.getElementById("card-exit")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { hideSettingsOverlay(); } });
 		document.querySelectorAll(".part-expand").forEach((btn) => {
 			btn.addEventListener("click", function (e) {
 				const clicked = e.currentTarget as HTMLElement;
@@ -389,17 +392,7 @@ export default class extends AView {
 		onLoad();
 	}
 
-	async unsetEventHandlers() {
-		document.querySelector(".avatar")?.removeEventListener("click", changeAvatar);
-		document.getElementById('hidden-file-input')?.removeEventListener('click', (e) => {
-			e.stopPropagation();
-		});
-		document.getElementById('hidden-file-input')?.removeEventListener('change', sendAvatarChangeReq);
-		document.getElementById("delete-account")?.removeEventListener("click", deleteAccount);
-		document.querySelector(".email")?.removeEventListener("click", sendEmailChangeReq);
-		document.querySelector(".dname")?.removeEventListener("click", sendDNameChangeReq);
-		document.querySelector(".pass")?.removeEventListener("click", sendPassChangeReq);
-	}
+	async unsetEventHandlers() {}
 
 	async setStylesheet() {
 		const link = document.createElement("link");

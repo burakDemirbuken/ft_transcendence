@@ -303,6 +303,7 @@
 	top: 5px;
 	right: 5px;
 	cursor: pointer;
+	outline: none;
 }
 
 #card-exit svg {

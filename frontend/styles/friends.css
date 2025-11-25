@@ -208,7 +208,7 @@
 	flex-shrink: 0;
 }
 
-.friend-user-avatar.online {
+.friend.online .friend-user-avatar {
 	border-color: #0f0;
 	box-shadow: 0 0 5px #0c0;
 }
