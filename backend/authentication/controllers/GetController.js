@@ -85,7 +85,7 @@ async function showEmailChangeForm(request, reply) {
     const trlt = getTranslations(request.query.lang || "eng");
     try {
         const { token } = request.query;
-        
+
         // Token'ı kontrol et
         let userEmail = null;
         for (const [email, data] of utils.tempStorage.entries()) {
@@ -146,21 +146,21 @@ async function showEmailChangeForm(request, reply) {
                         <p><strong>Current email:</strong> ${userEmail}</p>
                         <p>Please enter your new email address and current password to confirm the change.</p>
                     </div>
-                    
+
                     <form action="/api/auth/process-email-change" method="POST">
                         <input type="hidden" name="token" value="${token}">
                         <input type="hidden" name="oldEmail" value="${userEmail}">
-                        
+
                         <div class="form-group">
                             <label for="newEmail">New Email Address:</label>
                             <input type="email" id="newEmail" name="newEmail" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="password">Current Password:</label>
                             <input type="password" id="password" name="password" required>
                         </div>
-                        
+
                         <button type="submit" class="btn">Change Email</button>
                     </form>
                 </div>
@@ -183,7 +183,7 @@ async function showPasswordChangeForm(request, reply) {
     const trlt = getTranslations(request.query.lang || "eng");
     try {
         const { token } = request.query;
-        
+
         // Token'ı kontrol et
         let userEmail = null;
         for (const [email, data] of utils.tempStorage.entries()) {
@@ -245,15 +245,15 @@ async function showPasswordChangeForm(request, reply) {
                         <p><strong>Account:</strong> ${userEmail}</p>
                         <p>Please enter your current password and new password.</p>
                     </div>
-                    
+
                     <form action="/api/auth/process-password-change" method="POST">
                         <input type="hidden" name="token" value="${token}">
-                        
+
                         <div class="form-group">
                             <label for="currentPassword">Current Password:</label>
                             <input type="password" id="currentPassword" name="currentPassword" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="newPassword">New Password:</label>
                             <input type="password" id="newPassword" name="newPassword" required minlength="8">
@@ -261,15 +261,15 @@ async function showPasswordChangeForm(request, reply) {
                                 Minimum 8 characters required
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="confirmPassword">Confirm New Password:</label>
                             <input type="password" id="confirmPassword" name="confirmPassword" required>
                         </div>
-                        
+
                         <button type="submit" class="btn">Change Password</button>
                     </form>
-                    
+
                     <script>
                         document.querySelector('form').addEventListener('submit', function(e) {
                             const newPassword = document.getElementById('newPassword').value;
@@ -296,11 +296,16 @@ async function showPasswordChangeForm(request, reply) {
     }
 }
 
+async function healthCheck(request, reply) {
+    return reply.send({ status: 'ok', timestamp: new Date().toISOString() });
+}
+
 export default
 {
     checkUsername,
     checkEmail,
     getProfile,
     showEmailChangeForm,
-    showPasswordChangeForm
+    showPasswordChangeForm,
+    healthCheck
 };

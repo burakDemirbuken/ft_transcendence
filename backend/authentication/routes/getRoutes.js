@@ -75,7 +75,7 @@ export async function getRoutes(fastify, options)
                     {
                         type: 'string',
                         minLength: 32,
-                        maxLength: 64 
+                        maxLength: 64
                     },
                     lang:
                     {
@@ -121,4 +121,21 @@ export async function getRoutes(fastify, options)
             }
         }
     }, getController.getProfile);
+    fastify.get('/health',
+    {
+        schema:
+        {
+            querystring:
+            {
+                type: 'object',
+                properties:
+                {
+                    lang:
+                    {
+                        type: 'string'
+                    }
+                }
+            }
+        }
+    }, getController.healthCheck);
 }

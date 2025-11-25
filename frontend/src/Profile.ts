@@ -1824,25 +1824,15 @@ function openTournamentBracket(tournamentId: string) {
 }
 
 async function onLoad() {
-	const hasToken = getAuthToken();
-
-	if (!hasToken) {
-		console.log("⚠️ No auth token found, redirecting to login");
-		return window.location.replace('/login');
-	}
-
 	try {
-		const Profile = await doubleFetch(
-			`${API_BASE_URL}/profile/profile`,
-			{
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-					...getAuthHeaders()
-				}
+		const Profile = await fetch(`${API_BASE_URL}/profile/profile`,
+		{
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				...getAuthHeaders()
 			}
-		);
-
+		});
 		if (Profile.ok) {
 			const user = await Profile.json();
 			console.log("All data:", user);
@@ -1857,14 +1847,10 @@ async function onLoad() {
 				profileManager.animateLevelProgress();
 			}, 100);
 		} else {
-			console.error("❌ Failed to fetch profile data:", Profile.statusText);
-			if (Profile.status === 401) {
-				window.location.replace('/login');
-			}
+			showNotification("Error while loading profile data", "error");
 		}
 	} catch (error) {
-		console.error("❌ Error in onLoad:", error);
-		window.location.replace('/login');
+		showNotification("Error while loading profile data", "error");
 	}
 }
 

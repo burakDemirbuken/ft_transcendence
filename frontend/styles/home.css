@@ -352,7 +352,6 @@ body {
     flex-wrap: wrap;
     align-items: flex-start;
     margin: 0 auto 60px auto;
-    padding: 0 clamp(0.5rem, 2vw, 3rem);
     width: 100%;
 }
 
@@ -364,7 +363,7 @@ body {
     position: relative;
     transition: all 0.4s ease;
     width: clamp(260px, 90vw, 220px);
-    height: clamp(280px, auto, 300px);
+    height: clamp(300px, 30vw, 330px);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -423,7 +422,7 @@ body {
 
 .member-avatar {
     width: clamp(60px, 15vw, 80px);
-    height: clamp(60px, 15vw, 80px);
+    aspect-ratio: 1 / 1;
     border-radius: 50%;
     margin: 0 auto clamp(0.8rem, 2vw, 1rem);
     display: flex;
@@ -951,7 +950,7 @@ body {
     .member-avatar {
         width: 70px;
         height: 70px;
-        font-size: 1.8rem;
+        font-size: clamp(1rem, 2.5vw, 1.5rem);
     }
 
     .team-content {
@@ -964,11 +963,10 @@ body {
         gap: clamp(0.8rem, 2vw, 1.5rem);
         max-width: 100%;
         justify-content: center;
-        padding: 0 clamp(0.5rem, 2vw, 1rem);
     }
 
     .team-member {
-        width: clamp(260px, 85vw, 280px);
+        width: clamp(240px, 70vw, 280px);
         height: auto;
         min-height: 300px;
     }
@@ -987,7 +985,6 @@ body {
     }
 
     .team-member {
-        width: clamp(260px, 90vw, 300px);
         height: auto;
         min-height: 280px;
     }
@@ -1005,11 +1002,9 @@ body {
 
     .team-grid {
         gap: clamp(0.8rem, 2vw, 1rem);
-        padding: 0 clamp(0.3rem, 1vw, 0.5rem);
     }
 
     .team-member {
-        width: clamp(260px, 92vw, 300px);
         height: auto;
         min-height: 270px;
         padding: clamp(0.8rem, 2vw, 1.2rem);
@@ -1018,12 +1013,6 @@ body {
     .team-title {
         font-size: clamp(1.1rem, 3vw, 1.6rem);
         margin-bottom: clamp(1rem, 2vw, 1.5rem);
-    }
-
-    .member-avatar {
-        width: clamp(55px, 12vw, 70px);
-        height: clamp(55px, 12vw, 70px);
-        font-size: clamp(1rem, 2.5vw, 1.5rem);
     }
 
     .member-info h3 {
@@ -1041,16 +1030,8 @@ body {
 
 @media (max-width: 360px) {
     .team-member {
-        width: clamp(260px, 95vw, 290px);
         min-height: 260px;
         padding: clamp(0.7rem, 1.5vw, 1rem);
-    }
-
-    .member-avatar {
-        width: clamp(50px, 10vw, 60px);
-        height: clamp(50px, 10vw, 60px);
-        font-size: clamp(0.9rem, 2vw, 1.2rem);
-        margin-bottom: clamp(0.5rem, 1vw, 0.8rem);
     }
 
     .role {
