@@ -4,12 +4,14 @@ import TournamentRoom from "./TournamentRoom.js";
 import AIRoom from "./AIRoom.js";
 import LocalRoom from "./LocalRoom.js";
 import EventEmitter from "./EventEmitter.js";
+import gameSettings from "./defaultGameSettings.js"
 
 class RoomManager extends EventEmitter
 {
 	constructor()
 	{
 		super();
+		this.isConnectServer = false;
 		this.waitingPlayers = [];
 		this.rooms = new Map();
 		setInterval(() => {
@@ -18,7 +20,7 @@ class RoomManager extends EventEmitter
 				console.log(`Room ID: ${roomId}, Name: ${room.name}, Players: ${room.players.length}/${room.maxPlayers}, Status: ${room.status}`);
 				console.log('Players:', room.players.map(p => ({ id: p.id, name: p.name })));
 			});
-		}, 5000); // Log every 1 second
+		}, 5000);
 
 	}
 
@@ -29,7 +31,7 @@ class RoomManager extends EventEmitter
 			switch (action)
 			{
 				case 'create':
-					const state = this.createRoom(player, payload);
+					const state = await this.createRoom(player, payload);
 					player.clientSocket.send(JSON.stringify({ type: 'created', payload: { ...state } }));
 					break;
 				case 'join':
@@ -68,21 +70,32 @@ class RoomManager extends EventEmitter
 		}
 	}
 
-	quickMatch(player)
+	async quickMatch(player)
 	{
-		if (this.waitingPlayers.find(p => p.id === player.id))
-			throw new Error('Player is already in the quick match waiting list');
-		if (this._getRoomWithPlayer(player.id).room !== null)
-			throw new Error('Player is already in a room');
-
-		this.waitingPlayers.push(player);
-		if (this.waitingPlayers.length >= 2)
+		let room = null;
+		try
 		{
-			const [player1, player2] = this.waitingPlayers.splice(0, 2);
-			const roomState = this.createRoom(player1, { gameMode: 'classic' });
-			const room = this.getRoom(roomState.roomId);
-			room.addPlayer(player2);
-			this.startGame(player1.id);
+			if (this.waitingPlayers.find(p => p.id === player.id))
+				throw new Error('Player is already in the quick match waiting list');
+			if (this._getRoomWithPlayer(player.id).room !== null)
+				throw new Error('Player is already in a room');
+
+			this.waitingPlayers.push(player);
+			if (this.waitingPlayers.length >= 2)
+			{
+				const [player1, player2] = this.waitingPlayers.splice(0, 2);
+				const roomState = await this.createRoom(player1, { gameMode: 'classic', gameSettings});
+				room = this.getRoom(roomState.roomId);
+				room.addPlayer(player2);
+				this.startGame(player1.id);
+				console.log("naber müdür");
+			}
+		}
+		catch (error)
+		{
+			if (room !== null)
+				room.players.forEach(player => this.leaveRoom(player));
+			throw new Error("Failed to match: " + error.message);
 		}
 	}
 
@@ -128,34 +141,41 @@ class RoomManager extends EventEmitter
 		}
 	}
 
-	createRoom(player, payload)
+	async createRoom(player, payload)
 	{
-		for (const room of this.rooms.values())
+		try
 		{
-			if (room.players.find(p => p.id === player.id))
-				throw new Error(`Player with ID ${player.id} is already in a room`);
+			for (const room of this.rooms.values())
+			{
+				if (room.players.find(p => p.id === player.id))
+					throw new Error(`Player with ID ${player.id} is already in a room`);
+			}
+
+			const roomId = this._generateRoomId(player.id);
+			let room;
+			if (payload.gameMode === 'classic')
+				room = new ClassicRoom(payload.gameSettings);
+			else if (payload.gameMode === 'multiplayer')
+				room = new MultiPlayerRoom(payload.gameSettings);
+			else if (payload.gameMode === 'tournament')
+				room = new TournamentRoom(payload.tournamentSettings);
+			else if (payload.gameMode === 'ai')
+				room = new AIRoom(payload.gameSettings, payload.aiSettings, roomId);
+			else if (payload.gameMode === 'local')
+				room = new LocalRoom(payload.gameSettings);
+			else
+				throw new Error(`Invalid game mode: ${payload.gameMode}`);
+			room.addPlayer(player);
+
+			room.on('finished', this.finishedRoom.bind(this));
+
+			this.rooms.set(roomId, room);
+			return {roomId: roomId, ...room.getState()};
 		}
-
-		const roomId = this._generateRoomId(player.id);
-		let room;
-		if (payload.gameMode === 'classic')
-			room = new ClassicRoom(payload.gameSettings);
-		else if (payload.gameMode === 'multiplayer')
-			room = new MultiPlayerRoom(payload.gameSettings);
-		else if (payload.gameMode === 'tournament')
-			room = new TournamentRoom(payload.tournamentSettings);
-		else if (payload.gameMode === 'ai')
-			room = new AIRoom(payload.gameSettings, payload.aiSettings, roomId);
-		else if (payload.gameMode === 'local')
-			room = new LocalRoom(payload.gameSettings);
-		else
-			throw new Error(`Invalid game mode: ${payload.gameMode}`);
-		room.addPlayer(player);
-
-		room.on('finished', this.finishedRoom.bind(this));
-
-		this.rooms.set(roomId, room);
-		return {roomId: roomId, ...room.getState()};
+		catch (error)
+		{
+			throw new Error("Failed to create room: " + error.message)
+		}
 	}
 
 	async finishedRoom(data)
@@ -254,6 +274,8 @@ class RoomManager extends EventEmitter
 
 	startGame(playerId)
 	{
+		if (!this.isConnectServer)
+			throw new Error('Game server not unavailable');
 		const {room, roomId} = this._getRoomWithPlayer(playerId);
 		if (!room)
 			throw new Error(`Room with player ID ${playerId} does not exist`);
@@ -303,6 +325,12 @@ class RoomManager extends EventEmitter
 		});
 
 		return room;
+	}
+
+	isPlayerInRoom(playerId)
+	{
+		const {room} = this._getRoomWithPlayer(playerId);
+		return room !== null;
 	}
 }
 

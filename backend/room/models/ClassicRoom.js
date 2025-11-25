@@ -1,9 +1,8 @@
 import Room from "./Room.js";
-import gameSettings from './defaultGameSettings.js';
 
 export default class ClassicRoom extends Room
 {
-	constructor()
+	constructor(gameSettings)
 	{
 		super(gameSettings);
 		this.gameMode = 'classic';

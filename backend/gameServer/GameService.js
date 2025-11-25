@@ -22,11 +22,12 @@ class GameService
 		this.tournamentManager = new TournamentManager();
 		this.connectionId = new Map(); //  playerId -> connectionId
 		this.players = new Map(); // playerId -> Player instance
+		this.connectingPlayers = new Set(); // userID'leri tutan geçici set
 
 		this.gameManager.start();
 		this.tournamentManager.start();
 		this.setupRoomNetwork();
-
+/*
 		setInterval(
 			() =>
 			{
@@ -63,23 +64,41 @@ class GameService
 				console.log('');
 			},
 			5000
-		);
+		); */
 	}
 
 	setupRoomNetwork()
 	{
+		let reconnectTimer = null;
+
 		this.roomSocket.onConnect(() => {
 			console.log('🟢 Connected to Room Service');
+			if (reconnectTimer) {
+				clearTimeout(reconnectTimer);
+				reconnectTimer = null;
+			}
 		});
+
 		this.roomSocket.onError((error) => {
-			console.error('❌ Room Service connection error:', error);
+			if (!reconnectTimer) {
+				reconnectTimer = setTimeout(() => {
+					reconnectTimer = null;
+					this.roomSocket.connect('ws-room/server');
+				}, 5000);
+			}
 		});
+
 		this.roomSocket.onClose(() => {
-			console.warn('⚠️ Room Service connection closed, attempting to reconnect in 5 seconds...');
+			if (!reconnectTimer) {
+				reconnectTimer = setTimeout(() => {
+					reconnectTimer = null;
+					this.roomSocket.connect('ws-room/server');
+				}, 5000);
+			}
 		});
+
 		this.roomSocket.onMessage((message) => {
 			this.roomMessageHandler(message);
-			console.log('📨 Message from Room Service:', message);
 		});
 
 		this.roomSocket.connect('ws-room/server');
@@ -102,6 +121,17 @@ class GameService
 			this.websocketServer.onClientConnect(
 				(connectionId, userID, query) =>
 				{
+					console.log('--- New WebSocket Connection ---');
+
+					console.log('players map:', this.players);
+
+					const existingPlayer = Array.from(this.players.values()).find(p => p.id === userID);
+					if (existingPlayer) {
+						console.error('❌ Duplicate player ID detected:', userID);
+						this.websocketServer.send(connectionId, {type: 'error', payload: 'Duplicate player ID'});
+						this.websocketServer.disconnectConnection(connectionId);
+						return;
+					}
 					if (!userID || !query.userName || !query.gameMode || !query.gameId)
 					{
 						console.error('❌ Missing required parameters in query:', query);

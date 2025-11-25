@@ -7,7 +7,9 @@ class NetworkManager
 {
 	constructor(logger = false)
 	{
-		this.fastify = Fastify({ logger: true});
+		this.fastify = Fastify({ logger: false
+			
+		});
 		this.fastify.register(cookie);
 		this.fastify.register(jwt, { secret: process.env.JWT_SECRET });
 
@@ -45,7 +47,7 @@ class NetworkManager
 						if (!dataFromToken)
 						{
 							console.error('❌ Unauthorized WebSocket connection attempt. Closing connection.');
-							client.close(1008, 'Unauthorized'); // 1008: Policy Violation
+							client.close(1008, 'Unauthorized');
 							return;
 						}
 						const client = connection.socket;

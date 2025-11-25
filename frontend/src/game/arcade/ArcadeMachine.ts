@@ -82,8 +82,6 @@ class ArcadeMachine
 				if (loadingProgress) (loadingProgress as HTMLElement).style.width = "0%";
 			}
 
-            console.log("🎮 Loading arcade model from: /assets/models/arcade/arcade.glb");
-
             // 2. Modeli yükle (ilerleme takibi)
             const result = await BABYLON.SceneLoader.ImportMeshAsync(
                 "",
@@ -172,6 +170,7 @@ class ArcadeMachine
 	{
 		if (!this.meshs) return;
 
+		if (number !== 1 && number !== 2) return;
 		const joystickParts = this.meshs.filter(m => {
 			const name = m.name.toLowerCase();
 			return name.startsWith(`joystick${number}`) &&
