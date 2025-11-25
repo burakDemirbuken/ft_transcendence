@@ -272,7 +272,7 @@ export default async function gamedataRoute(fastify) {
 			const loserTeam = winner?.team ?
 				(winner.team.playersId[0] === team1.playersId[0] ? teamTwoPlayers : teamOnePlayers)
 				: null
-
+			const duration = Math.floor(time.duration / 1000)
 			await Promise.all([
 				...winnerTeam.map(async (player) => {
 					const playerState = state.players.find(p => p.id === player.userName)
@@ -282,13 +282,16 @@ export default async function gamedataRoute(fastify) {
 						xp: 70,
 						ballHitCount: playerState?.kickBall ?? 0,
 						ballMissCount: playerState?.missedBall ?? 0,
-						gameTotalDuration: time.duration,
+						gameTotalDuration: duration,
 						gameCurrentStreak: 1
 					}, { transaction: t })
 					await player.Stat.update({
 						gameLongestStreak: player.Stat.gameCurrentStreak + 1 > player.Stat.gameLongestStreak ?
 							player.Stat.gameCurrentStreak + 1 : player.Stat.gameLongestStreak,
-						gameMinDuration: time.duration < player.Stat.gameMinDuration ? time.duration : player.Stat.gameMinDuration
+						fastestWinDuration: (player.Stat.fastestWinDuration === 0 || player.Stat.fastestWinDuration > duration) ? duration : player.Stat.fastestWinDuration,
+						longestMatchDuration: player.Stat.longestMatchDuration < duration ? duration : player.Stat.longestMatchDuration,
+						gameMinDuration: player.Stat.gameMinDuration == 0 ? duration :
+							(duration < player.Stat.gameMinDuration ? duration : player.Stat.gameMinDuration)
 					}, { transaction: t })
 				}),
 				...loserTeam.map(async (player) => {
@@ -297,13 +300,15 @@ export default async function gamedataRoute(fastify) {
 						gamesPlayed: 1,
 						gamesLost: 1,
 						xp: 10,
-						gameTotalDuration: time.duration,
+						gameTotalDuration: duration,
 						ballHitCount: playerState?.kickBall ?? 0,
 						ballMissCount: playerState?.missedBall ?? 0
 					}, { transaction: t })
 					await player.Stat.update({
 						gameCurrentStreak: 0,
-						gameMinDuration: time.duration < player.Stat.gameMinDuration ? time.duration : player.Stat.gameMinDuration
+						longestMatchDuration: player.Stat.longestMatchDuration < duration ? duration : player.Stat.longestMatchDuration,
+						gameMinDuration: player.Stat.gameMinDuration == 0 ? duration :
+							(duration < player.Stat.gameMinDuration ? duration : player.Stat.gameMinDuration)
 					}, { transaction: t })
 				})
 			])
