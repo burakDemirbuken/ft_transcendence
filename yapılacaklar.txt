@@ -1,7 +1,0 @@
-9. xss kontrolleri backende yapılmıyor json alındığını farz sayarak
-    html'de (sanırsam script kısmında) gelen inputlarda kontrol edilmesi gerek
-
-submite basınca cookiler silinsede frontdan silinmiyor
-
-
-

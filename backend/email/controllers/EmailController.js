@@ -45,7 +45,7 @@ class EmailController {
 
   async send2FA(req, rep) {
     try {
-      const { email, code, username } = req.body
+      const { email, code, username, type = 'login' } = req.body
 
       // Validasyon
       if (!email || !code) {
@@ -72,7 +72,7 @@ class EmailController {
         })
       }
 
-      const result = await EmailService.send2FACode(email, code, username)
+      const result = await EmailService.send2FACode(email, code, username, type)
       
       rep.send({
         success: true,

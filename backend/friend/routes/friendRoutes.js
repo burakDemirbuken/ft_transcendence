@@ -3,13 +3,11 @@ export default async function friendRoutes(fastify) {
 
 	fastify.get("/ws-friend/friends", { websocket: true }, async (socket, req) => {
 		const userName  = (await fastify.getDataFromToken(req))?.username ?? null
-
 		if (!userName) {
 			console.error('Missing userName in presence connection')
 			socket.close(1008, "Missing parameter: userName")
 			return
 		}
-		console.log('New presence connection:', userName)
 
 		const state = { lastseen: Date.now(), socket: socket }
 		presence.set(userName, state)
@@ -50,7 +48,7 @@ export default async function friendRoutes(fastify) {
 
 			const userResult = await fastify.getFriendList(userName)
 			socket.send(JSON.stringify({
-				type: 'response',
+				type: 'list',
 				payload: {
 					friendlist: userResult,
 					message: result.user
@@ -60,7 +58,7 @@ export default async function friendRoutes(fastify) {
 			if (result.peer && presence.has(peerName)) {
 				const peerResult = await fastify.getFriendList(peerName)
 				presence.get(peerName).socket.send(JSON.stringify({
-					type: 'response',
+					type: 'list',
 					payload: {
 						friendlist: peerResult,
 						message: result.peer
@@ -72,7 +70,6 @@ export default async function friendRoutes(fastify) {
 		const cleanup = async (situation) => {
 			if (!(await presence.delete(userName)))
 				return
-			console.log(`Presence connection for ${userName} cleaned up due to:`, situation)
 			await fastify.notifyFriendChanges(userName)
 			fastify.log.info({ userName, situation })
 		}

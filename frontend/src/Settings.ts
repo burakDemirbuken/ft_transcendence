@@ -1,17 +1,18 @@
 import AView from "./AView.js";
-import { getAuthToken, getAuthHeaders } from './utils/auth.js';
+import { getAuthHeaders } from './utils/auth.js';
 import { API_BASE_URL, navigateTo } from './index.js';
 import { showNotification } from "./utils/notification.js";
-import tokenManager from './utils/tokenManager.js';
 import doubleFetch from "./utils/doubleFetch.js";
+import tokenManager from './utils/tokenManager.js';
 
 let currentUserName = null;
-let pendingAction = null; // 'password' veya 'email'
+let pendingAction = null; // 'password', 'email' veya 'delete'
 let pendingData = null; // İlgili data
 
 async function hideSettingsOverlay() {
 	console.log("HIDE SETTINGS OVERLAY");
 	document.querySelector(".overlay")?.classList.add("hide-away");
+	document.querySelector(".settings-container")?.removeAttribute("inert");
 	const input = document.querySelector(".card input") as HTMLInputElement;
 	if (input)
 		input.value = "";
@@ -22,6 +23,7 @@ async function hideSettingsOverlay() {
 async function showSettingsOverlay() {
 	console.log("SHOW SETTINGS OVERLAY");
 	document.querySelector(".overlay")?.classList.remove("hide-away");
+	document.querySelector(".settings-container")?.setAttribute("inert", "");
 }
 
 async function confirm2FACode(e) {
@@ -45,10 +47,14 @@ async function confirm2FACode(e) {
 
 	try {
 		let endpoint = '';
+		let method = 'POST';
 		if (pendingAction === 'password') {
 			endpoint = '/auth/confirm-password-change';
 		} else if (pendingAction === 'email') {
 			endpoint = '/auth/confirm-email-change';
+		} else if (pendingAction === 'delete') {
+			endpoint = '/auth/confirm-delete-account';
+			method = 'DELETE';
 		} else {
 			showNotification("Invalid action", "error");
 			submitBtn.disabled = false;
@@ -56,9 +62,8 @@ async function confirm2FACode(e) {
 			submitBtn.style.cursor = 'pointer';
 			return;
 		}
-
 		const response = await doubleFetch(`${API_BASE_URL}${endpoint}`, {
-			method: 'POST',
+			method: method,
 			credentials: 'include',
 			headers: {
 				'Content-Type': 'application/json',
@@ -66,7 +71,6 @@ async function confirm2FACode(e) {
 			},
 			body: JSON.stringify({ code })
 		});
-
 		const result = await response.json();
 
 		if (response.ok) {
@@ -74,23 +78,37 @@ async function confirm2FACode(e) {
 			hideSettingsOverlay();
 
 			// Şifre değiştiyse ve logout gerekliyse
+
 			if (pendingAction === 'password' && result.logout) {
 				showNotification("Password changed! Logging out...", "success");
-				// TokenManager ile logout yap (cookie'leri temizler)
 				await tokenManager.logout();
 				setTimeout(() => {
 					navigateTo('login');
 				}, 1500);
 			}
-			// Email değiştiyse sayfayı yenile
+			else if (pendingAction === 'email' && result.logout) {
+				showNotification(result.message || "Email başarıyla değiştirildi! Yeni email adresinizi doğrulamak için gelen emaildeki linke tıklayın. Oturumunuz kapatılıyor...", "success");
+				await tokenManager.logout();
+				setTimeout(() => {
+					navigateTo('login');
+				}, 3000);
+			}
 			else if (pendingAction === 'email') {
 				setTimeout(() => {
 					window.location.reload();
 				}, 1500);
 			}
+			else if (pendingAction === 'delete') {
+				console.log("🗑️ Account deletion successful, logging out...");
+				showNotification("Hesap başarıyla silindi. Hoşçakal!", "success");
+				await tokenManager.logout();
+				setTimeout(() => {
+					console.log("🔄 Redirecting to login page");
+					navigateTo('login');
+				}, 2000);
+			}
 		} else {
 			showNotification(result.error || "Verification failed", "error");
-			// Hata durumunda butonu tekrar aktif et
 			submitBtn.disabled = false;
 			submitBtn.style.opacity = '1';
 			submitBtn.style.cursor = 'pointer';
@@ -109,24 +127,39 @@ async function confirm2FACode(e) {
 
 async function deleteAccount(e) {
 	e.preventDefault();
-	const isConfirmed = confirm("Are you sure you want to delete your account? This action cannot be undone");
-	if (isConfirmed) {
-		try {
-			const res = await doubleFetch(`${API_BASE_URL}/auth/profile`, {
-				method: 'DELETE',
-				credentials: 'include',
-			});
-			const json = await res.json();
-			if (res.ok) {
-				showNotification(json.message, "success");
-				showSettingsOverlay();
-				// navigateTo("login");
-			} else {
-				showNotification(json.error, "error");
-			}
-		} catch (error) {
-			showNotification(`System Error: ${error.message}`, "error");
+	console.log("INIT ACCOUNT DELETION");
+
+	const form = e.target.closest('form');
+	const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+	const formData = new FormData(form);
+	const password = formData.get('password') as string;
+
+	if (!password) {
+		showNotification("Please enter your password", "error");
+		return;
+	}
+
+	try {
+		const res = await doubleFetch(`${API_BASE_URL}/auth/init-delete-account`, {
+			method: 'POST',
+			credentials: 'include',
+			headers: {
+				'Content-Type': 'application/json',
+				...getAuthHeaders()
+			},
+			body: JSON.stringify({ password })
+		});
+		const json = await res.json();
+		if (res.ok) {
+			pendingAction = 'delete';
+			pendingData = { password };
+			showNotification(json.message || "Hesap silme doğrulama kodu email adresinize gönderildi", "success");
+			showSettingsOverlay();
+		} else {
+			showNotification(json.error, "error");
 		}
+	} catch (error) {
+		showNotification(`System Error: ${error.message}`, "error");
 	}
 }
 
@@ -206,9 +239,15 @@ async function sendEmailChangeReq(e) {
 	const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
 	const formData = new FormData(form);
 	const newEmail = formData.get('new-email') as string;
+	const password = formData.get('pass') as string;
 
 	if (!newEmail) {
 		showNotification("Please enter new email", "error");
+		return;
+	}
+
+	if (!password) {
+		showNotification("Please enter current password", "error");
 		return;
 	}
 
@@ -225,7 +264,10 @@ async function sendEmailChangeReq(e) {
 				'Content-Type': 'application/json',
 				...getAuthHeaders()
 			},
-			body: JSON.stringify({ newEmail })
+			body: JSON.stringify({
+				newEmail,
+				password
+			})
 		});
 
 		const result = await response.json();
@@ -233,7 +275,7 @@ async function sendEmailChangeReq(e) {
 		if (response.ok) {
 			pendingAction = 'email';
 			pendingData = { newEmail };
-			showNotification(result.message || "2FA code sent to your email", "success");
+			showNotification(result.message || "Doğrulama kodu mevcut email adresinize gönderildi", "success");
 			showSettingsOverlay();
 		} else {
 			showNotification(result.error || "Failed to initiate email change", "error");
@@ -269,11 +311,6 @@ async function sendPassChangeReq(e) {
 
 	if (newPassword !== confirmPassword) {
 		showNotification("New passwords do not match", "error");
-		return;
-	}
-
-	if (newPassword.length < 6) {
-		showNotification("Password must be at least 6 characters", "error");
 		return;
 	}
 
@@ -339,6 +376,7 @@ export default class extends AView {
 		document.querySelector(".pass")?.addEventListener("click", sendPassChangeReq);
 		document.querySelector(".validation-form")?.addEventListener("submit", confirm2FACode);
 		document.getElementById("card-exit")?.addEventListener("click", hideSettingsOverlay);
+		document.getElementById("card-exit")?.addEventListener("keydown", (e) => { if (e.key === "Enter") { hideSettingsOverlay(); } });
 		document.querySelectorAll(".part-expand").forEach((btn) => {
 			btn.addEventListener("click", function (e) {
 				const clicked = e.currentTarget as HTMLElement;
@@ -354,17 +392,7 @@ export default class extends AView {
 		onLoad();
 	}
 
-	async unsetEventHandlers() {
-		document.querySelector(".avatar")?.removeEventListener("click", changeAvatar);
-		document.getElementById('hidden-file-input')?.removeEventListener('click', (e) => {
-			e.stopPropagation();
-		});
-		document.getElementById('hidden-file-input')?.removeEventListener('change', sendAvatarChangeReq);
-		document.getElementById("delete-account")?.removeEventListener("click", deleteAccount);
-		document.querySelector(".email")?.removeEventListener("click", sendEmailChangeReq);
-		document.querySelector(".dname")?.removeEventListener("click", sendDNameChangeReq);
-		document.querySelector(".pass")?.removeEventListener("click", sendPassChangeReq);
-	}
+	async unsetEventHandlers() {}
 
 	async setStylesheet() {
 		const link = document.createElement("link");
@@ -381,10 +409,6 @@ export default class extends AView {
 
 async function onLoad()
 {
-	const hasToken = getAuthToken();
-	if (!hasToken)
-		return navigateTo('login');
-
 	try {
 		const meReq = await doubleFetch(`${API_BASE_URL}/auth/me`, {
 			credentials: 'include',

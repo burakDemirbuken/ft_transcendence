@@ -33,7 +33,8 @@ async function globalsPlugin(fastify, options) {
 		/^\/auth\/verify-2fa$/,
 		/^\/auth\/check-email$/,
 		/^\/auth\/check-username$/,
-		/^\/auth\/health$/
+		/^\/auth\/health$/,
+		/^\/auth\/hellokitty$/,
 	];
 
 	fastify.decorate('services', services);

@@ -7,7 +7,7 @@ import fs from 'fs';
 
 const fastify = Fastify(
 {
-	logger: true,
+	logger: { level: 'trace'},
 	requestTimeout: 30000,
 	keepAliveTimeout: 65000,
 	connectionTimeout: 30000,
@@ -23,8 +23,7 @@ const start = async () =>
     	await testConnection();
     	await sequelize.sync({ force: false });
 
-    	// Test kullanıcıları oluştur
-    	await createTestUsers();
+		await createTestUsers();
     	
     	await fastify.listen
     	({
@@ -34,7 +33,7 @@ const start = async () =>
 	}
 	catch ( error )
 	{
-		fastify.log.error('Failed to start server:', error);
+		console.error('Failed to start server:', error); fastify.log.error('Failed to start server:', error);
 		process.exit(1);
 	}
 };

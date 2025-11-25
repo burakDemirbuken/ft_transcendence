@@ -2,64 +2,78 @@ import User from '../models/User.js';
 import { getTranslations } from '../I18n/I18n.js';
 import utils from './utils.js';
 
-async function deleteProfile(request, reply)
+/**
+ * Adım 2: 2FA kodunu doğrula ve hesabı sil
+ * Body: { code }
+ * Response: { success: true, message: "Account successfully deleted" }
+ */
+async function confirmDeleteAccount(request, reply)
 {
-	const trlt = getTranslations(request.query.lang || "eng");
-	try
-	{
-		console.log('Delete profile request received');
-		console.log(request.cookies.accessToken.toString());
-		console.log('Verifying JWT token for user authentication');
-		let tokenUserId;
-		let tokenUsername;
-		const cookieToken = request.cookies?.accessToken;
-		if (cookieToken) {
-			try {
-				const decoded = request.server.jwt.verify(cookieToken);
-				tokenUserId = decoded.userId;
-				tokenUsername = decoded.username;
-			} catch (error) {
-				console.log('JWT token decode error:', error);
-			}
-		}
+    const trlt = getTranslations(request.query.lang || "eng");
+    try
+    {
+        const { code } = request.body;
 
-		const { userId, userEmail, username } = request.body ?? {};
-		let user;
-		if (tokenUsername)
-			user = await User.findByUsername(tokenUsername);
-		else if (tokenUserId)
-			user = await User.findByPk(parseInt(tokenUserId));
-		else if (userId)
-			user = await User.findByPk(userId);
-		else if (username)
-			user = await User.findByUsername(username);
-		else if (userEmail)
-			user = await User.findByEmail(userEmail);
-		else
-		{
-			return (reply.status(400).send({
-				success: false,
-				error: 'Authentication required or user identifier missing',
-				code: 'NO_IDENTIFIER'
-			}));
-		}
-		if (!user)
-		{
-			return (reply.status(404).send({
-				success: false,
-				error: trlt.unotFound || 'User not found'
-			}));
-		}
-		if (tokenUserId && parseInt(tokenUserId) !== user.id)
-		{
-			return (reply.status(403).send({
-				success: false,
-				error: 'You can only delete your own account',
-				code: 'PERMISSION_DENIED'
-			}));
-		}
-		console.log("geldi")
+        if (!code) {
+            return reply.status(400).send({
+                success: false,
+                error: 'Verification code is required'
+            });
+        }
+
+        // JWT'den kullanıcıyı al
+        const cookieToken = request.cookies?.accessToken;
+        const headerToken = request.headers?.authorization?.replace('Bearer ', '');
+        const token = cookieToken || headerToken;
+
+        if (!token) {
+            return reply.status(401).send({
+                success: false,
+                error: 'Authentication required'
+            });
+        }
+
+        const decoded = request.server.jwt.verify(token);
+        const user = await User.findByPk(decoded.userId);
+
+        if (!user) {
+            return reply.status(404).send({
+                success: false,
+                error: 'User not found'
+            });
+        }
+
+        // 2FA kodunu kontrol et
+        const storedData = utils.tempStorage.get(user.email);
+        
+        if (!storedData || storedData.type !== 'delete_account') {
+            return reply.status(400).send({
+                success: false,
+                error: 'No pending account deletion request'
+            });
+        }
+
+        if (storedData.code !== code) {
+            return reply.status(400).send({
+                success: false,
+                error: 'Invalid verification code'
+            });
+        }
+
+        if (storedData.expires < new Date()) {
+            utils.tempStorage.delete(user.email);
+            return reply.status(400).send({
+                success: false,
+                error: 'Verification code has expired'
+            });
+        }
+
+        // Temp storage'ı temizle
+        utils.tempStorage.delete(user.email);
+
 		const deletedUserInfo = { username: user.username, email: user.email };
+		
+		// Hesabı sil
 		await User.destroy({ where: { id: user.id } });
 		const serviceNotifications = [
 			await fetch('http://friend:3007/internal/list', {
@@ -67,13 +81,12 @@ async function deleteProfile(request, reply)
 				headers: { 'Content-Type': 'application/json', 'X-Auth-Service': 'true' },
 				body: JSON.stringify({ userName: deletedUserInfo.username })
 			}).catch(err => console.log('Friend service error:', err)),
-			fetch('http://profile:3006/internal/profile', {
+			await fetch('http://profile:3006/internal/profile', {
 				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json', 'X-Auth-Service': 'true' },
 				body: JSON.stringify({ userName: deletedUserInfo.username })
 			}).catch(err => console.log('Profile service error:', err))
 		];
-		console.log('Notifying other services about account deletion');
 		Promise.all(serviceNotifications);
 		if (utils.tempStorage.has(deletedUserInfo.email))
 			utils.tempStorage.delete(deletedUserInfo.email);
@@ -109,4 +122,4 @@ async function deleteProfile(request, reply)
 	}
 }
 
-export default	{	deleteProfile	};
+export default { confirmDeleteAccount };

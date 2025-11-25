@@ -68,7 +68,7 @@ async function sendVerificationEmail(email, username, token)
 	return (response.json());
 }
 
-async function send2FAEmail(email, username, code, userIP)
+async function send2FAEmail(email, username, code, userIP, type = 'login')
 {
     const response = await fetch(`http://email:3005/send-2fa`,
     {
@@ -83,7 +83,8 @@ async function send2FAEmail(email, username, code, userIP)
 			username: username,
 			code: code,
 			ip: userIP,
-			timestamp: new Date().toISOString()
+			timestamp: new Date().toISOString(),
+			type: type  // 'login', 'password_change', 'email_change'
 		})
 	});
 
@@ -153,6 +154,38 @@ function storeVerificationCode(email, data = {})
     return (code);
 }
 
+function validatePassword(password) {
+    const errors = [];
+    
+    // 8-16 karakter kontrol
+    if (!password || password.length < 8) {
+        errors.push('Şifre en az 8 karakter olmalıdır');
+    }
+    if (password && password.length > 16) {
+        errors.push('Şifre en fazla 16 karakter olmalıdır');
+    }
+    
+    // En az 1 büyük harf kontrol
+    if (!/[A-Z]/.test(password)) {
+        errors.push('Şifre en az 1 büyük harf içermelidir');
+    }
+    
+    // En az 1 küçük harf kontrol (normal karakter)
+    if (!/[a-z]/.test(password)) {
+        errors.push('Şifre en az 1 küçük harf içermelidir');
+    }
+    
+    // En az 1 sayı kontrol
+    if (!/[0-9]/.test(password)) {
+        errors.push('Şifre en az 1 sayı içermelidir');
+    }
+    
+    return {
+        isValid: errors.length === 0,
+        errors: errors
+    };
+}
+
 export default
 {
 	blacklistToken,
@@ -162,5 +195,6 @@ export default
 	sendLoginNotification,
 	storeVerificationToken,
 	storeVerificationCode,
+	validatePassword,
 	tempStorage
 };
