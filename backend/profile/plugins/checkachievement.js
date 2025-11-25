@@ -1,7 +1,71 @@
- import fp from 'fastify-plugin'
-import { getUserMatchHistory, getLastSevenDaysMatches } from '../routes/gamedata.js'
+import fp from 'fastify-plugin'
+import { Op } from 'sequelize'
 
 export default fp(async (fastify) => {
+	async function getLastSevenDaysMatches(userId = null) {
+		const { MatchHistory } = fastify.sequelize.models
+
+		if (!userId) {
+			throw new Error("userId is required.")
+		}
+
+		const sevenDaysAgo = new Date()
+		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+		sevenDaysAgo.setHours(0, 0, 0, 0)
+
+		const matchHistory = await MatchHistory.findAll({
+			include: [
+				{
+					model: fastify.sequelize.models.Team,
+					as: 'teamOne',
+					required: false,
+					attributes: ['playerOneId', 'playerTwoId']
+				},
+				{
+					model: fastify.sequelize.models.Team,
+					as: 'teamTwo',
+					required: false,
+					attributes: ['playerOneId', 'playerTwoId']
+				}
+			],
+			where: {
+				matchStartDate: {
+					[Op.gte]: sevenDaysAgo
+				},
+				[Op.or]: [
+					{ '$teamOne.playerOneId$': userId },
+					{ '$teamOne.playerTwoId$': userId },
+					{ '$teamTwo.playerOneId$': userId },
+					{ '$teamTwo.playerTwoId$': userId },
+				]
+			},
+			attributes: ['matchStartDate']
+		})
+
+		const matchesByDay = {}
+
+		for (let i = 6; i >= 0; i--) {
+			const date = new Date()
+			date.setDate(date.getDate() - i)
+			const dateKey = date.toISOString().split('T')[0]
+			matchesByDay[dateKey] = 0
+		}
+
+		matchHistory.forEach(match => {
+			const matchDate = new Date(match.matchStartDate)
+			const dateKey = matchDate.toISOString().split('T')[0]
+
+			if (matchesByDay.hasOwnProperty(dateKey)) {
+				matchesByDay[dateKey]++
+			}
+		})
+
+		return {
+			matchesByDay: matchesByDay,
+			totalMatchesLastSevenDays: matchHistory.length
+		}
+	}
+
 	async function checkAchievements(player = null) {
 		if (!player) {
 			throw new Error('Profile not found for user')
@@ -90,79 +154,39 @@ export default fp(async (fastify) => {
 		}
 	}
 
-	async function statCalculate(userId, profile = null) {
-		const { Stat, Profile } = fastify.sequelize.models
-		console.log('Calculating stats for userId:', profile)
-		const stats = await Stat.findOne({
-			where: { userId: userId },
-			attributes: [
-				'xp',
-				'gamesPlayed',
-				'gamesWon',
-				'gamesLost',
-				'gameTotalDuration',
-				'gameCurrentStreak',
-				'gameLongestStreak',
-				'gameMinDuration',
-				'ballHitCount',
-				'ballMissCount'
-			]
-		})
-
-		if (!stats) {
+	async function statCalculate(profile = null) {
+		if (!profile || !profile.Stat) {
 			throw new Error('Stats not found for user')
-		}
-
-		// userId'den userName'i al
-		const userProfile = await Profile.findOne({
-			where: { id: userId },
-			attributes: ['userName']
-		})
-
-		if (!userProfile) {
-			throw new Error('User profile not found')
-		}
-
-		// Match history'yi al
-		const matchData = await getUserMatchHistory(fastify, userProfile.userName)
-
-		if (matchData.error) {
-			throw new Error(matchData.error)
 		}
 
 		let lastSevenDaysData = { matchesByDay: {}, totalMatchesLastSevenDays: 0 }
 
 		try {
-			lastSevenDaysData = await getLastSevenDaysMatches(fastify, userProfile.userName)
+			lastSevenDaysData = await getLastSevenDaysMatches(profile.id)
 		} catch (error) {
-			fastify.log.warn('Error getting last seven days matches:', error.message)
+			throw Error(`Error fetching last seven days matches: ${error.message}`)
 		}
 
 		const totalDurationSeconds = profile.Stat.gameTotalDuration || 0
-		const fastestWinDuration = profile.Stat.fastestWinDuration || 0
-		const longestMatchDuration = profile.Stat.longestMatchDuration || 0
 
 		return ({
-			...stats.toJSON(),
+			...JSON.parse(JSON.stringify(profile.Stat)),
 			...levelCalculate(profile.Stat.xp),
 			gameTotalDuration: totalDurationSeconds,
-			gameAverageDuration: stats.gamesPlayed > 0 ? (totalDurationSeconds / stats.gamesPlayed) : 0,
-			winRate: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0,
-			speed: (stats.gamesPlayed > 0 && totalDurationSeconds > 0) ? (stats.ballHitCount / (totalDurationSeconds)) * 100 : 0,
-			attack: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0,
-			endurance: (stats.gamesPlayed > 0 && totalDurationSeconds > 0) ? (totalDurationSeconds / (totalDurationSeconds + stats.gamesPlayed)) * 100 : 0,
-			defence: (stats.ballHitCount > 0 && stats.gamesLost > 0) ? (stats.ballHitCount / (stats.ballHitCount + stats.gamesLost + 1)) * 100 : 0,
-			accuracy: (stats.ballHitCount > 0 && stats.ballMissCount > 0) ? (stats.ballHitCount / (stats.ballHitCount + stats.ballMissCount)) * 100 : 0,
+			gameAverageDuration: profile.Stat.gamesPlayed > 0 ? (totalDurationSeconds / profile.Stat.gamesPlayed) : 0,
+			winRate: profile.Stat.gamesPlayed > 0 ? (profile.Stat.gamesWon / profile.Stat.gamesPlayed) * 100 : 0,
+			speed: (profile.Stat.gamesPlayed > 0 && totalDurationSeconds > 0) ? (profile.Stat.ballHitCount / (totalDurationSeconds)) * 100 : 0,
+			attack: profile.Stat.gamesPlayed > 0 ? (profile.Stat.gamesWon / profile.Stat.gamesPlayed) * 100 : 0,
+			endurance: (profile.Stat.gamesPlayed > 0 && totalDurationSeconds > 0) ? (totalDurationSeconds / (totalDurationSeconds + profile.Stat.gamesPlayed)) * 100 : 0,
+			defence: (profile.Stat.ballHitCount > 0 && profile.Stat.gamesLost > 0) ? (profile.Stat.ballHitCount / (profile.Stat.ballHitCount + profile.Stat.gamesLost + 1)) * 100 : 0,
+			accuracy: (profile.Stat.ballHitCount > 0 && profile.Stat.ballMissCount > 0) ? (profile.Stat.ballHitCount / (profile.Stat.ballHitCount + profile.Stat.ballMissCount)) * 100 : 0,
 			lastSevenDaysMatches: lastSevenDaysData.matchesByDay,
 			totalMatchesLastSevenDays: lastSevenDaysData.totalMatchesLastSevenDays,
-			hitRate: (stats.ballHitCount > 0 && stats.ballMissCount > 0) ?((stats.ballHitCount / (stats.ballHitCount + stats.ballMissCount)) * 100) : 0,
-			fastestWinDuration: fastestWinDuration,
-			longestMatchDuration: longestMatchDuration
+			hitRate: (profile.Stat.ballHitCount > 0 && profile.Stat.ballMissCount > 0) ?((profile.Stat.ballHitCount / (profile.Stat.ballHitCount + profile.Stat.ballMissCount)) * 100) : 0,
 		})
 	}
 
 	fastify.decorate('statCalculate', statCalculate)
-
 }, {
 	name: 'checkachievement',
 	fastify: '4.x'

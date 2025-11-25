@@ -43,6 +43,9 @@ export default (sequelize, DataTypes, Model) => {
 			},
 			onDelete: 'SET NULL'/*  */
 		},
+		matchDuration: {
+			type: DataTypes.INTEGER,
+		},
 		matchStartDate: {
 			type: DataTypes.DATE
 		},

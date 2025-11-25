@@ -1,218 +1,5 @@
 import { Op } from 'sequelize'
 
-export async function getUserMatchHistory(fastify, userName) {
-	const { Profile, MatchHistory, Team } = fastify.sequelize.models
-
-	try {
-		if (!userName) {
-			throw new Error("userName is required.")
-		}
-
-		const userProfile = await Profile.findOne({
-			where: { userName: userName },
-			attributes: ['id']
-		})
-
-		if (!userProfile) {
-			return { error: 'User profile not found', code: 404 }
-		}
-
-		const matchHistory = await MatchHistory.findAll({
-			include: [
-				{
-					model: fastify.sequelize.models.Team,
-					as: 'teamOne',
-					required: false,
-					include: [
-						{
-							model: fastify.sequelize.models.Profile,
-							as: 'PlayerOne',
-							attributes: ['userName', 'displayName', 'avatarUrl']
-						},
-						{
-							model: fastify.sequelize.models.Profile,
-							as: 'PlayerTwo',
-							attributes: ['userName', 'displayName', 'avatarUrl']
-						}
-					],
-					attributes: ['createdAt']
-				},
-				{
-					model: fastify.sequelize.models.Team,
-					as: 'teamTwo',
-					required: false,
-					include: [
-						{
-							model: fastify.sequelize.models.Profile,
-							as: 'PlayerOne',
-							attributes: ['userName', 'displayName', 'avatarUrl'],
-						},
-						{
-							model: fastify.sequelize.models.Profile,
-							as: 'PlayerTwo',
-							attributes: ['userName', 'displayName', 'avatarUrl']
-						}
-					],
-					attributes: ['createdAt']
-				},
-				{
-					model: fastify.sequelize.models.Team,
-					as: 'winnerTeam',
-					required: false,
-					include: [
-						{
-							model: fastify.sequelize.models.Profile,
-							as: 'PlayerOne',
-							attributes: ['userName', 'displayName', 'avatarUrl']
-						},
-						{
-							model: fastify.sequelize.models.Profile,
-							as: 'PlayerTwo',
-							attributes: ['userName', 'displayName', 'avatarUrl']
-						}
-					],
-					attributes: ['createdAt']
-				}
-			],
-			where: {
-				[Op.or]: [
-					{ '$teamOne.playerOneId$': userProfile.id },
-					{ '$teamOne.playerTwoId$': userProfile.id },
-					{ '$teamTwo.playerOneId$': userProfile.id },
-					{ '$teamTwo.playerTwoId$': userProfile.id },
-				]
-			},
-			attributes: ['teamOneScore', 'teamTwoScore', 'matchStartDate', 'matchEndDate', 'matchType', 'matchSettings', "matchState"],
-		})
-
-		let totalDurationSeconds = 0
-		let fastestWinDuration = null
-		let longestMatchDuration = null
-
-		const matchesWithDuration = matchHistory.map(match => {
-			const matchData = match.toJSON()
-			if (matchData.matchStartDate && matchData.matchEndDate) {
-				const durationMs = new Date(matchData.matchEndDate).getTime() -
-								   new Date(matchData.matchStartDate).getTime()
-				const durationSeconds = Math.floor(durationMs / 1000)
-				matchData.matchDuration = durationSeconds
-				totalDurationSeconds += durationSeconds
-
-				// En uzun maçı bul
-				if (longestMatchDuration === null || durationSeconds > longestMatchDuration) {
-					longestMatchDuration = durationSeconds
-				}
-
-				// Kazanılan maçları kontrol et ve en hızlı olanı bul
-				const isWin = match.winnerTeam?.PlayerOne?.userName === userName ||
-							  match.winnerTeam?.PlayerTwo?.userName === userName
-
-				if (isWin) {
-					if (fastestWinDuration === null || durationSeconds < fastestWinDuration) {
-						fastestWinDuration = durationSeconds
-					}
-				}
-			} else {
-				matchData.matchDuration = 0
-			}
-			return matchData
-		})
-
-		return {
-			success: true,
-			matches: matchesWithDuration,
-			totalDuration: totalDurationSeconds,
-			matchCount: matchesWithDuration.length,
-			fastestWinDuration: fastestWinDuration || 0,
-			longestMatchDuration: longestMatchDuration || 0
-		}
-	} catch (error) {
-		throw error
-	}
-}
-
-export async function getLastSevenDaysMatches(fastify, userName) {
-	const { Profile, MatchHistory } = fastify.sequelize.models
-
-	try {
-		if (!userName) {
-			throw new Error("userName is required.")
-		}
-
-		const userProfile = await Profile.findOne({
-			where: { userName: userName },
-			attributes: ['id']
-		})
-
-		if (!userProfile) {
-			return { error: 'User profile not found', code: 404 }
-		}
-
-		// Son 7 günü hesapla
-		const sevenDaysAgo = new Date()
-		sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-		sevenDaysAgo.setHours(0, 0, 0, 0)
-
-		const matchHistory = await MatchHistory.findAll({
-			include: [
-				{
-					model: fastify.sequelize.models.Team,
-					as: 'teamOne',
-					required: false,
-					attributes: ['playerOneId', 'playerTwoId']
-				},
-				{
-					model: fastify.sequelize.models.Team,
-					as: 'teamTwo',
-					required: false,
-					attributes: ['playerOneId', 'playerTwoId']
-				}
-			],
-			where: {
-				matchStartDate: {
-					[Op.gte]: sevenDaysAgo
-				},
-				[Op.or]: [
-					{ '$teamOne.playerOneId$': userProfile.id },
-					{ '$teamOne.playerTwoId$': userProfile.id },
-					{ '$teamTwo.playerOneId$': userProfile.id },
-					{ '$teamTwo.playerTwoId$': userProfile.id },
-				]
-			},
-			attributes: ['matchStartDate']
-		})
-
-		// Günlere göre grupla
-		const matchesByDay = {}
-
-		// Son 7 günü önceden oluştur (0 ile başlat)
-		for (let i = 6; i >= 0; i--) {
-			const date = new Date()
-			date.setDate(date.getDate() - i)
-			const dateKey = date.toISOString().split('T')[0]
-			matchesByDay[dateKey] = 0
-		}
-
-		// Maçları say
-		matchHistory.forEach(match => {
-			const matchDate = new Date(match.matchStartDate)
-			const dateKey = matchDate.toISOString().split('T')[0]
-
-			if (matchesByDay.hasOwnProperty(dateKey)) {
-				matchesByDay[dateKey]++
-			}
-		})
-
-		return {
-			success: true,
-			matchesByDay: matchesByDay,
-			totalMatchesLastSevenDays: matchHistory.length
-		}
-	} catch (error) {
-		throw error
-	}
-}
-
 export default async function gamedataRoute(fastify) {
 	fastify.post('/internal/match', async (request, reply) => {
 		const { team1, team2, winner, matchType, state, time, gameSettings } = request.body ?? {}
@@ -333,6 +120,7 @@ export default async function gamedataRoute(fastify) {
 				matchType: matchType,
 				matchStartDate: time.start ? new Date(time.start) : null,
 				matchEndDate: time.finish ? new Date(time.finish) : null,
+				matchDuration: duration,
 				matchSettings: gameSettings,
 				matchState: state
 			}, { transaction: t })
@@ -350,11 +138,11 @@ export default async function gamedataRoute(fastify) {
 			])
 
 			await t.commit()
-			return reply.status(200).send({ message: 'Match data processed successfully' })
+			return reply.code(200).send({ message: 'Match data processed successfully' })
 		} catch (error) {
 			await t.rollback()
 			fastify.log.error(`Error saving match data: ${error.message} -> ${error}`)
-			return reply.status(500).send({ message: 'Error processing match data' })
+			return reply.code(500).send({ message: 'Error processing match data' })
 		}
 	})
 
@@ -469,23 +257,105 @@ export default async function gamedataRoute(fastify) {
 			)
 
 			await t.commit()
-			return reply.status(200).send({ message: 'Tournament data processed successfully' })
+			return reply.code(200).send({ message: 'Tournament data processed successfully' })
 		} catch (error) {
 			await t.rollback()
 			fastify.log.error(`Error saving tournament data: ${error.message}`)
-			return reply.status(500).send({ message: 'Error processing tournament data' })
+			return reply.code(500).send({ message: 'Error processing tournament data' })
 		}
 	})
 
 	fastify.get('/match-history', async (request, reply) => {
-		const userName = request.query?.userName ?? fastify.getDataFromToken(request)?.username ?? null
+		const userName = request.query?.userName ?? (await fastify.getDataFromToken(request))?.username ?? null
+		const { Profile, MatchHistory } = fastify.sequelize.models
 
 		try {
-			const result = await getUserMatchHistory(fastify, userName)
-			if (result.error) {
-				return reply.code(result.code).send({ error: result.error })
+			if (!userName) {
+				return reply.code(400).send({ message: 'userName is required' })
 			}
-			return reply.send(result)
+
+			const userProfile = await Profile.findOne({
+				where: { userName: userName },
+				attributes: ['id']
+			})
+
+			if (!userProfile) {
+				return reply.code(404).send({ message: 'User profile not found' })
+			}
+
+			const matchHistory = await MatchHistory.findAll({
+				include: [
+					{
+						model: fastify.sequelize.models.Team,
+						as: 'teamOne',
+						required: false,
+						include: [
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerOne',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							},
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerTwo',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							}
+						],
+						attributes: ['createdAt']
+					},
+					{
+						model: fastify.sequelize.models.Team,
+						as: 'teamTwo',
+						required: false,
+						include: [
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerOne',
+								attributes: ['userName', 'displayName', 'avatarUrl'],
+							},
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerTwo',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							}
+						],
+						attributes: ['createdAt']
+					},
+					{
+						model: fastify.sequelize.models.Team,
+						as: 'winnerTeam',
+						required: false,
+						include: [
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerOne',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							},
+							{
+								model: fastify.sequelize.models.Profile,
+								as: 'PlayerTwo',
+								attributes: ['userName', 'displayName', 'avatarUrl']
+							}
+						],
+						attributes: ['createdAt']
+					}
+				],
+				where: {
+					[Op.or]: [
+						{ '$teamOne.playerOneId$': userProfile.id },
+						{ '$teamOne.playerTwoId$': userProfile.id },
+						{ '$teamTwo.playerOneId$': userProfile.id },
+						{ '$teamTwo.playerTwoId$': userProfile.id },
+					]
+				},
+				attributes: ['teamOneScore', 'teamTwoScore', 'matchStartDate', 'matchEndDate', 'matchType', 'matchSettings', "matchState", 'matchDuration'],
+			})
+	
+			const matchData = matchHistory.map(match => match.toJSON())
+			return reply.code(200).send({
+				matches: matchData,
+				matchCount: matchData.length,
+			})
 		} catch (error) {
 			fastify.log.error(`Error retrieving user match history: ${error.message}`)
 			return reply.code(500).send({ message: 'Failed to retrieve match history' })
@@ -493,7 +363,7 @@ export default async function gamedataRoute(fastify) {
 	})
 
 	fastify.get('/tournament-history', async (request, reply) => {
-		const userName = fastify.getDataFromToken(request)?.username ?? request.query?.userName ?? null
+		const userName = request.query?.userName ?? (await fastify.getDataFromToken(request))?.username ?? null
 
 		try {
 
