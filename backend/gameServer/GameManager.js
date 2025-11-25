@@ -62,7 +62,6 @@ class GameManager extends EventEmitter
 
 	async createGame(id, gameMode, properties, players)
 	{
-		console.log(`🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮🎮 Creating game. Mode: ${gameMode}, ID: ${id}, Properties:`, properties);
 		const gameId = id;
 		let game;
 		if (gameMode === 'local')

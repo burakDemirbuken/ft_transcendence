@@ -11,15 +11,16 @@ class RoomManager extends EventEmitter
 	constructor()
 	{
 		super();
+		this.isConnectServer = false;
 		this.waitingPlayers = [];
 		this.rooms = new Map();
-		setInterval(() => {
+/* 		setInterval(() => {
  			console.log(`Current rooms: ${this.rooms.size}`);
 			this.rooms.forEach((room, roomId) => {
 				console.log(`Room ID: ${roomId}, Name: ${room.name}, Players: ${room.players.length}/${room.maxPlayers}, Status: ${room.status}`);
 				console.log('Players:', room.players.map(p => ({ id: p.id, name: p.name })));
 			});
-		}, 5000);
+		}, 5000); */
 
 	}
 
@@ -273,6 +274,8 @@ class RoomManager extends EventEmitter
 
 	startGame(playerId)
 	{
+		if (!this.isConnectServer)
+			throw new Error('Game server not unavailable');
 		const {room, roomId} = this._getRoomWithPlayer(playerId);
 		if (!room)
 			throw new Error(`Room with player ID ${playerId} does not exist`);

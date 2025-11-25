@@ -8,18 +8,35 @@ class AiNetworkManager extends EventEmitter
 		try
 		{
 			super();
+			this.reconnectTimeout = null;
 			this.socket = new WebSocketClient('ai-server', 3003);
 
 			this.socket.onConnect(() => {
 				console.log('🤖 Connected to AI server');
+				if (this.reconnectTimeout) {
+					clearTimeout(this.reconnectTimeout);
+					this.reconnectTimeout = null;
+				}
 			});
 
 			this.socket.onClose(() => {
 				console.log('⚠️ Disconnected from AI server');
+				if (!this.reconnectTimeout) {
+					this.reconnectTimeout = setTimeout(() => {
+						this.reconnectTimeout = null;
+						this.socket.connect();
+					}, 5000);
+				}
 			});
 
 			this.socket.onError((error) => {
 				console.error('❌ AI server connection error:', error);
+				if (!this.reconnectTimeout) {
+					this.reconnectTimeout = setTimeout(() => {
+						this.reconnectTimeout = null;
+						this.socket.connect();
+					}, 5000);
+				}
 			});
 
 			this.socket.onMessage((data) => {

@@ -196,8 +196,7 @@ export default class TournamentRoom extends Room
 	{
 		if (this.players.length !== this.maxPlayers)
 			throw new Error("Match failed: Insufficient number of contacts");
-		if (this.status !== 'ready2match')
-			this.currentMatches = [];
+		this.currentMatches = [];
 
 		function shuffle(array)
 		{

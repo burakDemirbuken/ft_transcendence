@@ -61,6 +61,7 @@ export default class Room extends EventEmitter
 
 	startGame(playerId)
 	{
+		
 		if (this.host !== playerId)
 			throw new Error('Only the host can start the game');
 		if (this.players.length !== this.maxPlayers)

@@ -68,18 +68,36 @@ class GameService
 
 	setupRoomNetwork()
 	{
+		let reconnectTimer = null;
+
 		this.roomSocket.onConnect(() => {
 			console.log('🟢 Connected to Room Service');
+			if (reconnectTimer) {
+				clearTimeout(reconnectTimer);
+				reconnectTimer = null;
+			}
 		});
+
 		this.roomSocket.onError((error) => {
-			console.error('❌ Room Service connection error:', error);
+			if (!reconnectTimer) {
+				reconnectTimer = setTimeout(() => {
+					reconnectTimer = null;
+					this.roomSocket.connect('ws-room/server');
+				}, 5000);
+			}
 		});
+
 		this.roomSocket.onClose(() => {
-			console.warn('⚠️ Room Service connection closed, attempting to reconnect in 5 seconds...');
+			if (!reconnectTimer) {
+				reconnectTimer = setTimeout(() => {
+					reconnectTimer = null;
+					this.roomSocket.connect('ws-room/server');
+				}, 5000);
+			}
 		});
+
 		this.roomSocket.onMessage((message) => {
 			this.roomMessageHandler(message);
-			console.log('📨 Message from Room Service:', message);
 		});
 
 		this.roomSocket.connect('ws-room/server');
