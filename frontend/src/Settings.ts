@@ -1,5 +1,5 @@
 import AView from "./AView.js";
-import { getAuthToken, getAuthHeaders } from './utils/auth.js';
+import { getAuthHeaders } from './utils/auth.js';
 import { API_BASE_URL, navigateTo } from './index.js';
 import { showNotification } from "./utils/notification.js";
 import doubleFetch from "./utils/doubleFetch.js";
@@ -414,10 +414,6 @@ export default class extends AView {
 
 async function onLoad()
 {
-	const hasToken = getAuthToken();
-	if (!hasToken)
-		return navigateTo('login');
-
 	try {
 		const meReq = await doubleFetch(`${API_BASE_URL}/auth/me`, {
 			credentials: 'include',

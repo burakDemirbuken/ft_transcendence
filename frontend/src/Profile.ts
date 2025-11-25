@@ -1,4 +1,4 @@
-import { getAuthToken, getAuthHeaders } from './utils/auth.js';
+import { getAuthHeaders } from './utils/auth.js';
 import { getJsTranslations } from './utils/I18n.js';
 import { API_BASE_URL } from './index.js';
 import doubleFetch from "./utils/doubleFetch.js";
@@ -1825,7 +1825,7 @@ function openTournamentBracket(tournamentId: string) {
 
 async function onLoad() {
 	try {
-		const Profile = await fetch(`${API_BASE_URL}/profile/profile`,
+		const Profile = await doubleFetch(`${API_BASE_URL}/profile/profile`,
 		{
 			credentials: 'include',
 			headers: {
