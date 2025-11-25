@@ -138,11 +138,11 @@ export default async function gamedataRoute(fastify) {
 			])
 
 			await t.commit()
-			return reply.status(200).send({ message: 'Match data processed successfully' })
+			return reply.code(200).send({ message: 'Match data processed successfully' })
 		} catch (error) {
 			await t.rollback()
 			fastify.log.error(`Error saving match data: ${error.message} -> ${error}`)
-			return reply.status(500).send({ message: 'Error processing match data' })
+			return reply.code(500).send({ message: 'Error processing match data' })
 		}
 	})
 
@@ -257,16 +257,16 @@ export default async function gamedataRoute(fastify) {
 			)
 
 			await t.commit()
-			return reply.status(200).send({ message: 'Tournament data processed successfully' })
+			return reply.code(200).send({ message: 'Tournament data processed successfully' })
 		} catch (error) {
 			await t.rollback()
 			fastify.log.error(`Error saving tournament data: ${error.message}`)
-			return reply.status(500).send({ message: 'Error processing tournament data' })
+			return reply.code(500).send({ message: 'Error processing tournament data' })
 		}
 	})
 
 	fastify.get('/match-history', async (request, reply) => {
-		const userName = request.query?.userName ?? fastify.getDataFromToken(request)?.username ?? null
+		const userName = request.query?.userName ?? (await fastify.getDataFromToken(request))?.username ?? null
 		const { Profile, MatchHistory } = fastify.sequelize.models
 
 		try {
@@ -363,7 +363,7 @@ export default async function gamedataRoute(fastify) {
 	})
 
 	fastify.get('/tournament-history', async (request, reply) => {
-		const userName = fastify.getDataFromToken(request)?.username ?? request.query?.userName ?? null
+		const userName = request.query?.userName ?? (await fastify.getDataFromToken(request))?.username ?? null
 
 		try {
 

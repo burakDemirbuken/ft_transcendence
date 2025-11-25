@@ -269,7 +269,7 @@ export default async function profileRoute(fastify) {
 			const userProfile = await fastify.sequelize.models.Profile.findOne({
 				where: { userName: userName },
 				attributes: ['userName']
-			})
+			}) ?? null
 
 			if (userProfile == null) {
 				return reply.code(404).send({ exists: false, message: 'User not found' })

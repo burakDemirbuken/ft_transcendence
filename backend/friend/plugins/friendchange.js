@@ -8,6 +8,7 @@ export default fp(async function friendChanges(fastify) {
 			if (userName == null) {
 				throw new Error("userName is required.")
 			}
+
 			const friendships = await fastify.sequelize.models.Friend.findAll({
 				where: {
 					[Op.or]: [
@@ -18,7 +19,7 @@ export default fp(async function friendChanges(fastify) {
 				attributes: ['userName', 'peerName', 'status'],
 				raw: true
 			})
-			console.log(`Friendships for ${userName}:`, friendships)
+
 			const [incomingPending, outgoingPending, accepted] = friendships.reduce((acc, friendship) => {
 				const isUserInitiator = friendship.userName === userName
 				if (friendship.status === 'pending') {
@@ -33,6 +34,7 @@ export default fp(async function friendChanges(fastify) {
 				}
 				return acc
 			}, [[], [], []])
+
 			const allFriendNames = [...incomingPending, ...outgoingPending, ...accepted]
 			if (allFriendNames.length === 0) {
 				return {
@@ -43,6 +45,7 @@ export default fp(async function friendChanges(fastify) {
 					acceptedFriends: []
 				}
 			}
+
 			const friendsProfiles = await fetch("http://profile:3006/internal/friend", {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -52,8 +55,8 @@ export default fp(async function friendChanges(fastify) {
 				console.error("Error response from profile service:", friendsProfiles.status, await friendsProfiles.text());
 				throw new Error(`Failed to fetch friend profiles: ${friendsProfiles.status} ${await friendsProfiles.text()}`)
 			}
+
 			const { users } =  await friendsProfiles.json()
-			console.log(`Fetched profiles for friends of ${userName}:`, users)
 			const [incomingProfiles, outgoingProfiles, acceptedProfiles] = users.reduce((acc, profile) => {
 				const baseProfile = {
 					isOnline: fastify.presence.has(profile.userName),
@@ -81,10 +84,8 @@ export default fp(async function friendChanges(fastify) {
 			return { message: 'Failed to retrieve user friends' }
 		}
 	}
-
 	async function postSend(userName, peerName) {
 		
-		// userName = undefined
 		try {
 			if (!userName || !peerName) {
 				throw new Error("userName and peerName are required.")
@@ -259,7 +260,6 @@ export default fp(async function friendChanges(fastify) {
 			})
 
 			const users = friendships.map(f => f.userName === userName ? f.peerName : f.userName)
-
 			if (users.length === 0) {
 				console.log(`No friends to notify for user: ${userName}`)
 				return
@@ -284,8 +284,8 @@ export default fp(async function friendChanges(fastify) {
 					}
 				}
 			}))
+
 			const failed = results.map((result, index) => ({ result, user: users[index] })).filter(({ result }) => result.status === 'rejected')
-		
 			if (failed.length > 0) {
 				Promise.all(failed.map(async ({ result, user }) => {
 					fastify.log.error(`Failed to notify user: ${user}, reason: ${result.reason.message}`)

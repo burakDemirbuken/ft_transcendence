@@ -155,14 +155,16 @@ export default fp(async (fastify) => {
 	}
 
 	async function statCalculate(profile = null) {
-		console.log('Calculating stats for userId:', profile)
+		if (!profile || !profile.Stat) {
+			throw new Error('Stats not found for user')
+		}
 
 		let lastSevenDaysData = { matchesByDay: {}, totalMatchesLastSevenDays: 0 }
 
 		try {
 			lastSevenDaysData = await getLastSevenDaysMatches(profile.id)
 		} catch (error) {
-			fastify.log.warn(`Error fetching last seven days matches: ${error.message}`)
+			throw Error(`Error fetching last seven days matches: ${error.message}`)
 		}
 
 		const totalDurationSeconds = profile.Stat.gameTotalDuration || 0
@@ -185,7 +187,6 @@ export default fp(async (fastify) => {
 	}
 
 	fastify.decorate('statCalculate', statCalculate)
-
 }, {
 	name: 'checkachievement',
 	fastify: '4.x'
