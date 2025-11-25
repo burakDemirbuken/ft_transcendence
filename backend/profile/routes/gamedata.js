@@ -127,12 +127,12 @@ export default async function gamedataRoute(fastify) {
 			await Promise.all([
 				...teamOnePlayers.map(async (player) => {
 					if (player && player.id) {
-						await player.Achievement.update(await fastify.checkAchievements(player), { transaction: t })
+						await player.Achievement.update(fastify.checkAchievements(player), { transaction: t })
 					}
 				}),
 				...teamTwoPlayers.map(async (player) => {
 					if (player && player.id) {
-						await player.Achievement.update(await fastify.checkAchievements(player), { transaction: t })
+						await player.Achievement.update(fastify.checkAchievements(player), { transaction: t })
 					}
 				})
 			])

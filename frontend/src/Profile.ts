@@ -42,11 +42,7 @@ class ManagerProfile {
 		// DOM yüklendikten sonra avatar'ı seç
 		setTimeout(() => {
 			this.avatarStatus = document.querySelector('.avatar') as HTMLElement;
-			if (!this.avatarStatus) {
-				showNotification("Avatar element not found!", "error");
-			} else {
-				this.initConnectionStatus(); // Bağlantı durumunu başlat
-			}
+			this.initConnectionStatus(); // Bağlantı durumunu başlat
 			this.init();
 		}, 100);
 	}
