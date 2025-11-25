@@ -136,7 +136,7 @@ function getAIDecision(aiPlayer, gameData) {
     );
 
     return decision;
-}
+} 
 
 // Global AI Manager
 const aiManager = new GameAIManager();
