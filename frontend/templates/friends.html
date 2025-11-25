@@ -1,9 +1,9 @@
-<div class="friends-container">
+<div class="friends-container friends">
 	<nav class="friend-nav">
 		<ul>
-			<li><button class="pg-switch friends pg-actv" data-i18n="friends.friends.title">Friends</button></li>
-			<li><button class="pg-switch requests" data-i18n="friends.requests.title">Requests</button></li>
-			<li><button class="pg-switch invites" data-i18n="friends.invites.title">Invites</button></li>
+			<li><button value="friends" class="pg-switch friends"  data-i18n="friends.friends.title">Friends</button></li>
+			<li><button value="requests" class="pg-switch requests"  data-i18n="friends.requests.title">Requests</button></li>
+			<li><button value="invites" class="pg-switch invites" data-i18n="friends.invites.title">Invites</button></li>
 		</ul>
 		<select>
 			<option value="friends" class="pg-switch friends" data-i18n="friends.friends.title">Friends</option>
@@ -12,7 +12,7 @@
 		</select>
 	</nav>
 	<div class="friend-page-box">
-		<div id="friends" class="subpage friends user-grid pg-actv"></div>
+		<div id="friends" class="subpage friends user-grid"></div>
 		<div id="requests" class="subpage requests" inert="">
 			<div class="search-bar">
 				<form action="">

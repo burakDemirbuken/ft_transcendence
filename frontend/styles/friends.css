@@ -52,9 +52,10 @@
 	position: relative;
 }
 
-.friend-nav button:hover::after,
-.friend-nav button:focus::after,
-.friend-nav button.pg-actv::after {
+.friend-nav button:is(:hover, :focus)::after,
+.friends-container.friends .friend-nav button.friends::after,
+.friends-container.requests .friend-nav button.requests::after,
+.friends-container.invites .friend-nav button.invites::after{
 	content: "";
 	position: absolute;
 	bottom: 0;
@@ -90,20 +91,6 @@
 	margin-top: 1rem;
 }
 
-.subpage {
-	position: absolute;
-	width: 100%;
-
-	opacity: 0;
-	pointer-events: none;
-	transition: opacity .3s ease;
-}
-
-.subpage.pg-actv {
-	opacity: 1;
-	pointer-events: all;
-}
-
 .user-grid {
 	width: 100%;
 	display: grid;
@@ -117,6 +104,32 @@
 	align-items: center;
 
 	gap: 2em;
+}
+
+.subpage {
+	position: absolute;
+	width: 100%;
+}
+
+.user-grid {
+	width: 100%;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+	gap: .5em;
+}
+
+.subpage.requests {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	gap: 2em;
+}
+
+.friends-container:not(.friends) .subpage.friends,
+.friends-container:not(.requests) .subpage.requests,
+.friends-container:not(.invites) .subpage.invites {
+	display: none;
 }
 
 .search-bar form {

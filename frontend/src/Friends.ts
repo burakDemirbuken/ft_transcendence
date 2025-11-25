@@ -71,27 +71,13 @@ async function handleOverlay(e) {
 }
 
 function subpageSwitch(e) {
-	if (e.target.classList.contains("pg-switch")) {
-		let fields = document.querySelectorAll(`.${currentFrPage}`);
-
-		for (const field of fields) {
-			field.classList.remove("pg-actv");
-		}
-		let section = document.querySelector(`#${currentFrPage}`);
-		section?.setAttribute("inert", "");
-
-		if (e.target.matches(".friends"))
-			currentFrPage = "friends";
-		else if (e.target.matches(".requests"))
-			currentFrPage = "requests";
-		else if (e.target.matches(".invites"))
-			currentFrPage = "invites";
-
-		fields = document.querySelectorAll(`.${currentFrPage}`);
-		for (const field of fields) {
-			field.classList.add("pg-actv");
-		}
-		document.querySelector(`#${currentFrPage}`)?.removeAttribute("inert");
+	if (e.target.value) {
+		const fields = document.querySelector(`.friends-container`);
+		if (!fields)
+			return showNotification("Failed to find friends container");
+		fields?.classList.remove(`${currentFrPage}`);
+		currentFrPage = e.target.value;
+		fields?.classList.add(`${currentFrPage}`);
 	}
 }
 
@@ -362,6 +348,7 @@ export default class extends AView {
 		document.querySelector("#card-exit")?.addEventListener("click", handleOverlay);
 		document.addEventListener("keydown", esc);
 		document.querySelector(".friend-nav")?.addEventListener("click", subpageSwitch);
+		document.querySelector(".friend-nav select")?.addEventListener("change", subpageSwitch);
 		document.addEventListener('friends:list', this._onFriendsList as EventListener);
 		document.querySelector(".search-bar form")?.addEventListener("submit", request);
 		safeSend(JSON.stringify({ type: "list", payload: {} }));
