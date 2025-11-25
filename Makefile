@@ -116,7 +116,6 @@ shell-gameserver:
 	@echo "$(GREEN)Entering shell for gameserver service$(NC)"
 	@docker exec -it gameserver /bin/sh
 
-
 clean-db:
 	@echo "$(RED)Cleaning databases...$(NC)"
 	@rm -rf backend/profile/database/
@@ -130,7 +129,7 @@ fclean: clean clean-db
 	@echo "$(RED)Performing full cleanup...$(NC)"
 	@$(COMPOSE_CMD) down --remove-orphans --volumes --rmi --rm all 2>/dev/null || true
 	@docker system prune -a --volumes -f
-	@docker volume rm $(docker volume ls -q)
+	@docker volume prune -a -f
 	@docker network prune -f
 re: fclean all
 
