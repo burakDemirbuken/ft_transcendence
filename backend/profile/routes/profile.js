@@ -35,7 +35,7 @@ export default async function profileRoute(fastify) {
 
 			const [ userAchievementsProgress, userStats ] = await Promise.all([
 				fastify.getAchievementProgress(profileData.Achievement),
-				fastify.statCalculate(userProfile.id, profileData)
+				fastify.statCalculate(profileData)
 			])
 			delete profileData.id
 
