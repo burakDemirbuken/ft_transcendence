@@ -1986,6 +1986,34 @@ function handleRoundFinished(payload: RoundFinishedPayload): void {
 }
 
 // ============================================================================
+// DEVICE TYPE DETECTION
+// ============================================================================
+
+type DeviceType = 'Android' | 'iOS' | 'Windows' | 'MacOS' | 'Linux' | 'Other';
+
+const getDeviceType = (): DeviceType => {
+  const ua = navigator.userAgent;
+
+  if (/Android/i.test(ua)) {
+    return 'Android';
+  } else if (/iPhone|iPad|iPod/i.test(ua)) {
+    return 'iOS';
+  } else if (/Windows/i.test(ua)) {
+    return 'Windows';
+  } else if (/Macintosh/i.test(ua)) {
+    return 'MacOS';
+  } else if (/Linux/i.test(ua)) {
+    return 'Linux';
+  }
+  return 'Other';
+};
+
+const isMobileDevice = (): boolean => {
+  const deviceType = getDeviceType();
+  return deviceType === 'Android' || deviceType === 'iOS';
+};
+
+// ============================================================================
 // CANVAS ORIENTATION LOCK - LANDSCAPE ONLY
 // ============================================================================
 
@@ -1995,7 +2023,7 @@ class CanvasOrientationManager {
     private portraitWarning: HTMLElement | null = null;
     private isResizing: boolean = false;
     private resizeTimeout: number | null = null;
-    private hasTouchCapability: boolean = false;
+    private isMobile: boolean = false;
     private isCanvasReady: boolean = false;
     private isGameRunning: boolean = false;
     private keyboardListener: ((e: KeyboardEvent) => void) | null = null;
@@ -2003,12 +2031,13 @@ class CanvasOrientationManager {
 
     constructor(canvasId: string = 'renderCanvas') {
         this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-        this.hasTouchCapability = this.detectTouchCapability();
+        this.isMobile = isMobileDevice();
 
-        console.log(`🔍 DETECTION RESULT:`);
-        console.log(`   Touch Capability: ${this.hasTouchCapability}`);
-        console.log(`   maxTouchPoints: ${navigator.maxTouchPoints}`);
-        console.log(`   ontouchstart: ${'ontouchstart' in window}`);
+        const deviceType = getDeviceType();
+        console.log(`🔍 DEVICE DETECTION RESULT:`);
+        console.log(`   Device Type: ${deviceType}`);
+        console.log(`   Is Mobile: ${this.isMobile}`);
+        console.log(`   User Agent: ${navigator.userAgent}`);
 
         if (this.canvas) {
             this.waitForCanvasReady();
@@ -2023,7 +2052,9 @@ class CanvasOrientationManager {
 
         if (isRunning) {
             this.checkOrientation();
-            this.setupKeyboardControls();
+            if (this.isMobile) {
+                this.setupKeyboardControls();
+            }
         } else {
             this.hidePortraitWarning();
             this.hideDirectionButtons();
@@ -2032,19 +2063,16 @@ class CanvasOrientationManager {
     }
 
     private setupKeyboardControls(): void {
-        if (this.keyboardListener) return; // Zaten kuruluysa tekrar kurma
+        if (this.keyboardListener) return;
 
         this.keyboardListener = (e: KeyboardEvent) => {
-            const isPortrait = 480 < window.innerWidth;
+            const isPortrait = window.innerWidth < window.innerHeight;
 
-            // Sadece portrait modda ve touch cihazda çalış
-            if (!isPortrait || !this.hasTouchCapability) return;
+            if (!isPortrait || !this.isMobile) return;
 
-            // Arrow Up / Arrow Down tuşlarını yakala
             if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                e.preventDefault(); // Varsayılan davranışı engelle
+                e.preventDefault();
 
-                // Custom event oluştur ve gönder
                 const direction = e.key === 'ArrowUp' ? 'up' : 'down';
                 console.log(`⬆️ Portrait mode key pressed: ${direction}`);
 
@@ -2054,8 +2082,6 @@ class CanvasOrientationManager {
             }
         };
 
-        // Event listener'ı ekle
-		// unset'le
         window.addEventListener('keydown', this.keyboardListener);
         console.log('⌨️ Portrait mode keyboard controls enabled');
     }
@@ -2076,8 +2102,8 @@ class CanvasOrientationManager {
                 console.log('Canvas is ready!');
                 this.isCanvasReady = true;
 
-                if (this.hasTouchCapability) {
-                    this.init();
+                if (this.isMobile) {
+                    this.initMobileMode();
                 } else {
                     this.initDesktopMode();
                 }
@@ -2089,53 +2115,28 @@ class CanvasOrientationManager {
         checkCanvasReady();
     }
 
-    private detectTouchCapability(): boolean {
-        const maxTouchPoints = navigator.maxTouchPoints ?? 0;
-        const hasOnTouchStart = 'ontouchstart' in window;
-        const hasMsMaxTouchPoints = ((navigator as any).msMaxTouchPoints ?? 0) > 0;
-
-        let hasTouchEvent = false;
-        try {
-            new TouchEvent('test');
-            hasTouchEvent = true;
-        } catch (e) {
-            hasTouchEvent = false;
-        }
-
-        const result = maxTouchPoints > 0 || hasOnTouchStart || hasMsMaxTouchPoints || hasTouchEvent;
-
-        console.log(`🔍 Touch Detection Details:`);
-        console.log(`   - maxTouchPoints: ${maxTouchPoints} (MOST RELIABLE)`);
-        console.log(`   - ontouchstart: ${hasOnTouchStart}`);
-        console.log(`   - msMaxTouchPoints: ${hasMsMaxTouchPoints}`);
-        console.log(`   - TouchEvent: ${hasTouchEvent}`);
-        console.log(`   - FINAL RESULT: ${result}`);
-
-        return result;
-    }
-
     private initDesktopMode(): void {
         if (!this.canvas) return;
 
-        console.log('💻 DESKTOP MODE - No touch capability detected');
+        console.log('💻 DESKTOP MODE - No orientation lock needed');
 
         this.updateCanvasLayout();
-        window.addEventListener('resize', () => this.throttledHandleResize()); // unset'le
+        window.addEventListener('resize', () => this.throttledHandleResize());
         this.setupResizeObserver();
     }
 
-    private init(): void {
+    private initMobileMode(): void {
         if (!this.canvas) return;
 
-        console.log('📱 MOBILE MODE - Touch capability detected');
+        console.log('📱 MOBILE MODE - Portrait orientation lock enabled');
 
         this.updateCanvasLayout();
-        window.addEventListener('orientationchange', () => this.handleOrientationChange()); //unset'le
-        window.addEventListener('resize', () => this.throttledHandleResize()); //unset'le
+        window.addEventListener('orientationchange', () => this.handleOrientationChange());
+        window.addEventListener('resize', () => this.throttledHandleResize());
         this.setupResizeObserver();
         this.ensureViewportMeta();
         this.createPortraitWarning();
-		this.createDirectionButtons();
+        this.createDirectionButtons();
         this.checkOrientation();
     }
 
@@ -2171,22 +2172,21 @@ class CanvasOrientationManager {
     }
 
     private checkOrientation(): void {
-        // Sadece canvas hazırsa, touch cihazsa VE oyun çalışıyorsa kontrol et
-        if (!this.isCanvasReady || !this.hasTouchCapability || !this.isGameRunning) {
+        if (!this.isCanvasReady || !this.isMobile || !this.isGameRunning) {
             return;
         }
 
-        const isPortrait = 480 > window.innerWidth;
+        const isPortrait = window.innerWidth < window.innerHeight;
 
         console.log(`📐 Mobile Orientation: ${isPortrait ? 'PORTRAIT' : 'LANDSCAPE'}`);
 
-    if (isPortrait) {
-        this.showPortraitWarning();
-        this.hideDirectionButtons();
-    } else {
-        this.hidePortraitWarning();
-        this.showDirectionButtons();
-    }
+        if (isPortrait) {
+            this.showPortraitWarning();
+            this.hideDirectionButtons();
+        } else {
+            this.hidePortraitWarning();
+            this.showDirectionButtons();
+        }
     }
 
     private createPortraitWarning(): void {
@@ -2212,7 +2212,6 @@ class CanvasOrientationManager {
             </div>
         `;
 
-        // Canvas'ın üzerine yazdır - z-index yüksek tut
         this.portraitWarning.style.cssText = `
             position: fixed;
             top: 0;
@@ -2259,7 +2258,7 @@ class CanvasOrientationManager {
                 position: fixed;
                 bottom: 10vh;
                 right: 5vw;
-                display: none; /* Başta görünmesin */
+                display: none;
                 flex-direction: column;
                 gap: 20px;
                 z-index: 11000;
@@ -2296,42 +2295,28 @@ class CanvasOrientationManager {
         `;
         document.head.appendChild(style);
 
-        // Event binding
         const upBtn = document.getElementById('btn-up');
         const downBtn = document.getElementById('btn-down');
 
-		downBtn?.addEventListener('touchstart',
-			() =>
-			{
-				const e = new KeyboardEvent('keydown', { key: 's' });
-				document.dispatchEvent(e);
-			}
-		);
+        downBtn?.addEventListener('touchstart', () => {
+            const e = new KeyboardEvent('keydown', { key: 's' });
+            document.dispatchEvent(e);
+        });
 
-		downBtn?.addEventListener('touchend',
-			() =>
-			{
-				const e = new KeyboardEvent('keyup', { key: 's' });
-				document.dispatchEvent(e);
-			}
-		);
+        downBtn?.addEventListener('touchend', () => {
+            const e = new KeyboardEvent('keyup', { key: 's' });
+            document.dispatchEvent(e);
+        });
 
-		upBtn?.addEventListener('touchstart',
-			() =>
-			{
-				const e = new KeyboardEvent('keydown', { key: 'w' });
-				document.dispatchEvent(e);
-			}
-		);
+        upBtn?.addEventListener('touchstart', () => {
+            const e = new KeyboardEvent('keydown', { key: 'w' });
+            document.dispatchEvent(e);
+        });
 
-		upBtn?.addEventListener('touchend',
-			() =>
-			{
-				const e = new KeyboardEvent('keyup', { key: 'w' });
-				document.dispatchEvent(e);
-			}
-		);
-
+        upBtn?.addEventListener('touchend', () => {
+            const e = new KeyboardEvent('keyup', { key: 'w' });
+            document.dispatchEvent(e);
+        });
     }
 
     private showDirectionButtons(): void {
@@ -2475,7 +2460,6 @@ class CanvasOrientationManager {
     private updateCanvasLayout(): void {
         if (!this.canvas) return;
 
-        // Canvas'ı her zaman göster
         this.canvas.style.cssText = `
             position: fixed;
             top: 0;
@@ -2490,7 +2474,6 @@ class CanvasOrientationManager {
             z-index: 1000;
         `;
 
-        // Body ve HTML'i düzenle
         document.body.style.cssText = `
             margin: 0;
             padding: 0;
@@ -2570,6 +2553,7 @@ class CanvasOrientationManager {
         if (btnStyle) btnStyle.remove();
     }
 }
+
 
 export default class extends AView {
 
