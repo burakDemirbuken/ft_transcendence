@@ -2246,8 +2246,30 @@ class CanvasOrientationManager {
         this.directionButtonsContainer = document.createElement('div');
         this.directionButtonsContainer.id = 'direction-buttons';
         this.directionButtonsContainer.innerHTML = `
-            <button id="btn-up" class="direction-btn">▲</button>
-            <button id="btn-down" class="direction-btn">▼</button>
+            <div class="direction-buttons-left">
+                <button id="btn-up" class="direction-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor">
+                        <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM441 335C450.4 344.4 450.4 359.6 441 368.9C431.6 378.2 416.4 378.3 407.1 368.9L320.1 281.9L233.1 368.9C223.7 378.3 208.5 378.3 199.2 368.9C189.9 359.5 189.8 344.3 199.2 335L303 231C312.4 221.6 327.6 221.6 336.9 231L441 335z"/>
+                    </svg>
+                </button>
+                <button id="btn-down" class="direction-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor">
+                        <path d="M320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64zM199 305C189.6 295.6 189.6 280.4 199 271.1C208.4 261.8 223.6 261.7 232.9 271.1L319.9 358.1L406.9 271.1C416.3 261.7 431.5 261.7 440.8 271.1C450.1 280.5 450.2 295.7 440.8 305L337 409C327.6 418.4 312.4 418.4 303.1 409L199 305z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="direction-buttons-right">
+                <button id="btn-right-up" class="direction-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor">
+                        <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM441 335C450.4 344.4 450.4 359.6 441 368.9C431.6 378.2 416.4 378.3 407.1 368.9L320.1 281.9L233.1 368.9C223.7 378.3 208.5 378.3 199.2 368.9C189.9 359.5 189.8 344.3 199.2 335L303 231C312.4 221.6 327.6 221.6 336.9 231L441 335z"/>
+                    </svg>
+                </button>
+                <button id="btn-right-down" class="direction-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor">
+                        <path d="M320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64zM199 305C189.6 295.6 189.6 280.4 199 271.1C208.4 261.8 223.6 261.7 232.9 271.1L319.9 358.1L406.9 271.1C416.3 261.7 431.5 261.7 440.8 271.1C450.1 280.5 450.2 295.7 440.8 305L337 409C327.6 418.4 312.4 418.4 303.1 409L199 305z"/>
+                    </svg>
+                </button>
+            </div>
         `;
         document.body.appendChild(this.directionButtonsContainer);
 
@@ -2257,19 +2279,27 @@ class CanvasOrientationManager {
             #direction-buttons {
                 position: fixed;
                 bottom: 10vh;
+                left: 5vw;
                 right: 5vw;
                 display: none;
-                flex-direction: column;
-                gap: 20px;
+                flex-direction: row;
+                justify-content: space-between;
                 z-index: 11000;
                 pointer-events: auto;
             }
 
+            .direction-buttons-left,
+            .direction-buttons-right {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
             .direction-btn {
-                width: 70px;
-                height: 70px;
+                width: 60px;
+                height: 60px;
                 border-radius: 50%;
-                border: 2px solid #00ffff;
+                border: none;
                 background-color: transparent;
                 color: #00ffff;
                 font-size: 32px;
@@ -2277,6 +2307,16 @@ class CanvasOrientationManager {
                 cursor: pointer;
                 transition: all 0.2s ease;
                 box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+            }
+
+            .direction-btn svg {
+                width: 40px;
+                height: 40px;
+                fill: currentColor;
             }
 
             .direction-btn:active {
@@ -2286,15 +2326,26 @@ class CanvasOrientationManager {
             }
 
             @media (max-width: 768px) {
+                #direction-buttons {
+                    bottom: 5vh;
+                    left: 2vw;
+                    right: 2vw;
+                }
+
                 .direction-btn {
                     width: 60px;
                     height: 60px;
-                    font-size: 28px;
+                }
+
+                .direction-btn svg {
+                    width: 35px;
+                    height: 35px;
                 }
             }
         `;
         document.head.appendChild(style);
 
+        // Event binding - Sol taraf (Player 1)
         const upBtn = document.getElementById('btn-up');
         const downBtn = document.getElementById('btn-down');
 
@@ -2315,6 +2366,30 @@ class CanvasOrientationManager {
 
         upBtn?.addEventListener('touchend', () => {
             const e = new KeyboardEvent('keyup', { key: 'w' });
+            document.dispatchEvent(e);
+        });
+
+        // Event binding - Sağ taraf (Player 2)
+        const rightUpBtn = document.getElementById('btn-right-up');
+        const rightDownBtn = document.getElementById('btn-right-down');
+
+        rightUpBtn?.addEventListener('touchstart', () => {
+            const e = new KeyboardEvent('keydown', { key: 'ArrowUp' });
+            document.dispatchEvent(e);
+        });
+
+        rightUpBtn?.addEventListener('touchend', () => {
+            const e = new KeyboardEvent('keyup', { key: 'ArrowUp' });
+            document.dispatchEvent(e);
+        });
+
+        rightDownBtn?.addEventListener('touchstart', () => {
+            const e = new KeyboardEvent('keydown', { key: 'ArrowDown' });
+            document.dispatchEvent(e);
+        });
+
+        rightDownBtn?.addEventListener('touchend', () => {
+            const e = new KeyboardEvent('keyup', { key: 'ArrowDown' });
             document.dispatchEvent(e);
         });
     }
