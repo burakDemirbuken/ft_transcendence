@@ -75,6 +75,8 @@ async function confirm2FACode(e) {
 			showNotification(result.message || "Change successful!", "success");
 			hideSettingsOverlay();
 
+			// Şifre değiştiyse ve logout gerekliyse
+
 			if (pendingAction === 'password' && result.logout) {
 				showNotification("Password changed! Logging out...", "success");
 				await tokenManager.logout();

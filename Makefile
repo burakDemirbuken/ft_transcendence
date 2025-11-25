@@ -150,6 +150,10 @@ dev-gameserver:
 	@echo "$(BLUE)Development mode for gameserver service$(NC)"
 	@$(COMPOSE_CMD) up -d --build gameserver
 	@$(COMPOSE_CMD) logs -f gameserver
+dev-room:
+	@echo "$(BLUE)Development mode for room service$(NC)"
+	@$(COMPOSE_CMD) up -d --build room
+	@$(COMPOSE_CMD) logs -f room
 dev-profile:
 	@echo "$(BLUE)Development mode for profile service$(NC)"
 	@$(COMPOSE_CMD) up -d --build profile
@@ -166,6 +170,10 @@ dev-static:
 	@echo "$(BLUE)Development mode for static service$(NC)"
 	@$(COMPOSE_CMD) up -d --build static
 	@$(COMPOSE_CMD) logs -f static
+dev-email:
+	@echo "$(BLUE)Development mode for email service$(NC)"
+	@$(COMPOSE_CMD) up -d --build email
+	@$(COMPOSE_CMD) logs -f email
 
 health:
 	@echo "$(GREEN)Health check:$(NC)"

@@ -67,13 +67,11 @@ class AiNetworkManager extends EventEmitter
 		if (difficulty === "custom")
 			data.ai_config.settings = settings;
 
-		console.log('📤 Sending init_game with game_id:', gameId); // Debug için
 		this.sendMessage(JSON.stringify(data));
 	}
 
 	handleMessage(message)
 	{
-		console.log('📥 Received message from AI server:', message); // Debug için
 		switch (message.type)
 		{
 			case "game_initialized":
@@ -97,7 +95,6 @@ class AiNetworkManager extends EventEmitter
 			game_id: gameId,
 			...gameData,
 		};
-		console.log('📤 Sending game_data with game_id:', gameId); // Debug için
 		this.sendMessage(JSON.stringify(message));
 	}
 

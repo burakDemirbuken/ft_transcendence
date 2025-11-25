@@ -100,17 +100,17 @@ class GameService
 		try
 		{
 			this.websocketServer.onClientConnect(
-				(connectionId, query) =>
+				(connectionId, userID, query) =>
 				{
-					if (!query.userID || !query.userName || !query.gameMode || !query.gameId)
+					if (!userID || !query.userName || !query.gameMode || !query.gameId)
 					{
 						console.error('❌ Missing required parameters in query:', query);
 						this.websocketServer.send(connectionId, {type: 'error', payload: 'Missing required parameters: userID and userName'});
 						this.websocketServer.disconnectConnection(connectionId);
 						return;
 					}
-					console.log('🟢 New client id:', query.userID, 'name:', query.userName, 'connectionId:', connectionId);
-					const player = new Player(query.userID, query.userName);
+					console.log('🟢 New client id:', userID, 'name:', query.userName, 'connectionId:', connectionId);
+					const player = new Player(userID, query.userName);
 					this.players.set(query.userID, player);
 					this.connectionId.set(query.userID, connectionId);
 					this.addPlayerToGame(query.gameMode, query.gameId, player);
