@@ -2921,8 +2921,7 @@ private initAIGameListeners(): void {
             const loadingScreen = document.getElementById('loading-screen');
             const gamePage = document.getElementById('game-page');
 
-            // ✅ Leave room if in one
-            if (currentRoomId && roomSocket) {
+            if (roomSocket) {
                 console.log(`Leaving room from loading screen: ${currentRoomId}`);
                 roomSocket.send("leave", { roomId: currentRoomId });
                 currentRoomId = null;
