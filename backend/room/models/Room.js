@@ -6,20 +6,20 @@ export default class Room extends EventEmitter
 	{
 		super();
 		let errorMessage = "";
-		if (gameSettings.paddleWidth <= 0)
-			errorMessage += "Paddle Width cannot be negative"
-		if (gameSettings.paddleHeight <= 0)
-			errorMessage += "Paddle Height cannot be negative"
+		if (gameSettings.paddleWidth <= 0 || gameSettings.paddleWidth >= 100)
+			errorMessage += "Paddle Width must be between 1 and 100"
+		if (gameSettings.paddleHeight <= 50 || gameSettings.paddleHeight >= 600)
+			errorMessage += "Paddle Height must be between 50 and 600"
 		if (gameSettings.paddleSpeed <= 0)
-			errorMessage += "Paddle Speed cannot be negative"
-		if (gameSettings.ballRadius <= 0)
-			errorMessage += "Ball Radius cannot be negative"
+			errorMessage += "Paddle Speed must be positive"
+		if (gameSettings.ballRadius <= 0 || gameSettings.ballRadius >= 50)
+			errorMessage += "Ball Radius must be between 1 and 50"
 		if (gameSettings.ballSpeed <= 0)
-			errorMessage += "Ball speed cannot be negative"
+			errorMessage += "Ball speed must be positive"
 		if (gameSettings.ballSpeedIncrease <= 0)
-			errorMessage += "Ball Speed Increase cannot be negative"
+			errorMessage += "Ball Speed Increase must be between 0 and 100"
 		if (gameSettings.maxScore <= 0)
-			errorMessage += "Max score cannot be negative"
+			errorMessage += "Max score must be positive"
 		if (errorMessage !== "")
 			throw new Error(errorMessage);
 
@@ -61,7 +61,7 @@ export default class Room extends EventEmitter
 
 	startGame(playerId)
 	{
-		
+
 		if (this.host !== playerId)
 			throw new Error('Only the host can start the game');
 		if (this.players.length !== this.maxPlayers)

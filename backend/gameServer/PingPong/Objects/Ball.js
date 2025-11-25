@@ -39,11 +39,11 @@ class Ball extends EventEmitter
 	{
 		if (this.pos.y < 0)
 			this.emit('borderHit', 'top');
-		else if (this.pos.y + this.width > this.canvasSize.height)
+		if (this.pos.y + this.width > this.canvasSize.height)
 			this.emit('borderHit', 'bottom');
-		else if (this.pos.x < 0)
+		if (this.pos.x < 0)
 			this.emit('borderHit', 'left');
-		else if (this.pos.x + this.height > this.canvasSize.width)
+		if (this.pos.x + this.height > this.canvasSize.width)
 			this.emit('borderHit', 'right');
 	}
 
