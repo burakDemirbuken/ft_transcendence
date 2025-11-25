@@ -130,7 +130,7 @@ fclean: clean clean-db
 	@echo "$(RED)Performing full cleanup...$(NC)"
 	@$(COMPOSE_CMD) down --remove-orphans --volumes --rmi --rm all 2>/dev/null || true
 	@docker system prune -a --volumes -f
-	@docker volume rm $(docker volume ls -q)
+	@docker volume prune -a -f
 	@docker network prune -f
 re: fclean all
 
@@ -174,6 +174,10 @@ dev-email:
 	@echo "$(BLUE)Development mode for email service$(NC)"
 	@$(COMPOSE_CMD) up -d --build email
 	@$(COMPOSE_CMD) logs -f email
+dev-aiserver:
+	@echo "$(BLUE)Development mode for aiserver service$(NC)"
+	@$(COMPOSE_CMD) up -d --build aiserver
+	@$(COMPOSE_CMD) logs -f aiserver
 
 health:
 	@echo "$(GREEN)Health check:$(NC)"

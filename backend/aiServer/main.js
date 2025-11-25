@@ -1,6 +1,8 @@
-const WebSocket = require('ws');
+const fastify = require('fastify')({ logger: false });
+const websocketPlugin = require('@fastify/websocket');
 const { v4: uuidv4 } = require('uuid');
-const PingPongAI = require('./ai_player'); // veya './PingPongAI' - dosya adınıza göre
+const PingPongAI = require('./ai_player');
+
 class GameAIManager {
     /**Oyun AI'larını yöneten sınıf*/
     constructor() {
@@ -139,60 +141,68 @@ function getAIDecision(aiPlayer, gameData) {
 // Global AI Manager
 const aiManager = new GameAIManager();
 
-async function handleClient(ws, req) {
-    /**WebSocket istemcisini işle*/
-    const clientId = `${req.socket.remoteAddress}:${req.socket.remotePort}:${Date.now()}`;
-    console.log(`Yeni bağlantı: ${clientId}`);
+// Fastify WebSocket plugin'ini kaydet
+fastify.register(websocketPlugin);
 
-    ws.on('message', async (message) => {
-        try {
-            // JSON'u parse et
-            const data = JSON.parse(message.toString());
-            const messageType = data.type || 'game_data';
+fastify.addHook('onRequest', async (request, reply) => {
+	console.log("request:", request);
+});
+// WebSocket endpoint
+fastify.register(async function (fastify) {
+    fastify.get('/', { websocket: true }, (connection, req) => {
+        const clientId = `${req.socket.remoteAddress}:${req.socket.remotePort}:${Date.now()}`;
+        console.log(`Yeni bağlantı: ${clientId}`);
 
-            if (messageType === 'init_game') {
-                // Oyun başlatma mesajı
-                await handleInitGame(ws, clientId, data);
-            } else if (messageType === 'join_game') {
-                // Mevcut oyuna katılma mesajı
-                await handleJoinGame(ws, clientId, data);
-            } else if (messageType === 'game_data') {
-                // Normal oyun verisi
-                await handleGameData(ws, clientId, data);
-            } else {
-                // Eski format desteği (geriye uyumluluk)
-                if (data.ai_config || data.aiConfig) {
-                    // İlk mesaj, oyun başlatma
-                    await handleLegacyInit(ws, clientId, data);
-                } else {
+        connection.socket.on('message', async (message) => {
+            try {
+                // JSON'u parse et
+                const data = JSON.parse(message.toString());
+                const messageType = data.type || 'game_data';
+
+                if (messageType === 'init_game') {
+                    // Oyun başlatma mesajı
+                    await handleInitGame(connection.socket, clientId, data);
+                } else if (messageType === 'join_game') {
+                    // Mevcut oyuna katılma mesajı
+                    await handleJoinGame(connection.socket, clientId, data);
+                } else if (messageType === 'game_data') {
                     // Normal oyun verisi
-                    await handleGameData(ws, clientId, data);
+                    await handleGameData(connection.socket, clientId, data);
+                } else {
+                    // Eski format desteği (geriye uyumluluk)
+                    if (data.ai_config || data.aiConfig) {
+                        // İlk mesaj, oyun başlatma
+                        await handleLegacyInit(connection.socket, clientId, data);
+                    } else {
+                        // Normal oyun verisi
+                        await handleGameData(connection.socket, clientId, data);
+                    }
+                }
+            } catch (error) {
+                if (error instanceof SyntaxError) {
+                    console.log(`JSON parse hatası: ${error.message}`);
+                    connection.socket.send(JSON.stringify({ error: "Invalid JSON" }));
+                } else {
+                    console.log(`İşlem hatası: ${error.message}`);
+                    console.error(error.stack);
+                    connection.socket.send(JSON.stringify({ error: error.message }));
                 }
             }
-        } catch (error) {
-            if (error instanceof SyntaxError) {
-                console.log(`JSON parse hatası: ${error.message}`);
-                ws.send(JSON.stringify({ error: "Invalid JSON" }));
-            } else {
-                console.log(`İşlem hatası: ${error.message}`);
-                console.error(error.stack);
-                ws.send(JSON.stringify({ error: error.message }));
-            }
-        }
-    });
+        });
 
-    ws.on('close', () => {
-        console.log(`Bağlantı kapandı: ${clientId}`);
-        // Client ayrıldığında temizlik yap
-        aiManager.removeClient(clientId);
-        aiManager.cleanupEmptyGames();
-    });
+        connection.socket.on('close', () => {
+            console.log(`Bağlantı kapandı: ${clientId}`);
+            // Client ayrıldığında temizlik yap
+            aiManager.removeClient(clientId);
+            aiManager.cleanupEmptyGames();
+        });
 
-    ws.on('error', (error) => {
-        console.log(`WebSocket hatası: ${error.message}`);
-        console.error(error.stack);
+        connection.socket.on('error', (error) => {
+            console.log(`WebSocket hatası: ${error.message}`);
+            console.error(error.stack);
+        });
     });
-}
+});
 
 async function handleInitGame(ws, clientId, data) {
     /**Yeni oyun başlatma*/
@@ -433,54 +443,63 @@ async function handleLegacyInit(ws, clientId, data) {
 console.log("==> main.js başlatıldı");
 console.log("==> Argümanlar:", process.argv);
 
+// Sunucuyu başlat
+const start = async () => {
+    try {
+        const port = process.env.AI_SERVER_PORT || 3003;
+        const host = process.env.AI_SERVER_HOST || '0.0.0.0';
+
+        await fastify.listen({ port: parseInt(port), host: host });
+        
+        console.log("\n" + "=".repeat(80));
+        console.log("🚀 AI SERVER BAŞLATILDI");
+        console.log("=".repeat(80));
+        console.log(`📡 WebSocket: ws://${host}:${port}/ws`);
+        console.log(`🏥 Health Check: http://${host}:${port}/health`);
+        console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log("=".repeat(80) + "\n");
+    } catch (err) {
+        fastify.log.error(err);
+        process.exit(1);
+    }
+};
+
+// Graceful shutdown
+const closeGracefully = async (signal) => {
+    console.log(`\n⚠️  ${signal} sinyali alındı, sunucu kapatılıyor...`);
+    
+    // Tüm bağlantıları temizle
+    aiManager.clientGames.clear();
+    aiManager.gameAIs.clear();
+    
+    await fastify.close();
+    console.log('✅ Sunucu başarıyla kapatıldı');
+    process.exit(0);
+};
+
+process.on('SIGINT', () => closeGracefully('SIGINT'));
+process.on('SIGTERM', () => closeGracefully('SIGTERM'));
+
+// Hata yakalama
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+    process.exit(1);
+});
+
 // Ana kullanım
 if (require.main === module) {
-    console.log("==> __main__ bloğuna girildi");
-
-    const args = process.argv.slice(2);
-    
-    if (args.includes('--websocket') || args.length === 0) {
-        // WebSocket modu
-        console.log("WebSocket sunucusu başlatılıyor...");
-        console.log("Adres: ws://localhost:3003");
-
-        const wss = new WebSocket.Server({ 
-            port: 3003,
-            host: '0.0.0.0'
-        });
-
-        console.log("WebSocket sunucusu çalışıyor. Bağlantı bekleniyor...");
-
-        wss.on('connection', handleClient);
-
-        wss.on('error', (error) => {
-            console.error('WebSocket sunucu hatası:', error);
-        });
-
-        // Graceful shutdown
-        process.on('SIGINT', () => {
-            console.log('\nSunucu kapatılıyor...');
-            wss.close(() => {
-                console.log('WebSocket sunucusu kapatıldı');
-                process.exit(0);
-            });
-        });
-
-        process.on('SIGTERM', () => {
-            console.log('\nSunucu kapatılıyor...');
-            wss.close(() => {
-                console.log('WebSocket sunucusu kapatıldı');
-                process.exit(0);
-            });
-        });
-    }
+    start();
 }
 
-// // Export (eğer modül olarak kullanılacaksa)
-// module.exports = {
-//     GameAIManager,
-//     aiManager,
-//     handleClient,
-//     convertDecisionToDirection,
-//     getAIDecision
-// };
+// Export (eğer modül olarak kullanılacaksa)
+module.exports = {
+    fastify,
+    aiManager,
+    GameAIManager,
+    convertDecisionToDirection,
+    getAIDecision
+};
