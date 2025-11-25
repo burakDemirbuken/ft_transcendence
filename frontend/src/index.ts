@@ -63,12 +63,18 @@ const router = async function(page:string) {
 
 	const route = routes[page];
 	if (route) {
-		view = new route.view();
-		view.setStylesheet();
-		content.innerHTML = await view.getHtml();
-		view.setDynamicContent();
-		I18n.loadLanguage();
-		view.setEventHandlers();
+		try {
+			view = new route.view();
+			view.setStylesheet();
+			content.innerHTML = await view.getHtml();
+			view.setDynamicContent();
+			I18n.loadLanguage();
+			view.setEventHandlers();
+		} catch (error) {
+			showNotification(`System Error: ${error.message}`);
+			document.title = "Error";
+			content.innerHTML = "<h2>Error</h2><p>There was an error loading the page.</p>";
+		}
 	} else {
 		document.title = "Page Not Found";
 		content.innerHTML = "<h2>404</h2><p>Page not found.</p>";
