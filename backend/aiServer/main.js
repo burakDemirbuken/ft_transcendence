@@ -1,6 +1,5 @@
 const WebSocket = require('ws');
 const { v4: uuidv4 } = require('uuid');
-asasdasdas
 const PingPongAI = require('./ai_player'); // veya './PingPongAI' - dosya adınıza göre
 class GameAIManager {
     /**Oyun AI'larını yöneten sınıf*/

@@ -126,19 +126,19 @@ class PingPongAI {
             } else if (this.difficulty === "impossible") {
                 this.reactionSpeed = 1.0;
                 this.predictionAccuracy = 1.0;
-                this.prepareDistance = 600;
-                this.freezeDistance = 100;
+                this.prepareDistance = 700;
+                this.freezeDistance = 10;
                 this.errorRate = 0.0;
-                this.learningRate = 0.0;
+                this.learningRate = 1.0;
                 this.targetWinRate = 1.0;
                 this.loseProbability = 0.0;
-                this.maxConsecutiveWins = 100;
+                this.maxConsecutiveWins = 1000;
             }
 
             // Varsayılan özellikler
-            this.rageEnabled = false;
+            this.rageEnabled = true;
             this.fatigueEnabled = false;
-            this.focusEnabled = false;
+            this.focusEnabled = true;
             this.adaptiveEnabled = false;
             this.predictionLines = false;
         }
