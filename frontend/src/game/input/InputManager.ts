@@ -20,52 +20,51 @@ class InputManager
 		this.initEventListeners();
 	}
 
+	keyDownEvent(e: KeyboardEvent)
+	{
+		let key = e.key
+		if (key.length === 1)
+			key = key.toLowerCase();
+		if (this.pressedKeys.has(key))
+		{
+			if (this.isRegisteredKey(key))
+				e.preventDefault();
+			return;
+		}
+
+		this.pressedKeys.add(key);
+
+		if (this.isRegisteredKey(key))
+			e.preventDefault();
+
+		const callback = this.keyDownCallbacks.get(key);
+		if (callback)
+			callback(e);
+	}
+
+	keyUpEvent(e: KeyboardEvent)
+	{
+		let key = e.key;
+		if (key.length === 1)
+			key = key.toLowerCase();
+		this.pressedKeys.delete(key);
+		const callback = this.keyUpCallbacks.get(key);
+		if (callback)
+			callback(e);
+	}
+
+	blurEvent()
+	{
+		this.pressedKeys.clear();
+	}
+
 	initEventListeners(): void
 	{
-		document.addEventListener('keydown',
-			(e: KeyboardEvent) =>
-			{
-				let key = e.key
-				if (key.length === 1)
-					key = key.toLowerCase();
-				if (this.pressedKeys.has(key))
-				{
-					if (this.isRegisteredKey(key))
-						e.preventDefault();
-					return;
-				}
+		document.addEventListener('keydown', this.keyDownEvent.bind(this));
 
-				this.pressedKeys.add(key);
+		document.addEventListener('keyup', this.keyUpEvent.bind(this));
 
-				if (this.isRegisteredKey(key))
-					e.preventDefault();
-
-				const callback = this.keyDownCallbacks.get(key);
-				if (callback)
-					callback(e);
-			}
-		);
-
-		document.addEventListener('keyup',
-			(e: KeyboardEvent) =>
-			{
-
-				let key = e.key;
-				if (key.length === 1)
-					key = key.toLowerCase();
-				this.pressedKeys.delete(key);
-				const callback = this.keyUpCallbacks.get(key);
-				if (callback)
-					callback(e);
-			}
-		);
-
-		window.addEventListener('blur',
-			() =>
-			{
-				this.pressedKeys.clear();
-			}
-		);
+		window.addEventListener('blur', this.blurEvent.bind(this));
 	}
 
 	isRegisteredKey(key: string): boolean
@@ -89,53 +88,12 @@ class InputManager
 		if (onUp) this.onKeyUp(key, onUp);
 	}
 
-	isKeyPressed(key: string): boolean
-	{
-		return this.pressedKeys.has(key);
-	}
-
-	isAnyKeyPressed(keys: string[]): boolean
-	{
-		return keys.some(key => this.pressedKeys.has(key));
-	}
-
-	areAllKeysPressed(keys: string[]): boolean
-	{
-		return keys.every(key => this.pressedKeys.has(key));
-	}
-
-	removeKeyDown(key: string): void
-	{
-		this.keyDownCallbacks.delete(key);
-	}
-
-	removeKeyUp(key: string): void
-	{
-		this.keyUpCallbacks.delete(key);
-	}
-
-	clearCallbacks(): void
-	{
-		this.keyDownCallbacks.clear();
-		this.keyUpCallbacks.clear();
-	}
-
-	getActiveKeys(): string[]
-	{
-		return Array.from(this.pressedKeys);
-	}
-
-	getRegisteredKeys(): RegisteredKeys
-	{
-		return {
-			down: Array.from(this.keyDownCallbacks.keys()),
-			up: Array.from(this.keyUpCallbacks.keys())
-		};
-	}
-
 	destroy(): void
 	{
 		this.pressedKeys.clear();
+		document.removeEventListener("keydown", this.keyDownEvent);
+		document.removeEventListener("keyup", this.keyUpEvent);
+		document.removeEventListener("blur", this.blurEvent);
 		this.keyDownCallbacks.clear();
 		this.keyUpCallbacks.clear();
 	}

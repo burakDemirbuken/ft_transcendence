@@ -52,8 +52,6 @@ class App
 	async start(data: StartData): Promise<void>
 	{
 		let initData = null;
-		console.log('🚀 Starting app with data:', JSON.stringify(data, null, 2));
-
 		initData = {
 			canvasId: "renderCanvas",
 			gameMode: data.gameMode,
@@ -250,7 +248,6 @@ class App
 
 	async loadGame(gameConfig: GameConfig): Promise<void>
 	{
-		console.log('🎮 Loading game with config:', gameConfig);
 		await this.gameRenderer.initialize(gameConfig).then(
 			() =>
 			{
@@ -276,14 +273,9 @@ class App
 
 	destroy(): void
 	{
-		console.log('🧹 App resources cleaned up');
 		this.gameRenderer.reset();
 		this.webSocketClient.disconnect();
-		if (this.inputManager)
-		{
-			this.inputManager.destroy();
-			this.inputManager = null;
-		}
+		this.inputManager.destroy();
 	}
 }
 

@@ -5,6 +5,24 @@ export default class Room extends EventEmitter
 	constructor(gameSettings)
 	{
 		super();
+		let errorMessage = "";
+		if (gameSettings.paddleWidth <= 0)
+			errorMessage += "Paddle Width cannot be negative"
+		if (gameSettings.paddleHeight <= 0)
+			errorMessage += "Paddle Height cannot be negative"
+		if (gameSettings.paddleSpeed <= 0)
+			errorMessage += "Paddle Speed cannot be negative"
+		if (gameSettings.ballRadius <= 0)
+			errorMessage += "Ball Radius cannot be negative"
+		if (gameSettings.ballSpeed <= 0)
+			errorMessage += "Ball speed cannot be negative"
+		if (gameSettings.ballSpeedIncrease <= 0)
+			errorMessage += "Ball Speed Increase cannot be negative"
+		if (gameSettings.maxScore <= 0)
+			errorMessage += "Max score cannot be negative"
+		if (errorMessage !== "")
+			throw new Error(errorMessage);
+
 		this.gameMode = null;
 		this.gameType = 'classic';
 		this.status = 'waiting'; // "waiting", "in_game", "completed", "startable"
@@ -35,10 +53,7 @@ export default class Room extends EventEmitter
 		this.status = "waiting";
 		this.players = this.players.filter(p => p.id !== playerId);
 		if (this.status === 'waiting' || this.status == "startable")
-		{
-			console.log('Removing from participants:', playerId);
 			this.participants = this.participants.filter(p => p.id !== playerId);
-		}
 		if (this.host === playerId)
 			this.host = this.players[0]?.id;
 
