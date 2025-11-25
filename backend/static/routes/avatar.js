@@ -25,7 +25,7 @@ export default async function avatarRoutes(fastify) {
 		}
 
 		const randomNamefromFileName = await fastify.renameFile(data.filename)
-		const filePath = path.join(fastify.cwd, "database/avatars", randomNamefromFileName);
+		const filePath = path.join(fastify.cwd, "database/avatars", randomNamefromFileName)
 
 		try {
 			await pipeline(data.file, fs.createWriteStream(filePath))
