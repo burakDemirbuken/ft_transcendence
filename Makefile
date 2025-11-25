@@ -173,6 +173,10 @@ dev-email:
 	@echo "$(BLUE)Development mode for email service$(NC)"
 	@$(COMPOSE_CMD) up -d --build email
 	@$(COMPOSE_CMD) logs -f email
+dev-aiserver:
+	@echo "$(BLUE)Development mode for aiserver service$(NC)"
+	@$(COMPOSE_CMD) up -d --build aiserver
+	@$(COMPOSE_CMD) logs -f aiserver
 
 health:
 	@echo "$(GREEN)Health check:$(NC)"
