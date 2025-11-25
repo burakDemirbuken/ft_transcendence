@@ -1,5 +1,7 @@
 import Player from '../models/Player.js';
 
+const connections = [];
+
 export default async function clientConnectionSocket(fastify) {
 /* 	setInterval(() => {
 		console.log(`connected clients: ${fastify.websocketServer.clients.size}`);
@@ -10,6 +12,18 @@ export default async function clientConnectionSocket(fastify) {
 	},
 	(connection, req) => {
 		const userID = fastify.getDataFromToken(req)?.username ?? null;
+		if (!userID) {
+			console.error('❌ Unauthorized WebSocket connection attempt. Closing connection.');
+			connection.socket.close(1008, 'Unauthorized');
+			return;
+		}
+		if (connections.includes(userID))
+		{
+			console.error(`❌ User ${userID} is already in a room. Closing connection.`);
+			connection.socket.close(1008, 'Already in room');
+			return;
+		}
+		connections.push(userID);
 		const currentPlayer = new Player(userID, connection.socket, req.query.userName || 'Anonymous');
 
 
@@ -25,10 +39,19 @@ export default async function clientConnectionSocket(fastify) {
 
 		connection.socket.on('close', () => {
 			fastify.roomManager.leaveRoom(currentPlayer.id)
+			const index = connections.indexOf(userID);
+			if (index > -1) {
+				connections.splice(index, 1);
+			}
 		});
 
 		connection.socket.on('error', (error) => {
 			fastify.log.error('WebSocket error:', error);
+			fastify.roomManager.leaveRoom(currentPlayer.id);
+			const index = connections.indexOf(userID);
+			if (index > -1) {
+				connections.splice(index, 1);
+			}
 		});
 	});
 }

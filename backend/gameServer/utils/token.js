@@ -5,6 +5,7 @@ export default function getDataFromToken(request, fastify)
 		return null
 	try {
 		const decoded = fastify.jwt.verify(token)
+		console.log(`decode: ${JSON.stringify(decoded)}`)
 		return decoded
 	} catch (err) {
 		request.log.error(`Token verification failed: ${err.message}`)

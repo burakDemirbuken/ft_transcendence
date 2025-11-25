@@ -17,6 +17,13 @@ export default class AIRoom extends Room
 
 	}
 
+	startGame(playerId)
+	{
+		if (aiNetwork.isConnected() === false)
+			throw new Error('AI server unavailable');
+		return super.startGame(playerId);
+	}
+
 	getState()
 	{
 		const baseState = super.getState();

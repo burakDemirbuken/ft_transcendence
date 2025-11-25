@@ -10,8 +10,6 @@ export default class TournamentRoom extends Room
 		this.gameType = 'tournament';
 		this.gameMode = 'tournament';
 		this.tournamentName = tournamentSettings.name || 'deafult_tournament';
-		console.log('Creating TournamentRoom with settings:', JSON.stringify(tournamentSettings, null, 2));
-		console.log('name:', this.tournamentName);
 		this.tournamentSettings = tournamentSettings;
 		this.maxPlayers = tournamentSettings.maxPlayers || 8;
 		this.spectators = [];
@@ -66,7 +64,7 @@ export default class TournamentRoom extends Room
 			this.spectators = this.spectators.filter(s => s.id !== playerId);
 		else
 			super.removePlayer(playerId);
-		if ((this.status === "waiting" || this.status === "ready2match") && this.players.length < this.maxPlayers)
+		if ((this.status === "waiting" || this.status === "ready2match" || this.status === "ready2start") && this.players.length < this.maxPlayers)
 			this.status = 'waiting';
 	}
 
@@ -196,8 +194,9 @@ export default class TournamentRoom extends Room
 
 	matchMake()
 	{
-		if (this.status !== 'ready2match')
-			return this.emit('error', new Error(`Tournament is not in waiting state, current status: ${this.status}`));
+		if (this.players.length !== this.maxPlayers)
+			throw new Error("Match failed: Insufficient number of contacts");
+		this.currentMatches = [];
 
 		function shuffle(array)
 		{

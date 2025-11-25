@@ -1,18 +1,22 @@
 // for gameserver websocket
-
 export default async function gameServerConnectionSocket(fastify) {
 	fastify.get("/ws-room/server", { // "ws-room/server" olabilir
 		websocket: true
 	},
 	(connection, req) => {
 		const socket = connection.socket;
+		fastify.roomManager.isConnectServer = true;
+		connection.socket.on('close', () => {
+			fastify.roomManager.isConnectServer = false;
+		});
 		connection.socket.on('message', (message) => {
 			try
 			{
 				const data = JSON.parse(message.toString());
 				fastify.roomManager.handleServerRoomMessage(data.type, data.payload);
 			}
-			catch (error) {
+			catch (error)
+			{
 				console.error('❌ Failed to parse WebSocket message:', error);
 				console.error('Raw message data:', message.toString());
 			}
@@ -25,3 +29,4 @@ export default async function gameServerConnectionSocket(fastify) {
 
 	})
 }
+
