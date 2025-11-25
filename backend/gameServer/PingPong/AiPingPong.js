@@ -185,7 +185,6 @@ class AIPingPong extends PingPong
 		// AI kararlarını dinle ve hedef Y'yi kaydet
 		AiNetwork.on(`aiGame${this.id}_target`, (targetY) =>
 		{
-			console.log('🎯 AI target received for game', this.id, ':', targetY); // DEBUG
 			if (typeof targetY === 'number')
 				this._lastTargetY = targetY;
 		});

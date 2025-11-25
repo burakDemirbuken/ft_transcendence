@@ -140,86 +140,17 @@ function storeVerificationToken(email, type = 'email_verification')
     return (token);
 }
 
-function storeVerificationCode(email, type = '2fa')
+function storeVerificationCode(email, data = {})
 {
     const code = generateVerificationCode();
-    const expires = new Date(Date.now() + 5 * 60 * 1000);
+    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 dakika
     tempStorage.set(email,
     {
         code,
         expires,
-        type
+        ...data  // Data içindeki tüm alanları yay (type, newPassword, userId vs.)
     });
     return (code);
-}
-
-async function sendEmailChangeRequest(email, username, token)
-{
-	const response = await fetch(`http://email:3005/send-email-change`,
-    {
-		method: 'POST',
-		headers:
-		{
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify
-        ({
-			to: email,
-			username: username,
-			changeUrl: `https://${process.env.HOST_IP}:3030/api/auth/change-email?token=${token}`,
-			token: token
-		})
-	});
-
-	if (!response.ok)
-		throw new Error(`Email service error: ${response.status}`);
-	return (response.json());
-}
-
-async function sendPasswordChangeRequest(email, username, token)
-{
-	const response = await fetch(`http://email:3005/send-password-change`,
-    {
-		method: 'POST',
-		headers:
-		{
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify
-        ({
-			to: email,
-			username: username,
-			changeUrl: `https://${process.env.HOST_IP}:3030/api/auth/change-password?token=${token}`,
-			token: token
-		})
-	});
-
-	if (!response.ok)
-		throw new Error(`Email service error: ${response.status}`);
-	return (response.json());
-}
-
-async function sendNewEmailVerification(email, username, token)
-{
-	const response = await fetch(`http://email:3005/send-new-email-verification`,
-    {
-		method: 'POST',
-		headers:
-		{
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify
-        ({
-			to: email,
-			username: username,
-			verificationUrl: `https://${process.env.HOST_IP}:3030/api/auth/verify-new-email?token=${token}`,
-			token: token
-		})
-	});
-
-	if (!response.ok)
-		throw new Error(`Email service error: ${response.status}`);
-	return (response.json());
 }
 
 export default
@@ -229,9 +160,6 @@ export default
 	sendVerificationEmail,
 	send2FAEmail,
 	sendLoginNotification,
-	sendEmailChangeRequest,
-	sendPasswordChangeRequest,
-	sendNewEmailVerification,
 	storeVerificationToken,
 	storeVerificationCode,
 	tempStorage

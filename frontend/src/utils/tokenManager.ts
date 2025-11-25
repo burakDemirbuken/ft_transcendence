@@ -70,6 +70,25 @@ class TokenManager {
 	 */
 	private async performTokenCheck(): Promise<boolean> {
 		try {
+			// Önce /me ile kullanıcı bilgisini kontrol et
+			const meResponse = await fetch(`${this.API_BASE}/me`, {
+				method: 'GET',
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+
+			// /me başarılıysa token geçerli
+			if (meResponse.ok) {
+				const meData = await meResponse.json();
+				if (meData.success) {
+					this.tokenInfo.user = meData.user;
+					return true;
+				}
+			}
+
+			// /me başarısızsa auto-refresh dene
 			const response = await fetch(`${this.API_BASE}/auto-refresh`, {
 				method: 'POST',
 				credentials: 'include',

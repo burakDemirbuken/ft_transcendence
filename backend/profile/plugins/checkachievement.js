@@ -2,63 +2,40 @@ import fp from 'fastify-plugin'
 import { getUserMatchHistory, getLastSevenDaysMatches } from '../routes/gamedata.js'
 
 export default fp(async (fastify) => {
-	async function checkAchievements(userId, t) {
-		const { Achievement, Stat } = fastify.sequelize.models
-
-		const [ userStat, userAchievement ] = await Promise.all([
-			Stat.findOne({
-				where: { userId: userId },
-				transaction: t
-			}),
-			Achievement.findOne({
-				where: { userId: userId },
-				transaction: t
-			})
-		])
-		if (!userStat || !userAchievement) {
-			throw new Error('userStat or userAchievement not found for user')
+	async function checkAchievements(player = null) {
+		if (!player) {
+			throw new Error('Profile not found for user')
 		}
 
 		const updates = {}
-		if (!userAchievement.fiveHundredWins && userStat.gamesWon >= 500) {
+		if (!player.Achievement.fiveHundredWins && player.Stat.gamesWon >= 500) {
 			updates.fiveHundredWins = new Date()
 		}
-		else if (!userAchievement.hundredWins && userStat.gamesWon >= 100) {
+		else if (!player.Achievement.hundredWins && player.Stat.gamesWon >= 100) {
 			updates.hundredWins = new Date()
 		}
-		else if (!userAchievement.firstWin && userStat.gamesWon >= 1) {
+		else if (!player.Achievement.firstWin && player.Stat.gamesWon >= 1) {
 			updates.firstWin = new Date()
 		}
 
-		if (!userAchievement.twentyFiveTenStreak && userStat.gameLongestStreak >= 25) {
+		if (!player.Achievement.twentyFiveTenStreak && player.Stat.gameLongestStreak >= 25) {
 			updates.twentyFiveTenStreak = new Date()
 		}
-		else if (!userAchievement.firstTenStreak && userStat.gameLongestStreak >= 10) {
+		else if (!player.Achievement.firstTenStreak && player.Stat.gameLongestStreak >= 10) {
 			updates.firstTenStreak = new Date()
 		}
 
-		if (!userAchievement.lessThanThreeMin && userStat.gameMinDuration > 0 && userStat.gameMinDuration < 180000) {
+		if (!player.Achievement.lessThanThreeMin && player.Stat.gameMinDuration > 0 && player.Stat.gameMinDuration < 180000) {
 			updates.lessThanThreeMin = new Date()
 		}
 
 		if (Object.keys(updates).length > 0) {
-			await userAchievement.update(updates, { transaction: t })
+			return updates
 		}
 	}
 
-	async function getAchievementProgress(userId) {
-		const { Achievement, Stat } = fastify.sequelize.models
-
-		const [stats, achievements] = await Promise.all([
-			Stat.findOne({
-				where: { userId: userId }
-			}),
-			Achievement.findOne({
-				where: { userId: userId }
-			})
-		])
-
-		if (!stats || !achievements) {
+	async function getAchievementProgress(achievements = null) {
+		if (!achievements) {
 			throw new Error('Stats or Achievements not found for user')
 		}
 
@@ -84,67 +61,25 @@ export default fp(async (fastify) => {
 		})
 	}
 
-	async function updateGameStreak(userId, isWin, t) {
-		const { Stat } = fastify.sequelize.models
-
-		const userStat = await Stat.findOne({
-			where: { userId: userId },
-			transaction: t,
-		})
-
-		if (!userStat) {
-			throw new Error('Stat not found for user')
-		}
-
-		let newStreak = userStat.gameCurrentStreak || 0
-
-		if (isWin) {
-			newStreak += 1
-		} else {
-			newStreak = 0
-		}
-
-		// En uzun streak'i güncelle
-		const longestStreak = Math.max(
-			userStat.gameLongestStreak || 0,
-			newStreak
-		)
-
-		await userStat.update({
-			gameCurrentStreak: newStreak,
-			gameLongestStreak: longestStreak
-		}, { transaction: t })
-
-		return { gameCurrentStreak: newStreak, gameLongestStreak: longestStreak }
-	}
-
 	fastify.decorate('checkAchievements', checkAchievements)
 	fastify.decorate('getAchievementProgress', getAchievementProgress)
-	fastify.decorate('updateGameStreak', updateGameStreak)
 
 	function nRealcalculate(xp, baseXP = 100, growthFactor = 1.25) {
-		if (xp < 0)
-			return 0;
+		const A = (xp * (growthFactor - 1)) / baseXP + 1
+		const level = Math.floor(Math.log(A) / Math.log(growthFactor)) + 1
 
-		let level = 0;
-		let currentXP = 0;
-
-		while (currentXP <= xp) {
-			level++;
-			currentXP += baseXP * Math.pow(growthFactor, level - 1);
-		}
-
-		return level;
+		return level
 	}
 
 	function levelCalculate(xp, baseXP = 100, growthFactor = 1.25) {
-		if (xp < 0)
+		if (xp <= 0)
 			return { level: 0, currentXP: 0, xpForNextLevel: baseXP }
 
 		const nReal = nRealcalculate(xp, baseXP, growthFactor)
 		const level = Math.max(1, Math.floor(nReal))
 
-		const S = (level) => Math.floor(baseXP * (Math.pow(growthFactor, level) - 1) / (growthFactor - 1))
+		const coefficient = baseXP / (growthFactor - 1)
+		const S = (level) => Math.floor(coefficient * (Math.pow(growthFactor, level) - 1))
 		const minXp = S(level - 1)
 		const maxXp = S(level) - 1
 		const progressRatio = ((xp - minXp) / (maxXp - minXp)) * 100 || 0

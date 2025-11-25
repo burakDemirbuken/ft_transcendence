@@ -12,21 +12,34 @@ export default async function profileRoute(fastify) {
 
 			const userProfile = await fastify.sequelize.models.Profile.findOne({
 				where: { userName: userName },
+				include: [
+					{
+						model: fastify.sequelize.models.Stat,
+						attributes: {
+							exclude: ['id', 'userId', 'createdAt', 'updatedAt']
+						}
+					},
+					{
+						model: fastify.sequelize.models.Achievement,
+						attributes: {
+							exclude: ['id', 'userId', 'createdAt', 'updatedAt']
+						}
+					}],
 				attributes: ['id', 'userName', 'displayName', 'avatarUrl']
 			})
 
+			const profileData = userProfile?.toJSON()
+			console.log('Retrieved profile data:', profileData)
 			if (!userProfile && userProfile === undefined) {
 				return reply.code(404).send({ message: `User not found: ${userName}` })
 			}
 
 			const [ userAchievementsProgress, userStats ] = await Promise.all([
-				fastify.getAchievementProgress(userProfile.id),
+				fastify.getAchievementProgress(profileData.Achievement),
 				fastify.statCalculate(userProfile.id)
 			])
-
-			const profileData = userProfile.toJSON()
 			delete profileData.id
-
+			console.log('Retrieved profile for userName:', profileData)
 			return reply.send({
 				profile: profileData,
 				achievements: userAchievementsProgress,
