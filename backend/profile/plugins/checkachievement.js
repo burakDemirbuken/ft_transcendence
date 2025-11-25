@@ -1,4 +1,4 @@
-import fp from 'fastify-plugin'
+ import fp from 'fastify-plugin'
 import { getUserMatchHistory, getLastSevenDaysMatches } from '../routes/gamedata.js'
 
 export default fp(async (fastify) => {
@@ -90,9 +90,9 @@ export default fp(async (fastify) => {
 		}
 	}
 
-	async function statCalculate(userId) {
+	async function statCalculate(userId, profile = null) {
 		const { Stat, Profile } = fastify.sequelize.models
-
+		console.log('Calculating stats for userId:', profile)
 		const stats = await Stat.findOne({
 			where: { userId: userId },
 			attributes: [
@@ -138,13 +138,13 @@ export default fp(async (fastify) => {
 			fastify.log.warn('Error getting last seven days matches:', error.message)
 		}
 
-		const totalDurationSeconds = matchData.totalDuration
-		const fastestWinDuration = matchData.fastestWinDuration || 0
-		const longestMatchDuration = matchData.longestMatchDuration || 0
+		const totalDurationSeconds = profile.Stat.gameTotalDuration || 0
+		const fastestWinDuration = profile.Stat.fastestWinDuration || 0
+		const longestMatchDuration = profile.Stat.longestMatchDuration || 0
 
 		return ({
 			...stats.toJSON(),
-			...levelCalculate(stats.xp),
+			...levelCalculate(profile.Stat.xp),
 			gameTotalDuration: totalDurationSeconds,
 			gameAverageDuration: stats.gamesPlayed > 0 ? (totalDurationSeconds / stats.gamesPlayed) : 0,
 			winRate: stats.gamesPlayed > 0 ? (stats.gamesWon / stats.gamesPlayed) * 100 : 0,

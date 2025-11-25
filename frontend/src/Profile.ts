@@ -1526,6 +1526,7 @@ async function setTextStats(user: any) {
 	safeSetId("mwon", user.stats.gamesWon);
 	safeSetId("mlost", user.stats.gamesLost);
 	safeSetId("mdur-average", formatDuration(user.stats.gameAverageDuration));
+	console.log("Total Duration (seconds):", user.stats.gameTotalDuration);
 	safeSetId("total-play-time", formatDuration(user.stats.gameTotalDuration));
 
 	// Win Streak

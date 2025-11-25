@@ -28,18 +28,17 @@ export default async function profileRoute(fastify) {
 				attributes: ['id', 'userName', 'displayName', 'avatarUrl']
 			})
 
-			const profileData = userProfile?.toJSON()
-			console.log('Retrieved profile data:', profileData)
-			if (!userProfile && userProfile === undefined) {
+			const profileData = userProfile?.toJSON() ?? null
+			if (!profileData) {
 				return reply.code(404).send({ message: `User not found: ${userName}` })
 			}
 
 			const [ userAchievementsProgress, userStats ] = await Promise.all([
 				fastify.getAchievementProgress(profileData.Achievement),
-				fastify.statCalculate(userProfile.id)
+				fastify.statCalculate(userProfile.id, profileData)
 			])
 			delete profileData.id
-			console.log('Retrieved profile for userName:', profileData)
+
 			return reply.send({
 				profile: profileData,
 				achievements: userAchievementsProgress,
