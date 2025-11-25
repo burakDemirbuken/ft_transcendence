@@ -8,6 +8,9 @@ import WebSocketClient from '../dist/game/network/WebSocketClient.js';
 import gameConfig from '../dist/game/json/GameConfig.js';
 import aiConfig from '../dist/game/json/AiConfig.js';
 import tournamentConfig from '../dist/game/json/TournamentConfig.js';
+import doubleFetch from "./utils/doubleFetch.js";
+import { getAuthToken, getAuthHeaders } from './utils/auth.js';
+import { API_BASE_URL } from "./index.js";
 
 // ============================================================================
 // GLOBAL VARIABLES
@@ -16,6 +19,7 @@ let app: App | null = null;
 let roomSocket: any = null;
 let currentUserId: string | null = null;
 let currentUserName: string | null = null;
+let currentDisplayName: string | null = null;
 let canvasManager: CanvasOrientationManager | null = null;
 
 // Window interface'ini genişletin
@@ -1595,12 +1599,39 @@ const aiCustomSliderConfigs = [
 // INITIALIZATION
 // ============================================================================
 
-function connectWebSocket() {
-	// Generate user credentials
-	currentUserId = localStorage.getItem("userName") ?? "Player";
-	// currentUserName = generateRandomName();
-    // displayname gelicek VVVVVVVV
-	currentUserName = localStorage.getItem("userName") ?? "Player";
+async function connectWebSocket() {
+	try {
+		// Fetch user profile data
+		const profileResponse = await doubleFetch(
+			`${API_BASE_URL}/profile/profile`,
+			{
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+					...getAuthHeaders()
+				}
+			}
+		);
+
+		if (!profileResponse.ok) {
+			throw new Error(`Failed to fetch profile: ${profileResponse.statusText}`);
+		}
+
+		const profileData = await profileResponse.json();
+		console.log("Profile data:", profileData);
+
+		// Extract user information
+		currentUserId = profileData.profile.userName; // ID varsa: profileData.profile.id
+		currentUserName = profileData.profile.userName;
+		currentDisplayName = profileData.profile.displayName;
+
+		console.log(`User ID: ${currentUserId}, User Name: ${currentUserName}, Display Name: ${currentDisplayName}`);
+
+	} catch (error) {
+		console.error('❌ Error fetching profile:', error);
+		showNotification('Failed to load profile data', 'error');
+		return; // WebSocket bağlantısını yapma
+	}
 
 	// Initialize WebSocket
 	roomSocket = new WebSocketClient(window.location.hostname, 3030);
@@ -1637,7 +1668,8 @@ function connectWebSocket() {
 	// Connect to server
 	roomSocket.connect("ws-room/client", {
 		userID: currentUserId,
-		userName: currentUserName
+		userName: currentUserName,
+		displayName: currentDisplayName
 	});
 
 	// Export for debugging
@@ -1954,6 +1986,34 @@ function handleRoundFinished(payload: RoundFinishedPayload): void {
 }
 
 // ============================================================================
+// DEVICE TYPE DETECTION
+// ============================================================================
+
+type DeviceType = 'Android' | 'iOS' | 'Windows' | 'MacOS' | 'Linux' | 'Other';
+
+const getDeviceType = (): DeviceType => {
+  const ua = navigator.userAgent;
+
+  if (/Android/i.test(ua)) {
+    return 'Android';
+  } else if (/iPhone|iPad|iPod/i.test(ua)) {
+    return 'iOS';
+  } else if (/Windows/i.test(ua)) {
+    return 'Windows';
+  } else if (/Macintosh/i.test(ua)) {
+    return 'MacOS';
+  } else if (/Linux/i.test(ua)) {
+    return 'Linux';
+  }
+  return 'Other';
+};
+
+const isMobileDevice = (): boolean => {
+  const deviceType = getDeviceType();
+  return deviceType === 'Android' || deviceType === 'iOS';
+};
+
+// ============================================================================
 // CANVAS ORIENTATION LOCK - LANDSCAPE ONLY
 // ============================================================================
 
@@ -1963,7 +2023,7 @@ class CanvasOrientationManager {
     private portraitWarning: HTMLElement | null = null;
     private isResizing: boolean = false;
     private resizeTimeout: number | null = null;
-    private hasTouchCapability: boolean = false;
+    private isMobile: boolean = false;
     private isCanvasReady: boolean = false;
     private isGameRunning: boolean = false;
     private keyboardListener: ((e: KeyboardEvent) => void) | null = null;
@@ -1971,12 +2031,13 @@ class CanvasOrientationManager {
 
     constructor(canvasId: string = 'renderCanvas') {
         this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-        this.hasTouchCapability = this.detectTouchCapability();
+        this.isMobile = isMobileDevice();
 
-        console.log(`🔍 DETECTION RESULT:`);
-        console.log(`   Touch Capability: ${this.hasTouchCapability}`);
-        console.log(`   maxTouchPoints: ${navigator.maxTouchPoints}`);
-        console.log(`   ontouchstart: ${'ontouchstart' in window}`);
+        const deviceType = getDeviceType();
+        console.log(`🔍 DEVICE DETECTION RESULT:`);
+        console.log(`   Device Type: ${deviceType}`);
+        console.log(`   Is Mobile: ${this.isMobile}`);
+        console.log(`   User Agent: ${navigator.userAgent}`);
 
         if (this.canvas) {
             this.waitForCanvasReady();
@@ -1991,7 +2052,9 @@ class CanvasOrientationManager {
 
         if (isRunning) {
             this.checkOrientation();
-            this.setupKeyboardControls();
+            if (this.isMobile) {
+                this.setupKeyboardControls();
+            }
         } else {
             this.hidePortraitWarning();
             this.hideDirectionButtons();
@@ -2000,19 +2063,16 @@ class CanvasOrientationManager {
     }
 
     private setupKeyboardControls(): void {
-        if (this.keyboardListener) return; // Zaten kuruluysa tekrar kurma
+        if (this.keyboardListener) return;
 
         this.keyboardListener = (e: KeyboardEvent) => {
-            const isPortrait = 480 < window.innerWidth;
+            const isPortrait = window.innerWidth < window.innerHeight;
 
-            // Sadece portrait modda ve touch cihazda çalış
-            if (!isPortrait || !this.hasTouchCapability) return;
+            if (!isPortrait || !this.isMobile) return;
 
-            // Arrow Up / Arrow Down tuşlarını yakala
             if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-                e.preventDefault(); // Varsayılan davranışı engelle
+                e.preventDefault();
 
-                // Custom event oluştur ve gönder
                 const direction = e.key === 'ArrowUp' ? 'up' : 'down';
                 console.log(`⬆️ Portrait mode key pressed: ${direction}`);
 
@@ -2022,8 +2082,6 @@ class CanvasOrientationManager {
             }
         };
 
-        // Event listener'ı ekle
-		// unset'le
         window.addEventListener('keydown', this.keyboardListener);
         console.log('⌨️ Portrait mode keyboard controls enabled');
     }
@@ -2044,8 +2102,8 @@ class CanvasOrientationManager {
                 console.log('Canvas is ready!');
                 this.isCanvasReady = true;
 
-                if (this.hasTouchCapability) {
-                    this.init();
+                if (this.isMobile) {
+                    this.initMobileMode();
                 } else {
                     this.initDesktopMode();
                 }
@@ -2057,53 +2115,28 @@ class CanvasOrientationManager {
         checkCanvasReady();
     }
 
-    private detectTouchCapability(): boolean {
-        const maxTouchPoints = navigator.maxTouchPoints ?? 0;
-        const hasOnTouchStart = 'ontouchstart' in window;
-        const hasMsMaxTouchPoints = ((navigator as any).msMaxTouchPoints ?? 0) > 0;
-
-        let hasTouchEvent = false;
-        try {
-            new TouchEvent('test');
-            hasTouchEvent = true;
-        } catch (e) {
-            hasTouchEvent = false;
-        }
-
-        const result = maxTouchPoints > 0 || hasOnTouchStart || hasMsMaxTouchPoints || hasTouchEvent;
-
-        console.log(`🔍 Touch Detection Details:`);
-        console.log(`   - maxTouchPoints: ${maxTouchPoints} (MOST RELIABLE)`);
-        console.log(`   - ontouchstart: ${hasOnTouchStart}`);
-        console.log(`   - msMaxTouchPoints: ${hasMsMaxTouchPoints}`);
-        console.log(`   - TouchEvent: ${hasTouchEvent}`);
-        console.log(`   - FINAL RESULT: ${result}`);
-
-        return result;
-    }
-
     private initDesktopMode(): void {
         if (!this.canvas) return;
 
-        console.log('💻 DESKTOP MODE - No touch capability detected');
+        console.log('💻 DESKTOP MODE - No orientation lock needed');
 
         this.updateCanvasLayout();
-        window.addEventListener('resize', () => this.throttledHandleResize()); // unset'le
+        window.addEventListener('resize', () => this.throttledHandleResize());
         this.setupResizeObserver();
     }
 
-    private init(): void {
+    private initMobileMode(): void {
         if (!this.canvas) return;
 
-        console.log('📱 MOBILE MODE - Touch capability detected');
+        console.log('📱 MOBILE MODE - Portrait orientation lock enabled');
 
         this.updateCanvasLayout();
-        window.addEventListener('orientationchange', () => this.handleOrientationChange()); //unset'le
-        window.addEventListener('resize', () => this.throttledHandleResize()); //unset'le
+        window.addEventListener('orientationchange', () => this.handleOrientationChange());
+        window.addEventListener('resize', () => this.throttledHandleResize());
         this.setupResizeObserver();
         this.ensureViewportMeta();
         this.createPortraitWarning();
-		this.createDirectionButtons();
+        this.createDirectionButtons();
         this.checkOrientation();
     }
 
@@ -2139,22 +2172,21 @@ class CanvasOrientationManager {
     }
 
     private checkOrientation(): void {
-        // Sadece canvas hazırsa, touch cihazsa VE oyun çalışıyorsa kontrol et
-        if (!this.isCanvasReady || !this.hasTouchCapability || !this.isGameRunning) {
+        if (!this.isCanvasReady || !this.isMobile || !this.isGameRunning) {
             return;
         }
 
-        const isPortrait = 480 > window.innerWidth;
+        const isPortrait = window.innerWidth < window.innerHeight;
 
         console.log(`📐 Mobile Orientation: ${isPortrait ? 'PORTRAIT' : 'LANDSCAPE'}`);
 
-    if (isPortrait) {
-        this.showPortraitWarning();
-        this.hideDirectionButtons();
-    } else {
-        this.hidePortraitWarning();
-        this.showDirectionButtons();
-    }
+        if (isPortrait) {
+            this.showPortraitWarning();
+            this.hideDirectionButtons();
+        } else {
+            this.hidePortraitWarning();
+            this.showDirectionButtons();
+        }
     }
 
     private createPortraitWarning(): void {
@@ -2180,7 +2212,6 @@ class CanvasOrientationManager {
             </div>
         `;
 
-        // Canvas'ın üzerine yazdır - z-index yüksek tut
         this.portraitWarning.style.cssText = `
             position: fixed;
             top: 0;
@@ -2215,8 +2246,30 @@ class CanvasOrientationManager {
         this.directionButtonsContainer = document.createElement('div');
         this.directionButtonsContainer.id = 'direction-buttons';
         this.directionButtonsContainer.innerHTML = `
-            <button id="btn-up" class="direction-btn">▲</button>
-            <button id="btn-down" class="direction-btn">▼</button>
+            <div class="direction-buttons-left">
+                <button id="btn-up" class="direction-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor">
+                        <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM441 335C450.4 344.4 450.4 359.6 441 368.9C431.6 378.2 416.4 378.3 407.1 368.9L320.1 281.9L233.1 368.9C223.7 378.3 208.5 378.3 199.2 368.9C189.9 359.5 189.8 344.3 199.2 335L303 231C312.4 221.6 327.6 221.6 336.9 231L441 335z"/>
+                    </svg>
+                </button>
+                <button id="btn-down" class="direction-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor">
+                        <path d="M320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64zM199 305C189.6 295.6 189.6 280.4 199 271.1C208.4 261.8 223.6 261.7 232.9 271.1L319.9 358.1L406.9 271.1C416.3 261.7 431.5 261.7 440.8 271.1C450.1 280.5 450.2 295.7 440.8 305L337 409C327.6 418.4 312.4 418.4 303.1 409L199 305z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="direction-buttons-right">
+                <button id="btn-right-up" class="direction-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor">
+                        <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM441 335C450.4 344.4 450.4 359.6 441 368.9C431.6 378.2 416.4 378.3 407.1 368.9L320.1 281.9L233.1 368.9C223.7 378.3 208.5 378.3 199.2 368.9C189.9 359.5 189.8 344.3 199.2 335L303 231C312.4 221.6 327.6 221.6 336.9 231L441 335z"/>
+                    </svg>
+                </button>
+                <button id="btn-right-down" class="direction-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" fill="currentColor">
+                        <path d="M320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64zM199 305C189.6 295.6 189.6 280.4 199 271.1C208.4 261.8 223.6 261.7 232.9 271.1L319.9 358.1L406.9 271.1C416.3 261.7 431.5 261.7 440.8 271.1C450.1 280.5 450.2 295.7 440.8 305L337 409C327.6 418.4 312.4 418.4 303.1 409L199 305z"/>
+                    </svg>
+                </button>
+            </div>
         `;
         document.body.appendChild(this.directionButtonsContainer);
 
@@ -2226,19 +2279,27 @@ class CanvasOrientationManager {
             #direction-buttons {
                 position: fixed;
                 bottom: 10vh;
+                left: 5vw;
                 right: 5vw;
-                display: none; /* Başta görünmesin */
-                flex-direction: column;
-                gap: 20px;
+                display: none;
+                flex-direction: row;
+                justify-content: space-between;
                 z-index: 11000;
                 pointer-events: auto;
             }
 
+            .direction-buttons-left,
+            .direction-buttons-right {
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
             .direction-btn {
-                width: 70px;
-                height: 70px;
+                width: 60px;
+                height: 60px;
                 border-radius: 50%;
-                border: 2px solid #00ffff;
+                border: none;
                 background-color: transparent;
                 color: #00ffff;
                 font-size: 32px;
@@ -2246,6 +2307,16 @@ class CanvasOrientationManager {
                 cursor: pointer;
                 transition: all 0.2s ease;
                 box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+            }
+
+            .direction-btn svg {
+                width: 40px;
+                height: 40px;
+                fill: currentColor;
             }
 
             .direction-btn:active {
@@ -2255,51 +2326,72 @@ class CanvasOrientationManager {
             }
 
             @media (max-width: 768px) {
+                #direction-buttons {
+                    bottom: 5vh;
+                    left: 2vw;
+                    right: 2vw;
+                }
+
                 .direction-btn {
                     width: 60px;
                     height: 60px;
-                    font-size: 28px;
+                }
+
+                .direction-btn svg {
+                    width: 35px;
+                    height: 35px;
                 }
             }
         `;
         document.head.appendChild(style);
 
-        // Event binding
+        // Event binding - Sol taraf (Player 1)
         const upBtn = document.getElementById('btn-up');
         const downBtn = document.getElementById('btn-down');
 
-		downBtn?.addEventListener('touchstart',
-			() =>
-			{
-				const e = new KeyboardEvent('keydown', { key: 's' });
-				document.dispatchEvent(e);
-			}
-		);
+        downBtn?.addEventListener('touchstart', () => {
+            const e = new KeyboardEvent('keydown', { key: 's' });
+            document.dispatchEvent(e);
+        });
 
-		downBtn?.addEventListener('touchend',
-			() =>
-			{
-				const e = new KeyboardEvent('keyup', { key: 's' });
-				document.dispatchEvent(e);
-			}
-		);
+        downBtn?.addEventListener('touchend', () => {
+            const e = new KeyboardEvent('keyup', { key: 's' });
+            document.dispatchEvent(e);
+        });
 
-		upBtn?.addEventListener('touchstart',
-			() =>
-			{
-				const e = new KeyboardEvent('keydown', { key: 'w' });
-				document.dispatchEvent(e);
-			}
-		);
+        upBtn?.addEventListener('touchstart', () => {
+            const e = new KeyboardEvent('keydown', { key: 'w' });
+            document.dispatchEvent(e);
+        });
 
-		upBtn?.addEventListener('touchend',
-			() =>
-			{
-				const e = new KeyboardEvent('keyup', { key: 'w' });
-				document.dispatchEvent(e);
-			}
-		);
+        upBtn?.addEventListener('touchend', () => {
+            const e = new KeyboardEvent('keyup', { key: 'w' });
+            document.dispatchEvent(e);
+        });
 
+        // Event binding - Sağ taraf (Player 2)
+        const rightUpBtn = document.getElementById('btn-right-up');
+        const rightDownBtn = document.getElementById('btn-right-down');
+
+        rightUpBtn?.addEventListener('touchstart', () => {
+            const e = new KeyboardEvent('keydown', { key: 'ArrowUp' });
+            document.dispatchEvent(e);
+        });
+
+        rightUpBtn?.addEventListener('touchend', () => {
+            const e = new KeyboardEvent('keyup', { key: 'ArrowUp' });
+            document.dispatchEvent(e);
+        });
+
+        rightDownBtn?.addEventListener('touchstart', () => {
+            const e = new KeyboardEvent('keydown', { key: 'ArrowDown' });
+            document.dispatchEvent(e);
+        });
+
+        rightDownBtn?.addEventListener('touchend', () => {
+            const e = new KeyboardEvent('keyup', { key: 'ArrowDown' });
+            document.dispatchEvent(e);
+        });
     }
 
     private showDirectionButtons(): void {
@@ -2443,7 +2535,6 @@ class CanvasOrientationManager {
     private updateCanvasLayout(): void {
         if (!this.canvas) return;
 
-        // Canvas'ı her zaman göster
         this.canvas.style.cssText = `
             position: fixed;
             top: 0;
@@ -2458,7 +2549,6 @@ class CanvasOrientationManager {
             z-index: 1000;
         `;
 
-        // Body ve HTML'i düzenle
         document.body.style.cssText = `
             margin: 0;
             padding: 0;
@@ -2538,6 +2628,7 @@ class CanvasOrientationManager {
         if (btnStyle) btnStyle.remove();
     }
 }
+
 
 export default class extends AView {
 
@@ -2921,9 +3012,14 @@ private initAIGameListeners(): void {
             const loadingScreen = document.getElementById('loading-screen');
             const gamePage = document.getElementById('game-page');
 
+            if (roomSocket) {
+                console.log(`Leaving room from loading screen: ${currentRoomId}`);
+                roomSocket.send("leave", { roomId: currentRoomId });
+                currentRoomId = null;
+            }
+
             if (loadingScreen) loadingScreen.classList.remove('active');
             if (gamePage) gamePage.classList.remove('hidden');
-
             showNotification('Quick play cancelled', 'info');
         });
     }
