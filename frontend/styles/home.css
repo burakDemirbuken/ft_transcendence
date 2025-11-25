@@ -101,19 +101,10 @@ body {
 }
 
 /* Hero Section */
-.hero {
-    text-align: center;
-    position: relative;
-    z-index: 2;
-}
-
-.hero h1 {
-    font-size: clamp(2rem, 8vw, 8rem);
-    line-height: 1.1;
-}
 
 .group-name {
     font-weight: 100;
+    font-size: clamp(1.35rem, 5vw, 10rem);
     text-align: center;
     background: linear-gradient(45deg, #00ffff, #ff00ff, #00ffff);
     background-size: 200% 200%;
@@ -138,6 +129,17 @@ body {
     visibility: hidden;
     pointer-events: none;
     transform: scale(0.5);
+}
+
+.hero {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.hero h1 {
+    font-size: clamp(1.35rem, 7vw, 15rem);
+    line-height: 1.1;
 }
 
 @keyframes gradientShift {
@@ -315,6 +317,7 @@ body {
     visibility: visible;
     transform: translateY(0);
     pointer-events: all;
+    margin-left: 20px;
 }
 
 .team-title {
@@ -800,6 +803,7 @@ body {
     opacity: 0;
     transform: translateY(30px);
     transition: all 0.8s ease 1.5s;
+    margin-left: 20px;
 }
 
 .team-content.active .thanks-section {
@@ -816,11 +820,11 @@ body {
 
 .thanks-person {
     background: rgba(255, 255, 255, 0.05);
-    padding: 12px 20px;
+    padding: 10px 15px;
     border-radius: 20px;
     border: 1px solid rgba(255, 0, 255, 0.3);
     transition: all 0.3s ease;
-    font-size: 1.1rem;
+    font-size: 0.9rem;
 }
 
 .thanks-person:hover {
@@ -870,10 +874,6 @@ body {
         padding-top: 2rem;
     }
 
-    .group-name {
-        font-size: clamp(6rem, 20vw, 15rem);
-    }
-
     .thanks-list {
         flex-direction: column;
         align-items: center;
@@ -893,6 +893,11 @@ body {
         width: 70px;
         height: 70px;
         font-size: 1.8rem;
+    }
+
+    .thanks-person {
+        padding: 6px 12px;
+        font-size: 0.8rem;
     }
 }
 
@@ -920,13 +925,13 @@ body {
     }
 
     .team-member {
-        width: min(300px, 85vw);
+        width: min(200px, 80vw);
         height: 300px;
         padding: 1.5rem;
     }
 
     .team-title {
-        font-size: 1.8rem;
+        font-size: 2rem;
         margin-bottom: 1.5rem;
     }
 
@@ -942,6 +947,11 @@ body {
 
     .member-info .surname {
         font-size: 1.1rem;
+    }
+
+    .thanks-person {
+        padding: 5px 10px;
+        font-size: 0.75rem;
     }
 }
 
