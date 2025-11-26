@@ -117,8 +117,8 @@ export default async function gamedataRoute(fastify) {
 				teamOneScore: team1.score,
 				teamTwoScore: team2.score,
 				matchType: matchType,
-				matchStartDate: time.start ? new Date(time.start) : null,
-				matchEndDate: time.finish ? new Date(time.finish) : null,
+				matchStartDate: time.start ? new Date(time.start) : new Date(),
+				matchEndDate: time.finish ? new Date(time.finish) : new Date(),
 				matchDuration: duration,
 				matchSettings: gameSettings,
 				matchState: state
@@ -163,8 +163,8 @@ export default async function gamedataRoute(fastify) {
 					where: { userName: winner },
 					attributes: ['id']
 				}))?.id ?? null,
-				TournamentStartDate: time.start ? new Date(time.start) : null,
-				TournamentEndDate: time.end ? new Date(time.end) : null
+				TournamentStartDate: time.start ? new Date(time.start) : new Date(),
+				TournamentEndDate: time.end ? new Date(time.end) : new Date(),
 			}, { transaction: t })
 
 			let allPlayerProfile = []
@@ -240,6 +240,7 @@ export default async function gamedataRoute(fastify) {
 						winnerPlayerID: winnerPlayer ? winnerPlayer.id : null,
 					}, { transaction: t })
 
+					const duration = Math.floor(matchData.time.duration / 1000)
 					if (winnerPlayer && loserPlayer) {
 						const winnerState = matchData.state.players.find(p => p.id === winnerPlayer.userName)
 						const loserState = matchData.state.players.find(p => p.id === loserPlayer.userName)
@@ -252,10 +253,17 @@ export default async function gamedataRoute(fastify) {
 								xp: 70,
 								ballHitCount: winnerState?.kickBall ?? 0,
 								ballMissCount: winnerState?.missedBall ?? 0,
-								gameTotalDuration: matchData.time.duration
+								gameTotalDuration: duration
 							}, { transaction: t }),
 							winnerPlayer.Stat.update({
-								gameMinDuration: matchData.time.duration < winnerPlayer.Stat.gameMinDuration ? matchData.time.duration : winnerPlayer.Stat.gameMinDuration
+								gameLongestStreak: winnerPlayer.Stat.gameCurrentStreak + 1 > winnerPlayer.Stat.gameLongestStreak ?
+									winnerPlayer.Stat.gameCurrentStreak + 1 : winnerPlayer.Stat.gameLongestStreak,
+								fastestWinDuration: (winnerPlayer.Stat.fastestWinDuration === 0 || winnerPlayer.Stat.fastestWinDuration > duration) ?
+									duration : winnerPlayer.Stat.fastestWinDuration,
+								longestMatchDuration: winnerPlayer.Stat.longestMatchDuration < duration ?
+									duration : winnerPlayer.Stat.longestMatchDuration,
+								gameMinDuration: winnerPlayer.Stat.gameMinDuration == 0 ? duration :
+									(duration < winnerPlayer.Stat.gameMinDuration ? duration : winnerPlayer.Stat.gameMinDuration)
 							}, { transaction: t }),
 							loserPlayer.Stat.increment({
 								gamesPlayed: 1,
@@ -263,11 +271,13 @@ export default async function gamedataRoute(fastify) {
 								xp: 10,
 								ballHitCount: loserState?.kickBall ?? 0,
 								ballMissCount: loserState?.missedBall ?? 0,
-								gameTotalDuration: matchData.time.duration
+								gameTotalDuration: duration
 							}, { transaction: t }),
 							loserPlayer.Stat.update({
 								gameCurrentStreak: 0,
-								gameMinDuration: matchData.time.duration < loserPlayer.Stat.gameMinDuration ? matchData.time.duration : loserPlayer.Stat.gameMinDuration
+								longestMatchDuration: loserPlayer.Stat.longestMatchDuration < duration ? duration : loserPlayer.Stat.longestMatchDuration,
+								gameMinDuration: loserPlayer.Stat.gameMinDuration == 0 ? duration :
+									(duration < loserPlayer.Stat.gameMinDuration ? duration : loserPlayer.Stat.gameMinDuration)
 							}, { transaction: t })
 						])
 					}
@@ -276,7 +286,7 @@ export default async function gamedataRoute(fastify) {
 			await Promise.all(
 				allPlayerProfile
 					.filter(Boolean)
-					.map(async (player) => player.Achievement.update(await fastify.checkAchievements(player), { transaction: t }))
+					.map(async (player) => player.Achievement.update(fastify.checkAchievements(player), { transaction: t }))
 			)
 
 			await t.commit()
@@ -370,6 +380,9 @@ export default async function gamedataRoute(fastify) {
 			})
 	
 			const matchData = matchHistory.map(match => match.toJSON())
+			console.log(`Match data for user ${userName}:`, matchData)
+
+			console.log(`Retrieved ${matchData.length} matches for user ${userName}`)
 			return reply.code(200).send({
 				matches: matchData,
 				matchCount: matchData.length,
