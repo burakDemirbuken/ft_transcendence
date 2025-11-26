@@ -26,7 +26,6 @@ class EmailService {
         requireTLS: true
       })
 
-      console.log('📧 Email transporter initialized successfully')
     } catch (error) {
       console.error('❌ Email transporter initialization failed:', error.message)
       throw error
@@ -36,7 +35,6 @@ class EmailService {
   async verifyConnection() {
     try {
       await this.transporter.verify()
-      console.log('✅ Email server connection verified')
       return true
     } catch (error) {
       console.error('❌ Email server connection failed:', error.message)
@@ -84,7 +82,6 @@ class EmailService {
       }
 
       const info = await this.transporter.sendMail(mailOptions)
-      console.log(`✅ Email doğrulama kodu gönderildi: ${email} - MessageId: ${info.messageId}`)
       
       return {
         success: true,
@@ -99,7 +96,6 @@ class EmailService {
 
   async send2FACode(email, code, username = null, type = 'login') {
     try {
-      // Type'a göre farklı email içerikleri
       const emailContents = {
         login: {
           icon: '🔐',
@@ -170,7 +166,6 @@ class EmailService {
       }
 
       const info = await this.transporter.sendMail(mailOptions)
-      console.log(`✅ 2FA kodu gönderildi (${type}): ${email} - MessageId: ${info.messageId}`)
       
       return {
         success: true,
@@ -221,7 +216,6 @@ class EmailService {
       }
 
       const info = await this.transporter.sendMail(mailOptions)
-      console.log(`✅ Hoş geldin e-postası gönderildi: ${email} - MessageId: ${info.messageId}`)
       
       return {
         success: true,
@@ -271,7 +265,6 @@ class EmailService {
       }
 
       const info = await this.transporter.sendMail(mailOptions)
-      console.log(`✅ Giriş bildirimi gönderildi: ${email} - MessageId: ${info.messageId}`)
       
       return {
         success: true,
@@ -329,7 +322,6 @@ class EmailService {
       }
 
       const info = await this.transporter.sendMail(mailOptions)
-      console.log(`✅ Hesap silme kodu gönderildi: ${email} - MessageId: ${info.messageId}`)
       
       return {
         success: true,
@@ -383,7 +375,6 @@ class EmailService {
       }
 
       const info = await this.transporter.sendMail(mailOptions)
-      console.log(`✅ Hesap silme onayı gönderildi: ${email} - MessageId: ${info.messageId}`)
       
       return {
         success: true,
@@ -428,7 +419,6 @@ class EmailService {
       }
 
       const info = await this.transporter.sendMail(mailOptions)
-      console.log(`✅ Şifre sıfırlama kodu gönderildi: ${email} - MessageId: ${info.messageId}`)
       
       return {
         success: true,

@@ -8,7 +8,6 @@ import xssSanitizer from '../plugins/xssSanitizer.js';
 
 async function registration(fastify)
 {
-	// JWT secret'ı .env'den al - yoksa hata ver
 	const jwtSecret = process.env.JWT_SECRET;
 	
 	if (!jwtSecret) {
@@ -21,10 +20,8 @@ async function registration(fastify)
 
 	await fastify.register( cookie );
 	
-	// XSS Protection - must be registered early
 	await fastify.register( xssSanitizer );
 	
-	// Security headers with Helmet
 	await fastify.setNotFoundHandler( utils.NotFoundHandler );
 	await fastify.setErrorHandler( utils.InternalServerErrorHandler );
 	await fastify.register( helmet, {

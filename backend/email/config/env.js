@@ -20,7 +20,7 @@ export const config = {
     from: process.env.EMAIL_FROM || `Transcendence <${process.env.EMAIL_USER}>`
   },
   server: {
-    port: parseInt(process.env.EMAIL_PORT) || 3005,
-    host: process.env.HOST || '0.0.0.0',
+    port: 3005,
+    host: '0.0.0.0',
   }
 }
