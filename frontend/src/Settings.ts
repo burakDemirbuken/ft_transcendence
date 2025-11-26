@@ -418,6 +418,8 @@ export default class extends AView {
 		const link = document.querySelector("link[href='styles/settings.css']");
 		document.head.removeChild(link);
 	}
+
+	async updateJsLanguage() {}
 }
 
 async function onLoad()

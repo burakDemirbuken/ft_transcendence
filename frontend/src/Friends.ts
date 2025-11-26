@@ -363,6 +363,5 @@ export default class extends AView {
 		document.head.removeChild(link);
 	}
 
-	async updateJsLanguage() {
-	}
+	async updateJsLanguage() {}
 }

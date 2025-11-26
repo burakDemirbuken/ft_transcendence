@@ -3374,4 +3374,6 @@ private initAIGameListeners(): void {
 		}
 		roomSocket.disconnect();
 	}
+
+	async updateJsLanguage() {}
 }
