@@ -31,7 +31,6 @@ declare global {
 }
 
 export function deleteApp() {
-    console.log(   "DESTROYING APP...");
     if (app) {
         app.destroy();
         app = null;
