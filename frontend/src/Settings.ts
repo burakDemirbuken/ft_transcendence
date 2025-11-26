@@ -102,7 +102,6 @@ async function confirm2FACode(e) {
 						...getAuthHeaders()
 					}
 				});
-				localStorage.removeItem('userName');
 				document.querySelector("#navbar")?.classList.add("logout");
 				setTimeout(() => {
 					navigateTo('login');
@@ -304,7 +303,10 @@ async function sendEmailChangeReq(e) {
 		submitBtn.style.cursor = 'pointer';
 	}
 
-	form.querySelectorAll('input').forEach((input: HTMLInputElement) => input.value = '');
+	form.querySelectorAll('input').forEach((input: HTMLInputElement) => {
+		if (input.name !== 'current-email')
+			input.value = '';
+	});
 }
 
 async function sendPassChangeReq(e) {
