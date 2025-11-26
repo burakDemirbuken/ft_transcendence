@@ -145,7 +145,7 @@ export default async function allRoutes(fastify) {
 					return parsedData;
 				} catch (error) {
 					fastify.log.error(`Error forwarding request to ${finalUrl}`);
-					fastify.log.error(`Error details:`, error);
+					fastify.log.error(`Error details: ${error}`);
 					fastify.log.error(`Error message: ${error.message}`);
 					fastify.log.error(`Error code: ${error.code}`);
 					fastify.log.error(`Error cause: ${error.cause}`);

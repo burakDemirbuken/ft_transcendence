@@ -78,7 +78,8 @@ export default fp(async (fastify) => {
 	// Global hook - tüm request'leri otomatik temizle
 	fastify.addHook('preHandler', async (request, reply) => {
 		// Body ve query'leri otomatik temizle
-		sanitizeRequestBody(request)
+		if (request.url !== "/internal/avatar-update")
+			sanitizeRequestBody(request)
 		sanitizeQueryParams(request)
 	})
 })

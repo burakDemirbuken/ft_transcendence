@@ -41,7 +41,11 @@ await fastify.register(helmet, {
 
 await fastify.register(cookie)
 
-await fastify.register(multipart)
+await fastify.register(multipart, {
+	limits: {
+		fileSize: 5 * 1024 * 1024 // 5 MB
+	}
+})
 
 // JWT secret'ı .env'den al - yoksa hata ver
 const jwtSecret = process.env.JWT_SECRET;

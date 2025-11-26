@@ -21,17 +21,16 @@ const fastify = Fastify({
 })
 
 fastify.decorate("cwd", __dirname)
-fastify.register(fastifyStatic, {
-    root: avatarDir,
-    prefix: "/database/avatars/"
-})
 fastify.register(fastifyMultipart, {
     limits: {
         fileSize: 5 * 1024 * 1024
     }
 })
+fastify.register(fastifyStatic, {
+    root: avatarDir,
+    prefix: "/database/avatars/"
+})
 
-// JWT secret must be set in .env
 if (!process.env.JWT_SECRET) {
     throw new Error('JWT_SECRET environment variable is required! Please set it in .env file');
 }
