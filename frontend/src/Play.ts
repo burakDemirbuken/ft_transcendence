@@ -48,7 +48,7 @@ function displayMatchPairs(pairs, participants) {
     const container = isNextRound ? nextRoundContainer : matchPairsContainer;
 
     if (!container) {
-        showNotification('❌ Match pairs container not found!', "error");
+        showNotification('Match pairs container not found!', "error");
         return;
     }
 
@@ -390,10 +390,9 @@ function handleMatchReady(payload) {
             startBtn.style.display = 'block';
             startBtn.disabled = false;
         } else {
-            showNotification('❌ START BUTTON NOT FOUND IN DOM!', "error");
+            showNotification('START BUTTON NOT FOUND IN DOM!', "error");
         }
     } else {
-        showNotification('❌ NOT HOST - Hiding start button', "error");
         if (startBtn) {
             startBtn.style.display = 'none';
         }
@@ -1583,7 +1582,7 @@ async function connectWebSocket() {
 	});
 
 	roomSocket.onError((error) => { // odaya giremedi diye ve error geldiğinde notification göster
-		showNotification('❌ Room server connection error:', 'error');
+		showNotification('Room server connection error', 'error');
 	}); 
 
 	// Connect to server
@@ -1900,7 +1899,7 @@ class CanvasOrientationManager {
     private resizeObserver: ResizeObserver | null = null;
     private portraitWarning: HTMLElement | null = null;
     private isResizing: boolean = false;
-    private resizeTimeout: number | null = null;
+    private resizeTimeout: ReturnType<typeof setTimeout> | null = null;
     private isMobile: boolean = false;
     private isCanvasReady: boolean = false;
     private isGameRunning: boolean = false;
