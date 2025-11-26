@@ -30,6 +30,13 @@ declare global {
     }
 }
 
+export function deleteApp() {
+    if (app) {
+        app.destroy();
+        app = null;
+    }
+}
+
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
@@ -3373,4 +3380,6 @@ private initAIGameListeners(): void {
 		}
 		roomSocket.disconnect();
 	}
+
+	async updateJsLanguage() {}
 }

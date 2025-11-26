@@ -272,7 +272,7 @@ export default class extends AView {
 		// Initialize language preference and translations
 		langPref = localStorage.getItem("langPref") ?? 'eng';
 		trlt = await getJsTranslations(langPref);
-		
+
 		document.addEventListener("click", move);
 		document.addEventListener("input", growInput);
 		document.addEventListener("keydown", enterPress);
@@ -295,4 +295,6 @@ export default class extends AView {
 		const link = document.querySelector("link[href='styles/login.css']");
 		document.head.removeChild(link);
 	}
+
+	async updateJsLanguage() {}
 }

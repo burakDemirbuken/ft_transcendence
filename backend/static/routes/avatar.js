@@ -49,8 +49,8 @@ export default async function avatarRoutes(fastify) {
 			}
 
 			const responseJson = await response.json()
-			request.log.info(`Avatar updated successfully for user: ${userName}`)
-			return reply.code(201).send({ newAvatarUrl: responseJson.newAvatarUrl  })
+			console.log("hebele hübele", responseJson.newAvatarUrl)
+			return reply.code(201).send({ newAvatarUrl: responseJson.newAvatarUrl })
 		} catch (err) {
 			await fs.promises.unlink(filePath).catch(err => request.log.error(`Failed to delete orphaned file: ${err.message}`))
 			request.log.error(`Profile service communication failed: ${err.message}`)
@@ -58,3 +58,4 @@ export default async function avatarRoutes(fastify) {
 		}
 	})
 }
+
