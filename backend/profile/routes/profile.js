@@ -116,7 +116,7 @@ export default async function profileRoute(fastify) {
 		if (!isFromAuthService) {
 			return reply.code(403).send({
 				error: 'Profile deletion must be done through authentication service',
-				redirectTo: '/api/auth/profile'
+				redirectTo: '/api/auth/me'
 			});
 		}
 

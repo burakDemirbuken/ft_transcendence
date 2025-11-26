@@ -11,6 +11,44 @@ async function register(request, reply)
         if (!username || !email || !password)
             return (reply.status(400).send({ success: false, error: trlt.register.empty }));
 
+        // Username validations
+        if (username.length < 1 || username.length > 20) {
+            return reply.status(400).send({
+                success: false,
+                error: trlt.register && trlt.register.username_length || 'Username must be between 1 and 20 characters'
+            });
+        }
+
+        if (!/^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
+            return reply.status(400).send({
+                success: false,
+                error: trlt.register && trlt.register.username_invalid || 'Username can only contain letters, numbers, underscore and Turkish characters'
+            });
+        }
+
+        // Email validations
+        if (email.length < 5 || email.length > 254) {
+            return reply.status(400).send({
+                success: false,
+                error: trlt.register && trlt.register.email_length || 'Email must be between 5 and 254 characters'
+            });
+        }
+
+        if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/u.test(email)) {
+            return reply.status(400).send({
+                success: false,
+                error: trlt.register && trlt.register.email_invalid || 'Invalid email format'
+            });
+        }
+
+        // Password validations
+        if (password.length < 8 || password.length > 128) {
+            return reply.status(400).send({
+                success: false,
+                error: trlt.register && trlt.register.password_length || 'Password must be between 8 and 128 characters'
+            });
+        }
+
         // Şifre validasyonu
         const passwordValidation = utils.validatePassword(password);
         if (!passwordValidation.isValid) {
@@ -97,8 +135,23 @@ async function login(request, reply) {
             // Continue with login
         }
         const { login, password } = request.body;
-        if (!login || !password)
-            return (reply.status(400).send({ success: false, error: trlt.login.empty }));
+        
+        // Login validation (username or email)
+        if (!login || login.length < 1) {
+            return reply.status(400).send({
+                success: false,
+                error: trlt.login && trlt.login.empty || 'Username or email is required'
+            });
+        }
+
+        // Password validation
+        if (!password || password.length < 8 || password.length > 128) {
+            return reply.status(400).send({
+                success: false,
+                error: trlt.login && trlt.login.password_length || 'Password must be between 8 and 128 characters'
+            });
+        }
+
         const user = await User.findByEmail(login) || await User.findByUsername(login);
         if (!user)
             return (reply.status(401).send({ success: false, error: trlt.login.invalid }));
@@ -283,8 +336,22 @@ async function verify2FA(request, reply) {
     const trlt = getTranslations(request.query.lang || "eng");
     try {
         const { login, code, rememberMe } = request.body;
-        if (!login || !code)
-            return (reply.status(400).send({ success: false, error: trlt.verify2FA.empty }));
+        
+        // Login validation
+        if (!login || login.length < 1) {
+            return reply.status(400).send({
+                success: false,
+                error: trlt.verify2FA && trlt.verify2FA.login_empty || 'Username or email is required'
+            });
+        }
+
+        // Code validation (6 digits)
+        if (!code || !/^\d{6}$/.test(code)) {
+            return reply.status(400).send({
+                success: false,
+                error: trlt.verify2FA && trlt.verify2FA.code_invalid || 'Code must be 6 digits'
+            });
+        }
         const user = await User.findByEmail(login) || await User.findByUsername(login);
         if (!user)
             return (reply.status(404).send({ success: false, error: trlt.unotFound }));
@@ -316,10 +383,9 @@ async function verify2FA(request, reply) {
 
         const accessToken = await reply.jwtSign(
             { userId: user.id, username: user.username, email: user.email, type: 'access' },
-            { expiresIn: '15m' }
+            { expiresIn: '1m' }
         );
         const refreshExpiry = rememberMe ? '30d' : '7d';
-        const refreshMaxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000;
         const refreshToken = await reply.jwtSign(
             {
                 userId: user.id,
@@ -332,16 +398,16 @@ async function verify2FA(request, reply) {
         );
         console.log('🍪 Setting accessToken cookie:', accessToken.substring(0, 20) + '...');
         reply.setCookie('accessToken', accessToken, {
-            httpOnly: true, secure: true, sameSite: 'Lax', path: '/', maxAge: 24 * 60 * 60 * 1000
+            httpOnly: true, secure: true, sameSite: 'Lax', path: '/'
         });
         console.log('🍪 Setting refreshToken cookie');
         reply.setCookie('refreshToken', refreshToken, {
-            httpOnly: true, secure: true, sameSite: 'Lax', path: '/', maxAge: refreshMaxAge
+            httpOnly: true, secure: true, sameSite: 'Lax', path: '/'
         });
         // JavaScript erişimi için ayrı cookie (daha kısa sürede expire olan)
         console.log('🍪 Setting authStatus cookie');
         reply.setCookie('authStatus', 'authenticated', {
-            httpOnly: false, secure: true, sameSite: 'Lax', path: '/', maxAge: 24 * 60 * 60 * 1000
+            httpOnly: false, secure: true, sameSite: 'Lax', path: '/'
         });
         // Profile servisi çağrısı - ilk login'de profil oluştur
         try {
@@ -387,18 +453,9 @@ async function logout(request, reply)
 	const trlt = getTranslations(request.query.lang || "eng");
 	try
 	{
-		let username;
-
-		// Cookie'den JWT token'ı çek ve decode et
-		const cookieToken = request.cookies?.accessToken;
-		if (cookieToken) {
-			try {
-				const decoded = request.server.jwt.verify(cookieToken);
-				username = decoded.username;
-			} catch (error) {
-				console.log('JWT token decode error:', error);
-			}
-		}
+		// getDataFromToken kullan (header'dan veya cookie'den)
+		const userData = await request.server.getDataFromToken(request);
+		const username = userData?.username;
 
 	    reply.clearCookie('accessToken',
         {
@@ -422,106 +479,6 @@ async function logout(request, reply)
 	{
 		reply.status(500).send({ success: false, error: trlt.logout.fail });
 	}
-}
-
-
-async function refreshToken(request, reply)
-{
-    try
-    {
-        const oldRefreshToken = request.cookies.refreshToken;
-        if (!oldRefreshToken)
-        {
-            return (reply.status(401).send({
-                success: false,
-                error: 'No refresh token provided',
-                code: 'NO_REFRESH_TOKEN'
-            }));
-        }
-        let decoded;
-        try
-        {
-            decoded = request.server.jwt.verify(oldRefreshToken);
-        }
-        catch (err)
-        {
-            return (reply.status(401).send({
-                success: false,
-                error: 'Invalid refresh token',
-                code: 'INVALID_REFRESH_TOKEN'
-            }));
-        }
-        if (decoded.type !== 'refresh')
-        {
-            return (reply.status(401).send({
-                success: false,
-                error: 'Invalid token type',
-                code: 'INVALID_TOKEN_TYPE'
-            }));
-        }
-        const user = await User.findByPk(decoded.userId);
-        if (!user)
-        {
-            return (reply.status(401).send({
-                success: false,
-                error: 'User not found',
-                code: 'USER_NOT_FOUND'
-            }));
-        }
-        const newAccessToken = await reply.jwtSign(
-            {
-                userId: user.id,
-                username: user.username,
-                email: user.email,
-                type: 'access'
-            },
-            {
-                expiresIn: '15m'
-            }
-        );
-        utils.blacklistToken(oldRefreshToken);
-        const now = Math.floor(Date.now() / 1000);
-        const remainingTime = decoded.exp - now;
-        const remainingDays = Math.max(1, Math.ceil(remainingTime / (24 * 60 * 60)));
-        const isRememberMe = decoded.rememberMe || false;
-        const maxAllowedDays = isRememberMe ? 30 : 7;
-        const newRefreshExpiry = Math.min(remainingDays, maxAllowedDays);
-        const newRefreshMaxAge = newRefreshExpiry * 24 * 60 * 60 * 1000;
-        const newRefreshToken = await reply.jwtSign(
-            {
-                userId: user.id,
-                username: user.username,
-                type: 'refresh',
-                rememberMe: isRememberMe,
-                issuedAt: now
-            },
-            { expiresIn: `${newRefreshExpiry}d` }
-        );
-        reply.setCookie('accessToken', newAccessToken, {
-            httpOnly: true, secure: true, sameSite: 'Lax', path: '/', maxAge: 24 * 60 * 60 * 1000
-        });
-        reply.setCookie('refreshToken', newRefreshToken, {
-            httpOnly: true, secure: true, sameSite: 'Lax', path: '/', maxAge: newRefreshMaxAge
-        });
-        reply.send({
-            success: true,
-            message: 'Tokens refreshed successfully',
-            user: user.toSafeObject(),
-            tokenInfo: {
-                accessTokenExpiry: '15m',
-                refreshTokenExpiry: `${newRefreshExpiry}d`,
-                rememberMe: isRememberMe
-            }
-        });
-    }
-    catch (error)
-    {
-        console.log('Refresh token error:', error);
-        reply.status(500).send({
-            success: false,
-            error: 'Internal server error'
-        });
-    }
 }
 
 
@@ -560,10 +517,11 @@ async function autoRefreshToken(request, reply)
 		{
 			try
 			{
-				const decoded = request.server.jwt.verify(accessToken);
-				if (decoded.type === 'access')
+				// getDataFromToken kullan
+				const userData = await request.server.getDataFromToken(request);
+				if (userData && userData.userId)
 				{
-					currentUser = await User.findByPk(decoded.userId);
+					currentUser = await User.findByPk(userData.userId);
 					return (reply.send({
 						success: true,
 						action: 'no_refresh_needed',
@@ -602,36 +560,6 @@ async function autoRefreshToken(request, reply)
 		}));
 	}
 }
-async function blacklistTokens(request, reply)
-{
-	try
-	{
-		const { accessToken, refreshToken } = request.body;
-		let blacklistedCount = 0;
-		if (accessToken)
-		{
-			utils.blacklistToken(accessToken);
-			blacklistedCount++;
-		}
-		if (refreshToken)
-		{
-			utils.blacklistToken(refreshToken);
-			blacklistedCount++;
-		}
-		return (reply.send({
-			success: true,
-			message: `${blacklistedCount} tokens blacklisted`,
-			blacklistedCount: blacklistedCount
-		}));
-	}
-	catch (error)
-	{
-		return (reply.status(500).send({
-			success: false,
-			error: 'Failed to blacklist tokens'
-		}));
-	}
-}
 
 // ============================================
 // ŞİFRE DEĞİŞTİRME - 2FA İLE
@@ -653,6 +581,22 @@ async function initPasswordChange(request, reply) {
 			});
 		}
 
+		// Current password validation
+		if (currentPassword.length < 8 || currentPassword.length > 128) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Current password must be between 8 and 128 characters'
+			});
+		}
+
+		// New password validation
+		if (newPassword.length < 8 || newPassword.length > 128) {
+			return reply.status(400).send({
+				success: false,
+				error: 'New password must be between 8 and 128 characters'
+			});
+		}
+
 		// Yeni şifre validasyonu
 		const passwordValidation = utils.validatePassword(newPassword);
 		if (!passwordValidation.isValid) {
@@ -662,20 +606,17 @@ async function initPasswordChange(request, reply) {
 			});
 		}
 
-		// JWT'den kullanıcıyı al
-		const cookieToken = request.cookies?.accessToken;
-		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
-		const token = cookieToken || headerToken;
-
-		if (!token) {
+		// getDataFromToken kullan (header'dan veya cookie'den)
+		const userData = await request.server.getDataFromToken(request);
+		
+		if (!userData?.userId) {
 			return reply.status(401).send({
 				success: false,
 				error: 'Authentication required'
 			});
 		}
 
-		const decoded = request.server.jwt.verify(token);
-		const user = await User.findByPk(decoded.userId);
+		const user = await User.findByPk(userData.userId);
 
 		if (!user) {
 			return reply.status(404).send({
@@ -743,20 +684,17 @@ async function confirmPasswordChange(request, reply) {
 			});
 		}
 
-		// JWT'den kullanıcıyı al
-		const cookieToken = request.cookies?.accessToken;
-		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
-		const token = cookieToken || headerToken;
+		// getDataFromToken kullan (header'dan veya cookie'den)
+		const userData = await request.server.getDataFromToken(request);
 
-		if (!token) {
+		if (!userData?.userId) {
 			return reply.status(401).send({
 				success: false,
 				error: 'Authentication required'
 			});
 		}
 
-		const decoded = request.server.jwt.verify(token);
-		const user = await User.findByPk(decoded.userId);
+		const user = await User.findByPk(userData.userId);
 
 		if (!user) {
 			return reply.status(404).send({
@@ -851,29 +789,41 @@ async function initEmailChange(request, reply) {
 			});
 		}
 
-		// Email formatı kontrolü
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(newEmail)) {
+		// Email length validation
+		if (newEmail.length < 5 || newEmail.length > 254) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Email must be between 5 and 254 characters'
+			});
+		}
+
+		// Email pattern validation
+		if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/u.test(newEmail)) {
 			return reply.status(400).send({
 				success: false,
 				error: 'Invalid email format'
 			});
 		}
 
-		// JWT'den kullanıcıyı al
-		const cookieToken = request.cookies?.accessToken;
-		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
-		const token = cookieToken || headerToken;
+		// Password validation
+		if (password.length < 8 || password.length > 128) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Password must be between 8 and 128 characters'
+			});
+		}
 
-		if (!token) {
+		// getDataFromToken kullan (header'dan veya cookie'den)
+		const userData = await request.server.getDataFromToken(request);
+
+		if (!userData?.userId) {
 			return reply.status(401).send({
 				success: false,
 				error: 'Authentication required'
 			});
 		}
 
-		const decoded = request.server.jwt.verify(token);
-		const user = await User.findByPk(decoded.userId);
+		const user = await User.findByPk(userData.userId);
 
 		if (!user) {
 			return reply.status(404).send({
@@ -958,20 +908,17 @@ async function confirmEmailChange(request, reply) {
 			});
 		}
 
-		// JWT'den kullanıcıyı al
-		const cookieToken = request.cookies?.accessToken;
-		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
-		const token = cookieToken || headerToken;
+		// getDataFromToken kullan (header'dan veya cookie'den)
+		const userData = await request.server.getDataFromToken(request);
 
-		if (!token) {
+		if (!userData?.userId) {
 			return reply.status(401).send({
 				success: false,
 				error: 'Authentication required'
 			});
 		}
 
-		const decoded = request.server.jwt.verify(token);
-		const user = await User.findByPk(decoded.userId);
+		const user = await User.findByPk(userData.userId);
 
 		if (!user) {
 			return reply.status(404).send({
@@ -1100,20 +1047,25 @@ async function initDeleteAccount(request, reply) {
 			});
 		}
 
-		// JWT'den kullanıcıyı al
-		const cookieToken = request.cookies?.accessToken;
-		const headerToken = request.headers?.authorization?.replace('Bearer ', '');
-		const token = cookieToken || headerToken;
+		// Password validation
+		if (password.length < 8 || password.length > 128) {
+			return reply.status(400).send({
+				success: false,
+				error: 'Password must be between 8 and 128 characters'
+			});
+		}
 
-		if (!token) {
+		// getDataFromToken kullan (header'dan veya cookie'den)
+		const userData = await request.server.getDataFromToken(request);
+
+		if (!userData?.userId) {
 			return reply.status(401).send({
 				success: false,
 				error: 'Authentication required'
 			});
 		}
 
-		const decoded = request.server.jwt.verify(token);
-		const user = await User.findByPk(decoded.userId);
+		const user = await User.findByPk(userData.userId);
 
 		if (!user) {
 			return reply.status(404).send({
@@ -1155,335 +1107,7 @@ async function initDeleteAccount(request, reply) {
 }
 
 
-async function verifyNewEmail(request, reply) {
-    const trlt = getTranslations(request.query.lang || "eng");
-    try {
-        const { token } = request.query;
-        
-        if (!token) {
-            return reply.type('text/html').code(400).send(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Email Verification - Missing Token</title>
-                    <meta charset="UTF-8">
-                </head>
-                <body>
-                    <h2>Error</h2>
-                    <p>Verification token is missing.</p>
-                </body>
-                </html>
-            `);
-        }
 
-        // Email değişiklik bilgilerini al
-        const changeData = utils.tempStorage.get(`change_${token}`);
-        if (!changeData || changeData.type !== 'email_change_pending' || changeData.token !== token) {
-            return reply.type('text/html').code(400).send(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Email Change - Error</title>
-                    <meta charset="UTF-8">
-                    <style>
-                        body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
-                        .error { color: #d32f2f; text-align: center; }
-                    </style>
-                </head>
-                <body>
-                    <div class="error">
-                        <h2>Email Change Data Not Found</h2>
-                        <p>Email change request has expired or is invalid.</p>
-                    </div>
-                </body>
-                </html>
-            `);
-        }
-
-        // Token süresini kontrol et
-        if (changeData.expires < new Date()) {
-            utils.tempStorage.delete(`change_${token}`);
-            utils.tempStorage.delete(changeData.newEmail);
-            return reply.type('text/html').code(400).send(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Email Change - Expired</title>
-                    <meta charset="UTF-8">
-                </head>
-                <body>
-                    <div class="error">
-                        <h2>Email Change Request Expired</h2>
-                        <p>The email change request has expired. Please try again.</p>
-                    </div>
-                </body>
-                </html>
-            `);
-        }
-
-        // Kullanıcıyı bul
-        const user = await User.findByPk(changeData.userId);
-        if (!user) {
-            return reply.type('text/html').code(404).send(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Email Change - User Not Found</title>
-                    <meta charset="UTF-8">
-                    <style>
-                        body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
-                        .error { color: #d32f2f; text-align: center; }
-                    </style>
-                </head>
-                <body>
-                    <div class="error">
-                        <h2>User Not Found</h2>
-                        <p>The user account could not be found.</p>
-                    </div>
-                </body>
-                </html>
-            `);
-        }
-
-        // Email'i güncelle
-        const oldEmail = user.email;
-        await user.update({ email: changeData.newEmail });
-
-        // Tüm temp data'yı temizle
-        utils.tempStorage.delete(`change_${token}`);
-        utils.tempStorage.delete(changeData.newEmail);
-        if (changeData.oldEmail) {
-            utils.tempStorage.delete(changeData.oldEmail);
-        }
-
-        // Kullanıcının tüm token'larını blacklist'e ekle (yeniden login zorla)
-        // Not: Bu noktada kullanıcının aktif token'larına erişimimiz yok
-        // Bu yüzden sadece veritabanındaki refresh token'ı temizleyelim
-        await user.clearRefreshToken();
-
-        return reply.type('text/html').send(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Email Verification Successful</title>
-                <meta charset="UTF-8">
-                <style>
-                    body { font-family: Arial, sans-serif; max-width: 500px; margin: 50px auto; padding: 20px; }
-                    .success { color: #2e7d32; text-align: center; }
-                    .info { background-color: #e3f2fd; padding: 15px; border-radius: 5px; margin: 20px 0; }
-                </style>
-            </head>
-            <body>
-                <div class="success">
-                    <h2>✅ Email Successfully Changed!</h2>
-                    <p>Your email has been updated from:</p>
-                    <p><strong>${oldEmail}</strong></p>
-                    <p>to:</p>
-                    <p><strong>${changeData.newEmail}</strong></p>
-                </div>
-                <div class="info">
-                    <p><strong>Next Step:</strong> Please login again with your new email address.</p>
-                    <p>For security reasons, you have been logged out from all devices.</p>
-                </div>
-                <div style="text-align: center;">
-                    <a href="https://${process.env.HOST_IP}:3030" style="background-color: #2e7d32; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Login</a>
-                </div>
-            </body>
-            </html>
-        `);
-    } catch (error) {
-        console.log('Verify new email error:', error);
-        return reply.type('text/html').code(500).send(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Email Verification - Error</title>
-                <meta charset="UTF-8">
-            </head>
-            <body>
-                <h2>Error</h2>
-                <p>An error occurred while verifying your email address.</p>
-            </body>
-            </html>
-        `);
-    }
-}
-
-async function requestPasswordChange(request, reply)
-{
-	const trlt = getTranslations(request.query.lang || "eng");
-	try
-	{
-		// JWT token'dan kullanıcıyı al
-		const cookieToken = request.cookies?.accessToken;
-		if (!cookieToken) {
-			return reply.status(401).send({
-				success: false,
-				error: 'Authentication required'
-			});
-		}
-
-		let userId, username, currentEmail;
-		try {
-			const decoded = request.server.jwt.verify(cookieToken);
-			userId = decoded.userId;
-			username = decoded.username;
-			currentEmail = decoded.email;
-		} catch (error) {
-			return reply.status(401).send({
-				success: false,
-				error: 'Invalid authentication token'
-			});
-		}
-
-		// Kullanıcıyı database'den al
-		const user = await User.findByPk(userId);
-		if (!user) {
-			return reply.status(404).send({
-				success: false,
-				error: 'User not found'
-			});
-		}
-
-		// Email'i al (JWT'den veya DB'den)
-		const actualEmail = currentEmail || user.email;
-		if (!actualEmail) {
-			return reply.status(400).send({
-				success: false,
-				error: 'User email not found'
-			});
-		}
-
-		// Password değiştirme token'ı oluştur
-		const changeToken = utils.storeVerificationToken(actualEmail, 'password_change');
-
-		try {
-			await utils.sendPasswordChangeRequest(actualEmail, username, changeToken);
-			return reply.send({
-				success: true,
-				message: 'Password change request sent. Please check your email.',
-				next_step: 'check_email'
-			});
-		} catch (emailError) {
-			console.log("Email service error:", emailError);
-			utils.tempStorage.delete(actualEmail);
-			return reply.status(500).send({
-				success: false,
-				error: 'Failed to send password change request'
-			});
-		}
-	}
-	catch (error)
-	{
-		console.log('Request password change error:', error);
-		return reply.status(500).send({
-			success: false,
-			error: 'Internal server error'
-		});
-	}
-}
-
-async function processPasswordChange(request, reply)
-{
-	const trlt = getTranslations(request.query.lang || "eng");
-	try
-	{
-		const { token, currentPassword, newPassword } = request.body;
-
-		if (!token || !currentPassword || !newPassword) {
-			return reply.status(400).send({
-				success: false,
-				error: 'Missing required fields'
-			});
-		}
-
-		// Token'ı kontrol et
-		let userEmail = null;
-		for (const [email, data] of utils.tempStorage.entries()) {
-			if (data.type === 'password_change' && data.token === token) {
-				if (data.expires > new Date()) {
-					userEmail = email;
-					break;
-				} else {
-					utils.tempStorage.delete(email);
-				}
-			}
-		}
-
-		if (!userEmail) {
-			return reply.status(400).send({
-				success: false,
-				error: 'Invalid or expired token'
-			});
-		}
-
-		// Kullanıcıyı email ile bul
-		const user = await User.findByEmail(userEmail);
-		if (!user) {
-			return reply.status(404).send({
-				success: false,
-				error: 'User not found'
-			});
-		}
-
-		// Mevcut şifreyi kontrol et
-		const isPasswordValid = await user.validatePassword(currentPassword);
-		if (!isPasswordValid) {
-			return reply.status(400).send({
-				success: false,
-				error: 'Current password is incorrect'
-			});
-		}
-
-		// Yeni şifre validasyonu
-		const passwordValidation = utils.validatePassword(newPassword);
-		if (!passwordValidation.isValid) {
-			return reply.status(400).send({
-				success: false,
-				error: passwordValidation.errors.join(', ')
-			});
-		}
-
-		// Yeni şifrenin eski şifreyle aynı olmadığını kontrol et
-		const isSamePassword = await user.validatePassword(newPassword);
-		if (isSamePassword) {
-			return reply.status(400).send({
-				success: false,
-				error: 'New password must be different from current password'
-			});
-		}
-
-		// Şifreyi güncelle
-		user.password = newPassword;
-		await user.save();
-
-		// Token'ı temizle
-		utils.tempStorage.delete(userEmail);
-
-		// Tüm refresh token'ları temizle (güvenlik için)
-		await user.clearRefreshToken();
-
-		// Cookie'leri temizle
-		reply.clearCookie('accessToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
-		reply.clearCookie('refreshToken', { path: '/', httpOnly: true, secure: true, sameSite: 'lax' });
-		reply.clearCookie('authStatus', { path: '/', secure: true, sameSite: 'lax' });
-
-		return reply.send({
-			success: true,
-			message: 'Password successfully changed. Please login with your new password.',
-			next_step: 'login',
-			logout: true // Frontend'e logout yapması gerektiğini belirt
-		});
-	}
-	catch (error)
-	{
-		console.log('Process password change error:', error);
-		return reply.status(500).send({
-			success: false,
-			error: 'Internal server error'
-		});
-	}
-}
 export default
 {
     register,
@@ -1491,16 +1115,11 @@ export default
     verifyEmail,
     verify2FA,
     logout,
-    refreshToken,
     checkTokenBlacklist,
     autoRefreshToken,
-    blacklistTokens,
     initEmailChange,
     confirmEmailChange,
-    requestPasswordChange,
-    processPasswordChange,
     initPasswordChange,
     confirmPasswordChange,
-    initDeleteAccount,
-    verifyNewEmail
+    initDeleteAccount
 };

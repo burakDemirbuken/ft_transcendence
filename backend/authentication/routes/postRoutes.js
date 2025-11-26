@@ -21,18 +21,22 @@ export async function postRoutes(fastify, options)
 				    username: 
 					{
 						type: 'string',
-						minLength: 3,
-						maxLength: 50
+						minLength: 1,
+						maxLength: 20,
+						pattern: '^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$'
 					},
 				    email:
 					{
 						type: 'string',
-						format: 'email'
+						format: 'email',
+						minLength: 5,
+						maxLength: 254
 					},
 				    password:
 					{ 
 						type: 'string',
-						minLength: 8
+						minLength: 8,
+						maxLength: 128
 					}
 				}	
 			},
@@ -66,11 +70,14 @@ export async function postRoutes(fastify, options)
                 {
                     login:
 					{
-						type: 'string' 
+						type: 'string',
+						minLength: 1
 					},
                     password:
 					{
-						type: 'string'
+						type: 'string',
+						minLength: 8,
+						maxLength: 128
 					}
                 }
             },
@@ -88,40 +95,7 @@ export async function postRoutes(fastify, options)
         }
     }, postController.login);
 
-    fastify.post('/verify-email',
-    {
-        schema:
-        {
-            body:
-            {
-                type: 'object',
-                required:
-				[
-					'token'
-				],
-                properties:
-                {
-                    token:
-					{
-						type: 'string',
-						minLength: 32,
-						maxLength: 64
-					}
-                }
-            },
-            querystring:
-            {
-                type: 'object',
-                properties:
-                {
-                    lang:
-					{
-						type: 'string'
-					}
-                }
-            }
-        }
-    }, postController.verifyEmail);
+
 
     fastify.post('/verify-2fa',
     {
@@ -185,23 +159,7 @@ export async function postRoutes(fastify, options)
     	}
     }, postController.logout);
 
-    fastify.post('/refresh',
-    {
-		schema:
-		{
-		    querystring:
-		    {
-		    	type: 'object',
-		    	properties:
-		    	{
-		    	    lang:
-					{
-						type: 'string'
-					}
-		    	}
-		    }
-		}
-    }, postController.refreshToken);
+
 
     fastify.post('/check-token-blacklist',
     {
@@ -225,27 +183,7 @@ export async function postRoutes(fastify, options)
   		}
     }, postController.checkTokenBlacklist);
 
-    fastify.post('/blacklist-tokens',
-    {
-    	schema:
-    	{
-    		body:
-    		{
-    			type: 'object',
-    			properties:
-    			{
-    				accessToken:
-					{
-						type: 'string'
-					},
-    				refreshToken:
-					{
-						type: 'string'
-					}
-    			}
-    		}
-    	}
-    }, postController.blacklistTokens);
+
 
     fastify.post('/auto-refresh',
 	{
@@ -339,70 +277,9 @@ export async function postRoutes(fastify, options)
 		}
 	}, postController.confirmEmailChange);
 
-    fastify.post('/request-password-change',
-    {
-        schema:
-        {
-            querystring:
-            {
-                type: 'object',
-                properties:
-                {
-                    lang:
-                    {
-                        type: 'string'
-                    }
-                }
-            }
-        }
-    }, postController.requestPasswordChange);
 
-	fastify.post('/process-password-change',
-    {
-        schema:
-        {
-            body:
-            {
-                type: 'object',
-                required:
-                [
-                    'token',
-                    'currentPassword',
-                    'newPassword'
-                ],
-                properties:
-                {
-                    token:
-                    {
-                        type: 'string',
-                        minLength: 32,
-                        maxLength: 64
-                    },
-                    currentPassword:
-                    {
-                        type: 'string',
-                        minLength: 6
-                    },
-                    newPassword:
-                    {
-                        type: 'string',
-                        minLength: 8
-                    }
-                }
-            },
-            querystring:
-            {
-                type: 'object',
-                properties:
-                {
-                    lang:
-                    {
-                        type: 'string'
-                    }
-                }
-            }
-        }
-    }, postController.processPasswordChange);
+
+
 
 	fastify.post('/init-password-change',
 	{

@@ -2,12 +2,9 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-// Email şifresi ZORUNLU - .env'de olmalı
 if (!process.env.EMAIL_PASS) {
   console.error('❌ CRITICAL: EMAIL_PASS is not set in .env file!');
-  console.error('   Email service will NOT work without this.');
-  console.error('   Please set EMAIL_PASS in your .env file');
-  process.exit(1); // Email olmadan servis çalışmamalı
+  process.exit(1);
 }
 
 if (!process.env.EMAIL_USER) {
@@ -23,11 +20,7 @@ export const config = {
     from: process.env.EMAIL_FROM || `Transcendence <${process.env.EMAIL_USER}>`
   },
   server: {
-    port: process.env.EMAIL_PORT || 3005,
+    port: parseInt(process.env.EMAIL_PORT) || 3005,
     host: process.env.HOST || '0.0.0.0',
-  },
-  app: {
-    name: 'ft_transcendence',
-    url: process.env.APP_URL || 'http://localhost:3000'
   }
 }

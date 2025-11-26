@@ -10,7 +10,6 @@ import I18n from './utils/I18n.js';
 import { getAuthToken } from './utils/auth.js';
 import { removeAuthToken } from './utils/auth.js';
 import { showNotification } from './utils/notification.js';
-import doubleFetch from "./utils/doubleFetch.js";
 
 // Dynamic API base URL based on current hostname
 export const API_BASE_URL = `https://${window.location.hostname}:3030/api`;
@@ -93,7 +92,7 @@ async function logout() {
 		const hasToken = getAuthToken();
 		if (hasToken)
 		{
-			const response = await doubleFetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref") ?? 'eng'}`, {
+			const response = await fetch(`${API_BASE_URL}/auth/logout?lang=${localStorage.getItem("langPref") ?? 'eng'}`, {
 				method: "POST",
 				credentials: "include",
 			});

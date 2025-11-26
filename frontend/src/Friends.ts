@@ -5,6 +5,10 @@ import { showNotification } from "./utils/notification.js";
 import { getJsTranslations } from "./utils/I18n.js";
 import { API_BASE_URL } from "./index.js";
 
+// Global translation and language preference
+let langPref: string;
+let translations: any;
+
 let friendSocket = null;
 
 function safeSend(msg:string, notif:string = null)
@@ -268,7 +272,6 @@ async function updateUserList(list, domContainer, type: "friend" | "request" | "
 	removeUsers(newUserList, domContainer);
 
 	if (list.length === 0) {
-		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 		const emptyCard = document.createElement('div');
 		emptyCard.className = 'friend list-empty';
 		const emptyListText = translations?.friends?.emptyList?.[type] ?? `You have no ${type}s for now...`;
@@ -323,6 +326,10 @@ export default class extends AView {
 	}
 
 	async setEventHandlers() {
+		// Initialize language preference and translations
+		langPref = localStorage.getItem("langPref") ?? 'eng';
+		translations = await getJsTranslations(langPref);
+
 		document.addEventListener("click", handleOverlay);
 		document.querySelector("#card-exit")?.addEventListener("click", handleOverlay);
 		document.addEventListener("keydown", esc);

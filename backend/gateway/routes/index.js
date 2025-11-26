@@ -1,6 +1,9 @@
+import { verifyJWT } from '../plugins/authorization.js';
+
 export default async function allRoutes(fastify) {
-	fastify.register(async function (fastify) {
-		fastify.addHook('onRequest', async (request, reply) => {
+	fastify.register(async function (fastify) {		
+		
+		fastify.addHook('preHandler', async (request, reply) => {
 			console.log(`Incoming request: ${request.method} ${request.url}`); 
 			if (fastify.isAdminPath && fastify.isAdminPath(request.url)) {
 				if (!request.user || request.user.role !== 'admin') {
@@ -17,6 +20,7 @@ export default async function allRoutes(fastify) {
 			method: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
 			url: '/:serviceName/*',
 			handler: async function (request, reply) {
+				
 				const serviceName = request.params.serviceName;
 				const restPath = request.params['*'] || '';
 				const servicePath = fastify.services[serviceName];
@@ -36,7 +40,11 @@ export default async function allRoutes(fastify) {
 
 				console.log(`Forwarding ${request.method} request to: ${finalUrl}`);
 
-				try {
+				try
+				{
+					// JWT verification MUST be awaited
+					await verifyJWT(fastify, request, reply);
+					
 					// Forward the request to the target service
 					const headers = { ...request.headers };
 
@@ -49,6 +57,11 @@ export default async function allRoutes(fastify) {
 						if (request.user.role) {
 							headers['x-user-role'] = request.user.role;
 						}
+					}
+					
+					// Forward cookies to backend service
+					if (request.headers.cookie) {
+						headers['cookie'] = request.headers.cookie;
 					}
 
 					// Remove problematic headers

@@ -4,6 +4,15 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 async function globalsPlugin(fastify, options) {
+	// Validate required environment variables
+	if (!process.env.JWT_SECRET) {
+		throw new Error('JWT_SECRET environment variable is required! Please set it in .env file');
+	}
+
+	if (process.env.JWT_SECRET.length < 32) {
+		console.warn('⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security!');
+	}
+
 	const services = {
 		auth: "http://authentication:3001",
 		gateway: "http://gateway:3000",
@@ -22,7 +31,7 @@ async function globalsPlugin(fastify, options) {
 
 	const secrets =
 	{
-		jwtSecret: process.env.JWT_SECRET || 'default_secret',
+		jwtSecret: process.env.JWT_SECRET,
 	};
 
 	const publicPaths =
@@ -31,7 +40,6 @@ async function globalsPlugin(fastify, options) {
 		/^\/auth\/verify-email/,
 		/^\/auth\/login$/,
 		/^\/auth\/verify-2fa$/,
-		/^\/auth\/check-email$/,
 		/^\/auth\/check-username$/,
 		/^\/auth\/health$/,
 		/^\/auth\/hellokitty$/,

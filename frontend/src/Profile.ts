@@ -1,7 +1,6 @@
 import { getAuthHeaders } from './utils/auth.js';
 import { getJsTranslations } from './utils/I18n.js';
 import { API_BASE_URL } from './index.js';
-import doubleFetch from "./utils/doubleFetch.js";
 import AView from "./AView.js";
 import { showNotification } from './utils/notification.js';
 declare const Chart: any; // Global Chart.js nesnesini tanımlar
@@ -9,6 +8,10 @@ declare const Chart: any; // Global Chart.js nesnesini tanımlar
 function getCSSVar(name: string): string {
 	return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
+
+// Global translation and language preference
+let langPref: string;
+let translations: any;
 
 class ManagerProfile {
 	private currentTab: string;
@@ -73,7 +76,6 @@ class ManagerProfile {
 
 	private async createPerformanceChart(): Promise<void> {
 		const perfCtx = document.getElementById('performanceChart') as HTMLCanvasElement;
-		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
 		if (this.showcharts.performance) {
 			this.showcharts.performance.destroy();
@@ -154,14 +156,13 @@ class ManagerProfile {
 		let wins = parseInt(winLossCtx.dataset.wins || '0', 10);
 		let losses = parseInt(winLossCtx.dataset.losses || '0', 10);
 
-		// Eğer hiç veri yoksa default değerleri kullan
-		if (wins === 0 && losses === 0) {
-			wins = 0;
-			losses = 0;
-		}
+	// Eğer hiç veri yoksa default değerleri kullan
+	if (wins === 0 && losses === 0) {
+		wins = 0;
+		losses = 0;
+	}
 
-		const translations = await getJsTranslations(localStorage.getItem("langPref"));
-		let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost'];
+	let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost'];
 
 		this.charts.winLoss = new Chart(winLossCtx, {
 			type: 'doughnut',
@@ -433,7 +434,8 @@ class ManagerProfile {
 	}
 
 	public async updateChartLanguage(): Promise<void> {
-		const translations = await getJsTranslations(localStorage.getItem("langPref"));
+		// Reload translations when language changes
+		translations = await getJsTranslations(localStorage.getItem("langPref"));
 
 		let chart = this.showcharts.performance;
 		this.perfChartData.labelName = translations?.profile?.weekly?.label ?? this.perfChartData.labelName;
@@ -640,7 +642,8 @@ export function updateTournamentLanguage() {
 
 // Overlay'deki çevirileri güncelle
 async function updateMatchOverlayLanguage(content: HTMLDivElement) {
-	const translations = await getJsTranslations(localStorage.getItem("langPref"));
+	// Reload translations when language changes
+	translations = await getJsTranslations(localStorage.getItem("langPref"));
 
 	// Overlay'den matchIndex'i al
 	const overlay = document.getElementById('match-overlay') as HTMLDivElement;
@@ -749,7 +752,7 @@ async function showMatchDetails(matchIndex: number) {
         const userName = document.querySelector('.username')?.textContent?.replace('@', '');
         if (!userName) return;
 
-        const response = await doubleFetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
+        const response = await fetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
             credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
@@ -764,9 +767,6 @@ async function showMatchDetails(matchIndex: number) {
         const match = matches[matchIndex];
 
         if (!match) return;
-
-        // Çevirileri her seferinde al (dil değişikliğini yakala)
-        const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
         // Overlay'i doldur
         const overlay = document.getElementById('match-overlay') as HTMLDivElement;
@@ -1135,6 +1135,10 @@ export default class extends AView {
 	private offlineHandler = () => profileManager.setAvatarStatus('offline');
 
 	async setEventHandlers() {
+		// Initialize language preference and translations
+		langPref = localStorage.getItem("langPref") ?? 'eng';
+		translations = await getJsTranslations(langPref);
+
 		document.addEventListener("onload", onLoad);
 		document.addEventListener("mousemove", handleCardMouseMove);
 		document.addEventListener("mouseout", resetCardShadow); // fare dışarı çıkınca gölgeyi sıfırlar
@@ -1283,7 +1287,7 @@ export default class extends AView {
 
 async function fetchMatchHistory(userName: string) {
 	try {
-		const response = await doubleFetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
+		const response = await fetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
 			credentials: 'include',
 			headers: {
 				'Content-Type': 'application/json',
@@ -1326,7 +1330,6 @@ async function populateMatchHistory(userName: string) {
 
 	if (matches.length === 0) {
 		// Eğer maç yoksa bilgi mesajı göster
-		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 		const emptyRow = document.createElement('div');
 		emptyRow.className = 'match-row empty-state';
 		emptyRow.style.gridColumn = '1 / -1';
@@ -1338,8 +1341,7 @@ async function populateMatchHistory(userName: string) {
 		return;
 	}
 
-	// Çeviriyi bir kez al
-	const translations = await getJsTranslations(localStorage.getItem("langPref"));
+	// Use global translations
 	const winText = translations?.profile?.mhistory?.win || 'Victory';
 	const loseText = translations?.profile?.mhistory?.lose || 'Defeat';
 
@@ -1407,7 +1409,7 @@ async function populateRecentMatches(userName: string) {
 
 	try {
 		// Match history'yi çek
-		const response = await doubleFetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
+		const response = await fetch(`${API_BASE_URL}/profile/match-history?userName=${encodeURIComponent(userName)}`, {
 			credentials: 'include',
 			headers: {
 				'Content-Type': 'application/json',
@@ -1427,16 +1429,12 @@ async function populateRecentMatches(userName: string) {
 		matchesList.innerHTML = '';
 
 		if (matches.length === 0) {
-			const translations = await getJsTranslations(localStorage.getItem("langPref"));
 			matchesList.innerHTML = `<p style="text-align: center; color: var(--color-muted);">${translations?.profile?.mhistory?.nomatch || 'No match history yet'}</p>`;
 			return;
 		}
 
 		// Son 4 maçı al
 		const recentMatches = matches.slice(-4).reverse();
-
-		// Çevirileri al
-		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
 		recentMatches.forEach((match: any) => {
 			const isUserInTeamOne = match.teamOne?.PlayerOne?.userName === userName ||
@@ -1563,7 +1561,6 @@ async function updateWinLossChart(wins: number, losses: number) {
 	winLossCtx.dataset.losses = losses.toString();
 
 	// Çeviriler al
-	const translations = await getJsTranslations(localStorage.getItem("langPref"));
 	const labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost'];
 
 	// Chart'ı güncelle veya oluştur
@@ -1641,7 +1638,7 @@ async function setAchievementStats(user: any) {
 async function fetchTournamentHistory(userName: string) {
 	try {
 		// Endpoint'i deneyin - hangisi çalışırsa onu kullanın
-		let response = await doubleFetch(
+		let response = await fetch(
 			`${API_BASE_URL}/profile/tournament-history?userName=${encodeURIComponent(userName)}`,
 			{
 				credentials: 'include',
@@ -1654,7 +1651,7 @@ async function fetchTournamentHistory(userName: string) {
 
 		// Eğer 404 ise alternatif endpoint'i deneyin
 		if (response.status === 404) {
-			response = await doubleFetch(
+			response = await fetch(
 				`${API_BASE_URL}/tournaments/user/${encodeURIComponent(userName)}`,
 				{
 					credentials: 'include',
@@ -1695,7 +1692,6 @@ async function populateTournamentHistory(userName: string) {
 	existingEmptyStates.forEach(row => row.remove());
 
 	if (tournaments.length === 0) {
-		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 		const emptyRow = document.createElement('div');
 		emptyRow.className = 'match-row empty-state';
 		emptyRow.style.gridColumn = '1 / -1';
@@ -1705,8 +1701,6 @@ async function populateTournamentHistory(userName: string) {
 		tournamentTable.appendChild(emptyRow);
 		return;
 	}
-
-	const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
 	tournaments.forEach((tournament: any) => {
 		const tournamentRow = document.createElement('div');
@@ -1833,7 +1827,7 @@ function openTournamentBracket(tournamentId: string) {
 
 async function onLoad() {
 	try {
-		const Profile = await doubleFetch(`${API_BASE_URL}/profile/profile`,
+		const Profile = await fetch(`${API_BASE_URL}/profile/profile`,
 		{
 			credentials: 'include',
 			headers: {
@@ -1863,7 +1857,7 @@ async function onLoad() {
 
 export async function onUserProfile(userName: string): Promise<boolean> {
 	try {
-		const userProfile = await doubleFetch(`${API_BASE_URL}/profile/profile?userName=${userName}`);
+		const userProfile = await fetch(`${API_BASE_URL}/profile/profile?userName=${userName}`);
 
 		if (userProfile.ok) {
 			const user = await userProfile.json();
