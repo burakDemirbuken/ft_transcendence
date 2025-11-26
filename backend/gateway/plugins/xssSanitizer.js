@@ -1,8 +1,10 @@
 import fp from 'fastify-plugin'
 import xss from 'xss'
-export default fp(async (fastify) =>
-{
 
+
+
+async function xssVerify(fastify)
+{
 	const xssOptions =
 	{
 		whiteList: {}, 
@@ -62,4 +64,7 @@ export default fp(async (fastify) =>
 		sanitizeRequestBody(request)
 		sanitizeQueryParams(request)
 	})
-})
+
+}
+
+export default fp(xssVerify, { name: 'xss-sanitizer', fastify: '4.x' });

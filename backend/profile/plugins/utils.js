@@ -3,22 +3,6 @@ import fp from 'fastify-plugin'
 export default fp(async (fastify) => {
     async function getDataFromToken(request)
     {
-        // Gateway'den gelen header'ları kontrol et (öncelikli)
-        const userId = request.headers['x-user-id'];
-        const username = request.headers['x-user-username'];
-        const email = request.headers['x-user-email'];
-        
-        if (userId && username) {
-            // Gateway zaten token verify etmiş, direkt kullan
-            return {
-                userId: userId,
-                username: username,
-                email: email || '',
-                role: request.headers['x-user-role'] || null
-            };
-        }
-        
-        // Fallback: Cookie'den token oku (direkt erişim için)
         const token = request.cookies.accessToken;
         if (!token)
             return null;
