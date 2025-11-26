@@ -1602,7 +1602,7 @@ async function connectWebSocket() {
 
 		// Extract user information
 		currentUserId = profileData.profile.userName;
-		currentUserName = profileData.profile.userName;
+		currentUserName = profileData.profile.displayName;
 		currentDisplayName = profileData.profile.displayName;
 	} catch (error) {
 		showNotification('Failed to load profile data', 'error');
@@ -2758,7 +2758,13 @@ export default class extends AView {
 				}
 			};
 
-			roomSocket.send("create", data);
+			try {
+				roomSocket?.send("create", data); 
+			} catch (error) {
+				showNotification("Failed to create room", "error");
+				return ;
+			}
+
 			showNotification('Creating room...', 'info');
 		});
 
@@ -2791,7 +2797,12 @@ export default class extends AView {
 			}
 
 			currentGameMode = 'custom';
-			roomSocket.send("join", { roomId: roomCode, gameMode: 'classic' });
+			try {
+				roomSocket?.send("join", { roomId: roomCode, gameMode: 'classic' });
+			} catch (error) {
+				showNotification("Failed to join room", "error");
+				return ;
+			}
 			showNotification(`You are joining the room with code ${roomCode}...`, 'info');
 		});
 
@@ -2804,10 +2815,12 @@ export default class extends AView {
 		    const startButton = this as HTMLButtonElement;
 		    startButton.disabled = true;
 		    startButton.innerHTML = '<div class="loading"></div> Starting...';
-		    roomSocket.send("start", {
-		        roomId: currentRoomId,
-		        gameMode: 'classic'
-		    });
+			try {
+				roomSocket?.send("start", { roomId: currentRoomId, gameMode: 'classic' });
+			} catch (error) {
+				showNotification("Failed to start game", "error");
+				return ;
+			}
 		    showNotification('🚀 The game is starting!', 'success');
 		    // Timeout - eğer yanıt gelmezse butonu tekrar etkinleştir
 		    setTimeout(() => {
@@ -2817,7 +2830,6 @@ export default class extends AView {
 		        }
 		    }, 10000);
 		});
-
 	}
 
 private initAIGameListeners(): void {
@@ -2904,7 +2916,13 @@ private initAIGameListeners(): void {
             startBtn.disabled = true;
             startBtn.innerHTML = '<div class="loading"></div> Starting...';
 
-            roomSocket.send("create", data);
+			try {
+				roomSocket?.send("create", data);
+			} catch (error) {
+				showNotification("Failed to create room", "error");
+				return ;
+			}
+
             showNotification('🤖 Creating an AI game...', 'info');
 
             setTimeout(() => {
@@ -2929,10 +2947,12 @@ private initAIGameListeners(): void {
             startButton.disabled = true;
             startButton.innerHTML = '<div class="loading"></div> Starting...';
 
-            roomSocket.send("start", {
-                roomId: currentRoomId,
-                gameMode: 'ai'
-            });
+			try {
+				roomSocket?.send("start", { roomId: currentRoomId, gameMode: 'ai' });
+			} catch (error) {
+				showNotification("Failed to start game", "error");
+				return ;
+			}
 
             showNotification('🚀 AI game starting!', 'success');
 
@@ -2985,7 +3005,12 @@ private initAIGameListeners(): void {
             const gamePage = document.getElementById('game-page');
 
             if (roomSocket) {
-                roomSocket.send("leave", { roomId: currentRoomId });
+				try {
+					roomSocket?.send("leave", { roomId: currentRoomId });
+				} catch (error) {
+					showNotification("Failed to leave from room", "error");
+					return ;
+				}
                 currentRoomId = null;
             }
 
@@ -3049,7 +3074,12 @@ private initAIGameListeners(): void {
 
 			// Güvenli socket gönderimi
 			if (roomSocket) {
-				roomSocket.send("create", data);
+				try {
+					roomSocket?.send("create", data);
+				} catch (error) {
+					showNotification("Failed to create room", "error");
+					return ;
+				}
 				showNotification(`Creating tournament "${tournamentName}"...`, 'info');
 			} else {
 				showNotification('Socket connection error!', 'error');
@@ -3078,10 +3108,12 @@ private initAIGameListeners(): void {
 
 			// Güvenli socket gönderimi
 			if (roomSocket) {
-				roomSocket.send("join", {
-					roomId: tournamentCode,
-					gameMode: 'tournament'
-				});
+				try {
+					roomSocket?.send("join", { roomId: tournamentCode, gameMode: 'tournament' });
+				} catch (error) {
+					showNotification("Failed to join from room", "error");
+					return ;
+				}
 				showNotification(`You are participating in the tournament with code ${tournamentCode}...`, 'info');
 			} else {
 				showNotification('Socket connection error!', 'error');
@@ -3114,10 +3146,12 @@ private initAIGameListeners(): void {
             startButton.innerHTML = '<div class="loading"></div> Starting...';
 
             // WebSocket mesajı gönder - roomId'yi ekle
-            roomSocket.send("start", {
-                roomId: currentRoomId,
-                gameMode: 'tournament'
-            });
+			try {
+				roomSocket?.send("start", { roomId: currentRoomId, gameMode: 'tournament' });
+			} catch (error) {
+				showNotification("Failed to start game", "error");
+				return ;
+			}
             showNotification('🚀 The tournament is starting!', 'success');
 
             // Timeout - eğer yanıt gelmezse butonu tekrar etkinleştir
@@ -3149,12 +3183,12 @@ private initAIGameListeners(): void {
 
             const currentRound = tournamentData?.currentRoundNumber ?? 1;
 
-            roomSocket.send("start", {
-                roomId: currentRoomId,
-                round: currentRound + 1,
-                gameMode: 'tournament'
-            });
-
+			try {
+				roomSocket?.send("start", { roomId: currentRoomId, round: currentRound + 1, gameMode: 'tournament' });
+			} catch (error) {
+				showNotification("Failed to start game", "error");
+				return ;
+			}
             showNotification('🎮 The next round is starting!', 'success');
 
             setTimeout(() => {
@@ -3185,12 +3219,12 @@ private initAIGameListeners(): void {
 
                 const currentRound = tournamentData?.currentRoundNumber ?? 1;
 
-                roomSocket.send("start", {
-                    roomId: currentRoomId,
-                    round: currentRound + 1,
-                    isFinal: true,
-                    gameMode: 'tournament'
-                });
+				try {
+					roomSocket?.send("start", { roomId: currentRoomId, round: currentRound + 1, isFinal: true, gameMode: 'tournament' });
+				} catch (error) {
+					showNotification("Failed to start game", "error");
+					return ;
+				}
                 showNotification('🏆 The final round is starting!', 'success');
 
                 setTimeout(() => {
@@ -3221,7 +3255,12 @@ private initAIGameListeners(): void {
                 showNotification('Connection error!', 'error');
                 return;
             }
-            roomSocket.send("matchTournament", { roomId: currentRoomId });
+			try {
+				roomSocket?.send("matchTournament", { roomId: currentRoomId });
+			} catch (error) {
+				showNotification("Failed to match tournament", "error");
+				return ;
+			}
             showNotification('Matchmaking is underway...', 'info');
         });
 
@@ -3251,7 +3290,12 @@ private initAIGameListeners(): void {
 			backArrowBtn.addEventListener('click', () => {
 				// Leave room if in one
 				if (currentRoomId && roomSocket) {
-					roomSocket.send("leave", { roomId: currentRoomId });
+					try {
+						roomSocket.send("leave", { roomId: currentRoomId });
+					} catch (error) {
+						showNotification("Failed to leave from room", "error");
+						return ;
+					}
 					currentRoomId = null;
 				}
 				// Hide all waiting rooms

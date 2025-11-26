@@ -359,7 +359,7 @@ async function verify2FA(request, reply) {
 
         const accessToken = await reply.jwtSign(
             { userId: user.id, username: user.username, email: user.email, type: 'access' },
-            { expiresIn: '1m' }
+            { expiresIn: '4h' }
         );
         const refreshExpiry = rememberMe ? '30d' : '7d';
         const refreshToken = await reply.jwtSign(

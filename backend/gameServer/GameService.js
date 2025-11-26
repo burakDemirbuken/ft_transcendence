@@ -3,15 +3,7 @@ import WebSocketClient from './network/WebSocketClient.js';
 import GameManager from './GameManager.js';
 import Player from './Player.js';
 import TournamentManager from './Tournament/TournamentManager.js';
-/*
-exampleWebSocketMessage=
-{
-	matchId: '12345',
-	id: 'user1',
-	name: 'Player 1',
 
-*/
-// ws://localhost:3000
 class GameService
 {
 	constructor()
@@ -23,13 +15,6 @@ class GameService
 		this.connectionId = new Map(); //  playerId -> connectionId
 		this.players = new Map(); // playerId -> Player instance
 		this.connectingPlayers = new Set(); // userID'leri tutan geçici set
-
-		setInterval(() => {
-			console.log(`--- Connected Players: ${this.players.size} ---`);
-			this.players.forEach((player) => {
-				console.log(`Player ID: ${player.id}, Name: ${player.name}, Initialized: ${player.initialized}`);
-			});
-		}, 1000);
 		this.gameManager.start();
 		this.tournamentManager.start();
 		this.setupRoomNetwork();
@@ -290,18 +275,6 @@ class GameService
 						break;
 					case 'finished':
 						this.roomSocket.send('finished', { roomId: roomId, ...payload });
-
-						// winnerı kaçıncı takımsa ait olduğunu ve idlerini gönder
-						// winner: 1
-						/* fetch('http://user:3006/internal/match', {
-							method: 'POST',
-							headers: { 'Content-Type': 'application/json' },
-							body: JSON.stringify({
-
-								gameId: gameId,
-								...results
-							})
-						}); */
 						break;
 					default:
 						console.error('❌ Unhandled game event type:', type);
@@ -332,7 +305,6 @@ class GameService
 			}
 		);
 		this.roomSocket.send('created', { roomId: roomId });
-		//this.sendPlayers(players, { type: 'tournament/initial' , payload: { gameMode: 'tournament', ... initData }});
 	}
 
 	getPlayer(playerId)

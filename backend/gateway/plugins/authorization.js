@@ -8,7 +8,7 @@ async function attemptTokenRefresh(fastify, request, reply, refreshToken) {
         if (refreshDecoded.type !== 'refresh')
             return ( false );
  
-        const newAccessToken = fastify.jwt.sign({ userId: refreshDecoded.userId, username: refreshDecoded.username, email: refreshDecoded.email || '', type: 'access'},{ expiresIn: '1m'});
+        const newAccessToken = fastify.jwt.sign({ userId: refreshDecoded.userId, username: refreshDecoded.username, email: refreshDecoded.email || '', type: 'access'},{ expiresIn: '4h'});
         request.user = fastify.jwt.verify(newAccessToken);
         request.newAccessToken = newAccessToken
         reply.setCookie('accessToken', newAccessToken, { httpOnly: true, secure: true, sameSite: 'Lax', path: '/'});
