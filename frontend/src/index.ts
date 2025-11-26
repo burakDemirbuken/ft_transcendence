@@ -158,17 +158,6 @@ document.addEventListener("DOMContentLoaded", () =>
 	}
 });
 
-function toggleClassOnResize() {
-	const element = document.querySelector("#navbar");
-	const mediaQuery = window.matchMedia("(max-width: 1080px)");
-
-	if (mediaQuery.matches)
-		element.classList.add("collapse");
-}
-
-window.addEventListener('load', toggleClassOnResize);
-window.addEventListener('resize', toggleClassOnResize);
-
 // Handle browser back/forward
 window.addEventListener("popstate", (event) => {
 	const page = (event.state && event.state.page) || "login";
