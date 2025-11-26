@@ -99,7 +99,7 @@ export default fp(async function friendChanges(fastify) {
 				body: JSON.stringify({ userName: peerName })
 			})
 			if (!peerProfileResponse.ok) {
-				fastify.log.error("Error response from profile service:", friendsProfiles.status, await friendsProfiles.text());peerProfileResponse.status, await peerProfileResponse.text());
+				fastify.log.error("Error response from profile service:", peerProfileResponse.status, await peerProfileResponse.text());
 				return { user: `${peerName} user does not exist.`, peer: null }
 			}
 
