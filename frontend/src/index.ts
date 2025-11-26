@@ -43,14 +43,14 @@ const router = async function(page:string) {
 	if (page === "profile" || page === "settings" || page === "friends" || page === "play") {
 		if (!hasToken) {
 			showNotification("User not authenticated. Please log in, redirecting to login page.", "info");
-			page = "login";
+			return navigateTo("login");
 		}
 	}
 
 	if (page === "login") {
 		if (hasToken) {
 			showNotification("User is already logged in, redirecting to home.", "info");
-			page = "home";
+			return navigateTo("home");
 		}
 	}
 
@@ -186,6 +186,6 @@ window.addEventListener("load", () => {
 
 	I18n.loadLanguage();
 
-	router(initialPage);
 	history.replaceState({ page: initialPage }, "", `/${initialPage}`);
+	router(initialPage);
 });
