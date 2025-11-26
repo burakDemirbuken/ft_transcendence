@@ -184,10 +184,6 @@ async function verify() {
 			});
 			const json = await response.json();
 			if (response.ok) {
-				console.info("SAVING USERNAME TO LOCAL STORAGE!!", json?.user?.username);
-				if (json?.user?.username) {
-					localStorage.setItem('userName', json.user.username);
-				}
 				showNotification("Successfully logged in!", "success");
 				document.querySelector("#navbar")?.classList.remove("logout");
 				navigateTo("home");

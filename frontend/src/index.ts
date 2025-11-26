@@ -35,7 +35,6 @@ const router = async function(page:string) {
 	const hasToken = getAuthToken();
 
 	if (!hasToken) {
-		console.log('User is not authenticated');
 		document.querySelector("#navbar")?.classList.add("logout");
 	} else {
 		connectFriendsWebSocket();
@@ -43,12 +42,14 @@ const router = async function(page:string) {
 
 	if (page === "profile" || page === "settings" || page === "friends" || page === "play") {
 		if (!hasToken) {
+			showNotification("User not authenticated. Please log in, redirecting to login page.", "info");
 			page = "login";
 		}
 	}
 
 	if (page === "login") {
 		if (hasToken) {
+			showNotification("User is already logged in, redirecting to home.", "info");
 			page = "home";
 		}
 	}

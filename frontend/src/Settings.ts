@@ -10,7 +10,6 @@ let pendingAction = null; // 'password', 'email' veya 'delete'
 let pendingData = null; // İlgili data
 
 async function hideSettingsOverlay() {
-	console.log("HIDE SETTINGS OVERLAY");
 	document.querySelector(".overlay")?.classList.add("hide-away");
 	document.querySelector(".settings-container")?.removeAttribute("inert");
 	const input = document.querySelector(".card input") as HTMLInputElement;
@@ -21,14 +20,12 @@ async function hideSettingsOverlay() {
 }
 
 async function showSettingsOverlay() {
-	console.log("SHOW SETTINGS OVERLAY");
 	document.querySelector(".overlay")?.classList.remove("hide-away");
 	document.querySelector(".settings-container")?.setAttribute("inert", "");
 }
 
 async function confirm2FACode(e) {
 	e.preventDefault();
-	console.log("CONFIRM 2FA CODE");
 
 	const form = e.target.closest('form');
 	const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
@@ -62,6 +59,7 @@ async function confirm2FACode(e) {
 			submitBtn.style.cursor = 'pointer';
 			return;
 		}
+		showNotification("Sending verification code...");
 		const response = await doubleFetch(`${API_BASE_URL}${endpoint}`, {
 			method: method,
 			credentials: 'include',
@@ -74,10 +72,8 @@ async function confirm2FACode(e) {
 		const result = await response.json();
 
 		if (response.ok) {
-			showNotification(result.message || "Change successful!", "success");
+			showNotification(result.message ?? "Change successful!", "success");
 			hideSettingsOverlay();
-
-			// Şifre değiştiyse ve logout gerekliyse
 
 			if (pendingAction === 'password' && result.logout) {
 				showNotification("Password changed! Logging out...", "success");
@@ -99,35 +95,30 @@ async function confirm2FACode(e) {
 				}, 1500);
 			}
 			else if (pendingAction === 'delete') {
-				console.log("🗑️ Account deletion successful, logging out...");
-				showNotification("Hesap başarıyla silindi. Hoşçakal!", "success");
+				showNotification("Account deletion successful, logging out...", "success");
 				await tokenManager.logout();
 				setTimeout(() => {
-					console.log("🔄 Redirecting to login page");
 					navigateTo('login');
 				}, 2000);
 			}
 		} else {
-			showNotification(result.error || "Verification failed", "error");
+			showNotification(result.error ?? "Verification failed", "error");
 			submitBtn.disabled = false;
 			submitBtn.style.opacity = '1';
 			submitBtn.style.cursor = 'pointer';
 		}
 	} catch (error) {
-		console.error("❌ Error during 2FA confirmation:", error);
-		showNotification(`System Error: ${error.message}`, "error");
-		// Hata durumunda butonu tekrar aktif et
+		showNotification(`System Error: ${error.message ?? "Failed to confirm 2FA code"}`, "error");
 		submitBtn.disabled = false;
 		submitBtn.style.opacity = '1';
 		submitBtn.style.cursor = 'pointer';
 	}
 
-	form.querySelectorAll('input').forEach((input: HTMLInputElement) => input.value = '');
+	form?.querySelectorAll('input').forEach((input: HTMLInputElement) => input.value = '');
 }
 
 async function deleteAccount(e) {
 	e.preventDefault();
-	console.log("INIT ACCOUNT DELETION");
 
 	const form = e.target.closest('form');
 	const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
@@ -140,6 +131,7 @@ async function deleteAccount(e) {
 	}
 
 	try {
+		showNotification("Sending deletion request...");
 		const res = await doubleFetch(`${API_BASE_URL}/auth/init-delete-account`, {
 			method: 'POST',
 			credentials: 'include',
@@ -153,13 +145,13 @@ async function deleteAccount(e) {
 		if (res.ok) {
 			pendingAction = 'delete';
 			pendingData = { password };
-			showNotification(json.message || "Hesap silme doğrulama kodu email adresinize gönderildi", "success");
+			showNotification(json.message ?? "Verification code has been sent to your email", "success");
 			showSettingsOverlay();
 		} else {
-			showNotification(json.error, "error");
+			showNotification(json.error ?? "Account deletion failed", "error");
 		}
 	} catch (error) {
-		showNotification(`System Error: ${error.message}`, "error");
+		showNotification(`System Error: ${error.message ?? "Failed to delete account"}`, "error");
 	}
 }
 
@@ -169,12 +161,12 @@ function changeAvatar() {
 
 async function sendAvatarChangeReq(e) {
 	e.preventDefault();
-	console.log("SEND AVATAR CHANGE REQ");
 
 	try {
 		const formData = new FormData();
 		formData.append('avatar', e.target.files[0]);
 
+		showNotification("Sending avatar change request...");
 		const res = await doubleFetch(`${API_BASE_URL}/static/avatar`, {
 			method: 'POST',
 			credentials: 'include',
@@ -189,24 +181,22 @@ async function sendAvatarChangeReq(e) {
 			showNotification("Avatar changed successfully", "success");
 		}
 		else {
-			console.log(res.statusText);
-			showNotification("Failed to change avatar", "error");
+			showNotification(`Failed to change avatar with status: ${res.statusText}`, "error");
 		}
 	} catch (error) {
-		console.error("❌ Error during avatar change request:", error);
-		showNotification(`System Error: ${error.message}`, "error");
+		showNotification(`System Error: ${error.message ?? "Failed to change avatar"}`, "error");
 	}
 }
 
 async function sendDNameChangeReq(e) {
 	e.preventDefault();
-	console.log("SEND DNAME CHANGE REQ");
 
 	const form = e.target.closest('form');
 	const formData = new FormData(form);
 	const dname = formData.get('dname') as string;
 
 	try {
+		showNotification("Sending display name change request...");
 		const getProfileDatas = await doubleFetch(`${API_BASE_URL}/profile/displaynameupdate`, {
 			method: "POST",
 			credentials: 'include',
@@ -217,15 +207,12 @@ async function sendDNameChangeReq(e) {
 			body: JSON.stringify({userName: currentUserName, dname})
 		});
 		if (getProfileDatas.ok) {
-			console.log(await getProfileDatas.json());
 			showNotification("Display name updated successfully", "success");
 		} else {
-			console.log(getProfileDatas.statusText);
-			showNotification("Failed to update display name", "error");
+			showNotification(`Failed to update display name: ${getProfileDatas.statusText}`, "error");
 		}
 	} catch (error) {
-		console.error("❌ Error during profile update:", error);
-		showNotification(`System Error: ${error.message}`, "error");
+		showNotification(`System Error: ${error.message ?? "Failed to update display name"}`, "error");
 	}
 
 	form.querySelectorAll('input').forEach((input: HTMLInputElement) => input.value = '');
@@ -233,7 +220,6 @@ async function sendDNameChangeReq(e) {
 
 async function sendEmailChangeReq(e) {
 	e.preventDefault();
-	console.log("INIT EMAIL CHANGE");
 
 	const form = e.target.closest('form');
 	const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
@@ -257,6 +243,7 @@ async function sendEmailChangeReq(e) {
 	submitBtn.style.cursor = 'not-allowed';
 
 	try {
+		showNotification("Sending email change request...");
 		const response = await doubleFetch(`${API_BASE_URL}/auth/init-email-change`, {
 			method: 'POST',
 			credentials: 'include',
@@ -275,14 +262,13 @@ async function sendEmailChangeReq(e) {
 		if (response.ok) {
 			pendingAction = 'email';
 			pendingData = { newEmail };
-			showNotification(result.message || "Doğrulama kodu mevcut email adresinize gönderildi", "success");
+			showNotification(result.message ?? "Verification code has been sent to your email", "success");
 			showSettingsOverlay();
 		} else {
-			showNotification(result.error || "Failed to initiate email change", "error");
+			showNotification(result.error ?? "Failed to initiate email change", "error");
 		}
 	} catch (error) {
-		console.error("❌ Error during email change init:", error);
-		showNotification(`System Error: ${error.message}`, "error");
+		showNotification(`System Error: ${error.message ?? "Failed to initiate email change"}`, "error");
 	} finally {
 		// Butonu tekrar aktif et
 		submitBtn.disabled = false;
@@ -295,7 +281,6 @@ async function sendEmailChangeReq(e) {
 
 async function sendPassChangeReq(e) {
 	e.preventDefault();
-	console.log("INIT PASSWORD CHANGE");
 
 	const form = e.target.closest('form');
 	const submitBtn = form.querySelector('button[type="submit"]') as HTMLButtonElement;
@@ -320,6 +305,7 @@ async function sendPassChangeReq(e) {
 	submitBtn.style.cursor = 'not-allowed';
 
 	try {
+		showNotification("Sending password change request...");
 		const response = await doubleFetch(`${API_BASE_URL}/auth/init-password-change`, {
 			method: 'POST',
 			credentials: 'include',
@@ -335,14 +321,13 @@ async function sendPassChangeReq(e) {
 		if (response.ok) {
 			pendingAction = 'password';
 			pendingData = { currentPassword, newPassword };
-			showNotification(result.message || "2FA code sent to your email", "success");
+			showNotification(result.message ?? "2FA code has been sent to your email", "success");
 			showSettingsOverlay();
 		} else {
-			showNotification(result.error || "Failed to initiate password change", "error");
+			showNotification(result.error ?? "Failed to initiate password change", "error");
 		}
 	} catch (error) {
-		console.error("❌ Error during password change init:", error);
-		showNotification(`System Error: ${error.message}`, "error");
+		showNotification(`System Error: ${error.message ?? "Failed to initiate password change"}`, "error");
 	} finally {
 		// Butonu tekrar aktif et
 		submitBtn.disabled = false;
@@ -421,7 +406,6 @@ async function onLoad()
 
 		if (meReq.ok) {
 			const profileData = await meReq.json();
-			console.log(profileData);
 			const uname = document.querySelector(".settings-uname");
 			if (uname && profileData?.user?.username)
 				uname.textContent = "@" + profileData.user.username;
@@ -441,15 +425,11 @@ async function onLoad()
 				if (user?.profile?.avatarUrl)
 					document.getElementById('settings-avatar')?.setAttribute('src', `${API_BASE_URL}/static/${user.profile.avatarUrl}`);
 			} else
-				console.error("❌ Failed to fetch profile data:", profileReq.statusText);
+				showNotification(`Failed to fetch profile data: ${profileReq.statusText ?? "Unknown error"}`, "error");
 		} else {
-			if (meReq.status === 401) {
-				console.log("REQUSET NOT OK");
-				navigateTo("login");
-			}
+			showNotification(`Failed to fetch user data with status: ${meReq.statusText ?? "Unknown error"}`, "error");
 		}
 	} catch (error) {
-		console.error(error);
-		navigateTo("login");
+		showNotification(`System Error: ${error.message ?? "Failed to fetch user data"}`, "error");
 	}
 }
