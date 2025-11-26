@@ -362,12 +362,25 @@ function handleMatchReady(payload) {
         return;
     }
 
+    const matchPairsSection = document.getElementById('match-pairs-section');
+    if (matchPairsSection) {
+        matchPairsSection.style.display = 'block';
+    }
+
+    const container = document.getElementById('match-pairs-container');
+    if (container) container.innerHTML = '';
     displayMatchPairs(payload.matchPairs, payload.players);
 
     const statusDisplay = document.getElementById('tournament-status-display') as HTMLElement;
     if (statusDisplay) {
         statusDisplay.textContent = payload.tournamentStatus || 'Matches Ready';
     }
+
+    const roundTitle = document.getElementById('round-title');
+    if (roundTitle) {
+      roundTitle.textContent = 'Round ' + (payload.currentRound + 1);
+    }
+
 
     const isHost = payload.players && payload.players.some(player => player.id === currentUserId && player.isHost);
 
@@ -450,6 +463,37 @@ interface TransformedData {
   tournamentStatus: string;
 }
 
+function resetTournamentUI() {
+    const matchPairsSection = document.getElementById('match-pairs-section');
+    const matchPairsContainer = document.getElementById('match-pairs-container');
+    const participantsGrid = document.getElementById('participants-grid');
+    const statusDisplay = document.getElementById('tournament-status-display');
+    const waitingBtn = document.getElementById('waiting-players-btn') as HTMLButtonElement;
+    const matchBtn = document.getElementById('match-players-btn') as HTMLButtonElement;
+    const startBtn = document.getElementById('start-tournament-btn') as HTMLButtonElement;
+
+    if (matchPairsSection) matchPairsSection.style.display = 'none';
+    if (matchPairsContainer) matchPairsContainer.innerHTML = '';
+    if (participantsGrid) participantsGrid.innerHTML = '';
+    if (statusDisplay) statusDisplay.textContent = 'Waiting';
+
+    if (waitingBtn) {
+        waitingBtn.style.display = 'block';
+        waitingBtn.disabled = true;
+        waitingBtn.textContent = 'Players are awaited...';
+    }
+    if (matchBtn) {
+        matchBtn.style.display = 'none';
+        matchBtn.disabled = true;
+    }
+    if (startBtn) {
+        startBtn.style.display = 'none';
+        startBtn.disabled = true;
+    }
+
+    tournamentData = null;
+}
+
 export function transformMatchmakingData(data: MatchmakingData | null | undefined): TransformedData {
 
   if (!data) {
@@ -459,12 +503,16 @@ export function transformMatchmakingData(data: MatchmakingData | null | undefine
   // Match dizisini al
   let matches: Match[] = [];
 
-  if (data.match && Array.isArray(data.match))
+  if (data.match && Array.isArray(data.match)) {
     matches = data.match;
-  else if (data.rounds && Array.isArray(data.rounds)) {
-    const currentRoundIndex = data.currentRound ?? 0;
+  } else if (data.rounds && Array.isArray(data.rounds)) {
+    // 1-based varsayımı
+    const currentRoundIndex = (data.currentRound ?? 1);
+    // round alanı 1-based ise direkt eşle, değilse en yakınını al
     const currentRound =
-      data.rounds.find((r) => r.round === currentRoundIndex) || data.rounds[0];
+      data.rounds.find(r => r.round === currentRoundIndex)
+      || data.rounds.find(r => r.round === (currentRoundIndex - 1))
+      || data.rounds[0];
     matches = currentRound?.matchs || [];
   }
 
@@ -546,6 +594,7 @@ function handleRoomCreated(payload) {
 
     // Show appropriate waiting room
     if (currentGameMode === 'tournament') {
+        resetTournamentUIHard();
         showTournamentWaitingRoom(payload);
     } else if (currentGameMode === 'ai') {
         showAIWaitingRoom(payload);
@@ -669,6 +718,11 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
       if (matchPairsContainer) {
         matchPairsContainer.innerHTML = '';
       }
+
+    const roundTitle = document.getElementById('round-title');
+    if (roundTitle) {
+        roundTitle.textContent = 'Round ' + (payload.currentRound + 1);
+    }
 
       displayMatchPairs(transformedData.matchPairs, transformedData.players);
 
@@ -946,6 +1000,7 @@ function handleGameFinished(payload: GameFinishPayload): void {
             }
 
             // Tournament data'yı sıfırla
+            resetTournamentUIHard();
             tournamentData = null;
 
             return;
@@ -1583,7 +1638,7 @@ async function connectWebSocket() {
 
 	roomSocket.onError((error) => { // odaya giremedi diye ve error geldiğinde notification göster
 		showNotification('Room server connection error', 'error');
-	}); 
+	});
 
 	// Connect to server
 	roomSocket.connect("ws-room/client", {
@@ -2489,6 +2544,56 @@ class CanvasOrientationManager {
     }
 }
 
+function resetTournamentUIHard(): void {
+  // Bölümler
+  const waitingRoom = document.getElementById('waiting-room');
+  const roundWaitingRoom = document.getElementById('round-waiting-room');
+  const matchPairsSection = document.getElementById('match-pairs-section');
+  const matchPairsContainer = document.getElementById('match-pairs-container');
+  const participantsGrid = document.getElementById('participants-grid');
+  const statusDisplay = document.getElementById('tournament-status-display') as HTMLElement | null;
+
+  // Butonlar
+  const waitingBtn = document.getElementById('waiting-players-btn') as HTMLButtonElement | null;
+  const matchBtn = document.getElementById('match-players-btn') as HTMLButtonElement | null;
+  const startBtn = document.getElementById('start-tournament-btn') as HTMLButtonElement | null;
+
+  // Görünürlükleri sıfırla
+  if (waitingRoom) waitingRoom.classList.remove('active');
+  if (roundWaitingRoom) roundWaitingRoom.classList.remove('active');
+
+  if (matchPairsSection) matchPairsSection.style.display = 'none';
+  if (matchPairsContainer) matchPairsContainer.innerHTML = '';
+  if (participantsGrid) participantsGrid.innerHTML = '';
+  if (statusDisplay) {
+    statusDisplay.textContent = 'Waiting';
+    statusDisplay.style.color = '';
+    statusDisplay.style.textShadow = '';
+  }
+
+  if (waitingBtn) {
+    waitingBtn.style.display = 'block';
+    waitingBtn.disabled = true;
+    waitingBtn.textContent = 'Players are awaited...';
+  }
+  if (matchBtn) {
+    matchBtn.style.display = 'none';
+    matchBtn.disabled = true;
+  }
+  if (startBtn) {
+    startBtn.style.display = 'none';
+    startBtn.disabled = true;
+  }
+
+  // Global state
+  tournamentData = null;
+//   currentRoomId = null;
+  // Eski eşleşme renkleri/animasyonları kalmasın diye
+  const nextRoundPairsSection = document.getElementById('next-round-pairs-section');
+  const nextRoundContainer = document.getElementById('next-round-pairs-container');
+  if (nextRoundPairsSection) nextRoundPairsSection.style.display = 'none';
+  if (nextRoundContainer) nextRoundContainer.innerHTML = '';
+}
 
 export default class extends AView {
 
@@ -2884,6 +2989,7 @@ private initAIGameListeners(): void {
 	private initTournamentListeners(): void {
 		// Tournament Create Event Listener
 		document.getElementById('tournament-create-btn')?.addEventListener('click', function() {
+			resetTournamentUIHard();
 			// Null ve type assertion ile güvenli erişim
 			const tournamentNameElement = document.getElementById('tournament-name') as HTMLInputElement;
 			const tournamentName = tournamentNameElement.value.trim();
@@ -3098,6 +3204,8 @@ private initAIGameListeners(): void {
 
         // Kişileri eşleştir butonu
         document.getElementById('match-players-btn')?.addEventListener('click', function() {
+			console.log("currentRoomId:", currentRoomId);
+			console.log("roomSocket:", roomSocket);
             if (!currentRoomId || !roomSocket) {
                 showNotification('Connection error!', 'error');
                 return;
@@ -3152,6 +3260,7 @@ private initAIGameListeners(): void {
 				// Hide back arrow
 				backArrowBtn.classList.remove('active');
 				// Reset tournament data
+				resetTournamentUIHard();
 				tournamentData = null;
 				showNotification('You left the room', 'info');
 			});
