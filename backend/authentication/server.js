@@ -20,7 +20,6 @@ const start = async () =>
     	await register.registration(fastify);
     	if (!fs.existsSync('./data'))
     		fs.mkdirSync('./data', { recursive: true });
-		await createTestUsers();
     	await testConnection();
     	await sequelize.sync({ force: false });
     	

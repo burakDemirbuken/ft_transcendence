@@ -58,12 +58,10 @@ async function confirmDeleteAccount(request, reply)
             });
         }
 
-        // Temp storage'ı temizle
         utils.tempStorage.delete(user.email);
 
 		const deletedUserInfo = { username: user.username, email: user.email };
 		
-		// Hesabı sil
 		await User.destroy({ where: { id: user.id } });
 		const serviceNotifications = [
 			await fetch('http://friend:3007/internal/list', {
