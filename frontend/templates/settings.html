@@ -44,8 +44,8 @@
 						<div class="form-container" hidden="">
 							<form action="">
 								<input type="email" name="current-email" placeholder="Current Email" disabled>
-								<input type="email" name="new-email" placeholder="New Email">
-								<input type="password" name="pass" placeholder="Current Password">
+								<input type="email" name="new-email" placeholder="New Email" autocomplete="email">
+								<input type="password" name="pass" placeholder="Current Password" autocomplete="current-password">
 								<button class="submit email" type="submit">
 									<span>Change Email</span>
 								</button>
@@ -64,9 +64,9 @@
 						</div>
 						<div class="form-container" hidden="">
 							<form action="">
-								<input type="password" name="current-password" placeholder="Current Password">
-								<input type="password" name="new-password" placeholder="New Password">
-								<input type="password" name="confirm-password" placeholder="New Password Again">
+								<input type="password" name="current-password" placeholder="Current Password" autocomplete="current-password">
+								<input type="password" name="new-password" placeholder="New Password" autocomplete="new-password">
+								<input type="password" name="confirm-password" placeholder="New Password Again" autocomplete="new-password">
 								<button class="submit pass" type="submit">
 									<span>Change Password</span>
 								</button>
@@ -90,7 +90,7 @@
 						</div>
 						<div class="form-container" hidden="">
 							<form action="">
-								<input type="password" name="password" placeholder="Password">
+								<input type="password" name="password" placeholder="Password" autocomplete="current-password">
 								<button type="submit" id="delete-account" data-i18n="settings.dzone.button">Delete</button>
 							</form>
 						</div>
