@@ -244,8 +244,6 @@ async function sendDNameChangeReq(e) {
 	} catch (error) {
 		showNotification(`System Error: ${error.message ?? "Failed to update display name"}`, "error");
 	}
-
-	form.querySelectorAll('input').forEach((input: HTMLInputElement) => input.value = '');
 }
 
 async function sendEmailChangeReq(e) {
