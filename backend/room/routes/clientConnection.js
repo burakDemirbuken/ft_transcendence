@@ -10,20 +10,20 @@ export default async function clientConnectionSocket(fastify) {
 	(connection, req) => {
 		const userID = fastify.getDataFromToken(req)?.username ?? null;
 		if (!userID) {
-			console.error('❌ Unauthorized WebSocket connection attempt. Closing connection.');
+			fastify.log.error('❌ Unauthorized WebSocket connection attempt. Closing connection.');
 			connection.socket.close(1008, 'Unauthorized');
 			return;
 		}
 		if (connections.includes(userID))
 		{
-			console.error(`❌ User ${userID} is already in a room. Closing connection.`);
+			fastify.error(`❌ User ${userID} is already in a room. Closing connection.`);
 			connection.socket.close(1008, 'Already in room');
 			return;
 		}
 		connections.push(userID);
 		const currentPlayer = new Player(userID, connection.socket, req.query.userName || 'Anonymous');
-		console.log(`✅ User ${userID} connected via WebSocket.`);
-		console.log(`Player info: ID=${currentPlayer.id}, Name=${currentPlayer.name}`);
+		fastify.log.info(`✅ User ${userID} connected via WebSocket.`);
+		fastify.log.info(`Player info: ID=${currentPlayer.id}, Name=${currentPlayer.name}`);
 
 		connection.socket.on('message', (message) => {
 			let data;

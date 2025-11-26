@@ -41,18 +41,20 @@ await fastify.register(cookie)
 
 await fastify.register(multipart, {
 	limits: {
-		fileSize: 5 * 1024 * 1024 // 5 MB
+		fileSize: 5 * 1024 * 1024
 	}
 })
 
 const jwtSecret = process.env.JWT_SECRET;
 
 if (!jwtSecret) {
-	throw new Error('JWT_SECRET environment variable is required! Please set it in .env file');
+	fastify.log.error('FATAL ERROR: JWT_SECRET is not defined in environment variables.')
+	process.exit(1)
 }
 
 if (jwtSecret.length < 32) {
-	console.warn('⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security!');
+	fastify.log.error('FATAL ERROR: JWT_SECRET must be at least 32 characters long for security reasons.')
+	process.exit(1)
 }
 
 await fastify.register(jwt, {

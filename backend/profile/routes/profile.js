@@ -56,16 +56,16 @@ export default async function profileRoute(fastify) {
 
 		try {
 			if (!userName) {
-				console.error('userName is missing in token')
+				fastify.log.error('userName is missing in token')
 				return reply.code(400).send({ message: 'userName is required' })
 			}
 			if (dname.length < 3 || dname.length > 20) {
-				console.error('Display name length invalid:', dname)
+				fastify.log.error('Display name length invalid:', dname)
 				return reply.code(400).send({ message: 'Display name must be between 3 and 20 characters' })
 			}
 			
 			if (!dname) {
-				console.error('Display name is missing in request body')
+				fastify.log.error('Display name is missing in request body')
 				return reply.code(400).send({ message: 'Display name is required' })
 			}
 
@@ -74,7 +74,7 @@ export default async function profileRoute(fastify) {
 			})
 
 			if (!userProfile) {
-				console.error('User not found for userName:', userName)
+				fastify.log.error('User not found for userName:', userName)
 				return reply.code(404).send({ message: 'User not found' })
 			}
 
@@ -88,7 +88,7 @@ export default async function profileRoute(fastify) {
 			})
 
 			if (existingProfile) {
-				console.log('Display name already taken:', dname)
+				fastify.log.log('Display name already taken:', dname)
 				return reply.code(409).send({ message: 'Display name is already taken' })
 			}
 
@@ -217,7 +217,7 @@ export default async function profileRoute(fastify) {
 					}
 				},
 				attributes: ['userName', 'displayName', 'avatarUrl']
-			})
+			}) ?? null
 
 			if (!userProfiles || userProfiles.length === 0) {
 				return reply.code(404).send({ message: 'Users not found' })
@@ -253,7 +253,7 @@ export default async function profileRoute(fastify) {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ userName: userName })
-			}).catch(err => fastify.log.error('Error notifying friend service of avatar change:', err))
+			}).catch(err => fastify.log.error(`Error notifying friend service of avatar change: ${err.message}`))
 
 			return reply.code(200).send({  message: 'Avatar updated successfully', newAvatarUrl: userProfile.avatarUrl  })
 		} catch (error) {

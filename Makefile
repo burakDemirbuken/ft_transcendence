@@ -1,4 +1,3 @@
-# Variables
 COMPOSE_FILE = ./docker-compose.yml
 COMPOSE_CMD = docker compose -f $(COMPOSE_FILE)
 
@@ -9,31 +8,6 @@ RED = \033[0;31m
 YELLOW = \033[1;33m
 BLUE = \033[0;34m
 NC = \033[0m
-
-# İşletim sistemini algıla
-UNAME_S := $(shell uname -s)
-
-ifeq ($(UNAME_S),Linux) # linux
-	HOST_IP := $(shell hostname -I | awk '{print $$1}')
-endif
-
-ifeq ($(UNAME_S),Darwin) # macOS için
-	HOST_IP := $(shell ipconfig getifaddr en0)
-endif
-
-ifeq ($(UNAME_S),MINGW64_NT) # Windows (Git Bash) için
-	HOST_IP := $(shell hostname -I | awk '{print $$1}')
-endif
-
-# Eğer en0 çalışmazsa en1'i dene
-ifeq ($(HOST_IP),)
-	HOST_IP := $(shell ipconfig getifaddr en1)
-endif
-
-$(info Host IP: $(HOST_IP))
-
-# HOST_IP := $(shell hostname -I | awk '{print $$1}')
-export HOST_IP
 
 all: up
 
@@ -49,7 +23,6 @@ stop:
 status:
 	@echo "$(GREEN)Container status:$(NC)"
 	@$(COMPOSE_CMD) ps
-
 
 logs:
 	@$(COMPOSE_CMD) logs -f
@@ -183,6 +156,7 @@ health:
 	@docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
 help:
+	@echo ""
 	@echo "$(GREEN)Available targets:$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Main commands:$(NC)"
@@ -202,30 +176,17 @@ help:
 	@echo "  logs-<service>   - Show logs for specific service (e.g., logs-sqlite)"
 	@echo "  shell-<service>  - Enter container shell (e.g., shell-nginx)"
 	@echo ""
-	@echo "$(YELLOW)Development shortcuts:$(NC)"
-	@echo "  authentication   - Start authentication service"
-	@echo "  gateway          - Start gateway service"
-	@echo "  nginx            - Start nginx service"
-	@echo "  gameserver       - Start gameserver service (if uncommented)"
-	@echo "  frontend         - Start frontend service (if uncommented)"
-	@echo ""
 	@echo "$(YELLOW)Development modes (build + logs):$(NC)"
 	@echo "  dev-<service>    - Build, start and follow logs for specific service"
 	@echo ""
-	@echo "$(BLUE)Examples:$(NC)"
-	@echo "  make up-nginx          # Start only nginx"
-	@echo "  make logs-gateway      # Show gateway logs"
-	@echo "  make shell-sqlite      # Enter sqlite container"
-	@echo "  make dev-authentication # Development mode for authentication"
 
 .PHONY: all up down stop status logs clean clean-db fclean re health help \
-        send remove accept \
-        $(addprefix up-,$(ALL_SERVICES)) \
-        $(addprefix down-,$(ALL_SERVICES)) \
-        $(addprefix restart-,$(ALL_SERVICES)) \
-        $(addprefix build-,$(ALL_SERVICES)) \
-        $(addprefix rebuild-,$(ALL_SERVICES)) \
-        $(addprefix logs-,$(ALL_SERVICES)) \
-        $(addprefix shell-,$(ALL_SERVICES)) \
-        $(addprefix dev-,$(ALL_SERVICES)) \
-        $(ALL_SERVICES)
+		$(addprefix up-,$(ALL_SERVICES)) \
+		$(addprefix down-,$(ALL_SERVICES)) \
+		$(addprefix restart-,$(ALL_SERVICES)) \
+		$(addprefix build-,$(ALL_SERVICES)) \
+		$(addprefix rebuild-,$(ALL_SERVICES)) \
+		$(addprefix logs-,$(ALL_SERVICES)) \
+		$(addprefix shell-,$(ALL_SERVICES)) \
+		$(addprefix dev-,$(ALL_SERVICES)) \
+		$(ALL_SERVICES)

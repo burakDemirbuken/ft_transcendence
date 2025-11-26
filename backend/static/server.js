@@ -32,11 +32,13 @@ fastify.register(fastifyStatic, {
 })
 
 if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET environment variable is required! Please set it in .env file');
+    fastify.log.error('JWT_SECRET environment variable is required! Please set it in .env file')
+    process.exit(1)
 }
 
 if (process.env.JWT_SECRET.length < 32) {
-    console.warn('⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security!');
+    fastify.log.warn('⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security!')
+    process.exit(1)
 }
 
 fastify.register(jwt, {
@@ -45,7 +47,6 @@ fastify.register(jwt, {
 fastify.register(cookie)
 fastify.register(utils)
 
-console.log(path.join(__dirname, "database/avatars"))
 
 fastify.register(avatarRoutes)
 
