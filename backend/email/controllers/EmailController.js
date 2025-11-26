@@ -5,7 +5,6 @@ class EmailController {
     try {
       const { to, username, verificationUrl, token } = req.body
 
-      // Validasyon
       if (!to || !token || !verificationUrl) {
         return rep.status(400).send({
           success: false,
@@ -47,7 +46,6 @@ class EmailController {
     try {
       const { email, code, username, type = 'login' } = req.body
 
-      // Validasyon
       if (!email || !code) {
         return rep.status(400).send({
           success: false,
@@ -64,7 +62,6 @@ class EmailController {
         })
       }
 
-      // Code formatı kontrolü (6 haneli sayı)
       if (!/^\d{6}$/.test(code)) {
         return rep.status(400).send({
           success: false,
@@ -97,7 +94,6 @@ class EmailController {
     try {
       const { email, username, loginInfo } = req.body
 
-      // Validasyon
       if (!email || !username) {
         return rep.status(400).send({
           success: false,
@@ -114,7 +110,6 @@ class EmailController {
         })
       }
 
-      // loginInfo varsayılan değerleri
       const enrichedLoginInfo = {
         ip: loginInfo?.ip || req.ip || 'Bilinmiyor',
         userAgent: loginInfo?.userAgent || req.headers['user-agent'] || 'Bilinmiyor',

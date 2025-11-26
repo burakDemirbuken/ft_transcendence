@@ -21,7 +21,6 @@ function blacklistToken(token)
 	}
     catch (error)
     {
-		console.log('Token blacklist error:', error);
 	}
 }
 
@@ -156,7 +155,6 @@ function storeVerificationCode(email, data = {})
 function validatePassword(password) {
     const errors = [];
     
-    // 8-16 karakter kontrol
     if (!password || password.length < 8) {
         errors.push('Şifre en az 8 karakter olmalıdır');
     }
@@ -164,17 +162,14 @@ function validatePassword(password) {
         errors.push('Şifre en fazla 128 karakter olmalıdır');
     }
     
-    // En az 1 büyük harf kontrol
     if (!/[A-Z]/.test(password)) {
         errors.push('Şifre en az 1 büyük harf içermelidir');
     }
     
-    // En az 1 küçük harf kontrol (normal karakter)
     if (!/[a-z]/.test(password)) {
         errors.push('Şifre en az 1 küçük harf içermelidir');
     }
     
-    // En az 1 sayı kontrol
     if (!/[0-9]/.test(password)) {
         errors.push('Şifre en az 1 sayı içermelidir');
     }

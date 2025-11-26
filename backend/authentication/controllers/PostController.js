@@ -84,7 +84,6 @@ async function register(request, reply)
                     })
                 });
             } catch (profileError) {
-                console.log('Profile service error:', profileError);
             }
 
             return (reply.status(201).send({
@@ -101,10 +100,8 @@ async function register(request, reply)
         // Email gönderimini background'da yap - response'u bloklama
         utils.sendVerificationEmail(email, username, verificationToken)
             .then(() => {
-                console.log(`✅ Verification email sent to: ${email}`);
             })
             .catch((emailError) => {
-                console.log(`❌ Failed to send verification email to ${email}:`, emailError);
                 // Email gönderilemezse user'ı sil
                 User.destroy({ where: { id: newUser.id } }).catch(console.error);
                 utils.tempStorage.delete(email);
@@ -119,7 +116,6 @@ async function register(request, reply)
         }));
     } catch (error)
     {
-        console.log('Register error:', error);
         return (reply.status(500).send({ success: false, error: trlt.register.system }));
     }
 }
@@ -170,10 +166,8 @@ async function login(request, reply) {
         if (!isTestUser) {
             utils.send2FAEmail(user.email, user.username, twoFACode, userIP, 'login')
                 .then(() => {
-                    console.log(`✅ 2FA email sent to: ${user.email}`);
                 })
                 .catch((emailError) => {
-                    console.log(`❌ Failed to send 2FA email to ${user.email}:`, emailError);
                 });
         }
 
@@ -191,7 +185,6 @@ async function login(request, reply) {
             trlt.login.verify;
         return (reply.send({ success: true, message, next_step: '2fa_verification', email: user.email }));
     } catch (error) {
-        console.log('Login error:', error);
         return (reply.status(500).send({ success: false, error: trlt.login.system }));
     }
 }
@@ -237,7 +230,6 @@ export async function verifyEmail(request, reply)
                 })
             });
         } catch (profileError) {
-            console.log('Profile service error:', profileError);
         }
         if (request.method === 'GET') {
             return (reply.type('text/html; charset=utf-8').send(`
@@ -328,7 +320,6 @@ export async function verifyEmail(request, reply)
             return (reply.send({ success: true, message: trlt.verify.success, user: user.toSafeObject() }));
         }
     } catch (error) {
-        console.log('Email verification error:', error);
         return (reply.status(500).send({ success: false, error: trlt.verify.system }));
     }
 }
@@ -355,31 +346,18 @@ async function verify2FA(request, reply) {
         const user = await User.findByEmail(login) || await User.findByUsername(login);
         if (!user)
             return (reply.status(404).send({ success: false, error: trlt.unotFound }));
-        // Test kullanıcıları için özel kod kontrolü
-        const isTestUser = user.email.endsWith('@test.com');
 
-        if (isTestUser && code === '123123') {
-            // Test kullanıcısı ve özel kod - direkt geç
-            console.log(`Test user ${user.username} using special code 4152`);
-        } else {
-            // Normal kullanıcı - normal kod kontrolü
-            const storedData = utils.tempStorage.get(user.email);
-            if (!storedData || storedData.type !== '2fa')
-                return (reply.status(400).send({ success: false, error: trlt.verify2FA.expired }));
-            if (storedData.expires < new Date()) {
-                utils.tempStorage.delete(user.email);
-                return (reply.status(400).send({ success: false, error: trlt.verify2FA.expired }));
-            }
-            if (storedData.code !== code)
-                return (reply.status(400).send({ success: false, error: trlt.verify2FA.invalid }));
+        const storedData = utils.tempStorage.get(user.email);
+        if (!storedData || storedData.type !== '2fa')
+            return (reply.status(400).send({ success: false, error: trlt.verify2FA.expired }));
+        if (storedData.expires < new Date()) {
+            utils.tempStorage.delete(user.email);
+            return (reply.status(400).send({ success: false, error: trlt.verify2FA.expired }));
         }
-        await user.markLogin();
+        if (storedData.code !== code)
+            return (reply.status(400).send({ success: false, error: trlt.verify2FA.invalid }));
 
-        console.log("Creating JWT token for user:", {
-            id: user.id,
-            username: user.username,
-            email: user.email
-        });
+        await user.markLogin();
 
         const accessToken = await reply.jwtSign(
             { userId: user.id, username: user.username, email: user.email, type: 'access' },
@@ -396,16 +374,12 @@ async function verify2FA(request, reply) {
             },
             { expiresIn: refreshExpiry }
         );
-        console.log('🍪 Setting accessToken cookie:', accessToken.substring(0, 20) + '...');
         reply.setCookie('accessToken', accessToken, {
             httpOnly: true, secure: true, sameSite: 'Lax', path: '/'
         });
-        console.log('🍪 Setting refreshToken cookie');
         reply.setCookie('refreshToken', refreshToken, {
             httpOnly: true, secure: true, sameSite: 'Lax', path: '/'
         });
-        // JavaScript erişimi için ayrı cookie (daha kısa sürede expire olan)
-        console.log('🍪 Setting authStatus cookie');
         reply.setCookie('authStatus', 'authenticated', {
             httpOnly: false, secure: true, sameSite: 'Lax', path: '/'
         });
@@ -418,24 +392,14 @@ async function verify2FA(request, reply) {
                     userName: user.username,
                 })
             });
-            console.log(`Profile created for user: ${user.username}`);
         } catch (profileError) {
-            console.log('Profile service error during 2FA verification:', profileError);
         }
 
         utils.tempStorage.delete(user.email);
         const userIP = request.headers['x-forwarded-for'] || request.headers['x-real-ip'] || request.socket.remoteAddress || 'Unknown';
 
-        // Test kullanıcıları için login notification gönderme - asenkron
-        if (!isTestUser) {
-            utils.sendLoginNotification(user.email, user.username, userIP)
-                .then(() => {
-                    console.log(`✅ Login notification sent to: ${user.email}`);
-                })
-                .catch((emailError) => {
-                    console.log(`❌ Failed to send login notification to ${user.email}:`, emailError);
-                });
-        }
+        utils.sendLoginNotification(user.email, user.username, userIP).catch(() => {});
+
         reply.send({
             success: true,
             message: trlt.login.success,
@@ -443,7 +407,6 @@ async function verify2FA(request, reply) {
             accessToken: accessToken
         });
     } catch (error) {
-        console.log('2FA verification error:', error);
         return (reply.status(500).send({ success: false, error: trlt.verify2FA.system }));
     }
 }
@@ -495,7 +458,6 @@ async function checkTokenBlacklist(request, reply) {
     }
     catch (error)
     {
-        console.log('Token blacklist check error:', error);
         return (reply.status(500).send
         ({
             success: false,
@@ -565,11 +527,6 @@ async function autoRefreshToken(request, reply)
 // ŞİFRE DEĞİŞTİRME - 2FA İLE
 // ============================================
 
-/**
- * Adım 1: Şifre değiştirme isteği - 2FA kodu gönder
- * Body: { currentPassword, newPassword }
- * Response: { success: true, message: "2FA kodu email'inize gönderildi" }
- */
 async function initPasswordChange(request, reply) {
 	try {
 		const { currentPassword, newPassword } = request.body;
@@ -668,11 +625,6 @@ async function initPasswordChange(request, reply) {
 	}
 }
 
-/**
- * Adım 2: 2FA kodunu doğrula ve şifreyi değiştir
- * Body: { code }
- * Response: { success: true, message: "Password changed successfully" }
- */
 async function confirmPasswordChange(request, reply) {
 	try {
 		const { code } = request.body;
@@ -772,11 +724,6 @@ async function confirmPasswordChange(request, reply) {
 	}
 }
 
-/**
- * Adım 1: Email değiştirme isteği başlat
- * Body: { newEmail, password }
- * Response: { success: true, message: "2FA code sent to new email" }
- */
 async function initEmailChange(request, reply) {
 	const trlt = getTranslations(request.query.lang || "eng");
 	try {
@@ -879,7 +826,6 @@ async function initEmailChange(request, reply) {
 				expiresIn: '10 minutes'
 			});
 		} catch (emailError) {
-			console.log('Failed to send 2FA email:', emailError);
 			utils.tempStorage.delete(newEmail.toLowerCase());
 			return reply.status(500).send({
 				success: false,
@@ -888,7 +834,6 @@ async function initEmailChange(request, reply) {
 		}
 
 	} catch (error) {
-		console.log('Init email change error:', error);
 		return reply.status(500).send({
 			success: false,
 			error: 'Internal server error'
@@ -982,7 +927,6 @@ async function confirmEmailChange(request, reply) {
 		try {
 			await utils.sendVerificationEmail(newEmail, user.username, verificationToken);
 		} catch (emailError) {
-			console.log('Failed to send verification email to new address:', emailError);
 			// Email gönderemesek bile işlemi tamamla
 		}
 
@@ -1023,7 +967,6 @@ async function confirmEmailChange(request, reply) {
 		});
 
 	} catch (error) {
-		console.log('Confirm email change error:', error);
 		return reply.status(500).send({
 			success: false,
 			error: 'Internal server error'
@@ -1031,11 +974,6 @@ async function confirmEmailChange(request, reply) {
 	}
 }
 
-/**
- * Adım 1: Hesap silme isteği başlat
- * Body: { password }
- * Response: { success: true, message: "2FA code sent to your email" }
- */
 async function initDeleteAccount(request, reply) {
 	try {
 		const { password } = request.body;
