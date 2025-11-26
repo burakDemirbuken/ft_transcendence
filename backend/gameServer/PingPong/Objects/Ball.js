@@ -47,11 +47,6 @@ class Ball extends EventEmitter
 			this.emit('borderHit', 'right');
 	}
 
-	revertPosition()
-	{
-		this.pos = { x: this.oldPos.x, y: this.oldPos.y };
-	}
-
 	launchBall(direction, speed = this.speed)
 	{
 		this.speed = speed;

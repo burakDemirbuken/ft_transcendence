@@ -6,13 +6,13 @@ async function attemptTokenRefresh(fastify, request, reply, refreshToken) {
 	{
         console.log('🔄 Attempting to refresh access token...');
         const refreshDecoded = fastify.jwt.verify(refreshToken);
-        
+
         // Refresh token type kontrolü
         if (refreshDecoded.type !== 'refresh') {
             console.log('❌ Token is not a refresh token');
             return false;
         }
-        
+
         const newAccessToken = fastify.jwt.sign(
         {
             userId: refreshDecoded.userId,
@@ -21,12 +21,12 @@ async function attemptTokenRefresh(fastify, request, reply, refreshToken) {
             type: 'access'
         },
         {
-			expiresIn: '1m'
+			expiresIn: '4h'
         });
-        
+
         const decoded = fastify.jwt.verify(newAccessToken);
         request.user = decoded;
-        
+
         // Set cookie in response
         reply.setCookie('accessToken', newAccessToken,
 		{
@@ -35,7 +35,7 @@ async function attemptTokenRefresh(fastify, request, reply, refreshToken) {
             sameSite: 'Lax',
             path: '/',
         });
-        
+
         console.log('✅ Access token refreshed successfully for user:', decoded.username);
         console.log('✅ New token set in cookie header');
         return true;
@@ -51,7 +51,7 @@ async function attemptTokenRefresh(fastify, request, reply, refreshToken) {
 async function verifyJWT(fastify, request, reply) {
     const requestPath = request.url.split('?')[0];
     const token = request.cookies.accessToken;
-    
+
     if (token)
     {
         try
@@ -65,7 +65,7 @@ async function verifyJWT(fastify, request, reply) {
                 },
                 body: JSON.stringify({ token: token })
             });
-            
+
             if (blacklistResponse.ok)
             {
                 const blacklistResult = await blacklistResponse.json();
@@ -80,7 +80,7 @@ async function verifyJWT(fastify, request, reply) {
         {
             console.log('❌ Blacklist check failed:', blacklistError.message);
         }
-        
+
         try
         {
             console.log('🔍 Attempting JWT verify for token:', token.substring(0, 20) + '...');
@@ -92,7 +92,7 @@ async function verifyJWT(fastify, request, reply) {
         catch (err)
         {
             console.log('❌ Access token verification failed:', err.message);
-            
+
             // Token expire olmuş veya geçersiz
             if (err.message.includes('expired') || err.code === 'FAST_JWT_EXPIRED') {
                 console.log('⏰ Access token expired, attempting refresh...');
@@ -101,7 +101,7 @@ async function verifyJWT(fastify, request, reply) {
             } else {
                 console.log('🚫 Access token verification failed with error:', err.code || err.message);
             }
-            
+
             const refreshToken = request.cookies.refreshToken;
             if (refreshToken)
             {
@@ -114,13 +114,13 @@ async function verifyJWT(fastify, request, reply) {
                         console.log('✅ request.user:', request.user);
                         return; // ← Request devam eder
                     }
-                    
+
                     // Refresh başarısız (muhtemelen expire olmuş)
                     console.log('❌ Auto refresh failed - clearing cookies');
                     reply.clearCookie('accessToken', { path: '/', httpOnly: true, secure: true, sameSite: 'Lax' });
                     reply.clearCookie('refreshToken', { path: '/', httpOnly: true, secure: true, sameSite: 'Lax' });
                     reply.clearCookie('authStatus', { path: '/', secure: true, sameSite: 'Lax' });
-                    
+
                     if (!fastify.isPublicPath(requestPath)) {
                         return reply.code(401).send({
                             success: false,
@@ -133,19 +133,19 @@ async function verifyJWT(fastify, request, reply) {
                 catch (refreshErr)
                 {
                     console.log('❌ Refresh token verification failed:', refreshErr.message);
-                    
+
                     // Refresh token süresi dolmuş veya geçersiz
                     if (refreshErr.message.includes('expired') || refreshErr.code === 'FAST_JWT_EXPIRED') {
                         console.log('⏰ Refresh token expired - session ended');
                     } else {
                         console.log('🚫 Refresh token invalid:', refreshErr.code || refreshErr.message);
                     }
-                    
+
                     // Cookie'leri temizle
                     reply.clearCookie('accessToken', { path: '/', httpOnly: true, secure: true, sameSite: 'Lax' });
                     reply.clearCookie('refreshToken', { path: '/', httpOnly: true, secure: true, sameSite: 'Lax' });
                     reply.clearCookie('authStatus', { path: '/', secure: true, sameSite: 'Lax' });
-                    
+
                     if (!fastify.isPublicPath(requestPath)) {
                         return reply.code(401).send({
                             success: false,
@@ -162,7 +162,7 @@ async function verifyJWT(fastify, request, reply) {
                 console.log('⚠️  No refresh token available - cannot refresh');
                 reply.clearCookie('accessToken', { path: '/', httpOnly: true, secure: true, sameSite: 'Lax' });
                 reply.clearCookie('authStatus', { path: '/', secure: true, sameSite: 'Lax' });
-                
+
                 if (!fastify.isPublicPath(requestPath)) {
                     return reply.code(401).send({
                         success: false,
@@ -181,10 +181,10 @@ async function verifyJWT(fastify, request, reply) {
             return;
         else
         {
-            return reply.code(401).send({ 
-                success: false, 
-                error: 'Authentication required', 
-                code: 'NO_TOKEN' 
+            return reply.code(401).send({
+                success: false,
+                error: 'Authentication required',
+                code: 'NO_TOKEN'
             });
         }
     }
