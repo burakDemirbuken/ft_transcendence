@@ -1231,19 +1231,19 @@ function showCustomWaitingRoom(data: CustomRoomData): void {
     // Update game settings display
     if (data.gameSettings) {
         if (paddleDisplay) {
-            paddleDisplay.textContent = `${data.gameSettings.paddleHeight || 0}px`;
+            paddleDisplay.textContent = `${data.gameSettings.paddleHeight}px`;
         }
         if (ballDisplay) {
-            ballDisplay.textContent = `${data.gameSettings.ballRadius || 0}px`;
+            ballDisplay.textContent = `${data.gameSettings.ballRadius}px`;
         }
 
-        const cornerBoost = data.gameSettings.cornerBoost || data.gameSettings.ballSpeedIncrease || 100;
+        const cornerBoost = data.gameSettings.ballSpeedIncrease;
         if (cornerDisplay) {
             cornerDisplay.textContent = `${cornerBoost}`;
         }
 
         if (scoreDisplay) {
-            scoreDisplay.textContent = `${data.gameSettings.maxScore || 0}`;
+            scoreDisplay.textContent = `${data.gameSettings.maxScore}`;
         }
     }
 
@@ -1343,22 +1343,22 @@ function showAIWaitingRoom(data: AIWaitingRoomData): void {
     // Oyun ayarları için güvenli güncelleme
     if (data.gameSettings) {
         if (aiPaddleDisplay) {
-            aiPaddleDisplay.textContent = `${data.gameSettings.paddleHeight || 0}px`;
+            aiPaddleDisplay.textContent = `${data.gameSettings.paddleHeight}px`;
         }
 
         if (aiBallDisplay) {
-            aiBallDisplay.textContent = `${data.gameSettings.ballRadius || 0}px`;
+            aiBallDisplay.textContent = `${data.gameSettings.ballRadius}px`;
         }
 
         // Corner boost için güvenli hesaplama
-        const cornerBoost = data.gameSettings.cornerBoost || data.gameSettings.ballSpeedIncrease || 100;
+        const cornerBoost = data.gameSettings.cornerBoost || data.gameSettings.ballSpeedIncrease;
 
         if (aiCornerDisplay) {
             aiCornerDisplay.textContent = `${cornerBoost}`;
         }
 
         if (aiScoreDisplay) {
-            aiScoreDisplay.textContent = `${data.gameSettings.maxScore || 0}`;
+            aiScoreDisplay.textContent = `${data.gameSettings.maxScore}`;
         }
     }
 
