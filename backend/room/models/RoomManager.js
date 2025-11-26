@@ -182,9 +182,9 @@ class RoomManager extends EventEmitter
 	{
 		if (!(data.matchType === 'local' || data.matchType === 'ai' || data.matchType === 'multiplayer'))
 		{
-			let url = 'http://profile:3006/internal/';
 			try
 			{
+				let url = 'http://profile:3006/internal/';
 				if (data.matchType === 'tournament')
 					url += 'tournament';
 				else
@@ -198,7 +198,7 @@ class RoomManager extends EventEmitter
 				});
 
 				if (!response.ok)
-					console.error('❌ Profile service error:', response.status, await response.text());
+					throw new Error(response.status + await response.text());
 				else
 					console.log('✅ Data sent to profile service:', data);
 			}
@@ -208,7 +208,6 @@ class RoomManager extends EventEmitter
 			}
 		}
 		data.kickedPlayers.forEach(player => this.leaveRoom(player));
-		this.deleteRoom(data.roomId);
 	}
 
 	getRoom(roomId)
@@ -266,7 +265,7 @@ class RoomManager extends EventEmitter
 	{
 		for (const [roomId, room] of this.rooms.entries())
 		{
-			if (room.players.find(p => p.id === playerId))
+			if (room.players.find(p => p.id === playerId) || (room.spectators && room.spectators.find(s => s.id === playerId)))
 				return { room, roomId };
 		}
 		return { room: null, roomId: null };

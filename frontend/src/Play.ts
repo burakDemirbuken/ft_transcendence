@@ -1914,8 +1914,6 @@ class CanvasOrientationManager {
 
         if (this.canvas) {
             this.waitForCanvasReady();
-        } else {
-            showNotification('Canvas element not found!', 'error');
         }
     }
 
@@ -1968,7 +1966,6 @@ class CanvasOrientationManager {
 
         const checkCanvasReady = () => {
             if (this.canvas!.width > 0 && this.canvas!.height > 0) {
-                showNotification('Canvas is ready!', 'info');
                 this.isCanvasReady = true;
 
                 if (this.isMobile) {
