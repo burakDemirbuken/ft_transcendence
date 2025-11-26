@@ -1,0 +1,22 @@
+{
+  "name": "pingpong-ai-server",
+  "version": "1.0.0",
+  "description": "PingPong AI WebSocket Server",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "dev": "nodemon main.js"
+  },
+  "dependencies": {
+    "fastify": "^4.25.2",
+    "@fastify/websocket": "^8.3.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

@@ -14,13 +14,13 @@ class RoomManager extends EventEmitter
 		this.isConnectServer = false;
 		this.waitingPlayers = [];
 		this.rooms = new Map();
-		setInterval(() => {
+/* 		setInterval(() => {
  			console.log(`Current rooms: ${this.rooms.size}`);
 			this.rooms.forEach((room, roomId) => {
 				console.log(`Room ID: ${roomId}, Name: ${room.name}, Players: ${room.players.length}/${room.maxPlayers}, Status: ${room.status}`);
 				console.log('Players:', room.players.map(p => ({ id: p.id, name: p.name })));
 			});
-		}, 5000);
+		}, 5000); */
 
 	}
 
@@ -88,7 +88,6 @@ class RoomManager extends EventEmitter
 				room = this.getRoom(roomState.roomId);
 				room.addPlayer(player2);
 				this.startGame(player1.id);
-				console.log("naber müdür");
 			}
 		}
 		catch (error)
@@ -131,7 +130,6 @@ class RoomManager extends EventEmitter
 				}
 				const {state, players} = room.finishRoom(payload);
 				players.forEach(player => {
-					console.log(`Notifying player ${player.id} of finished room ${payload.roomId}`);
 					player.clientSocket.send(JSON.stringify({ type: 'finished', payload: state }));
 				});
 				this.notifyRoomUpdate(payload.roomId);
@@ -182,9 +180,9 @@ class RoomManager extends EventEmitter
 	{
 		if (!(data.matchType === 'local' || data.matchType === 'ai' || data.matchType === 'multiplayer'))
 		{
-			let url = 'http://profile:3006/internal/';
 			try
 			{
+				let url = 'http://profile:3006/internal/';
 				if (data.matchType === 'tournament')
 					url += 'tournament';
 				else
@@ -198,7 +196,7 @@ class RoomManager extends EventEmitter
 				});
 
 				if (!response.ok)
-					console.error('❌ Profile service error:', response.status, await response.text());
+					throw new Error(response.status + await response.text());
 				else
 					console.log('✅ Data sent to profile service:', data);
 			}
@@ -208,7 +206,6 @@ class RoomManager extends EventEmitter
 			}
 		}
 		data.kickedPlayers.forEach(player => this.leaveRoom(player));
-		this.deleteRoom(data.roomId);
 	}
 
 	getRoom(roomId)
@@ -220,7 +217,6 @@ class RoomManager extends EventEmitter
 	{
 		if (this.rooms.has(roomId))
 		{
-			console.log(`Deleting room with ID ${roomId}`);
 			this.rooms.delete(roomId);
 		}
 	}
@@ -258,7 +254,6 @@ class RoomManager extends EventEmitter
 			this.deleteRoom(roomId);
 		if (room.players.length > 0 || (room.spectators?.length || 0) > 0)
 			this.notifyRoomUpdate(roomId);
-		console.log(`Player with ID ${playerId} left room ${roomId}`);
 		return room;
 	}
 
@@ -266,7 +261,7 @@ class RoomManager extends EventEmitter
 	{
 		for (const [roomId, room] of this.rooms.entries())
 		{
-			if (room.players.find(p => p.id === playerId))
+			if (room.players.find(p => p.id === playerId) || (room.spectators && room.spectators.find(s => s.id === playerId)))
 				return { room, roomId };
 		}
 		return { room: null, roomId: null };

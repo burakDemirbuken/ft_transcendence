@@ -121,18 +121,15 @@ class App
 	{
 		this.webSocketClient.onConnect(() =>
 		{
-			console.log('✅ Connected to server');
 		});
 
 		this.webSocketClient.onMessage((data) =>
 		{
 			if (!data || typeof data !== 'object') {
-				console.error('❌ Received invalid message format:', data);
 				return;
 			}
 
 			if (!data.type) {
-				console.error('❌ Received message without type field:', data);
 				return;
 			}
 
@@ -141,7 +138,6 @@ class App
 
 		this.webSocketClient.onClose((event) =>
 		{
-			console.log('🔌 Disconnected from server:', event.code, event.reason);
 		});
 
 		this.webSocketClient.onError((error) =>
@@ -151,98 +147,17 @@ class App
 		this.webSocketClient.connect("ws-game", { userID: this.playerId, userName: this.playerName, gameId: roomId, gameMode: gameMode });
 	}
 
-	createRoom(mode: string, gameSettings: GameSettings): void
-	{
-		try
-		{
-			if (!this.webSocketClient.isConnect())
-				throw new Error('Not connected to server');
-			let data = {
-				name: `${this.playerName}'s Room`,
-				gameMode: mode,
-				...gameSettings
-			};
-			this.webSocketClient.send('create', data);
-		}
-		catch (error)
-		{
-			console.error('❌ Error creating room:', error);
-		}
-	}
-
-	nextRound(): void
-	{
-		this.webSocketClient.send('room/nextRound', {});
-	}
-
-	joinRoom(roomId: string): void
-	{
-		try
-		{
-			if (!this.webSocketClient.isConnect())
-				throw new Error('Not connected to server');
-			if (!roomId)
-				throw new Error('Room ID is required to join a room');
-			this.webSocketClient.send('join', { roomId });
-		}
-		catch (error)
-		{
-			console.error('❌ Error joining room:', error);
-		}
-	}
-
-	startGame(): void
-	{
-		this.webSocketClient.send('startGame', {});
-	}
-
-	// ================================
-	// NETWORK EVENT HANDLERS
-	// ================================
-
-	/**
-	 * Handle network events from server
-	 */
 	handleNetworkEvent(eventType: string, data: any): void
 	{
 		const [event, subEvent] = eventType.split('/');
 		switch (event)
 		{
-			case 'room':
-				this._handleRoomEvent(subEvent, data);
-				break;
 			case 'game':
-				this._handleGameEvent(subEvent, data);
-				break;
 			case 'tournament':
-				this._handleTournamentEvent(subEvent, data);
-				break;
-			case 'error':
-				console.error('❌ Server error:', data);
+				this._handleGameEvent(subEvent, data);
 				break;
 			default:
 				console.error('Unhandled network event:', eventType, data);
-		}
-	}
-
-	_handleRoomEvent(subEvent: string, data: any): void
-	{
-		switch (subEvent)
-		{
-			default:
-				console.log('Unhandled room event:', subEvent, data);
-		}
-	}
-
-	_handleTournamentEvent(subEvent: string, data: any): void
-	{
-		switch (subEvent)
-		{
-			case 'update':
-				this.gameRenderer.gameState = data;
-				break;
-			default:
-				console.error('Unhandled tournament event:', subEvent, data);
 		}
 	}
 

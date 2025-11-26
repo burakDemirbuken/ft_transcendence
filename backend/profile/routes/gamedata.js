@@ -52,7 +52,6 @@ export default async function gamedataRoute(fastify) {
 					transaction: t
 				})
 			])
-
 			const winnerTeam = winner?.team ?
 				(winner.team.playersId[0] === team1.playersId[0] ? teamOnePlayers : teamTwoPlayers)
 				: null
@@ -127,12 +126,12 @@ export default async function gamedataRoute(fastify) {
 			await Promise.all([
 				...teamOnePlayers.map(async (player) => {
 					if (player && player.id) {
-						await player.Achievement.update(await fastify.checkAchievements(player), { transaction: t })
+						await player.Achievement.update(fastify.checkAchievements(player), { transaction: t })
 					}
 				}),
 				...teamTwoPlayers.map(async (player) => {
 					if (player && player.id) {
-						await player.Achievement.update(await fastify.checkAchievements(player), { transaction: t })
+						await player.Achievement.update(fastify.checkAchievements(player), { transaction: t })
 					}
 				})
 			])
@@ -148,10 +147,9 @@ export default async function gamedataRoute(fastify) {
 
 	fastify.post('/internal/tournament', async (request, reply) => {
 		const { name, winner, rounds, time } = request.body ?? {}
-		const { Profile, Stat, RoundMatch, Round, TournamentHistory } = fastify.sequelize.models
+		const { Profile, Stat, Achievement, RoundMatch, Round, TournamentHistory } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
 
-		try {
 			if (!name || !rounds || !Array.isArray(rounds) || rounds.length === 0) {
 				console.error(request.body)
 				throw new Error('Invalid tournament data provided')
@@ -181,21 +179,47 @@ export default async function gamedataRoute(fastify) {
 					const [playerOneProfile, playerTwoProfile] = await Promise.all([
 						Profile.findOne({
 							where: { userName: matchData.player1 },
-							include: [{ model: Stat }],
+							include: [
+								{
+									model: Stat,
+									attributes: {
+										exclude: [ 'createdAt', 'updatedAt']
+									}
+								},
+								{
+									model: Achievement,
+									attributes: {
+										exclude: [ 'createdAt', 'updatedAt']
+									}
+								}
+							],
 							attributes: ['id', 'userName']
 						}),
 						Profile.findOne({
 							where: { userName: matchData.player2 },
-							include: [{ model: Stat }],
+							include: [
+								{
+									model: Stat,
+									attributes: {
+										exclude: [ 'createdAt', 'updatedAt']
+									}
+								},
+								{
+									model: Achievement,
+									attributes: {
+										exclude: [ 'createdAt', 'updatedAt']
+									}
+								}
+							],
 							attributes: ['id', 'userName']
 						})
 					])
 
-					if (playerOneProfile?.id && !allPlayerProfile.includes(playerOneProfile.id)) {
-						allPlayerProfile.push(playerOneProfile.id)
+					if (playerOneProfile?.id && !allPlayerProfile.some(p => p.id === playerOneProfile.id)) {
+						allPlayerProfile.push(playerOneProfile)
 					}
-					if (playerTwoProfile?.id && !allPlayerProfile.includes(playerTwoProfile.id)) {
-						allPlayerProfile.push(playerTwoProfile.id)
+					if (playerTwoProfile?.id && !allPlayerProfile.some(p => p.id === playerTwoProfile.id)) {
+						allPlayerProfile.push(playerTwoProfile)
 					}
 
 					const [winnerPlayer, loserPlayer] = await Promise.all([
@@ -249,20 +273,14 @@ export default async function gamedataRoute(fastify) {
 					}
 				}
 			}
-
 			await Promise.all(
 				allPlayerProfile
 					.filter(Boolean)
-					.map(async (playerId) => fastify.checkAchievements(playerId, t))
+					.map(async (player) => player.Achievement.update(await fastify.checkAchievements(player), { transaction: t }))
 			)
 
 			await t.commit()
 			return reply.code(200).send({ message: 'Tournament data processed successfully' })
-		} catch (error) {
-			await t.rollback()
-			fastify.log.error(`Error saving tournament data: ${error.message}`)
-			return reply.code(500).send({ message: 'Error processing tournament data' })
-		}
 	})
 
 	fastify.get('/match-history', async (request, reply) => {

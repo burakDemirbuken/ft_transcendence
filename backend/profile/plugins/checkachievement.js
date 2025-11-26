@@ -66,7 +66,7 @@ export default fp(async (fastify) => {
 		}
 	}
 
-	async function checkAchievements(player = null) {
+	function checkAchievements(player = null) {
 		if (!player) {
 			throw new Error('Profile not found for user')
 		}
@@ -75,24 +75,25 @@ export default fp(async (fastify) => {
 		if (!player.Achievement.fiveHundredWins && player.Stat.gamesWon >= 500) {
 			updates.fiveHundredWins = new Date()
 		}
-		else if (!player.Achievement.hundredWins && player.Stat.gamesWon >= 100) {
+		if (!player.Achievement.hundredWins && player.Stat.gamesWon >= 100) {
 			updates.hundredWins = new Date()
 		}
-		else if (!player.Achievement.firstWin && player.Stat.gamesWon >= 1) {
+		if (!player.Achievement.firstWin && player.Stat.gamesWon >= 1) {
 			updates.firstWin = new Date()
 		}
 
 		if (!player.Achievement.twentyFiveTenStreak && player.Stat.gameLongestStreak >= 25) {
 			updates.twentyFiveTenStreak = new Date()
 		}
-		else if (!player.Achievement.firstTenStreak && player.Stat.gameLongestStreak >= 10) {
+		if (!player.Achievement.firstTenStreak && player.Stat.gameLongestStreak >= 10) {
 			updates.firstTenStreak = new Date()
 		}
 
-		if (!player.Achievement.lessThanThreeMin && player.Stat.gameMinDuration > 0 && player.Stat.gameMinDuration < 180000) {
+		if (!player.Achievement.lessThanThreeMin && player.Stat.gameMinDuration > 0 && player.Stat.gameMinDuration < 180) {
 			updates.lessThanThreeMin = new Date()
 		}
 
+		console.log(`Achievement updates for user ${player.userName}:`, updates)
 		if (Object.keys(updates).length > 0) {
 			return updates
 		}

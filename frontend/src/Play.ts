@@ -48,22 +48,14 @@ function displayMatchPairs(pairs, participants) {
     const container = isNextRound ? nextRoundContainer : matchPairsContainer;
 
     if (!container) {
-        console.error('❌ Match pairs container not found!');
-        console.error('   matchPairsContainer:', matchPairsContainer);
-        console.error('   nextRoundContainer:', nextRoundContainer);
-        console.error('   isNextRound:', isNextRound);
+        showNotification('Match pairs container not found!', "error");
         return;
     }
-
-    console.log(`✅ Using container: ${isNextRound ? 'next-round-pairs-container' : 'match-pairs-container'}`);
-    console.log(`✅ Match pairs section display: ${matchPairsSection?.style.display}`);
-    console.log(`✅ Next round section display: ${nextRoundPairsSection?.style.display}`);
 
     container.innerHTML = '';
 
     // Katılımcı bilgilerini ID'ye göre hızlı erişim için map'le
     const participantsMap = {};
-    console.log('Participants for match pairs:', participants);
 
     if (participants && Array.isArray(participants)) {
         participants.forEach(p => {
@@ -73,9 +65,6 @@ function displayMatchPairs(pairs, participants) {
             }
         });
     }
-
-    console.log('Participants map:', participantsMap);
-    console.log('Match pairs to display:', pairs);
 
     // Her eşleşme için kart oluştur
     pairs.forEach((pair, index) => {
@@ -116,8 +105,6 @@ function displayMatchPairs(pairs, participants) {
             player2Name = p2 ? (p2.name || p2.userName || 'Unknown') : 'Unknown';
         }
 
-        console.log(`Match ${matchNum}: ${player1Name} vs ${player2Name}`);
-
         // İlk oyuncu
         const player1 = document.createElement('div');
         player1.className = 'match-player';
@@ -157,8 +144,6 @@ function displayMatchPairs(pairs, participants) {
         card.appendChild(players);
         container.appendChild(card);
     });
-
-    console.log(`✅ ${pairs.length} match pairs displayed in ${isNextRound ? 'next-round' : 'first-round'}`);
 
     // Katılımcıları eşleşme renklerine göre güncelle (sadece ilk eşleştirmede)
     if (!isNextRound && participants) {
@@ -336,7 +321,6 @@ function updateParticipants(
 
 // handleWebSocketMessage fonksiyonunu güncelle
 function handleWebSocketMessage(message) {
-    console.log('Started payload:', message.payload);
 
     switch (message.type) {
         case "created":
@@ -360,7 +344,6 @@ function handleWebSocketMessage(message) {
             break;
 
         case "matchReady":
-            console.log('🎲 Match pairs ready message received');
             const transformedData = transformMatchmakingData(message.payload);
             handleMatchReady(transformedData);
             break;
@@ -368,22 +351,24 @@ function handleWebSocketMessage(message) {
         case "error":
             handleError(message.payload);
             break;
-
-        default:
-            console.warn('⚠️ Unhandled message type:', message.type);
     }
 }
 
 // handleMatchReady fonksiyonunu güncelle
 function handleMatchReady(payload) {
-    console.log('🎲 Match pairs ready:', payload);
 
     if (!payload.matchPairs || !Array.isArray(payload.matchPairs) || payload.matchPairs.length === 0) {
-        console.error('Invalid match pairs data:', payload);
         showNotification('The matching data is invalid!', 'error');
         return;
     }
 
+    const matchPairsSection = document.getElementById('match-pairs-section');
+    if (matchPairsSection) {
+        matchPairsSection.style.display = 'block';
+    }
+
+    const container = document.getElementById('match-pairs-container');
+    if (container) container.innerHTML = '';
     displayMatchPairs(payload.matchPairs, payload.players);
 
     const statusDisplay = document.getElementById('tournament-status-display') as HTMLElement;
@@ -391,26 +376,18 @@ function handleMatchReady(payload) {
         statusDisplay.textContent = payload.tournamentStatus || 'Matches Ready';
     }
 
-    const isHost = payload.players && payload.players.some(player => player.id === currentUserId && player.isHost);
+    const roundTitle = document.getElementById('round-title');
+    if (roundTitle) {
+      roundTitle.textContent = 'Round ' + (payload.currentRound + 1);
+    }
 
-    console.log('👤 Current User ID:', currentUserId);
-    console.log('🏠 Is Host:', isHost);
-    console.log('📋 Players:', payload.players);
+
+    const isHost = payload.players && payload.players.some(player => player.id === currentUserId && player.isHost);
 
     // ===== DEBUG: Butonları kontrol et =====
     const waitingBtn = document.getElementById('waiting-players-btn') as HTMLButtonElement;
     const matchBtn = document.getElementById('match-players-btn') as HTMLButtonElement;
     const startBtn = document.getElementById('start-tournament-btn') as HTMLButtonElement;
-
-    console.log('=== BUTTON CHECK ===');
-    console.log('Waiting btn exists:', !!waitingBtn);
-    console.log('Match btn exists:', !!matchBtn);
-    console.log('Start btn exists:', !!startBtn);
-
-    if (startBtn) {
-        console.log('Start btn display BEFORE:', window.getComputedStyle(startBtn).display);
-        console.log('Start btn parent:', startBtn.parentElement?.id || startBtn.parentElement?.className);
-    }
 
     if (isHost) {
 
@@ -425,17 +402,10 @@ function handleMatchReady(payload) {
         if (startBtn) {
             startBtn.style.display = 'block';
             startBtn.disabled = false;
-
-            console.log('=== START BUTTON SHOWN ===');
-            console.log('Start btn display AFTER:', window.getComputedStyle(startBtn).display);
-            console.log('Start btn disabled:', startBtn.disabled);
-            console.log('Start btn offsetHeight:', startBtn.offsetHeight);
-            console.log('Start btn offsetWidth:', startBtn.offsetWidth);
         } else {
-            console.error('❌ START BUTTON NOT FOUND IN DOM!');
+            showNotification('START BUTTON NOT FOUND IN DOM!', "error");
         }
     } else {
-        console.log('❌ NOT HOST - Hiding start button');
         if (startBtn) {
             startBtn.style.display = 'none';
         }
@@ -493,28 +463,60 @@ interface TransformedData {
   tournamentStatus: string;
 }
 
+function resetTournamentUI() {
+    const matchPairsSection = document.getElementById('match-pairs-section');
+    const matchPairsContainer = document.getElementById('match-pairs-container');
+    const participantsGrid = document.getElementById('participants-grid');
+    const statusDisplay = document.getElementById('tournament-status-display');
+    const waitingBtn = document.getElementById('waiting-players-btn') as HTMLButtonElement;
+    const matchBtn = document.getElementById('match-players-btn') as HTMLButtonElement;
+    const startBtn = document.getElementById('start-tournament-btn') as HTMLButtonElement;
+
+    if (matchPairsSection) matchPairsSection.style.display = 'none';
+    if (matchPairsContainer) matchPairsContainer.innerHTML = '';
+    if (participantsGrid) participantsGrid.innerHTML = '';
+    if (statusDisplay) statusDisplay.textContent = 'Waiting';
+
+    if (waitingBtn) {
+        waitingBtn.style.display = 'block';
+        waitingBtn.disabled = true;
+        waitingBtn.textContent = 'Players are awaited...';
+    }
+    if (matchBtn) {
+        matchBtn.style.display = 'none';
+        matchBtn.disabled = true;
+    }
+    if (startBtn) {
+        startBtn.style.display = 'none';
+        startBtn.disabled = true;
+    }
+
+    tournamentData = null;
+}
+
 export function transformMatchmakingData(data: MatchmakingData | null | undefined): TransformedData {
-  console.log('🔄 Transforming matchmaking data:', data);
 
   if (!data) {
-    console.error('No data provided');
     return { matchPairs: [], players: [], tournamentStatus: 'Getting Ready' };
   }
 
   // Match dizisini al
   let matches: Match[] = [];
 
-  if (data.match && Array.isArray(data.match))
+  if (data.match && Array.isArray(data.match)) {
     matches = data.match;
-  else if (data.rounds && Array.isArray(data.rounds)) {
-    const currentRoundIndex = data.currentRound ?? 0;
+  } else if (data.rounds && Array.isArray(data.rounds)) {
+    // 1-based varsayımı
+    const currentRoundIndex = (data.currentRound ?? 1);
+    // round alanı 1-based ise direkt eşle, değilse en yakınını al
     const currentRound =
-      data.rounds.find((r) => r.round === currentRoundIndex) || data.rounds[0];
+      data.rounds.find(r => r.round === currentRoundIndex)
+      || data.rounds.find(r => r.round === (currentRoundIndex - 1))
+      || data.rounds[0];
     matches = currentRound?.matchs || [];
   }
 
   if (!matches || matches.length === 0) {
-    console.error('No matches found in data');
     return { matchPairs: [], players: [], tournamentStatus: 'Getting Ready' };
   }
 
@@ -563,8 +565,6 @@ export function transformMatchmakingData(data: MatchmakingData | null | undefine
     }
   });
 
-  console.log('📋 All players collected:', allPlayers);
-
   // Eşleştirmeleri dönüştür
   const matchPairs: TransformedMatchPair[] = matches.map((match, index) => {
     const player1 = match.player1 || { id: 'unknown', name: 'Unknown' };
@@ -579,8 +579,6 @@ export function transformMatchmakingData(data: MatchmakingData | null | undefine
     };
   });
 
-  console.log('Match pairs transformed:', matchPairs);
-
   return {
     matchPairs,
     players: allPlayers,
@@ -590,13 +588,13 @@ export function transformMatchmakingData(data: MatchmakingData | null | undefine
 }
 
 function handleRoomCreated(payload) {
-    console.log('Room created:', payload);
     currentRoomId = payload.roomId;
 
     showNotification(`Room created: ${payload.roomId}`, 'success');
 
     // Show appropriate waiting room
     if (currentGameMode === 'tournament') {
+        resetTournamentUIHard();
         showTournamentWaitingRoom(payload);
     } else if (currentGameMode === 'ai') {
         showAIWaitingRoom(payload);
@@ -618,26 +616,20 @@ function handleRoomJoined(payload) {
 }
 
 function updateRoundWaitingRoomButtons(players: any[]): void {
-  console.log('🔄 Updating round waiting room buttons...');
 
   // Host kontrolü
   const isHost = players.some(player => {
     const playerId = player.userId || player.id;
     const playerIsHost = player.isHost === true;
 
-    console.log(`Checking: ${player.name}, ID: ${playerId}, isHost: ${playerIsHost}, currentUserId: ${currentUserId}`);
-
     return playerId === currentUserId && playerIsHost;
   });
-
-  console.log(`Host status updated: ${isHost}`);
 
   const roundWaitingBtn = document.getElementById('round-waiting-btn') as HTMLButtonElement | null;
   const nextRoundBtn = document.getElementById('next-round-btn') as HTMLButtonElement | null;
   const finalRoundBtn = document.getElementById('final-round-btn') as HTMLButtonElement | null;
 
   if (isHost) {
-    console.log('✅ User is NOW HOST - showing host buttons');
 
     if (roundWaitingBtn) {
       roundWaitingBtn.style.display = 'none';
@@ -651,7 +643,6 @@ function updateRoundWaitingRoomButtons(players: any[]): void {
 
     // Final round mu?
     if (nextRound === totalRounds) {
-      console.log('🏆 Showing FINAL ROUND button');
       if (nextRoundBtn) {
         nextRoundBtn.style.display = 'none';
         nextRoundBtn.classList.remove('active');
@@ -664,7 +655,6 @@ function updateRoundWaitingRoomButtons(players: any[]): void {
     }
     // Normal round
     else {
-      console.log('▶️ Showing NEXT ROUND button');
       if (finalRoundBtn) {
         finalRoundBtn.style.display = 'none';
         finalRoundBtn.classList.remove('active');
@@ -676,7 +666,6 @@ function updateRoundWaitingRoomButtons(players: any[]): void {
       }
     }
   } else {
-    console.log('❌ User is NOT HOST - showing waiting button');
 
     if (nextRoundBtn) {
       nextRoundBtn.style.display = 'none';
@@ -697,7 +686,6 @@ function updateRoundWaitingRoomButtons(players: any[]): void {
 
 // handleRoomUpdate fonksiyonunu güncelle
 export function handleRoomUpdate(payload: MatchmakingData): void {
-  console.log('🔄 Room update:', payload);
 
   if (!payload.players) return;
 
@@ -707,7 +695,6 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
     // ✅ Eğer round waiting room aktifse, room update'i işleme
 	const roundWaitingRoom = document.getElementById('round-waiting-room');
 	if (roundWaitingRoom && roundWaitingRoom.classList.contains('active')) {
-		console.log('📋 Round waiting room is active, updating buttons for host change');
 
 		// Tournament data'yı güncelle
 		if (tournamentData) {
@@ -725,13 +712,17 @@ export function handleRoomUpdate(payload: MatchmakingData): void {
 
     // Eğer eşleşmeler hazırsa
     if (payload.status === 'ready2start' && payload.match) {
-      console.log('🎲 Matches are ready, transforming data...');
       const transformedData = transformMatchmakingData(payload);
 
       const matchPairsContainer = document.getElementById('match-pairs-container');
       if (matchPairsContainer) {
         matchPairsContainer.innerHTML = '';
       }
+
+    const roundTitle = document.getElementById('round-title');
+    if (roundTitle) {
+        roundTitle.textContent = 'Round ' + (payload.currentRound + 1);
+    }
 
       displayMatchPairs(transformedData.matchPairs, transformedData.players);
 
@@ -886,8 +877,6 @@ interface GameStartPayload {
 }
 
 function handleGameStarted(payload: GameStartPayload): void {
-    console.log('Payload gameSettings:', payload.gameSettings);
-    console.log('Payload keys:', Object.keys(payload));
     showNotification('The game begins!', 'success');
 
     // Non-null assertion operator kullanarak kesin var olduğunu belirtiyoruz
@@ -911,32 +900,24 @@ function handleGameStarted(payload: GameStartPayload): void {
     if (gameContainer) {
         gameContainer.style.display = 'block';
     } else {
-        console.error('Game container not found');
         return;
     }
 
     // currentUserId ve currentUserName'in null olmadığından emin olun
     if (!currentUserId || !currentUserName) {
-        console.error('User ID or Name is missing');
         return;
     }
-
-    // Payload'dan gelen oyun modunu ve ayarları logla
-    console.log(`Starting game mode: ${payload.gameMode}`);
-    console.log('Game settings:', payload.gameSettings);
 
     // App constructor'ına TypeScript desteği eklendiğini varsayarak
     app = new App(currentUserId, currentUserName);
     app.start(payload);
 
     if (canvasManager) {
-        console.log('🎮 Canvas manager found, setting game running...');
         canvasManager.setGameRunning(true);
     } else if (window.canvasManager) {
-        console.log('🎮 Canvas manager found on window, setting game running...');
         window.canvasManager.setGameRunning(true);
     } else {
-        console.warn('⚠️ Canvas manager not found!');
+        showNotification('Canvas manager not found!', 'error');
     }
 }
 
@@ -954,7 +935,6 @@ interface GameFinishPayload {
 }
 
 function handleGameFinished(payload: GameFinishPayload): void {
-    console.log('🏁 Game finished:', payload);
 
     if (canvasManager) {
         canvasManager.setGameRunning(false);
@@ -987,11 +967,9 @@ function handleGameFinished(payload: GameFinishPayload): void {
     }
 
     if (currentGameMode === 'tournament') {
-        console.log('🏆 Tournament game finished, status:', payload.status);
 
         // Status 'finished' veya isFinal true ise turnuva bitti demektir
         if (payload.status === 'finished' || payload.isFinal === true) {
-            console.log('🏆 TOURNAMENT COMPLETED!');
             showNotification('🏆 The tournament is over!', 'success');
 
             // Kazananı göster
@@ -1022,6 +1000,7 @@ function handleGameFinished(payload: GameFinishPayload): void {
             }
 
             // Tournament data'yı sıfırla
+            resetTournamentUIHard();
             tournamentData = null;
 
             return;
@@ -1029,7 +1008,7 @@ function handleGameFinished(payload: GameFinishPayload): void {
 
         // Status 'next_round' ise bir sonraki round var demektir
         if (payload.status === 'next_round') {
-            console.log('🏆 Tournament round finished, showing round waiting room');
+            showNotification('🏆 Tournament round finished, showing round waiting room', 'success');
             handleRoundFinished(payload);
             return;
         }
@@ -1049,7 +1028,6 @@ function handleGameFinished(payload: GameFinishPayload): void {
 }
 
 function handleError(payload) {
-    console.error('❌ Error:', payload);
     const errorMessage = payload.message || payload.error || 'An error occurred';
     showNotification(errorMessage, 'error');
 }
@@ -1081,7 +1059,6 @@ interface TournamentData {
 let tournamentData: TournamentData | null = null;
 
 function showTournamentWaitingRoom(data: TournamentData): void {
-    console.log('🏠 Showing tournament waiting room:', data);
 
     // Null kontrolü ile DOM element seçimleri
     const gamePage = document.getElementById('game-page');
@@ -1124,7 +1101,6 @@ function showTournamentWaitingRoom(data: TournamentData): void {
 
         // Eğer status 'ready2start' ise ve match varsa eşleştirmeleri göster
         if (data.status === 'ready2start' && data.match) {
-            console.log('🎲 Showing match pairs...');
             const transformedData = transformMatchmakingData(data);
 
             // match-pairs-section'ı göster
@@ -1453,7 +1429,6 @@ function setupGameModeSelection(
 
     // Eğer elementler mevcut değilse, fonksiyondan çık
     if (!modeCard || !settingsPanel) {
-        console.warn(`Element not found: ${modeCardId} or ${settingsPanelId}`);
         return;
     }
 
@@ -1618,17 +1593,13 @@ async function connectWebSocket() {
 		}
 
 		const profileData = await profileResponse.json();
-		console.log("Profile data:", profileData);
 
 		// Extract user information
 		currentUserId = profileData.profile.userName; // ID varsa: profileData.profile.id
 		currentUserName = profileData.profile.userName;
 		currentDisplayName = profileData.profile.displayName;
 
-		console.log(`User ID: ${currentUserId}, User Name: ${currentUserName}, Display Name: ${currentDisplayName}`);
-
 	} catch (error) {
-		console.error('❌ Error fetching profile:', error);
 		showNotification('Failed to load profile data', 'error');
 		return; // WebSocket bağlantısını yapma
 	}
@@ -1638,7 +1609,7 @@ async function connectWebSocket() {
 
 	// WebSocket event handlers
 	roomSocket.onConnect(() => {
-		console.log('Connected to room server');
+		showNotification('Connected to room server', 'info');
 	});
 
 	roomSocket.onMessage((message) => {
@@ -1652,17 +1623,21 @@ async function connectWebSocket() {
 			// Diğer mesajlar için normal işleme devam et
 			handleWebSocketMessage(message);
 		} catch (error) {
-			console.error('Error processing WebSocket message:', error);
 			showNotification('An error occurred while processing the message', 'error');
 		}
 	});
 
 	roomSocket.onClose((error) => {
-		console.log(`❌ Disconnected from room server: ${error.code} - ${error.reason}`);
+		if (error.code == 1008) {
+			showNotification("You are registered to an existing room", "error");
+		}
+		else {
+			showNotification(`Disconnected from room server`, 'error');
+		}
 	});
 
 	roomSocket.onError((error) => { // odaya giremedi diye ve error geldiğinde notification göster
-		console.error('❌ Room server connection error:', error);
+		showNotification('Room server connection error', 'error');
 	});
 
 	// Connect to server
@@ -1739,7 +1714,6 @@ if (customModeCard && customSettings && !customModeCard.classList.contains('acti
 
 // showRoundWaitingRoom fonksiyonunu güncelle
 function showRoundWaitingRoom(data) {
-    console.log('📋 Showing round waiting room with data:', data);
 
     // Tüm odaları gizle
     document.querySelectorAll('.waiting-room').forEach(room => room.classList.remove('active'));
@@ -1748,7 +1722,6 @@ function showRoundWaitingRoom(data) {
     // Round waiting room'u göster
     const roundWaitingRoom = document.getElementById('round-waiting-room');
     if (!roundWaitingRoom) {
-        console.error('Round waiting room element not found!');
         return;
     }
 
@@ -1786,10 +1759,7 @@ function showRoundWaitingRoom(data) {
         }
     }
 
-    console.log(`Round Info - Current: ${currentRound}, Total: ${totalRounds}, Next: ${nextRound}`);
-
     // Kazananları göster
-    console.log('Displaying winners:', data.winners);
     if (data.winners && data.winners.length > 0) {
         updateParticipants(data.winners, 'round-winners-grid');
     }
@@ -1797,7 +1767,6 @@ function showRoundWaitingRoom(data) {
     // Bir sonraki round eşleştirmelerini göster
     const nextRoundPairsSection = document.getElementById('next-round-pairs-section');
     if (data.nextMatches && data.nextMatches.length > 0) {
-        console.log('Displaying next matches:', data.nextMatches);
         if (nextRoundPairsSection) {
             nextRoundPairsSection.style.display = 'block';
         }
@@ -1817,30 +1786,17 @@ function showRoundWaitingRoom(data) {
     const isHost = data.winners && data.winners.some(player => {
         const playerId = player.userId || player.id;
         const playerIsHost = player.isHost === true;
-
-        console.log(`Checking player: ${player.name}, ID: ${playerId}, isHost: ${playerIsHost}, currentUserId: ${currentUserId}`);
-
         return playerId === currentUserId && playerIsHost;
     });
 
-    console.log(`=== HOST CHECK RESULT ===`);
-    console.log(`Host check - isHost: ${isHost}, currentUserId: ${currentUserId}`);
-    console.log(`Winners:`, data.winners);
 
     // Butonları ayarla
     const roundWaitingBtn = document.getElementById('round-waiting-btn') as HTMLButtonElement | null;
     const nextRoundBtn = document.getElementById('next-round-btn') as HTMLButtonElement | null;
     const finalRoundBtn = document.getElementById('final-round-btn') as HTMLButtonElement | null;
 
-    console.log('=== BUTTON ELEMENTS ===');
-    console.log('roundWaitingBtn exists:', !!roundWaitingBtn);
-    console.log('nextRoundBtn exists:', !!nextRoundBtn);
-    console.log('finalRoundBtn exists:', !!finalRoundBtn);
-
     // ✅ DÜZELTME: display yerine classList kullan ve !important ekle
     if (isHost) {
-        console.log('✅ User is HOST - showing appropriate button');
-
         // Önce tüm butonları gizle
         if (roundWaitingBtn) {
             roundWaitingBtn.style.display = 'none';
@@ -1849,7 +1805,6 @@ function showRoundWaitingRoom(data) {
 
         // Turnuva bitti mi kontrol et
         if (currentRound >= totalRounds) {
-            console.log('🏆 Tournament completed - no buttons shown');
             showNotification('🏆 The tournament is over!', 'success');
             if (nextRoundBtn) nextRoundBtn.style.display = 'none';
             if (finalRoundBtn) finalRoundBtn.style.display = 'none';
@@ -1857,7 +1812,6 @@ function showRoundWaitingRoom(data) {
         }
         // Final round mu?
         else if (nextRound === totalRounds) {
-            console.log('🏆 Showing FINAL ROUND button');
             if (nextRoundBtn) {
                 nextRoundBtn.style.display = 'none';
                 nextRoundBtn.classList.remove('active');
@@ -1866,13 +1820,10 @@ function showRoundWaitingRoom(data) {
                 finalRoundBtn.style.cssText = 'display: block !important;';
                 finalRoundBtn.classList.add('active');
                 finalRoundBtn.disabled = false;
-                console.log('Final round button display:', window.getComputedStyle(finalRoundBtn).display);
-                console.log('Final round button classList:', finalRoundBtn.classList);
             }
         }
         // Normal round
         else {
-            console.log('▶️ Showing NEXT ROUND button');
             if (finalRoundBtn) {
                 finalRoundBtn.style.display = 'none';
                 finalRoundBtn.classList.remove('active');
@@ -1882,15 +1833,9 @@ function showRoundWaitingRoom(data) {
                 nextRoundBtn.style.cssText = 'display: block !important;';
                 nextRoundBtn.classList.add('active');
                 nextRoundBtn.disabled = false;
-
-                console.log('Next round button display:', window.getComputedStyle(nextRoundBtn).display);
-                console.log('Next round button classList:', nextRoundBtn.classList);
-                console.log('Next round button offsetHeight:', nextRoundBtn.offsetHeight);
-                console.log('Next round button offsetWidth:', nextRoundBtn.offsetWidth);
             }
         }
     } else {
-        console.log('❌ User is NOT HOST - showing waiting button');
 
         // Önce host butonlarını gizle
         if (nextRoundBtn) {
@@ -1904,7 +1849,6 @@ function showRoundWaitingRoom(data) {
 
         // Turnuva bitti mi kontrol et
         if (currentRound >= totalRounds) {
-            console.log('🏆 Tournament completed - no waiting button');
             if (roundWaitingBtn) roundWaitingBtn.style.display = 'none';
             return;
         }
@@ -1913,7 +1857,6 @@ function showRoundWaitingRoom(data) {
             roundWaitingBtn.style.cssText = 'display: block !important;';
             roundWaitingBtn.classList.add('active');
             roundWaitingBtn.textContent = '⏳ Waiting for Host...';
-            console.log('Waiting button display:', window.getComputedStyle(roundWaitingBtn).display);
         }
     }
 }
@@ -1932,10 +1875,8 @@ interface RoundFinishedPayload {
 
 // handleRoundFinished fonksiyonunu da güncelle
 function handleRoundFinished(payload: RoundFinishedPayload): void {
-    console.log('🏁 Round finished:', payload);
 
     if (!payload) {
-        console.error('Invalid round data: payload is null');
         showNotification('Round data is invalid!', 'error');
         return;
     }
@@ -1943,14 +1884,9 @@ function handleRoundFinished(payload: RoundFinishedPayload): void {
     const currentRound = payload.currentRound || 1;
     const maxRound = payload.maxRound || payload.totalRounds || 3;
 
-    console.log(`Round finished - Current: ${currentRound}, Max: ${maxRound}`);
-
     // ✅ DÜZELTME: players = kazananlar (payload.players kullan)
     const winners = payload.players || [];
     const eliminated = payload.losers || payload.eliminated || [];
-
-    console.log(`Winners: ${winners.length}, Eliminated: ${eliminated.length}`);
-    console.log('Winners data:', winners);
 
     // Bir sonraki round'un eşleştirmelerini hazırla
     let nextMatches = [];
@@ -1966,8 +1902,6 @@ function handleRoundFinished(payload: RoundFinishedPayload): void {
         });
     }
 
-    console.log(`Next matches prepared: ${nextMatches.length}`);
-
     // Round verilerini sakla
     tournamentData = {
         currentRoundNumber: currentRound,
@@ -1976,8 +1910,6 @@ function handleRoundFinished(payload: RoundFinishedPayload): void {
         eliminated: eliminated,
         nextMatches: nextMatches
     };
-
-    console.log('Tournament data updated:', tournamentData);
 
     // Round arası bekleme odasını göster
     showRoundWaitingRoom(tournamentData);
@@ -2022,7 +1954,7 @@ class CanvasOrientationManager {
     private resizeObserver: ResizeObserver | null = null;
     private portraitWarning: HTMLElement | null = null;
     private isResizing: boolean = false;
-    private resizeTimeout: number | null = null;
+    private resizeTimeout: ReturnType<typeof setTimeout> | null = null;
     private isMobile: boolean = false;
     private isCanvasReady: boolean = false;
     private isGameRunning: boolean = false;
@@ -2034,20 +1966,13 @@ class CanvasOrientationManager {
         this.isMobile = isMobileDevice();
 
         const deviceType = getDeviceType();
-        console.log(`🔍 DEVICE DETECTION RESULT:`);
-        console.log(`   Device Type: ${deviceType}`);
-        console.log(`   Is Mobile: ${this.isMobile}`);
-        console.log(`   User Agent: ${navigator.userAgent}`);
 
         if (this.canvas) {
             this.waitForCanvasReady();
-        } else {
-            console.error('Canvas element not found!');
         }
     }
 
     public setGameRunning(isRunning: boolean): void {
-        console.log(`🎮 Game running state changed: ${isRunning}`);
         this.isGameRunning = isRunning;
 
         if (isRunning) {
@@ -2074,7 +1999,6 @@ class CanvasOrientationManager {
                 e.preventDefault();
 
                 const direction = e.key === 'ArrowUp' ? 'up' : 'down';
-                console.log(`⬆️ Portrait mode key pressed: ${direction}`);
 
                 window.dispatchEvent(new CustomEvent('portraitKeyPress', {
                     detail: { direction }
@@ -2083,14 +2007,12 @@ class CanvasOrientationManager {
         };
 
         window.addEventListener('keydown', this.keyboardListener);
-        console.log('⌨️ Portrait mode keyboard controls enabled');
     }
 
     private removeKeyboardControls(): void {
         if (this.keyboardListener) {
             window.removeEventListener('keydown', this.keyboardListener);
             this.keyboardListener = null;
-            console.log('⌨️ Portrait mode keyboard controls disabled');
         }
     }
 
@@ -2099,7 +2021,6 @@ class CanvasOrientationManager {
 
         const checkCanvasReady = () => {
             if (this.canvas!.width > 0 && this.canvas!.height > 0) {
-                console.log('Canvas is ready!');
                 this.isCanvasReady = true;
 
                 if (this.isMobile) {
@@ -2118,8 +2039,6 @@ class CanvasOrientationManager {
     private initDesktopMode(): void {
         if (!this.canvas) return;
 
-        console.log('💻 DESKTOP MODE - No orientation lock needed');
-
         this.updateCanvasLayout();
         window.addEventListener('resize', () => this.throttledHandleResize());
         this.setupResizeObserver();
@@ -2127,8 +2046,6 @@ class CanvasOrientationManager {
 
     private initMobileMode(): void {
         if (!this.canvas) return;
-
-        console.log('📱 MOBILE MODE - Portrait orientation lock enabled');
 
         this.updateCanvasLayout();
         window.addEventListener('orientationchange', () => this.handleOrientationChange());
@@ -2177,8 +2094,6 @@ class CanvasOrientationManager {
         }
 
         const isPortrait = window.innerWidth < window.innerHeight;
-
-        console.log(`📐 Mobile Orientation: ${isPortrait ? 'PORTRAIT' : 'LANDSCAPE'}`);
 
         if (isPortrait) {
             this.showPortraitWarning();
@@ -2629,6 +2544,56 @@ class CanvasOrientationManager {
     }
 }
 
+function resetTournamentUIHard(): void {
+  // Bölümler
+  const waitingRoom = document.getElementById('waiting-room');
+  const roundWaitingRoom = document.getElementById('round-waiting-room');
+  const matchPairsSection = document.getElementById('match-pairs-section');
+  const matchPairsContainer = document.getElementById('match-pairs-container');
+  const participantsGrid = document.getElementById('participants-grid');
+  const statusDisplay = document.getElementById('tournament-status-display') as HTMLElement | null;
+
+  // Butonlar
+  const waitingBtn = document.getElementById('waiting-players-btn') as HTMLButtonElement | null;
+  const matchBtn = document.getElementById('match-players-btn') as HTMLButtonElement | null;
+  const startBtn = document.getElementById('start-tournament-btn') as HTMLButtonElement | null;
+
+  // Görünürlükleri sıfırla
+  if (waitingRoom) waitingRoom.classList.remove('active');
+  if (roundWaitingRoom) roundWaitingRoom.classList.remove('active');
+
+  if (matchPairsSection) matchPairsSection.style.display = 'none';
+  if (matchPairsContainer) matchPairsContainer.innerHTML = '';
+  if (participantsGrid) participantsGrid.innerHTML = '';
+  if (statusDisplay) {
+    statusDisplay.textContent = 'Waiting';
+    statusDisplay.style.color = '';
+    statusDisplay.style.textShadow = '';
+  }
+
+  if (waitingBtn) {
+    waitingBtn.style.display = 'block';
+    waitingBtn.disabled = true;
+    waitingBtn.textContent = 'Players are awaited...';
+  }
+  if (matchBtn) {
+    matchBtn.style.display = 'none';
+    matchBtn.disabled = true;
+  }
+  if (startBtn) {
+    startBtn.style.display = 'none';
+    startBtn.disabled = true;
+  }
+
+  // Global state
+  tournamentData = null;
+//   currentRoomId = null;
+  // Eski eşleşme renkleri/animasyonları kalmasın diye
+  const nextRoundPairsSection = document.getElementById('next-round-pairs-section');
+  const nextRoundContainer = document.getElementById('next-round-pairs-container');
+  if (nextRoundPairsSection) nextRoundPairsSection.style.display = 'none';
+  if (nextRoundContainer) nextRoundContainer.innerHTML = '';
+}
 
 export default class extends AView {
 
@@ -2832,7 +2797,6 @@ export default class extends AView {
 		        roomId: currentRoomId,
 		        gameMode: 'classic'
 		    });
-		    console.log(`Start message sent for room: ${currentRoomId}`);
 		    showNotification('🚀 The game is starting!', 'success');
 		    // Timeout - eğer yanıt gelmezse butonu tekrar etkinleştir
 		    setTimeout(() => {
@@ -2939,8 +2903,6 @@ private initAIGameListeners(): void {
                 }
             }, 10000);
         });
-    } else {
-        console.error('❌ AI start button not found!');
     }
 
     // ✅ WAITING ROOM'DAKİ BUTON - Oyunu başlatmak için
@@ -2961,7 +2923,6 @@ private initAIGameListeners(): void {
                 gameMode: 'ai'
             });
 
-            console.log(`AI game start message sent for room: ${currentRoomId}`);
             showNotification('🚀 AI game starting!', 'success');
 
             setTimeout(() => {
@@ -3013,7 +2974,6 @@ private initAIGameListeners(): void {
             const gamePage = document.getElementById('game-page');
 
             if (roomSocket) {
-                console.log(`Leaving room from loading screen: ${currentRoomId}`);
                 roomSocket.send("leave", { roomId: currentRoomId });
                 currentRoomId = null;
             }
@@ -3029,6 +2989,7 @@ private initAIGameListeners(): void {
 	private initTournamentListeners(): void {
 		// Tournament Create Event Listener
 		document.getElementById('tournament-create-btn')?.addEventListener('click', function() {
+			resetTournamentUIHard();
 			// Null ve type assertion ile güvenli erişim
 			const tournamentNameElement = document.getElementById('tournament-name') as HTMLInputElement;
 			const tournamentName = tournamentNameElement.value.trim();
@@ -3077,7 +3038,6 @@ private initAIGameListeners(): void {
 
 			// Güvenli socket gönderimi
 			if (roomSocket) {
-				console.log(`🏆 Creating tournament: "${tournamentName}" with ${tournamentSize} players`);
 				roomSocket.send("create", data);
 				showNotification(`Creating tournament "${tournamentName}"...`, 'info');
 			} else {
@@ -3125,8 +3085,6 @@ private initAIGameListeners(): void {
 
 		// Tournament start button
         document.getElementById('start-tournament-btn')?.addEventListener('click', function() {
-            console.log("TOURNAMENT START BUTTON CLICKED!");
-
             const startButton = this as HTMLButtonElement;
 
             // Null kontrolü
@@ -3149,8 +3107,6 @@ private initAIGameListeners(): void {
                 roomId: currentRoomId,
                 gameMode: 'tournament'
             });
-
-            console.log(`Start message sent for room: ${currentRoomId}`);
             showNotification('🚀 The tournament is starting!', 'success');
 
             // Timeout - eğer yanıt gelmezse butonu tekrar etkinleştir
@@ -3164,7 +3120,6 @@ private initAIGameListeners(): void {
 
         // Next Round Button
         document.getElementById('next-round-btn')?.addEventListener('click', function() {
-            console.log("NEXT ROUND BUTTON CLICKED!");
 
             const nextRoundBtn = this as HTMLButtonElement;
 
@@ -3249,12 +3204,12 @@ private initAIGameListeners(): void {
 
         // Kişileri eşleştir butonu
         document.getElementById('match-players-btn')?.addEventListener('click', function() {
+			console.log("currentRoomId:", currentRoomId);
+			console.log("roomSocket:", roomSocket);
             if (!currentRoomId || !roomSocket) {
                 showNotification('Connection error!', 'error');
                 return;
             }
-
-            console.log(`🎲 Matching players for room: ${currentRoomId}`);
             roomSocket.send("matchTournament", { roomId: currentRoomId });
             showNotification('Matchmaking is underway...', 'info');
         });
@@ -3283,10 +3238,8 @@ private initAIGameListeners(): void {
 
 		if (backArrowBtn) {
 			backArrowBtn.addEventListener('click', () => {
-				console.log('Back arrow clicked!');
 				// Leave room if in one
 				if (currentRoomId && roomSocket) {
-					console.log(`Leaving room: ${currentRoomId}`);
 					roomSocket.send("leave", { roomId: currentRoomId });
 					currentRoomId = null;
 				}
@@ -3307,11 +3260,10 @@ private initAIGameListeners(): void {
 				// Hide back arrow
 				backArrowBtn.classList.remove('active');
 				// Reset tournament data
+				resetTournamentUIHard();
 				tournamentData = null;
 				showNotification('You left the room', 'info');
 			});
-		} else {
-			console.error('❌ Back arrow button not found!');
 		}
 	}
 

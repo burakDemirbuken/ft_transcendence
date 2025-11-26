@@ -16,6 +16,7 @@ class Tournament extends EventEmitter
 		this.spectators = [];
 		this.currentMatches = [];
 		this.finishedMatchesCount = 0;
+		this.status = 'waiting'; // 'waiting', 'running', 'finished'
 
 		this.registeredPlayers = new Set();
 	}
@@ -57,13 +58,15 @@ class Tournament extends EventEmitter
 
 	update(deltaTime)
 	{
-		if (this.status !== 'running' && this.status !== 'finished')
+		if (this.status === 'waiting')
 		{
 			let counter = 0;
 			this.currentMatches.forEach(
 				(match) =>
 				{
-					if (match.game?.status === 'ready to start' || match.game?.status === 'canceled' || match.game?.status === 'finished')
+					if (match.game?.status === 'ready to start' ||
+						match.game?.status === 'canceled' ||
+						match.game?.status === 'finished')
 						counter++;
 				}
 			);
@@ -161,9 +164,9 @@ class Tournament extends EventEmitter
 
 	start()
 	{
+		this.status = 'running';
 		if (this.startTime !== null)
 			this.startTime = Date.now();
-		this.status = 'running';
 		this.currentMatches.forEach(
 			(match) =>
 			{

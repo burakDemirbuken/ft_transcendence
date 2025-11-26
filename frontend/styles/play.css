@@ -2229,3 +2229,110 @@ html {
         font-size: 0.85rem;
     }
 }
+
+/* Tournament Start Button - Icon Styling */
+#start-tournament-btn svg {
+    width: 30px;
+    height: 30px;
+    fill: white;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Match Players Button - Icon Styling */
+#match-players-btn svg {
+    width: 30px;
+    height: 30px;
+    fill: white;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Waiting Players Button - Icon Styling */
+#waiting-players-btn svg {
+    width: 30px;
+    height: 30px;
+    fill: white;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Next Round Button - Icon Styling */
+#next-round-btn svg {
+    width: 30px;
+    height: 30px;
+    fill: white;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Final Round Button - Icon Styling */
+#final-round-btn svg {
+    width: 30px;
+    height: 30px;
+    fill: white;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Round Waiting Button - Icon Styling */
+#round-waiting-btn svg {
+    width: 30px;
+    height: 30px;
+    fill: white;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Tüm butonlarda icon + text alignment */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn svg {
+    flex-shrink: 0;
+}
+
+.btn span {
+    display: inline-block;
+}
+
+/* Responsive - Mobilde icon boyutunu küçült */
+@media (max-width: 768px) {
+    #start-tournament-btn svg,
+    #match-players-btn svg,
+    #waiting-players-btn svg,
+    #next-round-btn svg,
+    #final-round-btn svg,
+    #round-waiting-btn svg {
+        width: 18px;
+        height: 18px;
+        margin-right: 6px;
+    }
+
+    .btn {
+        gap: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    #start-tournament-btn svg,
+    #match-players-btn svg,
+    #waiting-players-btn svg,
+    #next-round-btn svg,
+    #final-round-btn svg,
+    #round-waiting-btn svg {
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
+    }
+
+    .btn {
+        gap: 4px;
+        padding: 14px 24px;
+        font-size: 0.9rem;
+    }
+}

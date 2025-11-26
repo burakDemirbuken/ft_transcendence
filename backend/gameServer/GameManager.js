@@ -32,12 +32,15 @@ class GameManager extends EventEmitter
 
 	removePlayerFromGame(playerId)
 	{
+		console.log(`Attempting to remove player ${playerId} from their game`);
 		for (const [gameId, game] of this.games.entries())
 		{
+			console.log(`Checking game ${gameId} for player ${playerId}`);
 			if (game.hasPlayer(playerId))
 			{
-				game.removePlayer(playerId);
 				console.log(`👤 Player ${playerId} removed from game ${gameId}`);
+				game.removePlayer(playerId);
+				console.log(`Game ${gameId} now has players:`, game.players.map(p => p.id));
 				if (game.players.length === 0)
 					this.removeGame(gameId);
 				return;
