@@ -1,7 +1,6 @@
 import fp from 'fastify-plugin'
 
 export default fp(async (fastify) => {
-
 	async function getDataFromToken(request)
 	{
 		// Gateway'den gelen x-user-* header'larını öncelikli olarak kullan

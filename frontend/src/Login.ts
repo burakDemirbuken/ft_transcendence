@@ -1,12 +1,14 @@
 import { getJsTranslations } from './utils/I18n.js';
 import { navigateTo, API_BASE_URL } from './index.js';
 import { showNotification } from './utils/notification.js';
-import doubleFetch from "./utils/doubleFetch.js";
 import AView from "./AView.js";
-let currentStep:string = "welcome";
-let userRegistered:boolean;
-let rememberMe:boolean = false;
-let userEmail:string;
+
+let currentStep: string = "welcome";
+let userRegistered: boolean;
+let rememberMe: boolean = false;
+let userEmail: string;
+let langPref: string;
+let trlt: any;
 
 function goToNextField(field) {
 	let step = document.querySelector(`.field[data-step="${currentStep}"]`);
@@ -20,28 +22,17 @@ function goToNextField(field) {
 }
 
 async function username() {
-	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
-
 	const form = document.querySelector("#loginForm") as HTMLFormElement;
 	if (!form)
 		return showNotification(trlt.system, "error");
 	const formData = new FormData(form);
-	const username:string = formData.get("username");
-
-	if (!username)
-		return showNotification(trlt.login.uname.empty, "error");
-
-	if (username.length < 1 || username.length > 20)
-		return showNotification(trlt.login.uname.length, "error");
-
-	if (!/^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username))
-		return showNotification(trlt.login.uname.invalid, "error")
+	const username: string = formData.get("username");
 
 	try {
-		const response = await doubleFetch(`${API_BASE_URL}/auth/check-username?username=${username}&lang=${localStorage.getItem("langPref")}`,{ method: "GET" });
+		const response = await fetch(`${API_BASE_URL}/auth/check-username?username=${username}&lang=${langPref}`, { method: "GET", credentials: "omit" });
 		const json = await response.json();
 		if (response.ok) {
-			if(json.exists) {
+			if (json.exists) {
 				userRegistered = true;
 				goToNextField("password");
 			} else {
@@ -57,13 +48,11 @@ async function username() {
 }
 
 async function email() {
-	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
-
 	const form = document.querySelector("#loginForm") as HTMLFormElement;
 	if (!form)
 		return showNotification(trlt.system, "error");
 	const formData = new FormData(form);
-	const email:string = formData.get("email");
+	const email: string = formData.get("email");
 
 	if (!email)
 		return showNotification(trlt.login.email.empty, "error");
@@ -78,13 +67,11 @@ async function email() {
 }
 
 async function login() {
-	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
-
 	const form = document.querySelector("#loginForm") as HTMLFormElement;
 	if (!form)
 		return showNotification(trlt.system, "error");
 	const formData = new FormData(form);
-	const password:string = formData.get("password");
+	const password: string = formData.get("password");
 
 	if (!password)
 		return showNotification(trlt.login.password.empty, "error");
@@ -92,14 +79,15 @@ async function login() {
 	if (password.length < 8 || password.length > 128)
 		return showNotification(trlt.login.password.length, "error");
 
-	const user:Object = {
+	const user: Object = {
 		"login": formData.get("username"),
 		"password": formData.get("password")
 	};
 
 	try {
-		const response = await doubleFetch(`${API_BASE_URL}/auth/login?lang=${localStorage.getItem("langPref") ?? 'eng'}`, {
+		const response = await fetch(`${API_BASE_URL}/auth/login?lang=${langPref}`, {
 			method: "POST",
+			credentials: "omit",
 			headers: new Headers({ "Content-Type": "application/json" }),
 			body: JSON.stringify(user),
 		});
@@ -116,13 +104,11 @@ async function login() {
 }
 
 async function register() {
-	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
-
 	const form = document.querySelector("#loginForm") as HTMLFormElement;
 	if (!form)
 		return showNotification(trlt.system, "error");
 	const formData = new FormData(form);
-	const password:string = formData.get("password");
+	const password: string = formData.get("password");
 
 	if (!password)
 		return showNotification(trlt.login.password.empty, "error");
@@ -130,14 +116,14 @@ async function register() {
 	if (password.length < 8 || password.length > 128)
 		return showNotification(trlt.login.password.length, "error");
 
-	const obj:Object = {
+	const obj: Object = {
 		"username": formData.get("username"),
 		"email": formData.get("email"),
 		"password": formData.get("password")
 	};
 
 	try {
-		const response = await doubleFetch(`${API_BASE_URL}/auth/register?lang=${localStorage.getItem("langPref") ?? "eng"}`, {
+		const response = await fetch(`${API_BASE_URL}/auth/register?lang=${langPref}`, {
 			method: "POST",
 			headers: new Headers({ "Content-Type": "application/json" }),
 			body: JSON.stringify(obj),
@@ -156,27 +142,24 @@ async function register() {
 }
 
 async function verify() {
-	let trlt = await getJsTranslations(localStorage.getItem("langPref"));
-
 	const form = document.querySelector("#loginForm") as HTMLFormElement;
 	if (!form)
 		return showNotification(trlt.system, "error");
 	const formData = new FormData(form);
-	const code:string = formData.get("code");
+	const code: string = formData.get("code");
 
 	if (!code)
 		return showNotification(trlt.login.code.empty, "error");
 
-	if (userEmail)
-	{
-		const obj:Object = {
+	if (userEmail) {
+		const obj: Object = {
 			"login": userEmail,
-			"code":  code,
+			"code": code,
 			"rememberMe": rememberMe
 		};
 
 		try {
-			const response = await doubleFetch(`${API_BASE_URL}/auth/verify-2fa?lang=${localStorage.getItem("langPref") ?? "eng"}`, {
+			const response = await fetch(`${API_BASE_URL}/auth/verify-2fa?lang=${langPref}`, {
 				method: "POST",
 				headers: new Headers({ "Content-Type": "application/json" }),
 				body: JSON.stringify(obj),
@@ -290,6 +273,10 @@ export default class extends AView {
 
 	async setEventHandlers() {
 		currentStep = "welcome";
+		// Initialize language preference and translations
+		langPref = localStorage.getItem("langPref") ?? 'eng';
+		trlt = await getJsTranslations(langPref);
+		
 		document.addEventListener("click", move);
 		document.addEventListener("input", growInput);
 		document.addEventListener("keydown", enterPress);

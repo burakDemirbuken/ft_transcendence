@@ -2,8 +2,7 @@ import AView from "./AView.js";
 import { getAuthHeaders } from './utils/auth.js';
 import { API_BASE_URL, navigateTo } from './index.js';
 import { showNotification } from "./utils/notification.js";
-import doubleFetch from "./utils/doubleFetch.js";
-import tokenManager from './utils/tokenManager.js';
+
 
 let currentUserName = null;
 let pendingAction = null; // 'password', 'email' veya 'delete'
@@ -62,7 +61,7 @@ async function confirm2FACode(e) {
 			submitBtn.style.cursor = 'pointer';
 			return;
 		}
-		const response = await doubleFetch(`${API_BASE_URL}${endpoint}`, {
+		const response = await fetch(`${API_BASE_URL}${endpoint}`, {
 			method: method,
 			credentials: 'include',
 			headers: {
@@ -81,14 +80,34 @@ async function confirm2FACode(e) {
 
 			if (pendingAction === 'password' && result.logout) {
 				showNotification("Password changed! Logging out...", "success");
-				await tokenManager.logout();
+				// Logout
+				await fetch(`${API_BASE_URL}/auth/logout`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: {
+						'Content-Type': 'application/json',
+						...getAuthHeaders()
+					}
+				});
+				localStorage.removeItem('userName');
+				document.querySelector("#navbar")?.classList.add("logout");
 				setTimeout(() => {
 					navigateTo('login');
 				}, 1500);
 			}
 			else if (pendingAction === 'email' && result.logout) {
 				showNotification(result.message || "Email başarıyla değiştirildi! Yeni email adresinizi doğrulamak için gelen emaildeki linke tıklayın. Oturumunuz kapatılıyor...", "success");
-				await tokenManager.logout();
+				// Logout
+				await fetch(`${API_BASE_URL}/auth/logout`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: {
+						'Content-Type': 'application/json',
+						...getAuthHeaders()
+					}
+				});
+				localStorage.removeItem('userName');
+				document.querySelector("#navbar")?.classList.add("logout");
 				setTimeout(() => {
 					navigateTo('login');
 				}, 3000);
@@ -101,7 +120,17 @@ async function confirm2FACode(e) {
 			else if (pendingAction === 'delete') {
 				console.log("🗑️ Account deletion successful, logging out...");
 				showNotification("Hesap başarıyla silindi. Hoşçakal!", "success");
-				await tokenManager.logout();
+				// Logout
+				await fetch(`${API_BASE_URL}/auth/logout`, {
+					method: 'POST',
+					credentials: 'include',
+					headers: {
+						'Content-Type': 'application/json',
+						...getAuthHeaders()
+					}
+				});
+				localStorage.removeItem('userName');
+				document.querySelector("#navbar")?.classList.add("logout");
 				setTimeout(() => {
 					console.log("🔄 Redirecting to login page");
 					navigateTo('login');
@@ -140,7 +169,7 @@ async function deleteAccount(e) {
 	}
 
 	try {
-		const res = await doubleFetch(`${API_BASE_URL}/auth/init-delete-account`, {
+		const res = await fetch(`${API_BASE_URL}/auth/init-delete-account`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: {
@@ -175,7 +204,7 @@ async function sendAvatarChangeReq(e) {
 		const formData = new FormData();
 		formData.append('avatar', e.target.files[0]);
 
-		const res = await doubleFetch(`${API_BASE_URL}/static/avatar`, {
+		const res = await fetch(`${API_BASE_URL}/static/avatar`, {
 			method: 'POST',
 			credentials: 'include',
 			body: formData
@@ -207,7 +236,7 @@ async function sendDNameChangeReq(e) {
 	const dname = formData.get('dname') as string;
 
 	try {
-		const getProfileDatas = await doubleFetch(`${API_BASE_URL}/profile/displaynameupdate`, {
+		const getProfileDatas = await fetch(`${API_BASE_URL}/profile/displaynameupdate`, {
 			method: "POST",
 			credentials: 'include',
 			headers: {
@@ -257,7 +286,7 @@ async function sendEmailChangeReq(e) {
 	submitBtn.style.cursor = 'not-allowed';
 
 	try {
-		const response = await doubleFetch(`${API_BASE_URL}/auth/init-email-change`, {
+		const response = await fetch(`${API_BASE_URL}/auth/init-email-change`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: {
@@ -320,7 +349,7 @@ async function sendPassChangeReq(e) {
 	submitBtn.style.cursor = 'not-allowed';
 
 	try {
-		const response = await doubleFetch(`${API_BASE_URL}/auth/init-password-change`, {
+		const response = await fetch(`${API_BASE_URL}/auth/init-password-change`, {
 			method: 'POST',
 			credentials: 'include',
 			headers: {
@@ -410,7 +439,7 @@ export default class extends AView {
 async function onLoad()
 {
 	try {
-		const meReq = await doubleFetch(`${API_BASE_URL}/auth/me`, {
+		const meReq = await fetch(`${API_BASE_URL}/auth/me`, {
 			credentials: 'include',
 			headers:
 			{
@@ -427,7 +456,7 @@ async function onLoad()
 				uname.textContent = "@" + profileData.user.username;
 			document.querySelector('input[name="current-email"]')?.setAttribute('value', profileData?.user?.email ?? '');
 
-			const profileReq = await doubleFetch(`${API_BASE_URL}/profile/profile?userName=${profileData?.user?.username}`, {
+			const profileReq = await fetch(`${API_BASE_URL}/profile/profile?userName=${profileData?.user?.username}`, {
 				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json',

@@ -8,7 +8,6 @@ import WebSocketClient from '../dist/game/network/WebSocketClient.js';
 import gameConfig from '../dist/game/json/GameConfig.js';
 import aiConfig from '../dist/game/json/AiConfig.js';
 import tournamentConfig from '../dist/game/json/TournamentConfig.js';
-import doubleFetch from "./utils/doubleFetch.js";
 import { getAuthToken, getAuthHeaders } from './utils/auth.js';
 import { API_BASE_URL } from "./index.js";
 
@@ -1602,7 +1601,7 @@ const aiCustomSliderConfigs = [
 async function connectWebSocket() {
 	try {
 		// Fetch user profile data
-		const profileResponse = await doubleFetch(
+		const profileResponse = await fetch(
 			`${API_BASE_URL}/profile/profile`,
 			{
 				credentials: 'include',
@@ -2022,7 +2021,7 @@ class CanvasOrientationManager {
     private resizeObserver: ResizeObserver | null = null;
     private portraitWarning: HTMLElement | null = null;
     private isResizing: boolean = false;
-    private resizeTimeout: number | null = null;
+    private resizeTimeout: ReturnType<typeof setTimeout> | null = null;
     private isMobile: boolean = false;
     private isCanvasReady: boolean = false;
     private isGameRunning: boolean = false;

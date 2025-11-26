@@ -25,9 +25,5 @@ export const config = {
   server: {
     port: process.env.EMAIL_PORT || 3005,
     host: process.env.HOST || '0.0.0.0',
-  },
-  app: {
-    name: 'ft_transcendence',
-    url: process.env.APP_URL || 'http://localhost:3000'
   }
 }

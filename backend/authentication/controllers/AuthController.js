@@ -2,11 +2,6 @@ import User from '../models/User.js';
 import { getTranslations } from '../I18n/I18n.js';
 import utils from './utils.js';
 
-/**
- * Adım 2: 2FA kodunu doğrula ve hesabı sil
- * Body: { code }
- * Response: { success: true, message: "Account successfully deleted" }
- */
 async function confirmDeleteAccount(request, reply)
 {
     const trlt = getTranslations(request.query.lang || "eng");
@@ -21,20 +16,17 @@ async function confirmDeleteAccount(request, reply)
             });
         }
 
-        // JWT'den kullanıcıyı al
-        const cookieToken = request.cookies?.accessToken;
-        const headerToken = request.headers?.authorization?.replace('Bearer ', '');
-        const token = cookieToken || headerToken;
+        // getDataFromToken kullan (header'dan veya cookie'den)
+        const userData = await request.server.getDataFromToken(request);
 
-        if (!token) {
+        if (!userData?.userId) {
             return reply.status(401).send({
                 success: false,
                 error: 'Authentication required'
             });
         }
 
-        const decoded = request.server.jwt.verify(token);
-        const user = await User.findByPk(decoded.userId);
+        const user = await User.findByPk(userData.userId);
 
         if (!user) {
             return reply.status(404).send({

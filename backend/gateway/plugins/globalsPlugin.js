@@ -31,7 +31,6 @@ async function globalsPlugin(fastify, options) {
 		/^\/auth\/verify-email/,
 		/^\/auth\/login$/,
 		/^\/auth\/verify-2fa$/,
-		/^\/auth\/check-email$/,
 		/^\/auth\/check-username$/,
 		/^\/auth\/health$/,
 		/^\/auth\/hellokitty$/,

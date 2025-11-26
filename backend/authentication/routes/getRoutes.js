@@ -3,32 +3,7 @@ import  { verifyEmail } from    '../controllers/PostController.js';
 
 export async function getRoutes(fastify, options)
 {
-    fastify.get('/check-email',
-    {
-        schema:
-        {
-            querystring:
-            {
-                type: 'object',
-                required:
-                [
-                    'email'
-                ],
-                properties:
-                {
-                    email:
-                    {
-                        type: 'string',
-                        format: 'email'
-                    },
-                    lang:
-                    {
-                        type: 'string'
-                    }
-                }
-            }
-        }
-    }, getController.checkEmail);
+
 
     fastify.get('/check-username',
     {
@@ -46,8 +21,9 @@ export async function getRoutes(fastify, options)
                     username:
                     {
                         type: 'string',
-                        minLength: 3,
-                        maxLength: 50
+                        minLength: 1,
+                        maxLength: 20,
+                        pattern: '^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$'
                     },
                     lang:
                     {
@@ -86,23 +62,6 @@ export async function getRoutes(fastify, options)
         }
     }, verifyEmail);
 
-    fastify.get('/profile',
-    {
-        schema:
-        {
-            querystring:
-            {
-                type: 'object',
-                properties:
-                {
-                    lang:
-                    {
-                        type: 'string'
-                    }
-                }
-            }
-        }
-    }, getController.getProfile);
 
     fastify.get('/me',
     {
@@ -121,6 +80,7 @@ export async function getRoutes(fastify, options)
             }
         }
     }, getController.getProfile);
+
     fastify.get('/health',
     {
         schema:

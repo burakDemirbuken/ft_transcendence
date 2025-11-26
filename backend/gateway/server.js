@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import Fastify from 'fastify'
 import globalsPlugin from './plugins/globalsPlugin.js'
-import jwtMiddleware from './plugins/authorization.js'
 import allRoutes from './routes/index.js'
 import cookie from '@fastify/cookie'
 import jwt from '@fastify/jwt'
@@ -39,7 +38,7 @@ await fastify.register(jwt, {
 	}
 });
 
-await fastify.register(jwtMiddleware)
+// JWT middleware artık plugin değil, routes'da manuel kullanılacak
 
 allRoutes(fastify)
 

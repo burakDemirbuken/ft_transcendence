@@ -2,6 +2,7 @@ import cookie from '@fastify/cookie';
 import jwt from '@fastify/jwt';
 import authRoutes from '../routes/authRoutes.js';
 import utils from './utils.js';
+import utilsPlugin from '../plugins/utils.js';
 
 async function registration(fastify)
 {
@@ -27,6 +28,7 @@ async function registration(fastify)
         	credentials: true,
     	}
 	});
+	await fastify.register( utilsPlugin );
 	await fastify.register( authRoutes );
 	await fastify.setNotFoundHandler( utils.NotFoundHandler );
 	await fastify.setErrorHandler( utils.InternalServerErrorHandler );

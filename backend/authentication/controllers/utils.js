@@ -62,7 +62,6 @@ async function sendVerificationEmail(email, username, token)
 			token: token
 		})
 	});
-
 	if (!response.ok)
 		throw new Error(`Email service error: ${response.status}`);
 	return (response.json());
@@ -161,8 +160,8 @@ function validatePassword(password) {
     if (!password || password.length < 8) {
         errors.push('Şifre en az 8 karakter olmalıdır');
     }
-    if (password && password.length > 16) {
-        errors.push('Şifre en fazla 16 karakter olmalıdır');
+    if (password && password.length > 128) {
+        errors.push('Şifre en fazla 128 karakter olmalıdır');
     }
     
     // En az 1 büyük harf kontrol
