@@ -1595,9 +1595,8 @@ async function connectWebSocket() {
 
 		// Extract user information
 		currentUserId = profileData.profile.userName; // ID varsa: profileData.profile.id
-		currentUserName = profileData.profile.userName;
+		currentUserName = profileData.profile.displayName;
 		currentDisplayName = profileData.profile.displayName;
-
 	} catch (error) {
 		showNotification('Failed to load profile data', 'error');
 		return; // WebSocket bağlantısını yapma

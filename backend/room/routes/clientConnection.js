@@ -22,7 +22,8 @@ export default async function clientConnectionSocket(fastify) {
 		}
 		connections.push(userID);
 		const currentPlayer = new Player(userID, connection.socket, req.query.userName || 'Anonymous');
-
+		console.log(`✅ User ${userID} connected via WebSocket.`);
+		console.log(`Player info: ID=${currentPlayer.id}, Name=${currentPlayer.name}`);
 
 		connection.socket.on('message', (message) => {
 			let data;
