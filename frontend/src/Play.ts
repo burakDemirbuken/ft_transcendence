@@ -1601,61 +1601,67 @@ async function connectWebSocket() {
 		const profileData = await profileResponse.json();
 
 		// Extract user information
-		currentUserId = profileData.profile.userName; // ID varsa: profileData.profile.id
-		currentUserName = profileData.profile.displayName;
+		currentUserId = profileData.profile.userName;
+		currentUserName = profileData.profile.userName;
 		currentDisplayName = profileData.profile.displayName;
 	} catch (error) {
 		showNotification('Failed to load profile data', 'error');
-		return; // WebSocket bağlantısını yapma
+		return;
 	}
 
-	// Initialize WebSocket
-	roomSocket = new WebSocketClient(window.location.hostname, 3030);
+	try {
+		// WebSocket bağlantısını güvenle oluştur
+		roomSocket = new WebSocketClient(window.location.hostname, 3030);
 
-	// WebSocket event handlers
-	roomSocket.onConnect(() => {
-		showNotification('Connected to room server', 'info');
-	});
+		// WebSocket event handlers
+		roomSocket.onConnect (() => {
+			showNotification('Connected to room server', 'info');
+		});
 
-	roomSocket.onMessage((message) => {
-		try {
-			// Eğer matchReady mesajı gelirse özel işleme yap
-			if (message.type === "matchReady") {
-				const transformedData = transformMatchmakingData(message.payload);
-				handleMatchReady(transformedData);
-				return;
+		roomSocket.onMessage ((message) => {
+			try {
+				
+				// Eğer matchReady mesajı gelirse özel işleme yap
+				if (message.type === "matchReady") {
+					const transformedData = transformMatchmakingData(message.payload);
+					handleMatchReady(transformedData);
+					return;
+				}
+				
+				// Diğer mesajlar için normal işleme devam et
+				handleWebSocketMessage(message);
+			} catch (error) {
+				showNotification('An error occurred while processing the message', 'error');
 			}
-			// Diğer mesajlar için normal işleme devam et
-			handleWebSocketMessage(message);
-		} catch (error) {
-			showNotification('An error occurred while processing the message', 'error');
+		});
+
+		roomSocket.onClose ((error) => {
+			if (error.code == 1008) { // Normal close değilse
+				showNotification('Disconnected from room server', 'error');
+			}
+			else {
+				showNotification(`Disconnected from room server`, 'error');
+			}
+		});
+
+		roomSocket.onError ((error) => {
+			showNotification('Room server connection error', 'error');
+		});
+
+		roomSocket.connect("ws-room/client", {
+			userID: currentUserId,
+			userName: currentUserName,
+			displayName: currentDisplayName
+		});
+
+		// Export for debugging
+		window.roomSocket = roomSocket;
+		if (app) {
+			window.app = app;
 		}
-	});
 
-	roomSocket.onClose((error) => {
-		if (error.code == 1008) {
-			showNotification("You are registered to an existing room", "error");
-		}
-		else {
-			showNotification(`Disconnected from room server`, 'error');
-		}
-	});
-
-	roomSocket.onError((error) => { // odaya giremedi diye ve error geldiğinde notification göster
-		showNotification('Room server connection error', 'error');
-	});
-
-	// Connect to server
-	roomSocket.connect("ws-room/client", {
-		userID: currentUserId,
-		userName: currentUserName,
-		displayName: currentDisplayName
-	});
-
-	// Export for debugging
-	window.roomSocket = roomSocket;
-	if (app) {
-		window.app = app;
+	} catch (error) {
+		showNotification('Failed to setup WebSocket connection', 'error');
 	}
 }
 
@@ -3378,7 +3384,9 @@ private initAIGameListeners(): void {
 			canvasManager?.destroy();
 			canvasManager = null;
 		}
-		roomSocket.disconnect();
+		if (roomSocket) {
+			roomSocket.disconnect();
+		}
 	}
 
 	async updateJsLanguage() {}
