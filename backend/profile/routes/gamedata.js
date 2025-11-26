@@ -8,7 +8,7 @@ export default async function gamedataRoute(fastify) {
 
 		try {
 			if (!team1 || !team2 || !state || !time || !matchType || !winner) {
-				console.error(request.body)
+				fastify.log.error(request.body)
 				throw new Error('Invalid match data provided')
 			} else if (!Profile || !Stat || !MatchHistory || !Team) {
 				throw new Error('Database models are not properly initialized')
@@ -151,7 +151,7 @@ export default async function gamedataRoute(fastify) {
 		const t = await fastify.sequelize.transaction()
 
 			if (!name || !rounds || !Array.isArray(rounds) || rounds.length === 0) {
-				console.error(request.body)
+				fastify.log.error(request.body)
 				throw new Error('Invalid tournament data provided')
 			} else if (!Profile || !Stat || !RoundMatch || !Round || !TournamentHistory) {
 				throw new Error('Database models are not properly initialized')
@@ -308,6 +308,7 @@ export default async function gamedataRoute(fastify) {
 			})
 
 			if (!userProfile) {
+				fastify.log.error(`User profile not found for userName: ${userName}`)
 				return reply.code(404).send({ message: 'User profile not found' })
 			}
 
@@ -380,9 +381,9 @@ export default async function gamedataRoute(fastify) {
 			})
 	
 			const matchData = matchHistory.map(match => match.toJSON())
-			console.log(`Match data for user ${userName}:`, matchData)
+			fastify.log.error(`Match data for user ${userName}:`, matchData)
 
-			console.log(`Retrieved ${matchData.length} matches for user ${userName}`)
+			fastify.log.error(`Retrieved ${matchData.length} matches for user ${userName}`)
 			return reply.code(200).send({
 				matches: matchData,
 				matchCount: matchData.length,
@@ -408,6 +409,7 @@ export default async function gamedataRoute(fastify) {
 				attributes: ['id']
 			})
 			if (!userProfile) {
+				fastify.log.error(`User profile not found for userName: ${userName}`)
 				return reply.code(404).send({ error: 'User profile not found' })
 			}
 

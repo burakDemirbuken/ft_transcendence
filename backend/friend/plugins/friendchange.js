@@ -52,7 +52,7 @@ export default fp(async function friendChanges(fastify) {
 				body: JSON.stringify({ friends: allFriendNames })
 			})
 			if (!friendsProfiles.ok) {
-				console.error("Error response from profile service:", friendsProfiles.status, await friendsProfiles.text());
+				fastify.log.error("Error response from profile service:", friendsProfiles.status, await friendsProfiles.text());
 				throw new Error(`Failed to fetch friend profiles: ${friendsProfiles.status} ${await friendsProfiles.text()}`)
 			}
 
@@ -99,7 +99,7 @@ export default fp(async function friendChanges(fastify) {
 				body: JSON.stringify({ userName: peerName })
 			})
 			if (!peerProfileResponse.ok) {
-				console.error("Error response from profile service:", peerProfileResponse.status, await peerProfileResponse.text());
+				fastify.log.error("Error response from profile service:", friendsProfiles.status, await friendsProfiles.text());peerProfileResponse.status, await peerProfileResponse.text());
 				return { user: `${peerName} user does not exist.`, peer: null }
 			}
 
@@ -261,7 +261,7 @@ export default fp(async function friendChanges(fastify) {
 
 			const users = friendships.map(f => f.userName === userName ? f.peerName : f.userName)
 			if (users.length === 0) {
-				console.log(`No friends to notify for user: ${userName}`)
+				fastify.log.error("Error response from profile service:", friendsProfiles.status, await friendsProfiles.text());log(`No friends to notify for user: ${userName}`)
 				return
 			}
 
@@ -280,7 +280,7 @@ export default fp(async function friendChanges(fastify) {
 								friendlist: friendList
 							}
 						}))
-						console.log(`list ${JSON.stringify(friendList)} sent to ${friendName}`);
+						fastify.log.error("Error response from profile service:", friendsProfiles.status, await friendsProfiles.text());log(`list ${JSON.stringify(friendList)} sent to ${friendName}`);
 					}
 				}
 			}))

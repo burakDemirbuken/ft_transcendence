@@ -17,8 +17,8 @@ export default async function gameServerConnectionSocket(fastify) {
 			}
 			catch (error)
 			{
-				console.error('❌ Failed to parse WebSocket message:', error);
-				console.error('Raw message data:', message.toString());
+				fastify.log.error('❌ Failed to parse WebSocket message:', error);
+				fastify.log.error('Raw message data:', message.toString());
 			}
 
 		})

@@ -157,6 +157,7 @@ export default fp(async (fastify) => {
 
 	async function statCalculate(profile = null) {
 		if (!profile || !profile.Stat) {
+			fastify.log.error('Stats not found for user:', profile?.id)
 			throw new Error('Stats not found for user')
 		}
 

@@ -10,16 +10,19 @@ export default async function avatarRoutes(fastify) {
 		const userName = (await fastify.getDataFromToken(request))?.username ?? null
 
 		if (!userName) {
+			fastify.log.error('Unauthorized avatar upload attempt: missing username in token')
 			return reply.code(401).send({ message: "Unauthorized: username is required" })
 		}
 
 		const data = await request.file()
 
 		if (!data) {
+			fastify.log.error('No file uploaded in avatar upload request')
 			return reply.code(400).send({ message: "No file uploaded" })
 		} 
 
 		if (!allowedMimeTypes.includes(data.mimetype)) {
+			fastify.log.error(`Unsupported file type uploaded: ${data.mimetype}`)
 			await data.file.resume()
 			return reply.code(415).send({ message: "Unsupported media type. Only JPG/JPEG and PNG are allowed." })
 		}
@@ -30,7 +33,7 @@ export default async function avatarRoutes(fastify) {
 		try {
 			await pipeline(data.file, fs.createWriteStream(filePath))
 		} catch (err) {
-			request.log.error(`File save failed: ${err.message}`)
+			fastify.log.error(`File save failed: ${err.message}`)
 			return reply.code(500).send({ message: "Failed to save file" })
 		}
 
@@ -44,16 +47,16 @@ export default async function avatarRoutes(fastify) {
 				})
 			})
 			if (!response.ok) {
-				await fs.promises.unlink(filePath).catch(err => request.log.error(`Failed to delete orphaned file: ${err.message}`))
+				await fs.promises.unlink(filePath).catch(err => fastify.log.error(`Failed to delete orphaned file: ${err.message}`))
+				fastify.log.error(`Profile service rejected avatar update with status ${response.status}`)
 				return reply.code(502).send({ message: "Upstream profile service rejected avatar update" })
 			}
 
 			const responseJson = await response.json()
-			console.log("hebele hübele", responseJson.newAvatarUrl)
 			return reply.code(201).send({ newAvatarUrl: responseJson.newAvatarUrl })
 		} catch (err) {
-			await fs.promises.unlink(filePath).catch(err => request.log.error(`Failed to delete orphaned file: ${err.message}`))
-			request.log.error(`Profile service communication failed: ${err.message}`)
+			await fs.promises.unlink(filePath).catch(err => fastify.log.error(`Failed to delete orphaned file: ${err.message}`))
+			fastify.log.error(`Profile service communication failed: ${err.message}`)
 			return reply.code(502).send({ message: "Failed to communicate with profile service" })
 		}
 	})
