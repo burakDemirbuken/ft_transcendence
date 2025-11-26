@@ -1,7 +1,7 @@
 FROM node:24-alpine
 
-RUN apk upgrade --no-cache && \
-	apk update --no-cache
+RUN apk update --no-cache && \
+	apk upgrade --no-cache
 
 WORKDIR /app
 

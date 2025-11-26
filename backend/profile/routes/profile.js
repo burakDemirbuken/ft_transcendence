@@ -217,7 +217,7 @@ export default async function profileRoute(fastify) {
 					}
 				},
 				attributes: ['userName', 'displayName', 'avatarUrl']
-			})
+			}) ?? null
 
 			if (!userProfiles || userProfiles.length === 0) {
 				return reply.code(404).send({ message: 'Users not found' })
@@ -253,7 +253,7 @@ export default async function profileRoute(fastify) {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ userName: userName })
-			}).catch(err => fastify.log.error('Error notifying friend service of avatar change:', err))
+			}).catch(err => fastify.log.error(`Error notifying friend service of avatar change: ${err.message}`))
 
 			return reply.code(200).send({  message: 'Avatar updated successfully', newAvatarUrl: userProfile.avatarUrl  })
 		} catch (error) {

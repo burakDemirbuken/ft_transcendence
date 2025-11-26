@@ -12,13 +12,14 @@ const fastify = Fastify({
 	logger: false
 })
 
-// JWT secret must be set in .env
 if (!process.env.JWT_SECRET) {
-	throw new Error('JWT_SECRET environment variable is required! Please set it in .env file');
+	fastify.log.error('FATAL ERROR: JWT_SECRET is not defined.');
+	process.exit(1);
 }
 
 if (process.env.JWT_SECRET.length < 32) {
-	console.warn('⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security!');
+	fastify.log.error('FATAL ERROR: JWT_SECRET must be at least 32 characters long.');
+	process.exit(1);
 }
 
 fastify.decorate('roomManager', new RoomManager())

@@ -52,7 +52,7 @@ export default fp(async function friendChanges(fastify) {
 				body: JSON.stringify({ friends: allFriendNames })
 			})
 			if (!friendsProfiles.ok) {
-				fastify.log.error("Error response from profile service:", friendsProfiles.status, await friendsProfiles.text());
+				fastify.log.error("Error response from profile service:")
 				throw new Error(`Failed to fetch friend profiles: ${friendsProfiles.status} ${await friendsProfiles.text()}`)
 			}
 
@@ -80,7 +80,7 @@ export default fp(async function friendChanges(fastify) {
 				acceptedFriends: acceptedProfiles
 			})
 		} catch (error) {
-			fastify.log.error(`Error retrieving friend list for ${userName}: ${error.message}`)
+			fastify.log.error(`Error retrieving friend list for ${userName}: ${error} - ${error.message}`)
 			return { message: 'Failed to retrieve user friends' }
 		}
 	}
@@ -121,8 +121,7 @@ export default fp(async function friendChanges(fastify) {
 			await fastify.sequelize.models.Friend.create({ userName, peerName, status: 'pending' })
 			return { user: "Friend request sent.", peer: `${userName} has sent you a friend request.` }
 		} catch (error) {
-			fastify.log.error('Error sending friend request:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error sending friend request: ${error} - ${error.message} - ${userName} - ${peerName}`)
 			return { user: 'Failed to send friend request', peer: null }
 		}
 	}
@@ -160,8 +159,7 @@ export default fp(async function friendChanges(fastify) {
 				return { user: "Friend request not found.", peer: null }
 			}
 		} catch (error) {
-			fastify.log.error('Error accepting friend request:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error accepting friend request: ${error} - ${error.message} - ${userName} - ${peerName}`)
 			return { user: 'Failed to accept friend request', peer: null }
 		}
 	}
@@ -206,8 +204,7 @@ export default fp(async function friendChanges(fastify) {
 				return { user: "Friend request not found.", peer: null }
 			}
 		} catch (error) {
-			fastify.log.error('Error rejecting friend request:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error rejecting friend request: ${error} - ${error.message} - ${userName} - ${peerName}`)
 			return { message: 'Failed to reject friend request' }
 		}
 	}
@@ -234,8 +231,7 @@ export default fp(async function friendChanges(fastify) {
 				return { user: "Friend not found.", peer: null }
 			}
 		} catch (error) {
-			fastify.log.error('Error removing friend:', { message: error.message,
-				details: error.toString() })
+			fastify.log.error(`Error removing friend: ${error} - ${error.message} - ${userName} - ${peerName}`)
 			return { user: 'Failed to remove friend', peer: null }
 		}
 	}
@@ -261,7 +257,7 @@ export default fp(async function friendChanges(fastify) {
 
 			const users = friendships.map(f => f.userName === userName ? f.peerName : f.userName)
 			if (users.length === 0) {
-				fastify.log.error("Error response from profile service:", friendsProfiles.status, await friendsProfiles.text());log(`No friends to notify for user: ${userName}`)
+				fastify.log.error(`No friends to notify for user: ${userName}`)
 				return
 			}
 
@@ -280,7 +276,8 @@ export default fp(async function friendChanges(fastify) {
 								friendlist: friendList
 							}
 						}))
-						fastify.log.error("Error response from profile service:", friendsProfiles.status, await friendsProfiles.text());log(`list ${JSON.stringify(friendList)} sent to ${friendName}`);
+						fastify.log.info(`Notified friend: ${friendName} of changes for user: ${userName} - ${JSON.stringify(friendList)}`)
+						
 					}
 				}
 			}))
@@ -292,7 +289,7 @@ export default fp(async function friendChanges(fastify) {
 				}))
 			}
 		} catch (error) {
-			fastify.log.error(`Error notifying friend changes: ${error.message}`)
+			fastify.log.error(`Error notifying friend changes: ${error} - ${error.message}, user: ${userName}`)
 		}
 	}
 

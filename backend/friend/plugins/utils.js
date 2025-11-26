@@ -11,7 +11,7 @@ export default fp(async (fastify) => {
 			const decoded = fastify.jwt.verify(token)
 			return decoded
 		} catch (err) {
-			request.log.error(`Token verification failed: ${err.message}`)
+			fastify.log.error(`Token verification failed: ${err.message}`)
 			return null
 		}
 	}

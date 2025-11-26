@@ -84,6 +84,7 @@ services:
       - 3003
     depends_on:
       - nginx
+
   nginx:
     container_name: nginx
     build: ./backend/nginx
@@ -112,6 +113,7 @@ services:
       - .env
     depends_on:
       - profile
+      - email
 
   gateway:
     container_name: gateway
@@ -187,6 +189,9 @@ services:
       - transcendency
     env_file:
       - .env
+    depends_on:
+      - friend
+      - static
 
   friend:
     container_name: friend

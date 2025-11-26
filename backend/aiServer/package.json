@@ -1,7 +1,7 @@
 {
-  "name": "pingpong-ai-server",
+  "name": "ai-server",
   "version": "1.0.0",
-  "description": "PingPong AI WebSocket Server",
+  "description": "AI WebSocket Server",
   "main": "main.js",
   "scripts": {
     "start": "node main.js",
@@ -14,9 +14,5 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
-  },
-  "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=8.0.0"
   }
 }

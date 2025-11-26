@@ -6,7 +6,7 @@ export default async function friendListRoutes(fastify) {
 		const userName = request.body?.userName ?? null
 
 		if (!userName) {
-			return reply.code(400).send({ error: 'Username is required' })
+			return reply.code(400).send({ message: 'Username is required' })
 		}
 
 		try {
@@ -22,7 +22,7 @@ export default async function friendListRoutes(fastify) {
 			})
 
 			if (!Array.isArray(friendships) || friendships.length === 0) {
-				return reply.code(404).send({ error: 'No friendships found for user' })
+				return reply.code(404).send({ message: 'No friendships found for user' })
 			}
 
 			const friendsToNotify = friendships.map(f => f.userName === userName ? f.peerName : f.userName)
@@ -67,7 +67,7 @@ export default async function friendListRoutes(fastify) {
 			return reply.code(200).send({ message: 'All friendships deleted successfully' })
 		} catch (error) {
 			fastify.log.error(`Error deleting friendships: ${error.message}`)
-			return reply.code(500).send({ error: 'Failed to delete friendships' })
+			return reply.code(500).send({ message: 'Failed to delete friendships' })
 		}
 	})
 
@@ -75,7 +75,7 @@ export default async function friendListRoutes(fastify) {
 		const { userName } = request.body ?? {}
 
 		if (!userName) {
-			return reply.code(400).send({ error: 'Username is required' })
+			return reply.code(400).send({ message: 'Username is required' })
 		}
 
 		try {
@@ -84,7 +84,7 @@ export default async function friendListRoutes(fastify) {
 			return reply.code(200).send({ message: 'Friends notified successfully' })
 		} catch (error) {
 			fastify.log.error(`Error notifying friend changes: ${error.message}`)
-			return reply.code(500).send({ error: 'Failed to notify friend changes' })
-		} 
+			return reply.code(500).send({ message: 'Failed to notify friend changes' })
+		}
 	})
 }

@@ -2,8 +2,8 @@ FROM node:24-alpine
 
 WORKDIR /app
 
-RUN apk update && \
-    apk upgrade
+RUN apk update --no-cache && \
+    apk upgrade --no-cache
 RUN mkdir -p database
 
 COPY package*.json ./
