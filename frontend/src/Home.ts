@@ -206,16 +206,27 @@ function cursorIndicatorSetup(): void {
         else showCursor();
     }
 
-    document.addEventListener('mousemove', (e) => { updateCursor(e); checkInteractiveElement(e); });
-    document.addEventListener('mouseenter', showCursor);
-    document.addEventListener('mouseleave', hideCursor);
-    document.addEventListener('mouseover', (e) => {
-        if ((e.target as HTMLElement).closest('.team-member, .social-link, .thanks-person')) hideCursor();
-    });
-    document.addEventListener('mouseout', (e) => {
+    function mouseMove(e) {
+        updateCursor(e);
+        checkInteractiveElement(e);
+    }
+
+    function mouseOver(e) {
+        if ((e.target as HTMLElement).closest('.team-member, .social-link, .thanks-person'))
+            hideCursor();
+    }
+
+    function mouseOut(e) {
         const related = e.relatedTarget as HTMLElement | null;
-        if (!related || !related.closest('.team-member, .social-link, .thanks-person')) showCursor();
-    });
+        if (!related || !related.closest('.team-member, .social-link, .thanks-person'))
+            showCursor();
+    }
+
+    document.querySelector('.homepage-container')?.addEventListener('mousemove', mouseMove);
+    document.querySelector('.homepage-container')?.addEventListener('mouseenter', showCursor);
+    document.querySelector('.homepage-container')?.addEventListener('mouseleave', hideCursor);
+    document.querySelector('.homepage-container')?.addEventListener('mouseover', mouseOver);
+    document.querySelector('.homepage-container')?.addEventListener('mouseout', mouseOut);
 }
 
 // ----------------------

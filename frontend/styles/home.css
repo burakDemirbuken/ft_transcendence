@@ -18,6 +18,14 @@ body {
 
 #content {
     position: relative;
+    padding: 0;
+}
+
+.homepage-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
 }
 
 /* Global Particles */
