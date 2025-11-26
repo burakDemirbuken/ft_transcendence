@@ -30,8 +30,18 @@ fastify.register(fastifyMultipart, {
         fileSize: 5 * 1024 * 1024
     }
 })
+
+// JWT secret must be set in .env
+if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is required! Please set it in .env file');
+}
+
+if (process.env.JWT_SECRET.length < 32) {
+    console.warn('⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security!');
+}
+
 fastify.register(jwt, {
-    secret: process.env.JWT_SECRET || "supersecret"
+    secret: process.env.JWT_SECRET
 })
 fastify.register(cookie)
 fastify.register(utils)

@@ -25,6 +25,8 @@ async function registration(fastify)
 	await fastify.register( xssSanitizer );
 	
 	// Security headers with Helmet
+	await fastify.setNotFoundHandler( utils.NotFoundHandler );
+	await fastify.setErrorHandler( utils.InternalServerErrorHandler );
 	await fastify.register( helmet, {
 		contentSecurityPolicy: {
 			directives: {
@@ -52,8 +54,6 @@ async function registration(fastify)
 	});
 	await fastify.register( utilsPlugin );
 	await fastify.register( authRoutes );
-	await fastify.setNotFoundHandler( utils.NotFoundHandler );
-	await fastify.setErrorHandler( utils.InternalServerErrorHandler );
 
 }
 
