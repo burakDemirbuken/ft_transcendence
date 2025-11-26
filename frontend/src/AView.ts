@@ -15,4 +15,6 @@ export default class {
 
 	async setStylesheet() {}
 	async unsetStylesheet() {}
+
+	async updateJsLanguage() {}
 }

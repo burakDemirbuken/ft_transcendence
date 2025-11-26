@@ -284,4 +284,6 @@ export default class extends AView {
         const link = document.querySelector("link[href='styles/home.css']");
         if (link) link.remove();
     }
+
+	async updateJsLanguage() {}
 }
