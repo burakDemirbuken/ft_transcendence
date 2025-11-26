@@ -1,8 +1,10 @@
 import cookie from '@fastify/cookie';
+import helmet from '@fastify/helmet';
 import jwt from '@fastify/jwt';
 import authRoutes from '../routes/authRoutes.js';
 import utils from './utils.js';
 import utilsPlugin from '../plugins/utils.js';
+import xssSanitizer from '../plugins/xssSanitizer.js';
 
 async function registration(fastify)
 {
@@ -18,6 +20,26 @@ async function registration(fastify)
 	}
 
 	await fastify.register( cookie );
+	
+	// XSS Protection - must be registered early
+	await fastify.register( xssSanitizer );
+	
+	// Security headers with Helmet
+	await fastify.register( helmet, {
+		contentSecurityPolicy: {
+			directives: {
+				defaultSrc: ["'self'"],
+				scriptSrc: ["'self'"],
+				styleSrc: ["'self'"],
+				imgSrc: ["'self'", "data:"],
+				connectSrc: ["'self'"],
+				fontSrc: ["'self'"],
+				objectSrc: ["'none'"],
+				frameSrc: ["'none'"],
+			}
+		}
+	});
+	
     await fastify.register( jwt,
 	{
 		secret: jwtSecret,

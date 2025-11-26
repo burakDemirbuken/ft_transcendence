@@ -1,14 +1,32 @@
 import Fastify from 'fastify'
+import helmet from '@fastify/helmet'
 import gamedataRoute from './routes/gamedata.js'
 import checkachievement from './plugins/checkachievement.js'
 import profileRoute from './routes/profile.js'
 import dbPlugin from './plugins/db.js'
 import utils from './plugins/utils.js'
+import xssSanitizer from './plugins/xssSanitizer.js'
 import cookie from '@fastify/cookie'
 import jwt from '@fastify/jwt'
 
 const fastify = Fastify({
 	logger: true,
+})
+
+// XSS Protection
+fastify.register(xssSanitizer)
+
+// Security headers
+fastify.register(helmet, {
+	contentSecurityPolicy: {
+		directives: {
+			defaultSrc: ["'self'"],
+			scriptSrc: ["'self'"],
+			styleSrc: ["'self'"],
+			imgSrc: ["'self'", "data:", "blob:"],
+			objectSrc: ["'none'"],
+		}
+	}
 })
 
 fastify.register(jwt, {
