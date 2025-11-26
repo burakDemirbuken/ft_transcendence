@@ -10,6 +10,27 @@ import I18n from './utils/I18n.js';
 import { getAuthToken, removeAuthToken} from './utils/auth.js';
 import { showNotification } from './utils/notification.js';
 
+function debounce<T extends (...args: any[]) => any>(
+    func: T,
+    wait: number,
+    immediate: boolean = false
+): (...args: Parameters<T>) => void {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+
+    return function executedFunction(...args: Parameters<T>) {
+        const later = () => {
+            timeout = null;
+            if (!immediate) func(...args);
+        };
+
+        const callNow = immediate && !timeout;
+        if (timeout) clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+
+        if (callNow) func(...args);
+    };
+}
+
 // Dynamic API base URL based on current hostname
 export const API_BASE_URL = `https://${window.location.hostname}:3030/api`;
 
@@ -27,6 +48,11 @@ const routes = {
 }
 
 let view = null;
+
+// Debounce edilmiş navigasyon (profile ve friends için)
+const debouncedNavigate = debounce((page: string) => {
+	navigateTo(page);
+}, 10000);
 
 const router = async function(page:string) {
 	const content = document.querySelector("#content");
@@ -133,6 +159,14 @@ document.addEventListener("DOMContentLoaded", () =>
 				e.preventDefault();
 				if (!e.currentTarget.matches("[id='logout']"))
 					navigateTo(e.currentTarget.getAttribute("href").replace(/^\//, ''));
+				const href = e.currentTarget.getAttribute("href").replace(/^\//, '');
+				// Profile ve friends için debounce kullan
+				if (href === 'profile' || href === 'friends') {
+					debouncedNavigate(href);
+				} else {
+					// Diğer sayfalar için normal navigasyon
+					navigateTo(href);
+				}
 				document.querySelector(".selected")?.classList.toggle("selected");
 				e.currentTarget.classList.toggle("selected");
 				if (e.currentTarget.matches("[id='logout']"))

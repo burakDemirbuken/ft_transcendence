@@ -23,13 +23,6 @@ class ManagerProfile {
 		labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
 		data: []
 	};
-	private monthChartData: { label0: string, label1: string, labels: string[], data1: number[], data2: number[] } = {
-		label0: "Total Matches",
-		label1: "Matches Won",
-		labels: ["Hits"],
-		data1: [],
-		data2: []
-	};
 	private skillChartData: { speed: number, accuracy: number, defence: number, attack: number, strategy: number, durability: number } = {
 	speed: 0,
 	accuracy: 0,
@@ -78,28 +71,131 @@ class ManagerProfile {
 		const perfCtx = document.getElementById('performanceChart') as HTMLCanvasElement;
 
 		if (this.showcharts.performance) {
-			this.showcharts.performance.destroy();
+			try {
+				this.showcharts.performance.destroy();
+			} catch (e) {
+				console.warn('Error destroying performance chart:', e);
+			}
+		}
+
+		// Canvas context'ini temizle
+		if (perfCtx) {
+			const ctx = perfCtx.getContext('2d');
+			if (ctx) {
+				ctx.clearRect(0, 0, perfCtx.width, perfCtx.height);
+			}
 		}
 
 		this.perfChartData.labelName = translations?.profile?.weekly?.label ?? this.perfChartData.labelName;
 		this.perfChartData.labels = translations?.profile?.weekly?.labels ?? this.perfChartData.labels;
 		if (perfCtx) {
-			this.showcharts.performance = new Chart(perfCtx, {
-				type: 'line',
+			try {
+				this.showcharts.performance = new Chart(perfCtx, {
+					type: 'line',
+					data: {
+						labels: this.perfChartData.labels,
+						datasets: [{
+							label: this.perfChartData.labelName,
+							data: this.perfChartData.data,
+							borderColor: getCSSVar('--color-primary'),
+							backgroundColor: 'rgba(75, 192, 192, 0.2)',
+							borderWidth: 3,
+							fill: true,
+							tension: 0.4,
+							pointBackgroundColor: getCSSVar('--color-primary'),
+							pointBorderColor: getCSSVar('--color-text'),
+							pointBorderWidth: 2,
+							pointRadius: 6
+						}]
+					},
+					options: {
+						responsive: true,
+						plugins: {
+							legend: {
+								labels: {
+									color: getCSSVar('--color-text'),
+									font: {
+										family: 'Orbitron'
+									}
+								}
+							}
+						},
+						scales: {
+							x: {
+								ticks: {
+									color: getCSSVar('--color-muted'),
+									font: {
+										family: 'Orbitron'
+									}
+								},
+								grid: {
+									color: getCSSVar('--bg-overlay-light')
+								}
+							},
+							y: {
+								ticks: {
+									color: getCSSVar('--color-muted'),
+									font: {
+										family: 'Orbitron'
+									}
+								},
+								grid: {
+									color: getCSSVar('--bg-overlay-light')
+								}
+							}
+						}
+					}
+				});
+			} catch (error) {
+			}
+		}
+	}
+
+	private async createWinLossChart(): Promise<void> {
+		const winLossCtx = document.getElementById('winLossChart') as HTMLCanvasElement | null;
+
+		if (!winLossCtx) return;
+
+		if (this.charts.winLoss) {
+			try {
+				this.charts.winLoss.destroy();
+			} catch (e) {
+				console.warn('Error destroying win loss chart:', e);
+			}
+		}
+
+		// Canvas context'ini temizle
+		const ctx = winLossCtx.getContext('2d');
+		if (ctx) {
+			ctx.clearRect(0, 0, winLossCtx.width, winLossCtx.height);
+		}
+
+		let wins = parseInt(winLossCtx.dataset.wins || '0', 10);
+		let losses = parseInt(winLossCtx.dataset.losses || '0', 10);
+
+		if (wins === 0 && losses === 0) {
+			wins = 0;
+			losses = 0;
+		}
+
+		let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost'];
+
+		try {
+			this.charts.winLoss = new Chart(winLossCtx, {
+				type: 'doughnut',
 				data: {
-					labels: this.perfChartData.labels, // Haftalık günler
+					labels: labels ?? ['Won', 'Lost'],
 					datasets: [{
-						label: this.perfChartData.labelName,
-						data: this.perfChartData.data, // Haftalık kazanılan maç sayıları
-						borderColor: getCSSVar('--color-primary'),
-						backgroundColor: 'rgba(75, 192, 192, 0.2)',
-						borderWidth: 3,
-						fill: true,
-						tension: 0.4, // Cubic interpolation için
-						pointBackgroundColor: getCSSVar('--color-primary'),
-						pointBorderColor: getCSSVar('--color-text'),
-						pointBorderWidth: 2,
-						pointRadius: 6
+						data: [wins, losses],
+						backgroundColor: [
+							getCSSVar('--color-success'),
+							getCSSVar('--color-important')
+						],
+						borderColor: [
+							getCSSVar('--color-success'),
+							getCSSVar('--color-important')
+						],
+						borderWidth: 3
 					}]
 				},
 				options: {
@@ -112,100 +208,23 @@ class ManagerProfile {
 									family: 'Orbitron'
 								}
 							}
-						}
-					},
-					scales: {
-						x: {
-							ticks: {
-								color: getCSSVar('--color-muted'),
-								font: {
-									family: 'Orbitron'
-								}
-							},
-							grid: {
-								color: getCSSVar('--bg-overlay-light')
-							}
 						},
-						y: {
-							ticks: {
-								color: getCSSVar('--color-muted'),
-								font: {
-									family: 'Orbitron'
+						tooltip: {
+							callbacks: {
+								label: function(context) {
+									const label = context.label || '';
+									const value = context.parsed || 0;
+									const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+									const percentage = ((value / total) * 100).toFixed(1);
+									return `${label}: ${value} (${percentage}%)`;
 								}
-							},
-							grid: {
-								color: getCSSVar('--bg-overlay-light')
 							}
 						}
 					}
 				}
 			});
+		} catch (error) {
 		}
-	}
-
-	private async createWinLossChart(): Promise<void> {
-		const winLossCtx = document.getElementById('winLossChart') as HTMLCanvasElement | null;
-
-		if (!winLossCtx) return;
-
-		if (this.charts.winLoss) {
-			this.charts.winLoss.destroy();
-		}
-
-		// HTML'den veya data attribute'lerinden wins/losses al
-		let wins = parseInt(winLossCtx.dataset.wins || '0', 10);
-		let losses = parseInt(winLossCtx.dataset.losses || '0', 10);
-
-	// Eğer hiç veri yoksa default değerleri kullan
-	if (wins === 0 && losses === 0) {
-		wins = 0;
-		losses = 0;
-	}
-
-	let labels: string[] = translations?.profile?.winloss?.labels ?? ['Won', 'Lost'];
-
-		this.charts.winLoss = new Chart(winLossCtx, {
-			type: 'doughnut',
-			data: {
-				labels: labels ?? ['Won', 'Lost'],
-				datasets: [{
-					data: [wins, losses],
-					backgroundColor: [
-						getCSSVar('--color-success'),
-						getCSSVar('--color-important')
-					],
-					borderColor: [
-						getCSSVar('--color-success'),
-						getCSSVar('--color-important')
-					],
-					borderWidth: 3
-				}]
-			},
-			options: {
-				responsive: true,
-				plugins: {
-					legend: {
-						labels: {
-							color: getCSSVar('--color-text'),
-							font: {
-								family: 'Orbitron'
-							}
-						}
-					},
-					tooltip: {
-						callbacks: {
-							label: function(context) {
-								const label = context.label || '';
-								const value = context.parsed || 0;
-								const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
-								const percentage = ((value / total) * 100).toFixed(1);
-								return `${label}: ${value} (${percentage}%)`;
-							}
-						}
-					}
-				}
-			}
-		});
 	}
 
 	public updateSkillChartData(stats: any): void {
@@ -241,100 +260,113 @@ class ManagerProfile {
 		if (!skillCtx) return;
 
 		if (this.charts.skill) {
-			this.charts.skill.destroy();
+			try {
+				this.charts.skill.destroy();
+			} catch (e) {
+				console.warn('Error destroying skill chart:', e);
+			}
+		}
+
+		// Canvas context'ini temizle
+		const ctx = skillCtx.getContext('2d');
+		if (ctx) {
+			ctx.clearRect(0, 0, skillCtx.width, skillCtx.height);
 		}
 
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 		const skills = translations?.profile?.skills.labels ?? ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"];
 		const label = translations?.profile?.skills.label ?? 'Skills';
 
-		this.charts.skill = new Chart(skillCtx, {
-			type: 'radar',
-			data: {
-				labels: skills,
-				datasets: [{
-					label: label,
-					data: [
-						this.skillChartData.speed,
-						this.skillChartData.accuracy,
-						this.skillChartData.defence,
-						this.skillChartData.attack,
-						this.skillChartData.strategy,
-						this.skillChartData.durability
-					],
-					borderColor: '#ff00ff',
-					backgroundColor: 'rgba(255, 0, 255, 0.2)',
-					borderWidth: 3,
-					pointBackgroundColor: '#ff00ff',
-					pointBorderColor: '#ffffff',
-					pointBorderWidth: 2,
-					pointRadius: 5,
-					pointHoverRadius: 7
-				}]
-			},
-			options: {
-				responsive: true,
-				maintainAspectRatio: true,
-				plugins: {
-					legend: {
-						labels: {
-							color: '#ffffff',
-							font: {
-								family: 'Orbitron',
-								size: 12
+		try {
+			this.charts.skill = new Chart(skillCtx, {
+				type: 'radar',
+				data: {
+					labels: skills,
+					datasets: [{
+						label: label,
+						data: [
+							this.skillChartData.speed,
+							this.skillChartData.accuracy,
+							this.skillChartData.defence,
+							this.skillChartData.attack,
+							this.skillChartData.strategy,
+							this.skillChartData.durability
+						],
+						borderColor: '#ff00ff',
+						backgroundColor: 'rgba(255, 0, 255, 0.2)',
+						borderWidth: 3,
+						pointBackgroundColor: '#ff00ff',
+						pointBorderColor: '#ffffff',
+						pointBorderWidth: 2,
+						pointRadius: 5,
+						pointHoverRadius: 7
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: true,
+					plugins: {
+						legend: {
+							labels: {
+								color: '#ffffff',
+								font: {
+									family: 'Orbitron',
+									size: 12
+								}
+							}
+						},
+						tooltip: {
+							backgroundColor: 'rgba(0, 0, 0, 0.8)',
+							titleColor: '#ffffff',
+							bodyColor: '#00ffff',
+							borderColor: '#ff00ff',
+							borderWidth: 1,
+							callbacks: {
+								label: function(context) {
+									return `${context.label}: ${context.parsed.r.toFixed(1)}`;
+								}
 							}
 						}
 					},
-					tooltip: {
-						backgroundColor: 'rgba(0, 0, 0, 0.8)',
-						titleColor: '#ffffff',
-						bodyColor: '#00ffff',
-						borderColor: '#ff00ff',
-						borderWidth: 1,
-						callbacks: {
-							label: function(context) {
-								return `${context.label}: ${context.parsed.r.toFixed(1)}`;
-							}
-						}
-					}
-				},
-				scales: {
-					r: {
-						beginAtZero: true,
-						min: 0,
-						max: 100,
-						ticks: {
-							stepSize: 20,
-							display: true,
-							color: 'rgba(255, 255, 255, 0.9)',
-							backdropColor: 'transparent',
-							font: {
-								size: 10,
-								family: 'Orbitron'
-							}
-						},
-						grid: {
-							color: 'rgba(49, 48, 48, 0.5)',
-							lineWidth: 2,
-							circular: false
-						},
-						angleLines: {
-							color: 'rgba(49, 48, 48, 0.5)',
-							lineWidth: 2
-						},
-						pointLabels: {
-							color: getCSSVar('--color-primary'),
-							font: {
-								size: 11,
-								family: 'Orbitron',
-								weight: 'bold'
+					scales: {
+						r: {
+							beginAtZero: true,
+							min: 0,
+							max: 100,
+							ticks: {
+								stepSize: 20,
+								display: true,
+								color: 'rgba(255, 255, 255, 0.9)',
+								backdropColor: 'transparent',
+								font: {
+									size: 10,
+									family: 'Orbitron'
+								}
 							},
-							padding: 10
+							grid: {
+								color: 'rgba(49, 48, 48, 0.5)',
+								lineWidth: 2,
+								circular: false
+							},
+							angleLines: {
+								color: 'rgba(49, 48, 48, 0.5)',
+								lineWidth: 2
+							},
+							pointLabels: {
+								color: getCSSVar('--color-primary'),
+								font: {
+									size: 11,
+									family: 'Orbitron',
+									weight: 'bold'
+								},
+								padding: 10
+							}
 						}
-					}
-				} as any
-			}
-		});
+					} as any
+				}
+			});
+		} catch (error) {
+		}
 	}
 
 	public updateBallStats(ballHitCount: number, ballMissCount: number): void {
@@ -351,9 +383,18 @@ class ManagerProfile {
 	private async createMonthlyChart(): Promise<void> {
 		const monthlyCtx = document.getElementById('monthlyChart') as HTMLCanvasElement | null;
 		if (!monthlyCtx) return;
-
 		if (this.charts.monthly) {
-			this.charts.monthly.destroy();
+			try {
+				this.charts.monthly.destroy();
+			} catch (e) {
+				console.warn('Error destroying monthly chart:', e);
+			}
+		}
+
+		// Canvas context'ini temizle
+		const ctx = monthlyCtx.getContext('2d');
+		if (ctx) {
+			ctx.clearRect(0, 0, monthlyCtx.width, monthlyCtx.height);
 		}
 
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
@@ -362,64 +403,67 @@ class ManagerProfile {
 		const missLabel = translations?.profile?.monthly?.missCount ?? 'Ball Misses';
 		const Label = translations?.profile?.monthly?.label ?? 'Hits';
 
-		this.charts.monthly = new Chart(monthlyCtx, {
-			type: 'bar',
-			data: {
-				labels: [Label],
-				datasets: [
-					{
-						label: hitLabel,
-						data: [0],
-						backgroundColor: 'rgba(0, 255, 255, 0.8)',
-						borderColor: '#00ffff',
-						borderWidth: 2,
-						borderRadius: 5,
-						barThickness: 40
+		try {
+			this.charts.monthly = new Chart(monthlyCtx, {
+				type: 'bar',
+				data: {
+					labels: [Label],
+					datasets: [
+						{
+							label: hitLabel,
+							data: [0],
+							backgroundColor: 'rgba(0, 255, 255, 0.8)',
+							borderColor: '#00ffff',
+							borderWidth: 2,
+							borderRadius: 5,
+							barThickness: 40
+						},
+						{
+							label: missLabel,
+							data: [0],
+							backgroundColor: 'rgba(255, 0, 0, 0.8)',
+							borderColor: '#ff0000',
+							borderWidth: 2,
+							borderRadius: 5,
+							barThickness: 40
+						}
+					],
+				},
+				options: {
+					responsive: true,
+					plugins: {
+						legend: {
+							labels: {
+								color: '#ffffff',
+								font: { family: 'Orbitron' },
+							},
+						},
 					},
-					{
-						label: missLabel,
-						data: [0],
-						backgroundColor: 'rgba(255, 0, 0, 0.8)',
-						borderColor: '#ff0000',
-						borderWidth: 2,
-						borderRadius: 5,
-						barThickness: 40
-					}
-				],
-			},
-			options: {
-				responsive: true,
-				plugins: {
-					legend: {
-						labels: {
-							color: '#ffffff',
-							font: { family: 'Orbitron' },
+					scales: {
+						x: {
+							ticks: {
+								color: '#888',
+								font: { family: 'Orbitron' },
+							},
+							grid: {
+								color: 'rgba(255, 255, 255, 0.1)',
+							},
+						},
+						y: {
+							beginAtZero: true,
+							ticks: {
+								color: '#888',
+								font: { family: 'Orbitron' },
+							},
+							grid: {
+								color: 'rgba(255, 255, 255, 0.1)',
+							},
 						},
 					},
 				},
-				scales: {
-					x: {
-						ticks: {
-							color: '#888',
-							font: { family: 'Orbitron' },
-						},
-						grid: {
-							color: 'rgba(255, 255, 255, 0.1)',
-						},
-					},
-					y: {
-						beginAtZero: true,
-						ticks: {
-							color: '#888',
-							font: { family: 'Orbitron' },
-						},
-						grid: {
-							color: 'rgba(255, 255, 255, 0.1)',
-						},
-					},
-				},
-			},
-		});
+			});
+		} catch (error) {
+		}
 	}
 
 	public updatePerformanceData(newData: number[], newLabels?: string[]): void {
@@ -1512,7 +1556,7 @@ async function setTextStats(user: any) {
 			avatarImg.style.background = 'none';
 		}
 	} else
-		avatarImg.setAttribute('src', `../profile.svg`);
+		avatarImg?.setAttribute('src', `../profile.svg`);
 
 	// ✅ Güvenli atamalar
 	safeSetText(".user-title", user.profile.displayName);
