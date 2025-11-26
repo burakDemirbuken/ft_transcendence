@@ -45,7 +45,6 @@ export const testConnection = async () =>
   try
   {
     await sequelize.authenticate();
-    console.log(' Auth database connection established successfully');
     return	(	true	);
   }
   catch (error)

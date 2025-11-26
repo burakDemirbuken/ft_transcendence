@@ -17,10 +17,8 @@ const fastify = Fastify({
 
 await fastify.register(globalsPlugin)
 
-// XSS Protection - must be before routes
 await fastify.register(xssSanitizer)
 
-// Security headers with Helmet
 await fastify.register(helmet, {
 	contentSecurityPolicy: {
 		directives: {
@@ -47,7 +45,6 @@ await fastify.register(multipart, {
 	}
 })
 
-// JWT secret'ı .env'den al - yoksa hata ver
 const jwtSecret = process.env.JWT_SECRET;
 
 if (!jwtSecret) {
@@ -66,18 +63,13 @@ await fastify.register(jwt, {
 	}
 });
 
-// JWT middleware artık plugin değil, routes'da manuel kullanılacak
-
-// Custom error handler for validation errors
 fastify.setErrorHandler(async (error, request, reply) => {
 	request.log.error(error);
 	
-	// Schema validation error (Fastify AJV validation)
 	if (error.validation) {
 		const field = error.validation[0]?.instancePath?.replace('/', '') || error.validation[0]?.params?.missingProperty || 'field';
 		const message = error.validation[0]?.message || 'Validation failed';
 		
-		// Basit ve net: field + orijinal mesaj
 		const userFriendlyMessage = field ? `${field}: ${message}` : message;
 		
 		return reply.status(400).send({
@@ -86,7 +78,6 @@ fastify.setErrorHandler(async (error, request, reply) => {
 		});
 	}
 	
-	// Diğer hatalar
 	reply.status(error.statusCode || 500).send({
 		success: false,
 		error: error.statusCode === 500 ? 'Internal server error' : error.message
@@ -98,10 +89,7 @@ allRoutes(fastify)
 await fastify.ready()
 
 fastify.listen({ port: 3000, host: '0.0.0.0' })
-	.then(() => {
-		console.log(`Gateway is running ${fastify.server.address().port}`);
-		console.log(`requests will be forwarded`);
-	}).catch(err => {
+	.catch(err => {
 		fastify.log.error(err);
 		process.exit(1);
 	});

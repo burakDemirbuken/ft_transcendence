@@ -16,7 +16,6 @@ async function confirmDeleteAccount(request, reply)
             });
         }
 
-        // getDataFromToken kullan (header'dan veya cookie'den)
         const userData = await request.server.getDataFromToken(request);
 
         if (!userData?.userId) {
@@ -35,7 +34,6 @@ async function confirmDeleteAccount(request, reply)
             });
         }
 
-        // 2FA kodunu kontrol et
         const storedData = utils.tempStorage.get(user.email);
         
         if (!storedData || storedData.type !== 'delete_account') {
@@ -72,12 +70,12 @@ async function confirmDeleteAccount(request, reply)
 				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json', 'X-Auth-Service': 'true' },
 				body: JSON.stringify({ userName: deletedUserInfo.username })
-			}).catch(err => console.log('Friend service error:', err)),
+			}).catch(() => {}),
 			await fetch('http://profile:3006/internal/profile', {
 				method: 'DELETE',
 				headers: { 'Content-Type': 'application/json', 'X-Auth-Service': 'true' },
 				body: JSON.stringify({ userName: deletedUserInfo.username })
-			}).catch(err => console.log('Profile service error:', err))
+			}).catch(() => {})
 		];
 		Promise.all(serviceNotifications);
 		if (utils.tempStorage.has(deletedUserInfo.email))

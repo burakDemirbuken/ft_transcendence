@@ -10,7 +10,6 @@ async function checkUsername(request, reply)
         if (!username)
             return (reply.status(400).send({ success: false, error: trlt.username && trlt.username.empty || 'Username is required' }));
         
-        // Length validation (1-20 characters)
         if (username.length < 1 || username.length > 20) {
             return reply.status(400).send({
                 success: false,
@@ -18,7 +17,6 @@ async function checkUsername(request, reply)
             });
         }
 
-        // Pattern validation (alphanumeric + underscore + Turkish characters)
         if (!/^[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+$/u.test(username)) {
             return reply.status(400).send({
                 success: false,
@@ -27,7 +25,6 @@ async function checkUsername(request, reply)
         }
 
         const user = await User.findByUsername(username);
-        console.log('Checking username availability for:', username);
         return (reply.send({
             exists: !!user,
             username: username,
@@ -37,7 +34,6 @@ async function checkUsername(request, reply)
     }
     catch (error)
     {
-        console.error('Check username error:', error);
         return (reply.status(500).send({ success: false, error: trlt.username && trlt.username.fail || 'Username check failed' }));
     }
 }
@@ -45,7 +41,6 @@ async function checkUsername(request, reply)
 async function getProfile(request, reply) {
     const trlt = getTranslations(request.query.lang || "eng");
     try {
-        // getDataFromToken kullan (header'dan veya cookie'den)
         const userData = await request.server.getDataFromToken(request);
         const userId = userData?.userId;
 
@@ -66,7 +61,6 @@ async function getProfile(request, reply) {
     }
     catch (error)
     {
-        console.log('Get profile error:', error);
         reply.status(500).send({ success: false, error: trlt.profile.fail });
     }
 }

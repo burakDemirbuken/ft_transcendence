@@ -3,7 +3,6 @@ import fp from 'fastify-plugin'
 export default fp(async (fastify) => {
 	async function getDataFromToken(request)
 	{
-		// Gateway'den gelen x-user-* header'larını öncelikli olarak kullan
 		const userIdFromHeader = request.headers['x-user-id']
 		const usernameFromHeader = request.headers['x-user-username']
 
@@ -14,7 +13,6 @@ export default fp(async (fastify) => {
 			}
 		}
 
-		// Header'lar yoksa cookie'den token oku
 		const token = request.cookies.accessToken
 		if (!token)
 			return null
