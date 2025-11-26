@@ -23,7 +23,7 @@ fastify.get('/health', async (req, rep) => {
 fastify.setNotFoundHandler(async (req, rep) => {
   rep.status(404).send({
     success: false,
-    error: 'Endpoint bulunamadı',
+    error: 'Endpoint not found',
     path: req.url,
     service: 'email-service'
   })
@@ -33,7 +33,7 @@ fastify.setErrorHandler(async (error, req, rep) => {
   req.log.error(error)
   rep.status(500).send({
     success: false,
-    error: 'Email servisi hatası',
+    error: 'Email service error',
     message: error.message
   })
 })

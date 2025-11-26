@@ -237,7 +237,7 @@ export async function verifyEmail(request, reply)
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Email Doğrulandı - Transcendence</title>
+    <title>Email Verified - Transcendence</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -275,28 +275,26 @@ export async function verifyEmail(request, reply)
 </head>
 <body>
     <div class="container">
-        <h1>🎉 Email Doğrulandı!</h1>
+        <h1>🎉 Email Verified!</h1>
 
         <p><strong>${user.username}</strong></p>
 
-        <p>Doğrulama işlemi başarılı. Bu sekmeyi kapatıp siteye geri dönebilirsiniz.</p>
+        <p>Verification successful. You can close this tab and return to the site.</p>
 
-        <p>Bu sekme <span id="count">5</span> saniye içinde otomatik olarak kapanacaktır.</p>
+        <p>This tab will automatically close in <span id="count">5</span> seconds.</p>
 
-        <div class="btn" id="closeBtn">Pencereyi Kapat</div>
+        <div class="btn" id="closeBtn">Close Window</div>
     </div>
 
     <script>
         function tryClose() {
             try { window.close(); } catch (e) {}
             try { window.open('', '_self'); window.close(); } catch (e) {}
-            // Yine de kapanmazsa sekmeyi temizlemeye çalış
             setTimeout(() => {
                 try { location.replace('about:blank'); } catch(e){}
             }, 50);
         }
 
-        // Geri sayım
         let counter = 5;
         const el = document.getElementById("count");
 

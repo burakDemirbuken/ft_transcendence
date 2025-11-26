@@ -156,22 +156,22 @@ function validatePassword(password) {
     const errors = [];
     
     if (!password || password.length < 8) {
-        errors.push('Şifre en az 8 karakter olmalıdır');
+        errors.push('Password must be at least 8 characters');
     }
     if (password && password.length > 128) {
-        errors.push('Şifre en fazla 128 karakter olmalıdır');
+        errors.push('Password must be at most 128 characters');
     }
     
     if (!/[A-Z]/.test(password)) {
-        errors.push('Şifre en az 1 büyük harf içermelidir');
+        errors.push('Password must contain at least 1 uppercase letter');
     }
     
     if (!/[a-z]/.test(password)) {
-        errors.push('Şifre en az 1 küçük harf içermelidir');
+        errors.push('Password must contain at least 1 lowercase letter');
     }
     
     if (!/[0-9]/.test(password)) {
-        errors.push('Şifre en az 1 sayı içermelidir');
+        errors.push('Password must contain at least 1 number');
     }
     
     return {

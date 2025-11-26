@@ -47,35 +47,35 @@ class EmailService {
       const mailOptions = {
         from: config.email.from,
         to: email,
-        subject: '✉️ Email Adresinizi Doğrulayın - ft_transcendence',
+        subject: '✉️ Verify Your Email - ft_transcendence',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #007bff; text-align: center;">✉️ Email Adresinizi Doğrulayın</h2>
-            ${username ? `<p>Merhaba <strong>${username}</strong>,</p>` : '<p>Merhaba,</p>'}
-            <p>ft_transcendence hesabınızı oluşturduğunuz için teşekkürler! Hesabınızı aktifleştirmek için email adresinizi doğrulamanız gerekiyor.</p>
+            <h2 style="color: #007bff; text-align: center;">✉️ Verify Your Email Address</h2>
+            ${username ? `<p>Hello <strong>${username}</strong>,</p>` : '<p>Hello,</p>'}
+            <p>Thank you for creating your ft_transcendence account! You need to verify your email address to activate your account.</p>
             
             <div style="text-align: center; margin: 30px 0;">
               <a href="${verificationUrl}" 
                  style="background-color: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                Email Adresimi Doğrula
+                Verify My Email
               </a>
             </div>
             
-            <p>Yukarıdaki butona tıklayamıyorsanız, aşağıdaki linki kopyalayıp tarayıcınıza yapıştırabilirsiniz:</p>
+            <p>If you can't click the button above, you can copy and paste the following link into your browser:</p>
             <p style="background-color: #f4f4f4; padding: 10px; word-break: break-all; font-size: 12px;">
               ${verificationUrl}
             </p>
             
-            <p><strong>Bu link 24 saat süreyle geçerlidir.</strong></p>
+            <p><strong>This link is valid for 24 hours.</strong></p>
             
             <p style="color: #666; font-size: 12px;">
-              Bu hesabı siz oluşturmadıysanız, bu e-postayı görmezden gelebilirsiniz.
+              If you didn't create this account, you can safely ignore this email.
             </p>
             
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #999; font-size: 12px; text-align: center;">
               ft_transcendence Team<br>
-              ${new Date().toLocaleString('tr-TR')}
+              ${new Date().toLocaleString('en-US')}
             </p>
           </div>
         `
@@ -89,7 +89,7 @@ class EmailService {
         email: email
       }
     } catch (error) {
-      console.error(`❌ Email doğrulama kodu gönderilemedi: ${email}`, error.message)
+      console.error(`❌ Failed to send email verification: ${email}`, error.message)
       throw error
     }
   }
@@ -99,38 +99,38 @@ class EmailService {
       const emailContents = {
         login: {
           icon: '🔐',
-          subject: '🔐 Giriş Doğrulama Kodu - ft_transcendence',
-          title: '🔐 Giriş Doğrulama Kodu',
-          message: 'ft_transcendence hesabınıza giriş yapmak için aşağıdaki doğrulama kodunu kullanın:',
-          warning: 'Bu giriş talebini siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.'
+          subject: '🔐 Login Verification Code - ft_transcendence',
+          title: '🔐 Login Verification Code',
+          message: 'Use the verification code below to log in to your ft_transcendence account:',
+          warning: 'If you didn\'t make this login request, you can safely ignore this email.'
         },
         password_change: {
           icon: '🔑',
-          subject: '🔑 Şifre Değişimi Doğrulama Kodu - ft_transcendence',
-          title: '🔑 Şifre Değişimi Doğrulaması',
-          message: 'Şifrenizi değiştirmek için aşağıdaki doğrulama kodunu kullanın:',
-          warning: 'Bu şifre değişimi talebini siz yapmadıysanız, derhal hesap güvenliğinizi kontrol edin.'
+          subject: '🔑 Password Change Verification Code - ft_transcendence',
+          title: '🔑 Password Change Verification',
+          message: 'Use the verification code below to change your password:',
+          warning: 'If you didn\'t request this password change, please check your account security immediately.'
         },
         email_change: {
           icon: '✉️',
-          subject: '✉️ Email Değişimi Doğrulama Kodu - ft_transcendence',
-          title: '✉️ Email Değişimi Doğrulaması',
-          message: 'Email adresinizi değiştirmek için aşağıdaki doğrulama kodunu kullanın:',
-          warning: 'Bu email değişimi talebini siz yapmadıysanız, derhal hesap güvenliğinizi kontrol edin.'
+          subject: '✉️ Email Change Verification Code - ft_transcendence',
+          title: '✉️ Email Change Verification',
+          message: 'Use the verification code below to change your email address:',
+          warning: 'If you didn\'t request this email change, please check your account security immediately.'
         },
         password_reset: {
           icon: '🔄',
-          subject: '🔄 Şifre Sıfırlama Kodu - ft_transcendence',
-          title: '🔄 Şifre Sıfırlama',
-          message: 'Şifrenizi sıfırlamak için aşağıdaki doğrulama kodunu kullanın:',
-          warning: 'Bu şifre sıfırlama talebini siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.'
+          subject: '🔄 Password Reset Code - ft_transcendence',
+          title: '🔄 Password Reset',
+          message: 'Use the verification code below to reset your password:',
+          warning: 'If you didn\'t request this password reset, you can safely ignore this email.'
         },
         delete_account: {
           icon: '⚠️',
-          subject: '⚠️ Hesap Silme Doğrulama Kodu - ft_transcendence',
-          title: '⚠️ Hesap Silme Onayı',
-          message: 'Hesabınızı silmek için aşağıdaki doğrulama kodunu kullanın:',
-          warning: 'Bu hesap silme talebini siz yapmadıysanız, derhal hesap güvenliğinizi kontrol edin ve şifrenizi değiştirin!'
+          subject: '⚠️ Account Deletion Verification Code - ft_transcendence',
+          title: '⚠️ Account Deletion Confirmation',
+          message: 'Use the verification code below to delete your account:',
+          warning: 'If you didn\'t request this account deletion, please check your account security and change your password immediately!'
         }
       }
 
@@ -143,14 +143,14 @@ class EmailService {
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #333; text-align: center;">${content.title}</h2>
-            ${username ? `<p>Merhaba <strong>${username}</strong>,</p>` : '<p>Merhaba,</p>'}
+            ${username ? `<p>Hello <strong>${username}</strong>,</p>` : '<p>Hello,</p>'}
             <p>${content.message}</p>
             
             <div style="background-color: #f4f4f4; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px;">
               <h1 style="color: #007bff; font-size: 32px; margin: 0; letter-spacing: 8px;">${code}</h1>
             </div>
             
-            <p><strong>Bu kod 10 dakika süreyle geçerlidir.</strong></p>
+            <p><strong>This code is valid for 10 minutes.</strong></p>
             
             <p style="color: #ff6b35; font-size: 14px; font-weight: bold;">
               ${content.warning}
@@ -159,7 +159,7 @@ class EmailService {
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #999; font-size: 12px; text-align: center;">
               ft_transcendence Security Team<br>
-              ${new Date().toLocaleString('tr-TR')}
+              ${new Date().toLocaleString('en-US')}
             </p>
           </div>
         `
@@ -173,7 +173,7 @@ class EmailService {
         email: email
       }
     } catch (error) {
-      console.error(`❌ 2FA kodu gönderilemedi: ${email}`, error.message)
+      console.error(`❌ Failed to send 2FA code: ${email}`, error.message)
       throw error
     }
   }
@@ -183,33 +183,33 @@ class EmailService {
       const mailOptions = {
         from: config.email.from,
         to: email,
-        subject: '🎉 Hoş Geldiniz - ft_transcendence',
+        subject: '🎉 Welcome - ft_transcendence',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #28a745; text-align: center;">🎉 Hoş Geldiniz ft_transcendence'a!</h2>
-            <p>Merhaba <strong>${username}</strong>,</p>
-            <p>ft_transcendence topluluğuna katıldığınız için teşekkür ederiz!</p>
+            <h2 style="color: #28a745; text-align: center;">🎉 Welcome to ft_transcendence!</h2>
+            <p>Hello <strong>${username}</strong>,</p>
+            <p>Thank you for joining the ft_transcendence community!</p>
             
             <div style="background-color: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="color: #28a745; margin-top: 0;">Hesabınız başarıyla oluşturuldu! ✅</h3>
+              <h3 style="color: #28a745; margin-top: 0;">Your account has been successfully created! ✅</h3>
               <ul>
-                <li>Güvenli giriş sistemi</li>
-                <li>İki faktörlü doğrulama</li>
-                <li>Oyun geçmişi takibi</li>
-                <li>Canlı sohbet</li>
+                <li>Secure login system</li>
+                <li>Two-factor authentication</li>
+                <li>Game history tracking</li>
+                <li>Live chat</li>
               </ul>
             </div>
             
             <p style="text-align: center;">
               <a href="${config.app.url}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Şimdi Oyna! 🎮
+                Play Now! 🎮
               </a>
             </p>
             
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #999; font-size: 12px; text-align: center;">
               ft_transcendence Team<br>
-              ${new Date().toLocaleString('tr-TR')}
+              ${new Date().toLocaleString('en-US')}
             </p>
           </div>
         `
@@ -223,7 +223,7 @@ class EmailService {
         email: email
       }
     } catch (error) {
-      console.error(`❌ Hoş geldin e-postası gönderilemedi: ${email}`, error.message)
+      console.error(`❌ Failed to send welcome email: ${email}`, error.message)
       throw error
     }
   }
@@ -235,30 +235,30 @@ class EmailService {
       const mailOptions = {
         from: config.email.from,
         to: email,
-        subject: '🔓 Hesap Giriş Bildirimi - ft_transcendence',
+        subject: '🔓 Account Login Notification - ft_transcendence',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #17a2b8; text-align: center;">🔓 Hesap Giriş Bildirimi</h2>
-            <p>Merhaba <strong>${username}</strong>,</p>
-            <p>Hesabınıza başarılı bir giriş yapıldı:</p>
+            <h2 style="color: #17a2b8; text-align: center;">🔓 Account Login Notification</h2>
+            <p>Hello <strong>${username}</strong>,</p>
+            <p>A successful login was made to your account:</p>
             
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h4 style="margin-top: 0; color: #495057;">Giriş Detayları:</h4>
+              <h4 style="margin-top: 0; color: #495057;">Login Details:</h4>
               <ul style="list-style: none; padding: 0;">
-                <li><strong>🕐 Zaman:</strong> ${timestamp || new Date().toLocaleString('tr-TR')}</li>
-                ${ip ? `<li><strong>🌐 IP Adresi:</strong> ${ip}</li>` : ''}
-                ${userAgent ? `<li><strong>💻 Tarayıcı:</strong> ${userAgent}</li>` : ''}
+                <li><strong>🕐 Time:</strong> ${timestamp || new Date().toLocaleString('en-US')}</li>
+                ${ip ? `<li><strong>🌐 IP Address:</strong> ${ip}</li>` : ''}
+                ${userAgent ? `<li><strong>💻 Browser:</strong> ${userAgent}</li>` : ''}
               </ul>
             </div>
             
             <p style="color: #dc3545;">
-              <strong>Bu giriş sizin değilse, derhal hesabınızın güvenliğini kontrol edin!</strong>
+              <strong>If this login wasn't you, please check your account security immediately!</strong>
             </p>
             
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #999; font-size: 12px; text-align: center;">
               ft_transcendence Security Team<br>
-              Bu otomatik bir güvenlik bildirimidir.
+              This is an automated security notification.
             </p>
           </div>
         `
@@ -272,7 +272,7 @@ class EmailService {
         email: email
       }
     } catch (error) {
-      console.error(`❌ Giriş bildirimi gönderilemedi: ${email}`, error.message)
+      console.error(`❌ Failed to send login notification: ${email}`, error.message)
       throw error
     }
   }
@@ -282,40 +282,40 @@ class EmailService {
       const mailOptions = {
         from: config.email.from,
         to: email,
-        subject: '⚠️ Hesap Silme Doğrulaması - ft_transcendence',
+        subject: '⚠️ Account Deletion Verification - ft_transcendence',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #dc3545; text-align: center;">⚠️ Hesap Silme Doğrulaması</h2>
-            <p>Merhaba <strong>${username}</strong>,</p>
-            <p style="color: #dc3545;"><strong>Hesabınızı kalıcı olarak silme talebinde bulundunuz.</strong></p>
+            <h2 style="color: #dc3545; text-align: center;">⚠️ Account Deletion Verification</h2>
+            <p>Hello <strong>${username}</strong>,</p>
+            <p style="color: #dc3545;"><strong>You have requested to permanently delete your account.</strong></p>
             
             <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3 style="color: #721c24; margin-top: 0;">⚠️ ÖNEMLİ UYARI</h3>
-              <p style="color: #721c24; margin-bottom: 0;">Bu işlem <strong>GERİ ALINAMAZ</strong>. Tüm verileriniz kalıcı olarak silinecektir:</p>
+              <h3 style="color: #721c24; margin-top: 0;">⚠️ IMPORTANT WARNING</h3>
+              <p style="color: #721c24; margin-bottom: 0;">This action is <strong>IRREVERSIBLE</strong>. All your data will be permanently deleted:</p>
               <ul style="color: #721c24;">
-                <li>Profil bilgileriniz</li>
-                <li>Oyun geçmişiniz</li>
-                <li>Arkadaş listeniz</li>
-                <li>Sohbet geçmişiniz</li>
+                <li>Profile information</li>
+                <li>Game history</li>
+                <li>Friend list</li>
+                <li>Chat history</li>
               </ul>
             </div>
             
-            <p>Hesabınızı silmek için aşağıdaki doğrulama kodunu kullanın:</p>
+            <p>Use the verification code below to delete your account:</p>
             
             <div style="background-color: #f4f4f4; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px;">
               <h1 style="color: #dc3545; font-size: 32px; margin: 0; letter-spacing: 8px;">${code}</h1>
             </div>
             
-            <p><strong>Bu kod 5 dakika süreyle geçerlidir.</strong></p>
+            <p><strong>This code is valid for 5 minutes.</strong></p>
             
             <p style="color: #28a745;">
-              <strong>Hesabınızı silmek istemiyorsanız, bu e-postayı görmezden gelin.</strong>
+              <strong>If you don't want to delete your account, simply ignore this email.</strong>
             </p>
             
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #999; font-size: 12px; text-align: center;">
               ft_transcendence Security Team<br>
-              ${new Date().toLocaleString('tr-TR')}
+              ${new Date().toLocaleString('en-US')}
             </p>
           </div>
         `
@@ -329,7 +329,7 @@ class EmailService {
         email: email
       }
     } catch (error) {
-      console.error(`❌ Hesap silme kodu gönderilemedi: ${email}`, error.message)
+      console.error(`❌ Failed to send account deletion code: ${email}`, error.message)
       throw error
     }
   }
@@ -339,36 +339,36 @@ class EmailService {
       const mailOptions = {
         from: config.email.from,
         to: email,
-        subject: '✅ Hesap Silindi - ft_transcendence',
+        subject: '✅ Account Deleted - ft_transcendence',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #28a745; text-align: center;">✅ Hesap Başarıyla Silindi</h2>
-            <p>Merhaba <strong>${username}</strong>,</p>
-            <p>ft_transcendence hesabınız başarıyla silindi.</p>
+            <h2 style="color: #28a745; text-align: center;">✅ Account Successfully Deleted</h2>
+            <p>Hello <strong>${username}</strong>,</p>
+            <p>Your ft_transcendence account has been successfully deleted.</p>
             
             <div style="background-color: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h4 style="color: #155724; margin-top: 0;">Silinen Veriler:</h4>
+              <h4 style="color: #155724; margin-top: 0;">Deleted Data:</h4>
               <ul style="color: #155724;">
-                <li>Profil bilgileriniz</li>
-                <li>Oyun geçmişiniz</li>
-                <li>Arkadaş listeniz</li>
-                <li>Sohbet geçmişiniz</li>
-                <li>Tüm oturum bilgileriniz</li>
+                <li>Profile information</li>
+                <li>Game history</li>
+                <li>Friend list</li>
+                <li>Chat history</li>
+                <li>All session data</li>
               </ul>
             </div>
             
-            <p>Bizi tercih ettiğiniz için teşekkür ederiz. Gelecekte tekrar aramızda görmeyi umuyoruz!</p>
+            <p>Thank you for choosing us. We hope to see you again in the future!</p>
             
             <p style="text-align: center;">
               <a href="${config.app.url}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                Yeni Hesap Oluştur
+                Create New Account
               </a>
             </p>
             
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #999; font-size: 12px; text-align: center;">
               ft_transcendence Team<br>
-              ${new Date().toLocaleString('tr-TR')}
+              ${new Date().toLocaleString('en-US')}
             </p>
           </div>
         `
@@ -382,7 +382,7 @@ class EmailService {
         email: email
       }
     } catch (error) {
-      console.error(`❌ Hesap silme onayı gönderilemedi: ${email}`, error.message)
+      console.error(`❌ Failed to send account deletion confirmation: ${email}`, error.message)
       throw error
     }
   }
@@ -392,27 +392,27 @@ class EmailService {
       const mailOptions = {
         from: config.email.from,
         to: email,
-        subject: '🔑 Şifre Sıfırlama Kodu - ft_transcendence',
+        subject: '🔑 Password Reset Code - ft_transcendence',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #ffc107; text-align: center;">🔑 Şifre Sıfırlama</h2>
-            <p>Merhaba <strong>${username}</strong>,</p>
-            <p>Şifrenizi sıfırlamak için aşağıdaki doğrulama kodunu kullanın:</p>
+            <h2 style="color: #ffc107; text-align: center;">🔑 Password Reset</h2>
+            <p>Hello <strong>${username}</strong>,</p>
+            <p>Use the verification code below to reset your password:</p>
             
             <div style="background-color: #f4f4f4; padding: 20px; text-align: center; margin: 20px 0; border-radius: 8px;">
               <h1 style="color: #ffc107; font-size: 32px; margin: 0; letter-spacing: 8px;">${code}</h1>
             </div>
             
-            <p><strong>Bu kod 10 dakika süreyle geçerlidir.</strong></p>
+            <p><strong>This code is valid for 10 minutes.</strong></p>
             
             <p style="color: #666; font-size: 12px;">
-              Bu şifre sıfırlama talebini siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.
+              If you didn't request this password reset, you can safely ignore this email.
             </p>
             
             <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
             <p style="color: #999; font-size: 12px; text-align: center;">
               ft_transcendence Security Team<br>
-              ${new Date().toLocaleString('tr-TR')}
+              ${new Date().toLocaleString('en-US')}
             </p>
           </div>
         `
@@ -426,7 +426,7 @@ class EmailService {
         email: email
       }
     } catch (error) {
-      console.error(`❌ Şifre sıfırlama kodu gönderilemedi: ${email}`, error.message)
+      console.error(`❌ Failed to send password reset code: ${email}`, error.message)
       throw error
     }
   }
