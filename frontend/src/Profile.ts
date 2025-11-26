@@ -75,6 +75,10 @@ class ManagerProfile {
 		const perfCtx = document.getElementById('performanceChart') as HTMLCanvasElement;
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
+		if (this.showcharts.performance) {
+			this.showcharts.performance.destroy();
+		}
+
 		this.perfChartData.labelName = translations?.profile?.weekly?.label ?? this.perfChartData.labelName;
 		this.perfChartData.labels = translations?.profile?.weekly?.labels ?? this.perfChartData.labels;
 		if (perfCtx) {
@@ -141,6 +145,10 @@ class ManagerProfile {
 		const winLossCtx = document.getElementById('winLossChart') as HTMLCanvasElement | null;
 
 		if (!winLossCtx) return;
+
+		if (this.charts.winLoss) {
+			this.charts.winLoss.destroy();
+		}
 
 		// HTML'den veya data attribute'lerinden wins/losses al
 		let wins = parseInt(winLossCtx.dataset.wins || '0', 10);
@@ -223,13 +231,17 @@ class ManagerProfile {
 			];
 			chart.update();
 		} else {
-			console.log("⚠️ Skill chart not initialized yet");
+			showNotification("Skill chart not initialized yet", 'info');
 		}
 	}
 
 	private async createSkillRadarChart(): Promise<void> {
 		const skillCtx = document.getElementById('skillRadar') as HTMLCanvasElement | null;
 		if (!skillCtx) return;
+
+		if (this.charts.skill) {
+			this.charts.skill.destroy();
+		}
 
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 		const skills = translations?.profile?.skills.labels ?? ["Speed", "Accuracy", "Defence", "Attack", "Strategy", "Durability"];
@@ -338,6 +350,11 @@ class ManagerProfile {
 	private async createMonthlyChart(): Promise<void> {
 		const monthlyCtx = document.getElementById('monthlyChart') as HTMLCanvasElement | null;
 		if (!monthlyCtx) return;
+
+		if (this.charts.monthly) {
+			this.charts.monthly.destroy();
+		}
+
 		const translations = await getJsTranslations(localStorage.getItem("langPref"));
 
 		const hitLabel = translations?.profile?.monthly?.hitCount ?? 'Ball Hits';
@@ -871,7 +888,7 @@ async function showMatchDetails(matchIndex: number) {
         overlay?.classList.remove('hide-away');
 
     } catch (error) {
-        console.error("❌ Error showing match details:", error);
+        showNotification("Error showing match details", "error");
     }
 }
 
@@ -1278,11 +1295,11 @@ async function fetchMatchHistory(userName: string) {
 			const data = await response.json();
 			return data.matches || [];
 		} else {
-			console.error("❌ Failed to fetch match history:", response.statusText);
+			showNotification("Failed to fetch match history", "error");
 			return [];
 		}
 	} catch (error) {
-		console.error("❌ Error fetching match history:", error);
+		showNotification("Error fetching match history", "error");
 		return [];
 	}
 }
@@ -1399,7 +1416,7 @@ async function populateRecentMatches(userName: string) {
 		});
 
 		if (!response.ok) {
-			console.error("❌ Failed to fetch match history for recent matches");
+			showNotification("Failed to fetch match history for recent matches", "error");
 			return;
 		}
 
@@ -1462,7 +1479,7 @@ async function populateRecentMatches(userName: string) {
 		});
 
 	} catch (error) {
-		console.error("❌ Error fetching recent matches:", error);
+		showNotification("Error fetching recent matches", "error");
 	}
 }
 
@@ -1479,8 +1496,6 @@ async function setTextStats(user: any) {
 		const el = document.querySelector(selector);
 		if (el) {
 			el.textContent = value;
-		} else {
-			console.warn(`Element not found: ${selector}`);
 		}
 	};
 
@@ -1488,8 +1503,6 @@ async function setTextStats(user: any) {
 		const el = document.getElementById(id);
 		if (el) {
 			el.textContent = value;
-		} else {
-			console.warn(`Element not found: #${id}`);
 		}
 	};
 
@@ -1522,7 +1535,6 @@ async function setTextStats(user: any) {
 	safeSetId("mwon", user.stats.gamesWon);
 	safeSetId("mlost", user.stats.gamesLost);
 	safeSetId("mdur-average", formatDuration(user.stats.gameAverageDuration));
-	console.log("Total Duration (seconds):", user.stats.gameTotalDuration);
 	safeSetId("total-play-time", formatDuration(user.stats.gameTotalDuration));
 
 	// Win Streak
@@ -1656,14 +1668,13 @@ async function fetchTournamentHistory(userName: string) {
 
 		if (response.ok) {
 			const data = await response.json();
-			console.log("tournament history: ", data);
 			return data.usersTournament || data.tournaments || [];
 		} else {
-			console.error("❌ Failed to fetch tournament history:", response.statusText);
+			showNotification("Failed to fetch tournament history", "error");
 			return [];
 		}
 	} catch (error) {
-		console.error("❌ Error fetching tournament history:", error);
+		showNotification("Error fetching tournament history", "error");
 		return [];
 	}
 }
@@ -1783,14 +1794,14 @@ function openTournamentBracket(tournamentId: string) {
 	const wrapper = document.getElementById('turnuva-wrapper') as HTMLDivElement;
 
 	if (!overlay || !turnuva || !wrapper) {
-		console.error("❌ Tournament elements not found");
+		showNotification("Tournament elements not found", "error");
 		return;
 	}
 
 	// Turnuva satırını bul
 	const row = document.querySelector(`[data-tournament-id="${tournamentId}"]`) as HTMLElement;
 	if (!row) {
-		console.error("❌ Tournament row not found");
+		showNotification("Tournament row not found", "error");
 		return;
 	}
 
@@ -1804,7 +1815,7 @@ function openTournamentBracket(tournamentId: string) {
 		const players = convertTournamentDataToPlayers(tournamentData, userName);
 
 		if (players.length === 0) {
-			console.error("❌ No players found in tournament data");
+			showNotification("No players found in tournament data", "error");
 			return;
 		}
 
@@ -1816,7 +1827,7 @@ function openTournamentBracket(tournamentId: string) {
 		initBracket(players, n, userName, turnuva, wrapper);
 
 	} catch (error) {
-		console.error("❌ Error opening tournament bracket:", error);
+		showNotification("Error opening tournament bracket", "error");
 	}
 }
 
@@ -1832,7 +1843,6 @@ async function onLoad() {
 		});
 		if (Profile.ok) {
 			const user = await Profile.json();
-			console.log("All data:", user);
 
 			setTextStats(user);
 			await setChartStats(user);
@@ -1857,7 +1867,6 @@ export async function onUserProfile(userName: string): Promise<boolean> {
 
 		if (userProfile.ok) {
 			const user = await userProfile.json();
-			console.log("Friend Page user data:", user);
 
 			setTextStats(user);
 			await setChartStats(user);
@@ -1871,12 +1880,11 @@ export async function onUserProfile(userName: string): Promise<boolean> {
 			return true;
 		} else {
 			showNotification("Error while loading user profile", "error");
-			console.error("❌ Failed to fetch profile data:", userProfile.statusText);
+			showNotification("Failed to fetch profile data", "error");
 			return false;
 		}
 	} catch (error) {
 		showNotification("Error while loading user profile", "error");
-		console.error("ERROR LOADING OVERLAY", error);
 		return false;
 	}
 }

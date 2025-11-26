@@ -361,7 +361,6 @@ class PingPong extends EventEmitter
 
 	start()
 	{
-		this.startTime = Date.now();
 		if (this.status === "finished")
 		{
 			console.warn('⚠️ Game has already finished. Cannot start again.');
@@ -412,7 +411,10 @@ class PingPong extends EventEmitter
 		setTimeout(() =>
 		{
 			if (this.status === 'countdown')
+			{
 				this.status = 'playing';
+				this.startTime = Date.now();
+			}
 		}, 2000);
 	}
 
