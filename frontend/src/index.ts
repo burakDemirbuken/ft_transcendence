@@ -1,14 +1,13 @@
 import Home from "../dist/Home.js";
 import Profile from "../dist/Profile.js";
 import Play from "../dist/Play.js";
+import { deleteApp } from "./Play.js";
 import Friends from "../dist/Friends.js";
-import { connectFriendsWebSocket } from "../dist/Friends.js"
-import { disconnectFriendsWebSocket } from "../dist/Friends.js"
+import { connectFriendsWebSocket, disconnectFriendsWebSocket} from "../dist/Friends.js"
 import Settings from "../dist/Settings.js";
 import Login from "../dist/Login.js";
 import I18n from './utils/I18n.js';
-import { getAuthToken } from './utils/auth.js';
-import { removeAuthToken } from './utils/auth.js';
+import { getAuthToken, removeAuthToken} from './utils/auth.js';
 import { showNotification } from './utils/notification.js';
 
 // Dynamic API base URL based on current hostname
@@ -160,14 +159,16 @@ document.addEventListener("DOMContentLoaded", () =>
 
 // Handle browser back/forward
 window.addEventListener("popstate", (event) => {
-	const page = (event.state && event.state.page) || "login";
+	const page = (event.state && event.state.page) || "home";
 	router(page);
+	if (event.state?.page !== "play")
+		deleteApp();
 });
 
 // Initial load and page reloads
 window.addEventListener("load", () => {
 	const urlPage = window.location.pathname.slice(1);
-	const initialPage = urlPage || (history.state && history.state.page) || "login";
+	const initialPage = urlPage || (history.state && history.state.page) || "home";
 
 	if (!localStorage.getItem("langPref"))
 		localStorage.setItem("langPref", "eng");
