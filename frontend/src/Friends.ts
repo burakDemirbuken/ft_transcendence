@@ -11,16 +11,13 @@ let translations: any;
 
 let friendSocket = null;
 
-function safeSend(msg:string, notif:string = null)
+function safeSend(msg:string)
 {
-	try {
+		try {
 		if (friendSocket && friendSocket.readyState === WebSocket.OPEN) {
-			friendSocket.send(msg);
-			if (notif)
-				showNotification(notif, "success");
-			return
+			friendSocket.send(msg), {once: true};
 		} else if (friendSocket && friendSocket.readyState === WebSocket.CONNECTING) {
-			friendSocket.addEventListener('open', () => { friendSocket.send(msg); if (notif) showNotification(notif, "success") }, { once: true });
+			friendSocket.addEventListener('open', () => { friendSocket.send(msg), { once: true }; });
 		} else {
 			showNotification("Friend socket is not connected", "error");
 		}
@@ -71,7 +68,6 @@ async function handleOverlay(e) {
 	}
 	else if (e.currentTarget.id === "card-exit") {
 		document.querySelector(".overlay")?.classList.add("hide-away");
-		// Clear user profile information
 	}
 }
 
@@ -128,9 +124,10 @@ async function createOverlay() {
 async function request(e) {
 	e.preventDefault();
 
+	console.log("Sending friend request...");
 	const formData = new FormData(e.currentTarget as HTMLFormElement);
 	try {
-		safeSend(JSON.stringify({ type: "send", payload: { peerName: formData.get("req-user") } }), "Friend request sent");
+		safeSend(JSON.stringify({ type: "send", payload: { peerName: formData.get("req-user") } }));
 	} catch (error) {
 		showNotification("Failed to send request", "error");
 	}
@@ -139,7 +136,7 @@ async function request(e) {
 async function unfriend(e) {
 	const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
 	try {
-		safeSend(JSON.stringify({ type: "remove", payload: { peerName: uname } }), "Friend removed");
+		safeSend(JSON.stringify({ type: "remove", payload: { peerName: uname } }));
 	} catch {
 		showNotification("Failed to unfriend user", "error");
 	}
@@ -148,7 +145,7 @@ async function unfriend(e) {
 async function undo(e) {
 	const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
 	try {
-		safeSend(JSON.stringify({ type: "reject", payload: { peerName: uname } }), "Friend request undone");
+		safeSend(JSON.stringify({ type: "reject", payload: { peerName: uname } }));
 	} catch {
 		showNotification("Failed to undo request", "error");
 	}
@@ -157,7 +154,7 @@ async function undo(e) {
 async function accept(e) {
 	const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
 	try {
-		safeSend(JSON.stringify({ type: "accept", payload: { peerName: uname } }), "Friend request accepted");
+		safeSend(JSON.stringify({ type: "accept", payload: { peerName: uname } }));
 	} catch {
 		showNotification("Failed to accept request", "error");
 	}
@@ -166,7 +163,7 @@ async function accept(e) {
 async function decline(e) {
 	const uname = e.target.closest(".friend")?.querySelector(".uname").textContent.slice(1);
 	try {
-		safeSend(JSON.stringify({ type: "reject", payload: { peerName: uname } }), "Friend request declined");
+		safeSend(JSON.stringify({ type: "reject", payload: { peerName: uname } }));
 	} catch {
 		showNotification("Failed to decline request", "error");
 	}
@@ -308,6 +305,9 @@ export default class extends AView {
 		this._onFriendsList = (ev: Event) => {
 			try {
 				const detail = (ev as CustomEvent).detail;
+				if (detail?.message) {
+					showNotification(detail.message, "info");
+				}
 				update(detail);
 			} catch (e) {
 				showNotification("Failed to update friends list", e);
