@@ -1614,14 +1614,12 @@ async function connectWebSocket() {
 		roomSocket = new WebSocketClient(window.location.hostname, 3030);
 
 		// WebSocket event handlers
-		roomSocket.onConnect = () => {
-			console.log('Connected to room server');
+		roomSocket.onConnect (() => {
 			showNotification('Connected to room server', 'info');
-		};
+		});
 
-		roomSocket.onMessage = (message) => {
+		roomSocket.onMessage ((message) => {
 			try {
-				console.log('📨 Message received:', message.type);
 				
 				// Eğer matchReady mesajı gelirse özel işleme yap
 				if (message.type === "matchReady") {
@@ -1633,20 +1631,22 @@ async function connectWebSocket() {
 				// Diğer mesajlar için normal işleme devam et
 				handleWebSocketMessage(message);
 			} catch (error) {
-				console.error('Message handling error:', error);
 				showNotification('An error occurred while processing the message', 'error');
 			}
-		};
+		});
 
-		roomSocket.onClose = (event) => {
-			if (event.code !== 1008) { // Normal close değilse
+		roomSocket.onClose ((error) => {
+			if (error.code == 1008) { // Normal close değilse
 				showNotification('Disconnected from room server', 'error');
 			}
-		};
+			else {
+				showNotification(`Disconnected from room server`, 'error');
+			}
+		});
 
-		roomSocket.onError = (error) => {;
+		roomSocket.onError ((error) => {
 			showNotification('Room server connection error', 'error');
-		};
+		});
 
 		roomSocket.connect("ws-room/client", {
 			userID: currentUserId,
