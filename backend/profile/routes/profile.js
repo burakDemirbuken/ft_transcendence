@@ -28,7 +28,7 @@ export default async function profileRoute(fastify) {
 				attributes: ['id', 'userName', 'displayName', 'avatarUrl']
 			})
 
-			const profileData = userProfile?.toJSON() ?? null
+			const profileData = (await userProfile?.toJSON()) ?? null
 			if (!profileData) {
 				return reply.code(404).send({ message: `User not found: ${userName}` })
 			}
