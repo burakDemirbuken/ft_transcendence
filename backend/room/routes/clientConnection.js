@@ -3,10 +3,7 @@ import Player from '../models/Player.js';
 const connections = [];
 
 export default async function clientConnectionSocket(fastify) {
-/* 	setInterval(() => {
-		console.log(`connected clients: ${fastify.websocketServer.clients.size}`);
 
-	}, 1000); */
 	fastify.get("/ws-room/client", {
 		websocket: true
 	},

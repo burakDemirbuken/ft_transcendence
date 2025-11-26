@@ -35,7 +35,6 @@ class NetworkManager
 			{
 				url += "?" + new URLSearchParams(params).toString();
 			}
-			console.log('Connecting to server at', url);
 			this.socket = new WebSocket(url);
 
 			const { onConnect, onMessage, onClose, onError } = this.callbacks;
@@ -47,7 +46,6 @@ class NetworkManager
 			}
 
 			this.socket.onopen = () => {
-				console.log('✅ WebSocket connected successfully');
 				onConnect();
 			};
 
@@ -76,7 +74,6 @@ class NetworkManager
 			};
 
 			this.socket.onclose = (event: CloseEvent) => {
-				console.log('🔌 WebSocket connection closed:', event.code, event.reason);
 				onClose({ code: event.code, reason: event.reason });
 			};
 

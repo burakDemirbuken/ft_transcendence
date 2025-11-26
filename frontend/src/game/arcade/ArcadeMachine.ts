@@ -102,12 +102,13 @@ class ArcadeMachine
             this.angle = angle || 0;
 
             const parentMesh = this.meshs.find(mesh => mesh.parent === null) || this.meshs[0];
-            if (parentMesh) {
+            if (parentMesh)
+			{
                 parentMesh.position = new BABYLON.Vector3(this.position.x, this.position.y, this.position.z);
                 parentMesh.rotation = new BABYLON.Vector3(0, this.angle, 0);
-            } else {
-                console.warn("Parent mesh not found. Using default position and rotation.");
             }
+			else
+                console.warn("Parent mesh not found. Using default position and rotation.");
 
             const light1 = new BABYLON.HemisphericLight(
                 "light1",
@@ -119,7 +120,6 @@ class ArcadeMachine
             this.createGameScreen();
             this.setActive(true);
 
-            console.log("✅ Arcade machine loaded successfully");
         }
 		catch (error)
 		{
@@ -156,9 +156,7 @@ class ArcadeMachine
             screenMesh.material = this.screenMaterial;
         }
 		else
-		{
             console.warn(`Screen mesh not found. Available meshes: ${this.meshs.map(m => m.name).join(', ')}`);
-        }
 		const ctx = this.gameScreen.getContext();
 
 		ctx.fillStyle = "#000000";
@@ -246,7 +244,6 @@ class ArcadeMachine
 	private createFallbackMesh(): void
 	{
 		try {
-			console.log("🔧 Creating fallback mesh...");
 			// Create a simple box as fallback
 			const box = BABYLON.MeshBuilder.CreateBox("arcadeFallback", {size: 2}, this.scene);
 			box.position = new BABYLON.Vector3(this.position.x, this.position.y + 1, this.position.z);
@@ -258,7 +255,6 @@ class ArcadeMachine
 			box.material = material;
 
 			this.meshs = [box];
-			console.log("✅ Fallback mesh created successfully");
 		} catch (error) {
 			console.error("❌ Failed to create fallback mesh:", error);
 			this.meshs = [];

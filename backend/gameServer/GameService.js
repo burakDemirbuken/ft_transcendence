@@ -24,6 +24,12 @@ class GameService
 		this.players = new Map(); // playerId -> Player instance
 		this.connectingPlayers = new Set(); // userID'leri tutan geçici set
 
+		setInterval(() => {
+			console.log(`--- Connected Players: ${this.players.size} ---`);
+			this.players.forEach((player) => {
+				console.log(`Player ID: ${player.id}, Name: ${player.name}, Initialized: ${player.initialized}`);
+			});
+		}, 1000);
 		this.gameManager.start();
 		this.tournamentManager.start();
 		this.setupRoomNetwork();
@@ -121,10 +127,6 @@ class GameService
 			this.websocketServer.onClientConnect(
 				(connectionId, userID, query) =>
 				{
-					console.log('--- New WebSocket Connection ---');
-
-					console.log('players map:', this.players);
-
 					const existingPlayer = Array.from(this.players.values()).find(p => p.id === userID);
 					if (existingPlayer) {
 						console.error('❌ Duplicate player ID detected:', userID);
@@ -262,9 +264,6 @@ class GameService
 	{
 		const { type, payload } = message;
 		const { roomId, gameMode, gameSettings, players } = payload;
-		console.log('--- Incoming Room Message ---');
-		console.log('Payload:', payload);
-
 		switch (type) {
 			case 'create':
 				if (gameMode !== 'tournament')

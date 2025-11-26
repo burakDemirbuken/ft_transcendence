@@ -8,11 +8,11 @@ export default class Room extends EventEmitter
 		let errorMessage = "";
 		if (gameSettings.paddleWidth <= 0 || gameSettings.paddleWidth >= 100)
 			errorMessage += "Paddle Width must be between 1 and 100"
-		if (gameSettings.paddleHeight <= 50 || gameSettings.paddleHeight >= 600)
+		if (gameSettings.paddleHeight <= 49 || gameSettings.paddleHeight >= 600)
 			errorMessage += "Paddle Height must be between 50 and 600"
 		if (gameSettings.paddleSpeed <= 0)
 			errorMessage += "Paddle Speed must be positive"
-		if (gameSettings.ballRadius <= 0 || gameSettings.ballRadius >= 50)
+		if (gameSettings.ballRadius <= 0 || gameSettings.ballRadius >= 51)
 			errorMessage += "Ball Radius must be between 1 and 50"
 		if (gameSettings.ballSpeed <= 0)
 			errorMessage += "Ball speed must be positive"

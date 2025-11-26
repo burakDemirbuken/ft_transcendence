@@ -119,11 +119,13 @@ class PingPong extends EventEmitter
 		const playerIndex = this.players.findIndex(p => p.id === playerId);
 		if (playerIndex !== -1)
 		{
+			console.log(`👤 Player ${playerId} removed from game`);
 			if (this.team.get(1).playersId.includes(playerId))
 				this.team.get(2).score = this.settings.maxScore;
 			else if (this.team.get(2).playersId.includes(playerId))
 				this.team.get(1).score = this.settings.maxScore;
 			this.finishedControls();
+			console.log(`winner determined after player removal`);
 			this.players.splice(playerIndex, 1);
 		}
 		else

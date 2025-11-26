@@ -89,7 +89,6 @@ class AiNetworkManager extends EventEmitter
 
 	handleMessage(message)
 	{
-		console.log('📥 Received message from AI server:', message); // Debug için
 		switch (message.type)
 		{
 			case "game_initialized":

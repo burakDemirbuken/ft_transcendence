@@ -8,7 +8,7 @@ class NetworkManager
 	constructor(logger = false)
 	{
 		this.fastify = Fastify({ logger: false
-			
+
 		});
 		this.fastify.register(cookie);
 		this.fastify.register(jwt, { secret: process.env.JWT_SECRET });
