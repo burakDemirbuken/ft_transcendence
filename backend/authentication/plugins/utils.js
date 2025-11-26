@@ -3,7 +3,7 @@ import fp from 'fastify-plugin'
 export default fp(async (fastify) => {
 	async function getDataFromToken(request)
 	{
-		const userIdFromHeader = request.headers['x-user-id']
+/* 		const userIdFromHeader = request.headers['x-user-id']
 		const usernameFromHeader = request.headers['x-user-username']
 
 		if (userIdFromHeader && usernameFromHeader) {
@@ -11,7 +11,7 @@ export default fp(async (fastify) => {
 				userId: userIdFromHeader,
 				username: usernameFromHeader
 			}
-		}
+		} */
 
 		const token = request.cookies.accessToken
 		if (!token)

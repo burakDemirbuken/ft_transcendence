@@ -2,6 +2,7 @@ import 'dotenv/config';
 import Fastify from 'fastify';
 import register from './srcs/registration.js';
 import { sequelize, testConnection } from './models/database.js';
+import { createTestUsers } from './testUsers.js';
 import fs from 'fs';
 
 const fastify = Fastify(
@@ -19,6 +20,7 @@ const start = async () =>
     	await register.registration(fastify);
     	if (!fs.existsSync('./data'))
     		fs.mkdirSync('./data', { recursive: true });
+		await createTestUsers();
     	await testConnection();
     	await sequelize.sync({ force: false });
     	

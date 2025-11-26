@@ -3,29 +3,29 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-async function globalsPlugin(fastify, options) {
-	if (!process.env.JWT_SECRET) {
-		throw new Error('JWT_SECRET environment variable is required! Please set it in .env file');
-	}
+async function globalsPlugin(fastify, options)
+{
+	if (!process.env.JWT_SECRET)
+		throw ( new Error('JWT_SECRET environment variable is required! Please set it in .env file'));
 
-	if (process.env.JWT_SECRET.length < 32) {
+	if (process.env.JWT_SECRET.length < 32)
 		console.warn('⚠️  WARNING: JWT_SECRET should be at least 32 characters long for security!');
-	}
 
-	const services = {
-		auth: "http://authentication:3001",
-		gateway: "http://gateway:3000",
-		email: "http://email:3005",
-		profile: "http://profile:3006",
+	const services =
+	{
+		auth:		"http://authentication:3001",
+		gateway:	"http://gateway:3000",
+		email:		"http://email:3005",
+		profile:	"http://profile:3006",
 		gameServer: "http://gameserver:3003",
-		static: "http://static:3008",
-		friend: "http://friend:3007",
+		static:		"http://static:3008",
+		friend:		"http://friend:3007",
 	};
 
 	const settings =
 	{
 		port: 3000,
-		host: process.env.HOST || '0.0.0.0',
+		host: '0.0.0.0',
 	};
 
 	const secrets =
@@ -44,9 +44,9 @@ async function globalsPlugin(fastify, options) {
 		/^\/auth\/hellokitty$/,
 	];
 
-	fastify.decorate('services', services);
-	fastify.decorate('settings', settings);
-	fastify.decorate('secrets', secrets);
+	fastify.decorate('services',	services);
+	fastify.decorate('settings',	settings);
+	fastify.decorate('secrets',		secrets);
 
 	fastify.decorate('isPublicPath', function(path)
 	{
@@ -60,7 +60,4 @@ async function globalsPlugin(fastify, options) {
 
 }
 
-export default fp(globalsPlugin, {
-	name: 'globals-plugin',
-	fastify: '4.x'
-});
+export default fp(globalsPlugin, { name: 'globals-plugin', fastify: '4.x' });
