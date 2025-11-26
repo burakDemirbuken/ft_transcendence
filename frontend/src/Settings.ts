@@ -237,7 +237,9 @@ async function sendDNameChangeReq(e) {
 		if (getProfileDatas.ok) {
 			showNotification("Display name updated successfully", "success");
 		} else {
-			showNotification(`Failed to update display name: ${getProfileDatas.statusText}`, "error");
+			const errorData = await getProfileDatas.json();
+			console.log(errorData.message);
+			showNotification(`Failed to update display name: ${errorData.message}`, "error");
 		}
 	} catch (error) {
 		showNotification(`System Error: ${error.message ?? "Failed to update display name"}`, "error");

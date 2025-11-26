@@ -59,7 +59,11 @@ export default async function profileRoute(fastify) {
 				console.error('userName is missing in token')
 				return reply.code(400).send({ message: 'userName is required' })
 			}
-
+			if (dname.length < 3 || dname.length > 20) {
+				console.error('Display name length invalid:', dname)
+				return reply.code(400).send({ message: 'Display name must be between 3 and 20 characters' })
+			}
+			
 			if (!dname) {
 				console.error('Display name is missing in request body')
 				return reply.code(400).send({ message: 'Display name is required' })

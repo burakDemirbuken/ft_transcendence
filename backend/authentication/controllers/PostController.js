@@ -131,7 +131,7 @@ async function login(request, reply) {
             // Continue with login
         }
         const { login, password } = request.body;
-        
+
         // Login validation (username or email)
         if (!login || login.length < 1) {
             return reply.status(400).send({
@@ -291,8 +291,8 @@ export async function verifyEmail(request, reply)
             try { window.close(); } catch (e) {}
             try { window.open('', '_self'); window.close(); } catch (e) {}
             // Yine de kapanmazsa sekmeyi temizlemeye çalış
-            setTimeout(() => { 
-                try { location.replace('about:blank'); } catch(e){} 
+            setTimeout(() => {
+                try { location.replace('about:blank'); } catch(e){}
             }, 50);
         }
 
@@ -327,7 +327,7 @@ async function verify2FA(request, reply) {
     const trlt = getTranslations(request.query.lang || "eng");
     try {
         const { login, code, rememberMe } = request.body;
-        
+
         // Login validation
         if (!login || login.length < 1) {
             return reply.status(400).send({
@@ -565,7 +565,7 @@ async function initPasswordChange(request, reply) {
 
 		// getDataFromToken kullan (header'dan veya cookie'den)
 		const userData = await request.server.getDataFromToken(request);
-		
+
 		if (!userData?.userId) {
 			return reply.status(401).send({
 				success: false,
@@ -601,7 +601,7 @@ async function initPasswordChange(request, reply) {
 		// Email'e 2FA kodunu gönder
 		try {
 			await utils.send2FAEmail(user.email, user.username, code, 'Unknown', 'password_change');
-			
+
 			return reply.send({
 				success: true,
 				message: '2FA code sent to your email',
@@ -657,7 +657,7 @@ async function confirmPasswordChange(request, reply) {
 
 		// 2FA kodunu kontrol et
 		const storedData = utils.tempStorage.get(user.email);
-		
+
 		if (!storedData || storedData.type !== 'password_change') {
 			return reply.status(400).send({
 				success: false,
@@ -691,22 +691,22 @@ async function confirmPasswordChange(request, reply) {
 		await user.clearRefreshToken();
 
 		// Cookie'leri temizle - kullanıcıyı logout yap
-		reply.clearCookie('accessToken', { 
-			path: '/', 
-			httpOnly: true, 
-			secure: true, 
-			sameSite: 'lax' 
+		reply.clearCookie('accessToken', {
+			path: '/',
+			httpOnly: true,
+			secure: true,
+			sameSite: 'lax'
 		});
-		reply.clearCookie('refreshToken', { 
-			path: '/', 
-			httpOnly: true, 
-			secure: true, 
-			sameSite: 'lax' 
+		reply.clearCookie('refreshToken', {
+			path: '/',
+			httpOnly: true,
+			secure: true,
+			sameSite: 'lax'
 		});
-		reply.clearCookie('authStatus', { 
-			path: '/', 
-			secure: true, 
-			sameSite: 'lax' 
+		reply.clearCookie('authStatus', {
+			path: '/',
+			secure: true,
+			sameSite: 'lax'
 		});
 
 		return reply.send({
@@ -816,7 +816,7 @@ async function initEmailChange(request, reply) {
 		// ESKİ email adresine 2FA kodunu gönder (güvenlik için)
 		try {
 			await utils.send2FAEmail(user.email, user.username, code, 'Unknown', 'email_change');
-			
+
 			return reply.send({
 				success: true,
 				message: 'Email değişimi için doğrulama kodu mevcut email adresinize gönderildi',
@@ -910,9 +910,9 @@ async function confirmEmailChange(request, reply) {
 		// Email'i değiştir
 		const oldEmail = user.email;
 		const newEmail = storedData.newEmail;
-		
+
 		// Önce kullanıcıyı inaktif yap (yeni email doğrulanana kadar)
-		await user.update({ 
+		await user.update({
 			email: newEmail,
 			is_active: false  // Yeni email doğrulanana kadar inactive
 		});
@@ -939,22 +939,22 @@ async function confirmEmailChange(request, reply) {
 		}
 
 		// Cookie'leri temizle - kullanıcıyı logout yap
-		reply.clearCookie('accessToken', { 
-			path: '/', 
-			httpOnly: true, 
-			secure: true, 
-			sameSite: 'lax' 
+		reply.clearCookie('accessToken', {
+			path: '/',
+			httpOnly: true,
+			secure: true,
+			sameSite: 'lax'
 		});
-		reply.clearCookie('refreshToken', { 
-			path: '/', 
-			httpOnly: true, 
-			secure: true, 
-			sameSite: 'lax' 
+		reply.clearCookie('refreshToken', {
+			path: '/',
+			httpOnly: true,
+			secure: true,
+			sameSite: 'lax'
 		});
-		reply.clearCookie('authStatus', { 
-			path: '/', 
-			secure: true, 
-			sameSite: 'lax' 
+		reply.clearCookie('authStatus', {
+			path: '/',
+			secure: true,
+			sameSite: 'lax'
 		});
 
 		return reply.send({

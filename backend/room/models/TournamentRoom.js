@@ -7,6 +7,15 @@ export default class TournamentRoom extends Room
 	constructor(tournamentSettings)
 	{
 		super(gameSettings);
+		if (!tournamentSettings)
+			throw new Error('Tournament settings are required to create a TournamentRoom');
+		if (!tournamentSettings.name)
+			throw new Error('Tournament name is required in tournament settings');
+		if (!tournamentSettings.maxPlayers)
+			throw new Error('Tournament maxPlayers is required in tournament settings');
+		if (tournamentSettings.maxPlayers !== 4 && tournamentSettings.maxPlayers !== 8)
+			throw new Error('Tournament maxPlayers must be either 4 or 8');
+
 		this.gameType = 'tournament';
 		this.gameMode = 'tournament';
 		this.tournamentName = tournamentSettings.name || 'deafult_tournament';

@@ -16,8 +16,8 @@ export default class Room extends EventEmitter
 			errorMessage += "Ball Radius must be between 1 and 50"
 		if (gameSettings.ballSpeed <= 0)
 			errorMessage += "Ball speed must be positive"
-		if (gameSettings.ballSpeedIncrease <= 0)
-			errorMessage += "Ball Speed Increase must be between 0 and 100"
+		if (gameSettings.ballSpeedIncrease < 0)
+			errorMessage += "Ball Speed Increase must be non-negative"
 		if (gameSettings.maxScore <= 0)
 			errorMessage += "Max score must be positive"
 		if (errorMessage !== "")
