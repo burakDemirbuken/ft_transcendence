@@ -1674,6 +1674,13 @@ async function setAchievementStats(user: any) {
 				date.textContent = formattedDate;
 			}
 		}
+		else {
+			card.classList.replace("unlocked", "locked");
+			const date = card.querySelector(".achievement-date");
+			if (date) {
+				date.textContent = '';
+			}
+		}
 	});
 }
 

@@ -15,7 +15,7 @@ export default async function gamedataRoute(fastify) {
 			}
 
 			const [teamOnePlayers, teamTwoPlayers] = await Promise.all([
-				Profile.findAll({
+				await Profile.findAll({
 					where: { userName: team1.playersId },
 					include: [
 						{
@@ -33,7 +33,7 @@ export default async function gamedataRoute(fastify) {
 					],
 					transaction: t
 				}),
-				Profile.findAll({
+				await Profile.findAll({
 					where: { userName: team2.playersId },
 					include: [
 						{
@@ -100,11 +100,11 @@ export default async function gamedataRoute(fastify) {
 			])
 
 			const [teamOne, teamTwo] = await Promise.all([
-				Team.create({
+				await Team.create({
 					playerOneId: teamOnePlayers?.[0]?.id ?? null,
 					playerTwoId: teamOnePlayers?.[1]?.id ?? null
 				}, { transaction: t }),
-				Team.create({
+				await Team.create({
 					playerOneId: teamTwoPlayers?.[0]?.id ?? null,
 					playerTwoId: teamTwoPlayers?.[1]?.id ?? null
 				}, { transaction: t })
@@ -123,20 +123,33 @@ export default async function gamedataRoute(fastify) {
 				matchSettings: gameSettings,
 				matchState: state
 			}, { transaction: t })
-			await Promise.all([
-				...teamOnePlayers.map(async (player) => {
-					if (player && player.id) {
-						await player.Achievement.update(fastify.checkAchievements(player), { transaction: t })
-					}
-				}),
-				...teamTwoPlayers.map(async (player) => {
-					if (player && player.id) {
-						await player.Achievement.update(fastify.checkAchievements(player), { transaction: t })
-					}
-				})
-			])
-
+			
 			await t.commit()
+			
+			const t2 = await fastify.sequelize.transaction()
+			try {
+				
+				await Promise.all([
+					...winnerTeam.map(async (player) => {
+						if (player && player.id) {
+							await player.Stat.reload()
+							await player.Achievement.update(fastify.checkAchievements(player, true), { transaction: t2 })
+						}
+					}),
+					...loserTeam.map(async (player) => {
+						if (player && player.id) {
+							await player.Stat.reload()
+							await player.Achievement.update(fastify.checkAchievements(player, false), { transaction: t2 })
+						}
+					})
+				])
+
+				await t2.commit()
+			} catch (error) {
+				fastify.log.error(`Error saving match data: ${error.message} -> ${error}`)
+				await t2.rollback()
+				return reply.code(500).send({ message: 'Error processing match data' })
+			} 
 			return reply.code(200).send({ message: 'Match data processed successfully' })
 		} catch (error) {
 			await t.rollback()
@@ -150,6 +163,7 @@ export default async function gamedataRoute(fastify) {
 		const { Profile, Stat, Achievement, RoundMatch, Round, TournamentHistory } = fastify.sequelize.models
 		const t = await fastify.sequelize.transaction()
 
+		try {
 			if (!name || !rounds || !Array.isArray(rounds) || rounds.length === 0) {
 				fastify.log.error(request.body)
 				throw new Error('Invalid tournament data provided')
@@ -177,7 +191,7 @@ export default async function gamedataRoute(fastify) {
 
 				for (const [matchIndex, matchData] of roundData.matchs.entries()) {
 					const [playerOneProfile, playerTwoProfile] = await Promise.all([
-						Profile.findOne({
+						await Profile.findOne({
 							where: { userName: matchData.player1 },
 							include: [
 								{
@@ -193,9 +207,10 @@ export default async function gamedataRoute(fastify) {
 									}
 								}
 							],
-							attributes: ['id', 'userName']
+							attributes: ['id', 'userName'],
+							transaction: t
 						}),
-						Profile.findOne({
+						await Profile.findOne({
 							where: { userName: matchData.player2 },
 							include: [
 								{
@@ -211,7 +226,8 @@ export default async function gamedataRoute(fastify) {
 									}
 								}
 							],
-							attributes: ['id', 'userName']
+							attributes: ['id', 'userName'],
+							transaction: t
 						})
 					])
 
@@ -222,12 +238,10 @@ export default async function gamedataRoute(fastify) {
 						allPlayerProfile.push(playerTwoProfile)
 					}
 
-					const [winnerPlayer, loserPlayer] = await Promise.all([
-						matchData.winner === playerOneProfile?.userName ? playerOneProfile :
-							(matchData.winner === playerTwoProfile?.userName ? playerTwoProfile : null),
-						matchData.loser === playerOneProfile?.userName ? playerOneProfile :
-							(matchData.loser === playerTwoProfile?.userName ? playerTwoProfile : null)
-					])
+					const winnerPlayer = matchData.winner === playerOneProfile?.userName ? playerOneProfile :
+						(matchData.winner === playerTwoProfile?.userName ? playerTwoProfile : null)
+					const loserPlayer = matchData.loser === playerOneProfile?.userName ? playerOneProfile :
+						(matchData.loser === playerTwoProfile?.userName ? playerTwoProfile : null)
 
 					await RoundMatch.create({
 						roundId: round.id,
@@ -283,14 +297,38 @@ export default async function gamedataRoute(fastify) {
 					}
 				}
 			}
-			await Promise.all(
-				allPlayerProfile
-					.filter(Boolean)
-					.map(async (player) => player.Achievement.update(fastify.checkAchievements(player), { transaction: t }))
-			)
 
 			await t.commit()
+
+			const t2 = await fastify.sequelize.transaction()
+			try {
+				for (const player of allPlayerProfile) {
+					if (player && player.id) {
+						await player.Stat.reload()
+						const isWinner = player.id === (await Profile.findOne({
+							where: { userName: winner },
+							attributes: ['id']
+						}))?.id
+						
+						await player.Achievement.update(
+							fastify.checkAchievements(player, isWinner), 
+							{ transaction: t2 }
+						)
+					}
+				}
+				await t2.commit()
+			} catch (error) {
+				await t2.rollback()
+				fastify.log.error(`Error saving tournament achievements: ${error.message} -> ${error}`)
+				return reply.code(500).send({ message: 'Error processing tournament achievements' })
+			}
+
 			return reply.code(200).send({ message: 'Tournament data processed successfully' })
+		} catch (error) {
+			await t.rollback()
+			fastify.log.error(`Error saving tournament data: ${error.message} -> ${error}`)
+			return reply.code(500).send({ message: 'Error processing tournament data' })
+		}
 	})
 
 	fastify.get('/match-history', async (request, reply) => {

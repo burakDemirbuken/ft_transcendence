@@ -66,34 +66,35 @@ export default fp(async (fastify) => {
 		}
 	}
 
-	function checkAchievements(player = null) {
+	function checkAchievements(player = null, isWinner) {
 		if (!player) {
 			throw new Error('Profile not found for user')
 		}
 
 		const updates = {}
-		if (!player.Achievement.fiveHundredWins && player.Stat.gamesWon >= 500) {
+		if (isWinner && !player.Achievement.fiveHundredWins && player.Stat.gamesWon >= 500) {
 			updates.fiveHundredWins = new Date()
 		}
-		if (!player.Achievement.hundredWins && player.Stat.gamesWon >= 100) {
+		if (isWinner && !player.Achievement.hundredWins && player.Stat.gamesWon >= 100) {
 			updates.hundredWins = new Date()
 		}
-		if (!player.Achievement.firstWin && player.Stat.gamesWon >= 1) {
+
+		console.log(player.Stat.gamesWon, player.Stat.gamesWon >= 1 , player.Stat.gamesWon > 0)
+		if (isWinner && !player.Achievement.firstWin && player.Stat.gamesWon >= 1) {
 			updates.firstWin = new Date()
 		}
 
-		if (!player.Achievement.twentyFiveTenStreak && player.Stat.gameLongestStreak >= 25) {
+		if (isWinner && !player.Achievement.twentyFiveTenStreak && player.Stat.gameLongestStreak >= 25) {
 			updates.twentyFiveTenStreak = new Date()
 		}
-		if (!player.Achievement.firstTenStreak && player.Stat.gameLongestStreak >= 10) {
+		if (isWinner && !player.Achievement.firstTenStreak && player.Stat.gameLongestStreak >= 10) {
 			updates.firstTenStreak = new Date()
 		}
 
-		if (!player.Achievement.lessThanThreeMin && player.Stat.gameMinDuration > 0 && player.Stat.gameMinDuration < 180) {
+		if (isWinner && !player.Achievement.lessThanThreeMin && player.Stat.gameMinDuration > 0 && player.Stat.gameMinDuration < 180) {
 			updates.lessThanThreeMin = new Date()
 		}
 
-		console.log(`Achievement updates for user ${player.userName}:`, updates)
 		if (Object.keys(updates).length > 0) {
 			return updates
 		}

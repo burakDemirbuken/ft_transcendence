@@ -26,6 +26,9 @@ status:
 
 logs:
 	@$(COMPOSE_CMD) logs -f
+log-frontend:
+	@echo "$(GREEN)Showing logs for frontend service$(NC)"
+	@$(COMPOSE_CMD) logs -f frontend
 log-profile:
 	@echo "$(GREEN)Showing logs for profile service$(NC)"
 	@$(COMPOSE_CMD) logs -f profile

@@ -146,19 +146,18 @@ export default async function profileRoute(fastify) {
 
 	fastify.post('/internal/create', async (request, reply) =>
 	{
-		const { userName } = request.body ?? {}
+		const { userName, displayName } = request.body ?? {}
 		let t;
 
 		try {
-			if (!userName) {
-				return reply.code(400).send({ message: 'userName is required' })
+			if (!userName || !displayName) {
+				return reply.code(400).send({ message: 'userName and displayName are required' })
 			}
 
 			const existingProfile = await fastify.sequelize.models.Profile.findOne({
 				where: {
 					[Op.or]: [
 						{ userName: userName },
-						{ displayName: userName }
 					]
 				}
 			})
@@ -175,7 +174,7 @@ export default async function profileRoute(fastify) {
 
 			const userProfile = await fastify.sequelize.models.Profile.create({
 				userName: userName,
-				displayName: userName
+				displayName: displayName
 			}, { transaction: t })
 
 			await Promise.all([
@@ -276,6 +275,7 @@ export default async function profileRoute(fastify) {
 			}) ?? null
 
 			if (userProfile == null) {
+				fastify.log.error('User does not exist');
 				return reply.code(404).send({ exists: false, message: 'User not found' })
 			}
 

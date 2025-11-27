@@ -160,7 +160,6 @@ class GameService
 			this.websocketServer.onClose(
 				(connectionId) =>
 				{
-					//? bağlantısı koptuğunda yapılacaklar burada
 					const player = this._getplayerByConnectionId(connectionId);
 					if (!player)
 					{

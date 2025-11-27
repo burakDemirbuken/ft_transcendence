@@ -38,8 +38,8 @@ class TournamentManager extends EventEmitter
 			{
 				setTimeout(() => {
 					this.emit(`tournament_${tournamentId}`, { type: 'finished', payload: data });
-					this.tournaments.get(tournamentId).destroy();
-					this.tournaments.delete(tournamentId);
+					this.tournaments?.get(tournamentId)?.destroy();
+					this.tournaments?.delete(tournamentId);
 					console.log(`🗑️ Tournament ${tournamentId} deleted after finishing`);
 				}, 3000);
 			}

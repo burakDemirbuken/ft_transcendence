@@ -25,6 +25,7 @@ async function checkUsername(request, reply)
         }
 
         const user = await User.findByUsername(username);
+
         return (reply.send({
             exists: !!user,
             username: username,

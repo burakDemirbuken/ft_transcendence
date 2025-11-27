@@ -1,6 +1,7 @@
 import      User                    from    '../models/User.js';
 import  {   getTranslations     }   from    '../I18n/I18n.js';
 import      utils                   from    './utils.js';
+import	crypto						from	"crypto";
 
 async function register(request, reply)
 {
@@ -172,6 +173,7 @@ export async function verifyEmail(request, reply)
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userName: user.username,
+					displayName: user.username + '#' + crypto.randomUUID().split('-')[0]
                 })
             });
         } catch (profileError) {
@@ -328,6 +330,7 @@ async function verify2FA(request, reply) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     userName: user.username,
+					displayName: user.username + '#' + crypto.randomUUID().split('-')[0]
                 })
             });
         } catch (profileError) {
@@ -825,18 +828,9 @@ async function confirmEmailChange(request, reply) {
 		utils.tempStorage.delete(oldEmailKey);
 
 		const verificationToken = utils.storeVerificationToken(newEmail, 'email_verification');
-
-		try {
-			await utils.sendVerificationEmail(newEmail, user.username, verificationToken);
-		} catch (emailError) {
-		}
-
+		
+		await utils.sendVerificationEmail(newEmail, user.username, verificationToken);		
 		await user.clearRefreshToken();
-
-		if (token) {
-			utils.blacklistToken(token);
-		}
-
 		reply.clearCookie('accessToken', {
 			path: '/',
 			httpOnly: true,
@@ -854,7 +848,6 @@ async function confirmEmailChange(request, reply) {
 			secure: true,
 			sameSite: 'lax'
 		});
-
 		return reply.send({
 			success: true,
 			message: `Email successfully changed from ${oldEmail} to ${newEmail}. Please verify your new email address by clicking the link in the email.`,
@@ -863,7 +856,6 @@ async function confirmEmailChange(request, reply) {
 			old_email: oldEmail,
 			new_email: newEmail
 		});
-
 	} catch (error) {
 		return reply.status(500).send({
 			success: false,

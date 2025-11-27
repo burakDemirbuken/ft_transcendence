@@ -2983,6 +2983,10 @@ private initAIGameListeners(): void {
     const fastGameBtn = document.getElementById('fast-game-mode');
     if (fastGameBtn) {
         fastGameBtn.addEventListener('click', () => {
+			if (roomSocket.isConnect() == false) {
+				showNotification("Web socket connection error", "error");
+				return ;
+			}
             showNotification('Starting quick game...', 'success');
 
             const loadingScreen = document.getElementById('loading-screen');

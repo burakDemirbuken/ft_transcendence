@@ -13,9 +13,28 @@ export default fp(async (fastify) => {
 		const sequelize = new Sequelize({
 			dialect: 'sqlite',
 			storage: './database/database.sqlite',
+			pool: {
+				max: 1,
+				min: 0,
+				acquire: 60000,
+				idle: 10000
+			},
+			retry: {
+				max: 10,
+				match: [
+					/SQLITE_BUSY/,
+					/SQLITE_LOCKED/,
+					/database is locked/
+				]
+			},
+			dialectOptions: {
+				timeout: 30000
+			},
 			logging: false
 		})
 
+		await sequelize.query("PRAGMA journal_mode = WAL;")
+		await sequelize.query("PRAGMA busy_timeout = 30000;")
 		await sequelize.query('PRAGMA foreign_keys = ON')
 
 		const Profile = ProfileModel(sequelize, DataTypes, Model)

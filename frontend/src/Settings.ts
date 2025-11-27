@@ -72,63 +72,16 @@ async function confirm2FACode(e) {
 
 		if (response.ok) {
 			showNotification(result.message ?? "Change successful!", "success");
-			hideSettingsOverlay();
-
-			if (pendingAction === 'password' && result.logout) {
+			if (pendingAction === 'password')
 				showNotification("Password changed! Logging out...", "success");
-				// Logout
-				await fetch(`${API_BASE_URL}/auth/logout`, {
-					method: 'POST',
-					credentials: 'include',
-					headers: {
-						'Content-Type': 'application/json',
-						...getAuthHeaders()
-					}
-				});
-				localStorage.removeItem('userName');
-				document.querySelector("#navbar")?.classList.add("logout");
-				setTimeout(() => {
-					navigateTo('login');
-				}, 1500);
-			}
-			else if (pendingAction === 'email' && result.logout) {
+			else if (pendingAction === 'email')
 				showNotification(result.message || "Email başarıyla değiştirildi! Yeni email adresinizi doğrulamak için gelen emaildeki linke tıklayın. Oturumunuz kapatılıyor...", "success");
-				// Logout
-				await fetch(`${API_BASE_URL}/auth/logout`, {
-					method: 'POST',
-					credentials: 'include',
-					headers: {
-						'Content-Type': 'application/json',
-						...getAuthHeaders()
-					}
-				});
-				document.querySelector("#navbar")?.classList.add("logout");
-				setTimeout(() => {
-					navigateTo('login');
-				}, 3000);
-			}
-			else if (pendingAction === 'email') {
-				setTimeout(() => {
-					window.location.reload();
-				}, 1500);
-			}
-			else if (pendingAction === 'delete') {
+			else if (pendingAction === 'delete')
 				showNotification("Account deletion successful, logging out...", "success");
-				await fetch(`${API_BASE_URL}/auth/logout`, {
-					method: 'POST',
-					credentials: 'include',
-					headers: {
-						'Content-Type': 'application/json',
-						...getAuthHeaders()
-					}
-				});
-				localStorage.removeItem('userName');
-				document.querySelector("#navbar")?.classList.add("logout");
-				setTimeout(() => {
-					navigateTo('login');
-				}, 2000);
-			}
-		} else {
+			navigateTo('login');
+		}
+		else
+		{
 			showNotification(result.error ?? "Verification failed", "error");
 			submitBtn.disabled = false;
 			submitBtn.style.opacity = '1';

@@ -5,9 +5,9 @@
   "scripts": {
     "build": "tsc --skipLibCheck || echo 'Build completed with warnings'",
     "build-strict": "tsc",
-    "dev": "nodemon --ext ts,js,json,html,css --watch frontend --exec \"tsc --skipLibCheck\"",
+    "dev": "tsc --watch",
     "serve": "http-server . -p 8080",
-    "start": "concurrently \"tsc --watch\" \"nodemon --watch frontend --ext html,css,js,json --exec node server.js\""
+    "start": "nodemon --watch frontend --ext ts,js,json,css,html --exec node server.js"
   },
   "dependencies": {
     "chart.js": "^4.4.3",
