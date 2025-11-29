@@ -92,7 +92,21 @@ shell-gameserver:
 	@echo "$(GREEN)Entering shell for gameserver service$(NC)"
 	@docker exec -it gameserver /bin/sh
 
-clean-db:
+	.PHONY: clean-docker
+clean-docker:
+	@echo "Stopping all containers..."
+	@docker stop $$(docker ps -q) 2>/dev/null || true
+	@echo "Removing all containers..."
+	@docker rm -f $$(docker ps -aq) 2>/dev/null || true
+	@echo "Removing all images..."
+	@docker rmi -f $$(docker images -q) 2>/dev/null || true
+	@echo "Removing all volumes..."
+	@docker volume rm $$(docker volume ls -q) 2>/dev/null || true
+	@docker network prune -f >/dev/null 2>&1 || true
+	@docker builder prune -af >/dev/null 2>&1 || true
+	@echo "Docker cleaned successfully!"
+
+clean-db: clean-docker
 	@echo "$(RED)Cleaning databases...$(NC)"
 	@rm -rf backend/profile/database/
 	@rm -rf backend/authentication/data/
@@ -183,7 +197,7 @@ help:
 	@echo "  dev-<service>    - Build, start and follow logs for specific service"
 	@echo ""
 
-.PHONY: all up down stop status logs clean clean-db fclean re health help \
+.PHONY: all up down stop status logs clean clean-db fclean re health help clean-docker \
 		$(addprefix up-,$(ALL_SERVICES)) \
 		$(addprefix down-,$(ALL_SERVICES)) \
 		$(addprefix restart-,$(ALL_SERVICES)) \
