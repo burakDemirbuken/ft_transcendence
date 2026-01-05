@@ -124,75 +124,56 @@ get_host_ip() {
 
   echo "$ip"
 }
-
 ###############################################################################
-# 3. .env File Creation
+# 3. .env File Check & Load (Secure)
 ###############################################################################
 
 create_env_file() {
-  section "Environment Configuration"
+  section "Environment Configuration Check"
 
   local env_file="${PROJECT_ROOT}/.env"
+  if [[ ! -f "$env_file" ]]; then
+    error "CRITIC ERROR: .env file could'nt found!"
+    echo
+    echo -e "${YELLOW}The project MUST have a .env file in the main directory to work.${NC}"
+    echo
+    echo -e "Please create a file named ${BOLD}.env${NC} in the project directory and enter your information in the following format:"
+    echo
+    echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${WHITE}# JWT Settings${NC}"
+    echo -e "JWT_SECRET=your_super_secret_key"
+    echo
+    echo -e "${WHITE}# Email Settings${NC}"
+    echo -e "EMAIL_SERVICE=gmail,yahoo,yandex etc."
+    echo -e "EMAIL_USER=yourmailaddress@(gmail,yahoo,yandex etc.).com"
+    echo -e "EMAIL_PASS=your application password"
+    echo -e "EMAIL_FROM=yourmailaddress@(gmail,yahoo,yandex etc.).com"
+    echo
+    echo -e "${WHITE}# Host Settings${NC}"
+    echo -e "HOST_IP=localhost/Or Your Host IP"
+    echo -e "NGINX_PORT=3030"
+    echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo
+    exit 1
+  fi
+  success "The .env file exists, and the configuration is being read..."
 
-  if [[ -f "$env_file" ]]; then
-    warning ".env file already exists"
-    read -p "$(echo -e ${CYAN})Overwrite existing .env file? (y/n): $(echo -e ${NC})" overwrite
-    if [[ "$overwrite" != "y" && "$overwrite" != "Y" ]]; then
-      success ".env file preserved"
-      return
-    fi
-    cp "$env_file" "${env_file}.backup"
-    success "Backup created: ${env_file}.backup"
+  HOST_IP=$(grep "^HOST_IP=" "$env_file" | cut -d'=' -f2 | cut -d'#' -f1 | tr -d '[:space:]')
+  NGINX_PORT=$(grep "^NGINX_PORT=" "$env_file" | cut -d'=' -f2 | cut -d'#' -f1 | tr -d '[:space:]')
+  
+  local email_check=$(grep "^EMAIL_USER=" "$env_file" | cut -d'=' -f2 | tr -d '[:space:]')
+  
+  if [[ -z "$email_check" ]]; then
+    warning "The EMAIL USER field appears empty in the .env file."
+  else
+    success "Email settings detected."
   fi
 
-  local host_ip=$(get_host_ip)
+  HOST_IP=${HOST_IP:-localhost}
+  NGINX_PORT=${NGINX_PORT:-3030}
 
-  if [[ "$host_ip" == "localhost" ]]; then
-    warning "Automatic IP detection failed"
-    echo
-    echo -e "${CYAN}Please enter your computer's IP address:${NC}"
-    echo "  • Windows: Run ${BOLD}ipconfig${NC} and copy the 'IPv4 Address' value"
-    echo "  • macOS/Linux: Run ${BOLD}ifconfig${NC} or ${BOLD}hostname -I${NC}"
-    echo
-    read -p "$(echo -e ${CYAN})IP Address (e.g., 192.168.1.100): $(echo -e ${NC})" host_ip
-
-    if [[ -z "$host_ip" ]]; then
-      error "IP address cannot be empty!"
-      exit 1
-    fi
-  fi
-
-  local jwt_secret=$(openssl rand -base64 32 2>/dev/null || python3 -c "import secrets; print(secrets.token_urlsafe(32))" 2>/dev/null || echo "your-super-secret-jwt-key-change-this-in-production-minimum-32-characters")
-
-  cat > "$env_file" << EOF
-# ============================================================================
-# JWT Configuration
-# ============================================================================
-JWT_SECRET=${jwt_secret}
-
-# ============================================================================
-# Email Configuration
-# ============================================================================
-EMAIL_SERVICE=gmail
-EMAIL_USER=forty2transcendence@gmail.com
-EMAIL_PASS=gfyk pfqi gvpm ahtx
-EMAIL_FROM=forty2transcendence@gmail.com
-
-# ============================================================================
-# Host Configuration
-# ============================================================================
-HOST_IP=${host_ip}
-NGINX_PORT=3030
-EOF
-
-  success ".env file created"
-  info "Location: ${env_file}"
-  echo
-  echo -e "${GRAY}Configuration:${NC}"
-  echo -e "  • ${CYAN}JWT_SECRET${NC}: ${BOLD}$(echo ${jwt_secret:0:20}...)${NC}  (auto-generated)"
-  echo -e "  • ${CYAN}HOST_IP${NC}: ${BOLD}${host_ip}${NC}"
-  echo -e "  • ${CYAN}NGINX_PORT${NC}: ${BOLD}3030${NC}"
-  echo
+  info "Aktif Host: ${BOLD}${HOST_IP}${NC}"
+  info "Aktif Port: ${BOLD}${NGINX_PORT}${NC}"
 }
 
 ###############################################################################
@@ -655,8 +636,11 @@ fi
 # 10. Success Message
 ###############################################################################
 
-HOST_IP=$(grep "^HOST_IP=" "${PROJECT_ROOT}/.env" | cut -d'=' -f2)
-NGINX_PORT=$(grep "^NGINX_PORT=" "${PROJECT_ROOT}/.env" | cut -d'=' -f2)
+HOST_IP=$(grep "^HOST_IP=" "${PROJECT_ROOT}/.env" | cut -d'=' -f2 | cut -d'#' -f1 | tr -d '[:space:]')
+NGINX_PORT=$(grep "^NGINX_PORT=" "${PROJECT_ROOT}/.env" | cut -d'=' -f2 | cut -d'#' -f1 | tr -d '[:space:]')
+
+HOST_IP=${HOST_IP:-localhost}
+NGINX_PORT=${NGINX_PORT:-3030}
 
 echo
 echo -e "${GREEN}${BOLD}"
@@ -697,4 +681,5 @@ echo -e "${BOLD}${CYAN}https://${HOST_IP}:${NGINX_PORT}${NC}"
 echo
 
 echo -e "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo "${GRAY}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo
